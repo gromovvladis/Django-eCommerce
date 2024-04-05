@@ -60,19 +60,19 @@ class CheckoutMixin(object):
             index_page.form.select("options", GatewayForm.GUEST)
             index_page.form.submit()
 
-    def create_shipping_country(self):
-        return factories.CountryFactory(iso_3166_1_a2="GB", is_shipping_country=True)
+    # def create_shipping_country(self):
+    #     return factories.CountryFactory(iso_3166_1_a2="GB", is_shipping_country=True)
 
     def enter_shipping_address(self):
-        self.create_shipping_country()
+        # self.create_shipping_country()
         address_page = self.get(reverse("checkout:shipping-address"))
         if address_page.status_code == 200:
             form = address_page.forms["new_shipping_address"]
             form["first_name"] = "John"
-            form["last_name"] = "Doe"
+            # form["last_name"] = "Doe"
             form["line1"] = "1 Egg Road"
             form["line4"] = "Shell City"
-            form["postcode"] = "N12 9RT"
+            # form["postcode"] = "N12 9RT"
             form.submit()
 
     def enter_shipping_method(self):

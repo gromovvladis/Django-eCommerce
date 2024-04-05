@@ -1,0 +1,172 @@
+{% extends "oscar/checkout/checkout.html" %}
+
+{% load currency_filters %}
+{% load i18n %}
+{% load shipping_tags %}
+
+
+{% comment %} {% block title %}
+    {% trans "Shipping method" %} | {{ block.super }}
+{% endblock %} {% endcomment %}
+
+{% comment %} {% block checkout_nav %}
+    {% include 'oscar/checkout/nav.html' with step=2 %}
+{% endblock %} {% endcomment %}
+
+{% comment %} {% block checkout_title %}{% trans "Shipping method" %}{% endblock %}
+
+{% block order_contents %}{% endblock %} {% endcomment %}
+
+{% block my_form %}
+
+        {% comment %} здесь выводятся адресса это одна из форм, которую надо внедрить в основную {% endcomment %}
+        {% if user.is_authenticated %}
+            {% if addresses %}
+                <h3>{% trans "An address from your address book?" %}</h3>
+                <div class="choose-block">
+                    <div class="row">
+
+                        {% for address in addresses %}
+                            {% block select_address_form %}
+                                <div class="col-sm-6 d-flex">
+                                    <div class="card card-body bg-light">
+
+                                        <address>
+                                            {% block select_address_fields %}
+                                                {% for field in address.active_address_fields %}
+                                                    <span>{{ field }}</span>{% if not forloop.first %}<br/>{% endif %}
+                                                {% endfor %}
+                                            {% endblock %}
+                                        </address>
+
+                                        <input type="radio" form="place_order_form" name="address_id" id="{{ address.id }}" value="{{ address.id }}">использовать этот адрес</input>
+
+                                        <form action="{% url 'checkout:checkoutview' %}" method="post" id="select_shipping_address_{{ address.id }}" class="mb-0">
+                                            
+                                            {% csrf_token %}
+                                            <input type="hidden" name="address_id" value="{{ address.id }}" />
+
+                                            <div class="btn-group address-controls">
+                                                <a href="{% url 'checkout:user-address-update' pk=address.id %}" class="btn btn-secondary">{% trans "Edit address" %}</a>
+                                                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"></button>
+                                                <ul class="dropdown-menu">
+                                                    <a href="{% url 'checkout:user-address-delete' pk=address.id %}" class="btn-remove-address nav-link">{% trans "Delete" %}</a>
+                                                </ul>
+                                            </div>
+
+                                        </form>
+
+                                    </div>
+                                </div>
+                                {% if forloop.counter|divisibleby:2 %}
+                                    </div><div class="row">
+                                {% endif %}
+                            {% endblock %}
+                        {% endfor %}
+
+                    </div>
+                </div>
+                <h3>{% trans "Or a new address?" %}</h3>
+
+                
+                <form action="{% url 'checkout:checkoutview' %}" method="post" id="place_order_form">
+                    {% csrf_token %}
+
+                    {% comment %} новый адрес {% endcomment %}
+                    <div>
+                        {% include "oscar/partials/form_fields.html" with form=form style='horizontal' %}
+                    </div>
+
+                    {% comment %} форма с выбором метода доставки {% endcomment %}
+                    <div class="basket-title">
+                        <div class="row">
+                            <h4 class="col-sm-8 m-0">{% trans "Method" %}</h4>
+                            <h4 class="col-sm-3 m-0">{% trans "Cost" %}</h4>
+                        </div>
+                    </div>
+                    {% for method in methods %}
+                        <div class="basket-items">
+                            <div class="row">
+                                <div class="col-sm-8">
+                                    <h4>{{ method.name }}</h4>
+                                    {% if method.description %}
+                                        <p>{{ method.description|safe }}</p>
+                                    {% endif %}
+                                    {% if method.is_discounted %}
+                                        <small>
+                                            {% shipping_charge_discount method basket as discount %}
+                                            {% blocktrans with amount=discount|currency:basket.currency name=method.discount_name %}
+                                                This includes a discount of <strong>{{ amount }}</strong> as
+                                                your basket qualifies for the <strong>{{ name }}</strong> offer.
+                                            {% endblocktrans %}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                <div class="col-sm-1">
+                                    {% shipping_charge method basket as charge %}
+                                    {% if charge.is_tax_known %}
+                                        {{ charge.incl_tax|currency:basket.currency }}
+                                    {% else %}
+                                        {{ charge.excl_tax|currency:basket.currency }}
+                                    {% endif %}
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="radio" checked name="method_code" value="{{ method.code }}" />
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                     
+                    
+
+                    <div class="form-group row">
+                        <div class="offset-sm-4 col-sm-8">
+                            <button type="submit" class="btn btn-lg btn-primary" data-loading-text="{% trans 'Continuing...' %}">{% trans "Continue" %}</button>
+                            {% trans "or" %} <a href="{% url 'basket:summary' %}">{% trans "return to basket" %}</a>
+                        </div>
+                    </div>
+
+                </form>
+
+
+            {% endif %}
+        {% else %}
+        {% comment %} форма с адресом новым {% endcomment %}
+
+        <div class="card card-body bg-light">
+            <form action="{% url 'checkout:checkoutview' %}" method="post" id="new_shipping_address">
+                {% csrf_token %}
+                {% include "oscar/partials/form_fields.html" with form=form style='horizontal' %}
+                <div class="form-group row">
+                    <div class="offset-sm-4 col-sm-8">
+                        <button type="submit" class="btn btn-lg btn-primary" data-loading-text="{% trans 'Continuing...' %}">{% trans "Continue" %}</button>
+                        {% trans "or" %} <a href="{% url 'basket:summary' %}">{% trans "return to basket" %}</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% endif %}
+
+{% endblock my_form %}
+
+
+
+{% block vouchers %}
+    {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
+    {% if voucher_form %}
+        <div class="col-sm-6">
+            <div class="sub-header">
+                <h2>{% trans "Voucher/promo code" %}</h2>
+            </div>
+            <div id="voucher_form_container" style="display:block">
+                <form id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
+                    {% csrf_token %}
+                    {% include "oscar/partials/form_fields.html" with form=voucher_form %}
+                    <button type="submit" class="btn btn-info" data-loading-text="{% trans 'Adding...' %}">{% trans "Add voucher" %}</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+{% endblock vouchers %}
