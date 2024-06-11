@@ -1,6 +1,4 @@
 from django import forms
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
 
 from oscar.core.loading import get_model
 from oscar.core.validators import URLDoesNotExistValidator
@@ -13,7 +11,7 @@ class PageSearchForm(forms.Form):
     Search form to filter pages by *title.
     """
 
-    title = forms.CharField(required=False, label=pgettext_lazy("Page title", "Title"))
+    title = forms.CharField(required=False, label=("Заголовок страницы", "Заголовок"))
 
 
 class PageUpdateForm(forms.ModelForm):
@@ -24,15 +22,15 @@ class PageUpdateForm(forms.ModelForm):
     """
 
     url = forms.RegexField(
-        label=_("URL"),
+        label="URL",
         max_length=100,
         regex=r"^[-\w/\.~]+$",
         required=False,
-        help_text=_("Example: '/about/contact/'."),
+        help_text="Пример: '/about/contact/'.",
         error_messages={
-            "invalid": _(
-                "This value must contain only letters, numbers, dots, "
-                "underscores, dashes, slashes or tildes."
+            "invalid": (
+                "Это значение должно содержать только буквы, цифры и точки,"
+                "подчеркивание, тире, косая черта или тильда."
             ),
         },
     )

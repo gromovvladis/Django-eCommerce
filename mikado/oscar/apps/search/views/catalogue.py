@@ -4,7 +4,6 @@ from urllib.parse import quote
 from django.contrib import messages
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.translation import gettext_lazy as _
 
 from oscar.core.loading import get_class, get_model
 
@@ -29,12 +28,12 @@ class CatalogueView(BaseSearchView):
             return super().get(request, *args, **kwargs)
         except Http404:
             # Redirect to page one.
-            messages.error(request, _("The given page number was invalid."))
+            messages.error(request, "Указанный номер недействителен.")
             return redirect("catalogue:index")
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["summary"] = _("All products")
+        ctx["summary"] = "Меню"
         return ctx
 
 
@@ -63,7 +62,7 @@ class ProductCategoryView(BaseSearchView):
         try:
             return super().get(request, *args, **kwargs)
         except Http404:
-            messages.error(request, _("The given page number was invalid."))
+            messages.error(request, "Указанный номер недействителен.")
             return redirect(self.category.get_absolute_url())
 
     def is_viewable(self, category, request):
@@ -78,7 +77,7 @@ class ProductCategoryView(BaseSearchView):
                 return HttpResponsePermanentRedirect(expected_path)
 
     def get_category(self):
-        return get_object_or_404(Category, pk=self.kwargs["pk"])
+        return get_object_or_404(Category, slug=self.kwargs["category_slug"])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

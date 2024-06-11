@@ -15,13 +15,5 @@
 {% endif %}
 
 {% for field in form %}
-    {% include 'oscar/partials/variants_field.html' with field=field style=style %}
-{% endfor %}
-
-{% for field in form %}
     {% include 'oscar/partials/form_field.html' with field=field style=style %}
-{% endfor %}
-
-{% for field in form %}
-    {% include 'oscar/partials/additinal_products_field.html' with field=field style=style %}
 {% endfor %}

@@ -4,8 +4,6 @@ from decimal import Decimal as D
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import transaction
-from django.utils.translation import gettext_lazy as _
-
 from oscar.apps.order.signals import order_placed
 from oscar.core.loading import get_class, get_model
 
@@ -45,6 +43,7 @@ class OrderCreator(object):
         self,
         basket,
         total,
+        order_time,
         shipping_method,
         shipping_charge,
         user=None,
@@ -60,7 +59,7 @@ class OrderCreator(object):
         basket and session data.
         """
         if basket.is_empty:
-            raise ValueError(_("Empty baskets cannot be submitted"))
+            raise ValueError("Пустая корзина не может быть подтверждена.")
         if not order_number:
             generator = OrderNumberGenerator()
             order_number = generator.order_number(basket)
@@ -68,9 +67,7 @@ class OrderCreator(object):
             status = getattr(settings, "OSCAR_INITIAL_ORDER_STATUS")
 
         if Order._default_manager.filter(number=order_number).exists():
-            raise ValueError(
-                _("There is already an order with number %s") % order_number
-            )
+            raise ValueError("Уже есть заказ с номером %s" % order_number)
 
         with transaction.atomic():
             kwargs["surcharges"] = surcharges
@@ -82,6 +79,7 @@ class OrderCreator(object):
                 shipping_method,
                 shipping_charge,
                 total,
+                order_time,
                 order_number,
                 status,
                 request,
@@ -135,6 +133,7 @@ class OrderCreator(object):
         shipping_method,
         shipping_charge,
         total,
+        order_time,
         order_number,
         status,
         request=None,
@@ -146,11 +145,9 @@ class OrderCreator(object):
             "basket": basket,
             "number": order_number,
             "currency": total.currency,
-            "total_incl_tax": total.incl_tax,
-            "total_excl_tax": total.excl_tax,
-            "shipping_incl_tax": shipping_charge.incl_tax,
-            "shipping_excl_tax": shipping_charge.excl_tax,
-            "shipping_tax_code": shipping_charge.tax_code,
+            "total": total.money,
+            "order_time": order_time,
+            "shipping": shipping_charge.money,
             "shipping_method": shipping_method.name,
             "shipping_code": shipping_method.code,
         }
@@ -162,8 +159,8 @@ class OrderCreator(object):
             order_data["status"] = status
         if extra_order_fields:
             order_data.update(extra_order_fields)
-        if "site" not in order_data:
-            order_data["site"] = Site._default_manager.get_current(request)
+        # if "site" not in order_data:
+        #     order_data["site"] = Site._default_manager.get_current(request)
         order = Order(**order_data)
         order.save()
         if surcharges is not None:
@@ -172,8 +169,7 @@ class OrderCreator(object):
                     order=order,
                     name=charge.surcharge.name,
                     code=charge.surcharge.code,
-                    excl_tax=charge.price.excl_tax,
-                    incl_tax=charge.price.incl_tax,
+                    money=charge.price.money,
                     tax_code=charge.price.tax_code,
                 )
 
@@ -207,13 +203,10 @@ class OrderCreator(object):
             "upc": product.upc,
             "quantity": basket_line.quantity,
             # Price details
-            "line_price_excl_tax": basket_line.line_price_excl_tax_incl_discounts,
-            "line_price_incl_tax": basket_line.line_price_incl_tax_incl_discounts,
-            "line_price_before_discounts_excl_tax": basket_line.line_price_excl_tax,
-            "line_price_before_discounts_incl_tax": basket_line.line_price_incl_tax,
+            "line_price": basket_line.line_price_incl_discounts,
+            "line_price_before_discounts": basket_line.line_price,
             # Reporting details
-            "unit_price_incl_tax": basket_line.unit_price_incl_tax,
-            "unit_price_excl_tax": basket_line.unit_price_excl_tax,
+            "unit_price": basket_line.unit_price,
             "tax_code": basket_line.tax_code,
         }
         extra_line_fields = extra_line_fields or {}
@@ -248,7 +241,6 @@ class OrderCreator(object):
             if order_discount:
                 order_line.discounts.create(
                     order_discount=order_discount,
-                    is_incl_tax=discount.incl_tax,
                     amount=discount.amount,
                 )
 
@@ -267,12 +259,11 @@ class OrderCreator(object):
         Creates the batch line price models
         """
         breakdown = basket_line.get_price_breakdown()
-        for price_incl_tax, price_excl_tax, quantity in breakdown:
+        for price, quantity in breakdown:
             order_line.prices.create(
                 order=order,
                 quantity=quantity,
-                price_incl_tax=price_incl_tax,
-                price_excl_tax=price_excl_tax,
+                price=price,
                 tax_code=basket_line.tax_code,
             )
 
@@ -342,7 +333,7 @@ class OrderDispatcher:
             "Order #%s - sending %s messages", order.number, event_code
         )
         if order.is_anonymous:
-            email = kwargs.get("email_address", order.guest_email)
+            email = kwargs.get("email_address")
             dispatched_messages = self.dispatcher.dispatch_anonymous_messages(
                 email, messages, attachments
             )

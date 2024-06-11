@@ -27,9 +27,8 @@ def as_stars(value):
 
 
 @register.filter
-def may_vote(review, user):
-    can_vote, __ = review.can_user_vote(user)
-    return can_vote
+def stars(review, stars):
+    return int(stars) <= review.score
 
 
 @register.filter

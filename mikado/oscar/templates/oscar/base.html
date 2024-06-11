@@ -1,17 +1,15 @@
-{% load i18n %}
 {% load static %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:"en-gb" }}" class="{% block html_class %}no-js{% endblock %}">
+<html lang="{{ LANGUAGE_CODE|default:"ru" }}">
     <head>
-        <title>{% block title %}{{ shop_name }} - {{ shop_tagline }}{% endblock %}</title>
+        <title>{% block title %}{{ shop_name }} | Суши, Роллы, Доставка{% endblock %}</title>
 
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-        <meta name="created" content="{% now "jS M Y h:i" %}" />
         <meta name="description" content="{% block description %}{% endblock %}" />
-        <meta name="viewport" content="{% block viewport %}width=device-width{% endblock %}" />
+        <meta name="viewport" content="{% block viewport %}width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=0{% endblock %}" />
 
         {% block favicon %}
-            <link rel="shortcut icon" href="{% static "oscar/favicon.ico" %}" />
+            <link rel="shortcut icon" href="{% static "favicon.ico" %}" />
         {% endblock %}
 
         {# Block where global CSS will go. #}
@@ -24,19 +22,32 @@
 
         {% block tracking %}
             {# Default to using Google analytics #}
-            {% include "oscar/partials/google_analytics.html" %}
+            {% comment %} {% include "oscar/partials/google_analytics.html" %} {% endcomment %}
         {% endblock %}
+
     </head>
 
     <body id="{% block body_id %}default{% endblock %}" class="{% block body_class %}default{% endblock %}">
-        {# Main content goes in this 'layout' block #}
-        {% block layout %}{% endblock %}
-
+        
         {# Scripts loaded from a CDN. #}
         {% block cdn_scripts %}
             <!-- jQuery -->
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-            <script>window.jQuery || document.write('<script src="{% static "oscar/js/jquery/jquery.min.js" %}"><\/script>')</script>
+            <script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="{% static "js/jquery/jquery.min.js" %}"><\/script>')</script>
+            <!-- Cookies -->
+            <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.5/js.cookie.min.js"></script>
+            <script>window.Cookies || document.write('<script src="{% static "js/cookie/js-cookie.min.js" %}"><\/script>')</script>
+        {% endblock %} 
+        
+        {# Main content goes in this 'layout' block #}
+        {% block layout %}{% endblock %}
+        
+        {% comment %}------------- мы используем куки ---------------{% endcomment %}
+        {% block cookie %}
+        {% endblock %}
+            
+        {# SVG #}
+        {% block SVG %}
         {% endblock %}
 
         {# Local scripts #}

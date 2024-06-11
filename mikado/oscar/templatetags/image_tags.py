@@ -7,6 +7,7 @@ from django.db.models.fields.files import ImageFieldFile
 from django.utils.encoding import smart_str
 from django.utils.html import escape
 
+from oscar.apps.catalogue.abstract_models import MissingProductImage
 from oscar.core.thumbnails import get_thumbnailer
 
 register = template.Library()
@@ -137,6 +138,39 @@ class ThumbnailNode(template.Node):
 
 def oscar_thumbnail(parser, token):
     return ThumbnailNode(parser, token)
+
+
+class ThumbnailUrlNode(template.Node):
+
+    def __init__(self, url, size, upscale):
+        self.source_var = url
+        self.size_var = size
+
+    def get_thumbnail_options(self):
+        return {"size": self.size_var}
+
+    def render(self):
+        try:
+            return self._render()
+        except Exception as e:
+            if getattr(settings, "OSCAR_THUMBNAIL_DEBUG", settings.DEBUG):
+                raise e
+
+            logger.exception(e)
+            return ""
+
+    def _render(self):
+        source = self.source_var
+        options = self.get_thumbnail_options()        
+        thumbnailer = get_thumbnailer()
+        return thumbnailer.generate_thumbnail(source, **options)
+
+
+
+@register.simple_tag
+def url_thumbnail(url, size, upscale):
+    return ThumbnailUrlNode(url, size, upscale).render()
+
 
 
 register.tag("image", do_dynamic_image_url)

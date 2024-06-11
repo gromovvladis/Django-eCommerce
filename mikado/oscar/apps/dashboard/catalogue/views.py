@@ -6,7 +6,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django_tables2 import SingleTableMixin, SingleTableView
 
@@ -96,8 +95,8 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
 
     def get_description(self, form):
         if form.is_valid() and any(form.cleaned_data.values()):
-            return _("Product search results")
-        return _("Products")
+            return "Результаты поиска"
+        return "Продукты"
 
     def get_table(self, **kwargs):
         if "recently_edited" in self.request.GET:
@@ -186,7 +185,7 @@ class ProductCreateRedirectView(generic.RedirectView):
         )
 
     def get_invalid_product_class_url(self):
-        messages.error(self.request, _("Please choose a product type"))
+        messages.error(self.request, "Пожалуйста, выберите тип продукта")
         return reverse("dashboard:catalogue-product-list")
 
     def get_redirect_url(self, *args, **kwargs):
@@ -309,18 +308,18 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
     def get_page_title(self):
         if self.creating:
             if self.parent is None:
-                return _("Create new %(product_class)s product") % {
+                return ("Создать новый %(product_class)s продукт") % {
                     "product_class": self.product_class.name
                 }
             else:
-                return _("Create new variant of %(parent_product)s") % {
+                return ("Создать новый вариант продукта %(parent_product)s") % {
                     "parent_product": self.parent.title
                 }
         else:
             if self.object.title or not self.parent:
                 return self.object.title
             else:
-                return _("Editing variant of %(parent_product)s") % {
+                return ("Editing variant of %(parent_product)s") % {
                     "parent_product": self.parent.title
                 }
 
@@ -419,10 +418,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             self.object.delete()
             self.object = None
 
-        messages.error(
-            self.request,
-            _("Your submitted data was not valid - please correct the errors below"),
-        )
+        messages.error(self.request, "Отправленные вами данные недействительны. Исправьте ошибки ниже.")
         ctx = self.get_context_data(form=form, **formsets)
         return self.render_to_response(ctx)
 
@@ -488,9 +484,9 @@ class ProductDeleteView(PartnerProductFilterMixin, generic.DeleteView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         if self.object.is_child:
-            ctx["title"] = _("Delete product variant?")
+            ctx["title"] = "Удалить вариант продукта?"
         else:
-            ctx["title"] = _("Delete product?")
+            ctx["title"] = "Удалить продукт?"
         return ctx
 
     def delete(self, request, *args, **kwargs):
@@ -534,13 +530,13 @@ class ProductDeleteView(PartnerProductFilterMixin, generic.DeleteView):
         product list view.
         """
         if self.object.is_child:
-            msg = _("Deleted product variant '%s'") % self.object.get_title()
+            msg = "Удаленный вариант продукта '%s'" % self.object.get_title()
             messages.success(self.request, msg)
             return reverse(
                 "dashboard:catalogue-product", kwargs={"pk": self.object.parent_id}
             )
         else:
-            msg = _("Deleted product '%s'") % self.object.title
+            msg = "Удаленный продукт '%s'" % self.object.title
             messages.success(self.request, msg)
             return reverse("dashboard:catalogue-product-list")
 
@@ -562,10 +558,10 @@ class StockAlertListView(generic.ListView):
             self.form = StockAlertSearchForm(self.request.GET)
             if self.form.is_valid():
                 status = self.form.cleaned_data["status"]
-                self.description = _('Alerts with status "%s"') % status
+                self.description = 'Оповещения со статусом "%s"' % status
                 return self.model.objects.filter(status=status)
         else:
-            self.description = _("All alerts")
+            self.description = "Все оповещения"
             self.form = StockAlertSearchForm()
         return self.model.objects.all()
 
@@ -619,11 +615,11 @@ class CategoryCreateView(CategoryListMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Add a new category")
+        ctx["title"] = "Добавить новую категорию"
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, _("Category created successfully"))
+        messages.info(self.request, "Категория успешно создана")
         return super().get_success_url()
 
     def get_initial(self):
@@ -641,11 +637,11 @@ class CategoryUpdateView(CategoryListMixin, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Update category '%s'") % self.object.name
+        ctx["title"] = "Обновить категорию '%s'" % self.object.name
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, _("Category updated successfully"))
+        messages.info(self.request, "Категория успешно обновлена")
         action = self.request.POST.get("action")
         if action == "continue":
             return reverse(
@@ -664,7 +660,7 @@ class CategoryDeleteView(CategoryListMixin, generic.DeleteView):
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, _("Category deleted successfully"))
+        messages.info(self.request, "Категория успешно удалена")
         return super().get_success_url()
 
 
@@ -713,10 +709,7 @@ class ProductClassCreateUpdateView(generic.UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def forms_invalid(self, form, attributes_formset):
-        messages.error(
-            self.request,
-            _("Your submitted data was not valid - please correct the errors below"),
-        )
+        messages.error(self.request, "Отправленные вами данные недействительны. Исправьте ошибки ниже.")
         ctx = self.get_context_data(form=form, attributes_formset=attributes_formset)
         return self.render_to_response(ctx)
 
@@ -749,10 +742,10 @@ class ProductClassCreateView(ProductClassCreateUpdateView):
         return None
 
     def get_title(self):
-        return _("Add a new product type")
+        return "Добавить новый тип продукта"
 
     def get_success_url(self):
-        messages.info(self.request, _("Product type created successfully"))
+        messages.info(self.request, "Тип продукта успешно создан")
         return reverse("dashboard:catalogue-class-list")
 
 
@@ -760,10 +753,10 @@ class ProductClassUpdateView(ProductClassCreateUpdateView):
     creating = False
 
     def get_title(self):
-        return _("Update product type '%s'") % self.object.name
+        return "Обновить тип продукта '%s'" % self.object.name
 
     def get_success_url(self):
-        messages.info(self.request, _("Product type updated successfully"))
+        messages.info(self.request, "Тип продукта успешно обновлен.")
         return reverse("dashboard:catalogue-class-list")
 
     def get_object(self, queryset=None):
@@ -778,7 +771,7 @@ class ProductClassListView(generic.ListView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["title"] = _("Product Types")
+        ctx["title"] = "Типы продуктов"
         return ctx
 
 
@@ -789,20 +782,17 @@ class ProductClassDeleteView(generic.DeleteView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["title"] = _("Delete product type '%s'") % self.object.name
+        ctx["title"] = "Удалить тип продукта '%s'" % self.object.name
         product_count = self.object.products.count()
 
         if product_count > 0:
             ctx["disallow"] = True
-            ctx["title"] = _("Unable to delete '%s'") % self.object.name
-            messages.error(
-                self.request,
-                _("%i products are still assigned to this type") % product_count,
-            )
+            ctx["title"] = "Невозможно удалить '%s'" % self.object.name
+            messages.error(self.request, "%i товары по-прежнему относятся к этому типу" % product_count)
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, _("Product type deleted successfully"))
+        messages.info(self.request, "Тип продукта успешно удален")
         return reverse("dashboard:catalogue-class-list")
 
 
@@ -844,10 +834,7 @@ class AttributeOptionGroupCreateUpdateView(generic.UpdateView):
             return HttpResponseRedirect(self.get_success_url())
 
     def forms_invalid(self, form, attribute_option_formset):
-        messages.error(
-            self.request,
-            _("Your submitted data was not valid - please correct the errors below"),
-        )
+        messages.error(self.request, "Отправленные вами данные недействительны. Исправьте ошибки ниже.")
         ctx = self.get_context_data(
             form=form, attribute_option_formset=attribute_option_formset
         )
@@ -887,10 +874,10 @@ class AttributeOptionGroupCreateView(
         return None
 
     def get_title(self):
-        return _("Add a new Attribute Option Group")
+        return "Добавить новую группу параметров атрибута"
 
     def get_success_url(self):
-        self.add_success_message(_("Attribute Option Group created successfully"))
+        self.add_success_message("Группа параметров атрибута успешно создана")
         url = reverse("dashboard:catalogue-attribute-option-group-list")
         return self.get_url_with_querystring(url)
 
@@ -907,10 +894,10 @@ class AttributeOptionGroupUpdateView(
         return attribute_option_group
 
     def get_title(self):
-        return _("Update Attribute Option Group '%s'") % self.object.name
+        return "Обновить группу параметров атрибута '%s'" % self.object.name
 
     def get_success_url(self):
-        self.add_success_message(_("Attribute Option Group updated successfully"))
+        self.add_success_message("Группа параметров атрибута успешно обновлена.")
         url = reverse("dashboard:catalogue-attribute-option-group-list")
         return self.get_url_with_querystring(url)
 
@@ -935,17 +922,14 @@ class AttributeOptionGroupDeleteView(PopUpWindowDeleteMixin, generic.DeleteView)
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
 
-        ctx["title"] = _("Delete Attribute Option Group '%s'") % self.object.name
+        ctx["title"] = "Удалить группу параметров атрибута '%s'" % self.object.name
 
         product_attribute_count = self.object.product_attributes.count()
         if product_attribute_count > 0:
             ctx["disallow"] = True
-            ctx["title"] = _("Unable to delete '%s'") % self.object.name
+            ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             messages.error(
-                self.request,
-                _(
-                    "%i product attributes are still assigned to this attribute option group"
-                )
+                self.request, "%i Атрибуты продукта по-прежнему назначены этой группе параметров атрибутов."
                 % product_attribute_count,
             )
 
@@ -965,7 +949,7 @@ class AttributeOptionGroupDeleteView(PopUpWindowDeleteMixin, generic.DeleteView)
         return "?".join(url_parts)
 
     def get_success_url(self):
-        self.add_success_message(_("Attribute Option Group deleted successfully"))
+        self.add_success_message("Группа параметров атрибута успешно удалена")
         url = reverse("dashboard:catalogue-attribute-option-group-list")
         return self.get_url_with_querystring(url)
 
@@ -997,10 +981,7 @@ class OptionCreateUpdateView(generic.UpdateView):
         return ctx
 
     def form_invalid(self, form):
-        messages.error(
-            self.request,
-            _("Your submitted data was not valid - please correct the errors below"),
-        )
+        messages.error(self.request, "Отправленные вами данные недействительны. Исправьте ошибки ниже.")
         return super().form_invalid(form)
 
 
@@ -1011,10 +992,10 @@ class OptionCreateView(PopUpWindowCreateMixin, OptionCreateUpdateView):
         return None
 
     def get_title(self):
-        return _("Add a new Option")
+        return "Добавить новую опцию"
 
     def get_success_url(self):
-        self.add_success_message(_("Option created successfully"))
+        self.add_success_message("Опция успешно создана")
         return reverse("dashboard:catalogue-option-list")
 
 
@@ -1026,10 +1007,10 @@ class OptionUpdateView(PopUpWindowUpdateMixin, OptionCreateUpdateView):
         return attribute_option_group
 
     def get_title(self):
-        return _("Update Option '%s'") % self.object.name
+        return "Обновить опцию '%s'" % self.object.name
 
     def get_success_url(self):
-        self.add_success_message(_("Option updated successfully"))
+        self.add_success_message("Опция успешно обновлена")
         return reverse("dashboard:catalogue-option-list")
 
 
@@ -1040,27 +1021,20 @@ class OptionDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
 
-        ctx["title"] = _("Delete Option '%s'") % self.object.name
+        ctx["title"] = "Удалить опцию '%s'" % self.object.name
 
         products = self.object.product_set.count()
         product_classes = self.object.productclass_set.count()
         if any([products, product_classes]):
             ctx["disallow"] = True
-            ctx["title"] = _("Unable to delete '%s'") % self.object.name
+            ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products:
-                messages.error(
-                    self.request,
-                    _("%i products are still assigned to this option") % products,
-                )
+                messages.error(self.request, "%i продукты по-прежнему относятся к этой опции" % products)
             if product_classes:
-                messages.error(
-                    self.request,
-                    _("%i product classes are still assigned to this option")
-                    % product_classes,
-                )
+                messages.error(self.request, "%i классы продуктов по-прежнему присвоены этой опции" % product_classes)
 
         return ctx
 
     def get_success_url(self):
-        self.add_success_message(_("Option deleted successfully"))
+        self.add_success_message("Опция успешно удалена")
         return reverse("dashboard:catalogue-option-list")

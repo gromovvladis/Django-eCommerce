@@ -1,0 +1,182 @@
+{% extends "oscar/layout.html" %}
+{% load static %}
+{% load svg_tags %}
+
+{% block title %}
+    Адрес доставки | {{ block.super }}
+{% endblock %}
+ 
+{% block wrapper_class %}delivery wrapper--small fill-width pd-2 pb-sm-8 delivery-address{% endblock %}
+
+{% block app_class %}v-app---delivery{% endblock %}
+{% block nav_class %}v-app__nav--delivery{% endblock %}
+
+{% block nav_title %}Адрес доставки{% endblock %}
+
+{% block breadcrumbs %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="mr-1 pd-0">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=22 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">Доставка</span>
+    </div>
+{% endblock %}
+
+{% block sticky_address %}{% endblock %}
+
+{% block content %}
+    <div class="delivery__wrapper py-sm-2">
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+        {% endif %}
+        {% comment %} формы для изменения адресса {% endcomment %}
+        {% block pickup_address %}
+
+            <div class="delivery__address">
+
+                <div class="delivery__title mb-2 d-none d-sm-block">
+                    <h1>Доставка и оплата</h1>
+                </div>
+
+                {% if user.is_authenticated %}
+                    {% comment %} сохранине в бд {% endcomment %}
+                    <form action="{% url 'address:delivery-address' %}" method="post" id="set_address">
+                        {% csrf_token %}
+                        <div class="delivery__address-input fill-width mb-2" style="position:relative;">
+                            <div class="v-address-info d-flex flex-column flex-sm-row">
+                                <div class="v-input-search d-flex fill-width justify-space-between align-center mt-2 mt-sm-0">
+                                    {% icon file_name='interface/search' size=24 fill="#111"%}
+                                    <div id="suggest_container" class="v-delivery fill-width v-input fill-width">
+                                        <div class="d-flex v-delivery--input">
+                                            <input for="set_address" type="text" name="line1" placeholder="Введите улицу и дом" data-id="address-input" id="id_line1" value="{{ address.line1 }}" autocomplete="off" {% if address.readonly %}readonly{% endif %}>
+                                            <div class="v-delivery--btn d-flex align-center justify-end">
+                                                <button id="clean_address" type="button" class="v-delivery--clear shrink d-flex align-center justify-center fill-height fill-width">
+                                                    {% icon file_name='interface/close' size=24 stroke="#111"%}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <span id="line1_hints" class="d-flex flex-column justify-center px-2 mt-2 d-none"></span>
+                        </div>
+                        <div id="delivery_time" class="v-address-info__content d-flex flex-column justify-center mt-2 px-2"></div>
+
+                        <div class="delivery__submit d-flex justify-center fill-width">
+                            <button id="save_address" type="submit" disabled="disabled" data-id="delivery-delivery-address-button" class="v-button fill-width v-button--main justify-center shrink" disabled>
+                                <span class="v-button__wrapper" style="opacity:1;">
+                                    <span class="v-button__value"> Укажите адрес </span>
+                                </span>
+                            </button>
+                        </div>
+                    
+                    </form>
+                {% else %}
+                    {% comment %} сохранине в куки {% endcomment %}
+                    <div class="delivery__address-input fill-width mb-2" style="position:relative;">
+                        <div class="v-address-info d-flex flex-column flex-sm-row">
+                            <div class="v-input-search d-flex fill-width justify-space-between align-center mt-2 mt-sm-0">
+                                {% icon file_name='interface/search' size=24 fill="#111"%}
+                                <div id="suggest_container" class="v-delivery fill-width v-input fill-width">
+                                    <div class="d-flex v-delivery--input">
+                                        <input for="set_address" type="text" name="line1" placeholder="Введите улицу и дом" data-id="address-input" id="id_line1" value="{{ address.line1 }}" autocomplete="off" {% if address.readonly %}readonly{% endif %}>
+                                        <div class="v-delivery--btn d-flex align-center justify-end">
+                                            <button id="clean_address" type="button" class="v-delivery--clear shrink d-flex align-center justify-center fill-height fill-width">
+                                                {% icon file_name='interface/close' size=24 stroke="#111"%}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <span id="line1_hints" class="d-flex flex-column justify-center px-2 mt-2 d-none"></span>
+                    </div>
+                    <div id="delivery_time" class="v-address-info__content d-flex flex-column justify-center mt-2 px-2"></div>
+                {% endif %}
+
+            </div>
+
+            <div class="delivery__map mt-4 mt-sm-2">
+                <div class="v-map__wrapper fill-width fill-height">
+                    <div class="v-map fill-width fill-height">
+                        <div id="map" class="fill-width fill-height"></div>
+                        <div id="delivery_map_controls" class="v-delivery-map--submit d-flex flex-column align-center justify-center pd-2 pd-md-4 d-none">
+                            <div id="delivery_map_address" class="v-delivery-map--label d-flex flex-column justify-center align-center px-2 py-1 mb-1 mb-sm-2"></div>
+                            <button id="submit_address_on_map" type="button" data-id="delivery-map-submit-btn" class="v-button fill-width v-button--main v-button--map justify-center shrink">
+                                <span class="v-button__wrapper">
+                                    <span class="v-button__value"> Доставить на этот адрес </span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="delivery__info mt-4 pd-md-0">
+                {% comment %} <h2>Доставка и оплата</h2> {% endcomment %}
+                <div class="delivery__regions-block mt-4">
+                    <p>
+                        <span class="mb-1">
+                            <strong>Время работы фудкорта в ТРЦ "Планета":</strong>
+                        </span>
+                        <br>
+                        <span>С 09:00 до 23:00</span>
+                        <br><br>
+                        <span class="mb-1">
+                            <strong>Время работы доставки:</strong>
+                        </span>
+                        <br>
+                        <span>С 09:00 до 23:00</span>
+                        <br><br>
+                        <span>Оформить заказ можно в на сайте mikado-sushi.ru или в ТРЦ "Планета" по адресу ул. 9 Мая 77</span>
+                        <br><br>
+                        <span>Минимальная сумма заказа - 700 рублей</span>
+                        <br><br>
+                        <span>
+                            <strong>Оплатить заказ можно любым удобным вам способом:</strong>
+                        </span>
+                        <br><br>
+                        <ul>
+                            <li>Онлайн с помощью карт МИР, VISA и MASTERCARD;</li>
+                            <li>Банковскими картами этих же платежных систем через систему быстрых платежей (СБП)</li>
+                            <li>Наличными курьеру при получении заказа.</li>
+                        </ul>
+                        <br>
+                        <span>
+                            <strong>Порядок возврата:</strong>
+                        </span>
+                        <br><br>
+                        <span>Возврат средств, производится на ваш банковский
+                            счёт в течение 10 рабочих дней (срок зависит от банка, который выдал вашу
+                            банковскую карту).
+                        </span>
+                        <br><br>
+                    </p>
+                </div>
+            </div>
+        {% endblock pickup_address %}
+    </div>
+{% endblock content %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script>
+        var csrf_token = "{{csrf_token}}";
+        var url_delivery = "{% url 'shipping:delivery-time' %}";
+        var url_delivery_zones = "{% url 'shipping:delivery-zones' %}";
+        var url_pickup = "{% url 'shipping:pickup-time' %}";
+    </script>
+    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
+    <script type="application/javascript" src="{% static "js/delivery/delivery.js" %}"></script>
+    <script>
+        createMap("{{ address.line1 }}");
+    </script>
+    <script type="application/javascript" src="{% static "js/address/cookie-address.js" %}"></script>
+    {% if user.is_authenticated %}
+        <script type="application/javascript" src="{% static "js/address/delivery-address.js" %}"></script>
+    {% endif %} 
+{% endblock %}

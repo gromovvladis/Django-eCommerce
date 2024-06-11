@@ -1,12 +1,12 @@
-from oscar.apps.customer import abstract_models
+from oscar.apps.customer.abstract_models import AbstractOrderReview
 from oscar.core.loading import is_model_registered
 
 __all__ = []
 
 
-if not is_model_registered("customer", "ProductAlert"):
+if not is_model_registered("customer", "OrderReview"):
 
-    class ProductAlert(abstract_models.AbstractProductAlert):
+    class OrderReview(AbstractOrderReview):
         pass
 
-    __all__.append("ProductAlert")
+    __all__.append("OrderReview")

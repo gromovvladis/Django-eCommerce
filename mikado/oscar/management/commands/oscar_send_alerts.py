@@ -1,8 +1,5 @@
 import logging
-
 from django.core.management.base import BaseCommand
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class
 
 logger = logging.getLogger(__name__)
@@ -16,7 +13,7 @@ class Command(BaseCommand):
     to customers that have registered for an alert.
     """
 
-    help = _("Check for products that are back in stock and send out alerts")
+    help = "Проверяйте наличие продуктов, которые снова есть на складе, и отправляйте оповещения"
 
     def handle(self, *args, **options):
         """

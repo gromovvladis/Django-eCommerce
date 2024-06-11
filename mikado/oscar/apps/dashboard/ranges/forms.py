@@ -1,8 +1,6 @@
 import re
-
 from django import forms
 from django.db.models import Q
-from django.utils.translation import gettext_lazy as _
 
 from oscar.core.loading import get_model
 
@@ -29,16 +27,16 @@ class RangeForm(forms.ModelForm):
 class RangeProductForm(forms.Form):
     query = forms.CharField(
         max_length=1024,
-        label=_("Product SKUs or UPCs"),
+        label="Артикулы продукта или UPC",
         widget=forms.Textarea,
         required=False,
-        help_text=_("You can paste in a selection of SKUs or UPCs"),
+        help_text="Вы можете вставить выбранные SKU или UPC",
     )
     file_upload = forms.FileField(
-        label=_("File of SKUs or UPCs"),
+        label="Файл SKU или UPC",
         required=False,
         max_length=255,
-        help_text=_("Either comma-separated, or one identifier per line"),
+        help_text="Либо через запятую, либо по одному идентификатору в строке",
     )
     upload_type = forms.CharField(widget=forms.HiddenInput(), required=False)
 
@@ -52,10 +50,10 @@ class RangeProductForm(forms.Form):
         # switch for included or excluded products
         if upload_type == RangeProductFileUpload.EXCLUDED_PRODUCTS_TYPE:
             products = self.product_range.excluded_products.all()
-            action = _("excluded from this range")
+            action = "исключено из этого диапазона"
         else:
             products = self.product_range.all_products()
-            action = _("added to this range")
+            action = "добавлено в этот диапазон"
         existing_skus = set(
             products.values_list("stockrecords__partner_sku", flat=True)
         )
@@ -65,9 +63,9 @@ class RangeProductForm(forms.Form):
         if len(new_ids) == 0:
             self.add_error(
                 "query",
-                _(
-                    "The products with SKUs or UPCs matching %(skus)s have "
-                    "already been %(action)s"
+                (
+                    "К продуктам с номерами SKU или UPC, соответствующими %(skus)s, "
+                    "уже было применено %(action)s"
                 )
                 % {"skus": ", ".join(ids), "action": action},
             )
@@ -78,7 +76,7 @@ class RangeProductForm(forms.Form):
             if len(self.products) == 0:
                 self.add_error(
                     "query",
-                    _("No products exist with a SKU or UPC matching %s")
+                    "Нет продуктов, соответствующих SKU или UPC %s"
                     % ", ".join(ids),
                 )
             found_skus = set(
@@ -92,9 +90,8 @@ class RangeProductForm(forms.Form):
     def clean(self):
         clean_data = super().clean()
         if not clean_data.get("query") and not clean_data.get("file_upload"):
-            raise forms.ValidationError(
-                _("You must submit either a list of SKU/UPCs or a file")
-            )
+            raise forms.ValidationError("Вы должны отправить либо список SKU/UPC, либо файл.")
+
         raw = clean_data["query"]
         if raw:
             self.clean_query_with_upload_type(raw, clean_data["upload_type"])
@@ -133,10 +130,7 @@ class RangeExcludedProductForm(RangeProductForm):
 
         if len(new_ids) == 0:
             raise forms.ValidationError(
-                _(
-                    "The products with SKUs or UPCs matching %s are already in"
-                    " this range"
-                )
+                "Товары с номерами SKU или UPC, соответствующими %s, уже находятся в этом ассортименте"
                 % (", ".join(ids))
             )
 
@@ -144,9 +138,7 @@ class RangeExcludedProductForm(RangeProductForm):
             Q(stockrecords__partner_sku__in=new_ids) | Q(upc__in=new_ids)
         )
         if len(self.products) == 0:
-            raise forms.ValidationError(
-                _("No products exist with a SKU or UPC matching %s") % ", ".join(ids)
-            )
+            raise forms.ValidationError("Нет продуктов, соответствующих SKU или UPC %s") % ", ".join(ids)
 
         found_skus = set(
             self.products.values_list("stockrecords__partner_sku", flat=True)

@@ -1,6 +1,5 @@
 from django import forms
 from django.template import Template, TemplateSyntaxError
-from django.utils.translation import gettext_lazy as _
 
 from oscar.apps.customer.utils import normalise_email
 from oscar.core.loading import get_model
@@ -10,18 +9,18 @@ Order = get_model("order", "Order")
 
 
 class CommunicationEventTypeForm(forms.ModelForm):
-    email_subject_template = forms.CharField(label=_("Email subject template"))
+    email_subject_template = forms.CharField(label="Шаблон темы письма")
     email_body_template = forms.CharField(
-        label=_("Email body text template"),
+        label="Шаблон основного текста электронного письма",
         required=True,
         widget=forms.widgets.Textarea(attrs={"class": "plain"}),
     )
     email_body_html_template = forms.CharField(
-        label=_("Email body HTML template"), required=True, widget=forms.Textarea
+        label="HTML-шаблон тела письма", required=True, widget=forms.Textarea
     )
 
-    preview_order_number = forms.CharField(label=_("Order number"), required=False)
-    preview_email = forms.EmailField(label=_("Preview email"), required=False)
+    preview_order_number = forms.CharField(label="Номер заказа", required=False)
+    preview_email = forms.EmailField(label="Предварительный просмотр письма", required=False)
 
     # pylint: disable=attribute-defined-outside-init
     def __init__(self, *args, data=None, **kwargs):
@@ -62,7 +61,7 @@ class CommunicationEventTypeForm(forms.ModelForm):
         try:
             self.preview_order = Order.objects.get(number=number)
         except Order.DoesNotExist:
-            raise forms.ValidationError(_("No order found with this number"))
+            raise forms.ValidationError("Заказ с этим номером не найден")
         return number
 
     def clean_preview_email(self):
@@ -70,7 +69,7 @@ class CommunicationEventTypeForm(forms.ModelForm):
         if not self.send_preview:
             return email
         if not email:
-            raise forms.ValidationError(_("Please enter an email address"))
+            raise forms.ValidationError("Пожалуйста введите адрес электронной почты")
         return email
 
     def get_preview_context(self):

@@ -1,8 +1,5 @@
 from decimal import Decimal
-
 from django.db import models
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.compat import AUTH_USER_MODEL
 
 
@@ -16,30 +13,29 @@ class AbstractProductRecord(models.Model):
 
     product = models.OneToOneField(
         "catalogue.Product",
-        verbose_name=_("Product"),
+        verbose_name="Продукт",
         related_name="stats",
         on_delete=models.CASCADE,
     )
 
     # Data used for generating a score
-    num_views = models.PositiveIntegerField(_("Views"), default=0)
-    num_basket_additions = models.PositiveIntegerField(_("Basket Additions"), default=0)
-    num_purchases = models.PositiveIntegerField(
-        _("Purchases"), default=0, db_index=True
+    num_views = models.PositiveIntegerField("Просмотры продукта", default=0)
+    num_basket_additions = models.PositiveIntegerField("Дополнения корзины", default=0)
+    num_purchases = models.PositiveIntegerField("Покупки", default=0, db_index=True
     )
 
     # Product score - used within search
-    score = models.FloatField(_("Score"), default=0.00)
+    score = models.FloatField("Счет", default=0.00)
 
     class Meta:
         abstract = True
         app_label = "analytics"
         ordering = ["-num_purchases"]
-        verbose_name = _("Product record")
-        verbose_name_plural = _("Product records")
+        verbose_name = "Запись о продукте"
+        verbose_name_plural = "Записи о продуктах"
 
     def __str__(self):
-        return _("Record for '%s'") % self.product
+        return "Запись о продукте '%s'" % self.product
 
 
 class AbstractUserRecord(models.Model):
@@ -48,51 +44,45 @@ class AbstractUserRecord(models.Model):
     """
 
     user = models.OneToOneField(
-        AUTH_USER_MODEL, verbose_name=_("User"), on_delete=models.CASCADE
+        AUTH_USER_MODEL, verbose_name="Пользователь", on_delete=models.CASCADE
     )
 
     # Browsing stats
-    num_product_views = models.PositiveIntegerField(_("Product Views"), default=0)
-    num_basket_additions = models.PositiveIntegerField(_("Basket Additions"), default=0)
+    num_product_views = models.PositiveIntegerField("Просмотры продукта", default=0)
+    num_basket_additions = models.PositiveIntegerField("Дополнения корзины", default=0)
 
     # Order stats
-    num_orders = models.PositiveIntegerField(_("Orders"), default=0, db_index=True)
-    num_order_lines = models.PositiveIntegerField(
-        _("Order Lines"), default=0, db_index=True
-    )
-    num_order_items = models.PositiveIntegerField(
-        _("Order Items"), default=0, db_index=True
-    )
-    total_spent = models.DecimalField(
-        _("Total Spent"), decimal_places=2, max_digits=12, default=Decimal("0.00")
-    )
-    date_last_order = models.DateTimeField(_("Last Order Date"), blank=True, null=True)
+    num_orders = models.PositiveIntegerField("Количество заказов", default=0, db_index=True)
+    num_order_lines = models.PositiveIntegerField("Количество позиций", default=0, db_index=True)
+    num_order_items = models.PositiveIntegerField("Количество товаров", default=0, db_index=True)
+    total_spent = models.DecimalField("Общая сумма покупок", decimal_places=2, max_digits=12, default=Decimal("0.00"))
+    date_last_order = models.DateTimeField("Дата последнего заказа", blank=True, null=True)
 
     class Meta:
         abstract = True
         app_label = "analytics"
-        verbose_name = _("User record")
-        verbose_name_plural = _("User records")
+        verbose_name = "Запись пользователя"
+        verbose_name_plural = "Записи пользователей"
 
 
 class AbstractUserProductView(models.Model):
     user = models.ForeignKey(
-        AUTH_USER_MODEL, verbose_name=_("User"), on_delete=models.CASCADE
+        AUTH_USER_MODEL, verbose_name="Пользователь", on_delete=models.CASCADE
     )
     product = models.ForeignKey(
-        "catalogue.Product", on_delete=models.CASCADE, verbose_name=_("Product")
+        "catalogue.Product", on_delete=models.CASCADE, verbose_name="Продукт"
     )
-    date_created = models.DateTimeField(_("Date Created"), auto_now_add=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
     class Meta:
         abstract = True
         app_label = "analytics"
         ordering = ["-pk"]
-        verbose_name = _("User product view")
-        verbose_name_plural = _("User product views")
+        verbose_name = "Просмотр продукта пользователем"
+        verbose_name_plural = "Просмотры продукта пользователями"
 
     def __str__(self):
-        return _("%(user)s viewed '%(product)s'") % {
+        return "%(user)s посмотрел товар '%(product)s'" % {
             "user": self.user,
             "product": self.product,
         }
@@ -100,20 +90,20 @@ class AbstractUserProductView(models.Model):
 
 class AbstractUserSearch(models.Model):
     user = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("User")
+        AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Пользователь"
     )
-    query = models.CharField(_("Search term"), max_length=255, db_index=True)
-    date_created = models.DateTimeField(_("Date Created"), auto_now_add=True)
+    query = models.CharField("Поисковое условие", max_length=255, db_index=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
     class Meta:
         abstract = True
         app_label = "analytics"
         ordering = ["-pk"]
-        verbose_name = _("User search query")
-        verbose_name_plural = _("User search queries")
+        verbose_name = "Поисковый запрос пользователя"
+        verbose_name_plural = "Поисковые запросы пользователей"
 
     def __str__(self):
-        return _("%(user)s searched for '%(query)s'") % {
+        return "%(user)s искал '%(query)s'" % {
             "user": self.user,
             "query": self.query,
         }

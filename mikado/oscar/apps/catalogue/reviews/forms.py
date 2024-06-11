@@ -1,59 +1,64 @@
 from django import forms
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_model
 
-Vote = get_model("reviews", "vote")
-ProductReview = get_model("reviews", "productreview")
+ProductReview = get_model("reviews", "ProductReview")
+OrderReview = get_model("customer", "OrderReview")
 
 
 class ProductReviewForm(forms.ModelForm):
-    name = forms.CharField(label=_("Name"), required=True)
-    email = forms.EmailField(label=_("Email"), required=True)
 
     def __init__(self, product, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.product = product
         if user and user.is_authenticated:
             self.instance.user = user
-            del self.fields["name"]
-            del self.fields["email"]
 
     class Meta:
         model = ProductReview
-        fields = ("title", "score", "body", "name", "email")
+        fields = ("score", "body")
+        widgets = {
+            'score': forms.RadioSelect(),
+            'body': forms.Textarea(attrs={
+                'class' : 'v-input v-input-textarea fill-width fill-height d-flex align-center v-input__padding pd-2',
+                'rows': 6,
+                'placeholder': "Ваш отзыв"
+            }),
+        }
 
 
-class VoteForm(forms.ModelForm):
-    class Meta:
-        model = Vote
-        fields = ("delta",)
+class OrderReviewForm(forms.ModelForm):
 
-    def __init__(self, review, user, *args, **kwargs):
+    def __init__(self, order, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.review = review
-        self.instance.user = user
+        self.instance.order = order
+        if user and user.is_authenticated:
+            self.instance.user = user
 
-    @property
-    def is_up_vote(self):
-        return self.cleaned_data["delta"] == Vote.UP
+    class Meta:
+        model = OrderReview
+        fields = ("score", "body")
+        widgets = {
+            'score': forms.RadioSelect(),
+            'body': forms.Textarea(attrs={
+                'class' : 'v-input v-input-textarea fill-width fill-height d-flex align-center v-input__padding pd-2',
+                'rows': 6,
+                'placeholder': "Ваш отзыв"
+            }),
+        }
 
-    @property
-    def is_down_vote(self):
-        return self.cleaned_data["delta"] == Vote.DOWN
 
 
 class SortReviewsForm(forms.Form):
     SORT_BY_SCORE = "score"
     SORT_BY_RECENCY = "recency"
     SORT_REVIEWS_BY_CHOICES = (
-        (SORT_BY_SCORE, _("Score")),
-        (SORT_BY_RECENCY, _("Recency")),
+        (SORT_BY_SCORE, "Оценка"),
+        (SORT_BY_RECENCY, "Новизна"),
     )
 
     sort_by = forms.ChoiceField(
         choices=SORT_REVIEWS_BY_CHOICES,
-        label=_("Sort by"),
+        label="Сортировать по",
         initial=SORT_BY_SCORE,
         required=False,
     )

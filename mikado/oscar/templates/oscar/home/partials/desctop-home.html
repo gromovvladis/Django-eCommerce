@@ -1,0 +1,157 @@
+{% load image_tags %}
+{% load product_tags %}
+{% load svg_tags %}
+
+{% for promo_cat in promo_cats %}
+    {% if promo_cat.type == "RECOMEND" %}
+        <div class="d-flex flex-column fill-width mb-5 mb-md-8">
+
+            <div class="home__subtitle mb-2 mb-md-2 d-flex align-center">
+                <h2>{{ promo_cat.title }}</h2>
+                <div role="separator" class="v-spacer"></div>
+                <a href="{{ promo_cat.get_absolute_url }}" class="home__category-link" data-test-id="home-categories-link-new" data-id="new"> 
+                    Смотреть все 
+                </a>
+            </div>
+
+            <div class="v-dish-slider fill-width v-dish-slider--dish-small">
+                <div class="v-h-nav--wrapper" data-id="slider-action" data-per-page="3">
+
+                    <button type="button" class="v-h-nav--button" data-id="swiper-prev">
+                        {% icon file_name='interface/arrow-home' stroke="#000" %}
+                    </button>
+
+                    <div class="v-h-nav" data-id="slider-swiper">
+                        <div class="v-h-nav--inner swiper-wrapper">                                   
+                            {% if promo_cat.has_products %}
+                                {% for product in promo_cat.all_products|slice:":6" %}
+                                    <div class="v-h-nav--item v-h-nav--width swiper-slide">
+                                        <div class="v-dish-order d-flex fill-width fill-height mb-1 v-dish-order--info">
+                                            <div class="v-dish-order__picture">
+                                                <a href="{{ product.get_absolute_url }}" class="d-block" data-id="dish-order-image-link">
+                                                    <div class="v-dish-image fill-width">
+                                                        <div class="v-images-chunks" style="position: relative;">
+                                                            <div class="v-image">
+                                                                <div class="v-image__inner" style="padding-bottom: 100%;">
+                                                                    {% with image=product.primary_image %}
+                                                                        {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
+                                                                        <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" class="img-thumbnail w-auto mx-auto my-0">
+                                                                    {% endwith %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </a>                                                
+                                            </div>                                            
+                                            <a href="{{ product.get_absolute_url }}" class="v-dish-order__content d-flex flex-column fill-width">
+                                                <div class="d-flex align-start fill-width">
+                                                    <div class="v-dish-order__name-wrapper d-flex flex-column fill-width">
+                                                        <span class="v-dish-order__name mb-1" data-id="dish-order-link">{{ product.title }}</span>
+                                                        {% if product.short_desc %}
+                                                            <span class="short-description">{{ product.short_desc }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <div role="separator" class="v-spacer"></div>
+
+                                                {% include "oscar/catalogue/partials/product_price.html" %}
+
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="v-h-nav--button right"data-id="swiper-next"> 
+                        {% icon file_name='interface/arrow-home' stroke="#000" %}
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    {% elif promo_cat.type == "ACTION" %}
+
+        <div class="v-collection d-flex flex-column fill-width mb-5 mb-md-8">
+            <div class="v-collection__wrapper d-flex flex-column fill-width">
+                
+                <div class="v-collection__banner fill-width shrink px-2">
+                    <a href="{{ promo_cat.get_absolute_url }}" class="v-collection__banner-wrapper d-flex fill-width" data-id="collection-link">
+                        <div class="v-images-chunks fill-width" style="position: relative;">
+                            <div class="v-image">
+                                <div class="v-image__inner" style="padding-bottom: 27%;">
+                                    {% with image=promo_cat.primary_image %}
+                                        {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
+                                        <img src="{{ thumb.url }}" alt="{{ promo_cat.title }}" class="img-thumbnail w-auto mx-auto my-0">
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="v-collection__slider d-flex flex-column fill-width">
+                    <div class="v-dish-slider fill-width v-dish-slider--dish-large">
+                        <div class="v-h-nav--wrapper content-inside" data-id="slider-action" data-per-page="4">
+
+                            <button type="button" class="v-h-nav--button d-none" data-id="swiper-prev">
+                                {% icon file_name='interface/arrow-home' stroke="#000" %}
+                            </button>
+
+                            <div class="v-h-nav" data-id="slider-swiper">
+                                <div class="v-h-nav--inner swiper-wrapper">
+                                    {% if promo_cat.has_products %}
+                                        {% for product in promo_cat.all_products|slice:":8" %}
+                                            <div class="v-h-nav--item swiper-slide">
+                                                <div class="dish d-flex flex-column v-card elevation-none">
+                                                    <div class="d-flex flex-column grow-1">
+                                                        {% render_product product %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="v-h-nav--button right d-none" data-id="swiper-next">
+                                {% icon file_name='interface/arrow-home' stroke="#000" %}
+                            </button>
+
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    {% else %}        
+        
+        <div class="home__cat-title px-2 mb-2 mb-md-2 d-flex align-center">
+            <h2 class="font-medium">{{ promo_cat.title }}</h2>
+            <div role="separator" class="v-spacer"></div>
+            <a href="{{ promo_cat.get_absolute_url }}" class="home__category-link" data-test-id="home-categories-link-new" data-id="new"> 
+                Смотреть все 
+            </a>
+        </div>
+
+        {% comment %}------------- содержимое категории ---------------{% endcomment %}
+        <div class="pd-2">
+            {% if promo_cat.all_products %}
+            <div class="v-dishes row">
+                {% for product in promo_cat.all_products|slice:":5" %}
+                    <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-5">
+                        {% render_product product %}
+                    </div>
+                {% endfor %}
+            </div>
+            {% include "oscar/partials/pagination.html" %}
+            {% endif %}
+        </div>
+    {% endif %}
+
+{% endfor %}
+

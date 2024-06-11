@@ -1,24 +1,10 @@
 from decimal import Decimal as D
 
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import gettext_lazy as _
-
+from oscar.apps.shipping.methods import OfferDiscount
 from oscar.core.loading import get_classes
 
-(
-    Free,
-    NoShippingRequired,
-    TaxExclusiveOfferDiscount,
-    TaxInclusiveOfferDiscount,
-) = get_classes(
-    "shipping.methods",
-    [
-        "Free",
-        "NoShippingRequired",
-        "TaxExclusiveOfferDiscount",
-        "TaxInclusiveOfferDiscount",
-    ],
-)
+Free, NoShippingRequired = get_classes("shipping.methods", ["Free", "NoShippingRequired"])
 
 
 class Repository(object):
@@ -30,7 +16,11 @@ class Repository(object):
     # We default to just free shipping. Customise this class and override this
     # property to add your own shipping methods. This should be a list of
     # instantiated shipping methods.
-    methods = (Free(),NoShippingRequired())
+
+    methods = (
+        Free(True), #first if default
+        NoShippingRequired(5)
+    )
 
     # API
 
@@ -60,7 +50,7 @@ class Repository(object):
             basket, shipping_addr=shipping_addr, **kwargs
         )
         if len(shipping_methods) == 0:
-            raise ImproperlyConfigured(_("You need to define some shipping methods"))
+            raise ImproperlyConfigured("Вам необходимо определить способы доставки")
 
         # Assume first returned method is default
         return shipping_methods[0]
@@ -92,14 +82,9 @@ class Repository(object):
         # method with a decorating class that applies the offer discount to the
         # shipping charge.
         charge = method.calculate(basket)
-        if charge.excl_tax == D("0.00"):
+        if charge.money == D("0.00"):
             # No need to wrap zero shipping charges
             return method
 
-        if charge.is_tax_known:
-            return TaxInclusiveOfferDiscount(method, offer)
-        else:
-            # When returning a tax exclusive discount, it is assumed
-            # that this will be used to calculate taxes which will then
-            # be assigned directly to the method instance.
-            return TaxExclusiveOfferDiscount(method, offer)
+        return OfferDiscount(method, offer)
+

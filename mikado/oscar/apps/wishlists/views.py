@@ -3,7 +3,6 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView
 
 from oscar.core.loading import get_model
@@ -15,22 +14,6 @@ class WishListView(DetailView):
     template_name = "oscar/wishlists/wishlist_detail.html"
     model = WishList
     context_object_name = "wishlist"
-
-    def dispatch(self, request, *args, **kwargs):
-        wishlist = self.get_object()
-
-        if wishlist.is_allowed_to_see(request.user):
-            return super().dispatch(request, *args, **kwargs)
-        elif (
-            wishlist.visibility == WishList.PRIVATE
-            or request.user.is_authenticated
-            and not wishlist.is_allowed_to_see(request.user)
-        ):
-            raise PermissionDenied
-        else:
-            messages.info(request, _("You must be logged in to view the wish list"))
-            redirect_url = "%s?next=%s" % (settings.LOGIN_URL, request.path)
-            return redirect(redirect_url)
 
     def get_object(self, queryset=None):
         return get_object_or_404(WishList, key=self.kwargs.get("key"))

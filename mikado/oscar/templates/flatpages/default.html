@@ -1,30 +1,36 @@
 {% extends "oscar/layout.html" %}
-{% load i18n %}
+{% load static %}
+{% load svg_tags %}
 
 {% block title %}
-    {{ flatpage.title}} | {{ block.super }}
+    {{ flatpage.title }} | {{ block.super }}
 {% endblock %}
 
-{% block header%}
-    <div class="page-header">
-        {% if user.is_staff %}
-            <a class="float-right d-none d-md-block" href="{% url 'dashboard:page-update' pk=flatpage.id %}"><small><i class="fas fa-pencil-alt"></i> {% trans "Edit this page" %}</small></a>
-        {% endif %}
-        <h1>{{ flatpage.title }}</h1>
+{% block wrapper_class %}flatpage wrapper--small fill-width pd-2 pb-sm-8{% endblock %}
+
+{% block app_class %}v-app---flatpage{% endblock %}
+{% block nav_class %}v-app__nav--flatpage{% endblock %}
+
+{% block nav_title %}{{ flatpage.title }}{% endblock %}
+
+{% block breadcrumbs %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="mr-1 pd-0">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=22 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">{{ flatpage.title }}</span>
     </div>
 {% endblock %}
 
-{% block breadcrumbs %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{{ homepage_url }}">{% trans "Home" %}</a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">{{ flatpage.title }}</li>
-        </ol>
-    </nav>
-{% endblock %}
+{% block sticky_address %}{% endblock %}
 
 {% block content %}
-    <article>{{ flatpage.content }}</article>
-{% endblock %}
+    <div class="flatpage__wrapper py-sm-2">
+        <div class="flatpage__title mb-2 d-none d-sm-block">
+            <h1>{{ flatpage.title }}</h1>
+        </div>
+        {{ flatpage.content }}
+    </div>
+{% endblock content %}

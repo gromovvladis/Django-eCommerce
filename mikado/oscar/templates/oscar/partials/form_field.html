@@ -2,12 +2,7 @@
 
 {% if field.is_hidden %}
     {{ field }}
-{% elif not field.field.widget.attrs.good and not field.field.widget.attrs.variant%}
-    {% comment %}
-        Make the field widget type available to templates so we can mark-up
-        checkbox and radio inputs differently to other widgets.
-    {% endcomment %}
-
+{% else %}
     {% block control_group %}
         <div class="form-group{% if style == "horizontal" %} row{% endif %}">
 

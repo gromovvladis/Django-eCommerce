@@ -1,7 +1,4 @@
 from decimal import Decimal as D
-
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core import prices
 
 
@@ -20,7 +17,7 @@ class BaseSurcharge:
 
 
 class PercentageCharge(BaseSurcharge):
-    name = _("Percentage surcharge")
+    name = "Процентная надбавка"
     code = "percentage-surcharge"
 
     def __init__(self, percentage):
@@ -31,32 +28,28 @@ class PercentageCharge(BaseSurcharge):
             shipping_charge = kwargs.get("shipping_charge")
 
             if shipping_charge is not None:
-                total_excl_tax = basket.total_excl_tax + shipping_charge.excl_tax
-                total_incl_tax = basket.total_incl_tax + shipping_charge.incl_tax
+                total = basket.total + shipping_charge.money
             else:
-                total_excl_tax = basket.total_excl_tax
-                total_incl_tax = basket.total_incl_tax
+                total = basket.total
 
             return prices.Price(
                 currency=basket.currency,
-                excl_tax=total_excl_tax * self.percentage / 100,
-                incl_tax=total_incl_tax * self.percentage / 100,
+                money=total * self.percentage / 100,
             )
         else:
             return prices.Price(
-                currency=basket.currency, excl_tax=D("0.0"), incl_tax=D("0.0")
+                currency=basket.currency, money=D("0.0")
             )
 
 
 class FlatCharge(BaseSurcharge):
-    name = _("Flat surcharge")
+    name = "Фиксированная доплата"
     code = "flat-surcharge"
 
-    def __init__(self, excl_tax=None, incl_tax=None):
-        self.excl_tax = excl_tax
-        self.incl_tax = incl_tax
+    def __init__(self, money=None):
+        self.money = money
 
     def calculate(self, basket, **kwargs):
         return prices.Price(
-            currency=basket.currency, excl_tax=self.excl_tax, incl_tax=self.incl_tax
+            currency=basket.currency, money=self.money
         )

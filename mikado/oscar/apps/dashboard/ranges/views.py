@@ -7,8 +7,6 @@ from django.db.models import Count
 from django.shortcuts import HttpResponse, get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView, View
 
 from oscar.core.loading import get_classes, get_model
@@ -51,7 +49,7 @@ class RangeCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Create range")
+        ctx["title"] = "Создать диапазон"
         return ctx
 
 
@@ -90,7 +88,7 @@ class RangeDeleteView(DeleteView):
     context_object_name = "range"
 
     def get_success_url(self):
-        messages.warning(self.request, _("Range deleted"))
+        messages.warning(self.request,"Диапазон удален")
         return reverse("dashboard:range-list")
 
 
@@ -163,9 +161,9 @@ class RangeProductListView(BulkEditMixin, ListView):
         num_products = len(products)
         messages.success(
             request,
-            ngettext(
-                "Removed %d product from range",
-                "Removed %d products from range",
+            (
+                "Удален %d продукт из ассортимента",
+                "Удалено %d продуктов из ассортимента",
                 num_products,
             )
             % num_products,
@@ -217,9 +215,9 @@ class RangeProductListView(BulkEditMixin, ListView):
         num_products = len(products)
         messages.success(
             request,
-            ngettext(
-                "Removed %d product from excluded list",
-                "Removed %d products from excluded list",
+            (
+                "Удален %d товар из исключенного списка",
+                "Удалено %d товаров из исключенного списка",
                 num_products,
             )
             % num_products,
@@ -239,16 +237,16 @@ class RangeProductListView(BulkEditMixin, ListView):
                 == RangeProductFileUpload.EXCLUDED_PRODUCTS_TYPE
             ):
                 product_range.excluded_products.add(product)
-                action = _("excluded from this range")
+                action = "исключено из этого диапазона"
             else:
                 product_range.add_product(product)
-                action = _("added to this range")
+                action = "добавлено в этот диапазон"
         num_products = len(products)
         messages.success(
             request,
-            ngettext(
-                "%(num_products)d product has been %(action)s",
-                "%(num_products)d products have been %(action)s",
+            (
+                "%(num_products)d продукт был %(action)s",
+                "%(num_products)d продуктов было %(action)s",
                 num_products,
             )
             % {"num_products": num_products, "action": action},
@@ -257,10 +255,7 @@ class RangeProductListView(BulkEditMixin, ListView):
         if dupe_skus:
             messages.warning(
                 request,
-                _(
-                    "The products with SKUs or UPCs matching %(skus)s have "
-                    "already been %(action)s"
-                )
+                "Продукты с номерами SKU или UPC, соответствующими %(skus)s, уже были %(action)s."
                 % {"skus": ", ".join(dupe_skus), "action": action},
             )
 
@@ -268,7 +263,7 @@ class RangeProductListView(BulkEditMixin, ListView):
         if missing_skus:
             messages.warning(
                 request,
-                _("No product(s) were found with SKU or UPC matching %s")
+                "Не найдено ни одного продукта(ов), соответствующего SKU или UPC. %s"
                 % ", ".join(missing_skus),
             )
         self.check_imported_products_sku_duplicates(request, products)
@@ -319,7 +314,7 @@ class RangeProductListView(BulkEditMixin, ListView):
             dupe_skus = [p["stockrecords__partner_sku"] for p in dupe_sku_products]
             messages.warning(
                 request,
-                _("There are more than one product with SKU %s") % ", ".join(dupe_skus),
+                "Есть более одного продукта с SKU %s" % ", ".join(dupe_skus),
             )
 
 

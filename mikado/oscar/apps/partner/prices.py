@@ -10,25 +10,15 @@ class Base(object):
     #: Whether any prices exist
     exists = False
 
-    #: Whether tax is known
-    is_tax_known = False
+    #: Price
+    money = None 
 
-    #: Price excluding tax
-    excl_tax = None
-
-    #: Price including tax
-    incl_tax = None
+    old_price = None 
 
     #: Price to use for offer calculations
     @property
     def effective_price(self):
-        if settings.OSCAR_OFFERS_INCL_TAX:
-            return self.incl_tax
-        # Default to using the price excluding tax for calculations
-        return self.excl_tax
-
-    #: Price tax
-    tax = None
+        return self.money
 
     # Code used to store the vat rate reference
     tax_code = None
@@ -65,27 +55,13 @@ class FixedPrice(Base):
     exists = True
 
     #vlad
-    def __init__(self, currency, excl_tax, old_price=None, variations_price=None, tax=None, tax_code=None):
+    def __init__(self, currency, money, old_price=None, variations_price=None, tax_code=None):
         super().__init__()
         self.currency = currency
-        self.excl_tax = excl_tax
+        self.money = money
         self.old_price = old_price
         self.variations_price = variations_price
-        self.tax = tax
         self.tax_code = tax_code
-
-    @property
-    def incl_tax(self):
-        if self.is_tax_known:
-            return self.excl_tax + self.tax
-        raise prices.TaxNotKnown("Can't calculate price.incl_tax as tax isn't known")
-
-    @property
-    def is_tax_known(self) -> bool:
-        """
-        Test whether the tax is known or not
-        """
-        return self.tax is not None
 
 
 class TaxInclusiveFixedPrice(FixedPrice):
@@ -94,13 +70,7 @@ class TaxInclusiveFixedPrice(FixedPrice):
     specifies that offers should use the tax-inclusive price (which is the norm
     in the UK).
     """
-
-    exists = is_tax_known = True
-
-    @property
-    def incl_tax(self):
-        return self.excl_tax + self.tax
-
+    
     @property
     def effective_price(self):
-        return self.incl_tax
+        return self.money

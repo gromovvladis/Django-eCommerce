@@ -5,7 +5,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, ListView
 
 from oscar.core.loading import get_class, get_classes, get_model
@@ -81,7 +80,7 @@ class OfferListView(ListView):
 
         if name:
             qs = qs.filter(name__icontains=name)
-            self.search_filters.append(_('Name matches "%s"') % name)
+            self.search_filters.append('Имя соответствует "%s"' % name)
         if is_active is not None:
             now = timezone.now()
             if is_active:
@@ -90,27 +89,25 @@ class OfferListView(ListView):
                     & (Q(end_datetime__gte=now) | Q(end_datetime__isnull=True)),
                     status=ConditionalOffer.OPEN,
                 )
-                self.search_filters.append(_("Is active"))
+                self.search_filters.append("Активен")
             else:
                 qs = qs.filter(
                     Q(start_datetime__gt=now)
                     | Q(end_datetime__lt=now)
                     | Q(status=ConditionalOffer.SUSPENDED)
                 )
-                self.search_filters.append(_("Is inactive"))
+                self.search_filters.append("Неактивен")
         if offer_type:
             qs = qs.filter(offer_type=offer_type)
             self.search_filters.append(
-                _('Is of type "%s"') % dict(ConditionalOffer.TYPE_CHOICES)[offer_type]
+                'Тип товара "%s"' % dict(ConditionalOffer.TYPE_CHOICES)[offer_type]
             )
         if has_vouchers is not None:
             qs = qs.filter(vouchers__isnull=not has_vouchers).distinct()
-            self.search_filters.append(
-                _("Has vouchers") if has_vouchers else _("Has no vouchers")
-            )
+            self.search_filters.append("Есть промокод" if has_vouchers else "Нет промокода")
         if voucher_code:
             qs = qs.filter(vouchers__code__icontains=voucher_code).distinct()
-            self.search_filters.append(_('Voucher code matches "%s"') % voucher_code)
+            self.search_filters.append('Промокод соответствует коду: "%s"' % voucher_code)
 
         return qs
 
@@ -133,7 +130,7 @@ class OfferMetaDataView(OfferWizardStepView):
         return self.offer
 
     def get_title(self):
-        return _("Name, description and type")
+        return "Название, описание и тип"
 
 
 class OfferBenefitView(OfferWizardStepView):
@@ -149,7 +146,7 @@ class OfferBenefitView(OfferWizardStepView):
 
     def get_title(self):
         # This is referred to as the 'incentive' within the dashboard.
-        return _("Incentive")
+        return "Стимул"
 
 
 class OfferConditionView(OfferWizardStepView):
@@ -179,7 +176,7 @@ class OfferRestrictionsView(OfferWizardStepView):
         return self.offer
 
     def get_title(self):
-        return _("Restrictions")
+        return "Ограничения"
 
 
 class OfferDeleteView(DeleteView):
@@ -192,15 +189,13 @@ class OfferDeleteView(DeleteView):
         if offer.vouchers.exists():
             messages.warning(
                 request,
-                _(
-                    "This offer can only be deleted if it has no vouchers attached to it"
-                ),
+                "Это предложение можно удалить только в том случае, если к нему не прикреплены ваучеры."
             )
             return redirect("dashboard:offer-detail", pk=offer.pk)
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
-        messages.success(self.request, _("Offer deleted!"))
+        messages.success(self.request, "Предложение удалено.!")
         return reverse("dashboard:offer-list")
 
 
@@ -225,10 +220,10 @@ class OfferDetailView(ListView):
 
     def suspend(self):
         if self.offer.is_suspended:
-            messages.error(self.request, _("Offer is already suspended"))
+            messages.error(self.request, "Предложение уже приостановлено")
         else:
             self.offer.suspend()
-            messages.success(self.request, _("Offer suspended"))
+            messages.success(self.request, "Предложение приостановлено")
         return HttpResponseRedirect(
             reverse("dashboard:offer-detail", kwargs={"pk": self.offer.pk})
         )
@@ -237,11 +232,11 @@ class OfferDetailView(ListView):
         if not self.offer.is_suspended:
             messages.error(
                 self.request,
-                _("Offer cannot be reinstated as it is not currently suspended"),
+                "Предложение не может быть восстановлено, поскольку в настоящее время оно не приостановлено.",
             )
         else:
             self.offer.unsuspend()
-            messages.success(self.request, _("Offer reinstated"))
+            messages.success(self.request, "Предложение восстановлено")
         return HttpResponseRedirect(
             reverse("dashboard:offer-detail", kwargs={"pk": self.offer.pk})
         )

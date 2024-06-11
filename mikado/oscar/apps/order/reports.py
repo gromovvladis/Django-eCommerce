@@ -1,5 +1,3 @@
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class, get_model
 
 ReportGenerator = get_class("dashboard.reports.reports", "ReportGenerator")
@@ -14,11 +12,11 @@ class OrderReportCSVFormatter(ReportCSVFormatter):
     def generate_csv(self, response, orders):
         writer = self.get_csv_writer(response)
         header_row = [
-            _("Order number"),
-            _("Name"),
-            _("Email"),
-            _("Total incl. tax"),
-            _("Date placed"),
+            "Номер заказа",
+            "Имя",
+            "Email",
+            "Итого",
+            "Дата размещения",
         ]
         writer.writerow(header_row)
         for order in orders:
@@ -26,7 +24,7 @@ class OrderReportCSVFormatter(ReportCSVFormatter):
                 order.number,
                 "-" if order.is_anonymous else order.user.get_full_name(),
                 order.email,
-                order.total_incl_tax,
+                order.total,
                 self.format_datetime(order.date_placed),
             ]
             writer.writerow(row)
@@ -41,7 +39,7 @@ class OrderReportHTMLFormatter(ReportHTMLFormatter):
 
 class OrderReportGenerator(ReportGenerator):
     code = "order_report"
-    description = _("Orders placed")
+    description = "Заказов размещено"
     date_range_field_name = "date_placed"
     model_class = Order
 

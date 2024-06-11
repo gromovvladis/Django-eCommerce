@@ -38,24 +38,24 @@ class SorlThumbnail(AbstractThumbnailer):
             pass
 
 
-class EasyThumbnails(AbstractThumbnailer):
-    def __init__(self):
-        if not apps.is_installed("easy_thumbnails"):
-            raise ValueError('"easy_thumbnails" is not listed in "INSTALLED_APPS".')
+# class EasyThumbnails(AbstractThumbnailer):
+#     def __init__(self):
+#         if not apps.is_installed("easy_thumbnails"):
+#             raise ValueError('"easy_thumbnails" is not listed in "INSTALLED_APPS".')
 
-    def generate_thumbnail(self, source, **opts):
-        from easy_thumbnails.files import get_thumbnailer as get_easy_thumbnailer
+#     def generate_thumbnail(self, source, **opts):
+#         from easy_thumbnails.files import get_thumbnailer as get_easy_thumbnailer
 
-        width, height = opts["size"].split("x")
-        width = width or 0
-        height = height or 0
-        opts["size"] = (width, height)
-        return get_easy_thumbnailer(source).get_thumbnail(opts)
+#         width, height = opts["size"].split("x")
+#         width = width or 0
+#         height = height or 0
+#         opts["size"] = (width, height)
+#         return get_easy_thumbnailer(source).get_thumbnail(opts)
 
-    def delete_thumbnails(self, source):
-        from easy_thumbnails.files import get_thumbnailer as get_easy_thumbnailer
+#     def delete_thumbnails(self, source):
+#         from easy_thumbnails.files import get_thumbnailer as get_easy_thumbnailer
 
-        get_easy_thumbnailer(source).delete(save=False)
+#         get_easy_thumbnailer(source).delete(save=False)
 
 
 def get_thumbnailer():

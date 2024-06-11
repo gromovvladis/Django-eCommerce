@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.template import TemplateSyntaxError
-from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
 from oscar.core.loading import get_class, get_model
@@ -29,12 +28,7 @@ class UpdateView(generic.UpdateView):
 
     def form_invalid(self, form):
         messages.error(
-            self.request,
-            _(
-                "The submitted form was not valid, please correct "
-                "the errors and resubmit"
-            ),
-        )
+            self.request, "Отправленная форма недействительна, пожалуйста, исправьте ошибки и повторите отправку")
         return super().form_invalid(form)
 
     def form_valid(self, form):
@@ -42,7 +36,7 @@ class UpdateView(generic.UpdateView):
             return self.send_preview(form)
         if "show_preview" in self.request.POST:
             return self.show_preview(form)
-        messages.success(self.request, _("Email saved"))
+        messages.success(self.request, "Электронная почта сохранена.")
         return super().form_valid(form)
 
     def get_messages_context(self, form):
@@ -81,6 +75,6 @@ class UpdateView(generic.UpdateView):
         email = form.cleaned_data["preview_email"]
         dispatch = Dispatcher()
         dispatch.send_email_messages(email, msgs)
-        messages.success(self.request, _("A preview email has been sent to %s") % email)
+        messages.success(self.request, "Письмо с предварительным просмотром было отправлено на адрес %s" % email)
 
         return self.render_to_response(ctx)

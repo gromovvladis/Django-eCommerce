@@ -3,16 +3,10 @@ from django.db.models import F, signals
 from django.db.models.functions import Coalesce, Least
 from django.utils.functional import cached_property
 from django.utils.timezone import now
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
-
 from oscar.apps.partner.exceptions import InvalidStockAdjustment
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.utils import get_default_currency
 from oscar.models.fields import AutoSlugField
-
-from django.core.validators import MinValueValidator
-
 
 class AbstractPartner(models.Model):
     """
@@ -25,10 +19,10 @@ class AbstractPartner(models.Model):
     """
 
     code = AutoSlugField(
-        _("Code"), max_length=128, unique=True, db_index=True, populate_from="name"
+        "Код", max_length=128, unique=True, db_index=True, populate_from="name"
     )
     name = models.CharField(
-        pgettext_lazy("Partner's name", "Name"),
+        ("Название точки продажи", "Название"),
         max_length=128,
         blank=True,
         db_index=True,
@@ -37,7 +31,7 @@ class AbstractPartner(models.Model):
     #: A partner can have users assigned to it. This is used
     #: for access modelling in the permission-based dashboard
     users = models.ManyToManyField(
-        AUTH_USER_MODEL, related_name="partners", blank=True, verbose_name=_("Users")
+        AUTH_USER_MODEL, related_name="partners", blank=True, verbose_name="Пользователи"
     )
 
     @property
@@ -81,8 +75,8 @@ class AbstractPartner(models.Model):
         app_label = "partner"
         ordering = ("name", "code")
         permissions = (("dashboard_access", "Can access dashboard"),)
-        verbose_name = _("Fulfillment partner")
-        verbose_name_plural = _("Fulfillment partners")
+        verbose_name = "Точка продажи"
+        verbose_name_plural = "Точка продажи"
 
     def __str__(self):
         return self.display_name
@@ -102,13 +96,13 @@ class AbstractStockRecord(models.Model):
     product = models.ForeignKey(
         "catalogue.Product",
         on_delete=models.CASCADE,
+        verbose_name="Продукт",
         related_name="stockrecords",
-        verbose_name=_("Product"),
     )
     partner = models.ForeignKey(
         "partner.Partner",
         on_delete=models.CASCADE,
-        verbose_name=_("Partner"),
+        verbose_name="Точка продажи",
         related_name="stockrecords",
     )
 
@@ -116,11 +110,11 @@ class AbstractStockRecord(models.Model):
     #: which we store here.  This will sometimes be the same the product's UPC
     #: but not always.  It should be unique per partner.
     #: See also http://en.wikipedia.org/wiki/Stock-keeping_unit
-    partner_sku = models.CharField(_("Partner SKU"), max_length=128)
+    partner_sku = models.CharField("Артикул в точке продажи", max_length=128)
 
     # Price info:
     price_currency = models.CharField(
-        _("Currency"), max_length=12, default=get_default_currency
+        "Валюта", max_length=12, default=get_default_currency
     )
 
     # This is the base price for calculations - whether this is inclusive or exclusive of
@@ -128,44 +122,44 @@ class AbstractStockRecord(models.Model):
     # It is nullable because some items don't have a fixed
     # price but require a runtime calculation (possibly from an external service).
     price = models.DecimalField(
-        _("Price"),
+        "Цена",
         decimal_places=2,
         max_digits=12, 
         blank=True,
         null=True,
-        help_text=_("Price to sell."),
+        help_text="Цена продажи",
     )
 
     old_price = models.DecimalField(
-        _("Old Price"),
+        "Цена до скидки",
         decimal_places=2,
         max_digits=12, 
         blank=True,
         null=True,
-        help_text=_("Old price."),
+        help_text="Цена до скидки. Оставить пустым, если скидки нет",
         # validators=[MinValueValidator(price)]
     )
 
     #: Number of items in stock
     num_in_stock = models.PositiveIntegerField(
-        _("Number in stock"), blank=True, null=True
+        "Количество в наличии", blank=True, null=True
     )
 
     #: The amount of stock allocated to orders but not fed back to the master
     #: stock system.  A typical stock update process will set the
     #: :py:attr:`.num_in_stock` variable to a new value and reset
     #: :py:attr:`.num_allocated` to zero.
-    num_allocated = models.IntegerField(_("Number allocated"), blank=True, null=True)
+    num_allocated = models.IntegerField("Количество заказано", blank=True, null=True)
 
     #: Threshold for low-stock alerts.  When stock goes beneath this threshold,
     #: an alert is triggered so warehouse managers can order more.
     low_stock_threshold = models.PositiveIntegerField(
-        _("Low Stock Threshold"), blank=True, null=True
+        "Граница малых запасов", blank=True, null=True
     )
 
     # Date information
-    date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
-    date_updated = models.DateTimeField(_("Date updated"), auto_now=True, db_index=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
     def __str__(self):
         msg = "Partner: %s, product: %s" % (
@@ -180,8 +174,8 @@ class AbstractStockRecord(models.Model):
         abstract = True
         app_label = "partner"
         unique_together = ("partner", "partner_sku")
-        verbose_name = _("Stock record")
-        verbose_name_plural = _("Stock records")
+        verbose_name = "Товарная запись"
+        verbose_name_plural = "Товарные записи"
 
     @property
     def net_stock_level(self):
@@ -251,7 +245,7 @@ class AbstractStockRecord(models.Model):
         if not self.can_track_allocations:
             return
         if not self.is_allocation_consumption_possible(quantity):
-            raise InvalidStockAdjustment(_("Invalid stock consumption request"))
+            raise InvalidStockAdjustment("Неверный запрос товарного запаса")
 
         # send the pre save signal
         self.pre_save_signal()
@@ -329,21 +323,21 @@ class AbstractStockAlert(models.Model):
         "partner.StockRecord",
         on_delete=models.CASCADE,
         related_name="alerts",
-        verbose_name=_("Stock Record"),
+        verbose_name="Товарная запись",
     )
-    threshold = models.PositiveIntegerField(_("Threshold"))
+    threshold = models.PositiveIntegerField("Порог")
     OPEN, CLOSED = "Open", "Closed"
     status_choices = (
-        (OPEN, _("Open")),
-        (CLOSED, _("Closed")),
+        (OPEN, "Открыто"),
+        (CLOSED, "Закрыто"),
     )
     status = models.CharField(
-        _("Status"), max_length=128, default=OPEN, choices=status_choices
+        "Статус", max_length=128, default=OPEN, choices=status_choices
     )
     date_created = models.DateTimeField(
-        _("Date Created"), auto_now_add=True, db_index=True
+        "Дата создания", auto_now_add=True, db_index=True
     )
-    date_closed = models.DateTimeField(_("Date Closed"), blank=True, null=True)
+    date_closed = models.DateTimeField("Дата закрытия", blank=True, null=True)
 
     def close(self):
         self.status = self.CLOSED
@@ -353,7 +347,7 @@ class AbstractStockAlert(models.Model):
     close.alters_data = True
 
     def __str__(self):
-        return _('<stockalert for "%(stock)s" status %(status)s>') % {
+        return '<Уведомление о наличии товара "%(stock)s" со статусом %(status)s>' % {
             "stock": self.stockrecord,
             "status": self.status,
         }
@@ -362,5 +356,5 @@ class AbstractStockAlert(models.Model):
         abstract = True
         app_label = "partner"
         ordering = ("-date_created",)
-        verbose_name = _("Stock alert")
-        verbose_name_plural = _("Stock alerts")
+        verbose_name = "Уведомление товарного запаса"
+        verbose_name_plural = "Уведомления товарных запасов"

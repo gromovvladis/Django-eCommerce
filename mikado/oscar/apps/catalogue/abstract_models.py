@@ -1,8 +1,6 @@
 import logging
 import os
-from datetime import date, datetime
 from django.conf import settings
-from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.finders import find
 from django.core.cache import cache
@@ -12,7 +10,6 @@ from django.core.exceptions import (
     ObjectDoesNotExist,
 )
 from django.core.files.base import File
-from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, Exists, OuterRef, Sum
 from django.db.models.fields import Field
@@ -22,15 +19,10 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext, pgettext_lazy
 from treebeard.mp_tree import MP_Node
 
-from oscar.core.decorators import deprecated
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import get_default_currency, slugify
-from oscar.core.validators import non_python_keyword
 from oscar.models.fields import AutoSlugField, NullCharField
 from oscar.models.fields.slugfield import SlugField
 from oscar.utils.models import get_image_upload_path
@@ -88,31 +80,31 @@ class AbstractProductClass(models.Model):
     Not necessarily equivalent to top-level categories but usually will be.
     """
 
-    name = models.CharField(_("Name"), max_length=128)
-    slug = AutoSlugField(_("Slug"), max_length=128, unique=True, populate_from="name")
+    name = models.CharField("Имя", max_length=128)
+    slug = AutoSlugField("Ярлык", max_length=128, unique=True, populate_from="name")
 
     #: Some product type don't require shipping (e.g. digital products) - we use
     #: this field to take some shortcuts in the checkout.
-    requires_shipping = models.BooleanField(_("Requires shipping?"), default=True)
+    requires_shipping = models.BooleanField("Доставка необходима?", default=True)
 
     #: Digital products generally don't require their stock levels to be
     #: tracked.
-    track_stock = models.BooleanField(_("Track stock levels?"), default=True)
+    track_stock = models.BooleanField("Отслеживать запасы", default=True)
 
     #: These are the options (set by the user when they add to basket) for this
     #: item class.  For instance, a product class of "SMS message" would always
     #: require a message to be specified before it could be bought.
     #: Note that you can also set options on a per-product level.
     options = models.ManyToManyField(
-        "catalogue.Option", blank=True, verbose_name=_("Options")
+        "catalogue.Option", blank=True, verbose_name="Опиция"
     )
 
     class Meta:
         abstract = True
         app_label = "catalogue"
         ordering = ["name"]
-        verbose_name = _("Product class")
-        verbose_name_plural = _("Product classes")
+        verbose_name = "Класс товара"
+        verbose_name_plural = "Классы товара"
 
     def __str__(self):
         return self.name or self.slug
@@ -135,36 +127,44 @@ class AbstractCategory(MP_Node):
     #: this avoids fetching a lot of unneeded extra data from the database.
     COMPARISON_FIELDS = ("pk", "path", "depth")
 
-    name = models.CharField(_("Name"), max_length=255, db_index=True)
+    name = models.CharField("Имя", max_length=255, db_index=True)
     code = NullCharField(
-        _("Code"),
+        "Код",
         max_length=255,
         blank=True,
         null=True,
         unique=True,
     )
-    description = models.TextField(_("Description"), blank=True)
+    description = models.TextField("Описание", blank=True)
     meta_title = models.CharField(
-        _("Meta title"), max_length=255, blank=True, null=True
+        "Мета заголовок", max_length=255, blank=True, null=True
     )
-    meta_description = models.TextField(_("Meta description"), blank=True, null=True)
+    meta_description = models.TextField("Мета описание", blank=True, null=True)
     image = models.ImageField(
-        _("Image"), upload_to="categories", blank=True, null=True, max_length=255
+        "Изображение", upload_to="categories", blank=True, null=True
     )
-    slug = SlugField(_("Slug"), max_length=255, db_index=True)
+    slug = SlugField("Ярлык", max_length=255, db_index=True, unique=True)
+
+    order = models.IntegerField("Порядок", default=0, null=False, blank=False)
 
     is_public = models.BooleanField(
-        _("Is public"),
+        "Является общедоступным",
         default=True,
         db_index=True,
-        help_text=_("Show this category in search results and catalogue listings."),
+        help_text="Показывать эту категорию в результатах поиска и каталогах.",
+    )
+
+    is_promo = models.BooleanField(
+        "Является промо-категорией в списке категорий",
+        default=False,
+        help_text="Показывать эту категорию в списке категорий, как промокатегорию ('Хиты' или 'Новинки')",
     )
 
     ancestors_are_public = models.BooleanField(
-        _("Ancestor categories are public"),
+        "Категории предков являются общедоступными",
         default=True,
         db_index=True,
-        help_text=_("The ancestors of this category are public"),
+        help_text="Предки этой категории являются общедоступными",
     )
 
     _slug_separator = "/"
@@ -174,6 +174,22 @@ class AbstractCategory(MP_Node):
 
     def __str__(self):
         return self.full_name
+    
+    
+    # Images
+    
+    @cached_property
+    def primary_image(self):
+        """
+        Returns the primary image for a product. Usually used when one can
+        only display one product image, e.g. in a list of products.
+        """
+        img = self.image
+        if not img:
+            mis_img = MissingProductImage()
+            return {"original": mis_img.name, "caption": "", "is_missing": True}
+
+        return {"original": img.name, "caption": "", "is_missing": False}
 
     @property
     def full_name(self):
@@ -288,8 +304,9 @@ class AbstractCategory(MP_Node):
         return self.get_tree(self)
 
     def get_url_cache_key(self):
-        current_locale = get_language()
-        cache_key = "CATEGORY_URL_%s_%s" % (current_locale, self.pk)
+        # current_locale = get_language()
+        # cache_key = "CATEGORY_URL_%s_%s" % (current_locale, self.pk)
+        cache_key = "CATEGORY_URL_%s" % (self.pk)
         return cache_key
 
     def _get_absolute_url(self, parent_slug=None):
@@ -305,7 +322,6 @@ class AbstractCategory(MP_Node):
             "catalogue:category",
             kwargs={
                 "category_slug": self.get_full_slug(parent_slug=parent_slug),
-                "pk": self.pk,
             },
         )
 
@@ -315,9 +331,9 @@ class AbstractCategory(MP_Node):
     class Meta:
         abstract = True
         app_label = "catalogue"
-        ordering = ["path"]
-        verbose_name = _("Category")
-        verbose_name_plural = _("Categories")
+        ordering = ["order","path"]
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
 
     def has_children(self):
         return self.get_num_children() > 0
@@ -332,10 +348,10 @@ class AbstractProductCategory(models.Model):
     """
 
     product = models.ForeignKey(
-        "catalogue.Product", on_delete=models.CASCADE, verbose_name=_("Product")
+        "catalogue.Product", on_delete=models.CASCADE, verbose_name="Продукт"
     )
     category = models.ForeignKey(
-        "catalogue.Category", on_delete=models.CASCADE, verbose_name=_("Category")
+        "catalogue.Category", on_delete=models.CASCADE, verbose_name="Категория"
     )
 
     class Meta:
@@ -343,39 +359,11 @@ class AbstractProductCategory(models.Model):
         app_label = "catalogue"
         ordering = ["product", "category"]
         unique_together = ("product", "category")
-        verbose_name = _("Product category")
-        verbose_name_plural = _("Product categories")
+        verbose_name = "Категория товара"
+        verbose_name_plural = "Категории товара"
 
     def __str__(self):
         return "<productcategory for product '%s'>" % self.product
-
-
-# добавить: 
-#           1) мин-макс кол-во, +
-    
-#           2) время изготовления, + 
-#           3) характеристики:
-#                           вес, + 
-#                           каллории
-#                           белки
-#                           жиры
-#                           углеводы
-#           4) доп. товары %
-#           4) порядок сортировки
-    
-#           4) атрибуты 
-#           4) вариации 
-
-
-# удалить: 
-#           1) структура товара
-#           2) родительский товар
-#           3) у партнера удалить цену и добавить в товар
-#           2) у партнера удалить карточку продовца
-
-# осталось: доп.товары 
-
-
 
 class AbstractProduct(models.Model):
     """
@@ -395,34 +383,34 @@ class AbstractProduct(models.Model):
 
     STANDALONE, PARENT, CHILD = "standalone", "parent", "child"
     STRUCTURE_CHOICES = (
-        (STANDALONE, _("Stand-alone product")),
-        (PARENT, _("Parent product")),
-        (CHILD, _("Child product")),
+        (STANDALONE, "Простой товар"),
+        (PARENT, "Вариативный товар"),
+        (CHILD, "Вариация"),
     )
     structure = models.CharField(
-        _("Product structure"),
+        "Вид продукта",
         max_length=10,
         choices=STRUCTURE_CHOICES,
         default=STANDALONE,
     )
 
     is_public = models.BooleanField(
-        _("Is public"),
+        "Является общедоступным",
         default=True,
         db_index=True,
-        help_text=_("Show this product in search results and catalogue listings."),
+        help_text="Показывать этот продукт в результатах поиска и каталогах.",
     )
 
     upc = NullCharField(
-        _("UPC"),
+        "Товарный код продукта UPC",
         max_length=64,
         blank=True,
         null=True,
         unique=True,
-        help_text=_(
-            "Universal Product Code (UPC) is an identifier for "
-            "a product which is not specific to a particular "
-            " supplier. Eg an ISBN for a book."
+        help_text=(
+            "Универсальный код продукта (UPC) является идентификатором для "
+            "продукта, который не является специфичным для конкретного"
+            "Поставщик. Например, ISBN книги"
         ),
     )
 
@@ -432,30 +420,30 @@ class AbstractProduct(models.Model):
         null=True,
         on_delete=models.CASCADE,
         related_name="children",
-        verbose_name=_("Parent product"),
-        help_text=_(
-            "Only choose a parent product if you're creating a child "
-            "product.  For example if this is a size "
-            "4 of a particular t-shirt.  Leave blank if this is a "
-            "stand-alone product (i.e. there is only one version of"
-            " this product)."
+        verbose_name="Вариативный товар",
+        help_text=(
+            "Выбирайте родительский продукт только в том случае, если вы создаете дочерний "
+            "товар. Например, если это размер "
+            "4 конкретной футболки. Оставьте пустым, если это "
+            "автономный продукт (т.е. существует только одна версия"
+            " этого продукта)."
         ),
     )
 
     # Title is mandatory for canonical products but optional for child products
-    title = models.CharField(
-        pgettext_lazy("Product title", "Title"), max_length=255, blank=True
+    title = models.CharField(("Название продукта", "Название"), max_length=255, blank=True
     )
-    variant = models.CharField(
-        pgettext_lazy("Variant name", "Variant"), max_length=255, blank=True
+    variant = models.CharField(("Название варианта", "Вариант"), max_length=255, blank=True
     )
 
-    slug = SlugField(_("Slug"), max_length=255, unique=False)
-    description = models.TextField(_("Description"), blank=True)
+    slug = SlugField("Ярлык", max_length=255, unique=True)
+    description = models.TextField("Описание", blank=True)
+    short_description = models.CharField("Краткое описание", max_length=255, null=True, blank=True)
+
     meta_title = models.CharField(
-        _("Meta title"), max_length=255, blank=True, null=True
+        "Мета заголовок", max_length=255, blank=True, null=True
     )
-    meta_description = models.TextField(_("Meta description"), blank=True, null=True)
+    meta_description = models.TextField("Мета описание", blank=True, null=True)
 
     #: "Kind" of product, e.g. T-Shirt, Book, etc.
     #: None for child products, they inherit their parent's product class
@@ -464,29 +452,28 @@ class AbstractProduct(models.Model):
         null=True,
         blank=True,
         on_delete=models.PROTECT,
-        verbose_name=_("Product type"),
+        verbose_name="Тип продукта",
         related_name="products",
-        help_text=_("Choose what type of product this is"),
+        help_text="Выберите, что это за продукт",
     )
     attributes = models.ManyToManyField(
         "catalogue.ProductAttribute",
         through="ProductAttributeValue",
-        verbose_name=_("Attributes"),
-        help_text=_(
-            "A product attribute is something that this product may "
-            "have, such as a size, as specified by its class"
+        verbose_name="Атрибуты",
+        help_text=(
+            "Атрибут продукта — это то, что этот продукт может"
+            "иметь, например, размер, указанный его классом"
         ),
     )
     #: It's possible to have options product class-wide, and per product.
     product_options = models.ManyToManyField(
         "catalogue.Option",
         blank=True,
-        verbose_name=_("Product options"),
-        help_text=_(
-            "Options are values that can be associated with a item "
-            "when it is added to a customer's basket.  This could be "
-            "something like a personalised message to be printed on "
-            "a T-shirt."
+        verbose_name="Варианты продукта",
+        help_text=(
+            "Параметры — это значения, которые могут быть связаны с элементом, "
+            "когда товар добавляется в корзину покупателя. Это может быть "
+            "что-то вроде персонализированного сообщения для печати на футболке"
         ),
     )
 
@@ -494,25 +481,27 @@ class AbstractProduct(models.Model):
         "catalogue.Product",
         through="ProductRecommendation",
         blank=True,
-        verbose_name=_("Recommended products"),
-        help_text=_(
-            "These are products that are recommended to accompany the main product."
+        verbose_name="Рекомендуемые продукты",
+        help_text=(
+            "Это продукты, которые рекомендуется сопровождать основной продукт."
         ),
     )
 
     # Denormalised product rating - used by reviews app.
     # Product has no ratings if rating is None
-    rating = models.FloatField(_("Rating"), null=True, editable=False)
+    rating = models.FloatField("Рейтинг", null=True, editable=False)
+
+    order = models.IntegerField("Порядок", null=False, blank=False, default=0)
 
     date_created = models.DateTimeField(
-        _("Date created"), auto_now_add=True, db_index=True
+        "Дата создания", auto_now_add=True, db_index=True
     )
 
     # This field is used by Haystack to reindex search
-    date_updated = models.DateTimeField(_("Date updated"), auto_now=True, db_index=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
     categories = models.ManyToManyField(
-        "catalogue.Category", through="ProductCategory", verbose_name=_("Categories")
+        "catalogue.Category", through="ProductCategory", verbose_name="Категории"
     )
 
     #: Determines if a product may be used in an offer. It is illegal to
@@ -521,10 +510,10 @@ class AbstractProduct(models.Model):
     #: Note that this flag is ignored for child products; they inherit from
     #: the parent product.
     is_discountable = models.BooleanField(
-        _("Is discountable?"),
+        "Предоставляется скидка?",
         default=True,
-        help_text=_(
-            "This flag indicates if this product can be used in an offer or not"
+        help_text=(
+            "Этот флаг указывает, можно ли использовать этот продукт в предложении со скидками или нет"
         ),
     )
 
@@ -533,9 +522,9 @@ class AbstractProduct(models.Model):
     class Meta:
         abstract = True
         app_label = "catalogue"
-        ordering = ["-date_created"]
-        verbose_name = _("Product")
-        verbose_name_plural = _("Products")
+        ordering = ["-order"]
+        verbose_name = "Продукт"
+        verbose_name_plural = "Продукты"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -549,28 +538,20 @@ class AbstractProduct(models.Model):
         else:
             return self.get_title()
 
-    #vlad
-    # def get_absolute_url(self):
-    #     """
-    #     Return a product's absolute URL
-    #     """
-    #     return reverse(
-    #         "catalogue:detail", kwargs={"product_slug": self.slug, "pk": self.id}
-    #     )
-    
     def get_absolute_url(self):
         """
         Return a product's variant absolute URL
         """
-        slug = self.slug
-        id = self.id
 
         if self.is_child:
             slug = self.parent.slug
-            id = self.parent.id
+            cat = self.parent.categories.first().full_slug
+        else:
+            slug = self.slug
+            cat = self.categories.first().full_slug
 
         return reverse(
-            "catalogue:detail", kwargs={"product_slug": slug, "pk": id}
+            "catalogue:detail", kwargs={"product_slug": slug, "category_slug": cat}
         )
 
 
@@ -610,11 +591,11 @@ class AbstractProduct(models.Model):
         Validates a stand-alone product
         """
         if not self.title:
-            raise ValidationError(_("Your product must have a title."))
+            raise ValidationError("Ваш продукт должен иметь название.")
         if not self.product_class:
-            raise ValidationError(_("Your product must have a product class."))
+            raise ValidationError("Ваш продукт должен иметь класс продукта.")
         if self.parent_id:
-            raise ValidationError(_("Only child products can have a parent."))
+            raise ValidationError("Родительский продукт может иметь только дочерний продукт.")
 
     def _clean_child(self):
         """
@@ -623,26 +604,24 @@ class AbstractProduct(models.Model):
         has_parent = self.parent or self.parent_id
 
         if not has_parent:
-            raise ValidationError(_("A child product needs a parent."))
+            raise ValidationError("Дочернему продукту нужен родительский продукт.")
         if has_parent and not self.parent.is_parent:
-            raise ValidationError(
-                _("You can only assign child products to parent products.")
-            )
+            raise ValidationError("Вы можете назначать только дочерние продукты родительским продуктам.")
         if self.product_class:
-            raise ValidationError(_("A child product can't have a product class."))
+            raise ValidationError("Дочерний продукт не может иметь класс продукта.")
         if self.pk and self.categories.exists():
-            raise ValidationError(_("A child product can't have a category assigned."))
+            raise ValidationError("Дочернему товару не может быть присвоена категория.")
         # Note that we only forbid options on product level
         if self.pk and self.product_options.exists():
-            raise ValidationError(_("A child product can't have options."))
+            raise ValidationError("У дочернего продукта не может быть опций.")
 
     def _clean_parent(self):
         """
         Validates a parent product.
         """
         self._clean_standalone()
-        # if self.has_stockrecords:
-        #     raise ValidationError(_("A parent product can't have stockrecords."))
+        if self.has_stockrecords:
+            raise ValidationError("Родительский продукт не может иметь складские записи.")
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -674,9 +653,9 @@ class AbstractProduct(models.Model):
         """
         reason = None
         if self.is_child:
-            reason = _("The specified parent product is a child product.")
+            reason = "Указанный родительский продукт является дочерним продуктом."
         if self.has_stockrecords:
-            reason = _("One can't add a child product to a product with stock records.")
+            reason = "Невозможно добавить дочерний продукт к продукту с учетными записями на складе."
         is_valid = reason is None
         if give_reason:
             return is_valid, reason
@@ -696,12 +675,54 @@ class AbstractProduct(models.Model):
     def has_options(self):
         # Extracting annotated value with number of product class options
         # from product list queryset.
-        has_product_class_options = getattr(self, "has_product_class_options", None)
-        has_product_options = getattr(self, "has_product_options", None)
-        if has_product_class_options is not None and has_product_options is not None:
-            return has_product_class_options or has_product_options
-        return self.options.exists()
+        # has_product_class_options = getattr(self, "has_product_class_options", None)
+        # has_product_options = getattr(self, "has_product_options", None)
+        # if has_product_class_options is not None and has_product_options is not None:
+        #     return has_product_class_options or has_product_options
+        options = self.options.exclude(type='good')
+        if options:
+            return True
+        return False
+    
+    @cached_property
+    def has_additions(self):
+        # Extracting annotated value with number of product class options
+        # from product list queryset.
+        # has_product_class_options = getattr(self, "has_product_class_options", None)
+        # has_product_options = getattr(self, "has_product_options", None)
+        # if has_product_class_options is not None and has_product_options is not None:
+        #     return has_product_class_options or has_product_options
+        goods = self.options.filter(type='good')
+        if goods:
+            return True
+        return False
+    
+    @cached_property
+    def has_compound(self):
+        compound = self.attributes.filter(code='compound')
+        if compound:
+            return True
+        return False
+    
+    @cached_property
+    def has_weight(self):
+        compound = self.attributes.filter(code='weight')
+        if compound:
+            return True
+        return False
+    
+    @property
+    def compound(self):
+        return self.attribute_values.filter(attribute__code='compound').first().value_as_text
 
+    @property
+    def weight(self):
+        return self.attribute_values.filter(attribute__code='weight').first().value
+    
+    @property
+    def short_desc(self):
+        return self.short_description
+    
     @property
     def is_shipping_required(self):
         return self.get_product_class().requires_shipping
@@ -743,10 +764,12 @@ class AbstractProduct(models.Model):
         """
         variant = self.variant
         if not variant and self.parent_id:
-            variant = self.parent.title
+            if self.title:
+                return self.title
+            return self.parent.title
         return variant
 
-    get_title.short_description = pgettext_lazy("Product title", "Title")
+    get_title.short_description = ("Название продукта", "Название")
 
     def get_meta_title(self):
         title = self.meta_title
@@ -754,7 +777,7 @@ class AbstractProduct(models.Model):
             title = self.parent.meta_title
         return title or self.get_title()
 
-    get_meta_title.short_description = pgettext_lazy("Product meta title", "Meta title")
+    get_meta_title.short_description = ("Мета-заголовок продукта", "Мета-заголовок")
 
     def get_meta_description(self):
         meta_description = self.meta_description
@@ -762,8 +785,8 @@ class AbstractProduct(models.Model):
             meta_description = self.parent.meta_description
         return meta_description or striptags(self.description)
 
-    get_meta_description.short_description = pgettext_lazy(
-        "Product meta description", "Meta description"
+    get_meta_description.short_description = (
+        "Мета-описание продукта", "Мета-описание"
     )
 
     def get_product_class(self):
@@ -775,16 +798,7 @@ class AbstractProduct(models.Model):
         else:
             return self.product_class
 
-    get_product_class.short_description = _("Product class")
-
-    @deprecated
-    def get_is_discountable(self):
-        """
-        It used to be that, :py:attr:`.is_discountable` couldn't be set individually for child
-        products; so they had to inherit it from their parent. This is nolonger the case because
-        ranges can include child products as well. That make this method useless.
-        """
-        return self.is_discountable
+    get_product_class.short_description = "Класс товара"
 
     # pylint: disable=no-member
     def get_categories(self):
@@ -796,7 +810,7 @@ class AbstractProduct(models.Model):
         else:
             return self.categories.browsable()
 
-    get_categories.short_description = _("Categories")
+    get_categories.short_description = "Категории"
 
     def get_attribute_values(self):
         if not self.pk:
@@ -810,7 +824,7 @@ class AbstractProduct(models.Model):
             return attribute_values | parent_attribute_values
 
         return attribute_values
-
+    
     # Images
 
     def get_missing_image(self):
@@ -889,7 +903,7 @@ class AbstractProduct(models.Model):
         Override this if you want to alter the default behaviour; e.g. enforce
         that a user purchased the product to be allowed to leave a review.
         """
-        if user.is_authenticated or settings.OSCAR_ALLOW_ANON_REVIEWS:
+        if user.is_authenticated:
             return not self.has_review_by(user)
         else:
             return False
@@ -916,20 +930,20 @@ class AbstractProductRecommendation(models.Model):
         "catalogue.Product",
         on_delete=models.CASCADE,
         related_name="primary_recommendations",
-        verbose_name=_("Primary product"),
+        verbose_name="Основной продукт",
     )
     recommendation = models.ForeignKey(
         "catalogue.Product",
         on_delete=models.CASCADE,
-        verbose_name=_("Recommended product"),
+        verbose_name="Рекомендуемый продукт",
     )
     ranking = models.PositiveSmallIntegerField(
-        _("Ranking"),
+        "Рейтинг",
         default=0,
         db_index=True,
-        help_text=_(
-            "Determines order of the products. A product with a higher"
-            " value will appear before one with a lower ranking."
+        help_text=(
+            "Определяет порядок товаров. Товар с более высоким значением"
+            "Значение появится перед значением с более низким рейтингом."
         ),
     )
 
@@ -938,8 +952,8 @@ class AbstractProductRecommendation(models.Model):
         app_label = "catalogue"
         ordering = ["primary", "-ranking"]
         unique_together = ("primary", "recommendation")
-        verbose_name = _("Product recommendation")
-        verbose_name_plural = _("Product recomendations")
+        verbose_name = "Рекомендация продукта"
+        verbose_name_plural = "Рекомендации продукта"
 
 
 class AbstractProductAttribute(models.Model):
@@ -954,22 +968,12 @@ class AbstractProductAttribute(models.Model):
         on_delete=models.CASCADE,
         related_name="attributes",
         null=True,
-        verbose_name=_("Product type"),
+        verbose_name="Тип продукта",
     )
-    name = models.CharField(_("Name"), max_length=128)
+    name = models.CharField("Имя", max_length=128)
     code = models.SlugField(
-        _("Code"),
+        "Код",
         max_length=128,
-        # validators=[
-        #     RegexValidator(
-        #         regex=r"^[a-zA-Z_][0-9a-zA-Z_]*$",
-        #         message=_(
-        #             "Code can only contain the letters a-z, A-Z, digits, "
-        #             "and underscores, and can't start with a digit."
-        #         ),
-        #     ),
-        #     non_python_keyword,
-        # ],
     )
 
     # Attribute types
@@ -978,32 +982,26 @@ class AbstractProductAttribute(models.Model):
     BOOLEAN = "boolean"
     FLOAT = "float"
     RICHTEXT = "richtext"
-    DATE = "date"
-    DATETIME = "datetime"
     OPTION = "option"
     MULTI_OPTION = "multi_option"
-    ENTITY = "entity"
     FILE = "file"
     IMAGE = "image"
     TYPE_CHOICES = (
-        (TEXT, _("Text")),
-        (INTEGER, _("Integer")),
-        (BOOLEAN, _("True / False")),
-        (FLOAT, _("Float")),
-        (RICHTEXT, _("Rich Text")),
-        (DATE, _("Date")),
-        (DATETIME, _("Datetime")),
-        (OPTION, _("Option")),
-        (MULTI_OPTION, _("Multi Option")),
-        (ENTITY, _("Entity")),
-        (FILE, _("File")),
-        (IMAGE, _("Image")),
+        (TEXT, "Текст"),
+        (INTEGER, "Целое число"),
+        (BOOLEAN, "Да / Нет"),
+        (FLOAT, "Дробное число"),
+        (RICHTEXT, "Текстовое поле"),
+        (OPTION, "Опция"),
+        (MULTI_OPTION, "Мульти-опция"),
+        (FILE, "Файл"),
+        (IMAGE, "Изображение"),
     )
     type = models.CharField(
         choices=TYPE_CHOICES,
         default=TYPE_CHOICES[0][0],
         max_length=20,
-        verbose_name=_("Type"),
+        verbose_name="Тип",
     )
 
     option_group = models.ForeignKey(
@@ -1012,17 +1010,17 @@ class AbstractProductAttribute(models.Model):
         null=True,
         on_delete=models.CASCADE,
         related_name="product_attributes",
-        verbose_name=_("Option Group"),
-        help_text=_('Select an option group if using type "Option" or "Multi Option"'),
+        verbose_name="Группа опций",
+        help_text='Выберите группу параметров, если используете тип «Опция» или «Множество опций».',
     )
-    required = models.BooleanField(_("Required"), default=False)
+    required = models.BooleanField("Необходимый", default=False)
 
     class Meta:
         abstract = True
         app_label = "catalogue"
         ordering = ["code"]
-        verbose_name = _("Product attribute")
-        verbose_name_plural = _("Product attributes")
+        verbose_name = "Атрибут продукта"
+        verbose_name_plural = "Атрибуты продукта"
         unique_together = ("code", "product_class")
 
     @property
@@ -1037,16 +1035,12 @@ class AbstractProductAttribute(models.Model):
     def is_file(self):
         return self.type in [self.FILE, self.IMAGE]
 
-    @property
-    def is_entity(self):
-        return self.type == self.ENTITY
-
     def __str__(self):
         return self.name
 
     def clean(self):
         if self.type == self.BOOLEAN and self.required:
-            raise ValidationError(_("Boolean attribute should not be required."))
+            raise ValidationError("Логический атрибут не должен быть обязательным.")
 
     def _get_value_obj(self, product, value):
         try:
@@ -1124,7 +1118,7 @@ class AbstractProductAttribute(models.Model):
 
     def _validate_text(self, value):
         if not isinstance(value, str):
-            raise ValidationError(_("Must be str"))
+            raise ValidationError("Должно быть строка")
 
     _validate_richtext = _validate_text
 
@@ -1132,35 +1126,23 @@ class AbstractProductAttribute(models.Model):
         try:
             float(value)
         except ValueError:
-            raise ValidationError(_("Must be a float"))
+            raise ValidationError("Должно быть числом с плавающей запятой")
 
     def _validate_integer(self, value):
         try:
             int(value)
         except ValueError:
-            raise ValidationError(_("Must be an integer"))
-
-    def _validate_date(self, value):
-        if not (isinstance(value, datetime) or isinstance(value, date)):
-            raise ValidationError(_("Must be a date or datetime"))
-
-    def _validate_datetime(self, value):
-        if not isinstance(value, datetime):
-            raise ValidationError(_("Must be a datetime"))
+            raise ValidationError("Должно быть целое число")
 
     def _validate_boolean(self, value):
         if not type(value) == bool:
-            raise ValidationError(_("Must be a boolean"))
-
-    def _validate_entity(self, value):
-        if not isinstance(value, models.Model):
-            raise ValidationError(_("Must be a model instance"))
+            raise ValidationError("Должно быть логическое значение ДА / НЕТ")
 
     def _validate_multi_option(self, value):
         try:
             values = iter(value)
         except TypeError:
-            raise ValidationError(_("Must be a list or AttributeOption queryset"))
+            raise ValidationError("Должен быть списком или набором запросов AttributeOption.")
         # Validate each value as if it were an option
         # Pass in valid_values so that the DB isn't hit multiple times per iteration
         valid_values = self.option_group.options.values_list("option", flat=True)
@@ -1169,20 +1151,20 @@ class AbstractProductAttribute(models.Model):
 
     def _validate_option(self, value, valid_values=None):
         if not isinstance(value, get_model("catalogue", "AttributeOption")):
-            raise ValidationError(_("Must be an AttributeOption model object instance"))
+            raise ValidationError("Должен быть экземпляром объекта модели AttributeOption.")
         if not value.pk:
-            raise ValidationError(_("AttributeOption has not been saved yet"))
+            raise ValidationError("AttributeOption еще не сохранен.")
         if valid_values is None:
             valid_values = self.option_group.options.values_list("option", flat=True)
         if value.option not in valid_values:
             raise ValidationError(
-                _("%(enum)s is not a valid choice for %(attr)s")
+                ("%(enum)s не корректен для %(attr)s")
                 % {"enum": value, "attr": self}
             )
 
     def _validate_file(self, value):
         if value and not isinstance(value, File):
-            raise ValidationError(_("Must be a file field"))
+            raise ValidationError("Должно быть поле файла")
 
     _validate_image = _validate_file
 
@@ -1199,40 +1181,36 @@ class AbstractProductAttributeValue(models.Model):
     attribute = models.ForeignKey(
         "catalogue.ProductAttribute",
         on_delete=models.CASCADE,
-        verbose_name=_("Attribute"),
+        verbose_name="Атрибут",
     )
     product = models.ForeignKey(
         "catalogue.Product",
         on_delete=models.CASCADE,
         related_name="attribute_values",
-        verbose_name=_("Product"),
+        verbose_name="Продукт",
     )
 
-    value_text = models.TextField(_("Text"), blank=True, null=True)
+    value_text = models.TextField("Текст", blank=True, null=True)
     value_integer = models.IntegerField(
-        _("Integer"), blank=True, null=True, db_index=True
+        "Целое число", blank=True, null=True, db_index=True
     )
     value_boolean = models.BooleanField(
-        _("Boolean"), blank=True, null=True, db_index=True
+        "Логическое значение", blank=True, null=True, db_index=True
     )
-    value_float = models.FloatField(_("Float"), blank=True, null=True, db_index=True)
-    value_richtext = models.TextField(_("Richtext"), blank=True, null=True)
-    value_date = models.DateField(_("Date"), blank=True, null=True, db_index=True)
-    value_datetime = models.DateTimeField(
-        _("DateTime"), blank=True, null=True, db_index=True
-    )
+    value_float = models.FloatField("Дробное число", blank=True, null=True, db_index=True)
+    value_richtext = models.TextField("Текстовое поле", blank=True, null=True)
     value_multi_option = models.ManyToManyField(
         "catalogue.AttributeOption",
         blank=True,
         related_name="multi_valued_attribute_values",
-        verbose_name=_("Value multi option"),
+        verbose_name="Значение нескольких вариантов Мульти-Опции",
     )
     value_option = models.ForeignKey(
         "catalogue.AttributeOption",
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        verbose_name=_("Value option"),
+        verbose_name="Вариант значения Опции",
     )
     value_file = models.FileField(
         upload_to=get_image_upload_path, max_length=255, blank=True, null=True
@@ -1240,7 +1218,6 @@ class AbstractProductAttributeValue(models.Model):
     value_image = models.ImageField(
         upload_to=get_image_upload_path, max_length=255, blank=True, null=True
     )
-    value_entity = GenericForeignKey("entity_content_type", "entity_object_id")
 
     entity_content_type = models.ForeignKey(
         ContentType, blank=True, editable=False, on_delete=models.CASCADE, null=True
@@ -1289,8 +1266,8 @@ class AbstractProductAttributeValue(models.Model):
         abstract = True
         app_label = "catalogue"
         unique_together = ("attribute", "product")
-        verbose_name = _("Product attribute value")
-        verbose_name_plural = _("Product attribute values")
+        verbose_name = "Значение атрибута продукта"
+        verbose_name_plural = "Значения атрибутов продукта"
 
     def __str__(self):
         return self.summary()
@@ -1338,8 +1315,8 @@ class AbstractProductAttributeValue(models.Model):
     @property
     def _boolean_as_text(self):
         if self.value:
-            return pgettext("Product attribute value", "Yes")
-        return pgettext("Product attribute value", "No")
+            return ("Значение атрибута продукта", "Да")
+        return ("Значение атрибута продукта", "Нет")
 
     @property
     def value_as_html(self):
@@ -1365,9 +1342,9 @@ class AbstractAttributeOptionGroup(models.Model):
     For example, Language
     """
 
-    name = models.CharField(_("Name"), max_length=128)
+    name = models.CharField("Имя", max_length=128)
     code = NullCharField(
-        _("Unique identifier"),
+        "Уникальный идентификатор",
         max_length=255,
         blank=True,
         null=True,
@@ -1380,8 +1357,8 @@ class AbstractAttributeOptionGroup(models.Model):
     class Meta:
         abstract = True
         app_label = "catalogue"
-        verbose_name = _("Attribute option group")
-        verbose_name_plural = _("Attribute option groups")
+        verbose_name = "Группа параметров атрибута"
+        verbose_name_plural = "Группы параметров атрибутов"
 
     @property
     def option_summary(self):
@@ -1400,11 +1377,11 @@ class AbstractAttributeOption(models.Model):
         "catalogue.AttributeOptionGroup",
         on_delete=models.CASCADE,
         related_name="options",
-        verbose_name=_("Group"),
+        verbose_name="Группа",
     )
-    option = models.CharField(_("Option"), max_length=255)
+    option = models.CharField("Опция", max_length=255)
     code = NullCharField(
-        _("Unique identifier"),
+        "Уникальный идентификатор",
         max_length=255,
         blank=True,
         null=True,
@@ -1418,8 +1395,8 @@ class AbstractAttributeOption(models.Model):
         abstract = True
         app_label = "catalogue"
         unique_together = ("group", "option")
-        verbose_name = _("Attribute option")
-        verbose_name_plural = _("Attribute options")
+        verbose_name = "Параметр атрибута"
+        verbose_name_plural = "Параметры атрибута"
 
 
 class AbstractOption(models.Model):
@@ -1454,95 +1431,94 @@ class AbstractOption(models.Model):
     GOOD = "good"
 
     TYPE_CHOICES = (
-        (TEXT, _("Text")),
-        (INTEGER, _("Integer")),
-        (BOOLEAN, _("True / False")),
-        (FLOAT, _("Float")),
-        (DATE, _("Date")),
-        (SELECT, _("Select")),
-        (RADIO, _("Radio")),
-        (MULTI_SELECT, _("Multi select")),
-        (CHECKBOX, _("Checkbox")),
-        (GOOD, _("Good")),
+        (TEXT, "Текст"),
+        (INTEGER, "Целое число"),
+        (BOOLEAN, "Да / Нет"),
+        (FLOAT, "Дробное число"),
+        (SELECT, "Селект"),
+        (RADIO, "Радио кнопка"),
+        (MULTI_SELECT, "Multi select"),
+        (CHECKBOX, "Флажок"),
+        (GOOD, "Дополнительный товар"),
         
     )
 
     empty_label = "------"
-    empty_radio_label = _("Skip this option")
+    empty_radio_label = "Пропустить этот вариант"
 
-    name = models.CharField(_("Name"), max_length=128, db_index=True)
-    code = AutoSlugField(_("Code"), max_length=128, unique=True, populate_from="name")
+    name = models.CharField("Имя", max_length=128, db_index=True)
+    code = AutoSlugField("Код", max_length=128, unique=True, populate_from="name")
     type = models.CharField(
-        _("Type"), max_length=255, default=TEXT, choices=TYPE_CHOICES
+        "Тип", max_length=255, default=TEXT, choices=TYPE_CHOICES
     )
-    required = models.BooleanField(_("Is this option required?"), default=False)
+    required = models.BooleanField("Требуется ли эта опция?", default=False)
     option_group = models.ForeignKey(
         "catalogue.AttributeOptionGroup",
         blank=True,
         null=True,
         on_delete=models.CASCADE,
         related_name="product_options",
-        verbose_name=_("Option Group"),
-        help_text=_('Select an option group if using type "Option" or "Multi Option"'),
+        verbose_name="Группа опций",
+        help_text='Выберите группу параметров, если используете тип «Опция» или «Множество опций».',
     )
     help_text = models.CharField(
-        verbose_name=_("Help text"),
+        verbose_name="Текст справки",
         blank=True,
         null=True,
         max_length=255,
-        help_text=_("Help text shown to the user on the add to basket form"),
+        help_text="Текст справки, отображаемый пользователю в форме добавления в корзину",
     )
     order = models.IntegerField(
-        _("Ordering"),
+        "Порядок",
         null=True,
         blank=True,
-        help_text=_("Controls the ordering of product options on product detail pages"),
+        help_text="Управляет порядком опций продукта на страницах сведений о продукте.",
         db_index=True,
     )
 
-    description = models.TextField(_("Description"), blank=True)
+    description = models.TextField("Описание", blank=True)
 
     price_currency = models.CharField(
-        _("Currency"), max_length=12, default=get_default_currency
+        "Валюта", max_length=12, default=get_default_currency
     )
         
     price = models.DecimalField(
-        _("Price"),
+        "Цена",
         decimal_places=2,
         max_digits=12, 
         default=0,
-        help_text=_("Price to sell."),
+        help_text="Цена продажи",
     )
 
     old_price = models.DecimalField(
-        _("Old Price"),
+        "Цена до скидки",
         decimal_places=2,
         max_digits=12, 
         blank=True,
         null=True,
-        help_text=_("Old price."),
+        help_text="Цена до скидки. Оставить пустым, если скидки нет",
     )
 
     weight = models.IntegerField(
-        _("Weight"),
+        "Вес",
         default=0,
         db_index=True,
-        help_text=_(
-            "Weight of additional product"
-        ),
+        help_text="Вес дополнительного товара",
     )
 
     max_amount = models.IntegerField(
-        _("Max amount"),
+        "Максимальное количество",
         default=0,
         db_index=True,
-        help_text=_(
-            "Max amount to one item"
-        ),
+        help_text="Максимальное количество доп. товара, которое может быть добавлено к основному товару",
     )
 
-    date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
-    date_updated = models.DateTimeField(_("Date updated"), auto_now=True, db_index=True)
+    img = models.ImageField(
+        "Изображение", upload_to="catalogue", blank=True, null=True, max_length=255
+    )
+
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
     @property
     def is_option(self):
@@ -1588,20 +1564,32 @@ class AbstractOption(models.Model):
         if self.type in [self.RADIO, self.SELECT, self.MULTI_SELECT, self.CHECKBOX]:
             if self.option_group is None:
                 raise ValidationError(
-                    _("Option Group is required for type %s") % self.get_type_display()
+                    ("Для типа требуется группа опций %s") % self.get_type_display()
                 )
         elif self.option_group:
             raise ValidationError(
-                _("Option Group can not be used with type %s") % self.get_type_display()
+                ("Группа опций не может использоваться с типом %s") % self.get_type_display()
             )
         return super().clean()
+
+    @cached_property
+    def primary_image(self):
+        """
+        Returns the primary image for a product. Usually used when one can
+        only display one product image, e.g. in a list of products.
+        """
+        img = self.img
+        if not img:
+            return MissingProductImage()
+
+        return img
 
     class Meta:
         abstract = True
         app_label = "catalogue"
         ordering = ["order", "name"]
-        verbose_name = _("Option")
-        verbose_name_plural = _("Options")
+        verbose_name = "Опция"
+        verbose_name_plural = "Опиция"
 
     def __str__(self):
         return self.name
@@ -1665,31 +1653,30 @@ class AbstractProductImage(models.Model):
         "catalogue.Product",
         on_delete=models.CASCADE,
         related_name="images",
-        verbose_name=_("Product"),
+        verbose_name="Продукт",
     )
     code = NullCharField(
-        _("Code"),
+        "Код",
         max_length=255,
         blank=True,
         null=True,
         unique=True,
     )
     original = models.ImageField(
-        _("Original"), upload_to=get_image_upload_path, max_length=255
+        "Оригинал", upload_to=get_image_upload_path, max_length=255
     )
-    caption = models.CharField(_("Caption"), max_length=200, blank=True)
+    caption = models.CharField("Подпись", max_length=200, blank=True)
 
     #: Use display_order to determine which is the "primary" image
     display_order = models.PositiveIntegerField(
-        _("Display order"),
+        "Порядок отображения",
         default=0,
         db_index=True,
-        help_text=_(
-            "An image with a display order of zero will be the primary"
-            " image for a product"
+        help_text=(
+            "Изображение с нулевым порядком отображения будет основным"
         ),
     )
-    date_created = models.DateTimeField(_("Date created"), auto_now_add=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
     class Meta:
         abstract = True
@@ -1697,8 +1684,8 @@ class AbstractProductImage(models.Model):
         # Any custom models should ensure that this ordering is unchanged, or
         # your query count will explode. See AbstractProduct.primary_image.
         ordering = ["display_order"]
-        verbose_name = _("Product image")
-        verbose_name_plural = _("Product images")
+        verbose_name = "Изображение продукта"
+        verbose_name_plural = "Изображения продуктов"
 
     def __str__(self):
         return "Image of '%s'" % self.product

@@ -1,7 +1,6 @@
 from urllib.parse import quote
 
 from django.http import Http404, HttpResponsePermanentRedirect
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView
 
 from oscar.apps.catalogue.signals import product_viewed
@@ -9,8 +8,8 @@ from oscar.core.loading import get_class, get_model
 
 Product = get_model("catalogue", "product")
 Category = get_model("catalogue", "category")
-ProductAlert = get_model("customer", "ProductAlert")
-ProductAlertForm = get_class("customer.forms", "ProductAlertForm")
+# ProductAlert = get_model("customer", "ProductAlert")
+# ProductAlertForm = get_class("customer.forms", "ProductAlertForm")
 
 
 class ProductDetailView(DetailView):
@@ -53,6 +52,7 @@ class ProductDetailView(DetailView):
         if hasattr(self, "object"):
             return self.object
         else:
+            self.kwargs["slug"] = self.kwargs.get("product_slug")
             return super().get_object(queryset)
 
     def redirect_if_necessary(self, current_path, product):
@@ -65,23 +65,23 @@ class ProductDetailView(DetailView):
                 return HttpResponsePermanentRedirect(expected_path)
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["alert_form"] = self.get_alert_form()
-        ctx["has_active_alert"] = self.get_alert_status()
-        return ctx
+        return super().get_context_data(**kwargs)
+        # ctx["alert_form"] = self.get_alert_form()
+        # ctx["has_active_alert"] = self.get_alert_status()
+        # return ctx
 
-    def get_alert_status(self):
-        # Check if this user already have an alert for this product
-        has_alert = False
-        if self.request.user.is_authenticated:
-            alerts = ProductAlert.objects.filter(
-                product=self.object, user=self.request.user, status=ProductAlert.ACTIVE
-            )
-            has_alert = alerts.exists()
-        return has_alert
+    # def get_alert_status(self):
+    #     # Check if this user already have an alert for this product
+    #     has_alert = False
+    #     if self.request.user.is_authenticated:
+    #         alerts = ProductAlert.objects.filter(
+    #             product=self.object, user=self.request.user, status=ProductAlert.ACTIVE
+    #         )
+    #         has_alert = alerts.exists()
+    #     return has_alert
 
-    def get_alert_form(self):
-        return ProductAlertForm(user=self.request.user, product=self.object)
+    # def get_alert_form(self):
+    #     return ProductAlertForm(user=self.request.user, product=self.object)
 
     def send_signal(self, request, response, product):
         self.view_signal.send(
@@ -116,6 +116,8 @@ class ProductDetailView(DetailView):
         ]
 
 
+
+
 # Import catalogue and category view from search app
-CatalogueView = get_class("search.views", "CatalogueView")
+# CatalogueView = get_class("search.views", "CatalogueView")
 ProductCategoryView = get_class("search.views", "ProductCategoryView")

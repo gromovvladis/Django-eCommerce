@@ -12,8 +12,8 @@ from django.template.defaultfilters import date as date_filter
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.timezone import get_current_timezone, now
-from django.utils.translation import gettext_lazy as _
 
+from oscar.apps.catalogue.abstract_models import MissingProductImage
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import cached_import_string, get_class, get_classes, get_model
 from oscar.models import fields
@@ -90,18 +90,19 @@ class AbstractConditionalOffer(models.Model):
     """
 
     name = models.CharField(
-        _("Name"),
+        "Имя",
         max_length=128,
         unique=True,
-        help_text=_("This is displayed within the customer's basket"),
+        help_text="Это отображается в корзине клиента",
     )
+    img = models.ImageField("Изображение", upload_to="Offers", blank=True)
     slug = fields.AutoSlugField(
-        _("Slug"), max_length=128, unique=True, populate_from="name"
+        "Ярлык", max_length=128, unique=True, populate_from="name"
     )
     description = models.TextField(
-        _("Description"),
+        "Описание",
         blank=True,
-        help_text=_("This is displayed on the offer browsing page"),
+        help_text="Это отображается на странице просмотра предложений",
     )
 
     # Offers come in a few different types:
@@ -114,39 +115,25 @@ class AbstractConditionalOffer(models.Model):
     # (d) Session offers - these are temporarily available to a user after some
     #     trigger event.  e.g. users coming from some affiliate site get 10%
     #     off.
-    SITE, VOUCHER, USER, SESSION = ("Site", "Voucher", "User", "Session")
+    SITE, VOUCHER, USER, SESSION = ("Общее", "Промокод", "Пользовательское", "Предложение сеанса")
     TYPE_CHOICES = (
-        (SITE, _("Site offer - available to all users")),
-        (
-            VOUCHER,
-            _(
-                "Voucher offer - only available after entering "
-                "the appropriate voucher code"
-            ),
-        ),
-        (USER, _("User offer - available to certain types of user")),
-        (
-            SESSION,
-            _(
-                "Session offer - temporary offer, available for "
-                "a user for the duration of their session"
-            ),
-        ),
+        (SITE, "Общее предложение - доступно всем пользователям"),
+        (VOUCHER, "Промокод — доступно только после ввода кода промокода"),
+        (USER, "Пользовательское предложение - доступно определенным типам пользователей."),
+        (SESSION,"Предложение сеанса – временное предложение, доступное для пользователей на время сеанса"),
     )
     offer_type = models.CharField(
-        _("Type"), choices=TYPE_CHOICES, default=SITE, max_length=128
+        "Тип", choices=TYPE_CHOICES, default=SITE, max_length=128
     )
 
     exclusive = models.BooleanField(
-        _("Exclusive offer"),
-        help_text=_("Exclusive offers cannot be combined on the same items"),
+        "Эксклюзивное предложение",
+        help_text="Эксклюзивные предложения не могут быть объединены на одни и те же товары",
         default=True,
     )
     combinations = models.ManyToManyField(
         "offer.ConditionalOffer",
-        help_text=_(
-            "Select other non-exclusive offers that this offer can be combined with on the same items"
-        ),
+        help_text="Выберите другие неэксклюзивные предложения, с которыми можно объединить это предложение на те же товары.",
         related_name="in_combination",
         limit_choices_to={"exclusive": False},
         blank=True,
@@ -155,27 +142,27 @@ class AbstractConditionalOffer(models.Model):
     # We track a status variable so it's easier to load offers that are
     # 'available' in some sense.
     OPEN, SUSPENDED, CONSUMED = "Open", "Suspended", "Consumed"
-    status = models.CharField(_("Status"), max_length=64, default=OPEN)
+    status = models.CharField("Статус", max_length=64, default=OPEN)
 
     condition = models.ForeignKey(
         "offer.Condition",
         on_delete=models.CASCADE,
         related_name="offers",
-        verbose_name=_("Condition"),
+        verbose_name="Условие",
     )
     benefit = models.ForeignKey(
         "offer.Benefit",
         on_delete=models.CASCADE,
         related_name="offers",
-        verbose_name=_("Benefit"),
+        verbose_name="Выгода",
     )
 
     # Some complicated situations require offers to be applied in a set order.
     priority = models.IntegerField(
-        _("Priority"),
+        "Приоритет",
         default=0,
         db_index=True,
-        help_text=_("The highest priority offers are applied first"),
+        help_text="Предложения с наивысшим приоритетом применяются в первую очередь",
     )
 
     # AVAILABILITY
@@ -184,21 +171,21 @@ class AbstractConditionalOffer(models.Model):
     # dates are ignored and only the dates from the voucher are used to
     # determine availability.
     start_datetime = models.DateTimeField(
-        _("Start date"),
+        "Дата начала",
         blank=True,
         null=True,
-        help_text=_(
-            "Offers are active from the start date. "
-            "Leave this empty if the offer has no start date."
+        help_text=(
+            "Предложения активны с даты начала. "
+            "Оставьте это поле пустым, если у предложения нет даты начала"
         ),
     )
     end_datetime = models.DateTimeField(
-        _("End date"),
+        "Дата окончания",
         blank=True,
         null=True,
-        help_text=_(
-            "Offers are active until the end date. "
-            "Leave this empty if the offer has no expiry date."
+        help_text=(
+            "Предложения активны до даты окончания. "
+            "Оставьте это поле пустым, если у предложения нет срока действия."
         ),
     )
 
@@ -207,10 +194,8 @@ class AbstractConditionalOffer(models.Model):
     # this is not necessarily the same as the number of orders that can use it.
     # Also see max_basket_applications.
     max_global_applications = models.PositiveIntegerField(
-        _("Max global applications"),
-        help_text=_(
-            "The number of times this offer can be used before it is unavailable"
-        ),
+        "Максимальное количество глобальных применений",
+        help_text="Сколько раз можно использовать это предложение, прежде чем оно станет недоступным",
         blank=True,
         null=True,
     )
@@ -219,8 +204,8 @@ class AbstractConditionalOffer(models.Model):
     # single user.  This only works for signed-in users - it doesn't really
     # make sense for sites that allow anonymous checkout.
     max_user_applications = models.PositiveIntegerField(
-        _("Max user applications"),
-        help_text=_("The number of times a single user can use this offer"),
+        "Максимальное количество применений пользователем",
+        help_text="Сколько раз один пользователь может воспользоваться этим предложением",
         blank=True,
         null=True,
     )
@@ -229,26 +214,23 @@ class AbstractConditionalOffer(models.Model):
     # a basket (and hence a single order). Often, an offer should only be
     # usable once per basket/order, so this field will commonly be set to 1.
     max_basket_applications = models.PositiveIntegerField(
-        _("Max basket applications"),
+        "Максимальное количество применений в корзине",
         blank=True,
         null=True,
-        help_text=_(
-            "The number of times this offer can be applied to a basket (and order)"
-        ),
+        help_text="Сколько раз это предложение можно применить к корзине (и заказу)",
     )
 
     # Use this field to limit the amount of discount an offer can lead to.
     # This can be helpful with budgeting.
     max_discount = models.DecimalField(
-        _("Max discount"),
+        "Максимальная скидка",
         decimal_places=2,
         max_digits=12,
         null=True,
         blank=True,
-        help_text=_(
-            "When an offer has given more discount to orders "
-            "than this threshold, then the offer becomes "
-            "unavailable"
+        help_text=(
+            "Когда предложение дало большую скидку на заказы"
+            "чем этот порог, то предложение становится недоступным"
         ),
     )
 
@@ -257,15 +239,15 @@ class AbstractConditionalOffer(models.Model):
     # max_* fields above.
 
     total_discount = models.DecimalField(
-        _("Total Discount"), decimal_places=2, max_digits=12, default=D("0.00")
+        "Общая скидка", decimal_places=2, max_digits=12, default=D("0.00")
     )
     num_applications = models.PositiveIntegerField(
-        _("Number of applications"), default=0
+        "Количество применений", default=0
     )
-    num_orders = models.PositiveIntegerField(_("Number of Orders"), default=0)
+    num_orders = models.PositiveIntegerField("Количество заказов", default=0)
 
-    redirect_url = fields.ExtendedURLField(_("URL redirect (optional)"), blank=True)
-    date_created = models.DateTimeField(_("Date Created"), auto_now_add=True)
+    redirect_url = fields.ExtendedURLField("Перенаправление URL-адреса (необязательно)", blank=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
     objects = models.Manager()
     active = ActiveOfferManager()
@@ -278,8 +260,8 @@ class AbstractConditionalOffer(models.Model):
         abstract = True
         app_label = "offer"
         ordering = ["-priority", "pk"]
-        verbose_name = _("Conditional offer")
-        verbose_name_plural = _("Conditional offers")
+        verbose_name = "Условное предложение"
+        verbose_name_plural = "Условные предложения"
 
     def save(self, *args, **kwargs):
         # Check to see if consumption thresholds have been broken
@@ -303,9 +285,20 @@ class AbstractConditionalOffer(models.Model):
             and self.end_datetime
             and self.start_datetime > self.end_datetime
         ):
-            raise exceptions.ValidationError(
-                _("End date should be later than start date")
-            )
+            raise exceptions.ValidationError("Дата окончания должна быть позже даты начала.")
+
+    @property
+    def primary_image(self):
+        """
+        Returns the primary image for a product. Usually used when one can
+        only display one product image, e.g. in a list of products.
+        """
+        img = self.img
+        if not img:
+            mis_img = MissingProductImage()
+            return {"original": mis_img.name, "caption": "", "is_missing": True}
+
+        return {"original": img.name, "caption": "", "is_missing": False}
 
     @property
     def is_voucher_offer_type(self):
@@ -431,12 +424,12 @@ class AbstractConditionalOffer(models.Model):
         restrictions = []
         if self.is_suspended:
             restrictions.append(
-                {"description": _("Offer is suspended"), "is_satisfied": False}
+                {"description": "Предложение приостановлено", "is_satisfied": False}
             )
 
         if self.max_global_applications:
             remaining = self.max_global_applications - self.num_applications
-            desc = _("Limited to %(total)d uses (%(remainder)d remaining)") % {
+            desc = "Ограничено %(total)d использованиями (%(remainder)d осталось)" % {
                 "total": self.max_global_applications,
                 "remainder": remaining,
             }
@@ -444,18 +437,18 @@ class AbstractConditionalOffer(models.Model):
 
         if self.max_user_applications:
             if self.max_user_applications == 1:
-                desc = _("Limited to 1 use per user")
+                desc = "Ограничено 1 использованием на пользователя."
             else:
-                desc = _("Limited to %(total)d uses per user") % {
+                desc = ("Ограничено %(total)d использованиями на пользователя") % {
                     "total": self.max_user_applications
                 }
             restrictions.append({"description": desc, "is_satisfied": True})
 
         if self.max_basket_applications:
             if self.max_user_applications == 1:
-                desc = _("Limited to 1 use per basket")
+                desc = "Ограничено 1 использованием на корзину"
             else:
-                desc = _("Limited to %(total)d uses per basket") % {
+                desc = "Ограничено %(total)d использованиями на корзину" % {
                     "total": self.max_basket_applications
                 }
             restrictions.append({"description": desc, "is_satisfied": True})
@@ -473,25 +466,25 @@ class AbstractConditionalOffer(models.Model):
         if self.start_datetime or self.end_datetime:
             today = now()
             if self.start_datetime and self.end_datetime:
-                desc = _("Available between %(start)s and %(end)s") % {
+                desc = "Доступно между %(start)s и %(end)s" % {
                     "start": hide_time_if_zero(self.start_datetime),
                     "end": hide_time_if_zero(self.end_datetime),
                 }
                 is_satisfied = self.start_datetime <= today <= self.end_datetime
             elif self.start_datetime:
-                desc = _("Available from %(start)s") % {
+                desc = "Доступно с %(start)s" % {
                     "start": hide_time_if_zero(self.start_datetime)
                 }
                 is_satisfied = today >= self.start_datetime
             elif self.end_datetime:
-                desc = _("Available until %(end)s") % {
+                desc = "Доступно до %(end)s" % {
                     "end": hide_time_if_zero(self.end_datetime)
                 }
                 is_satisfied = today <= self.end_datetime
             restrictions.append({"description": desc, "is_satisfied": is_satisfied})
 
         if self.max_discount:
-            desc = _("Limited to a cost of %(max)s") % {
+            desc = "Ограничено стоимостью %(max)s" % {
                 "max": currency(self.max_discount)
             }
             restrictions.append(
@@ -533,7 +526,7 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        verbose_name=_("Range"),
+        verbose_name="Ассортимент",
     )
 
     # Benefit types
@@ -550,48 +543,45 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
         "Shipping fixed price",
     )
     TYPE_CHOICES = (
-        (PERCENTAGE, _("Discount is a percentage off of the product's value")),
-        (FIXED, _("Discount is a fixed amount off of the basket's total")),
-        (FIXED_UNIT, _("Discount is a fixed amount off of the product's value")),
-        (MULTIBUY, _("Discount is to give the cheapest product for free")),
-        (FIXED_PRICE, _("Get the products that meet the condition for a fixed price")),
-        (SHIPPING_ABSOLUTE, _("Discount is a fixed amount of the shipping cost")),
-        (SHIPPING_FIXED_PRICE, _("Get shipping for a fixed price")),
-        (
-            SHIPPING_PERCENTAGE,
-            _("Discount is a percentage off of the shipping cost"),
-        ),
+        (PERCENTAGE, "Скидка — это процент от стоимости товара."),
+        (FIXED, "Скидка — фиксированная сумма от суммы корзины."),
+        (FIXED_UNIT, "Скидка — это фиксированная сумма от стоимости товара."),
+        (MULTIBUY, "Скидка – это предоставление самого дешевого товара бесплатно."),
+        (FIXED_PRICE, "Приобретайте товары, соответствующие условию, по фиксированной цене."),
+        (SHIPPING_ABSOLUTE, "Скидка – это фиксированная сумма стоимости доставки."),
+        (SHIPPING_FIXED_PRICE, "Получите доставку по фиксированной цене"),
+        (SHIPPING_PERCENTAGE, "Скидка представляет собой процент от стоимости доставки."),
     )
-    type = models.CharField(_("Type"), max_length=128, choices=TYPE_CHOICES, blank=True)
+    type = models.CharField("Тип", max_length=128, choices=TYPE_CHOICES, blank=True)
 
     # The value to use with the designated type.  This can be either an integer
     # (eg for multibuy) or a decimal (eg an amount) which is slightly
     # confusing.
     value = fields.PositiveDecimalField(
-        _("Value"), decimal_places=2, max_digits=12, null=True, blank=True
+        "Значение", decimal_places=2, max_digits=12, null=True, blank=True
     )
 
     # If this is not set, then there is no upper limit on how many products
     # can be discounted by this benefit.
     max_affected_items = models.PositiveIntegerField(
-        _("Max Affected Items"),
+        "Максимальное количество товаров для скидки",
         blank=True,
         null=True,
-        help_text=_(
-            "Set this to prevent the discount consuming all items "
-            "within the range that are in the basket."
+        help_text=(
+            "Установите это, чтобы скидка не расходовала все товары "
+            "в пределах, находящихся в корзине."
         ),
     )
 
     # A custom benefit class can be used instead.  This means the
     # type/value/max_affected_items fields should all be None.
-    proxy_class = fields.NullCharField(_("Custom class"), max_length=255, default=None)
+    proxy_class = fields.NullCharField("Пользовательский класс", max_length=255, default=None)
 
     class Meta:
         abstract = True
         app_label = "offer"
-        verbose_name = _("Benefit")
-        verbose_name_plural = _("Benefits")
+        verbose_name = "Выгода"
+        verbose_name_plural = "Выгоды"
 
     @property
     def proxy_map(self):
@@ -629,13 +619,11 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
         errors = []
 
         if not self.range:
-            errors.append(_("Multibuy benefits require a product range"))
+            errors.append("Для получения преимуществ мультипокупок требуется ассортимент продукции")
         if self.value:
-            errors.append(_("Multibuy benefits don't require a value"))
+            errors.append("Преимущества многократной покупки не требуют значения")
         if self.max_affected_items:
-            errors.append(
-                _("Multibuy benefits don't require a 'max affected items' attribute")
-            )
+            errors.append("Для преимуществ многократной покупки не требуется атрибут «Максимальное количество затронутых товаров».")
 
         if errors:
             raise exceptions.ValidationError(errors)
@@ -644,12 +632,12 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
         errors = []
 
         if not self.range:
-            errors.append(_("Percentage benefits require a product range"))
+            errors.append("Процентная скидка требуют ассортимента продукции")
 
         if not self.value:
-            errors.append(_("Percentage discount benefits require a value"))
+            errors.append("Процентная скидка требуют значения скидки")
         elif self.value > 100:
-            errors.append(_("Percentage discount cannot be greater than 100"))
+            errors.append("Процентная скидка не может быть больше 100%")
 
         if errors:
             raise exceptions.ValidationError(errors)
@@ -657,20 +645,14 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
     def clean_shipping_absolute(self):
         errors = []
         if not self.value:
-            errors.append(_("A discount value is required"))
+            errors.append("Укажите значение скидки.")
         if self.range:
             errors.append(
-                _(
-                    "No range should be selected as this benefit does "
-                    "not apply to products"
-                )
+                "Не следует выбирать диапазон, поскольку это преимущество не распространяется на продукты."
             )
         if self.max_affected_items:
             errors.append(
-                _(
-                    "Shipping discounts don't require a "
-                    "'max affected items' attribute"
-                )
+                "Скидки на доставку не требуют атрибута максимального количества затронутых товаров"
             )
 
         if errors:
@@ -680,23 +662,17 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
         errors = []
 
         if not self.value:
-            errors.append(_("Percentage discount benefits require a value"))
+            errors.append("Процентные скидки требуют значения")
         elif self.value > 100:
-            errors.append(_("Percentage discount cannot be greater than 100"))
+            errors.append("Процентная скидка не может быть больше 100%")
 
         if self.range:
             errors.append(
-                _(
-                    "No range should be selected as this benefit does "
-                    "not apply to products"
-                )
+                "Не следует выбирать диапазон, поскольку это преимущество не распространяется на продукты."
             )
         if self.max_affected_items:
             errors.append(
-                _(
-                    "Shipping discounts don't require a "
-                    "'max affected items' attribute"
-                )
+                "Скидки на доставку не требуют атрибута максимального количества затронутых товаров"
             )
         if errors:
             raise exceptions.ValidationError(errors)
@@ -705,17 +681,11 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
         errors = []
         if self.range:
             errors.append(
-                _(
-                    "No range should be selected as this benefit does "
-                    "not apply to products"
-                )
+                "Не следует выбирать диапазон, поскольку это преимущество не распространяется на продукты."
             )
         if self.max_affected_items:
             errors.append(
-                _(
-                    "Shipping discounts don't require a "
-                    "'max affected items' attribute"
-                )
+                "Скидки на доставку не требуют атрибута максимального количества затронутых товаров"
             )
 
         if errors:
@@ -724,18 +694,15 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
     def clean_fixed_price(self):
         if self.range:
             raise exceptions.ValidationError(
-                _(
-                    "No range should be selected as the condition range will "
-                    "be used instead."
-                )
+                "Не следует выбирать диапазон, поскольку вместо него будет использоваться диапазон условий.."
             )
 
     def clean_absolute(self):
         errors = []
         if not self.range:
-            errors.append(_("Fixed discount benefits require a product range"))
+            errors.append("Фиксированные скидки требуют наличия ассортимента продукции.")
         if not self.value:
-            errors.append(_("Fixed discount benefits require a value"))
+            errors.append("Фиксированные скидки требуют значения")
 
         if errors:
             raise exceptions.ValidationError(errors)
@@ -743,11 +710,10 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
     def clean_fixed(self):
         errors = []
         if not self.range:
-            errors.append(
-                _("Fixed product level discount benefits require a product range")
-            )
+            errors.append("Для фиксированных скидок на уровне продукта требуется ассортимент продуктов.")
+        
         if not self.value:
-            errors.append(_("Fixed product level discount benefits require a value"))
+            errors.append("Фиксированные скидки на уровне продукта требуют значения.")
 
         if errors:
             raise exceptions.ValidationError(errors)
@@ -817,41 +783,29 @@ class AbstractCondition(BaseOfferMixin, models.Model):
 
     COUNT, VALUE, COVERAGE = ("Count", "Value", "Coverage")
     TYPE_CHOICES = (
-        (
-            COUNT,
-            _("Depends on number of items in basket that are in condition range"),
-        ),
-        (
-            VALUE,
-            _("Depends on value of items in basket that are in condition range"),
-        ),
-        (
-            COVERAGE,
-            _(
-                "Needs to contain a set number of DISTINCT items "
-                "from the condition range"
-            ),
-        ),
+        (COUNT,"Зависит от количества товаров в корзине, находящихся в определенном состоянии."),
+        (VALUE, "Зависит от стоимости товаров в корзине, находящихся в определенном состоянии."),
+        (COVERAGE,"Должно содержать заданное количество ОТЛИЧНЫХ элементов из диапазона условий."),
     )
     range = models.ForeignKey(
         "offer.Range",
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        verbose_name=_("Range"),
+        verbose_name="Ассортимент",
     )
-    type = models.CharField(_("Type"), max_length=128, choices=TYPE_CHOICES, blank=True)
+    type = models.CharField("Тип", max_length=128, choices=TYPE_CHOICES, blank=True)
     value = fields.PositiveDecimalField(
-        _("Value"), decimal_places=2, max_digits=12, null=True, blank=True
+        "Значение", decimal_places=2, max_digits=12, null=True, blank=True
     )
 
-    proxy_class = fields.NullCharField(_("Custom class"), max_length=255, default=None)
+    proxy_class = fields.NullCharField("Пользовательский класс", max_length=255, default=None)
 
     class Meta:
         abstract = True
         app_label = "offer"
-        verbose_name = _("Condition")
-        verbose_name_plural = _("Conditions")
+        verbose_name = "Условие"
+        verbose_name_plural = "Условия"
 
     @property
     def proxy_map(self):
@@ -873,10 +827,10 @@ class AbstractCondition(BaseOfferMixin, models.Model):
         errors = []
 
         if not self.range:
-            errors.append(_("Count conditions require a product range"))
+            errors.append("Для условий подсчета требуется ассортимент продукции")
 
         if not self.value:
-            errors.append(_("Count conditions require a value"))
+            errors.append("Условия подсчета требуют значения")
 
         if errors:
             raise exceptions.ValidationError(errors)
@@ -885,10 +839,10 @@ class AbstractCondition(BaseOfferMixin, models.Model):
         errors = []
 
         if not self.range:
-            errors.append(_("Value conditions require a product range"))
+            errors.append("Условия ценности требуют ассортимента продукции")
 
         if not self.value:
-            errors.append(_("Value conditions require a value"))
+            errors.append("Условия значения требуют значения")
 
         if errors:
             raise exceptions.ValidationError(errors)
@@ -897,10 +851,10 @@ class AbstractCondition(BaseOfferMixin, models.Model):
         errors = []
 
         if not self.range:
-            errors.append(_("Coverage conditions require a product range"))
+            errors.append("Условия покрытия требуют ассортимента продукции")
 
         if not self.value:
-            errors.append(_("Coverage conditions require a value"))
+            errors.append("Условия покрытия требуют значения")
 
         if errors:
             raise exceptions.ValidationError(errors)
@@ -931,7 +885,7 @@ class AbstractCondition(BaseOfferMixin, models.Model):
         """
         Determines whether the condition can be applied to a given basket line
         """
-        if not line.stockrecord_id:
+        if not line.stockrecord_id or line.quantity < 1:
             return False
         product = line.product
         return self.range.contains_product(product) and product.is_discountable
@@ -960,56 +914,56 @@ class AbstractRange(models.Model):
     Represents a range of products that can be used within an offer.
     """
 
-    name = models.CharField(_("Name"), max_length=128, unique=True)
+    name = models.CharField("Имя", max_length=128, unique=True)
     slug = fields.AutoSlugField(
-        _("Slug"), max_length=128, unique=True, populate_from="name"
+        "Ярлык", max_length=128, unique=True, populate_from="name"
     )
 
-    description = models.TextField(_("Description"), blank=True)
+    description = models.TextField("Описание", blank=True)
 
     # Whether this range is public
     is_public = models.BooleanField(
-        _("Is public?"),
+        "Является ли общедоступным",
         default=False,
-        help_text=_("Public ranges have a customer-facing page"),
+        help_text="Общедоступные ассортименты имеют страницу для клиентов.",
     )
 
     includes_all_products = models.BooleanField(
-        _("Includes all products?"), default=False
+        "Включает все продукты?", default=False
     )
 
     included_products = models.ManyToManyField(
         "catalogue.Product",
         related_name="includes",
         blank=True,
-        verbose_name=_("Included Products"),
+        verbose_name="Включенные продукты",
         through="offer.RangeProduct",
     )
     excluded_products = models.ManyToManyField(
         "catalogue.Product",
         related_name="excludes",
         blank=True,
-        verbose_name=_("Excluded Products"),
+        verbose_name="Исключенные продукты",
     )
     classes = models.ManyToManyField(
         "catalogue.ProductClass",
         related_name="classes",
         blank=True,
-        verbose_name=_("Product Types"),
+        verbose_name="Типы продуктов",
     )
     included_categories = models.ManyToManyField(
         "catalogue.Category",
         related_name="includes",
         blank=True,
-        verbose_name=_("Included Categories"),
+        verbose_name="Включенные категории",
     )
 
     # Allow a custom range instance to be specified
     proxy_class = fields.NullCharField(
-        _("Custom class"), max_length=255, default=None, unique=True
+        "Пользовательский прокси-класс", max_length=255, default=None, unique=True
     )
 
-    date_created = models.DateTimeField(_("Date Created"), auto_now_add=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
     objects = RangeManager()
     browsable = BrowsableRangeManager()
@@ -1018,8 +972,8 @@ class AbstractRange(models.Model):
         abstract = True
         app_label = "offer"
         ordering = ["name"]
-        verbose_name = _("Range")
-        verbose_name_plural = _("Ranges")
+        verbose_name = "Ассортимент"
+        verbose_name_plural = "Ассортимент"
 
     def __str__(self):
         return self.name
@@ -1186,15 +1140,15 @@ class AbstractRangeProductFileUpload(models.Model):
         "offer.Range",
         on_delete=models.CASCADE,
         related_name="file_uploads",
-        verbose_name=_("Range"),
+        verbose_name="Ассортимент",
     )
-    filepath = models.CharField(_("File Path"), max_length=255)
-    size = models.PositiveIntegerField(_("Size"))
+    filepath = models.CharField("Путь к файлу", max_length=255)
+    size = models.PositiveIntegerField("Размер")
     uploaded_by = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("Uploaded By")
+        AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Загружено пользователем"
     )
     date_uploaded = models.DateTimeField(
-        _("Date Uploaded"), auto_now_add=True, db_index=True
+        "Дата загрузки", auto_now_add=True, db_index=True
     )
 
     INCLUDED_PRODUCTS_TYPE = "included"
@@ -1214,26 +1168,26 @@ class AbstractRangeProductFileUpload(models.Model):
         (PROCESSED, PROCESSED),
     )
     status = models.CharField(
-        _("Status"), max_length=32, choices=choices, default=PENDING
+        "Статус", max_length=32, choices=choices, default=PENDING
     )
-    error_message = models.CharField(_("Error Message"), max_length=255, blank=True)
+    error_message = models.CharField("Сообщение об ошибке", max_length=255, blank=True)
 
     # Post-processing audit fields
-    date_processed = models.DateTimeField(_("Date Processed"), null=True)
-    num_new_skus = models.PositiveIntegerField(_("Number of New SKUs"), null=True)
+    date_processed = models.DateTimeField("Дата обработки", null=True)
+    num_new_skus = models.PositiveIntegerField("Количество новых SKU", null=True)
     num_unknown_skus = models.PositiveIntegerField(
-        _("Number of Unknown SKUs"), null=True
+        "Количество неизвестных SKU", null=True
     )
     num_duplicate_skus = models.PositiveIntegerField(
-        _("Number of Duplicate SKUs"), null=True
+        "Количество повторяющихся SKU", null=True
     )
 
     class Meta:
         abstract = True
         app_label = "offer"
         ordering = ("-date_uploaded",)
-        verbose_name = _("Range Product Uploaded File")
-        verbose_name_plural = _("Range Product Uploaded Files")
+        verbose_name = "Загруженный файл продукта ассортимента"
+        verbose_name_plural = "Загруженные файлы продуктов линейки"
 
     def mark_as_failed(self, message=None):
         self.date_processed = now()

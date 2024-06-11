@@ -1,182 +1,165 @@
-{% extends "oscar/checkout/layout.html" %}
-{% load currency_filters %}
-{% load i18n %}
-{% load image_tags %}
-{% load purchase_info_tags %}
+{% extends "oscar/layout.html" %}
 
-{% block title %}
-    {% trans "Checkout" %} | {{ block.super }}
+{% load currency_filters %}
+{% load static %}
+{% load image_tags %}
+{% load svg_tags %}
+
+{% block title %}Оформление заказа | {{ block.super }}{% endblock %}
+
+{% block nav_title %}Оформление заказа{% endblock %}
+{% block nav_title_center %}Оформление заказа{% endblock %}
+
+{% block wrapper_class %}checkout fill-width px-2 py-3 pb-sm-4 pt-sm-2 checkout__container{% endblock %}
+
+{% block app_class %}v-app---checkout{% endblock %}
+{% block nav_class %}v-app__nav--checkout{% endblock %}
+
+{% block sticky_address %}{% endblock %}
+
+{% block breadcrumbs %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <a href="{% url 'basket:summary' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Корзина</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">Оформление заказа</span>
+    </div>
 {% endblock %}
 
-{% comment %} {% block checkout_nav %}
-    {% include 'oscar/checkout/nav.html' %}
-{% endblock %} {% endcomment %}
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "css/air-datepicker.css" %}" />
+{% endblock %}
 
 {% block content %}
+    <div class="d-flex flex-column">
+        <div class="v-order d-flex flex-column flex-md-row align-md-start">
 
-    {% if error %}
-        <div class="alert alert-danger">
-            {{ error }}
-        </div>
-    {% endif %}
+            {% block chekout_form %}{% endblock chekout_form %}
 
-    {% block my_form %}
-    {% endblock my_form %}
-
-    
-    {% block vouchers %}
-    {% endblock vouchers %}
-
-    <div class="row shipping-payment">
-        
-        {% block shipping_address %}
-            <div class="col-sm-6">
-                <div class="sub-header">
-                    <h2>{% trans "Shipping" %}</h2>
-                </div>
-                {% if shipping_address %}
-                    <div class="card card-body bg-light">
-                        <h3>
-                          {% trans "Address" %}
-                          {% block shipping_address_actions %}
-                            {% comment %} <a href="{% url 'checkout:shipping-address' %}" class="float-right"> {% endcomment %}
-                            <a href="{% url 'checkout:checkoutview' %}" class="float-right">
-                                {% trans "Change" %}
-                            </a>
-                        {% endblock %}</h3>
-                        <address>
-                            {% for field in shipping_address.active_address_fields %}
-                                {{ field }}<br/>
-                            {% endfor %}
-                        </address>
-
-                        {% if shipping_address.phone_number %}
-                            <h4>{% trans "Contact" %}</h4>
-                            <p>
-                                {% trans "Phone" %}: {{ shipping_address.phone_number }}
-                                {% if guest_email %}
-                                    <br/>{% trans "Email" %}: {{ guest_email }}
-                                {% endif %}
-                            </p>
-                        {% endif %}
-
-                        {% if shipping_address.notes %}
-                            <h4>{% trans "Instructions" %}</h4>
-                            <p>{{ shipping_address.notes|linebreaks }}</p>
-                        {% endif %}
+            <div class="v-order__info ml-md-4">
+                <div class="v-order__info-wrapper pt-4">
+            
+                    <p class="v-order__title d-none d-md-block mb-4"> Ваш заказ </p>
+            
+                    <div class="v-order__subtitle d-md-none mb-1 mb-sm-2">
+                        <h2>Ваш заказ</h2>
                     </div>
-                {% endif %}
-
-                {% if shipping_method %}
-                    <div class="card card-body bg-light card card-body bg-light-info">
-                        <h3>
-                          {% trans "Shipping method" %}
-                          {% block shipping_method_actions %}
-                            <a href="{% url 'checkout:shipping-method' %}" class="float-right">
-                                {% trans "Change" %}
-                            </a>
-                          {% endblock %}
-                        </h3>
-                        <p>{{ shipping_method.name }}
-                            {% if shipping_method.description %}
-                                - {{ shipping_method.description|safe }}
-                            {% endif %}
-                        </p>
-
-                    </div>
-                {% endif %}
-            </div>
-        {% endblock shipping_address %}
-
-        {# You will almost certainly want to override this block to provide a payment summary #}
-        {% block payment_method %}
-            <div class="col-sm-6">
-                <div class="sub-header">
-                    <h2>{% trans "Payment" %}</h2>
-                </div>
-                <div class="card card-body bg-light card card-body bg-light-success">
-                    <h3>
-                      {% trans "Payment" %}
-                      <a href="{% url 'checkout:checkoutview' %}" class="float-right">
-                        {% trans "Change" %}
-                      </a>
-                    </h3>
-                    <p>{% trans "Payment details to go here" %}</p>
-                </div>
-            </div>
-        {% endblock payment_method %}
-    </div>
-
-    {% block order_contents %}
-        <div class="sub-header">
-            {% block order_contents_actions %}
-                <a href="{% url 'basket:summary' %}" class="float-right">
-                    {% trans "Edit order contents" %}
-                </a>
-            {% endblock %}
-
-            <h2>{% trans "Order contents" %}</h2>
-        </div>
-        <div class="basket-title">
-            <div class="row">
-                <p class="col-sm-9 h4">{% trans "Item" %}</p>
-                <p class="col-sm-1 h4 text-center">{% trans "Quantity" %}</p>
-                <p class="col-sm-2 h4 text-right">{% trans "Total" %}</p>
-            </div>
-        </div>
-        {% for line in basket.all_lines %}
-            {% purchase_info_for_line request line as session %}
-            <div class="basket-items">
-                <div class="row">
-                    <div class="col-sm-2">
-                        <div class="image_container w-100">
-                            {% with image=line.product.primary_image %}
-                                {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
-                                <a href="{{ form.instance.product.get_absolute_url }}">
-                                    <img src="{{ thumb.url }}" alt="{{ product.get_title }}" class="img-thumbnail w-auto mx-auto my-0">
-                                </a>
-                            {% endwith %}
+            
+                    {% comment %} приборы {% endcomment %}
+                    {% comment %} <div class="v-cutlery d-flex align-center justify-space-between mb-3 mb-sm-4 readonly">
+                        
+                        <div class="d-flex align-center mr-2">
+                            <svg class="v-cutlery__icon mr-1 shrink">
+                                <use xlink:href="/img/icons.svg#catlery_32"></use>
+                            </svg>
+                            <p class="v-cutlery__text">Добавить приборы</p>
                         </div>
+            
+                        <div class="v-order-button">
+                            <div class="v-order-button--dec">
+                                <button disabled="disabled" data-test-id="order-button-minus" class="v-order-button--elem">
+                                    <svg>
+                                        <use xlink:href="/img/icons.svg#minus_24"></use>
+                                    </svg>
+                                </button>
+                                <span class="v-order-button--elem v-order-button--value"> 39 </span>
+                            </div>
+                            <button disabled="disabled" data-test-id="order-button-plus" class="v-order-button--elem">
+                                <svg>
+                                    <use xlink:href="/img/icons.svg#plus_24"></use>
+                                </svg>
+                            </button>
+                        </div>
+            
+                    </div> {% endcomment %}
+            
+            
+                    {% comment %} promocode {% endcomment %}
+                    <div class="v-promo mb-3 mb-sm-4">
+                        <form class="v-promo__input-wrapper d-flex align-center g-2" id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
+                            <div data-id="v-input-field" class="v-input d-flex align-center fill-width v-input__padding{% if voucher_form.initial.code %} v-input__label-active{% endif %}">
+                                <div class="v-input__wrapper">
+                                    <div class="v-input__label">Введите промокод</div>
+                                    <div id="voucher_form_container" class="v-input__control d-flex align-center">
+                                        {% if voucher_form %}
+                                            {% csrf_token %}
+                                            {% include "oscar/partials/render_field.html" with field=voucher_form.code data_id="voucher-input-code" %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" id="voucher_btn" disabled="disabled" data-id="promo-submit-btn" class="v-button fill-width v-button--main v-button--second justify-center shrink">
+                                <span class="v-button__wrapper">
+                                    <span class="v-button__value"> Применить </span>
+                                </span>
+                            </button>
+                        </form>
                     </div>
-                    <div class="col-sm-7">
-                        <h3><a href="{{ line.product.get_absolute_url }}">{{ line.description }}</a></h3>
-                        <span class="availability {{ session.availability.code }}">{{ session.availability.message }}</span>
-                    </div>
-                    <div class="col-sm-1 text-center">
-                        {{ line.quantity }}
-                    </div>
-                    <div class="col-sm-2 text-right">
-                        <p class="price_color">
-                            {% if not show_tax_separately and line.is_tax_known %}
-                                {{ line.line_price_incl_tax|currency:basket.currency }}
-                            {% else %}
-                                {{ line.line_price_excl_tax|currency:basket.currency }}
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
 
-        <div class="row">
-            <div class="col-sm-6">&nbsp;</div>
-            <div class="col-sm-6">
-                <div class="sub-header">
-                    <h2>{% trans 'Totals' %}</h2>
+                    <span id="voucher_message" class="info-message"></span>
+
+                    {% comment %} состав заказа {% endcomment %}
+                    {% block order_contents %}
+                        <div class="v-order-checkout__items">
+                            {% for line in basket.all_lines %}
+                                <span>{{ line.product.get_title }} ({{ line.quantity }}){% if not forloop.last %},{% endif %}</span>
+                            {% endfor %}
+                        </div>
+                    {% endblock order_contents %}
+
+            
+                    {% comment %} totals {% endcomment %}
+                    <div id="checkout_totals">
+                        {% include 'oscar/checkout/checkout_totals.html' with editable=True %}
+                    </div>
+
+                    {% comment %} ошибки и валидация {% endcomment %}
+                    {% comment %} <div class="v-error-list d-flex mt-3 v-error-list--frame">
+                        <div class="d-flex flex-column fill-width" id="place_order_hints">
+                            <span class="v-error-list__error d-flex fill-width" id="place_order_hints_address"></span>
+                        </div>
+                    </div> {% endcomment %}
+
+
+                    {% comment %} кнопка подтверждения {% endcomment %}       
+                    <div class="mt-3">
+                        <button id="submit_order" form="place_order_form" type="submit" data-test-id="order-submit-btn" class="v-button fill-width v-button--main justify-center shrink">
+                            <span class="v-button__wrapper">
+                                <span class="v-button__value"> 
+                                    Оформить заказ
+                                </span>
+                            </span>
+                        </button>
+                    </div>
+
+
                 </div>
-                {% include 'oscar/basket/partials/basket_totals.html' %}
             </div>
         </div>
-
-    {% endblock order_contents %}
-
-    {% block shipping_method %}
-    {% endblock shipping_method %}
-
-    {% block payment_details %}
-    {% endblock payment_details %}
-
-    {% block place_order %}
-    {% endblock place_order %}
-
+    </div>
 {% endblock content %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script>
+        var csrf_token = "{{ csrf_token }}";
+        var url_voucher = "{% url 'checkout:vouchers-add' %}";
+        var url_delivery = "{% url 'shipping:delivery-time' %}";
+        var url_pickup = "{% url 'shipping:pickup-time' %}";
+        var url_delivery_later = "{% url 'shipping:delivery-later' %}";
+        var url_delivery_zones = "{% url 'shipping:delivery-zones' %}";
+    </script>
+    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
+    <script type="application/javascript" src="{% static "js/datetimepicker/air-datepicker.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/delivery/delivery.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/checkout/checkout-main.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/datetimepicker/order-timepicker.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/checkout/voucher.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/checkout/cookie-checkout.js" %}"></script>
+{% endblock %}
+

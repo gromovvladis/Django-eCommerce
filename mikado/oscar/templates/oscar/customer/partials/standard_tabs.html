@@ -1,26 +1,88 @@
-{% load i18n %}
 {% load display_tags %}
+{% load svg_tags %}
 
-<li class="nav-item">
-    <a href="{% url 'customer:profile-view' %}" class="nav-link{% if active_tab == 'profile' %} active{% endif %}">{% trans "Profile" %}</a>
-</li>
-<li class="nav-item">
-    <a href="{% url 'customer:order-list' %}" class="nav-link{% if active_tab == 'orders' %} active{% endif %}">{% trans "Order History" %}</a>
-</li>
-<li class="nav-item">
-    <a href="{% url 'customer:address-list' %}" class="nav-link{% if active_tab == 'addresses' %} active{% endif %}">{% trans "Address Book" %}</a>
-</li>
-<li class="nav-item">
-    <a href="{% url 'customer:email-list' %}" class="nav-link{% if active_tab == 'emails' %} active{% endif %}">{% trans "Email History" %}</a>
-</li>
-<li class="nav-item">
-    <a href="{% url 'customer:alerts-list' %}" class="nav-link{% if active_tab == 'alerts' %} active{% endif %}">{% trans "Product Alerts" %}</a>
-</li>
-<li class="nav-item">
-    <a href="{% url 'customer:notifications-inbox' %}" class="nav-link{% if active_tab == 'notifications' %} active{% endif %}">{% trans "Notifications" %}</a>
-</li>
-{% iffeature 'wishlists' %}
-    <li class="nav-item">
-        <a href="{% url 'customer:wishlists-list' %}" class="nav-link{% if active_tab == 'wishlists' %} active{% endif %}">{% trans "Wish Lists" %}</a>
+<ul class="profile__menu-collection d-flex flex-column fill-width  pt-3 pt-sm-0 pb-sm-0">
+
+    <li class="profile__menu-list d-sm-flex">
+        <button data-link="{% url 'customer:profile-view' %}" class="profile__menu-button{% if active_tab == "profile" %} active{% endif %}"
+            data-id="profile-tab">
+            Личные данные 
+            <div role="separator" class="v-spacer"></div>
+            {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
+    </button>
     </li>
-{% endiffeature %}
+                        
+    <li class="profile__menu-list">
+        <button data-link="{% url 'customer:order-list' %}" class="profile__menu-button{% if active_tab == "history" %} active{% endif %}" data-id="profile-tab">
+            История заказов 
+            <div role="separator" class="v-spacer"></div>
+            {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
+        </button>
+    </li>
+
+    <li class="profile__menu-list">
+        <button data-link="{% url 'customer:address-list' %}" class="profile__menu-button{% if active_tab == "addresses" %} active{% endif %}" data-id="profile-tab">
+            Адрес доставки
+            <div role="separator" class="v-spacer"></div>
+            {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
+        </button>
+    </li>
+
+    <li class="profile__menu-list">
+        <button data-link="{% url 'customer:feedbacks-available' %}" class="profile__menu-button{% if active_tab == "feedback" %} active{% endif %}" data-id="profile-tab">
+            Оставить отзыв 
+            <div role="separator" class="v-spacer"></div>
+            {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
+        </button>
+    </li>
+
+    <li class="profile__menu-list">
+        <button data-link="{% url 'customer:notifications-inbox' %}" class="profile__menu-button{% if active_tab == "notifications" %} active{% endif %}" data-id="profile-tab">
+            <div class="d-flex">
+                Уведомления
+                <div class="d-flex align-center ml-1">
+                    <span data-id="notifications-nums" class="notif-badge d-flex justify-center align-center">{{ num_unread_notifications }}</span>
+                </div>
+            </div>
+            <div role="separator" class="v-spacer"></div>
+            {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
+        </button>
+    </li>
+
+    <li class="profile__menu-list">
+        <button data-link="{% url 'customer:wishlist' %}" class="profile__menu-button{% if active_tab == "wishlist" %} active{% endif %}" data-id="profile-tab"> 
+            Избранное 
+            <div role="separator" class="v-spacer"></div>
+            {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
+        </button>
+    </li>
+    
+    <li class="profile__menu-list">
+        <a target="_blank" href="#" data-id="profile-tab-help" class="profile__menu-button">
+            Поддержка 
+            <div role="separator" class="v-spacer"></div>
+            {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
+        </a>
+    </li>
+
+    {% if user.is_staff or perms.partner.dashboard_access %}
+        <li class="profile__menu-list d-sm-flex">
+            <a class="profile__menu-button"
+                data-id="profile-tab-admin" href="{% url 'dashboard:index' %}">
+                Админ-панель 
+                <div role="separator" class="v-spacer"></div>
+                {% icon file_name='app_mobile_sticker/settings' size=24 stroke='#222'%}
+            </a>
+        </li>
+    {% endif %}
+
+    <li class="profile__menu-list d-sm-flex">
+        <a data-id="profile-logout-btn" href="{% url 'dashboard:logout' %}"
+            class="v-button fill-width v-button--outline justify-center shrink">
+                <span class="v-button__wrapper">
+                <span class="v-button__value"> Выйти из аккаунта </span>
+            </span>
+        </a>
+    </li>
+    
+</ul>

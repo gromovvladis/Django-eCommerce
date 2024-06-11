@@ -1,202 +1,225 @@
-{% extends "oscar/checkout/layout.html" %}
+{% extends "oscar/layout.html" %}
 {% load currency_filters %}
-{% load i18n %}
 {% load image_tags %}
+{% load static %}
+{% load svg_tags %}
+{% load purchase_info_tags %}
 
-{% block title %}
-    {% blocktrans with number=order.number %}
-        Order {{ number }}: confirmation
-    {% endblocktrans %} | {{ block.super }}
-{% endblock title %}
+{% block title %}Заказ №{{ order.number }} | {{ block.super }}{% endblock %}
 
-{% block checkout_nav %}
-    {% include 'oscar/checkout/nav.html' with step=5 %}
-{% endblock %}
+{% block nav_title %}Заказ №{{ order.number }}{% endblock %}
+{% block nav_title_center %}Заказ №{{ order.number }}{% endblock %}
 
-{% block checkout_title %}
-    {% blocktrans with number=order.number %}
-        Order {{ number }}: confirmation
-    {% endblocktrans %}
+{% block wrapper_class %}checkout fill-width px-2 py-3 pb-sm-4 pt-sm-2 checkout__container{% endblock %}
+
+{% block app_class %}v-app---checkout{% endblock %}
+{% block nav_class %}v-app__nav--checkout{% endblock %}
+
+{% block sticky_address %}{% endblock %}
+
+{% block breadcrumbs %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center my-2">
+        <button onclick="window.location.href='{{ homepage_url }}'" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">Заказ №{{ order.number }}</span>
+    </div>
 {% endblock %}
 
 {% block content %}
-    <p class="lead">
-        {% blocktrans with number=order.number %}
-        Your order has been placed and a confirmation email has been sent - your order number is
-        <strong>{{ number }}</strong>.
-        {% endblocktrans %}
-        {% trans "Please make a note of this reference or print this page and quote it in any communication with us regarding your order." %}
-    </p>
 
-    <div class="row shipping-payment">
-        <div class="col-sm-6">
-            {% block shipping_info %}
-                <div class="sub-header">
-                    <h2>{% trans "Shipping" %}</h2>
-                </div>
-                <div class="card card-body bg-light">
-                    <h3>{% trans "Address" %}</h3>
-                    {% if order.shipping_address %}
-                        <address>
-                            {% for field in order.shipping_address.active_address_fields %}
-                                {{ field }}<br/>
-                            {% endfor %}
-                        </address>
+    <div class="d-flex flex-column mt-md-4">
+        <div class="v-order d-flex flex-column flex-md-row align-md-start">
 
-                        {% if order.shipping_address.phone_number %}
-                            <h4>{% trans "Contact" %}</h4>
-                            <p>
-                                {% trans "Phone" %}: {{ order.shipping_address.phone_number }}
-                                {% if order.guest_email %}
-                                    <br/>{% trans "Email" %}: {{ order.guest_email }}
+            <div class="v-order__wrapper  d-flex flex-column">
+                <div class="v-order__info-wrapper d-flex flex-column fill-width">
+
+                    <div class="v-order__title d-flex mb-4 justify-start align-center">
+                        <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
+                            {% if order.status == "Ожидает оплаты" %}
+                                <use xlink:href="#svg-order-pending"></use>
+                            {% elif order.status == "Отменен" %}
+                                <use xlink:href="#svg-order-cancel"></use>
+                            {% else %}
+                                <use xlink:href="#svg-order-success"></use>
+                            {% endif %}
+                        </svg>
+                        <h1> Заказ оформлен! </h1>
+                    </div>
+
+                    {% block shipping_info %}
+
+                        <div class="v-checkout__datail">
+                            {% if order.shipping_address %}
+    
+                                <div class="v-order__subtitle mb-1 mb-sm-2">
+                                    <h2>Адрес доставки</h2>
+                                </div>
+    
+                                <address class="v-checkout__detail-text mb-2">
+                                    {% for field in order.shipping_address.active_address_fields_and_labels %}
+                                        {{ field.label }}: {{ field.value }}{% if not forloop.last %},{% endif %}
+                                        <br>
+                                    {% endfor %}
+                                </address>
+    
+                                {% if order.shipping_address.notes %}
+                                    <div class="v-checkout__detail-text mb-1">
+                                        <span>Инструкции курьеру: </span>
+                                        <span>{{ order.shipping_address.notes }}</span>
+                                    </div>
                                 {% endif %}
-                            </p>
-                        {% endif %}
 
-                        {% if order.shipping_address.notes %}
-                            <h4>{% trans "Instructions" %}</h4>
-                            <p>{{ order.shipping_address.notes|linebreaks }}</p>
-                        {% endif %}
-                    {% else %}
-                        <p>{% trans "No shipping address required." %}</p>
-                    {% endif %}
-                </div>
+                                {% with order_note=order.client_note %}
+                                    {% if order_note %}
+                                        <div class="v-checkout__detail-text mb-2">
+                                            <span>Коментарий к заказу: </span>
+                                            <span>{{ order_note }}</span>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+    
+                            {% else %}
+    
+                                <div class="v-order__subtitle mb-1 mb-sm-2">
+                                    <h2>Адрес самовывоза</h2>
+                                </div>
+    
+                                <a href="{% url 'address:pickup-address' %}" class="mb-2">
+                                    <address> Красноясрк, ул. 9 Мая 77,
+                                        <br>
+                                        ТРЦ "Планета" Фудкорд Mikado
+                                    </address>
+                                </a>
+    
+                            {% endif %}
+                        </div>
+                        <div class="v-checkout__datail">
+                            <div class="v-order__subtitle mb-1 mb-sm-2">
+                                <h2>Телефон для связи</h2>
+                            </div>
 
-                <div class="card card-body bg-light">
-                    <h3>{% trans "Shipping method" %}</h3>
-                    <p>{{ order.shipping_method }}</p>
-                </div>
-            {% endblock %}
-        </div>
+                            <div class="mb-2 v-checkout__detail-text">
+                                <p>{{ request.user.username }}</p>
+                            </div>
+                        </div>
 
-        <div class="col-sm-6">
-            {% block payment_info %}
-                <div class="sub-header">
-                    <h2>{% trans "Payment" %}</h2>
-                </div>
-                <div class="card card-body bg-light">
-                    <h3>{% trans "Payment" %}</h3>
-                    {% for source in order.sources.all %}
-                        <p>
-                        {% if source.reference %}
-                            {% blocktrans with amount=source.amount_allocated|currency:source.currency type=source.source_type.name reference=source.reference %}
-                                Allocation of {{ amount }} from type {{ type }} (reference: {{ reference }})
-                            {% endblocktrans %}
-                        {% else %}
-                            {% blocktrans with amount=source.amount_allocated|currency:source.currency type=source.source_type.name %}
-                                Allocation of {{ amount }} from type {{ type }}
-                            {% endblocktrans %}
-                        {% endif %}
-                        </p>
-                    {% empty %}
-                        <p>
-                        {% trans "No payment was required for this order." %}
-                        </p>
-                    {% endfor %}
-                </div>
+                    {% endblock %}
 
-            {% endblock %}
+                    {% block payment_info %}
+
+                        <div class="v-order__subtitle mb-1 mb-sm-2">
+                            <h2>Оплата</h2>
+                        </div>
+
+                        {% for source in order.sources.all %}
+                            <div class="v-checkout__detail-text mr-2">
+                                <span>Способ оплаты: </span>
+                                <span>{{ source.source_type.name }}</span>
+                            </div>    
+                            <div class="v-checkout__detail-text mr-2">
+                                <span>Сумма: </span>
+                                <span>{{ source.amount_allocated|currency:source.currency }}</span>
+                            </div>    
+                            
+                            <div class="v-checkout__detail-text mr-2">
+                                <span >Статус заказа: </span>
+                                <strong><span class="text--info" data-id="payment-status">{{ order.status }}</span></strong>
+                            </div> 
+                            
+                        {% endfor %}
+
+                    {% endblock %}
+
+                </div>
+            </div>
+
+            <div class="v-order__info ml-md-4">
+                <div class="v-order__info-wrapper pt-4">
+            
+                    <p class="v-order__title d-none d-md-block mb-4"> Ваш заказ </p>
+            
+                    <div class="v-order__subtitle d-md-none mb-1 mb-sm-2">
+                        <h2>Ваш заказ</h2>
+                    </div>
+
+                    
+                    <div class="v-order__subtitle mb-1 mb-sm-1 d-none d-md-block">
+                        <h2>Состав заказа</h2>
+                    </div>
+
+                    {% comment %} состав заказа {% endcomment %}
+                    {% block order_contents %}
+                        <div class="v-order-checkout__items">
+                            {% for line in order.basket.all_lines %}
+                                {% purchase_info_for_line request line as session %}
+                                    <span>{{ line.product.get_title }} ({{ line.quantity }}){% if not forloop.last %},{% endif %}</span>
+                            {% endfor %}
+                        </div>
+                    {% endblock order_contents %}
+            
+                    {% comment %} totals {% endcomment %}
+                    <div id="checkout_totals">
+                        {% include 'oscar/checkout/thank_you_totals.html' with order=order  %}
+                    </div>
+
+                </div>
+            </div>  
+
         </div>
     </div>
 
-    {% block order_contents %}
-        <div class="sub-header">
-            <h2>{% trans "Order contents" %}</h2>
-        </div>
-
-        <div class="basket-title">
-            <div class="row">
-                <p class="col-sm-9 h4">{% trans "Items purchased" %}</p>
-                <p class="col-sm-1 h4 text-center">{% trans "Quantity" %}</p>
-                <p class="col-sm-2 h4 text-right">{% trans "Total" %}</p>
-            </div>
-        </div>
-
-        {% for line in order.lines.all %}
-            <div class="basket-items">
-                <div class="row">
-                    <div class="col-sm-2">
-                        <div class="image_container w-100">
-                            {% with image=line.product.primary_image %}
-                                {% oscar_thumbnail image.original "200x200" upscale=False as thumb %}
-                                <a href="{{ line.product.get_absolute_url }}">
-                                    <img src="{{ thumb.url }}" alt="{{ product.get_title }}" class="img-thumbnail w-auto mx-auto my-0">
-                                </a>
-                            {% endwith %}
-                        </div>
-                    </div>
-                    <div class="col-sm-7">
-                        
-                        <h3>
-                            <a href="{{ line.product.get_absolute_url }}">
-                                <span>{{ line.title }}</span>
-                                <br>
-                                <span>{{ line.variants }}</span>
-                                <br>
-                                <span>{{ line.options }}</span>
-                                <br>
-                                <span>{{ line.additions }}</span>
-                            </a>
-                        </h3>
-                        {% comment %} {% if line.upc %}<p>{{ line.upc }}</p>{% endif %} {% endcomment %}
-                    </div>
-                    <div class="col-sm-1 text-center">
-                        {{ line.quantity }}
-                    </div>
-                    <div class="col-sm-2 text-right">
-                        <p class="price_color">
-                            {% if show_tax_separately %}
-                                {{ line.line_price_before_discounts_excl_tax|currency:order.currency }}
-                            {% else %}
-                                {{ line.line_price_before_discounts_incl_tax|currency:order.currency }}
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-
-        {% block basket_totals %}
-            <div class="row">
-                <div class="col-sm-6">&nbsp;</div>
-                <div class="col-sm-6">
-                    <div class="sub-header">
-                        <h2>{% trans 'Totals' %}</h2>
-                    </div>
-                    {% include 'oscar/order/partials/basket_totals.html' %}
-                </div>
-            </div>
-        {% endblock basket_totals %}
-
-    {% endblock order_contents %}
-
-    {% block order_tracking %}
-        {% if not order.user %}
-            <div class="sub-header">
-                <h2>{% trans "Tracking your order" %}</h2>
-            </div>
-            <p>{% trans "You can track the status of your order" %}
-                <a class="btn btn-primary" href="{% url 'customer:anon-order' order_number=order.number hash=order.verification_hash %}">{% trans "View order status" %}</a>.</p>
-        {% endif %}
-    {% endblock %}
-
-
-    {% block order_actions %}
-        <div class="form-group">
-            <div class="row">
-                <div class="col-sm-4">
-                    <p><a onclick="window.print()" href="#" class="btn btn-primary btn-block btn-lg">{% trans "Print this page" %}</a></p>
-                </div>
-                <div class="col-sm-4 offset-sm-4">
-                    <p><a href="{{ homepage_url }}" class="btn btn-primary btn-block btn-lg">{% trans "Continue shopping" %}</a></p>
-                </div>
-            </div>
-        </div>
-    {% endblock order_actions %}
+    {% if order.status == "Ожидает оплаты" %}
+        {% include "oscar/checkout/partials/payment_waiting.html" %}
+    {% endif %}
+            
 {% endblock content %}
 
 {% block tracking %}
     {% if send_analytics_event %}
         {% include "oscar/partials/google_analytics_transaction.html" %}
     {% endif %}
+{% endblock %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script>
+        action_back = function(){window.location.href="{{ homepage_url }}"}
+    </script>
+
+    {% if order.status == "Ожидает оплаты" %}
+        <script>
+            var csrf_token = "{{ csrf_token }}";
+            var update_payment_url = "{% url 'payment:update' pk=order.pk %}";
+        </script>
+        <script type="application/javascript" src="{% static "js/thank-you/thank-you.js" %}"></script>
+    {% endif %}
+
+{% endblock %}
+
+
+{% block SVG %}
+    <svg style="display: none">
+        <symbol id="svg-order-cancel" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#b24040" d="M23,12A11,11,0,0,1,1,12a10.827,10.827,0,0,1,.29-2.5,11,11,0,0,1,21.42,0A10.827,10.827,0,0,1,23,12Z"/>
+            <ellipse fill="#ce5959" cx="12" cy="9.5" rx="10.71" ry="8.5"/>
+            <path fill="#6c2e7c" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z"/>
+            <path fill="#6c2e7c" d="M16.707,7.293a1,1,0,0,0-1.414,0L12,10.586,8.707,7.293A1,1,0,1,0,7.293,8.707L10.586,12,7.293,15.293a1,1,0,1,0,1.414,1.414L12,13.414l3.293,3.293a1,1,0,0,0,1.414-1.414L13.414,12l3.293-3.293A1,1,0,0,0,16.707,7.293Z"/>
+        </symbol>
+        <symbol id="svg-order-pending" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#e1ca00" d="M23,12A11,11,0,0,1,1,12a10.827,10.827,0,0,1,.29-2.5,11,11,0,0,1,21.42,0A10.827,10.827,0,0,1,23,12Z"/>
+            <ellipse fill="#fe0" cx="12" cy="9.5" rx="10.71" ry="8.5"/>
+            <path fill="#cffeff" d="M15,16a1,1,0,0,1-.707-.293l-3-3A1,1,0,0,1,11,12V6a1,1,0,0,1,2,0v5.586l2.707,2.707A1,1,0,0,1,15,16Z"/>
+            <path fill="#6c2e7c" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z"/>
+            <path fill="#6c2e7c" d="M13,11.586V6a1,1,0,0,0-2,0v6a1,1,0,0,0,.293.707l3,3a1,1,0,0,0,1.414-1.414Z"/>
+        </symbol>
+        <symbol id="svg-order-success" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#56b54e" d="M23,12A11,11,0,0,1,1,12a10.827,10.827,0,0,1,.29-2.5,11,11,0,0,1,21.42,0A10.827,10.827,0,0,1,23,12Z"/>
+            <ellipse fill="#60cc5a" cx="12" cy="9.5" rx="10.71" ry="8.5"/>
+            <path fill="#6c2e7c" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z"/>
+            <path fill="#6c2e7c" d="M16.293,8.293,10,14.586,7.707,12.293a1,1,0,0,0-1.414,1.414l3,3a1,1,0,0,0,1.414,0l7-7a1,1,0,0,0-1.414-1.414Z"/>
+        </symbol>
+    </svg>
 {% endblock %}

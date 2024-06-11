@@ -1,3 +1,4 @@
+import random
 from django import template
 from django.template.loader import select_template
 
@@ -29,4 +30,7 @@ def render_product(context, product):
 
     # Ensure the passed product is in the context as 'product'
     context["product"] = product
+    range_start = 10 ** (5)
+    range_finish = (10 ** 6) - 1
+    context["unique_number"] = random.randint(range_start, range_finish)
     return template_.render(context)

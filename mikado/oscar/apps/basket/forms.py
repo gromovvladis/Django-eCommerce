@@ -2,13 +2,8 @@
 from django import forms
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
-from django.db.models import Sum
 from django.forms.utils import ErrorDict
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_model
-from oscar.core.prices import Price
-from oscar.forms import widgets
 
 Line = get_model("basket", "line")
 Basket = get_model("basket", "basket")
@@ -90,24 +85,28 @@ def _good_integer_field(form, product, option):
     return forms.IntegerField(
         label=option.name, 
         required=option.required,
+        initial=0,
         help_text=option.help_text, 
         widget=forms.widgets.NumberInput(attrs={
             'good': True,
+            'img': option.primary_image,
             'price': option.price, 
             'old_price': option.old_price,
             'weight': option.weight,
-            'max_amount': option.max_amount,
+            'min': 0,
+            'max': option.max_amount,
+            'readonly': True,
         }),
 
     )
 
 
 class BasketLineForm(forms.ModelForm):
+
+    is_ajax_updated = True
+
     quantity = forms.IntegerField(
-        label=_("Quantity"), min_value=0, required=False, initial=1
-    )
-    save_for_later = forms.BooleanField(
-        initial=False, required=False, label=_("Save for Later")
+        label="Количество", min_value=0, required=False, initial=1
     )
 
     def __init__(self, strategy, *args, **kwargs):
@@ -174,51 +173,6 @@ class BasketLineForm(forms.ModelForm):
         fields = ["quantity"]
 
 
-class SavedLineForm(forms.ModelForm):
-    move_to_basket = forms.BooleanField(
-        initial=False, required=False, label=_("Move to Basket")
-    )
-
-    class Meta:
-        model = Line
-        fields = ("id", "move_to_basket")
-
-    def __init__(self, strategy, basket, *args, **kwargs):
-        self.strategy = strategy
-        self.basket = basket
-        super().__init__(*args, **kwargs)
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if not cleaned_data["move_to_basket"]:
-            # skip further validation (see issue #666)
-            return cleaned_data
-
-        # Get total quantity of all lines with this product (there's normally
-        # only one but there can be more if you allow product options).
-        lines = self.basket.lines.filter(product=self.instance.product)
-        current_qty = lines.aggregate(Sum("quantity"))["quantity__sum"] or 0
-        desired_qty = current_qty + self.instance.quantity
-
-        result = self.strategy.fetch_for_product(self.instance.product)
-        is_available, reason = result.availability.is_purchase_permitted(
-            quantity=desired_qty
-        )
-        if not is_available:
-            raise forms.ValidationError(reason)
-        return cleaned_data
-
-
-class BasketVoucherForm(forms.Form):
-    code = forms.CharField(max_length=128, label=_("Code"))
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def clean_code(self):
-        return self.cleaned_data["code"].strip().upper()
-
-
 class AddToBasketForm(forms.Form):
     OPTION_FIELD_FACTORIES = {
         Option.TEXT: _option_text_field,
@@ -233,7 +187,7 @@ class AddToBasketForm(forms.Form):
         Option.GOOD: _good_integer_field,
     }
 
-    quantity = forms.IntegerField(initial=1, min_value=1, label=_("Quantity"))
+    quantity = forms.IntegerField(initial=1, min_value=1, label="Количество")
 
     def __init__(self, basket, product, *args, **kwargs):
         # Note, the product passed in here isn't necessarily the product being
@@ -251,8 +205,6 @@ class AddToBasketForm(forms.Form):
 
         self._create_product_fields(product)
 
-    # Dynamic form building methods
-
     def _create_parent_product_fields(self, product):
         """
         Adds the fields for a "group"-type product (eg, a parent product with a
@@ -262,27 +214,23 @@ class AddToBasketForm(forms.Form):
         """
         choices = []
         disabled_values = []
-        for child in product.children.public():
+        for child in product.children.order_by('order').public():
             # Build a description of the child, including any pertinent
             # attributes
-            attr_summary = child.attribute_summary
-            if attr_summary:
-                summary = attr_summary
-            else:
-                summary = child.get_variant()
-                # summary = child.get_title()
-
+            stc = child.stockrecords.all()[0]
+            summary = {'name':child.get_variant(), 'price':stc.price, 'old_price':stc.old_price}
             # Check if it is available to buy
             info = self.basket.strategy.fetch_for_product(child)
             if not info.availability.is_available_to_buy:
                 disabled_values.append(child.id)
 
-            choices.append((child.id, summary))
+            if child.id not in disabled_values:
+                choices.append((child.id, summary))
 
         self.fields["child_id"] = forms.ChoiceField(
             choices=tuple(choices),
-            label=_("Variant"),
-            widget=widgets.AdvancedSelect(disabled_values=disabled_values, attrs={'variant': True}),
+            label="Вариант",
+            widget=forms.widgets.RadioSelect(),
         )
 
 
@@ -313,7 +261,7 @@ class AddToBasketForm(forms.Form):
         try:
             child = self.parent_product.children.get(id=self.cleaned_data["child_id"])
         except Product.DoesNotExist:
-            raise forms.ValidationError(_("Please select a valid product"))
+            raise forms.ValidationError("Пожалуйста, выберите корректный продукт")
 
         # To avoid duplicate SQL queries, we cache a copy of the loaded child
         # product as we're going to need it later.
@@ -330,10 +278,9 @@ class AddToBasketForm(forms.Form):
             max_allowed = basket_threshold - total_basket_quantity
             if qty > max_allowed:
                 raise forms.ValidationError(
-                    _(
-                        "Due to technical limitations we are not able to ship"
-                        " more than %(threshold)d items in one order. Your"
-                        " basket currently has %(basket)d items."
+                    (
+                        "Из-за технических ограничений мы не можем отправить более "
+                        "%(threshold)d товаров в одном заказе. В настоящее время в вашей корзине %(basket)d товаров."
                     )
                     % {"threshold": basket_threshold, "basket": total_basket_quantity}
                 )
@@ -354,18 +301,16 @@ class AddToBasketForm(forms.Form):
         # Check that a price was found by the strategy
         if not info.price.exists:
             raise forms.ValidationError(
-                _(
-                    "This product cannot be added to the basket because a "
-                    "price could not be determined for it."
+                (
+                "Этот товар нельзя добавить в корзину, поскольку для него не удалось определить цену."
                 )
             )
 
         # Check currencies are sensible
         if self.basket.currency and info.price.currency != self.basket.currency:
             raise forms.ValidationError(
-                _(
-                    "This product cannot be added to the basket as its currency "
-                    "isn't the same as other products in your basket"
+                (
+                    "Этот товар нельзя добавить в корзину, поскольку его валюта не совпадает с валютой других товаров в вашей корзине."
                 )
             )
 

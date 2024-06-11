@@ -1,5 +1,3 @@
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class, get_model
 
 ReportGenerator = get_class("dashboard.reports.reports", "ReportGenerator")
@@ -14,14 +12,14 @@ class OpenBasketReportCSVFormatter(ReportCSVFormatter):
     def generate_csv(self, response, baskets):
         writer = self.get_csv_writer(response)
         header_row = [
-            _("User ID"),
-            _("Name"),
-            _("Email"),
-            _("Basket status"),
-            _("Num lines"),
-            _("Num items"),
-            _("Date of creation"),
-            _("Time since creation"),
+            "ID Пользователя",
+            "Имя",
+            "Email",
+            "Статус корзины",
+            "Количество позиций",
+            "Количество товаров",
+            "Дата создания",
+            "Время с момента создания",
         ]
         writer.writerow(header_row)
 
@@ -64,7 +62,7 @@ class OpenBasketReportGenerator(ReportGenerator):
     """
 
     code = "open_baskets"
-    description = _("Open baskets")
+    description = "Открытые корзины"
     date_range_field_name = "date_created"
     queryset = Basket._default_manager.filter(status=Basket.OPEN)
 
@@ -84,13 +82,13 @@ class SubmittedBasketReportCSVFormatter(ReportCSVFormatter):
     def generate_csv(self, response, baskets):
         writer = self.get_csv_writer(response)
         header_row = [
-            _("User ID"),
-            _("User"),
-            _("Basket status"),
-            _("Num lines"),
-            _("Num items"),
-            _("Date created"),
-            _("Time between creation and submission"),
+            "ID Пользователя",
+            "Пользователь",
+            "Статус корзины",
+            "Количество позиций",
+            "Количество товаров",
+            "Дата создания",
+            "Время между созданием и отправкой",
         ]
         writer.writerow(header_row)
 
@@ -120,7 +118,7 @@ class SubmittedBasketReportGenerator(ReportGenerator):
     """
 
     code = "submitted_baskets"
-    description = _("Submitted baskets")
+    description = "Отправленные корзины"
     date_range_field_name = "date_submitted"
     queryset = Basket._default_manager.filter(status=Basket.SUBMITTED)
 

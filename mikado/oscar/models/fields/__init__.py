@@ -1,8 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.fields import CharField, DecimalField
-from django.utils.translation import gettext_lazy as _
-from phonenumber_field.modelfields import PhoneNumberField
-
 from oscar.core import validators
 from oscar.forms import fields
 from oscar.models.fields.autoslugfield import AutoSlugField
@@ -28,7 +25,7 @@ class Creator(object):
 
 
 class ExtendedURLField(CharField):
-    description = _("URL")
+    description = "URL"
 
     def __init__(self, *args, **kwargs):
         kwargs["max_length"] = kwargs.get("max_length", 200)

@@ -1,0 +1,125 @@
+{% comment %} карта яндекс {% endcomment %}
+<div class="checkout__map">
+    <div class="v-map fill-width fill-height">
+        <div id="map" data-full-screen="true" class="fill-width fill-height"></div>
+        <div id="delivery_map_controls" class="v-delivery-map--submit d-flex flex-column align-center justify-center pd-2 pd-md-4">
+            <div id="delivery_map_address" class="v-delivery-map--label d-flex flex-column justify-center align-center px-2 py-1 mb-1 mb-sm-2"></div>
+            <button id="submit_address_on_map" type="button" data-id="delivery-map-submit-btn" class="v-button fill-width v-button--main justify-center shrink" disabled="disabled">
+                <span class="v-button__wrapper">
+                    <span class="v-button__value"> Доставить на этот адрес </span>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+{% comment %} основная форма {% endcomment %}
+<form method="post" >
+    {% csrf_token %}
+
+    {% if form.is_bound and not form.is_valid %}
+        <div class="alert alert-danger mb-2">
+            <strong>Что-то пошло не так</strong>
+        </div>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-danger mb-2">
+                <i class="fas fa-exclamation"></i> {{ error }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="v-delivery mb-3 mb-sm-4" id="address_fields">
+
+        <div class="d-none d-sm-flex mb-2">
+            <h1>Адрес доставки</h1>
+        </div>
+
+        {% comment %} <div class="v-order__subtitle mb-1 mb-sm-2">
+            <h1>Адрес доставки</h1>
+        </div> {% endcomment %}
+
+        {% comment %} line1 {% endcomment %}
+        <div id="suggest_container" class="v-delivery__address-wrapper v-input mb-1">
+            <div class="d-flex v-delivery--input">
+                {% include "oscar/partials/render_field.html" with field=form.line1 data_id="address-input" %}
+            </div>
+        </div>
+        <span id="line1_hints" class="v-delivery__address-hint d-inline-block mt-1 mb-1 pl-2 d-none"></span>
+
+
+        <div class="mt-0 row">
+
+            {% comment %} line2 {% endcomment %}
+            <div class="col col-4 col-sm-4">
+                <div data-id="v-input-field" class="v-input d-flex align-center v-input__padding{% if form.initial.line2 %} v-input__label-active{% endif %}">
+                    <div class="v-input__wrapper">
+                        <div class="v-input__label">Квартира</div> 
+                        <div class="v-input__control d-flex align-center">
+                            {% include "oscar/partials/render_field.html" with field=form.line2 data_id="delivery-input-flat" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% comment %} line3 {% endcomment %}
+            <div class="col col-4 col-sm-4">
+                <div data-id="v-input-field" class="v-input d-flex align-center v-input__padding{% if form.initial.line3 %} v-input__label-active{% endif %}">
+                    <div class="v-input__wrapper">
+                        <div class="v-input__label">Подъезд</div> 
+                        <div class="v-input__control d-flex align-center">
+                            {% include "oscar/partials/render_field.html" with field=form.line3 data_id="delivery-input-door" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% comment %} line4 {% endcomment %}
+            <div class="col col-4 col-sm-4">
+                <div data-id="v-input-field" class="v-input d-flex align-center v-input__padding{% if form.initial.line4 %} v-input__label-active{% endif %}">
+                    <div class="v-input__wrapper">
+                        <div class="v-input__label">Этаж</div> 
+                        <div class="v-input__control d-flex align-center">
+                            {% include "oscar/partials/render_field.html" with field=form.line4 data_id="delivery-input-floor" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {% comment %} notes {% endcomment %}
+        <div data-id="v-input-field" class="v-input v-text-area d-flex align-center mt-2 v-input__padding{% if form.initial.notes %} v-input__label-active{% endif %}">
+            <div class="v-input__wrapper">
+                <div class="v-input__label">Комментарий курьеру</div> 
+                <div class="v-input__control d-flex align-center">
+                    {% include "oscar/partials/render_field.html" with field=form.notes data_id="delivery-input-note" %}
+                </div>
+            </div>
+        </div>
+
+
+        <div class="d-flex align-center justify-space-between mt-2 mt-sm-3">
+            
+            <div class="v-confirm__button">
+                <button id="save_address" type="submit" class="v-button fill-width v-button--main justify-center shrink">
+                    <span class="v-button__wrapper">
+                        <span class="v-button__value"> Сохранить адрес </span>
+                    </span>
+                </button>
+            </div>
+
+            <div class="v-confirm__button">
+                <button onclick="window.history.go(-1);return false" type="button" class="v-button fill-width v-button--white justify-center shrink">
+                    <span class="v-button__wrapper">
+                        <span class="v-button__value"> Отмена </span>
+                    </span>
+                </button>
+            </div>
+            
+        </div>
+
+    </div>
+</div>

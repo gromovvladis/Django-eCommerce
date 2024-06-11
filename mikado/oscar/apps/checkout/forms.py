@@ -1,101 +1,99 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
-from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
-from oscar.apps.customer.utils import normalise_email
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
-from oscar.forms.mixins import PhoneNumberMixin
 
 User = get_user_model()
 AbstractAddressForm = get_class("address.forms", "AbstractAddressForm")
 
-# class ShippingAddressForm(PhoneNumberMixin, AbstractAddressForm):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
+
+class CheckoutVoucherForm(forms.Form):
+    code = forms.CharField(max_length=128, label="Промокод")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def clean_code(self):
+        return self.cleaned_data["code"].strip().upper()
 
 
-#     class Meta:
-#         model = get_model("order", "shippingaddress")
-#         fields = [
-#             "first_name",
-#             "line1",
-#             "line2",
-#             "line3",
-#             "line4",
-#             "phone_number",
-#             "notes",
-#         ]
+class CheckoutForm(AbstractAddressForm, forms.Form): 
 
+    method_code = forms.ChoiceField(label="Выберите способ доставки",widget=forms.HiddenInput)
 
-# class ShippingMethodForm(forms.Form):
-#     method_code = forms.ChoiceField(widget=forms.HiddenInput)
-
-#     def __init__(self, *args, **kwargs):
-#         methods = kwargs.pop("methods", [])
-#         super().__init__(*args, **kwargs)
-#         self.fields["method_code"].choices = ((m.code, m.name) for m in methods)
-
-
-class GatewayForm(AuthenticationForm):
-    username = forms.EmailField(label=_("My email address is"))
-    GUEST, NEW, EXISTING = "anonymous", "new", "existing"
-    CHOICES = (
-        (GUEST, _("I am a new customer and want to checkout as a guest")),
-        (
-            NEW,
-            _(
-                "I am a new customer and want to create an account "
-                "before checking out"
-            ),
-        ),
-        (EXISTING, _("I am a returning customer, and my password is")),
-    )
-    options = forms.ChoiceField(
-        widget=forms.widgets.RadioSelect, choices=CHOICES, initial=GUEST
+    order_time = forms.DateTimeField(
+        required=False, 
+        widget=forms.HiddenInput(),
+        localize=True,
+        input_formats = ['%d.%m.%Y %H:%M'],
     )
 
-    def clean_username(self):
-        return normalise_email(self.cleaned_data["username"])
+    order_note = forms.CharField(
+        label="Комментарий к заказу", 
+        widget=forms.Textarea(attrs = {
+                'class' : 'v-input v-text-area d-flex align-center v-input__padding',
+                'rows': 2,
+        }), 
+        required=False
+    )
 
-    def clean(self):
-        if self.is_guest_checkout() or self.is_new_account_checkout():
-            if "password" in self.errors:
-                del self.errors["password"]
-            if "username" in self.cleaned_data:
-                email = normalise_email(self.cleaned_data["username"])
-                if User._default_manager.filter(email__iexact=email).exists():
-                    msg = _("A user with that email address already exists")
-                    self._errors["username"] = self.error_class([msg])
-            return self.cleaned_data
-        return super().clean()
+    email_or_change = forms.CharField(
+        label="Эмаил для чеков или поле для сдачи", 
+        widget=forms.TextInput(attrs = {
+                'class' : 'v-input v-text-area d-flex align-center v-input__padding',
+        }), 
+        required=False
+    )
 
-    def is_guest_checkout(self):
-        return self.cleaned_data.get("options", None) == self.GUEST
-
-    def is_new_account_checkout(self):
-        return self.cleaned_data.get("options", None) == self.NEW
-
-
-class CheckoutForm(PhoneNumberMixin, AbstractAddressForm): 
-
-    method_code = forms.ChoiceField(widget=forms.HiddenInput)
+    payment_method = forms.ChoiceField(
+        label="Выберите метод оплаты",
+        choices=settings.WEBSHOP_PAYMENT_CHOICES,
+        initial=settings.WEBSHOP_PAYMENT_CHOICES[0],
+        widget=forms.Select(attrs = {
+                'class' : 'fill-width v-button--grey justify-space-between shrink',
+        }),
+    )
 
     def __init__(self, *args, **kwargs):
         methods = kwargs.pop("methods", [])
         super().__init__(*args, **kwargs)
         self.fields["method_code"].choices = ((m.code, m.name) for m in methods)
+        self.fields["method_code"].initial = self.fields["method_code"].choices[0][0]
 
 
     class Meta:
         model = get_model("order", "shippingaddress")
         fields = [
-            "first_name",
             "line1",
             "line2",
             "line3",
             "line4",
-            "phone_number",
             "notes",
         ]
-
+        
+        widgets = {
+            'line1': forms.TextInput(attrs={
+                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'placeholder': "Введите адрес доставки"
+            }),
+            'line2': forms.NumberInput(attrs={
+                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'min': 1,
+                'max': 1000,
+            }),
+            'line3': forms.NumberInput(attrs={
+                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'min': 1,
+                'max': 100,
+            }),
+            'line4': forms.NumberInput(attrs={
+                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'min': 1,
+                'max': 100,
+            }),
+            'notes': forms.Textarea(attrs={
+                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'rows': 2,
+            }),
+        }

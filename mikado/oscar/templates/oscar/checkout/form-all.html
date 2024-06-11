@@ -2,171 +2,197 @@
 
 {% load currency_filters %}
 {% load i18n %}
+{% load static %}
 {% load shipping_tags %}
 
+{% block chekout_form %}
 
-{% comment %} {% block title %}
-    {% trans "Shipping method" %} | {{ block.super }}
-{% endblock %} {% endcomment %}
+        {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+        {% endif %}
 
-{% comment %} {% block checkout_nav %}
-    {% include 'oscar/checkout/nav.html' with step=2 %}
-{% endblock %} {% endcomment %}
+        <div class="v-order__wrapper d-flex flex-column">
+            <div class="v-order__form d-flex flex-column fill-width">
 
-{% comment %} {% block checkout_title %}{% trans "Shipping method" %}{% endblock %}
-
-{% block order_contents %}{% endblock %} {% endcomment %}
-
-{% block my_form %}
-
-        {% comment %} здесь выводятся адресса это одна из форм, которую надо внедрить в основную {% endcomment %}
-        {% if user.is_authenticated %}
-            {% if addresses %}
-                <h3>{% trans "An address from your address book?" %}</h3>
-                <div class="choose-block">
-                    <div class="row">
-
-                        {% for address in addresses %}
-                            {% block select_address_form %}
-                                <div class="col-sm-6 d-flex">
-                                    <div class="card card-body bg-light">
-
-                                        <address>
-                                            {% block select_address_fields %}
-                                                {% for field in address.active_address_fields %}
-                                                    <span>{{ field }}</span>{% if not forloop.first %}<br/>{% endif %}
-                                                {% endfor %}
-                                            {% endblock %}
-                                        </address>
-
-                                        <input type="radio" form="place_order_form" name="address_id" id="{{ address.id }}" value="{{ address.id }}">использовать этот адрес</input>
-
-                                        <form action="{% url 'checkout:checkoutview' %}" method="post" id="select_shipping_address_{{ address.id }}" class="mb-0">
-                                            
-                                            {% csrf_token %}
-                                            <input type="hidden" name="address_id" value="{{ address.id }}" />
-
-                                            <div class="btn-group address-controls">
-                                                <a href="{% url 'checkout:user-address-update' pk=address.id %}" class="btn btn-secondary">{% trans "Edit address" %}</a>
-                                                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"></button>
-                                                <ul class="dropdown-menu">
-                                                    <a href="{% url 'checkout:user-address-delete' pk=address.id %}" class="btn-remove-address nav-link">{% trans "Delete" %}</a>
-                                                </ul>
-                                            </div>
-
-                                        </form>
-
-                                    </div>
-                                </div>
-                                {% if forloop.counter|divisibleby:2 %}
-                                    </div><div class="row">
-                                {% endif %}
-                            {% endblock %}
-                        {% endfor %}
-
-                    </div>
-                </div>
-                <h3>{% trans "Or a new address?" %}</h3>
-
-                
-                <form action="{% url 'checkout:checkoutview' %}" method="post" id="place_order_form">
-                    {% csrf_token %}
-
-                    {% comment %} новый адрес {% endcomment %}
-                    <div>
-                        {% include "oscar/partials/form_fields.html" with form=form style='horizontal' %}
-                    </div>
-
-                    {% comment %} форма с выбором метода доставки {% endcomment %}
-                    <div class="basket-title">
-                        <div class="row">
-                            <h4 class="col-sm-8 m-0">{% trans "Method" %}</h4>
-                            <h4 class="col-sm-3 m-0">{% trans "Cost" %}</h4>
+                {% comment %} карта яндекс {% endcomment %}
+                <div class="checkout__map">
+                    <div class="v-map fill-width fill-height">
+                        <div id="map" data-full-screen="true" class="fill-width fill-height"></div>
+                        <div id="delivery_map_controls" class="v-delivery-map--submit d-flex flex-column align-center justify-center pd-2 pd-md-4">
+                            <div id="delivery_map_address" class="v-delivery-map--label d-flex flex-column justify-center align-center px-2 py-1 mb-1 mb-sm-2"></div>
+                            <button id="submit_address_on_map" type="button" data-id="delivery-map-submit-btn" class="v-button fill-width v-button--main justify-center shrink" disabled="disabled">
+                                <span class="v-button__wrapper">
+                                    <span class="v-button__value"> Доставить на этот адрес </span>
+                                </span>
+                            </button>
                         </div>
                     </div>
-                    {% for method in methods %}
-                        <div class="basket-items">
-                            <div class="row">
-                                <div class="col-sm-8">
-                                    <h4>{{ method.name }}</h4>
-                                    {% if method.description %}
-                                        <p>{{ method.description|safe }}</p>
-                                    {% endif %}
-                                    {% if method.is_discounted %}
-                                        <small>
-                                            {% shipping_charge_discount method basket as discount %}
-                                            {% blocktrans with amount=discount|currency:basket.currency name=method.discount_name %}
-                                                This includes a discount of <strong>{{ amount }}</strong> as
-                                                your basket qualifies for the <strong>{{ name }}</strong> offer.
-                                            {% endblocktrans %}
-                                        </small>
-                                    {% endif %}
-                                </div>
-                                <div class="col-sm-1">
-                                    {% shipping_charge method basket as charge %}
-                                    {% if charge.is_tax_known %}
-                                        {{ charge.incl_tax|currency:basket.currency }}
-                                    {% else %}
-                                        {{ charge.excl_tax|currency:basket.currency }}
-                                    {% endif %}
-                                </div>
-                                <div class="col-sm-3">
-                                    <input type="radio" checked name="method_code" value="{{ method.code }}" />
+                </div>
+                    
+                {% comment %} <div class="v-order__title d-none d-sm-block mb-3 mb-sm-4"> {% endcomment %}
+                <div class="v-order__title d-none d-sm-block mb-4">
+                    <h1>Оформление заказа</h1>
+                </div>
+                
+                {% comment %} коментарий к заказу {% endcomment %}
+                <div data-id="v-input-field" class="v-input v-text-area d-flex align-center mb-2 v-input__padding{% if form.initial.order_note %} v-input__label-active{% endif %}">
+                    <div class="v-input__wrapper">
+                        <div class="v-input__label">Комментарий к заказу</div>
+                        <div class="v-input__control d-flex align-center">
+                        {% include "oscar/partials/render_field.html" with field=form.order_note form_id="place_order_form" data_id="order-input-comment" %}
+                        </div>
+                    </div>
+                </div>
+        
+                {% comment %} форма с выбором метода доставки должен быть в форме {% endcomment %}
+                <div class="d-flex flex-column fill-width mb-4">
+                    <div class="v-deferred--wrapper">
+                        <div class="v-deferred">
+                            <div class="v-deferred-tabs fill-width">
+                                <div class="v-tabs-button d-flex fill">
+                                    <div data-id="delivery-method-block"  class="v-tabs-button__active-block" style="width: 50%; left: 0px;">
+                                        <div class="fill-width fill-height"></div>
+                                    </div>
+                                    {% for method in methods %}
+                                        <button class="v-tabs-button__button{% if method.default_selected %} active{% endif %}" {% if method.default_selected %}selected{% endif %} data-id="delivery-method-button" name="method_code" value="{{ method.code }}">{{ method.name }}</button>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
-
-                     
-                    
-
-                    <div class="form-group row">
-                        <div class="offset-sm-4 col-sm-8">
-                            <button type="submit" class="btn btn-lg btn-primary" data-loading-text="{% trans 'Continuing...' %}">{% trans "Continue" %}</button>
-                            {% trans "or" %} <a href="{% url 'basket:summary' %}">{% trans "return to basket" %}</a>
-                        </div>
-                    </div>
-
-                </form>
-
-
-            {% endif %}
-        {% else %}
-        {% comment %} форма с адресом новым {% endcomment %}
-
-        <div class="card card-body bg-light">
-            <form action="{% url 'checkout:checkoutview' %}" method="post" id="new_shipping_address">
-                {% csrf_token %}
-                {% include "oscar/partials/form_fields.html" with form=form style='horizontal' %}
-                <div class="form-group row">
-                    <div class="offset-sm-4 col-sm-8">
-                        <button type="submit" class="btn btn-lg btn-primary" data-loading-text="{% trans 'Continuing...' %}">{% trans "Continue" %}</button>
-                        {% trans "or" %} <a href="{% url 'basket:summary' %}">{% trans "return to basket" %}</a>
                     </div>
                 </div>
-            </form>
-        </div>
-
-        {% endif %}
-
-{% endblock my_form %}
-
-
-
-{% block vouchers %}
-    {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
-    {% if voucher_form %}
-        <div class="col-sm-6">
-            <div class="sub-header">
-                <h2>{% trans "Voucher/promo code" %}</h2>
-            </div>
-            <div id="voucher_form_container" style="display:block">
-                <form id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
+                
+        
+        
+                {% comment %} основная форма {% endcomment %}
+                <form action="{% url 'checkout:checkoutview' %}" method="post" id="place_order_form">
                     {% csrf_token %}
-                    {% include "oscar/partials/form_fields.html" with form=voucher_form %}
-                    <button type="submit" class="btn btn-info" data-loading-text="{% trans 'Adding...' %}">{% trans "Add voucher" %}</button>
+                    {% include "oscar/partials/render_field.html" with field=form.method_code %}
+                    <div class="v-delivery mb-4" id="address_fields">
+
+                        <div class="v-order__subtitle mb-1 mb-sm-2">
+                            <h2>Адрес доставки</h2>
+                        </div>
+        
+                        {% comment %} line1 {% endcomment %}
+                        <div id="suggest_container" class="v-delivery__address-wrapper v-input alternative">
+                            <div class="d-flex v-delivery--input">
+                                {% include "oscar/partials/render_field.html" with field=form.line1 data_id="address-input" %}
+                            </div>
+                        </div>
+                        <span id="line1_hints" class="v-delivery__address-hint d-inline-block mt-1 mb-2 d-none"></span>
+        
+        
+                        <div class="mt-0 row">
+        
+                            
+                            
+                            {% comment %} line2 {% endcomment %}
+                            <div class="col col-4 col-sm-4">
+                                <div data-id="v-input-field" class="v-input d-flex align-center v-input__padding{% if form.initial.line2 %} v-input__label-active{% endif %}">
+                                    <div class="v-input__wrapper">
+                                        <div class="v-input__label">Квартира</div> 
+                                        <div class="v-input__control d-flex align-center">
+                                            {% include "oscar/partials/render_field.html" with field=form.line2 data_id="delivery-input-flat" %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+        
+                            {% comment %} line3 {% endcomment %}
+                            <div class="col col-4 col-sm-4">
+                                <div data-id="v-input-field" class="v-input d-flex align-center v-input__padding{% if form.initial.line3 %} v-input__label-active{% endif %}">
+                                    <div class="v-input__wrapper">
+                                        <div class="v-input__label">Подъезд</div> 
+                                        <div class="v-input__control d-flex align-center">
+                                            {% include "oscar/partials/render_field.html" with field=form.line3 data_id="delivery-input-door" %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+        
+                            {% comment %} line4 {% endcomment %}
+                            <div class="col col-4 col-sm-4">
+                                <div data-id="v-input-field" class="v-input d-flex align-center v-input__padding{% if form.initial.line4 %} v-input__label-active{% endif %}">
+                                    <div class="v-input__wrapper">
+                                        <div class="v-input__label">Этаж</div> 
+                                        <div class="v-input__control d-flex align-center">
+                                            {% include "oscar/partials/render_field.html" with field=form.line4 data_id="delivery-input-floor" %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+        
+                        </div>
+        
+                        {% comment %} notes {% endcomment %}
+                        <div data-id="v-input-field" class="v-input v-text-area d-flex align-center mt-1 mt-sm-2 v-input__padding{% if form.initial.notes %} v-input__label-active{% endif %}">
+                            <div class="v-input__wrapper">
+                                <div class="v-input__label">Комментарий курьеру</div> 
+                                <div class="v-input__control d-flex align-center">
+                                    {% include "oscar/partials/render_field.html" with field=form.notes data_id="delivery-input-note" %}
+                                </div>
+                            </div>
+                        </div>
+        
+                    </div>
+        
+        
+                    <div class="v-order__subtitle mb-1 mb-sm-2">
+                        <h2>Время доставки</h2>
+                    </div>
+        
+        
+                    {% comment %} время {% endcomment %}      
+                    <div class="d-flex flex-column fill-width">
+                        <div class="v-deferred--wrapper">
+                            <div class="v-deferred">
+                                <div class="v-deferred-tabs fill-width">
+                                    <div class="v-tabs-button d-flex fill">
+                                        {% include "oscar/partials/render_field.html" with field=form.order_time %}
+                                        <div data-id="delivery-time-block" class="v-tabs-button__active-block" style="width: 50%; left: 0px;">
+                                            <div class="fill-width fill-height"></div>
+                                        </div>
+                                        <button data-id="delivery-time" data-type="now" type="button" class="v-tabs-button__button"> Сейчас </button>
+                                        <label data-id="delivery-time" data-type="later" for="delivery_time_later" class="v-tabs-button__button v-label"> Ко времени </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div id="delivery_time" class="v-order__delivery-time mt-2"></div>
+                        <input id="delivery_time_later" type="text" class="v-order__delivery-time mt-2 hidden">
+                    </div>
+        
+        
+        
+                    <div class="v-order__subtitle mt-4">
+                        <h2>Способ оплаты</h2>
+                    </div>
+        
+                    {% block payment_method %}
+                        <div class="v-payment-block fill-width mt-1 mt-sm-2">
+                            {% include "oscar/partials/render_field.html" with field=form.payment_method %}
+                        </div>
+                    {% endblock payment_method %}
+        
+        
+        
+                    <div data-id="v-input-field" data-field="v-email-field" class="v-input d-flex align-center mt-2 v-input__padding">
+                        <div class="v-input__wrapper">
+                            <div class="v-input__label" id="email_field_label">E-mail для получения чеков</div>
+                            <div class="v-input__control d-flex align-center">
+                                {% include "oscar/partials/render_field.html" with field=form.email_or_change %}
+                            </div>
+                        </div>
+                    </div>
+        
                 </form>
             </div>
         </div>
-    {% endif %}
-{% endblock vouchers %}
+
+{% endblock chekout_form %}
+

@@ -1,9 +1,6 @@
 from urllib import parse
-
 from django import template
 from django.urls import Resolver404, resolve
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class, get_model
 
 Site = get_model("sites", "Site")
@@ -58,13 +55,4 @@ def get_back_button(context):
     except Resolver404:
         return None
 
-    # This dict can be extended to link back to other browsing pages
-    titles = {
-        "search:search": _("Back to search results"),
-    }
-    title = titles.get(match.view_name, None)
-
-    if title is None:
-        return None
-
-    return {"url": referrer, "title": str(title), "match": match}
+    return {"url": referrer, "title": 'Назад', "match": match}

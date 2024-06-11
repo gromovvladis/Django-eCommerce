@@ -1,10 +1,6 @@
 # pylint: disable=W0621, unused-argument
 
 from decimal import Decimal as D
-
-from django.conf import settings
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.templatetags.currency_filters import currency
 
@@ -30,13 +26,12 @@ __all__ = [
 ]
 
 
-def apply_discount(line, discount, quantity, offer=None, incl_tax=None):
+def apply_discount(line, discount, quantity, offer=None):
     """
     Apply a given discount to the passed basket
     """
-    # use OSCAR_OFFERS_INCL_TAX setting if incl_tax is left unspecified.
-    incl_tax = incl_tax if incl_tax is not None else settings.OSCAR_OFFERS_INCL_TAX
-    line.discount(discount, quantity, incl_tax=incl_tax, offer=offer)
+    # use OSCAR_OFFERS_INCL_TAX setting if t is left unspecified.
+    line.discount(discount, quantity, offer=offer)
 
 
 class PercentageDiscountBenefit(Benefit):
@@ -44,7 +39,7 @@ class PercentageDiscountBenefit(Benefit):
     An offer benefit that gives a percentage discount
     """
 
-    _description = _("%(value)s%% discount on %(range)s")
+    _description = "%(value)s%% скидка на %(range)s"
 
     @property
     def name(self):
@@ -60,8 +55,8 @@ class PercentageDiscountBenefit(Benefit):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Percentage discount benefit")
-        verbose_name_plural = _("Percentage discount benefits")
+        verbose_name = "Процентная скидка"
+        verbose_name_plural = "Процентные скидки"
 
     # pylint: disable=unused-argument
     def apply(
@@ -119,7 +114,7 @@ class AbsoluteDiscountBenefit(Benefit):
     An offer benefit that gives an absolute discount
     """
 
-    _description = _("%(value)s discount on %(range)s")
+    _description = "%(value)s скидка на %(range)s"
 
     @property
     def name(self):
@@ -138,8 +133,8 @@ class AbsoluteDiscountBenefit(Benefit):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Absolute discount benefit")
-        verbose_name_plural = _("Absolute discount benefits")
+        verbose_name = "Абсолютная скидка"
+        verbose_name_plural = "Абсолютнаые скидки"
 
     def apply(
         self,
@@ -165,6 +160,9 @@ class AbsoluteDiscountBenefit(Benefit):
         for price, line in line_tuples:
             if num_affected_items >= max_affected_items:
                 break
+            #vlad
+            if price <= line.discount_value:
+                continue
             qty = min(
                 line.quantity_without_offer_discount(offer),
                 max_affected_items - num_affected_items,
@@ -212,8 +210,8 @@ class FixedUnitDiscountBenefit(AbsoluteDiscountBenefit):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Fixed unit discount benefit")
-        verbose_name_plural = _("Fixed unit discount benefits")
+        verbose_name = "Фиксированная скидка за единицу"
+        verbose_name_plural = "Фиксированные скидки за единицу"
 
     def get_lines_to_discount(self, offer, line_tuples):
         # Determine which lines can have the discount applied to them
@@ -266,7 +264,7 @@ class FixedPriceBenefit(Benefit):
     We also ignore the max_affected_items setting.
     """
 
-    _description = _("The products that meet the condition are sold for %(amount)s")
+    _description = "Товары, соответствующие условию, продаются за %(amount)s"
 
     @property
     def name(self):
@@ -275,8 +273,8 @@ class FixedPriceBenefit(Benefit):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Fixed price benefit")
-        verbose_name_plural = _("Fixed price benefits")
+        verbose_name = "Фиксированная скидка"
+        verbose_name_plural = "Фиксированные скидки"
 
     def apply(self, basket, condition, offer, **kwargs):
         if isinstance(condition, ValueCondition):
@@ -328,7 +326,7 @@ class FixedPriceBenefit(Benefit):
 
 
 class MultibuyDiscountBenefit(Benefit):
-    _description = _("Cheapest product from %(range)s is free")
+    _description = "Самый дешевый товар из %(range)s бесплатно"
 
     @property
     def name(self):
@@ -341,8 +339,8 @@ class MultibuyDiscountBenefit(Benefit):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Multibuy discount benefit")
-        verbose_name_plural = _("Multibuy discount benefits")
+        verbose_name = "Скидка при покупке нескольких покупок"
+        verbose_name_plural = "Скидки при покупке нескольких покупок"
 
     def apply(self, basket, condition, offer, **kwargs):
         line_tuples = self.get_applicable_lines(offer, basket)
@@ -378,7 +376,7 @@ class ShippingBenefit(Benefit):
 
 
 class ShippingAbsoluteDiscountBenefit(ShippingBenefit):
-    _description = _("%(amount)s off shipping cost")
+    _description = "%(amount)s скидка на стоимость доставки"
 
     @property
     def name(self):
@@ -387,15 +385,15 @@ class ShippingAbsoluteDiscountBenefit(ShippingBenefit):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Shipping absolute discount benefit")
-        verbose_name_plural = _("Shipping absolute discount benefits")
+        verbose_name = "Преимущество абсолютной скидки на доставку"
+        verbose_name_plural = "Преимущества абсолютной скидки на доставку"
 
     def shipping_discount(self, charge, currency=None):
         return min(charge, self.value)
 
 
 class ShippingFixedPriceBenefit(ShippingBenefit):
-    _description = _("Get shipping for %(amount)s")
+    _description = "Получите доставку за %(amount)s"
 
     @property
     def name(self):
@@ -404,8 +402,8 @@ class ShippingFixedPriceBenefit(ShippingBenefit):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Fixed price shipping benefit")
-        verbose_name_plural = _("Fixed price shipping benefits")
+        verbose_name = "Фиксированная цена доставки"
+        verbose_name_plural = "Фиксированные цены доставки"
 
     def shipping_discount(self, charge, currency=None):
         if charge < self.value:
@@ -414,7 +412,7 @@ class ShippingFixedPriceBenefit(ShippingBenefit):
 
 
 class ShippingPercentageDiscountBenefit(ShippingBenefit):
-    _description = _("%(value)s%% off of shipping cost")
+    _description = "%(value)s%% за вычетом стоимости доставки"
 
     @property
     def name(self):
@@ -423,8 +421,8 @@ class ShippingPercentageDiscountBenefit(ShippingBenefit):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Shipping percentage discount benefit")
-        verbose_name_plural = _("Shipping percentage discount benefits")
+        verbose_name = "Процентная скидка на доставку"
+        verbose_name_plural = "Процентнаые скидки на доставку"
 
     def shipping_discount(self, charge, currency=None):
         discount = charge * self.value / D("100.0")

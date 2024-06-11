@@ -4,7 +4,6 @@ from django.contrib.auth.models import Permission
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
 from oscar.apps.customer.utils import normalise_email
@@ -44,7 +43,7 @@ class PartnerListView(generic.ListView):
         qs = self.model._default_manager.all()
         qs = sort_queryset(qs, self.request, ["name"])
 
-        self.description = _("All partners")
+        self.description = "Все точки продажи"
 
         # We track whether the queryset is filtered to determine whether we
         # show the search form 'reset' button.
@@ -57,7 +56,7 @@ class PartnerListView(generic.ListView):
 
         if data["name"]:
             qs = qs.filter(name__icontains=data["name"])
-            self.description = _("Partners matching '%s'") % data["name"]
+            self.description = "Точки продаж соответствующие '%s'" % data["name"]
             self.is_filtered = True
 
         return qs
@@ -78,12 +77,12 @@ class PartnerCreateView(generic.CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Create new partner")
+        ctx["title"] = "Создать точку продажи"
         return ctx
 
     def get_success_url(self):
         messages.success(
-            self.request, _("Partner '%s' was created successfully.") % self.object.name
+            self.request, "Точка продажи '%s' успешно создана." % self.object.name
         )
         return reverse("dashboard:partner-list")
 
@@ -118,7 +117,7 @@ class PartnerManageView(generic.UpdateView):
     def form_valid(self, form):
         messages.success(
             self.request,
-            _("Partner '%s' was updated successfully.") % self.partner.name,
+            "точка продажи '%s' успешно обновлена." % self.partner.name,
         )
         self.partner.name = form.cleaned_data["name"]
         self.partner.save()
@@ -131,7 +130,7 @@ class PartnerDeleteView(generic.DeleteView):
 
     def get_success_url(self):
         messages.success(
-            self.request, _("Partner '%s' was deleted successfully.") % self.object.name
+            self.request, "ТОчка продажи '%s' успешно удалена." % self.object.name
         )
         return reverse("dashboard:partner-list")
 
@@ -153,7 +152,7 @@ class PartnerUserCreateView(generic.CreateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["partner"] = self.partner
-        ctx["title"] = _("Create user")
+        ctx["title"] = "Создать пользователя"
         return ctx
 
     def get_form_kwargs(self):
@@ -163,7 +162,7 @@ class PartnerUserCreateView(generic.CreateView):
 
     def get_success_url(self):
         name = self.object.get_full_name() or self.object.email
-        messages.success(self.request, _("User '%s' was created successfully.") % name)
+        messages.success(self.request, "Пользователь '%s' успешно создан." % name)
         return reverse("dashboard:partner-list")
 
 
@@ -209,13 +208,13 @@ class PartnerUserLinkView(generic.View):
         if self.link_user(user, partner):
             messages.success(
                 request,
-                _("User '%(name)s' was linked to '%(partner_name)s'")
+                "Пользователь '%(name)s' был прикреплен к точке продаж - '%(partner_name)s'"
                 % {"name": name, "partner_name": partner.name},
             )
         else:
             messages.info(
                 request,
-                _("User '%(name)s' is already linked to '%(partner_name)s'")
+                "Пользователь '%(name)s' уже прикреплен к точке продаж - '%(partner_name)s'"
                 % {"name": name, "partner_name": partner.name},
             )
         return redirect("dashboard:partner-manage", pk=partner_pk)
@@ -274,7 +273,7 @@ class PartnerUserUnlinkView(generic.View):
         else:
             messages.error(
                 request,
-                _("User '%(name)s' is not linked to '%(partner_name)s'")
+                "Пользователь '%(name)s' не прикреплен к точке продаж - '%(partner_name)s'"
                 % {"name": name, "partner_name": partner.name},
             )
         return redirect("dashboard:partner-manage", pk=partner_pk)
@@ -299,10 +298,10 @@ class PartnerUserUpdateView(generic.UpdateView):
         ctx = super().get_context_data(**kwargs)
         name = self.object.get_full_name() or self.object.email
         ctx["partner"] = self.partner
-        ctx["title"] = _("Edit user '%s'") % name
+        ctx["title"] = "Редактировать пользователя '%s'" % name
         return ctx
 
     def get_success_url(self):
         name = self.object.get_full_name() or self.object.email
-        messages.success(self.request, _("User '%s' was updated successfully.") % name)
+        messages.success(self.request, "Пользователь '%s' был успешно обновлен." % name)
         return reverse("dashboard:partner-list")

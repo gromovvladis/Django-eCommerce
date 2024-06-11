@@ -1,7 +1,6 @@
 from copy import deepcopy
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
 
 
@@ -144,14 +143,14 @@ class ProductAttributesContainer:
 
     def __getattr__(self, name):
         raise AttributeError(
-            _("%(obj)s has no attribute named '%(attr)s'")
+            ("%(obj)s не имеет атрибута с именем '%(attr)s'")
             % {"obj": self.product.get_product_class(), "attr": name}
         )
 
     def __setattr__(self, name, value):
         if name in self.RESERVED_ATTRIBUTES:
             raise ValidationError(
-                "%s is a reserved name and cannot be used as an attribute"
+                "%s является зарезервированным именем и не может использоваться в качестве атрибута"
             )
 
         self._dirty.add(name)
@@ -162,8 +161,8 @@ class ProductAttributesContainer:
             self.__setattr__(name, value)
         else:
             raise ValidationError(
-                _(
-                    "%s is not a valid identifier, but attribute codes must be valid python identifiers"
+                (
+                    "%s не является допустимым идентификатором, но коды атрибутов должны быть действительными идентификаторами Python"
                     % name
                 )
             )
@@ -178,7 +177,7 @@ class ProductAttributesContainer:
             if value is None:
                 if attribute.required:
                     raise ValidationError(
-                        _("%(attr)s attribute cannot be blank")
+                        ("%(attr)s атрибут не может быть пустым")
                         % {"attr": attribute.code}
                     )
             else:
@@ -186,7 +185,7 @@ class ProductAttributesContainer:
                     attribute.validate_value(value)
                 except ValidationError as e:
                     raise ValidationError(
-                        _("%(attr)s attribute %(err)s")
+                        ("%(attr)s атрибут %(err)s")
                         % {"attr": attribute.code, "err": e}
                     )
 
@@ -258,11 +257,6 @@ class ProductAttributesContainer:
                         if bound_value_obj is None:
                             to_be_deleted.append(value_obj.pk)
                         else:
-                            if bound_value_obj.attribute.is_entity:
-                                # entities can be bulk_created, but not bulk_saved
-                                bound_value_obj.save()
-                                continue
-
                             if bound_value_obj.attribute.is_file:
                                 # with bulk_create the file is save just fine, but
                                 # with buld_update, it's not, so we have to performa

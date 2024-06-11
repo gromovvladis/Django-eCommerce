@@ -1,6 +1,4 @@
 from django.urls import path
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.application import OscarDashboardConfig
 from oscar.core.loading import get_class
 
@@ -8,7 +6,7 @@ from oscar.core.loading import get_class
 class ReportsDashboardConfig(OscarDashboardConfig):
     label = "reports_dashboard"
     name = "oscar.apps.dashboard.reports"
-    verbose_name = _("Reports dashboard")
+    verbose_name = "Панель управления - Отчеты"
 
     default_permissions = [
         "is_staff",

@@ -1,4 +1,5 @@
 # pylint: disable=F0002
+from functools import cached_property
 import logging
 from decimal import Decimal as D
 
@@ -7,12 +8,11 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signing import BadSignature, Signer
 from django.db import models
 from django.db.models import Sum
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 from django.utils.timezone import now
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
-
+from oscar.apps.customer.models import OrderReview
 from oscar.apps.order.signals import order_line_status_changed, order_status_changed
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_model
@@ -30,17 +30,15 @@ class AbstractOrder(models.Model):
     """
 
     number = models.CharField(
-        _("Order number"), max_length=128, db_index=True, unique=True
+        "Номер заказа", max_length=128, db_index=True, unique=True
     )
 
     # We track the site that each order is placed within
-    site = models.ForeignKey(
-        "sites.Site", verbose_name=_("Site"), null=True, on_delete=models.SET_NULL
-    )
+    # site = models.CharField(verbose_name="Источник заказа", null=True, blank=True, max_length=128)
 
     basket = models.ForeignKey(
         "basket.Basket",
-        verbose_name=_("Basket"),
+        verbose_name="Корзина",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -53,7 +51,7 @@ class AbstractOrder(models.Model):
         related_name="orders",
         null=True,
         blank=True,
-        verbose_name=_("User"),
+        verbose_name="Пользователь",
         on_delete=models.SET_NULL,
     )
 
@@ -61,24 +59,15 @@ class AbstractOrder(models.Model):
     # prices of the associated lines, but in some circumstances extra
     # order-level charges are added and so we need to store it separately
     currency = models.CharField(
-        _("Currency"), max_length=12, default=get_default_currency
+        "Валюта", max_length=12, default=get_default_currency
     )
-    total_incl_tax = models.DecimalField(
-        _("Order total (inc. tax)"), decimal_places=2, max_digits=12
-    )
-    total_excl_tax = models.DecimalField(
-        _("Order total (excl. tax)"), decimal_places=2, max_digits=12
+    total = models.DecimalField(
+        "Сумма заказа", decimal_places=2, max_digits=12
     )
 
     # Shipping charges
-    shipping_incl_tax = models.DecimalField(
-        _("Shipping charge (inc. tax)"), decimal_places=2, max_digits=12, default=0
-    )
-    shipping_excl_tax = models.DecimalField(
-        _("Shipping charge (excl. tax)"), decimal_places=2, max_digits=12, default=0
-    )
-    shipping_tax_code = models.CharField(
-        _("Shipping VAT rate code"), max_length=64, blank=True, null=True
+    shipping = models.DecimalField(
+        "Плата за доставку", decimal_places=2, max_digits=12, default=0
     )
 
     # Not all lines are actually shipped (such as downloads), hence shipping
@@ -87,20 +76,27 @@ class AbstractOrder(models.Model):
         "order.ShippingAddress",
         null=True,
         blank=True,
-        verbose_name=_("Shipping Address"),
+        verbose_name="Адрес доставки",
         on_delete=models.SET_NULL,
     )
-    shipping_method = models.CharField(_("Shipping method"), max_length=128, blank=True)
+    shipping_method = models.CharField("Способ доставки", max_length=128, blank=True)
 
     # Identifies shipping code
     shipping_code = models.CharField(blank=True, max_length=128, default="")
 
     # Use this field to indicate that an order is on hold / awaiting payment
-    status = models.CharField(_("Status"), max_length=100, blank=True)
-    guest_email = models.EmailField(_("Guest email address"), blank=True)
+    status = models.CharField("Статус", max_length=100, blank=True)
 
     # Index added to this field for reporting
-    date_placed = models.DateTimeField(db_index=True)
+    date_placed = models.DateTimeField(db_index=True, editable=False)
+
+    # Date and time of order
+    order_time = models.DateTimeField(db_index=True, blank=True)
+
+    # Date and time of finish order
+    date_finish = models.DateTimeField(db_index=True, blank=True, null=True)
+
+    has_review = models.BooleanField(db_index=True, default=False)
 
     #: Order status pipeline.  This should be a dict where each (key, value) #:
     #: corresponds to a status and a list of possible statuses that can follow
@@ -140,9 +136,9 @@ class AbstractOrder(models.Model):
 
         if new_status not in self.available_statuses():
             raise exceptions.InvalidOrderStatus(
-                _(
-                    "'%(new_status)s' is not a valid status for order %(number)s"
-                    " (current status: '%(status)s')"
+                (
+                    "'%(new_status)s' недействительный статус для заказа %(number)s"
+                    " (текущий статус: '%(status)s')"
                 )
                 % {
                     "new_status": new_status,
@@ -174,80 +170,40 @@ class AbstractOrder(models.Model):
     def _create_order_status_change(self, old_status, new_status):
         # Not setting the status on the order as that should be handled before
         self.status_changes.create(old_status=old_status, new_status=new_status)
+        
 
     @property
-    def is_anonymous(self):
-        # It's possible for an order to be placed by a customer who then
-        # deletes their profile.  Hence, we need to check that a guest email is
-        # set.
-        return self.user is None and bool(self.guest_email)
-
-    @property
-    def basket_total_before_discounts_incl_tax(self):
+    def basket_total_before_discounts(self):
         """
-        Return basket total including tax but before discounts are applied
+        Return basket total but before discounts are applied
         """
-        result = self.lines.aggregate(total=Sum("line_price_before_discounts_incl_tax"))
+        result = self.lines.aggregate(total=Sum("line_price_before_discounts"))
         return result["total"]
 
     @property
-    def basket_total_before_discounts_excl_tax(self):
+    def basket_total(self):
         """
-        Return basket total excluding tax but before discounts are applied
+        Return basket total
         """
-        result = self.lines.aggregate(total=Sum("line_price_before_discounts_excl_tax"))
-        return result["total"]
+        return self.total - self.shipping - self.surcharge
 
     @property
-    def basket_total_incl_tax(self):
-        """
-        Return basket total including tax
-        """
-        return self.total_incl_tax - self.shipping_incl_tax - self.surcharge_incl_tax
+    def total_before_discounts(self):
+        return self.basket_total_before_discounts + self.shipping
 
     @property
-    def basket_total_excl_tax(self):
-        """
-        Return basket total excluding tax
-        """
-        return self.total_excl_tax - self.shipping_excl_tax - self.surcharge_excl_tax
-
-    @property
-    def total_before_discounts_incl_tax(self):
-        return self.basket_total_before_discounts_incl_tax + self.shipping_incl_tax
-
-    @property
-    def total_before_discounts_excl_tax(self):
-        return self.basket_total_before_discounts_excl_tax + self.shipping_excl_tax
-
-    @property
-    def total_discount_incl_tax(self):
+    def total_discount(self):
         """
         The amount of discount this order received
         """
         discount = D("0.00")
         for line in self.lines.all():
-            discount += line.discount_incl_tax
+            discount += line.discount
         return discount
 
     @property
-    def total_discount_excl_tax(self):
-        discount = D("0.00")
-        for line in self.lines.all():
-            discount += line.discount_excl_tax
-        return discount
-
-    @property
-    def total_tax(self):
-        return self.total_incl_tax - self.total_excl_tax
-
-    @property
-    def surcharge_excl_tax(self):
-        return sum(charge.excl_tax for charge in self.surcharges.all())
-
-    @property
-    def surcharge_incl_tax(self):
-        return sum(charge.incl_tax for charge in self.surcharges.all())
+    def surcharge(self):
+        return sum(charge.money for charge in self.surcharges.all())
 
     @property
     def num_lines(self):
@@ -263,9 +219,6 @@ class AbstractOrder(models.Model):
             num_items += line.quantity
         return num_items
 
-    @property
-    def shipping_tax(self):
-        return self.shipping_incl_tax - self.shipping_excl_tax
 
     @property
     def shipping_status(self):
@@ -287,7 +240,7 @@ class AbstractOrder(models.Model):
             event_map[event_name].extend(list(event.line_quantities.all()))
 
         # Determine last complete event
-        status = _("In progress")
+        status = "В процессе выполнения"
         for event_name, event_line_quantities in event_map.items():
             if self._is_event_complete(event_line_quantities):
                 return event_name
@@ -298,13 +251,13 @@ class AbstractOrder(models.Model):
         return len(self.shipping_discounts) > 0
 
     @property
-    def shipping_before_discounts_incl_tax(self):
+    def shipping_before_discounts(self):
         # We can construct what shipping would have been before discounts by
         # adding the discounts back onto the final shipping charge.
         total = D("0.00")
         for discount in self.shipping_discounts:
             total += discount.amount
-        return self.shipping_incl_tax + total
+        return self.shipping + total
 
     def _is_event_complete(self, event_quantities):
         # Form map of line to quantity
@@ -323,8 +276,8 @@ class AbstractOrder(models.Model):
         abstract = True
         app_label = "order"
         ordering = ["-date_placed"]
-        verbose_name = _("Order")
-        verbose_name_plural = _("Orders")
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
 
     def __str__(self):
         return "#%s" % (self.number,)
@@ -348,9 +301,14 @@ class AbstractOrder(models.Model):
 
     @property
     def email(self):
-        if not self.user:
-            return self.guest_email
-        return self.user.email
+        if self.user:
+            return self.user.email
+        
+    @property
+    def client_note(self):
+        note = self.notes.get(note_type="Комментарий к заказу")
+        if note:
+            return note.message   
 
     @property
     def basket_discounts(self):
@@ -390,22 +348,28 @@ class AbstractOrderNote(models.Model):
         "order.Order",
         on_delete=models.CASCADE,
         related_name="notes",
-        verbose_name=_("Order"),
+        verbose_name="Заказ",
     )
 
     # These are sometimes programatically generated so don't need a
     # user everytime
     user = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, verbose_name=_("User")
+        AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, verbose_name="Пользователь"
     )
 
     # We allow notes to be classified although this isn't always needed
-    INFO, WARNING, ERROR, SYSTEM = "Info", "Warning", "Error", "System"
-    note_type = models.CharField(_("Note Type"), max_length=128, blank=True)
+    USER, MANAGER, STAFF, SYSTEM = "Комментарий к заказу", "Заметка менеджера", "Заметка персоналу", "Системная заметка"
+    TYPE_CHOICES = (
+        (USER, "Комментарий к заказу"),
+        (MANAGER, "Заметка менеджера"),
+        (STAFF, "Заметка персоналу"),
+        (SYSTEM, "Системная заметка"),
+    )
+    note_type = models.CharField("Тип примечания", choices=TYPE_CHOICES, default=MANAGER, max_length=30, blank=True)
 
-    message = models.TextField(_("Message"))
-    date_created = models.DateTimeField(_("Date Created"), auto_now_add=True)
-    date_updated = models.DateTimeField(_("Date Updated"), auto_now=True)
+    message = models.TextField("Сообщение")
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True)
 
     # Notes can only be edited for 5 minutes after being created
     editable_lifetime = 300
@@ -414,8 +378,8 @@ class AbstractOrderNote(models.Model):
         abstract = True
         app_label = "order"
         ordering = ["-date_updated"]
-        verbose_name = _("Order Note")
-        verbose_name_plural = _("Order Notes")
+        verbose_name = "Примечание к заказу"
+        verbose_name_plural = "Примечания к заказам"
 
     def __str__(self):
         return "'%s' (%s)" % (self.message[0:50], self.user)
@@ -432,24 +396,24 @@ class AbstractOrderStatusChange(models.Model):
         "order.Order",
         on_delete=models.CASCADE,
         related_name="status_changes",
-        verbose_name=_("Order Status Changes"),
+        verbose_name="Изменение статуса заказа",
     )
-    old_status = models.CharField(_("Old Status"), max_length=100, blank=True)
-    new_status = models.CharField(_("New Status"), max_length=100, blank=True)
+    old_status = models.CharField("Старый статус", max_length=100, blank=True)
+    new_status = models.CharField("Новый статус", max_length=100, blank=True)
     date_created = models.DateTimeField(
-        _("Date Created"), auto_now_add=True, db_index=True
+        "Дата создания", auto_now_add=True, db_index=True
     )
 
     class Meta:
         abstract = True
         app_label = "order"
-        verbose_name = _("Order Status Change")
-        verbose_name_plural = _("Order Status Changes")
+        verbose_name = "Изменение статуса заказа"
+        verbose_name_plural = "Изменения статусов заказов"
         ordering = ["-date_created"]
 
     def __str__(self):
-        return _(
-            "%(order)s has changed status from %(old_status)s to %(new_status)s"
+        return (
+            "%(order)s изменил статус с %(old_status)s на %(new_status)s"
         ) % {
             "order": self.order,
             "old_status": self.old_status,
@@ -467,32 +431,30 @@ class AbstractCommunicationEvent(models.Model):
         "order.Order",
         on_delete=models.CASCADE,
         related_name="communication_events",
-        verbose_name=_("Order"),
+        verbose_name="Заказ",
     )
     event_type = models.ForeignKey(
         "communication.CommunicationEventType",
         on_delete=models.CASCADE,
-        verbose_name=_("Event Type"),
+        verbose_name="Тип события",
     )
-    date_created = models.DateTimeField(_("Date"), auto_now_add=True, db_index=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True, db_index=True)
 
     class Meta:
         abstract = True
         app_label = "order"
-        verbose_name = _("Communication Event")
-        verbose_name_plural = _("Communication Events")
+        verbose_name = "Событие связи"
+        verbose_name_plural = "События связи"
         ordering = ["-date_created"]
 
     def __str__(self):
-        return _("'%(type)s' event for order #%(number)s") % {
+        return ("'%(type)s' событие заказа #%(number)s") % {
             "type": self.event_type.name,
             "number": self.order.number,
         }
 
 
 # LINES
-
-
 class AbstractLine(models.Model):
     """
     An order line
@@ -502,7 +464,7 @@ class AbstractLine(models.Model):
         "order.Order",
         on_delete=models.CASCADE,
         related_name="lines",
-        verbose_name=_("Order"),
+        verbose_name="Заказ",
     )
 
     # PARTNER INFORMATION
@@ -518,22 +480,22 @@ class AbstractLine(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        verbose_name=_("Partner"),
+        verbose_name="Точка продажи",
     )
-    partner_name = models.CharField(_("Partner name"), max_length=128, blank=True)
-    partner_sku = models.CharField(_("Partner SKU"), max_length=128)
+    partner_name = models.CharField("Название точки продажи", max_length=128, blank=True)
+    partner_sku = models.CharField("Артикул в точке продажи", max_length=128)
 
     # A line reference is the ID that a partner uses to represent this
     # particular line (it's not the same as a SKU).
     partner_line_reference = models.CharField(
-        _("Partner reference"),
+        "Код точки продажи",
         max_length=128,
         blank=True,
-        help_text=_(
-            "This is the item number that the partner uses within their system"
+        help_text=(
+            "Это номер позиции, который партнер использует в своей системе."
         ),
     )
-    partner_line_notes = models.TextField(_("Partner Notes"), blank=True)
+    partner_line_notes = models.TextField("Примечание точки продажи", blank=True)
 
     # We keep a link to the stockrecord used for this line which allows us to
     # update stocklevels when it ships
@@ -542,7 +504,7 @@ class AbstractLine(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        verbose_name=_("Stock record"),
+        verbose_name="Товарная запись",
     )
 
     # PRODUCT INFORMATION
@@ -555,45 +517,32 @@ class AbstractLine(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        verbose_name=_("Product"),
+        verbose_name="Продукт",
     )
-    title = models.CharField(pgettext_lazy("Product title", "Title"), max_length=255)
+    title = models.CharField(("Название продукта", "Название"), max_length=255)
     # UPC can be null because it's usually set as the product's UPC, and that
     # can be null as well
-    upc = models.CharField(_("UPC"), max_length=128, blank=True, null=True)
+    upc = models.CharField("Товарный код продукта UPC", max_length=128, blank=True, null=True)
 
-    quantity = models.PositiveIntegerField(_("Quantity"), default=1)
+    quantity = models.PositiveIntegerField("Количество", default=1)
 
     # REPORTING INFORMATION
     # ---------------------
 
     # Price information (these fields are actually redundant as the information
     # can be calculated from the LinePrice models
-    line_price_incl_tax = models.DecimalField(
-        _("Price (inc. tax)"), decimal_places=2, max_digits=12
-    )
-    line_price_excl_tax = models.DecimalField(
-        _("Price (excl. tax)"), decimal_places=2, max_digits=12
+    line_price = models.DecimalField(
+        "Цена", decimal_places=2, max_digits=12
     )
 
     # Price information before discounts are applied
-    line_price_before_discounts_incl_tax = models.DecimalField(
-        _("Price before discounts (inc. tax)"), decimal_places=2, max_digits=12
-    )
-    line_price_before_discounts_excl_tax = models.DecimalField(
-        _("Price before discounts (excl. tax)"), decimal_places=2, max_digits=12
+    line_price_before_discounts = models.DecimalField(
+        "Цена без учета скидок", decimal_places=2, max_digits=12
     )
 
     # Normal site price for item (without discounts)
-    unit_price_incl_tax = models.DecimalField(
-        _("Unit Price (inc. tax)"),
-        decimal_places=2,
-        max_digits=12,
-        blank=True,
-        null=True,
-    )
-    unit_price_excl_tax = models.DecimalField(
-        _("Unit Price (excl. tax)"),
+    unit_price = models.DecimalField(
+        "Цена за единицу товара",
         decimal_places=2,
         max_digits=12,
         blank=True,
@@ -601,12 +550,12 @@ class AbstractLine(models.Model):
     )
 
     tax_code = models.CharField(
-        _("VAT rate code"), max_length=64, blank=True, null=True
+        "Налоговый код", max_length=64, blank=True, null=True
     )
 
     # Partners often want to assign some status to each line to help with their
     # own business processes.
-    status = models.CharField(_("Status"), max_length=255, blank=True)
+    status = models.CharField("Статус", max_length=255, blank=True)
 
     #: Order status pipeline.  This should be a dict where each (key, value)
     #: corresponds to a status and the possible statuses that can follow that
@@ -618,15 +567,15 @@ class AbstractLine(models.Model):
         app_label = "order"
         # Enforce sorting in order of creation.
         ordering = ["pk"]
-        verbose_name = _("Order Line")
-        verbose_name_plural = _("Order Lines")
+        verbose_name = "Позиция заказа"
+        verbose_name_plural = "Позиции заказа"
 
     def __str__(self):
         if self.product:
             title = self.product.title
         else:
-            title = _("<missing product>")
-        return _("Product '%(name)s', quantity '%(qty)s'") % {
+            title = ("<Товар не найден>")
+        return ("Товар '%(name)s', количество '%(qty)s'") % {
             "name": title,
             "qty": self.quantity,
         }
@@ -658,8 +607,8 @@ class AbstractLine(models.Model):
 
         if new_status not in self.available_statuses():
             raise exceptions.InvalidLineStatus(
-                _(
-                    "'%(new_status)s' is not a valid status (current status:"
+                (
+                    "'%(new_status)s' недействительный статус (текущий статус:"
                     " '%(status)s')"
                 )
                 % {"new_status": new_status, "status": self.status}
@@ -677,7 +626,6 @@ class AbstractLine(models.Model):
 
     set_status.alters_data = True
     
-    #vlad
     @property
     def options(self):
         ops = []
@@ -699,23 +647,19 @@ class AbstractLine(models.Model):
             d = "%s" % ("\n".join(ops))
         return d
     
-    #vlad
     @property 
     def additions(self):
         addit = []
         d = ""
-        all = self.attributes.all()
         for attribute in self.attributes.all():
-            f = attribute
             if attribute.option.type == "good":
-                1
                 value = attribute.value
-                addit.append("%s (%s)" % (attribute.option.name, value))
+                if value > 0:
+                    addit.append("%s (%s)" % (attribute.option.name, value))
             if addit:
                 d = "%s" % (", ".join(addit))
         return d
     
-    #vlad
     @property 
     def variants(self):
         slug = ""
@@ -724,41 +668,9 @@ class AbstractLine(models.Model):
 
         return slug
 
-    # @property
-    # def description(self):
-    #     """
-    #     Returns a description of this line including details of any
-    #     line attributes.
-    #     """
-    #     desc = self.title
-    #     ops = []
-    #     for attribute in self.attributes.all():
-    #         value = attribute.value
-    #         if isinstance(value, list):
-    #             ops.append(
-    #                 "%s = '%s'" % (attribute.type, (", ".join([str(v) for v in value])))
-    #             )
-    #         else:
-    #             ops.append("%s = '%s'" % (attribute.type, value))
-    #     if ops:
-    #         desc = "%s (%s)" % (desc, ", ".join(ops))
-    #     return desc
-
     @property
-    def discount_incl_tax(self):
-        return self.line_price_before_discounts_incl_tax - self.line_price_incl_tax
-
-    @property
-    def discount_excl_tax(self):
-        return self.line_price_before_discounts_excl_tax - self.line_price_excl_tax
-
-    @property
-    def line_price_tax(self):
-        return self.line_price_incl_tax - self.line_price_excl_tax
-
-    @property
-    def unit_price_tax(self):
-        return self.unit_price_incl_tax - self.unit_price_excl_tax
+    def discount(self):
+        return self.line_price_before_discounts - self.line_price
 
     # Shipping status helpers
 
@@ -884,13 +796,15 @@ class AbstractLine(models.Model):
         Test if this line can be re-ordered using the passed strategy and
         basket
         """
+        
+        # переделай. если несолько продуктов с разными параметрами но один продукт типа товар2, то он добавит каждого по 1 если доступен всего 1, получается всего будет 2, изза этого ощиьки в форме
         if not self.product:
             return False, (
-                _("'%(title)s' is no longer available") % {"title": self.title}
+                ("'%(title)s' больше недоступно") % {"title": self.title}
             )
 
         try:
-            basket_line = basket.lines.get(product=self.product)
+            basket_line = basket.lines.first(product=self.product)
         except basket.lines.model.DoesNotExist:
             desired_qty = self.quantity
         else:
@@ -914,24 +828,24 @@ class AbstractLineAttribute(models.Model):
         "order.Line",
         on_delete=models.CASCADE,
         related_name="attributes",
-        verbose_name=_("Line"),
+        verbose_name="Позиция",
     )
     option = models.ForeignKey(
         "catalogue.Option",
         null=True,
         on_delete=models.SET_NULL,
         related_name="line_attributes",
-        verbose_name=_("Option"),
+        verbose_name="Опция",
     )
 
-    type = models.CharField(_("Type"), max_length=128)
-    value = models.JSONField(_("Value"), encoder=DjangoJSONEncoder)
+    type = models.CharField("Тип", max_length=128)
+    value = models.JSONField("Значение", encoder=DjangoJSONEncoder)
 
     class Meta:
         abstract = True
         app_label = "order"
-        verbose_name = _("Line Attribute")
-        verbose_name_plural = _("Line Attributes")
+        verbose_name = "Атрибут позиции"
+        verbose_name_plural = "Атрибуты позиций"
 
     def __str__(self):
         return "%s = %s" % (self.type, self.value)
@@ -950,43 +864,37 @@ class AbstractLinePrice(models.Model):
         "order.Order",
         on_delete=models.CASCADE,
         related_name="line_prices",
-        verbose_name=_("Option"),
+        verbose_name="Опция",
     )
     line = models.ForeignKey(
         "order.Line",
         on_delete=models.CASCADE,
         related_name="prices",
-        verbose_name=_("Line"),
+        verbose_name="Позиция",
     )
-    quantity = models.PositiveIntegerField(_("Quantity"), default=1)
-    price_incl_tax = models.DecimalField(
-        _("Price (inc. tax)"), decimal_places=2, max_digits=12
+    quantity = models.PositiveIntegerField("Количество", default=1)
+    price = models.DecimalField(
+        "Цена", decimal_places=2, max_digits=12
     )
-    price_excl_tax = models.DecimalField(
-        _("Price (excl. tax)"), decimal_places=2, max_digits=12
-    )
-    shipping_incl_tax = models.DecimalField(
-        _("Shiping (inc. tax)"), decimal_places=2, max_digits=12, default=0
-    )
-    shipping_excl_tax = models.DecimalField(
-        _("Shipping (excl. tax)"), decimal_places=2, max_digits=12, default=0
+    shipping = models.DecimalField(
+        "Доставка", decimal_places=2, max_digits=12, default=0
     )
     tax_code = models.CharField(
-        _("VAT rate code"), max_length=64, blank=True, null=True
+        "Налоговый код", max_length=64, blank=True, null=True
     )
 
     class Meta:
         abstract = True
         app_label = "order"
         ordering = ("id",)
-        verbose_name = _("Line Price")
-        verbose_name_plural = _("Line Prices")
+        verbose_name = "Цена позиции"
+        verbose_name_plural = "Цены позиций"
 
     def __str__(self):
-        return _("Line '%(number)s' (quantity %(qty)d) price %(price)s") % {
+        return ("Позиция '%(number)s' (количество %(qty)d) цена %(price)s") % {
             "number": self.line,
             "qty": self.quantity,
-            "price": self.price_incl_tax,
+            "price": self.price,
         }
 
 
@@ -1000,14 +908,14 @@ class AbstractPaymentEventType(models.Model):
     These are effectively the transaction types.
     """
 
-    name = models.CharField(_("Name"), max_length=128, unique=True)
-    code = AutoSlugField(_("Code"), max_length=128, unique=True, populate_from="name")
+    name = models.CharField("Имя", max_length=128, unique=True)
+    code = AutoSlugField("Код", max_length=128, unique=True, populate_from="name")
 
     class Meta:
         abstract = True
         app_label = "order"
-        verbose_name = _("Payment Event Type")
-        verbose_name_plural = _("Payment Event Types")
+        verbose_name = "Тип платежного события"
+        verbose_name_plural = "Типы платежных событий"
         ordering = ("name",)
 
     def __str__(self):
@@ -1028,17 +936,17 @@ class AbstractPaymentEvent(models.Model):
         "order.Order",
         on_delete=models.CASCADE,
         related_name="payment_events",
-        verbose_name=_("Order"),
+        verbose_name="Заказ",
     )
-    amount = models.DecimalField(_("Amount"), decimal_places=2, max_digits=12)
+    amount = models.DecimalField("Сумма", decimal_places=2, max_digits=12)
     # The reference should refer to the transaction ID of the payment gateway
     # that was used for this event.
-    reference = models.CharField(_("Reference"), max_length=128, blank=True)
+    reference = models.CharField("Референс", max_length=128, blank=True)
     lines = models.ManyToManyField(
-        "order.Line", through="PaymentEventQuantity", verbose_name=_("Lines")
+        "order.Line", through="PaymentEventQuantity", verbose_name="Позиции"
     )
     event_type = models.ForeignKey(
-        "order.PaymentEventType", on_delete=models.CASCADE, verbose_name=_("Event Type")
+        "order.PaymentEventType", on_delete=models.CASCADE, verbose_name="Тип события"
     )
     # Allow payment events to be linked to shipping events.  Often a shipping
     # event will trigger a payment event and so we can use this FK to capture
@@ -1050,18 +958,18 @@ class AbstractPaymentEvent(models.Model):
         related_name="payment_events",
     )
     date_created = models.DateTimeField(
-        _("Date created"), auto_now_add=True, db_index=True
+        "Дата создания", auto_now_add=True, db_index=True
     )
 
     class Meta:
         abstract = True
         app_label = "order"
-        verbose_name = _("Payment Event")
-        verbose_name_plural = _("Payment Events")
+        verbose_name = "Платежное событие"
+        verbose_name_plural = "Платежные события"
         ordering = ["-date_created"]
 
     def __str__(self):
-        return _("Payment event for order %s") % self.order
+        return "Платежное событие %s" % self.order
 
     def num_affected_lines(self):
         return self.lines.all().count()
@@ -1076,20 +984,20 @@ class PaymentEventQuantity(models.Model):
         "order.PaymentEvent",
         on_delete=models.CASCADE,
         related_name="line_quantities",
-        verbose_name=_("Event"),
+        verbose_name="Событие",
     )
     line = models.ForeignKey(
         "order.Line",
         on_delete=models.CASCADE,
         related_name="payment_event_quantities",
-        verbose_name=_("Line"),
+        verbose_name="Позиция",
     )
-    quantity = models.PositiveIntegerField(_("Quantity"))
+    quantity = models.PositiveIntegerField("Количество")
 
     class Meta:
         app_label = "order"
-        verbose_name = _("Payment Event Quantity")
-        verbose_name_plural = _("Payment Event Quantities")
+        verbose_name = "Событие платежа - Количество"
+        verbose_name_plural = "События платежей - Количества"
         unique_together = ("event", "line")
 
 
@@ -1106,37 +1014,37 @@ class AbstractShippingEvent(models.Model):
         "order.Order",
         on_delete=models.CASCADE,
         related_name="shipping_events",
-        verbose_name=_("Order"),
+        verbose_name="Заказ",
     )
     lines = models.ManyToManyField(
         "order.Line",
         related_name="shipping_events",
         through="ShippingEventQuantity",
-        verbose_name=_("Lines"),
+        verbose_name="Позиции",
     )
     event_type = models.ForeignKey(
         "order.ShippingEventType",
         on_delete=models.CASCADE,
-        verbose_name=_("Event Type"),
+        verbose_name="Тип события",
     )
     notes = models.TextField(
-        _("Event notes"),
+        "Заметка события",
         blank=True,
-        help_text=_("This could be the dispatch reference, or a tracking number"),
+        help_text="Это может быть номер отправки или номер отслеживания.",
     )
     date_created = models.DateTimeField(
-        _("Date Created"), auto_now_add=True, db_index=True
+        "Дата создания", auto_now_add=True, db_index=True
     )
 
     class Meta:
         abstract = True
         app_label = "order"
-        verbose_name = _("Shipping Event")
-        verbose_name_plural = _("Shipping Events")
+        verbose_name = "Событие доставки"
+        verbose_name_plural = "События доставки"
         ordering = ["-date_created"]
 
     def __str__(self):
-        return _("Order #%(number)s, type %(type)s") % {
+        return "Заказ #%(number)s, тип %(type)s" % {
             "number": self.order.number,
             "type": self.event_type,
         }
@@ -1157,20 +1065,20 @@ class ShippingEventQuantity(models.Model):
         "order.ShippingEvent",
         on_delete=models.CASCADE,
         related_name="line_quantities",
-        verbose_name=_("Event"),
+        verbose_name="Событие",
     )
     line = models.ForeignKey(
         "order.Line",
         on_delete=models.CASCADE,
         related_name="shipping_event_quantities",
-        verbose_name=_("Line"),
+        verbose_name="Позиция",
     )
-    quantity = models.PositiveIntegerField(_("Quantity"))
+    quantity = models.PositiveIntegerField("Количество")
 
     class Meta:
         app_label = "order"
-        verbose_name = _("Shipping Event Quantity")
-        verbose_name_plural = _("Shipping Event Quantities")
+        verbose_name = "Событие доставки - Количество"
+        verbose_name_plural = "События доставок - Количества"
         unique_together = ("event", "line")
 
     def save(self, *args, **kwargs):
@@ -1185,7 +1093,7 @@ class ShippingEventQuantity(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return _("%(product)s - quantity %(qty)d") % {
+        return ("%(product)s - количество %(qty)d") % {
             "product": self.line.product,
             "qty": self.quantity,
         }
@@ -1199,15 +1107,15 @@ class AbstractShippingEventType(models.Model):
     """
 
     # Name is the friendly description of an event
-    name = models.CharField(_("Name"), max_length=255, unique=True)
+    name = models.CharField("Имя", max_length=255, unique=True)
     # Code is used in forms
-    code = AutoSlugField(_("Code"), max_length=128, unique=True, populate_from="name")
+    code = AutoSlugField("Код", max_length=128, unique=True, populate_from="name")
 
     class Meta:
         abstract = True
         app_label = "order"
-        verbose_name = _("Shipping Event Type")
-        verbose_name_plural = _("Shipping Event Types")
+        verbose_name = "Тип события доставки"
+        verbose_name_plural = "Типы событий доставки"
         ordering = ("name",)
 
     def __str__(self):
@@ -1216,8 +1124,6 @@ class AbstractShippingEventType(models.Model):
     
 
 # DISCOUNTS
-
-
 class AbstractOrderDiscount(models.Model):
     """
     A discount against an order.
@@ -1234,32 +1140,32 @@ class AbstractOrderDiscount(models.Model):
         "order.Order",
         on_delete=models.CASCADE,
         related_name="discounts",
-        verbose_name=_("Order"),
+        verbose_name="Заказ",
     )
 
     # We need to distinguish between basket discounts, shipping discounts and
     # 'deferred' discounts.
-    BASKET, SHIPPING, DEFERRED = "Basket", "Shipping", "Deferred"
+    BASKET, SHIPPING, DEFERRED = "Корзина", "Доставка", "Отложенная"
     CATEGORY_CHOICES = (
-        (BASKET, _(BASKET)),
-        (SHIPPING, _(SHIPPING)),
-        (DEFERRED, _(DEFERRED)),
+        (BASKET, "Скидка на элементы корзины"),
+        (SHIPPING, "Скидка на доставку"),
+        (DEFERRED, "Отложенная скидка"),
     )
     category = models.CharField(
-        _("Discount category"), default=BASKET, max_length=64, choices=CATEGORY_CHOICES
+        "Категория скидки", default=BASKET, max_length=64, choices=CATEGORY_CHOICES
     )
 
-    offer_id = models.PositiveIntegerField(_("Offer ID"), blank=True, null=True)
+    offer_id = models.PositiveIntegerField("ID Предложения", blank=True, null=True)
     offer_name = models.CharField(
-        _("Offer name"), max_length=128, db_index=True, blank=True
+        "Название предложения", max_length=128, db_index=True, blank=True
     )
-    voucher_id = models.PositiveIntegerField(_("Voucher ID"), blank=True, null=True)
+    voucher_id = models.PositiveIntegerField("D Промокода", blank=True, null=True)
     voucher_code = models.CharField(
-        _("Code"), max_length=128, db_index=True, blank=True
+        "Код", max_length=128, db_index=True, blank=True
     )
-    frequency = models.PositiveIntegerField(_("Frequency"), null=True)
+    frequency = models.PositiveIntegerField("Частота", null=True)
     amount = models.DecimalField(
-        _("Amount"), decimal_places=2, max_digits=12, default=0
+        "Сумма", decimal_places=2, max_digits=12, default=0
     )
 
     # Post-order offer applications can return a message to indicate what
@@ -1282,8 +1188,8 @@ class AbstractOrderDiscount(models.Model):
         abstract = True
         app_label = "order"
         ordering = ["pk"]
-        verbose_name = _("Order Discount")
-        verbose_name_plural = _("Order Discounts")
+        verbose_name = "Скидка в заказе"
+        verbose_name_plural = "Скидки в заказах"
 
     def save(self, *args, **kwargs):
         if self.offer_id and not self.offer_name:
@@ -1299,7 +1205,7 @@ class AbstractOrderDiscount(models.Model):
         super().save(**kwargs)
 
     def __str__(self):
-        return _("Discount of %(amount)r from order %(order)s") % {
+        return "Скидка %(amount)r заказа %(order)s" % {
             "amount": self.amount,
             "order": self.order,
         }
@@ -1332,26 +1238,25 @@ class AbstractOrderLineDiscount(models.Model):
         "order.Line",
         on_delete=models.CASCADE,
         related_name="discounts",
-        verbose_name=_("Line"),
+        verbose_name="Позиция",
     )
     order_discount = models.ForeignKey(
         "order.OrderDiscount",
         on_delete=models.CASCADE,
         related_name="discount_lines",
-        verbose_name=_("Order discount"),
+        verbose_name="Скидка заказа",
     )
 
-    is_incl_tax = models.BooleanField()
     amount = models.DecimalField(
-        _("Line discount (excl. tax)"), decimal_places=2, max_digits=12, default=0
+        "Скидка позиции", decimal_places=2, max_digits=12, default=0
     )
 
     class Meta:
         abstract = True
         app_label = "order"
         ordering = ["pk"]
-        verbose_name = _("Order line discount")
-        verbose_name_plural = _("Order line discounts")
+        verbose_name = "Скидка позиции заказа"
+        verbose_name_plural = "Скидки позиций заказов"
 
 
 class AbstractSurcharge(models.Model):
@@ -1359,30 +1264,23 @@ class AbstractSurcharge(models.Model):
         "order.Order",
         on_delete=models.CASCADE,
         related_name="surcharges",
-        verbose_name=_("Surcharges"),
+        verbose_name="Дополнительные сборы",
     )
 
-    name = models.CharField(_("Surcharge"), max_length=128)
+    name = models.CharField("Название дополнительного сбора", max_length=128)
 
-    code = models.CharField(_("Surcharge code"), max_length=128)
+    code = models.CharField("Код дополнительных сборов", max_length=128)
 
-    incl_tax = models.DecimalField(
-        _("Surcharge (inc. tax)"), decimal_places=2, max_digits=12, default=0
-    )
-    excl_tax = models.DecimalField(
-        _("Surcharge (excl. tax)"), decimal_places=2, max_digits=12, default=0
+    money = models.DecimalField(
+        "Сумма дополнительных сборов", decimal_places=2, max_digits=12, default=0
     )
     tax_code = models.CharField(
-        _("VAT rate code"), max_length=64, blank=True, null=True
+        "Налоговый код", max_length=64, blank=True, null=True
     )
-
-    @property
-    def tax(self):
-        return self.incl_tax - self.excl_tax
 
     class Meta:
         abstract = True
         app_label = "order"
         ordering = ["pk"]
-        verbose_name = _("Surcharge")
-        verbose_name_plural = _("Surcharges")
+        verbose_name = "Дополнительный сбор"
+        verbose_name_plural = "Дополнительные сборы"

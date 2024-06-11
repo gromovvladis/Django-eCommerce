@@ -1,11 +1,12 @@
 import logging
 
 from django.contrib.sites.models import Site
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 from django.urls import NoReverseMatch, reverse
 
 from oscar.apps.checkout.signals import post_checkout
+
+from django.conf import settings
 from oscar.core.loading import get_class, get_model
 
 OrderCreator = get_class("order.utils", "OrderCreator")
@@ -95,6 +96,7 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         shipping_method,
         shipping_charge,
         order_total,
+        order_time,
         surcharges=None,
         **kwargs
     ):
@@ -113,11 +115,13 @@ class OrderPlacementMixin(CheckoutSessionMixin):
             shipping_method=shipping_method,
             shipping_charge=shipping_charge,
             order_total=order_total,
+            order_time=order_time,
             surcharges=surcharges,
             **kwargs
         )
         basket.submit()
-        return self.handle_successful_order(order)
+        self.handle_successful_order(order)
+        return order
 
     def place_order(
         self,
@@ -128,6 +132,7 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         shipping_method,
         shipping_charge,
         order_total,
+        order_time,
         surcharges=None,
         **kwargs
     ):
@@ -136,7 +141,7 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         """
         # Create saved shipping address instance from passed in unsaved
         # instance
-        shipping_address = self.create_shipping_address(user, shipping_address)
+        shipping_address = self.create_shipping_address(user, shipping_address, shipping_method)
 
         if "status" not in kwargs:
             # pylint: disable=assignment-from-none
@@ -157,6 +162,7 @@ class OrderPlacementMixin(CheckoutSessionMixin):
             shipping_method=shipping_method,
             shipping_charge=shipping_charge,
             total=order_total,
+            order_time=order_time,
             status=status,
             request=request,
             surcharges=surcharges,
@@ -165,7 +171,7 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         self.save_payment_details(order)
         return order
 
-    def create_shipping_address(self, user, shipping_address):
+    def create_shipping_address(self, user, shipping_address, shipping_method):
         """
         Create and return the shipping address for the current order.
 
@@ -185,15 +191,11 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         """
         Update the user's address book based on the new shipping address
         """
-        try:
-            user_addr = user.addresses.get(hash=addr.generate_hash())
-        except ObjectDoesNotExist:
-            # Create a new user address
-            user_addr = UserAddress(user=user)
-            addr.populate_alternative_model(user_addr)
-        if isinstance(addr, ShippingAddress):
-            user_addr.num_orders_as_shipping_address += 1
+        # Create a new user address
+        user_addr = UserAddress(user=user)
+        addr.populate_alternative_model(user_addr)
         user_addr.save()
+
 
     def save_payment_details(self, order):
         """
@@ -246,7 +248,14 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         order is submitted.
         """
         # Send confirmation message (normally an email)
-        self.send_order_placed_email(order)
+        if settings.OSCAR_SEND_ORDER_PLACED_EMAIL:
+            try:
+                self.send_order_placed_email(order)
+            except Exception as e: 
+                logger.error(
+                    "Невозможно отправить email у заказа номер №%s",
+                    order.number,
+                )
 
         # Flush all session data
         self.checkout_session.flush()
@@ -255,6 +264,12 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         self.request.session["checkout_order_id"] = order.id
 
         response = HttpResponseRedirect(self.get_success_url())
+        response.delete_cookie('notes')
+        response.delete_cookie('order_note')
+        response.delete_cookie('line1')
+        response.delete_cookie('line2')
+        response.delete_cookie('line3')
+        response.delete_cookie('line4')
         self.send_signal(self.request, response, order)
         return response
 

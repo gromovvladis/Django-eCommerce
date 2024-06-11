@@ -17,8 +17,6 @@ ProductImage = get_model("catalogue", "ProductImage")
 ProductRecommendation = get_model("catalogue", "ProductRecommendation")
 
 
-# Additional = get_model("catalogue", "Additional")
-
 class AttributeInline(admin.TabularInline):
     model = ProductAttributeValue
 
@@ -105,5 +103,3 @@ admin.site.register(Option, OptionAdmin)
 admin.site.register(ProductImage)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(ProductCategory)
-
-# admin.site.register(Additional)

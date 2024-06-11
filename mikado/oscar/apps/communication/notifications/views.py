@@ -1,14 +1,15 @@
+from gettext import ngettext
+from django import http
 from django.conf import settings
 from django.contrib import messages
 from django.utils.html import strip_tags
 from django.utils.timezone import now
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext
 from django.views import generic
+from django.db.models import Q
 
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import redirect_to_referrer
-from oscar.views.generic import BulkEditMixin
+from oscar.views.generic import NotifEditMixin
 
 PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
 Notification = get_model("communication", "Notification")
@@ -16,15 +17,17 @@ Notification = get_model("communication", "Notification")
 
 class NotificationListView(PageTitleMixin, generic.ListView):
     model = Notification
-    template_name = "oscar/communication/notifications/list.html"
+    template_name = "oscar/communication/notifications/notifications_list.html"
     context_object_name = "notifications"
     paginate_by = settings.OSCAR_NOTIFICATIONS_PER_PAGE
-    page_title = _("Notifications")
+    page_title = "Уведомления"
     active_tab = "notifications"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["list_type"] = self.list_type
+        ctx["content_open"] = True
+        ctx["summary"] = "Профиль"
         return ctx
 
 
@@ -46,58 +49,59 @@ class ArchiveView(NotificationListView):
         )
 
 
-class DetailView(PageTitleMixin, generic.DetailView):
-    model = Notification
-    template_name = "oscar/communication/notifications/detail.html"
-    context_object_name = "notification"
-    active_tab = "notifications"
-
-    def get_object(self, queryset=None):
-        obj = super().get_object()
-        if not obj.date_read:
-            obj.date_read = now()
-            obj.save()
-        return obj
-
-    def get_page_title(self):
-        """Append subject to page title"""
-        title = strip_tags(self.object.subject)
-        return "%s: %s" % (_("Notification"), title)
-
-    def get_queryset(self):
-        return self.model._default_manager.filter(recipient=self.request.user)
-
-
-class UpdateView(BulkEditMixin, generic.View):
+class UpdateView(NotifEditMixin, generic.View):
     model = Notification
     http_method_names = ["post"]
     actions = ("archive", "delete")
     checkbox_object_name = "notification"
 
-    def get_object_dict(self, ids):
-        return self.model.objects.filter(recipient=self.request.user).in_bulk(ids)
+    def get_object(self, id):
+        return self.model.objects.get(Q(recipient=self.request.user) & Q(id=id))
 
     def get_success_response(self):
         return redirect_to_referrer(self.request, "communication:notifications-inbox")
 
-    def archive(self, request, notifications):
-        for notification in notifications:
-            notification.archive()
-        msg = ngettext(
-            "%(count)d notification archived",
-            "%(count)d notifications archived",
-            len(notifications),
-        ) % {"count": len(notifications)}
-        messages.success(request, msg)
-        return self.get_success_response()
+    def archive(self, request, notification):
+        # for notification in notifications:
+        notification.archive()
 
-    def delete(self, request, notifications):
-        for notification in notifications:
-            notification.delete()
-        msg = ngettext(
-            "%(count)d notification deleted",
-            "%(count)d notifications deleted",
-            len(notifications),
-        ) % {"count": len(notifications)}
-        messages.success(request, msg)
-        return self.get_success_response()
+        num_unread = Notification.objects.filter(
+            recipient=request.user, date_read=None, location="Inbox"
+        ).count()
+
+        if num_unread == 0:
+            num_unread = ""
+
+        return http.JsonResponse({"action": 'archive', "num_unread": num_unread}, status=200)
+
+    def delete(self, request, notification):
+        notification.delete()
+        nums_total = Notification.objects.filter(
+            recipient=request.user, location="Archive"
+        ).count() 
+        return http.JsonResponse({"action": 'delete', "nums_total": nums_total}, status=200)
+
+
+class DetailView(PageTitleMixin, generic.DetailView):
+    model = Notification
+    template_name = "oscar/communication/notifications/notifications_detail.html"
+    context_object_name = "notification"
+    active_tab = "notifications"
+    page_title = "Уведомление"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["content_open"] = True
+        ctx["summary"] = "Профиль"
+        return ctx
+
+    def get_object(self, queryset=None):
+        obj = super().get_object()
+        if not obj.date_read:
+            obj.date_read = now()
+            obj.location = "Archive"
+            obj.save()
+        return obj
+
+    def get_queryset(self):
+        return self.model._default_manager.filter(recipient=self.request.user)

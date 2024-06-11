@@ -4,32 +4,19 @@ from django.contrib import messages
 from django.template.loader import render_to_string
 
 from oscar.core.loading import get_class, get_model
-from oscar.core.decorators import deprecated
 
 Applicator = get_class("offer.applicator", "Applicator")
 ConditionalOffer = get_model("offer", "ConditionalOffer")
 
 DiscountApplication = namedtuple(
-    "DiscountApplication", ["amount", "quantity", "incl_tax", "offer"]
+    "DiscountApplication", ["amount", "quantity", "offer"]
 )
 
 
 class BasketMessageGenerator(object):
-    new_total_template_name = "oscar/basket/messages/new_total.html"
+    
     offer_lost_template_name = "oscar/basket/messages/offer_lost.html"
     offer_gained_template_name = "oscar/basket/messages/offer_gained.html"
-
-    def get_new_total_messages(self, basket, include_buttons=True):
-        new_total_messages = []
-        # We use the 'include_buttons' parameter to determine whether to show the
-        # 'Checkout now' buttons.  We don't want to show these on the basket page.
-        msg = render_to_string(
-            self.new_total_template_name,
-            {"basket": basket, "include_buttons": include_buttons},
-        )
-        new_total_messages.append((messages.INFO, msg))
-
-        return new_total_messages
 
     def get_offer_lost_messages(self, offers_before, offers_after):
         offer_messages = []
@@ -50,16 +37,8 @@ class BasketMessageGenerator(object):
     def get_offer_messages(self, offers_before, offers_after):
         offer_messages = []
         offer_messages.extend(self.get_offer_lost_messages(offers_before, offers_after))
-        offer_messages.extend(
-            self.get_offer_gained_messages(offers_before, offers_after)
-        )
+        offer_messages.extend(self.get_offer_gained_messages(offers_before, offers_after))
         return offer_messages
-
-    def get_messages(self, basket, offers_before, offers_after, include_buttons=True):
-        message_list = []
-        message_list.extend(self.get_offer_messages(offers_before, offers_after))
-        message_list.extend(self.get_new_total_messages(basket, include_buttons))
-        return message_list
 
     def apply_messages(self, request, offers_before):
         """
@@ -70,7 +49,7 @@ class BasketMessageGenerator(object):
         Applicator().apply(request.basket, request.user, request)
         offers_after = request.basket.applied_offers()
 
-        for level, msg in self.get_messages(
+        for level, msg in self.get_offer_messages(
             request.basket, offers_before, offers_after
         ):
             messages.add_message(request, level, msg, extra_tags="safe noicon")
@@ -129,10 +108,6 @@ class LineOfferConsumer(object):
             num_consumed = min(available, quantity)
             self._consumptions[offer.pk] += num_consumed
         return num_consumed
-
-    @deprecated
-    def consumed(self, offer=None):
-        return self.num_consumed(offer)
 
     def num_consumed(self, offer=None):
         """
@@ -209,33 +184,13 @@ class LineDiscountRegistry(LineOfferConsumer):
     def __init__(self, line):
         super().__init__(line)
         self._discounts = []
-        self._discount_excl_tax = None
-        self._discount_incl_tax = None
+        self._discount = None
 
-    def discount(self, amount, quantity, incl_tax=True, offer=None):
-        self._discounts.append(DiscountApplication(amount, quantity, incl_tax, offer))
+    def discount(self, amount, quantity, offer=None):
+        self._discounts.append(DiscountApplication(amount, quantity, offer))
         self.consume(quantity, offer=offer)
-        if incl_tax:
-            self._discount_incl_tax = None
-        else:
-            self._discount_excl_tax = None
 
-    @property
-    def excl_tax(self):
-        if self._discount_excl_tax is None:
-            self._discount_excl_tax = sum(
-                [d.amount for d in self._discounts if not d.incl_tax], 0
-            )
-        return self._discount_excl_tax
-
-    @property
-    def incl_tax(self):
-        if self._discount_incl_tax is None:
-            self._discount_incl_tax = sum(
-                [d.amount for d in self._discounts if d.incl_tax], 0
-            )
-        return self._discount_incl_tax
-
+    
     @property
     def total(self):
         return sum([d.amount for d in self._discounts], 0)

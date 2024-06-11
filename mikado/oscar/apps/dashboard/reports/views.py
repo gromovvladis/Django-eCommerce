@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.http import Http404, HttpResponseForbidden
 from django.template.response import TemplateResponse
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import ListView
 
 from oscar.core.loading import get_class
@@ -40,9 +39,7 @@ class IndexView(ListView):
             if form.is_valid():
                 generator = self._get_generator(form)
                 if not generator.is_available_to(request.user):
-                    return HttpResponseForbidden(
-                        _("You do not have access to this report")
-                    )
+                    return HttpResponseForbidden("У вас нет доступа к этому отчету")
 
                 report = generator.generate()
 

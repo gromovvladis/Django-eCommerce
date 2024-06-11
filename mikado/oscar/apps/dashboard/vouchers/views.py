@@ -9,7 +9,6 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
 from oscar.core.loading import get_class, get_model
@@ -52,7 +51,7 @@ class VoucherListView(generic.ListView):
             self.advanced_form = self.form_class(
                 initial={"in_set": False}, auto_id="id_advanced_%s"
             )
-            self.search_filters.append(_("Not in a set"))
+            self.search_filters.append("Нет в комплекте")
             return qs.filter(voucher_set__isnull=True)
 
         self.form = self.form_class(self.request.GET)
@@ -72,28 +71,28 @@ class VoucherListView(generic.ListView):
 
         if name:
             qs = qs.filter(name__icontains=name)
-            self.search_filters.append(_('Name matches "%s"') % name)
+            self.search_filters.append('Имя соответствует "%s"' % name)
         if code:
             qs = qs.filter(code=code)
-            self.search_filters.append(_('Code is "%s"') % code)
+            self.search_filters.append('Код - "%s"' % code)
         if offer_name:
             qs = qs.filter(offers__name__icontains=offer_name)
-            self.search_filters.append(_('Offer name matches "%s"') % offer_name)
+            self.search_filters.append('Имя прдложения соответствует "%s"' % offer_name)
         if is_active is not None:
             now = timezone.now()
             if is_active:
                 qs = qs.filter(start_datetime__lte=now, end_datetime__gte=now)
-                self.search_filters.append(_("Is active"))
+                self.search_filters.append("Активен")
             else:
                 qs = qs.filter(end_datetime__lt=now)
-                self.search_filters.append(_("Is inactive"))
+                self.search_filters.append("Неактивен")
         if in_set is not None:
             qs = qs.filter(voucher_set__isnull=not in_set)
-            self.search_filters.append(_("In a set") if in_set else _("Not in a set"))
+            self.search_filters.append("В комплекте" if in_set else "Нет в комплекте")
         if has_offers is not None:
             qs = qs.filter(offers__isnull=not has_offers).distinct()
             self.search_filters.append(
-                _("Has offers") if has_offers else _("Has no offers")
+                "Есть предложения" if has_offers else "Не имеет предложений"
             )
 
         return qs
@@ -114,7 +113,7 @@ class VoucherCreateView(generic.CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Create voucher")
+        ctx["title"] = "Создать промокод"
         return ctx
 
     def get_initial(self):
@@ -129,7 +128,7 @@ class VoucherCreateView(generic.CreateView):
         return response
 
     def get_success_url(self):
-        messages.success(self.request, _("Voucher created"))
+        messages.success(self.request, "Промокод создан")
         return super().get_success_url()
 
 
@@ -157,7 +156,7 @@ class VoucherUpdateView(generic.UpdateView):
         voucher_set = self.get_object().voucher_set
         if voucher_set is not None:
             messages.warning(
-                request, _("The voucher can only be edited as part of its set")
+                request, "Промокод можно редактировать только как часть его набора"
             )
             return redirect("dashboard:voucher-set-update", pk=voucher_set.pk)
         return super().dispatch(request, *args, **kwargs)
@@ -179,7 +178,7 @@ class VoucherUpdateView(generic.UpdateView):
         return response
 
     def get_success_url(self):
-        messages.success(self.request, _("Voucher updated"))
+        messages.success(self.request, "Промокод обновлен")
         return super().get_success_url()
 
 
@@ -199,7 +198,7 @@ class VoucherDeleteView(generic.DeleteView):
         return self.delete(request, *args, **kwargs)
 
     def get_success_url(self):
-        messages.warning(self.request, _("Voucher deleted"))
+        messages.warning(self.request, "Промокод удален")
         if self.object.voucher_set is not None:
             return reverse(
                 "dashboard:voucher-set-detail",
@@ -216,7 +215,7 @@ class VoucherSetCreateView(generic.CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Create voucher set")
+        ctx["title"] = "Создать набор промокодов"
         return ctx
 
     def get_initial(self):
@@ -225,7 +224,7 @@ class VoucherSetCreateView(generic.CreateView):
         return initial
 
     def get_success_url(self):
-        messages.success(self.request, _("Voucher set created"))
+        messages.success(self.request, "Набор промокодов создан")
         return reverse("dashboard:voucher-set-list")
 
 
@@ -251,7 +250,7 @@ class VoucherSetUpdateView(generic.UpdateView):
         return initial
 
     def get_success_url(self):
-        messages.success(self.request, _("Voucher updated"))
+        messages.success(self.request, "Промокод обновлен")
         return reverse("dashboard:voucher-set-detail", kwargs={"pk": self.object.pk})
 
 
@@ -292,7 +291,7 @@ class VoucherSetDetailView(generic.ListView):
         data = self.form.cleaned_data
         if data["code"]:
             qs = qs.filter(code__icontains=data["code"])
-            self.search_filters.append(_('Code matches "%s"') % data["code"])
+            self.search_filters.append('Промокод соответствует "%s"' % data["code"])
 
         return qs
 
@@ -322,7 +321,7 @@ class VoucherSetListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        description = _("Voucher sets")
+        description = "Набор промокодов"
         ctx["description"] = description
         return ctx
 
@@ -353,5 +352,5 @@ class VoucherSetDeleteView(generic.DeleteView):
     context_object_name = "voucher_set"
 
     def get_success_url(self):
-        messages.warning(self.request, _("Voucher set deleted"))
+        messages.warning(self.request, "Набор промокодо удален")
         return reverse("dashboard:voucher-set-list")

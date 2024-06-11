@@ -75,9 +75,7 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
             result = strategy.fetch_for_product(obj)
 
         if result:
-            if result.price.is_tax_known:
-                return result.price.incl_tax
-            return result.price.excl_tax
+            return result.price.money
 
     def prepare_num_in_stock(self, obj):
         strategy = self.get_strategy()

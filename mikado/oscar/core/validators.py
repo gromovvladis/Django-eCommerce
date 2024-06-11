@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.urls import get_urlconf, resolve
 from django.utils.translation import get_language, get_language_from_path
-from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
 
 from oscar.core.loading import get_model
@@ -42,7 +41,7 @@ class ExtendedURLValidator(validators.URLValidator):
                     self.is_local_url = True
                 else:
                     return
-            raise ValidationError(_('The URL "%s" does not exist') % value)
+            raise ValidationError('URL-адрес "%s" не существует' % value)
         else:
             self.is_local_url = True
 
@@ -100,17 +99,17 @@ class URLDoesNotExistValidator(ExtendedURLValidator):
         except ValidationError:
             # Page exists - that is what we want
             return
-        raise ValidationError(_("Specified page already exists!"), code="invalid")
+        raise ValidationError("Указанная страница уже существует!", code="invalid")
 
 
 def non_whitespace(value):
     stripped = value.strip()
     if not stripped:
-        raise ValidationError(_("This field is required"))
+        raise ValidationError("Это поле обязательно к заполнению")
     return stripped
 
 
 def non_python_keyword(value):
     if keyword.iskeyword(value):
-        raise ValidationError(_("This field is invalid as its value is forbidden"))
+        raise ValidationError("Это поле недействительно, поскольку его значение запрещено.")
     return value

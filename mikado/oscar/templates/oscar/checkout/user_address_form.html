@@ -10,9 +10,9 @@
 {% block payment_method %}{% endblock %}
 {% block payment_details %}{% endblock %}
 
-{% comment %} {% block checkout_nav %}
+{% block checkout_nav %}
     {% include 'oscar/checkout/nav.html' with step=1 %}
-{% endblock %} {% endcomment %}
+{% endblock %}
 
 {% block checkout_title %}{% trans "Edit address" %}{% endblock %}
 

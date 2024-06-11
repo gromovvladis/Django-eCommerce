@@ -153,7 +153,7 @@ class Structured(Base):
         Select appropriate stock record for all children of a product
         """
         records = []
-        for child in product.children.public():
+        for child in product.children.order_by('order').public():
             # Use tuples of (child product, stockrecord)
             records.append((child, self.select_stockrecord(child)))
         return records
@@ -245,9 +245,8 @@ class NoTax(object):
         #vlad
         return FixedPrice(
             currency=stockrecord.price_currency,
-            excl_tax=stockrecord.price,
+            money=stockrecord.price,
             old_price=stockrecord.old_price,
-            tax=D("0.00"),
         )
 
     #vlad
@@ -259,7 +258,7 @@ class NoTax(object):
         stockrecord = stockrecords[0]
 
         variations_price = dict()
-        prices = namedtuple("prices", ["price", "old_price",])
+        # prices = namedtuple("prices", ["price", "old_price",])
 
         if product.is_parent:
             for stc in stockrecords:
@@ -267,21 +266,12 @@ class NoTax(object):
                     'price':stc.price,
                     'old_price':stc.old_price
                 }
-                
-        s=FixedPrice(
-            currency=stockrecord.price_currency,
-            excl_tax=stockrecord.price,
-            old_price=stockrecord.old_price,
-            variations_price=variations_price,
-            tax=D("0.00"),
-        )
 
         return FixedPrice(
             currency=stockrecord.price_currency,
-            excl_tax=stockrecord.price,
+            money=stockrecord.price,
             old_price=stockrecord.old_price,
             variations_price=variations_price,
-            tax=D("0.00"),
         )
 
 
@@ -301,10 +291,9 @@ class FixedRateTax(object):
             return UnavailablePrice()
         rate = self.get_rate(product, stockrecord)
         exponent = self.get_exponent(stockrecord)
-        tax = (stockrecord.price * rate).quantize(exponent)
         #vlad
         return TaxInclusiveFixedPrice(
-            currency=stockrecord.price_currency, excl_tax=stockrecord.price, old_price=stockrecord.old_price, tax=tax
+            currency=stockrecord.price_currency, money=stockrecord.price, old_price=stockrecord.old_price,
         )
 
     def parent_pricing_policy(self, product, children_stock):
@@ -316,11 +305,10 @@ class FixedRateTax(object):
         stockrecord = stockrecords[0]
         rate = self.get_rate(product, stockrecord)
         exponent = self.get_exponent(stockrecord)
-        tax = (stockrecord.price * rate).quantize(exponent)
 
         #vlad
         return FixedPrice(
-            currency=stockrecord.price_currency, excl_tax=stockrecord.price, old_price=stockrecord.old_price, tax=tax
+            currency=stockrecord.price_currency, money=stockrecord.price, old_price=stockrecord.old_price
         )
 
     def get_rate(self, product, stockrecord):
@@ -354,7 +342,7 @@ class DeferredTax(object):
             return UnavailablePrice()
         #vlad
         return FixedPrice(
-            currency=stockrecord.price_currency, excl_tax=stockrecord.price, old_price=stockrecord.old_price,
+            currency=stockrecord.price_currency, money=stockrecord.price, old_price=stockrecord.old_price,
         )
 
     def parent_pricing_policy(self, product, children_stock):
@@ -367,7 +355,7 @@ class DeferredTax(object):
 
         #vlad
         return FixedPrice(
-            currency=stockrecord.price_currency, excl_tax=stockrecord.price, old_price=stockrecord.old_price,
+            currency=stockrecord.price_currency, money=stockrecord.price, old_price=stockrecord.old_price,
         )
 
 
@@ -382,36 +370,5 @@ class Default(UseFirstStockRecord, StockRequired, NoTax, Structured):
     product, ensures that stock is available (unless the product class
     indicates that we don't need to track stock) and charges zero tax.
     """
+    rate = D(0)
 
-
-class UK(UseFirstStockRecord, StockRequired, FixedRateTax, Structured):
-    """
-    Sample strategy for the UK that:
-
-    - uses the first stockrecord for each product (effectively assuming
-        there is only one).
-    - requires that a product has stock available to be bought
-    - applies a fixed rate of tax on all products
-
-    This is just a sample strategy used for internal development.  It is not
-    recommended to be used in production, especially as the tax rate is
-    hard-coded.
-    """
-
-    # Use UK VAT rate (as of December 2013)
-    rate = D("0.20")
-
-
-class US(UseFirstStockRecord, StockRequired, DeferredTax, Structured):
-    """
-    Sample strategy for the US.
-
-    - uses the first stockrecord for each product (effectively assuming
-      there is only one).
-    - requires that a product has stock available to be bought
-    - doesn't apply a tax to product prices (normally this will be done
-      after the shipping address is entered).
-
-    This is just a sample one used for internal development.  It is not
-    recommended to be used in production.
-    """

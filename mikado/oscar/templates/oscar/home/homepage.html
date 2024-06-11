@@ -1,0 +1,62 @@
+{% extends "oscar/layout.html" %}
+
+{% load static %}
+{% load svg_tags %}
+
+{% block title %}
+    {% if summary %}{{ summary }} |{% endif %} {{ block.super }}
+{% endblock %}
+
+{% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pt-sm-2 pb-sm-6{% endblock %}
+
+{% block app_class %}v-app---home{% endblock %}
+{% block nav_class %}v-app__nav--home{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav_title %}
+    <a href="{{ homepage_url }}" data-id="header-logo"
+        class="logo_nav d-sm-flex shrink router-link-exact-active router-link-active"
+        aria-current="page">
+        {% icon file_name='header/logo'%}
+    </a>
+{% endblock %}
+
+{% block carousel %}
+    {% include "oscar/home/partials/slider.html" %}
+{% endblock %}
+
+{% block sticky_address %}
+    <div class="stiky-address-button d-sm-none pb-2">
+        <a href="{% url 'address:delivery-address' %}" data-id="address-button"
+            class="v-address-button fill-width">
+            {% icon file_name='map/location-arrow' class_str="v-address-button__icon shrink mx-1" size=24 stroke='#fff'%}
+            <div class="d-flex flex-column justify-space-between align-center fill-width mr-2">
+                <span class="v-address-button__text">
+                    Адрес доставки
+                </span>
+            </div>
+        </a>
+    </div> 
+{% endblock %}
+
+{% block content %}
+    <div class="home__wrapper d-flex flex-column">
+        {% block mobile_categories %}
+            {% include "oscar/home/partials/mobile-categories.html" %}
+        {% endblock %}
+
+        <div class="home-desc__wrapper d-none mt-2">
+            {% block desctop_home %}
+                {% include "oscar/home/partials/desctop-home.html" with promo_cats=promo_cats %}
+            {% endblock %}  
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/slider/slider.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/slider/homepage-sliders.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+{% endblock %}

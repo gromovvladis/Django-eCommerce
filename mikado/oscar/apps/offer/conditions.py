@@ -1,11 +1,9 @@
 from decimal import ROUND_UP
 from decimal import Decimal as D
 
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext
-
 from oscar.core.loading import get_classes, get_model
 from oscar.templatetags.currency_filters import currency
+from django.utils.translation import ngettext
 
 Condition = get_model("offer", "Condition")
 range_anchor, unit_price = get_classes("offer.utils", ["range_anchor", "unit_price"])
@@ -19,7 +17,7 @@ class CountCondition(Condition):
     basket.
     """
 
-    _description = _("Basket includes %(count)d item(s) from %(range)s")
+    _description = "Корзина включает в себя %(count)d товар(ов) из диапазона - %(range)s"
 
     @property
     def name(self):
@@ -38,8 +36,8 @@ class CountCondition(Condition):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Count condition")
-        verbose_name_plural = _("Count conditions")
+        verbose_name = "Условие подсчета"
+        verbose_name_plural = "Условия подсчетов"
 
     def is_satisfied(self, offer, basket):
         """
@@ -73,8 +71,8 @@ class CountCondition(Condition):
         delta = self.value - num_matches
         if delta > 0:
             return ngettext(
-                "Buy %(delta)d more product from %(range)s",
-                "Buy %(delta)d more products from %(range)s",
+                "Купите дополнительно %(delta)d товар из %(range)s",
+                "Купите дополнительно %(delta)d товара(ов) из %(range)s",
                 int(delta),
             ) % {"delta": delta, "range": self.range}
 
@@ -111,7 +109,7 @@ class CoverageCondition(Condition):
     the basket.
     """
 
-    _description = _("Basket includes %(count)d distinct item(s) from %(range)s")
+    _description = "Корзина включает в себя %(count)d отличный(ых) товар(ов) из диапазона - %(range)s"
 
     @property
     def name(self):
@@ -130,8 +128,8 @@ class CoverageCondition(Condition):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Coverage Condition")
-        verbose_name_plural = _("Coverage Conditions")
+        verbose_name = "Условие покрытия"
+        verbose_name_plural = "Условия покрытиий"
 
     def is_satisfied(self, offer, basket):
         """
@@ -163,8 +161,8 @@ class CoverageCondition(Condition):
         delta = self.value - self._get_num_covered_products(basket, offer)
         if delta > 0:
             return ngettext(
-                "Buy %(delta)d more product from %(range)s",
-                "Buy %(delta)d more products from %(range)s",
+                "Купите дополнительно %(delta)d товар из %(range)s",
+                "Купите дополнительно %(delta)d товара(ов) из %(range)s",
                 int(delta),
             ) % {"delta": delta, "range": self.range}
 
@@ -219,7 +217,7 @@ class ValueCondition(Condition):
     basket.
     """
 
-    _description = _("Basket includes %(amount)s from %(range)s")
+    _description = "Корзина включает в себя %(amount)s из диапазона - %(range)s"
 
     @property
     def name(self):
@@ -238,8 +236,8 @@ class ValueCondition(Condition):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = _("Value condition")
-        verbose_name_plural = _("Value conditions")
+        verbose_name = "Условие значения"
+        verbose_name_plural = "Условия значений"
 
     def is_satisfied(self, offer, basket):
         """
@@ -280,7 +278,11 @@ class ValueCondition(Condition):
         value_of_matches = self._get_value_of_matches(offer, basket)
         delta = self.value - value_of_matches
         if delta > 0:
-            return _("Spend %(value)s more from %(range)s") % {
+            # return ("Купите еще на %(value)s товаров из %(range)s для участия в акции") % {
+            #     "value": currency(delta, basket.currency),
+            #     "range": self.range,
+            # }
+            return ("Купите еще на %(value)s товаров из списка ниже для участия в акции") % {
                 "value": currency(delta, basket.currency),
                 "range": self.range,
             }

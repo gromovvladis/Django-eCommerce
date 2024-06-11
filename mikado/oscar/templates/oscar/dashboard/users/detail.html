@@ -16,7 +16,7 @@
     </nav>
 {% endblock %}
 
-{% block headertext %}{{ customer.email }}{% endblock %}
+{% block navtext %}{{ customer.email }}{% endblock %}
 
 {% block dashboard_content %}
     <div class="row">
@@ -131,7 +131,7 @@
                                             <tr>
                                                 <td><a href="{% url 'dashboard:order-detail' order.number %}">{{ order.number }}</a></td>
                                                 <td>{{ order.num_items }}</td>
-                                                <td>{{ order.basket_total_incl_tax|currency }}</td>
+                                                <td>{{ order.basket_total|currency }}</td>
                                                 <td>{{ order.date_placed|date }}</td>
                                                 <td>{{ order.status|default:"-" }}</td>
                                                 <td><a href="{% url 'dashboard:order-detail' number=order.number %}" class="btn btn-info">{% trans "View" %}</a></td>

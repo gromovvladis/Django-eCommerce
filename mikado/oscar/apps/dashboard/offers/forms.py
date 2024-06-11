@@ -1,7 +1,6 @@
 from django import forms
 from django.conf import settings
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 
 from oscar.core.loading import get_model
 from oscar.forms import widgets
@@ -24,7 +23,7 @@ def get_offer_type_choices():
 
 
 class MetaDataForm(forms.ModelForm):
-    offer_type = forms.ChoiceField(label=_("Type"), choices=get_offer_type_choices)
+    offer_type = forms.ChoiceField(label="Тип", choices=get_offer_type_choices)
 
     class Meta:
         model = ConditionalOffer
@@ -39,17 +38,17 @@ class MetaDataForm(forms.ModelForm):
             and self.instance.vouchers.exists()
         ):
             raise forms.ValidationError(
-                _("This can only be changed if it has no vouchers attached to it")
+                "Это можно изменить только в том случае, если к нему не прикреплены ваучеры."
             )
         return data
 
 
 class RestrictionsForm(forms.ModelForm):
     start_datetime = forms.DateTimeField(
-        widget=widgets.DateTimePickerInput(), label=_("Start date"), required=False
+        widget=widgets.DateTimePickerInput(), label="Дата начала", required=False
     )
     end_datetime = forms.DateTimeField(
-        widget=widgets.DateTimePickerInput(), label=_("End date"), required=False
+        widget=widgets.DateTimePickerInput(), label="Дата окончания", required=False
     )
 
     def __init__(self, *args, **kwargs):
@@ -75,11 +74,11 @@ class RestrictionsForm(forms.ModelForm):
         start = cleaned_data["start_datetime"]
         end = cleaned_data["end_datetime"]
         if start and end and end < start:
-            raise forms.ValidationError(_("The end date must be after the start date"))
+            raise forms.ValidationError("Дата окончания должна быть позже даты начала.")
         exclusive = cleaned_data["exclusive"]
         combinations = cleaned_data["combinations"]
         if exclusive and combinations:
-            raise forms.ValidationError(_("Exclusive offers cannot be combined"))
+            raise forms.ValidationError("Эксклюзивные предложения не суммируются.")
         return cleaned_data
 
     def save(self, *args, **kwargs):
@@ -111,7 +110,7 @@ class RestrictionsForm(forms.ModelForm):
 
 class ConditionForm(forms.ModelForm):
     custom_condition = forms.ChoiceField(
-        required=False, label=_("Custom condition"), choices=()
+        required=False, label="Пользовательское условие", choices=()
     )
 
     def __init__(self, *args, **kwargs):
@@ -143,26 +142,20 @@ class ConditionForm(forms.ModelForm):
         # has been chosen
         if not any(data.values()):
             raise forms.ValidationError(
-                _(
-                    "Please either choose a range, type and value OR "
-                    "select a custom condition"
-                )
+                "Пожалуйста, выберите диапазон, тип и значение ИЛИ "
+                "выберете индивидуальное условие"
             )
 
         if data["custom_condition"]:
             if data.get("range") or data.get("type") or data.get("value"):
                 raise forms.ValidationError(
-                    _(
-                        "No other options can be set if you are using a "
-                        "custom condition"
-                    )
+                    "Никакие другие параметры не могут быть установлены, если вы используете "
+                    "индивидуальное условие"
                 )
         elif not data.get("type"):
             raise forms.ValidationError(
-                _(
-                    "Please either choose a range, type and value OR "
-                    "select a custom condition"
-                )
+                "Пожалуйста, выберите диапазон, тип и значение ИЛИ "
+                "выбрать индивидуальное условие"
             )
 
         return data
@@ -177,7 +170,7 @@ class ConditionForm(forms.ModelForm):
 
 class BenefitForm(forms.ModelForm):
     custom_benefit = forms.ChoiceField(
-        required=False, label=_("Custom incentive"), choices=()
+        required=False, label="Стимул", choices=()
     )
 
     def __init__(self, *args, **kwargs):
@@ -208,26 +201,20 @@ class BenefitForm(forms.ModelForm):
         # has been chosen
         if not any(data.values()):
             raise forms.ValidationError(
-                _(
-                    "Please either choose a range, type and value OR "
-                    "select a custom incentive"
-                )
+                "Пожалуйста, выберите диапазон, тип и значение ИЛИ "
+                "выберете индивидуальный стимул"
             )
 
         if data["custom_benefit"]:
             if data.get("range") or data.get("type") or data.get("value"):
                 raise forms.ValidationError(
-                    _(
-                        "No other options can be set if you are using a "
-                        "custom incentive"
-                    )
+                    "Никакие другие параметры не могут быть установлены, если вы используете "
+                    "индивидуальный стимул"
                 )
         elif not data.get("type"):
             raise forms.ValidationError(
-                _(
-                    "Please either choose a range, type and value OR "
-                    "select a custom incentive"
-                )
+                "Пожалуйста, выберите диапазон, тип и значение ИЛИ "
+                "выберете индивидуальный стимул"
             )
 
         return data
@@ -241,17 +228,17 @@ class BenefitForm(forms.ModelForm):
 
 
 class OfferSearchForm(forms.Form):
-    name = forms.CharField(required=False, label=_("Offer name"))
+    name = forms.CharField(required=False, label="Название предложения")
     is_active = forms.NullBooleanField(
-        required=False, label=_("Is active?"), widget=widgets.NullBooleanSelect
+        required=False, label="Активен?", widget=widgets.NullBooleanSelect
     )
     offer_type = forms.ChoiceField(
-        required=False, label=_("Offer type"), choices=get_offer_type_choices
+        required=False, label="Тип предложения", choices=get_offer_type_choices
     )
     has_vouchers = forms.NullBooleanField(
-        required=False, label=_("Has vouchers?"), widget=widgets.NullBooleanSelect
+        required=False, label="Есть промокод?", widget=widgets.NullBooleanSelect
     )
-    voucher_code = forms.CharField(required=False, label=_("Voucher code"))
+    voucher_code = forms.CharField(required=False, label="Код промокода")
 
     basic_fields = [
         "name",

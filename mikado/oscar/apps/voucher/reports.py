@@ -1,5 +1,3 @@
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class, get_model
 
 ReportGenerator = get_class("dashboard.reports.reports", "ReportGenerator")
@@ -14,10 +12,10 @@ class VoucherReportCSVFormatter(ReportCSVFormatter):
     def generate_csv(self, response, vouchers):
         writer = self.get_csv_writer(response)
         header_row = [
-            _("Voucher code"),
-            _("Added to a basket"),
-            _("Used in an order"),
-            _("Total discount"),
+            "Промокод",
+            "Добавлено в корзину",
+            "Используется в заказе",
+            "Общая скидка",
         ]
         writer.writerow(header_row)
 
@@ -37,7 +35,7 @@ class VoucherReportHTMLFormatter(ReportHTMLFormatter):
 
 class VoucherReportGenerator(ReportGenerator):
     code = "vouchers"
-    description = _("Voucher performance")
+    description = "Исполнение ваучера"
     model_class = Voucher
 
     formatters = {

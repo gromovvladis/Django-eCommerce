@@ -1,24 +1,70 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
 
+{% load svg_tags %}
+{% load static %}
 
-{% load i18n %}
+{% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
 
-{% block extra_breadcrumbs %}
-    <li class="breadcrumb-item">
-        <a href="{% url 'customer:address-list' %}">{% trans 'Address book' %}</a>
-    </li>
+{% block nav_title_center %}{{ page_title }}{% endblock %}
+
+{% block breadcrumbs %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <a href="{% url 'customer:summary' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Личный кабинет</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <a href="{% url 'customer:address-list' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Адрес доставки</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
+    </div>
 {% endblock %}
 
 {% block tabcontent %}
-<form method="post">
-    {% csrf_token %}
-    <p>{% trans 'Are you sure you want to delete this address?' %}</p>
+    <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">    
+        <form method="post">
+            {% csrf_token %}
+            <div class="v-delivery mb-3 mb-sm-4" id="address_fields">
 
-    <p><strong>{{ object.summary }}</strong></p>
+                <div class="d-none d-sm-flex mb-2">
+                    <h1>Вы уверены, что хотите удалить этот адрес?</h1>
+                </div>
 
-    <div class="form-group form-actions">
-        <button type="submit" class="btn btn-danger btn-lg" data-loading-text="{% trans 'Deleting...' %}">{% trans 'Delete' %}</button> {% trans 'or' %} <a href="{% url 'customer:address-list' %}">{% trans 'cancel' %}</a>
+                <p>
+                    {% for field in object.active_address_fields_and_labels %}
+                        {{ field.label }}: {{ field.value }}{% if not forloop.last %},{% endif %}
+                        <br>
+                    {% endfor %}
+                </p>
+
+                <div class="d-flex align-center justify-space-between mt-2 mt-sm-3">
+                    <div class="v-confirm__button">
+                        <button id="save_address" type="submit" class="v-button fill-width v-button--outline justify-center shrink">
+                            <span class="v-button__wrapper">
+                                <span class="v-button__value"> Удалить адрес </span>
+                            </span>
+                        </button>
+                    </div>
+
+                    <div class="v-confirm__button">
+                        <button onclick="window.location.href='{% url 'customer:address-list' %}" type="button" class="v-button fill-width v-button--white justify-center shrink">
+                            <span class="v-button__wrapper">
+                                <span class="v-button__value"> Отмена </span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </form>
     </div>
-</form>
 {% endblock tabcontent %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/profile/profile-links.js" %}"></script>
+{% endblock %}
+
 

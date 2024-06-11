@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic import ListView
 
@@ -38,7 +37,7 @@ class PageListView(ListView):
         """
         # pylint: disable=attribute-defined-outside-init
         self.desc_ctx = {
-            "main_filter": _("All pages"),
+            "main_filter": "Все станицы",
             "title_filter": "",
         }
         queryset = self.model.objects.all().order_by("title")
@@ -53,7 +52,7 @@ class PageListView(ListView):
         if data["title"]:
             queryset = queryset.filter(title__icontains=data["title"])
             self.desc_ctx["title_filter"] = (
-                _(" with title containing '%s'") % data["title"]
+                " с заголовком, содержащим '%s'" % data["title"]
             )
 
         return queryset
@@ -94,7 +93,7 @@ class PageCreateUpdateMixin(object):
 class PageCreateView(PageCreateUpdateMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Create New Page")
+        ctx["title"] = "Создать новую страницу"
         return ctx
 
     def form_valid(self, form):
@@ -138,5 +137,5 @@ class PageDeleteView(generic.DeleteView):
     model = FlatPage
 
     def get_success_url(self):
-        messages.success(self.request, _("Deleted page '%s'") % self.object.title)
+        messages.success(self.request, "Удалить страницу '%s'" % self.object.title)
         return reverse("dashboard:page-list")

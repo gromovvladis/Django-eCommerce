@@ -1,0 +1,46 @@
+{% load currency_filters %}
+{% load shipping_tags %}
+
+{% with discounts=order.basket_discounts  %}
+        
+    <div class="v-order__total_and_discounts d-flex flex-column mt-3">
+
+        {% block discount_totals %}
+            {% if discounts %}
+                <div class="v-prices__price_discounts">
+
+                    <span class="d-flex justify-space-between no-wrap">
+                        До скидки
+                        <span class="v-prices__price-before">
+                            {{ order.basket_total_before_discounts|currency:order.basket.currency }}
+                        </span>
+                    </span>
+
+                    {% for discount in discounts %}
+                        <span class="d-flex justify-space-between no-wrap">
+                            {{ discount.offer_name }}
+                            {% if discount.description %}
+                                ({{ discount.description }})
+                            {% endif %}
+                            <span class="v-prices__price-before">
+                                - {{ discount.amount|currency:order.basket.currency }}
+                            </span>
+                        </span>
+                    {% endfor %}
+
+                </div>
+            {% endif %}
+        {% endblock %}
+
+        <div class="v-order__info-total d-flex align-end total">
+            Итого
+            <div role="separator" class="v-spacer"></div>
+            <span class="v-prices d-flex flex-column align-start v-prices--big">
+                <span class="v-prices__price no-wrap">
+                    {{ order.total|currency:order.basket.currency }}
+                </span>
+            </span>
+        </div>
+    </div>
+
+{% endwith %}

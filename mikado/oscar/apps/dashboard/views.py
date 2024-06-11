@@ -75,13 +75,13 @@ class IndexView(TemplateView):
             hourly_orders = orders.filter(
                 date_placed__gte=start_time, date_placed__lt=end_time
             )
-            total = hourly_orders.aggregate(Sum("total_incl_tax"))[
-                "total_incl_tax__sum"
+            total = hourly_orders.aggregate(Sum("total"))[
+                "total__sum"
             ] or D("0.0")
-            order_total_hourly.append({"end_time": end_time, "total_incl_tax": total})
+            order_total_hourly.append({"end_time": end_time, "total": total})
             start_time = end_time
 
-        max_value = max([x["total_incl_tax"] for x in order_total_hourly])
+        max_value = max([x["total"] for x in order_total_hourly])
         divisor = 1
         while divisor < max_value / 50:
             divisor *= 10
@@ -90,7 +90,7 @@ class IndexView(TemplateView):
         if max_value:
             segment_size = (max_value) / D("100.0")
             for item in order_total_hourly:
-                item["percentage"] = int(item["total_incl_tax"] / segment_size)
+                item["percentage"] = int(item["total"] / segment_size)
 
             y_range = []
             y_axis_steps = max_value / D(str(segments))
@@ -141,12 +141,12 @@ class IndexView(TemplateView):
         stats = {
             "total_orders_last_day": orders_last_day.count(),
             "total_lines_last_day": total_lines_last_day,
-            "average_order_costs": orders_last_day.aggregate(Avg("total_incl_tax"))[
-                "total_incl_tax__avg"
+            "average_order_costs": orders_last_day.aggregate(Avg("total"))[
+                "total__avg"
             ]
             or D("0.00"),
-            "total_revenue_last_day": orders_last_day.aggregate(Sum("total_incl_tax"))[
-                "total_incl_tax__sum"
+            "total_revenue_last_day": orders_last_day.aggregate(Sum("total"))[
+                "total__sum"
             ]
             or D("0.00"),
             "hourly_report_dict": self.get_hourly_report(orders),
@@ -163,8 +163,8 @@ class IndexView(TemplateView):
             "total_open_baskets": baskets.count(),
             "total_orders": orders.count(),
             "total_lines": lines.count(),
-            "total_revenue": orders.aggregate(Sum("total_incl_tax"))[
-                "total_incl_tax__sum"
+            "total_revenue": orders.aggregate(Sum("total"))[
+                "total__sum"
             ]
             or D("0.00"),
             "order_status_breakdown": orders.order_by("status")

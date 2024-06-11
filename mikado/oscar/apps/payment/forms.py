@@ -5,10 +5,7 @@ from datetime import date
 from django import forms
 from django.core import validators
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class, get_model
-from oscar.forms.mixins import PhoneNumberMixin
 
 from . import bankcards
 
@@ -24,7 +21,7 @@ class BankcardNumberField(forms.CharField):
         _kwargs = {
             "max_length": 20,
             "widget": forms.TextInput(attrs={"autocomplete": "off"}),
-            "label": _("Card number"),
+            "label": "Номер карты",
         }
         if "types" in kwargs:
             self.accepted_cards = set(kwargs.pop("types"))
@@ -46,12 +43,12 @@ class BankcardNumberField(forms.CharField):
         value = non_decimal.sub("", (value or "").strip())
 
         if value and not bankcards.luhn(value):
-            raise forms.ValidationError(_("Please enter a valid credit card number."))
+            raise forms.ValidationError("Пожалуйста введите действующий номер карты.")
 
         if hasattr(self, "accepted_cards"):
             card_type = bankcards.bankcard_type(value)
             if card_type not in self.accepted_cards:
-                raise forms.ValidationError(_("%s cards are not accepted." % card_type))
+                raise forms.ValidationError("%s карты не принимаются." % card_type)
 
         return super().clean(value)
 
@@ -76,8 +73,8 @@ class BankcardMonthField(forms.MultiValueField):
     """
 
     default_error_messages = {
-        "invalid_month": _("Enter a valid month."),
-        "invalid_year": _("Enter a valid year."),
+        "invalid_month": "Введите действительный месяц.",
+        "invalid_year": "Введите действительный год.",
     }
     num_years = 5
 
@@ -120,7 +117,7 @@ class BankcardExpiryMonthField(BankcardMonthField):
         today = date.today()
         _kwargs = {
             "required": True,
-            "label": _("Valid to"),
+            "label": "Действителен до",
             "initial": ["%.2d" % today.month, today.year],
         }
         _kwargs.update(kwargs)
@@ -137,9 +134,8 @@ class BankcardExpiryMonthField(BankcardMonthField):
     def clean(self, value):
         expiry_date = super().clean(value)
         if expiry_date and date.today() > expiry_date:
-            raise forms.ValidationError(
-                _("The expiration date you entered is in the past.")
-            )
+            raise forms.ValidationError("Введенная вами дата истечения срока действия уже прошла.")
+        
         return expiry_date
 
     def compress(self, data_list):
@@ -162,7 +158,7 @@ class BankcardStartingMonthField(BankcardMonthField):
     def __init__(self, *args, **kwargs):
         _kwargs = {
             "required": False,
-            "label": _("Valid from"),
+            "label": "Действителен с",
         }
         _kwargs.update(kwargs)
         super().__init__(*args, **_kwargs)
@@ -181,9 +177,7 @@ class BankcardStartingMonthField(BankcardMonthField):
     def clean(self, value):
         starting_date = super().clean(value)
         if starting_date and date.today() < starting_date:
-            raise forms.ValidationError(
-                _("The starting date you entered is in the future.")
-            )
+            raise forms.ValidationError("Введенная вами дата начала находится в будущем.")
         return starting_date
 
     def compress(self, data_list):
@@ -204,13 +198,10 @@ class BankcardCCVField(forms.RegexField):
     def __init__(self, *args, **kwargs):
         _kwargs = {
             "required": True,
-            "label": _("CCV number"),
+            "label": "CCV",
             "widget": forms.TextInput(attrs={"size": "5"}),
-            "error_messages": {"invalid": _("Please enter a 3 or 4 digit number")},
-            "help_text": _(
-                "This is the 3 or 4 digit security number "
-                "on the back of your bankcard"
-            ),
+            "error_messages": {"invalid": "Пожалуйста, введите 4-значный номер"},
+            "help_text": "Это четырехзначный код безопасности на обратной стороне банковской карты",
         }
         _kwargs.update(kwargs)
         super().__init__(r"^\d{3,4}$", *args, **_kwargs)
@@ -242,9 +233,8 @@ class BankcardForm(forms.ModelForm):
         number, ccv = data.get("number"), data.get("ccv")
         if number and ccv:
             if bankcards.is_amex(number) and len(ccv) != 4:
-                raise forms.ValidationError(
-                    _("American Express cards use a 4 digit security code")
-                )
+                raise forms.ValidationError("Карты American Express используют 4-значный код безопасности")
+
         return data
 
     def save(self, *args, **kwargs):

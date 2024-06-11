@@ -2,8 +2,6 @@ from datetime import time
 
 from django.http import HttpResponse
 from django.template.defaultfilters import date
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core import utils
 from oscar.core.compat import UnicodeCSVWriter
 
@@ -33,7 +31,7 @@ class ReportGenerator(object):
         self.queryset = self.filter_with_date_range(self.queryset)
 
     def report_description(self):
-        return _("%(report_filter)s between %(start_date)s and %(end_date)s") % {
+        return "%(report_filter)s между %(start_date)s и %(end_date)s" % {
             "report_filter": self.description,
             "start_date": date(self.start_date, "DATE_FORMAT"),
             "end_date": date(self.end_date, "DATE_FORMAT"),

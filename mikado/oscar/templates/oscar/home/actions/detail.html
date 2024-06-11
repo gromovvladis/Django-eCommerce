@@ -1,0 +1,79 @@
+{% extends "oscar/layout.html" %}
+
+{% load static %}
+{% load svg_tags %}
+{% load image_tags %}
+{% load product_tags %}
+
+{% block title %}
+    {% if summary %}{{ summary }} |{% endif %} {{ block.super }}
+{% endblock %}
+
+{% block wrapper_class %}v-actions d-flex flex-column pd-2 pb-sm-8 container pd-0{% endblock %}
+
+{% block app_class %}v-app---action{% endblock %}
+{% block nav_class %}v-app__nav--action{% endblock %}
+
+{% block breadcrumbs %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 ">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="mr-1 pd-0">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <a href="{% url 'home:actions' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Акции</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">{{ summary }}</span>
+    </div>
+{% endblock %}
+
+{% block nav_title_center %}{{ summary }}{% endblock %}
+
+{% block content %}
+    <div class="action__wrapper d-flex flex-column">
+        <div class="v-actions__action-detail-header d-flex flex-column align-start">
+            {% if action.has_image %}
+                <div class="v-actions__action-detail-banner shrink mb-2 mb-sm-4">
+                    <div class="v-images-chunks">
+                        <div class="v-image">
+                            <div class="v-image__inner v-image__inner--action">
+                                {% with image=action.primary_image %}
+                                    {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
+                                    <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" class="img-thumbnail w-auto mx-auto my-0">
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="v-actions__action-detail-content fill-width d-flex flex-column">
+            <h1>{{ action.title }}</h1>
+            {% if offer.description %}
+                <div class="v-actions__action-detail-text mt-2 mt-sm-3">
+                    <p>{{ action.description|safe }}</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if action.all_products %}
+            <h2 class="py-2 offer-dish mt-2 text--grey-dark">Товары участвующие в акции</h2>
+            <div class="v-dishes row fill-width">
+                {% for product in action.all_products %}
+                    <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
+                        {% render_product product %}</li>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="my-3 d-flex fill-width">
+            <a class="v-button v-button--main mt-md-0" href="{% url 'home:actions' %}">Смотреть все акции</a>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+{% endblock %}

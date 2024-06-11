@@ -24,7 +24,7 @@ class SurchargeApplicator:
         For example::
             return (
                 PercentageCharge(percentage=D("2.00")),
-                FlatCharge(excl_tax=D("20.0"), incl_tax=D("20.0")),
+                FlatCharge(et=D("20.0"), it=D("20.0")),
             )
 
         Surcharges must implement the minimal API in ``oscar.apps.checkout.surcharges.BaseSurcharge``.

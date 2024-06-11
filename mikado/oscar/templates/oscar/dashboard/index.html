@@ -12,7 +12,7 @@
 {% block breadcrumbs %}
 {% endblock %}
 
-{% block headertext %}
+{% block navtext %}
 {% trans "Dashboard" %}
 {% endblock %}
 
@@ -45,7 +45,7 @@
                         <dd class="bar-layer">
                             <em>{{ item.end_time|time }}</em>
                             <span style="height: {{ item.percentage }}%;" >
-                                <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total_incl_tax|currency }}</p>
+                                <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
                             </span>
                         </dd>
                     {% endfor %}

@@ -5,7 +5,6 @@ from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
 from oscar.core.loading import get_classes, get_model
@@ -28,7 +27,7 @@ class ReviewListView(BulkEditMixin, generic.ListView):
     paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
     actions = ("update_selected_review_status",)
     checkbox_object_name = "review"
-    desc_template = _(
+    desc_template = (
         "%(main_filter)s %(date_filter)s %(status_filter)s"
         "%(kw_filter)s %(name_filter)s"
     )
@@ -52,21 +51,21 @@ class ReviewListView(BulkEditMixin, generic.ListView):
 
         if date_from:
             queryset = queryset.filter(date_created__gte=date_from)
-            self.desc_ctx["date_filter"] = _(" created after %s") % format_datetime(
+            self.desc_ctx["date_filter"] = " создан после %s" % format_datetime(
                 date_from
             )
         if date_to:
             # Add 24 hours to make search inclusive
             date_to = date_to + datetime.timedelta(days=1)
             queryset = queryset.filter(date_created__lt=date_to)
-            self.desc_ctx["date_filter"] = _(" created before %s") % format_datetime(
+            self.desc_ctx["date_filter"] = " созданный ранее %s" % format_datetime(
                 date_to
             )
 
         if date_from and date_to:
             # override description
-            self.desc_ctx["date_filter"] = _(
-                " created between %(start_date)s and %(end_date)s"
+            self.desc_ctx["date_filter"] = (
+                " создано между %(start_date)s и %(end_date)s"
             ) % {
                 "start_date": format_datetime(date_from),
                 "end_date": format_datetime(date_to),
@@ -78,11 +77,12 @@ class ReviewListView(BulkEditMixin, generic.ListView):
         queryset = sort_queryset(
             queryset,
             self.request,
-            ["date_created", "score", "total_votes"],
+            ["date_created", "score"],
+            # ["date_created", "score", "total_votes"],
             default="-date_created",
         )
         self.desc_ctx = {
-            "main_filter": _("All reviews"),
+            "main_filter": "Все отзывы",
             "date_filter": "",
             "status_filter": "",
             "kw_filter": "",
@@ -113,7 +113,7 @@ class ReviewListView(BulkEditMixin, generic.ListView):
             queryset = queryset.filter(status=status).distinct()
             display_status = self.form.get_friendly_status()
             self.desc_ctx["status_filter"] = (
-                _(" with status matching '%s'") % display_status
+                " со статусом соответствующим '%s'" % display_status
             )
         return queryset
 
@@ -122,7 +122,7 @@ class ReviewListView(BulkEditMixin, generic.ListView):
             queryset = queryset.filter(
                 Q(title__icontains=keyword) | Q(body__icontains=keyword)
             ).distinct()
-            self.desc_ctx["kw_filter"] = _(" with keyword matching '%s'") % keyword
+            self.desc_ctx["kw_filter"] = " с ключевым словом соответствующим '%s'" % keyword
         return queryset
 
     def add_filter_name(self, queryset, name):
@@ -140,7 +140,7 @@ class ReviewListView(BulkEditMixin, generic.ListView):
                     Q(user__first_name__istartswith=parts[0])
                     | Q(user__last_name__istartswith=parts[-1])
                 ).distinct()
-            self.desc_ctx["name_filter"] = _(" with customer name matching '%s'") % name
+            self.desc_ctx["name_filter"] = " спользователем соответствующим '%s'" % name
 
         return queryset
 

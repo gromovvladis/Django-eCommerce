@@ -1,7 +1,5 @@
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext_lazy
 from django_tables2 import A, Column, LinkColumn, TemplateColumn
 
 from oscar.core.loading import get_class, get_model
@@ -15,33 +13,33 @@ Option = get_model("catalogue", "Option")
 
 class ProductTable(DashboardTable):
     title = TemplateColumn(
-        verbose_name=_("Title"),
+        verbose_name="Заголовок",
         template_name="oscar/dashboard/catalogue/product_row_title.html",
         order_by="title",
         accessor=A("title"),
     )
     image = TemplateColumn(
-        verbose_name=_("Image"),
+        verbose_name="Изображение",
         template_name="oscar/dashboard/catalogue/product_row_image.html",
         orderable=False,
     )
     product_class = Column(
-        verbose_name=_("Product type"),
+        verbose_name="Тип продукта",
         accessor=A("product_class"),
         order_by="product_class__name",
     )
     variants = TemplateColumn(
-        verbose_name=_("Variants"),
+        verbose_name="Варианты",
         template_name="oscar/dashboard/catalogue/product_row_variants.html",
         orderable=False,
     )
     stock_records = TemplateColumn(
-        verbose_name=_("Stock records"),
+        verbose_name="Товарные записи",
         template_name="oscar/dashboard/catalogue/product_row_stockrecords.html",
         orderable=False,
     )
     actions = TemplateColumn(
-        verbose_name=_("Actions"),
+        verbose_name="Акции",
         template_name="oscar/dashboard/catalogue/product_row_actions.html",
         orderable=False,
     )
@@ -77,7 +75,7 @@ class CategoryTable(DashboardTable):
     num_children = LinkColumn(
         "dashboard:catalogue-category-detail-list",
         args=[A("pk")],
-        verbose_name=mark_safe(_("Number of child categories")),
+        verbose_name=mark_safe("Количество дочерних категорий"),
         accessor="get_num_children",
         orderable=False,
     )
@@ -87,7 +85,7 @@ class CategoryTable(DashboardTable):
     )
 
     icon = "sitemap"
-    caption = ngettext_lazy("%s Category", "%s Categories")
+    caption = ("%s Категория", "%s Категории")
 
     class Meta(DashboardTable.Meta):
         model = Category
@@ -97,23 +95,23 @@ class CategoryTable(DashboardTable):
 
 class AttributeOptionGroupTable(DashboardTable):
     name = TemplateColumn(
-        verbose_name=_("Name"),
+        verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/attribute_option_group_row_name.html",
         order_by="name",
     )
     option_summary = TemplateColumn(
-        verbose_name=_("Option summary"),
+        verbose_name="Краткое описание опций",
         template_name="oscar/dashboard/catalogue/attribute_option_group_row_option_summary.html",
         orderable=False,
     )
     actions = TemplateColumn(
-        verbose_name=_("Actions"),
+        verbose_name="Акции",
         template_name="oscar/dashboard/catalogue/attribute_option_group_row_actions.html",
         orderable=False,
     )
 
     icon = "sitemap"
-    caption = ngettext_lazy("%s Attribute Option Group", "%s Attribute Option Groups")
+    caption = ("%s Группа параметров атрибута", "%s Группы параметров атрибутов")
 
     class Meta(DashboardTable.Meta):
         model = AttributeOptionGroup
@@ -124,18 +122,18 @@ class AttributeOptionGroupTable(DashboardTable):
 
 class OptionTable(DashboardTable):
     name = TemplateColumn(
-        verbose_name=_("Name"),
+        verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/option_row_name.html",
         order_by="name",
     )
     actions = TemplateColumn(
-        verbose_name=_("Actions"),
+        verbose_name="Акции",
         template_name="oscar/dashboard/catalogue/option_row_actions.html",
         orderable=False,
     )
 
     icon = "reorder"
-    caption = ngettext_lazy("%s Option", "%s Options")
+    caption = ("%s Опция", "%s Опции")
 
     class Meta(DashboardTable.Meta):
         model = Option

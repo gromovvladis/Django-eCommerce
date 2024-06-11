@@ -29,7 +29,8 @@ import re
 from django.conf import settings
 from django.utils.encoding import force_str
 
-from oscar.core.utils import slugify
+# from oscar.core.utils import slugify
+from pytils.translit import slugify
 
 from .slugfield import SlugField
 

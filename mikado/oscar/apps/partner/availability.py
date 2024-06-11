@@ -1,5 +1,3 @@
-from django.utils.translation import gettext_lazy as _
-
 
 class Base(object):
     """
@@ -40,7 +38,7 @@ class Base(object):
 
         Should return a boolean and a reason
         """
-        return False, _("unavailable")
+        return False, "Недоступно"
 
 
 # Common availability policies
@@ -52,7 +50,7 @@ class Unavailable(Base):
     """
 
     code = "unavailable"
-    message = _("Unavailable")
+    message = "Недоступно"
 
 
 class Available(Base):
@@ -64,7 +62,7 @@ class Available(Base):
     """
 
     code = "available"
-    message = _("Available")
+    message = "Доступно"
 
     def is_purchase_permitted(self, quantity):
         return True, ""
@@ -88,9 +86,9 @@ class StockRequired(Base):
 
     def is_purchase_permitted(self, quantity):
         if self.num_available <= 0:
-            return False, _("no stock available")
+            return False, "нет в наличии"
         if quantity > self.num_available:
-            msg = _("a maximum of %(max)d can be bought") % {"max": self.num_available}
+            msg = "максимум %(max)d доступно для покупки" % {"max": self.num_available}
             return False, msg
         return True, ""
 
@@ -106,8 +104,8 @@ class StockRequired(Base):
     @property
     def short_message(self):
         if self.num_available > 0:
-            return _("In stock")
-        return _("Unavailable")
+            return "В наличии"
+        return "Недоступно"
 
     @property
     def message(self) -> str:
@@ -115,5 +113,5 @@ class StockRequired(Base):
         Full availability text, suitable for detail pages.
         """
         if self.num_available > 0:
-            return _("In stock (%d available)") % self.num_available
-        return _("Unavailable")
+            return "В наличии (%d шт.)" % self.num_available
+        return "Недоступно"

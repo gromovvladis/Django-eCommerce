@@ -2,6 +2,7 @@
 {% load basket_tags %}
 {% load category_tags %}
 {% load i18n %}
+{% load static %}
 {% load product_tags %}
 
 {% block title %}
@@ -19,7 +20,7 @@
     </nav>
 {% endblock breadcrumbs %}
 
-{% block headertext %}{{ range.name }}{% endblock %}
+{% block navtext %}{{ range.name }}{% endblock %}
 
 {% block content %}
     {% if range.description %}
@@ -40,3 +41,8 @@
         <p class="nonefound">{% trans "No products found." %}</p>
     {% endif %}
 {% endblock content %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+{% endblock %}

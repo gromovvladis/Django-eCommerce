@@ -1,7 +1,4 @@
 from decimal import Decimal as D
-
-from django.utils.translation import gettext_lazy as _
-
 from oscar.apps.order import exceptions
 
 
@@ -89,7 +86,7 @@ class EventHandler(object):
             # 'is_shipping_event_permitted' and enforce the correct order of
             # shipping events.
             if not line.is_shipping_event_permitted(event_type, qty):
-                msg = _("The selected quantity for line #%(line_id)s is too large") % {
+                msg = "Выбранное количество для позиций #%(line_id)s слишком большое" % {
                     "line_id": line.id
                 }
                 errors.append(msg)
@@ -104,8 +101,8 @@ class EventHandler(object):
             errors = []
             for line, qty in zip(lines, line_quantities):
                 if not line.is_payment_event_permitted(event_type, qty):
-                    msg = _(
-                        "The selected quantity for line #%(line_id)s is too large"
+                    msg = (
+                        "Выбранное количество для позиций #%(line_id)s слишком большое"
                     ) % {"line_id": line.id}
                     errors.append(msg)
             if errors:
@@ -174,7 +171,7 @@ class EventHandler(object):
                     # track how many we needed to skip and how many we settled
                     # for.
                     qty_to_include = min(qty_to_consume - qty_consumed, qty_available)
-                    total += qty_to_include * price.price_incl_tax
+                    total += qty_to_include * price.price
                     # There can't be any left to skip if we've included some in
                     # our total
                     qty_to_skip = 0

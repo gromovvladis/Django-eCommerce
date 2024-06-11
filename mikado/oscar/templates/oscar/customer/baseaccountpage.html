@@ -1,38 +1,37 @@
-{% extends "oscar/layout_2_col.html" %}
+{% extends "oscar/layout.html" %}
 
-{% load i18n %}
+{% load static %}
 
-{% block title %}
-    {{ page_title }} | {% trans 'Account' %} | {{ block.super }}
-{% endblock %}
+{% block wrapper_class %}profile fill-width px-2 pt-2 pb-3 pb-sm-4 pt-sm-2 profile__container{% endblock %}
 
-{% block body_class %}account-profile{% endblock %}
+{% block app_class %}v-app---profile{% endblock %}
+{% block nav_class %}v-app__nav--profile{% endblock %}
 
-{% block breadcrumbs %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{{ homepage_url }}">{% trans 'Home' %}</a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="{% url 'customer:summary' %}">{% trans 'Account' %}</a>
-            </li>
-            {% block extra_breadcrumbs %}{% endblock %}
-            <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
-        </ol>
-    </nav>
-{% endblock %}
-
-{% block headertext %}{{ page_title }}{% endblock %}
-
-{% block column_left %}
-    <ul class="nav nav-pills flex-column">
-        {% block standard_tabs %}
-            {% include 'oscar/customer/partials/standard_tabs.html' %}
-        {% endblock %}
-    </ul>
-{% endblock %}
+{% block sticky_address %}{% endblock %}
 
 {% block content %}
-    {% block tabcontent %}{% endblock tabcontent %}
+    <div class="profile wrapper--small d-flex flex-column fill-width fill-height">
+        {% include "oscar/partials/alert_messages.html" %}
+        <div class="profile__wrapper d-flex flex-column fill-width grow-1 pb-sm-8">
+            <div data-id="profile-wrapper" class="profile-wrapper{% if content_open %} open{% endif %} d-flex fill-width pt-0 pt-sm-3">
+                
+                <div class="profile__menu fill-width">
+
+                    <div class="d-flex flex-column fill-width pb-sm-3 ml-sm-2">
+                        <p class="profile__user-name"> Привет{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}!</p>
+                        <p class="profile__user-phone mt-1">{{ request.user.username }}</p>
+                    </div>
+
+                    {% block standard_tabs %}
+                        {% include 'oscar/customer/partials/standard_tabs.html' %}
+                    {% endblock %}
+                </div>
+
+                <div class="profile__content fill-width pl-0 pl-sm-4">
+                    {% block tabcontent %}{% endblock tabcontent %}
+                </div>
+
+            </div>
+        </div>
+    </div>
 {% endblock content %}

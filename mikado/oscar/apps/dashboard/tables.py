@@ -1,9 +1,7 @@
-from django.utils.translation import ngettext_lazy
 from django_tables2 import Table
 
-
 class DashboardTable(Table):
-    caption = ngettext_lazy("%d Row", "%d Rows")
+    caption = ("%d Ряд", "%d Ряды")
 
     def get_caption_display(self):
         # Allow overriding the caption with an arbitrary string that we cannot

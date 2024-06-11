@@ -1,28 +1,27 @@
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView, DetailView, ListView, View
+from django.urls import reverse, reverse_lazy
+from django.views.generic import CreateView, ListView
 
 from oscar.apps.catalogue.reviews.signals import review_added
-from oscar.core.loading import get_classes, get_model
-from oscar.core.utils import redirect_to_referrer
+from oscar.core.loading import get_classes, get_model, get_class
 
-ProductReviewForm, VoteForm, SortReviewsForm = get_classes(
-    "catalogue.reviews.forms", ["ProductReviewForm", "VoteForm", "SortReviewsForm"]
+PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
+ProductReviewForm, SortReviewsForm = get_classes(
+    "catalogue.reviews.forms", ["ProductReviewForm", "SortReviewsForm"]
 )
-
-Vote = get_model("reviews", "vote")
 ProductReview = get_model("reviews", "ProductReview")
 Product = get_model("catalogue", "product")
 
 
-class CreateProductReview(CreateView):
+class CreateProductReview(PageTitleMixin, CreateView):
     template_name = "oscar/catalogue/reviews/review_form.html"
     model = ProductReview
     product_model = Product
     form_class = ProductReviewForm
     view_signal = review_added
+    page_title = "Оставить отзыв"
 
     def dispatch(self, request, *args, **kwargs):
         # pylint: disable=attribute-defined-outside-init
@@ -32,9 +31,9 @@ class CreateProductReview(CreateView):
         # check permission to leave review
         if not self.product.is_review_permitted(request.user):
             if self.product.has_review_by(request.user):
-                message = _("You have already reviewed this product!")
+                message = "Вы уже оставили отзыв об этом товаре!"
             else:
-                message = _("You can't leave a review for this product.")
+                message = "Вы не можете оставить отзыв об этом товаре."
             messages.warning(self.request, message)
             return redirect(self.product.get_absolute_url())
 
@@ -43,6 +42,8 @@ class CreateProductReview(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["product"] = self.product
+        context["summary"] = "Профиль"
+        context["content_open"] = True
         return context
 
     def get_form_kwargs(self):
@@ -57,8 +58,8 @@ class CreateProductReview(CreateView):
         return response
 
     def get_success_url(self):
-        messages.success(self.request, _("Thank you for reviewing this product"))
-        return self.product.get_absolute_url()
+        messages.success(self.request, "Спасибо за ваш отзыв!")
+        return reverse_lazy("customer:order-list")
 
     def send_signal(self, request, response, review):
         self.view_signal.send(
@@ -68,47 +69,6 @@ class CreateProductReview(CreateView):
             request=request,
             response=response,
         )
-
-
-class ProductReviewDetail(DetailView):
-    template_name = "oscar/catalogue/reviews/review_detail.html"
-    context_object_name = "review"
-    model = ProductReview
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["product"] = get_object_or_404(
-            Product, pk=self.kwargs["product_pk"], is_public=True
-        )
-        return context
-
-
-class AddVoteView(View):
-    """
-    Simple view for voting on a review.
-
-    We use the URL path to determine the product and review and use a 'delta'
-    POST variable to indicate it the vote is up or down.
-    """
-
-    def post(self, request, *args, **kwargs):
-        product = get_object_or_404(
-            Product, pk=self.kwargs["product_pk"], is_public=True
-        )
-        review = get_object_or_404(ProductReview, pk=self.kwargs["pk"])
-
-        form = VoteForm(review, request.user, request.POST)
-        if form.is_valid():
-            if form.is_up_vote:
-                review.vote_up(request.user)
-            elif form.is_down_vote:
-                review.vote_down(request.user)
-            messages.success(request, _("Thanks for voting!"))
-        else:
-            for error_list in form.errors.values():
-                for msg in error_list:
-                    messages.error(request, msg)
-        return redirect_to_referrer(request, product.get_absolute_url())
 
 
 class ProductReviewList(ListView):
@@ -121,6 +81,13 @@ class ProductReviewList(ListView):
     model = ProductReview
     product_model = Product
     paginate_by = settings.OSCAR_REVIEWS_PER_PAGE
+    page_title = "Оставить отзыв"
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_staff:
+            return super().get(request, *args, **kwargs)
+        else:
+            return redirect(reverse("customer:profile-view"))
 
     def get_queryset(self):
         qs = self.model.objects.approved().filter(product=self.kwargs["product_pk"])
@@ -134,8 +101,23 @@ class ProductReviewList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["product"] = get_object_or_404(
-            self.product_model, pk=self.kwargs["product_pk"], is_public=True
+        _product = get_object_or_404(
+            self.product_model, slug=self.kwargs["product_slug"], is_public=True
         )
+        context["product"] = _product
         context["form"] = self.form
+        context["page_title"] = "Отзывы товара " + _product.title
         return context
+
+
+# class ProductReviewDetail(DetailView):
+#     template_name = "oscar/catalogue/reviews/review_detail.html"
+#     context_object_name = "review"
+#     model = ProductReview
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context["product"] = get_object_or_404(
+#             Product, pk=self.kwargs["product_pk"], is_public=True
+#         )
+#         return context

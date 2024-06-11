@@ -1,36 +1,50 @@
 {% extends "oscar/layout.html" %}
-{% load i18n %}
+{% load static %}
+{% load svg_tags %}
 
 {% block title %}
-    {% trans "Basket" %} | {{ block.super }}
+    Корзина | {{ block.super }}
 {% endblock %}
+
+{% block wrapper_class %}fill-width fill-height px-sm-2 pb-sm-2 pt-md-2{% endblock %}
+
+{% block app_class %}v-app---cart{% endblock %}
+{% block nav_class %}v-app__nav--cart{% endblock %}
+
+{% block nav_title %}Корзина{% endblock %}
+{% block nav_title_center %}Корзина{% endblock %}
+
+{% block sticky_address %}{% endblock %}
 
 {% block breadcrumbs %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ homepage_url }}">{% trans "Home" %}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{% trans "Basket" %}</li>
-        </ol>
-    </nav>
-{% endblock %}
-
-{# Hide mini-basket so we don't have two baskets to keep in sync #}
-{% block mini_basket %}{% endblock %}
-
-{% block headertext %}
-    {% trans "Basket" %}
-{% endblock %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% for category in category.get_ancestors %}
+            {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+            <a href="{{ category.get_absolute_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">{{ category.name }}</a>
+        {% endfor %}
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">Корзина</span>
+    </div>
+{% endblock breadcrumbs %}
 
 {% block content %}
-    {# Use a partial template so that AJAX can be used to re-render basket #}
-    {% include 'oscar/basket/partials/basket_content.html' %}
+    <div class="v-cart-page d-flex flex-row flex-md-row pd-0">
+        <div class="d-flex align-start pd-0 fill-height container pos-relative">
+            {% include 'oscar/basket/partials/basket_content.html' %}
+        </div>
+    </div>
 {% endblock content %}
 
-{% block onbodyload %}
+{% block scripts %}
     {{ block.super }}
-    {# We pass in the URL to send AJAX requests to #}
-    var options = {
-        'basketURL': '{% url 'basket:summary' %}'
-    };
-    oscar.basket.init(options);
+    <script>
+        var url_empty_basket = "{% url 'basket:empty' %}";
+        var url_upsell_masseges = "{% url 'basket:upsell' %}";
+    </script>
+    <script type="application/javascript" src="{% static "js/basket/basket-main.js" %}"></script>
 {% endblock %}
+

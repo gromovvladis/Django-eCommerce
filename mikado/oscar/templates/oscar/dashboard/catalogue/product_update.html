@@ -28,7 +28,7 @@
      </nav>
 {% endblock %}
 
-{% block headertext %}{{ title }}{% endblock %}
+{% block navtext %}{{ title }}{% endblock %}
 
 {% block dashboard_content %}
     <form action="{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" method="post" class="form-stacked wysiwyg fixed-actions" enctype="multipart/form-data" data-behaviour="tab-nav-errors" autocomplete="off">

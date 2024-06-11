@@ -1,0 +1,31 @@
+{% load i18n %}
+{% load widget_tweaks %}
+{% load currency_filters %}
+
+<div class="d-flex mt-1">
+    <div class="v-tabs-button d-flex fill">
+        {% for field in form %}
+
+                {% if field.field.choices %}
+                    <div id="variant_active_block" class="v-tabs-button__active-block" style="width: calc(100% / {{ field.field.choices|length }}); left: 0px;">
+                        <div class="fill-width fill-height"></div>
+                    </div>
+                {% endif %}
+
+                {% block errors %}
+                    {% for error in field.errors %}
+                        <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                    {% endfor %}
+                {% endblock %}
+
+                {% for value in field.field.choices %}
+                    <label data-id="tab-button-label" for="child_id_{{ value.0 }}" class="v-label v-tabs-button__button{% if forloop.first %} active{% endif %}">
+                        {{ value.1.name }}
+                        <input value="{{ value.0 }}" {% if forloop.first %}checked{% endif %} style="display: none;" id="child_id_{{ value.0 }}" type="radio" name="child_id" value="{{ value.0 }}" required="required" data-price="{{ value.1.price|formate_price }}" data-old-price="{{value.1.old_price|formate_price }}">
+                    </label>
+                {% endfor %}
+
+        {% endfor %}
+    </div>
+</div>
+

@@ -23,7 +23,7 @@
     </nav>
 {% endblock %}
 
-{% block headertext %}
+{% block navtext %}
     {% if not voucher.voucher_set %}
     {% blocktrans with name=voucher.name %}Delete voucher '{{ name }}'?{% endblocktrans %}
     {% else %}

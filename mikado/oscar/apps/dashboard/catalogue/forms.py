@@ -1,6 +1,5 @@
 from django import forms
 from django.core import exceptions
-from django.utils.translation import gettext_lazy as _
 from treebeard.forms import movenodeform_factory
 
 from oscar.core.loading import get_class, get_classes, get_model
@@ -33,6 +32,7 @@ BaseCategoryForm = movenodeform_factory(
         "description",
         "image",
         "is_public",
+        "is_promo",
         "meta_title",
         "meta_description",
     ],
@@ -63,8 +63,8 @@ class CategoryForm(SEOFormMixin, BaseCategoryForm):
         super().__init__(*args, **kwargs)
         if "slug" in self.fields:
             self.fields["slug"].required = False
-            self.fields["slug"].help_text = _(
-                "Leave blank to generate from category name"
+            self.fields["slug"].help_text = (
+                "Оставьте пустым, чтобы сгенерировать на основе названия категории"
             )
 
 
@@ -74,8 +74,8 @@ class ProductClassSelectForm(forms.Form):
     """
 
     product_class = forms.ModelChoiceField(
-        label=_("Create a new product of type"),
-        empty_label=_("-- Choose type --"),
+        label="Создать новый тип продукта",
+        empty_label="-- Выберите тип продукта --",
         queryset=ProductClass.objects.all(),
     )
 
@@ -90,8 +90,8 @@ class ProductClassSelectForm(forms.Form):
 
 
 class ProductSearchForm(forms.Form):
-    upc = forms.CharField(max_length=64, required=False, label=_("UPC"))
-    title = forms.CharField(max_length=255, required=False, label=_("Product title"))
+    upc = forms.CharField(max_length=64, required=False, label="Товарный код продукта UPC")
+    title = forms.CharField(max_length=255, required=False, label="Название продукта")
 
     def clean(self):
         cleaned_data = super().clean()
@@ -260,8 +260,8 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
         if "slug" in self.fields:
             self.fields["slug"].required = False
-            self.fields["slug"].help_text = _(
-                "Leave blank to generate from product title"
+            self.fields["slug"].help_text = (
+                "Оставьте поле пустым, чтобы сгенерировать из названия продукта"
             )
         if "title" in self.fields:
             self.fields["title"].widget = forms.TextInput(attrs={"autocomplete": "off"})
@@ -337,7 +337,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
 
 class StockAlertSearchForm(forms.Form):
-    status = forms.CharField(label=_("Status"))
+    status = forms.CharField(label="Статус")
 
 
 class ProductCategoryForm(forms.ModelForm):
@@ -402,7 +402,7 @@ class ProductAttributesForm(forms.ModelForm):
         # codes so that we can generate them.
         self.fields["code"].required = False
 
-        self.fields["option_group"].help_text = _("Select an option group")
+        self.fields["option_group"].help_text = "Выберите группу опций"
 
         # pylint: disable=no-member
         remote_field = self._meta.model._meta.get_field("option_group").remote_field
@@ -426,7 +426,7 @@ class ProductAttributesForm(forms.ModelForm):
             attr_type in [ProductAttribute.OPTION, ProductAttribute.MULTI_OPTION]
             and not option_group
         ):
-            self.add_error("option_group", _("An option group is required"))
+            self.add_error("option_group", "Требуется группа опций.")
 
     class Meta:
         model = ProductAttribute

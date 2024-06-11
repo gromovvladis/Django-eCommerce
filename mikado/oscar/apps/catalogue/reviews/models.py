@@ -1,6 +1,6 @@
 from oscar.apps.catalogue.reviews.abstract_models import (
     AbstractProductReview,
-    AbstractVote,
+    # AbstractVote,
 )
 from oscar.core.loading import is_model_registered
 
@@ -10,7 +10,7 @@ if not is_model_registered("reviews", "ProductReview"):
         pass
 
 
-if not is_model_registered("reviews", "Vote"):
+# if not is_model_registered("reviews", "Vote"):
 
-    class Vote(AbstractVote):
-        pass
+#     class Vote(AbstractVote):
+#         pass

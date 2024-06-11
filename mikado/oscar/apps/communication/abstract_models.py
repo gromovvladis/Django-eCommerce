@@ -4,7 +4,6 @@ from django.db import models
 from django.template import engines
 from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import get_template
-from django.utils.translation import gettext_lazy as _
 
 from oscar.apps.communication.managers import CommunicationTypeManager
 from oscar.core.compat import AUTH_USER_MODEL
@@ -20,30 +19,30 @@ class AbstractEmail(models.Model):
         AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="emails",
-        verbose_name=_("User"),
+        verbose_name="Пользователь",
         null=True,
     )
-    email = models.EmailField(_("Email Address"), null=True, blank=True)
-    subject = models.TextField(_("Subject"), max_length=255)
-    body_text = models.TextField(_("Body Text"))
-    body_html = models.TextField(_("Body HTML"), blank=True)
-    date_sent = models.DateTimeField(_("Date Sent"), auto_now_add=True)
+    email = models.EmailField("Email", null=True, blank=True)
+    subject = models.TextField("Тема", max_length=255)
+    body_text = models.TextField("Тело Text")
+    body_html = models.TextField("Тело HTML", blank=True)
+    date_sent = models.DateTimeField("Дата отправки", auto_now_add=True)
 
     class Meta:
         abstract = True
         app_label = "communication"
         ordering = ["-date_sent"]
-        verbose_name = _("Email")
-        verbose_name_plural = _("Emails")
+        verbose_name = "Email"
+        verbose_name_plural = "Emails"
 
     def __str__(self):
         if self.user:
-            return _("Email to %(user)s with subject '%(subject)s'") % {
+            return ("Email для пользователя %(user)s с темой '%(subject)s'") % {
                 "user": self.user.get_username(),
                 "subject": self.subject,
             }
         else:
-            return _("Email to %(email)s with subject '%(subject)s'") % {
+            return ("Email для пользователя %(email)s с темой '%(subject)s'") % {
                 "email": self.email,
                 "subject": self.subject,
             }
@@ -58,7 +57,7 @@ class AbstractCommunicationEventType(models.Model):
     # e.g. PASSWORD_RESET. AutoSlugField uppercases the code for us because
     # it's a useful convention that's been enforced in previous Oscar versions
     code = AutoSlugField(
-        _("Code"),
+        "Код",
         max_length=128,
         unique=True,
         populate_from="name",
@@ -68,29 +67,29 @@ class AbstractCommunicationEventType(models.Model):
         validators=[
             RegexValidator(
                 regex=r"^[A-Z_][0-9A-Z_]*$",
-                message=_(
-                    "Code can only contain the uppercase letters (A-Z), "
-                    "digits, and underscores, and can't start with a digit."
+                message=(
+                    "Код может содержать только заглавные буквы (A-Z)"
+                    "цифры и подчеркивания, и не могут начинаться с цифры."
                 ),
             )
         ],
-        help_text=_("Code used for looking up this event programmatically"),
+        help_text="Код, используемый для программного поиска этого события",
     )
 
     #: Name is the friendly description of an event for use in the admin
-    name = models.CharField(_("Name"), max_length=255, db_index=True)
+    name = models.CharField("Имя", max_length=255, db_index=True)
 
     # We allow communication types to be categorised
     # For backwards-compatibility, the choice values are quite verbose
     ORDER_RELATED = "Order related"
     USER_RELATED = "User related"
     CATEGORY_CHOICES = (
-        (ORDER_RELATED, _("Order related")),
-        (USER_RELATED, _("User related")),
+        (ORDER_RELATED, "Связанный с заказом"),
+        (USER_RELATED, "Связанный с пользователем"),
     )
 
     category = models.CharField(
-        _("Category"), max_length=255, default=ORDER_RELATED, choices=CATEGORY_CHOICES
+        "Категория", max_length=255, default=ORDER_RELATED, choices=CATEGORY_CHOICES
     )
 
     # Template content for emails
@@ -98,29 +97,29 @@ class AbstractCommunicationEventType(models.Model):
     # instructs Oscar to look for a file-based template, '' is just an empty
     # template.
     email_subject_template = models.CharField(
-        _("Email Subject Template"), max_length=255, blank=True, null=True
+        "Шаблон темы электронного письма", max_length=255, blank=True, null=True
     )
     email_body_template = models.TextField(
-        _("Email Body Template"), blank=True, null=True
+        "Шаблон тела электронного письма", blank=True, null=True
     )
     email_body_html_template = models.TextField(
-        _("Email Body HTML Template"),
+        "HTML-шаблон тела электронного письма",
         blank=True,
         null=True,
-        help_text=_("HTML template"),
+        help_text="HTML шаблон",
     )
 
     # Template content for SMS messages
     sms_template = models.CharField(
-        _("SMS Template"),
+        "SMS шаблон",
         max_length=170,
         blank=True,
         null=True,
-        help_text=_("SMS template"),
+        help_text="SMS шаблон",
     )
 
-    date_created = models.DateTimeField(_("Date Created"), auto_now_add=True)
-    date_updated = models.DateTimeField(_("Date Updated"), auto_now=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True)
 
     objects = CommunicationTypeManager()
 
@@ -134,8 +133,8 @@ class AbstractCommunicationEventType(models.Model):
         abstract = True
         app_label = "communication"
         ordering = ["name"]
-        verbose_name = _("Communication event type")
-        verbose_name_plural = _("Communication event types")
+        verbose_name = "Событие уведомления"
+        verbose_name_plural = "События уведомлений"
 
     def get_messages(self, ctx=None):
         """
@@ -200,13 +199,20 @@ class AbstractNotification(models.Model):
     # Not all notifications will have a sender.
     sender = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
 
+    order = models.ForeignKey("order.Order", on_delete=models.CASCADE, null=True)
+
     # HTML is allowed in this field as it can contain links
     subject = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, null=True, blank=True)
     body = models.TextField()
 
     INBOX, ARCHIVE = "Inbox", "Archive"
-    choices = ((INBOX, _("Inbox")), (ARCHIVE, _("Archive")))
-    location = models.CharField(max_length=32, choices=choices, default=INBOX)
+    location_choices = ((INBOX,"Входящие"), (ARCHIVE, "Архив"))
+    location = models.CharField(max_length=32, choices=location_choices, default=INBOX)
+
+    SUCCESS, INFO, WARNING, CANCELED  = "Success", "Info", "Warning", "Canceled"
+    status_choices = ((SUCCESS,"Успешно"), (INFO, "Инфо"), (WARNING, "Предупреждение"), (CANCELED, "Отмена"))
+    status = models.CharField(max_length=32, choices=status_choices, default=INFO)
 
     date_sent = models.DateTimeField(auto_now_add=True)
     date_read = models.DateTimeField(blank=True, null=True)
@@ -215,8 +221,8 @@ class AbstractNotification(models.Model):
         abstract = True
         app_label = "communication"
         ordering = ("-date_sent",)
-        verbose_name = _("Notification")
-        verbose_name_plural = _("Notifications")
+        verbose_name = "Уведомление"
+        verbose_name_plural = "Уведомления"
 
     def __str__(self):
         return self.subject

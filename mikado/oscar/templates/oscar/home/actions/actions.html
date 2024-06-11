@@ -1,0 +1,96 @@
+{% extends "oscar/layout.html" %}
+
+{% load static %}
+{% load svg_tags %}
+{% load image_tags %}
+
+{% block title %}
+    {% if summary %}{{ summary }} |{% endif %} {{ block.super }}
+{% endblock %}
+
+{% block wrapper_class %}v-actions d-flex flex-column pd-2 pb-4 pb-sm-8 container{% endblock %}
+
+{% block app_class %}v-app---action{% endblock %}
+{% block nav_class %}v-app__nav--action{% endblock %}
+
+{% block breadcrumbs %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 ">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="mr-1 pd-0">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">{{ summary }}</span>
+    </div>
+{% endblock %}
+
+{% block nav_title_center %}{{ summary }}{% endblock %}
+
+{% block content %}
+    <div class="action__wrapper d-flex flex-column">
+        <div class="v-actions__actions">
+
+            <div class="d-none d-sm-flex mb-2">
+                <h1>Акции</h1>
+            </div>
+            <div class="row">
+                {% for action in actions %}
+                    <div class="v-actions__actions-col col col-12 col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                        <a href="{{ action.get_absolute_url }}" data-id="action-link">
+                            <div class="v-actions__actions-action d-flex flex-column fill-height fill-width">
+                                <div class="v-actions__actions-action-picture fill-width">
+                                    <div class="v-images-chunks fill-width">
+                                        <div class="v-image">
+                                            <div class="v-image__inner" style="padding-bottom: 45%;">
+                                                {% with image=action.primary_image %}
+                                                    {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
+                                                    <img src="{{ thumb.url }}" alt="{{ action.title }}" class="img-thumbnail w-auto mx-auto my-0">
+                                                {% endwith %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h3 class="v-actions__actions-action-title mt-2">{{ action.title }}</h3>
+                                <p class="short-description short-description--nowrap mt-1">{{ action.description|safe }}</p>
+                            </div>
+                        </a>
+                    </div> 
+                {% endfor %}           
+            </div>
+
+
+
+            <div class="d-none d-sm-flex mb-2 mt-4">
+                <h1>Спецпредложения</h1>
+            </div>
+            <div class="row">
+                {% for offer in offers %}
+                    {% if offer.is_available %}
+                        <div class="v-actions__actions-col col col-12 col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                            <a href="{{ offer.get_absolute_url }}" data-id="action-link">
+                                <div class="v-actions__actions-action d-flex flex-column fill-height fill-width">
+                                    <div class="v-actions__actions-action-picture fill-width">
+                                        <div class="v-images-chunks fill-width">
+                                            <div class="v-image">
+                                                <div class="v-image__inner" style="padding-bottom: 45%;">
+                                                    {% with image=offer.primary_image %}
+                                                        {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
+                                                        <img src="{{ thumb.url }}" alt="{{ offer.name }}" class="img-thumbnail w-auto mx-auto my-0">
+                                                    {% endwith %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <h3 class="v-actions__actions-action-title mt-2">{{ offer.name }}</h3>
+                                    <p class="short-description short-description--nowrap mt-1">{{ offer.description|safe }}</p>
+                                </div>
+                            </a>
+                        </div> 
+                    {% endif %} 
+                {% endfor %}           
+            </div>
+
+        </div>
+    </div>
+{% endblock content %}
+

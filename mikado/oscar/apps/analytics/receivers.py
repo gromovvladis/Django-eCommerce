@@ -59,7 +59,7 @@ def _record_user_order(user, order):
             num_orders=F("num_orders") + 1,
             num_order_lines=F("num_order_lines") + order.num_lines,
             num_order_items=F("num_order_items") + order.num_items,
-            total_spent=F("total_spent") + order.total_incl_tax,
+            total_spent=F("total_spent") + order.total,
             date_last_order=order.date_placed,
         )
         if not affected:
@@ -68,7 +68,7 @@ def _record_user_order(user, order):
                 num_orders=1,
                 num_order_lines=order.num_lines,
                 num_order_items=order.num_items,
-                total_spent=order.total_incl_tax,
+                total_spent=order.total,
                 date_last_order=order.date_placed,
             )
     except IntegrityError:  # pragma: no cover

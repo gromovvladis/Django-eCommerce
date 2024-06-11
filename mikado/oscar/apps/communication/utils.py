@@ -134,8 +134,8 @@ class Dispatcher(object):
 
         if self.mail_connection:
             self.mail_connection.send_messages([email])
-        else:
-            email.send()
+        # else:
+            # email.send()
 
         return email
 

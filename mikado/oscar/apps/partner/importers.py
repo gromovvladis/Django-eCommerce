@@ -1,10 +1,7 @@
 import csv
 import os
 from decimal import Decimal as D
-
 from django.db.transaction import atomic
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class, get_model
 
 ImportingError = get_class("partner.exceptions", "ImportingError")
@@ -35,7 +32,7 @@ class CatalogueImporter(object):
     def handle(self, file_path=None):
         """Handles the actual import process"""
         if not file_path:
-            raise ImportingError(_("No file path supplied"))
+            raise ImportingError("Путь к файлу не указан")
         Validator().validate(file_path)
         if self._flush is True:
             self.logger.info(" - Flushing product data before import")
@@ -127,12 +124,12 @@ class Validator(object):
     def _exists(self, file_path):
         """Check whether a file exists"""
         if not os.path.exists(file_path):
-            raise ImportingError(_("%s does not exist") % (file_path))
+            raise ImportingError("%s не существует" % (file_path))
 
     def _is_file(self, file_path):
         """Check whether file is actually a file type"""
         if not os.path.isfile(file_path):
-            raise ImportingError(_("%s is not a file") % (file_path))
+            raise ImportingError("%s это не файл" % (file_path))
 
     def _is_readable(self, file_path):
         """Check file is readable"""
@@ -140,4 +137,4 @@ class Validator(object):
             f = open(file_path, "r", encoding="utf-8")
             f.close()
         except IOError:
-            raise ImportingError(_("%s is not readable") % (file_path))
+            raise ImportingError("%s не возможно прочитать" % (file_path))

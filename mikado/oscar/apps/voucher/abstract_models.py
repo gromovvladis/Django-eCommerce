@@ -4,10 +4,7 @@ from django.core import exceptions
 from django.db import models
 from django.db.models import Sum
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.compat import AUTH_USER_MODEL
-from oscar.core.decorators import deprecated
 
 
 class AbstractVoucherSet(models.Model):
@@ -27,21 +24,21 @@ class AbstractVoucherSet(models.Model):
       range for all vouchers in the set.
     """
 
-    name = models.CharField(verbose_name=_("Name"), max_length=100, unique=True)
-    count = models.PositiveIntegerField(verbose_name=_("Number of vouchers"))
-    code_length = models.IntegerField(verbose_name=_("Length of Code"), default=12)
-    description = models.TextField(verbose_name=_("Description"))
+    name = models.CharField(verbose_name="Имя", max_length=100, unique=True)
+    count = models.PositiveIntegerField(verbose_name="Количество ваучеров")
+    code_length = models.IntegerField(verbose_name="Длина кода кода", default=12)
+    description = models.TextField(verbose_name="Описание")
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
-    start_datetime = models.DateTimeField(_("Start datetime"))
-    end_datetime = models.DateTimeField(_("End datetime"))
+    start_datetime = models.DateTimeField("Дата и время начала")
+    end_datetime = models.DateTimeField("Дата и время окончания")
 
     class Meta:
         abstract = True
         app_label = "voucher"
         get_latest_by = "date_created"
         ordering = ["-date_created"]
-        verbose_name = _("VoucherSet")
-        verbose_name_plural = _("VoucherSets")
+        verbose_name = "Набор ваучеров"
+        verbose_name_plural = "Наборы ваучеров"
 
     def __str__(self):
         return self.name
@@ -52,9 +49,7 @@ class AbstractVoucherSet(models.Model):
             and self.end_datetime
             and (self.start_datetime > self.end_datetime)
         ):
-            raise exceptions.ValidationError(
-                _("End date should be later than start date")
-            )
+            raise exceptions.ValidationError("Дата окончания должна быть позже даты начала.")
 
     def update_count(self):
         vouchers_count = self.vouchers.count()
@@ -97,26 +92,25 @@ class AbstractVoucher(models.Model):
     """
 
     name = models.CharField(
-        _("Name"),
+        "Имя",
         max_length=128,
         unique=True,
-        help_text=_(
-            "This will be shown in the checkout"
-            " and basket once the voucher is"
-            " entered"
+        help_text=(
+            "Это будет показано на странице оформления"
+            "и корзине, как только купон будет введен"
         ),
     )
     code = models.CharField(
-        _("Code"),
+        "Код",
         max_length=128,
         db_index=True,
         unique=True,
-        help_text=_("Case insensitive / No spaces allowed"),
+        help_text="Нечувствителен к регистру/пробелы не допускаются",
     )
     offers = models.ManyToManyField(
         "offer.ConditionalOffer",
         related_name="vouchers",
-        verbose_name=_("Offers"),
+        verbose_name="Предложения",
         limit_choices_to={"offer_type": "Voucher"},
     )
 
@@ -126,24 +120,24 @@ class AbstractVoucher(models.Model):
         "Once per customer",
     )
     USAGE_CHOICES = (
-        (SINGLE_USE, _("Can be used once by one customer")),
-        (MULTI_USE, _("Can be used multiple times by multiple customers")),
-        (ONCE_PER_CUSTOMER, _("Can only be used once per customer")),
+        (SINGLE_USE, "Может быть использован один раз одним клиентом"),
+        (MULTI_USE, "Может использоваться несколько раз несколькими клиентами"),
+        (ONCE_PER_CUSTOMER, "Можно использовать только один раз для каждого клиента."),
     )
     usage = models.CharField(
-        _("Usage"), max_length=128, choices=USAGE_CHOICES, default=MULTI_USE
+        "Использований", max_length=128, choices=USAGE_CHOICES, default=MULTI_USE
     )
 
-    start_datetime = models.DateTimeField(_("Start datetime"), db_index=True)
-    end_datetime = models.DateTimeField(_("End datetime"), db_index=True)
+    start_datetime = models.DateTimeField("Дата и время начала", db_index=True)
+    end_datetime = models.DateTimeField("Дата и время окончания", db_index=True)
 
     # Reporting information. Not used to enforce any consumption limits.
     num_basket_additions = models.PositiveIntegerField(
-        _("Times added to basket"), default=0
+        "Раз добавлено в корзину", default=0
     )
-    num_orders = models.PositiveIntegerField(_("Times on orders"), default=0)
+    num_orders = models.PositiveIntegerField("Количество заказов", default=0)
     total_discount = models.DecimalField(
-        _("Total discount"), decimal_places=2, max_digits=12, default=Decimal("0.00")
+        "Общая скидка", decimal_places=2, max_digits=12, default=Decimal("0.00")
     )
 
     voucher_set = models.ForeignKey(
@@ -161,8 +155,8 @@ class AbstractVoucher(models.Model):
         app_label = "voucher"
         ordering = ["-date_created"]
         get_latest_by = "date_created"
-        verbose_name = _("Voucher")
-        verbose_name_plural = _("Vouchers")
+        verbose_name = "Промокод"
+        verbose_name_plural = "Промокоды"
 
     def __str__(self):
         return self.name
@@ -173,9 +167,7 @@ class AbstractVoucher(models.Model):
             and self.end_datetime
             and (self.start_datetime > self.end_datetime)
         ):
-            raise exceptions.ValidationError(
-                _("End date should be later than start date")
-            )
+            raise exceptions.ValidationError("Дата окончания должна быть позже даты начала.")
 
     def save(self, *args, **kwargs):
         self.code = self.code.upper()
@@ -206,21 +198,20 @@ class AbstractVoucher(models.Model):
         if self.usage == self.SINGLE_USE:
             is_available = not self.applications.exists()
             if not is_available:
-                message = _("This voucher has already been used")
+                message = "Этот промокод уже использован"
         elif self.usage == self.MULTI_USE:
             is_available = True
         elif self.usage == self.ONCE_PER_CUSTOMER:
             if not user.is_authenticated:
                 is_available = False
-                message = _("This voucher is only available to signed in users")
+                message = "Этот промокод доступен только авторизованным пользователям."
             else:
                 is_available = not self.applications.filter(
                     voucher=self, user=user
                 ).exists()
                 if not is_available:
-                    message = _(
-                        "You have already used this voucher in a previous order"
-                    )
+                    message = "Вы уже использовали этот промокод в предыдущем заказе."
+
         return is_available, message
 
     def is_available_for_basket(self, basket):
@@ -234,9 +225,8 @@ class AbstractVoucher(models.Model):
         if not is_available:
             return False, message
 
-        is_available, message = False, _(
-            "This voucher is not available for this basket"
-        )
+        is_available, message = False, "Этот промокод недоступен для этой корзины."
+
         for offer in self.offers.all():
             if offer.is_condition_satisfied(basket=basket):
                 is_available = True
@@ -266,18 +256,6 @@ class AbstractVoucher(models.Model):
 
     record_discount.alters_data = True
 
-    @property
-    @deprecated
-    def benefit(self):
-        """
-        Returns the first offer's benefit instance.
-
-        A voucher is commonly only linked to one offer. In that case,
-        this helper can be used for convenience.
-        """
-        return self.offers.first().benefit
-
-
 class AbstractVoucherApplication(models.Model):
     """
     For tracking how often a voucher has been used in an order.
@@ -290,7 +268,7 @@ class AbstractVoucherApplication(models.Model):
         "voucher.Voucher",
         on_delete=models.CASCADE,
         related_name="applications",
-        verbose_name=_("Voucher"),
+        verbose_name="Промокод",
     )
 
     # It is possible for an anonymous user to apply a voucher so we need to
@@ -300,10 +278,10 @@ class AbstractVoucherApplication(models.Model):
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        verbose_name=_("User"),
+        verbose_name="Пользователь",
     )
     order = models.ForeignKey(
-        "order.Order", on_delete=models.CASCADE, verbose_name=_("Order")
+        "order.Order", on_delete=models.CASCADE, verbose_name="Заказ"
     )
     date_created = models.DateTimeField(auto_now_add=True, db_index=True)
 
@@ -311,11 +289,11 @@ class AbstractVoucherApplication(models.Model):
         abstract = True
         app_label = "voucher"
         ordering = ["-date_created"]
-        verbose_name = _("Voucher Application")
-        verbose_name_plural = _("Voucher Applications")
+        verbose_name = "Предложение промокода"
+        verbose_name_plural = "Предложения промокодов"
 
     def __str__(self):
-        return _("'%(voucher)s' used by '%(user)s'") % {
+        return ("'%(voucher)s' использован пользователем - '%(user)s'") % {
             "voucher": self.voucher,
             "user": self.user,
         }

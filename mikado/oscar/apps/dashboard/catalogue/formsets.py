@@ -1,7 +1,6 @@
 from django import forms
 from django.core import exceptions
 from django.forms.models import inlineformset_factory
-from django.utils.translation import gettext_lazy as _
 
 from oscar.core.loading import get_classes, get_model
 
@@ -97,12 +96,7 @@ class StockRecordFormSet(BaseStockRecordFormSet):
             )
             user_partners = set(self.user.partners.all())
             if not user_partners & stockrecord_partners:
-                raise exceptions.ValidationError(
-                    _(
-                        "At least one stock record must be set to a partner that"
-                        " you're associated with."
-                    )
-                )
+                raise exceptions.ValidationError("По крайней мере одна товарная запись должна быть установлена точке продажи, которая связана с вами.")
 
 
 BaseProductCategoryFormSet = inlineformset_factory(
@@ -119,10 +113,10 @@ class ProductCategoryFormSet(BaseProductCategoryFormSet):
     def clean(self):
         if not self.instance.is_child and self.get_num_categories() == 0:
             raise forms.ValidationError(
-                _("Stand-alone and parent products must have at least one category")
+                "Отдельные и родительские продукты должны иметь хотя бы одну категорию."
             )
         if self.instance.is_child and self.get_num_categories() > 0:
-            raise forms.ValidationError(_("A child product should not have categories"))
+            raise forms.ValidationError("Дочерний товар не должен иметь категорий")
 
     def get_num_categories(self):
         num_categories = 0

@@ -6,7 +6,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
 from oscar.core.loading import get_model
@@ -33,7 +32,7 @@ class OfferWizardStepView(FormView):
         if not self.is_previous_step_complete(request):
             messages.warning(
                 request,
-                _("%s step not complete") % (self.previous_view.step_name.title(),),
+                "%s шаг не был завершен" % (self.previous_view.step_name.title(),),
             )
             return HttpResponseRedirect(reverse(self.previous_view.url_name))
         return super().dispatch(request, *args, **kwargs)
@@ -170,9 +169,9 @@ class OfferWizardStepView(FormView):
         self._flush_session()
 
         if self.update:
-            msg = _("Offer '%s' updated") % offer.name
+            msg = "Предложение '%s' обновлено" % offer.name
         else:
-            msg = _("Offer '%s' created!") % offer.name
+            msg = "Предложение '%s' создано!" % offer.name
         messages.success(self.request, msg)
 
         return HttpResponseRedirect(

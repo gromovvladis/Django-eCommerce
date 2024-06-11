@@ -2,8 +2,6 @@ from django import forms
 from django.db import transaction
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
-
 from oscar.apps.voucher.utils import get_unused_code
 from oscar.core.loading import get_model
 from oscar.forms import widgets
@@ -20,7 +18,7 @@ class VoucherForm(forms.ModelForm):
     """
 
     offers = forms.ModelMultipleChoiceField(
-        label=_("Which offers apply for this voucher?"),
+        label="Какие предложения действительны для этого ваучера?",
         queryset=ConditionalOffer.objects.filter(offer_type=ConditionalOffer.VOUCHER),
     )
 
@@ -43,17 +41,17 @@ class VoucherForm(forms.ModelForm):
 
 
 class VoucherSearchForm(forms.Form):
-    name = forms.CharField(required=False, label=_("Name"))
-    code = forms.CharField(required=False, label=_("Code"))
-    offer_name = forms.CharField(required=False, label=_("Offer name"))
+    name = forms.CharField(required=False, label="Имя")
+    code = forms.CharField(required=False, label="Код")
+    offer_name = forms.CharField(required=False, label="Название предложения")
     is_active = forms.NullBooleanField(
-        required=False, label=_("Is active?"), widget=widgets.NullBooleanSelect
+        required=False, label="Активен?", widget=widgets.NullBooleanSelect
     )
     in_set = forms.NullBooleanField(
-        required=False, label=_("In voucher set?"), widget=widgets.NullBooleanSelect
+        required=False, label="В наборе ваучеров?", widget=widgets.NullBooleanSelect
     )
     has_offers = forms.NullBooleanField(
-        required=False, label=_("Has offers?"), widget=widgets.NullBooleanSelect
+        required=False, label="Есть предложения?", widget=widgets.NullBooleanSelect
     )
 
     basic_fields = [
@@ -69,11 +67,11 @@ class VoucherSearchForm(forms.Form):
 
 class VoucherSetForm(forms.ModelForm):
     usage = forms.ChoiceField(
-        choices=(("", "---------"),) + Voucher.USAGE_CHOICES, label=_("Usage")
+        choices=(("", "---------"),) + Voucher.USAGE_CHOICES, label="Использование"
     )
 
     offers = forms.ModelMultipleChoiceField(
-        label=_("Which offers apply for this voucher set?"),
+        label="Какие предложения действительны для этого набора ваучеров?",
         queryset=ConditionalOffer.objects.filter(offer_type=ConditionalOffer.VOUCHER),
     )
 
@@ -100,10 +98,8 @@ class VoucherSetForm(forms.ModelForm):
             )
             raise forms.ValidationError(
                 mark_safe(
-                    _(
-                        "This cannot be used to delete vouchers (currently %s) in this set. "
-                        'You can do that on the <a href="%s">detail</a> page.'
-                    )
+                    "Это нельзя использовать для удаления ваучеров (в настоящее время %s) в этом наборе. "
+                    "Это можно сделать на странице <a href='%s'>Поднобности</a>."
                     % (self.instance.count, detail_url)
                 )
             )
@@ -143,7 +139,7 @@ class VoucherSetForm(forms.ModelForm):
 
 
 class VoucherSetSearchForm(forms.Form):
-    code = forms.CharField(required=False, label=_("Code"))
+    code = forms.CharField(required=False, label="Код")
 
     def clean_code(self):
         return self.cleaned_data["code"].upper()

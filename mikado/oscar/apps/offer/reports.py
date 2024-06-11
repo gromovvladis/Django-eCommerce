@@ -1,7 +1,5 @@
 from django.db.models import OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class, get_model
 
 ReportGenerator = get_class("dashboard.reports.reports", "ReportGenerator")
@@ -16,7 +14,7 @@ class OfferReportCSVFormatter(ReportCSVFormatter):
 
     def generate_csv(self, response, offer_discounts):
         writer = self.get_csv_writer(response)
-        header_row = [_("Offer"), _("Total discount")]
+        header_row = ["Предложение", "Общая скидка"]
         writer.writerow(header_row)
 
         for discount in offer_discounts:
@@ -31,7 +29,7 @@ class OfferReportHTMLFormatter(ReportHTMLFormatter):
 
 class OfferReportGenerator(ReportGenerator):
     code = "conditional-offers"
-    description = _("Offer performance")
+    description = "Эффективность предложения"
     model_class = OrderDiscount
 
     formatters = {

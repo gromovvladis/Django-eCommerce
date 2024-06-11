@@ -10,16 +10,21 @@ from django.db.models import Count, Q, Sum, fields
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import DetailView, FormView, ListView, UpdateView
+from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView, CreateView
 
+from oscar.apps.dashboard.orders.forms import NewSourceForm, NewTransactionForm
 from oscar.apps.order import exceptions as order_exceptions
-from oscar.apps.payment.exceptions import PaymentError
+from oscar.apps.payment.exceptions import DebitedAmountIsNotEqualsRefunded, PaymentError
+from oscar.apps.payment.methods import PaymentManager
+from oscar.apps.payment.models import Source
 from oscar.core.compat import UnicodeCSVWriter
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import datetime_combine, format_datetime
 from oscar.views import sort_queryset
 from oscar.views.generic import BulkEditMixin
+
+import logging
+logger = logging.getLogger("oscar.dashboard")
 
 Partner = get_model("partner", "Partner")
 Transaction = get_model("payment", "Transaction")
@@ -96,8 +101,8 @@ class OrderStatsView(FormView):
         stats = {
             "total_orders": orders.count(),
             "total_lines": Line.objects.filter(order__in=orders).count(),
-            "total_revenue": orders.aggregate(Sum("total_incl_tax"))[
-                "total_incl_tax__sum"
+            "total_revenue": orders.aggregate(Sum("total"))[
+                "total__sum"
             ]
             or D("0.00"),
             "order_status_breakdown": orders.order_by("status")
@@ -120,13 +125,13 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
     paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
     actions = ("download_selected_orders", "change_order_statuses")
     CSV_COLUMNS = {
-        "number": _("Order number"),
-        "value": _("Order value"),
-        "date": _("Date of purchase"),
-        "num_items": _("Number of items"),
-        "status": _("Order status"),
-        "customer": _("Customer email address"),
-        "shipping_address_name": _("Deliver to name"),
+        "number": "Номер заказа",
+        "value": "Стоимость заказа",
+        "date": "Дата покупки",
+        "num_items": "Количество товаров",
+        "status": "Последний статус",
+        "customer": "Email клиента",
+        "shipping_address_name": "Адрес доставки",
     }
 
     def dispatch(self, request, *args, **kwargs):
@@ -155,7 +160,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
         Build the queryset for this list.
         """
         queryset = sort_queryset(
-            self.base_queryset, self.request, ["number", "total_incl_tax"]
+            self.base_queryset, self.request, ["number", "total"]
         )
 
         self.form = self.form_class(self.request.GET)
@@ -173,7 +178,6 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
             # If the value is two words, then assume they are first name and
             # last name
             parts = data["name"].split()
-            allow_anon = getattr(settings, "OSCAR_ALLOW_ANON_CHECKOUT", False)
 
             if len(parts) == 1:
                 parts = [data["name"], data["name"]]
@@ -181,9 +185,6 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
                 parts = [parts[0], parts[1:]]
 
             query = Q(user__first_name__istartswith=parts[0])
-            if allow_anon:
-                query |= Q(shipping_address__first_name__istartswith=parts[0])
-
             queryset = queryset.filter(query).distinct()
 
         if data["product_title"]:
@@ -247,21 +248,21 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
 
         if data.get("order_number"):
             descriptions.append(
-                _('Order number starts with "{order_number}"').format(
+                ('Номер заказа начинается с "{order_number}"').format(
                     order_number=data["order_number"]
                 )
             )
 
         if data.get("name"):
             descriptions.append(
-                _('Customer name matches "{customer_name}"').format(
+                ('Имя клиента совпадает "{customer_name}"').format(
                     customer_name=data["name"]
                 )
             )
 
         if data.get("product_title"):
             descriptions.append(
-                _('Product name matches "{product_name}"').format(
+                ('Название продукта соответствует "{product_name}"').format(
                     product_name=data["product_title"]
                 )
             )
@@ -272,7 +273,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
                 # used to uniquely identify a product in an online store.
                 # "Item" in this context means an item in an order placed
                 # in an online store.
-                _('Includes an item with UPC "{upc}"').format(upc=data["upc"])
+                ('Включает предмет с UPC "{upc}"').format(upc=data["upc"])
             )
 
         if data.get("partner_sku"):
@@ -281,7 +282,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
                 # identify products that can be shipped from an online store.
                 # A "partner" is a company that ships items to users who
                 # buy things in an online store.
-                _('Includes an item with partner SKU "{partner_sku}"').format(
+                ('Включает товар с артикулом партнера. "{partner_sku}"').format(
                     partner_sku=data["partner_sku"]
                 )
             )
@@ -290,7 +291,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
             descriptions.append(
                 # Translators: This string refers to orders in an online
                 # store that were made within a particular date range.
-                _("Placed between {start_date} and {end_date}").format(
+                ("Размещено между {start_date} и {end_date}").format(
                     start_date=data["date_from"], end_date=data["date_to"]
                 )
             )
@@ -299,7 +300,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
             descriptions.append(
                 # Translators: This string refers to orders in an online store
                 # that were made after a particular date.
-                _("Placed after {start_date}").format(start_date=data["date_from"])
+                ("Размещено после {start_date}").format(start_date=data["date_from"])
             )
 
         elif data.get("date_to"):
@@ -307,7 +308,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
             descriptions.append(
                 # Translators: This string refers to orders in an online store
                 # that were made before a particular date.
-                _("Placed before {end_date}").format(end_date=end_date)
+                ("Размещено до {end_date}").format(end_date=end_date)
             )
 
         if data.get("voucher"):
@@ -316,7 +317,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
                 # an order in an online store in order to receive a discount.
                 # The voucher "code" is a string that users can enter to
                 # receive the discount.
-                _('Used voucher code "{voucher_code}"').format(
+                ('Использованный промокод "{voucher_code}"').format(
                     voucher_code=data["voucher"]
                 )
             )
@@ -327,7 +328,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
                 # Translators: A payment method is a way of paying for an
                 # item in an online store.  For example, a user can pay
                 # with a credit card or PayPal.
-                _("Paid using {payment_method}").format(
+                ("Оплачено с помощью {payment_method}").format(
                     payment_method=payment_type.name
                 )
             )
@@ -337,7 +338,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
                 # Translators: This string refers to an order in an
                 # online store.  Some examples of order status are
                 # "purchased", "cancelled", or "refunded".
-                _("Order status is {order_status}").format(order_status=data["status"])
+                ("Статус заказа {order_status}").format(order_status=data["status"])
             )
 
         return descriptions
@@ -369,7 +370,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
             "customer": order.email,
             "num_items": order.num_items,
             "date": format_datetime(order.date_placed, "DATETIME_FORMAT"),
-            "value": order.total_incl_tax,
+            "value": order.total,
             "status": order.status,
         }
         if order.shipping_address:
@@ -399,11 +400,11 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
         # OrderDetailView.change_order_status does. Ripe for refactoring.
         new_status = request.POST["new_status"].strip()
         if not new_status:
-            messages.error(request, _("The new status '%s' is not valid") % new_status)
+            messages.error(request, "Новый статус '%s' не действительный" % new_status)
         elif new_status not in order.available_statuses():
             messages.error(
                 request,
-                _("The new status '%s' is not valid for this order") % new_status,
+                "Новый статус '%s' недействительно для этого заказа" % new_status,
             )
         else:
             handler = self.get_handler(user=request.user)
@@ -413,11 +414,11 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
             except PaymentError as e:
                 messages.error(
                     request,
-                    _("Unable to change order status due to payment error: %s") % e,
+                    "Невозможно изменить статус заказа из-за ошибки оплаты.: %s" % e,
                 )
             else:
-                msg = _(
-                    "Order status changed from '%(old_status)s' to '%(new_status)s'"
+                msg = (
+                    "Статус заказа изменился с '%(old_status)s' на '%(new_status)s'"
                 ) % {"old_status": old_status, "new_status": new_status}
                 messages.info(request, msg)
                 order.notes.create(
@@ -435,6 +436,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
     model = Order
     context_object_name = "order"
     template_name = "oscar/dashboard/orders/order_detail.html"
+    
 
     # These strings are method names that are allowed to be called from a
     # submitted form.
@@ -451,7 +453,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
     )
 
     def get_object(self, queryset=None):
-        return get_order_for_user_or_404(self.request.user, self.kwargs["number"])
+        return  get_order_for_user_or_404(self.request.user, self.kwargs["number"])
 
     def get_order_lines(self):
         return self.object.lines.all()
@@ -473,26 +475,26 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         if "line_action" in request.POST:
             return self.handle_line_action(request, order, request.POST["line_action"])
 
-        return self.reload_page(error=_("No valid action submitted"))
+        return self.reload_page(error="Действительные действия не отправлены")
 
     def handle_order_action(self, request, order, action):
         if action not in self.order_actions:
-            return self.reload_page(error=_("Invalid action"))
+            return self.reload_page(error="Недопустимое действие")
         return getattr(self, action)(request, order)
 
     def handle_line_action(self, request, order, action):
         if action not in self.line_actions:
-            return self.reload_page(error=_("Invalid action"))
+            return self.reload_page(error="Недопустимое действие")
 
         # Load requested lines
         line_ids = request.POST.getlist("selected_line")
         if len(line_ids) == 0:
-            return self.reload_page(error=_("You must select some lines to act on"))
+            return self.reload_page(error="Вы должны выбрать несколько строк для действий.")
 
         lines = self.get_order_lines()
         lines = lines.filter(id__in=line_ids)
         if len(line_ids) != len(lines):
-            return self.reload_page(error=_("Invalid lines requested"))
+            return self.reload_page(error="Запрошены неверные строки")
 
         # Build list of line quantities
         line_quantities = []
@@ -503,12 +505,12 @@ class OrderDetailView(EventHandlerMixin, DetailView):
             except ValueError:
                 qty = None
             if qty is None or qty <= 0:
-                error_msg = _("The entered quantity for line #%s is not valid")
+                error_msg = ("Введенное количество для строки #%s не действует")
                 return self.reload_page(error=error_msg % line.id)
             elif qty > line.quantity:
-                error_msg = _(
-                    "The entered quantity for line #%(line_id)s "
-                    "should not be higher than %(quantity)s"
+                error_msg = (
+                    "Введенное количество для строки #%(line_id)s "
+                    "не должно быть выше, чем %(quantity)s"
                 )
                 kwargs = {"line_id": line.id, "quantity": line.quantity}
                 return self.reload_page(error=error_msg % kwargs)
@@ -538,15 +540,24 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         ctx["shipping_event_types"] = ShippingEventType.objects.all()
         ctx["payment_event_types"] = PaymentEventType.objects.all()
 
-        ctx["payment_transactions"] = self.get_payment_transactions()
+        transactions = self.get_payment_transactions()
+        ctx["payment_transactions"] = transactions
+
+        transactions_source_id = []
+        for trans in transactions:
+            transactions_source_id.append(trans.source_id)
+        ctx["payment_transactions_source_id"] = transactions_source_id
 
         return ctx
 
     # Data fetching methods for template context
 
     def get_payment_transactions(self):
-        return Transaction.objects.filter(source__order=self.object)
-
+        # return Transaction.objects.filter(source__order=self.object)
+        transactions = Transaction.objects.filter(source__order=self.object)
+        for trans in transactions:
+            setattr(trans, 'source_refundable', trans.source.refundable)
+        return transactions
     def get_order_note_form(self):
         kwargs = {"order": self.object, "user": self.request.user, "data": None}
         if self.request.method == "POST":
@@ -571,7 +582,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         form = self.get_order_note_form()
         if form.is_valid():
             form.save()
-            messages.success(self.request, _("Note saved"))
+            messages.success(self.request, "Заметка сохранена")
             return self.reload_page(fragment="notes")
 
         ctx = self.get_context_data(note_form=form, active_tab="notes")
@@ -581,39 +592,35 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         try:
             note = order.notes.get(id=request.POST.get("note_id", None))
         except ObjectDoesNotExist:
-            messages.error(request, _("Note cannot be deleted"))
+            messages.error(request, "Примечание не может быть удалено")
         else:
-            messages.info(request, _("Note deleted"))
+            messages.info(request, "Примечание удалено")
             note.delete()
         return self.reload_page()
 
     def change_order_status(self, request, order):
         form = self.get_order_status_form()
         if not form.is_valid():
-            return self.reload_page(error=_("Invalid form submission"))
+            return self.reload_page(error="Неверная отправка формы")
 
         old_status, new_status = order.status, form.cleaned_data["new_status"]
         handler = self.get_handler(user=request.user)
 
-        success_msg = _(
-            "Order status changed from '%(old_status)s' to '%(new_status)s'"
+        success_msg = (
+            "Статус заказа изменился с '%(old_status)s' на '%(new_status)s'"
         ) % {"old_status": old_status, "new_status": new_status}
         try:
             handler.handle_order_status_change(order, new_status, note_msg=success_msg)
         except PaymentError as e:
             messages.error(
                 request,
-                _("Unable to change order status due to payment error: %s") % e,
+                ("Невозможно изменить статус заказа из-за ошибки оплаты.: %s") % e,
             )
         except order_exceptions.InvalidOrderStatus:
             # The form should validate against this, so we should only end up
             # here during race conditions.
             messages.error(
-                request,
-                _(
-                    "Unable to change order status as the requested "
-                    "new status is not valid"
-                ),
+                request, "Невозможно изменить статус заказа в соответствии с запрошенным - новый статус недействителен"
             )
         else:
             messages.info(request, success_msg)
@@ -627,7 +634,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         try:
             amount = D(amount_str)
         except InvalidOperation:
-            messages.error(request, _("Please choose a valid amount"))
+            messages.error(request, "Пожалуйста, выберите действительную сумму")
             return self.reload_page()
         return self._create_payment_event(request, order, amount)
 
@@ -637,13 +644,13 @@ class OrderDetailView(EventHandlerMixin, DetailView):
     def change_line_statuses(self, request, order, lines, quantities):
         new_status = request.POST["new_status"].strip()
         if not new_status:
-            messages.error(request, _("The new status '%s' is not valid") % new_status)
+            messages.error(request, "Новый статус '%s' не действует" % new_status)
             return self.reload_page()
         errors = []
         for line in lines:
             if new_status not in line.available_statuses():
                 errors.append(
-                    _("'%(status)s' is not a valid new status for line %(line_id)d")
+                    ("'%(status)s' недопустимый новый статус для позиции %(line_id)d")
                     % {"status": new_status, "line_id": line.id}
                 )
         if errors:
@@ -652,9 +659,9 @@ class OrderDetailView(EventHandlerMixin, DetailView):
 
         msgs = []
         for line in lines:
-            msg = _(
-                "Status of line #%(line_id)d changed from '%(old_status)s'"
-                " to '%(new_status)s'"
+            msg = (
+                "Статус позиции #%(line_id)d изменен с '%(old_status)s'"
+                " на '%(new_status)s'"
             ) % {
                 "line_id": line.id,
                 "old_status": line.status,
@@ -674,7 +681,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         try:
             event_type = ShippingEventType._default_manager.get(code=code)
         except ShippingEventType.DoesNotExist:
-            messages.error(request, _("The event type '%s' is not valid") % code)
+            messages.error(request, "Тип события '%s' не действительный" % code)
             return self.reload_page()
 
         reference = request.POST.get("reference", None)
@@ -683,16 +690,15 @@ class OrderDetailView(EventHandlerMixin, DetailView):
                 order, event_type, lines, quantities, reference=reference
             )
         except order_exceptions.InvalidShippingEvent as e:
-            messages.error(request, _("Unable to create shipping event: %s") % e)
+            messages.error(request, "Не удалось создать событие доставки.: %s" % e)
         except order_exceptions.InvalidStatus as e:
-            messages.error(request, _("Unable to create shipping event: %s") % e)
+            messages.error(request, "Не удалось создать событие доставки.: %s" % e)
         except PaymentError as e:
             messages.error(
-                request,
-                _("Unable to create shipping event due to payment error: %s") % e,
+                request, "Невозможно создать событие доставки из-за ошибки платежа.: %s" % e,
             )
         else:
-            messages.success(request, _("Shipping event created"))
+            messages.success(request, "Событие доставки создано")
         return self.reload_page()
 
     def create_payment_event(self, request, order, lines, quantities):
@@ -703,12 +709,12 @@ class OrderDetailView(EventHandlerMixin, DetailView):
 
         # If no amount passed, then we add up the total of the selected lines
         if not amount_str:
-            amount = sum([line.line_price_incl_tax for line in lines])
+            amount = sum([line.line_price for line in lines])
         else:
             try:
                 amount = D(amount_str)
             except InvalidOperation:
-                messages.error(request, _("Please choose a valid amount"))
+                messages.error(request, "Пожалуйста, выберите корректную сумму")
                 return self.reload_page()
 
         return self._create_payment_event(request, order, amount, lines, quantities)
@@ -720,7 +726,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         try:
             event_type = PaymentEventType._default_manager.get(code=code)
         except PaymentEventType.DoesNotExist:
-            messages.error(request, _("The event type '%s' is not valid") % code)
+            messages.error(request, "Тип события '%s' не действительный" % code)
             return self.reload_page()
         try:
             self.get_handler().handle_payment_event(
@@ -728,13 +734,12 @@ class OrderDetailView(EventHandlerMixin, DetailView):
             )
         except PaymentError as e:
             messages.error(
-                request,
-                _("Unable to create payment event due to payment error: %s") % e,
-            )
+                request, "Невозможно создать платежное событие из-за ошибки платежа: %s" % e
+                )
         except order_exceptions.InvalidPaymentEvent as e:
-            messages.error(request, _("Unable to create payment event: %s") % e)
+            messages.error(request, "Невозможно создать событие платежа: %s" % e)
         else:
-            messages.info(request, _("Payment event created"))
+            messages.info(request, "Событие платежа создано")
         return self.reload_page()
 
 
@@ -791,7 +796,7 @@ def get_change_summary(model1, model2):
     change_descriptions = []
     for field, delta in changes.items():
         change_descriptions.append(
-            _("%(field)s changed from '%(old_value)s' to '%(new_value)s'")
+            ("%(field)s изменено с '%(old_value)s' на '%(new_value)s'")
             % {"field": field, "old_value": delta[0], "new_value": delta[1]}
         )
     return "\n".join(change_descriptions)
@@ -822,17 +827,210 @@ class ShippingAddressUpdateView(UpdateView):
         response = super().form_valid(form)
         changes = get_change_summary(old_address, self.object)
         if changes:
-            msg = _("Delivery address updated:\n%s") % changes
+            msg = "Адрес доставки обновлен:\n%s" % changes
             self.object.order.notes.create(
                 user=self.request.user, message=msg, note_type=OrderNote.SYSTEM
             )
         return response
 
     def get_success_url(self):
-        messages.info(self.request, _("Delivery address updated"))
+        messages.info(self.request, "Адрес доставки обновлен")
         return reverse(
             "dashboard:order-detail",
             kwargs={
                 "number": self.object.order.number,
             },
         )
+
+#vlad
+class UpdateSourceView(UpdateView):
+    """
+    Обновить информацию о транзациях для конкретного СОРСА
+    """
+
+    model = Source
+
+    def get(self, request, *args, **kwargs):
+        """
+        Fetch the latest status from docdata.
+        """
+        self.object = self.get_object()
+
+
+        # Perform update.
+        try:
+            payment_method = PaymentManager(self.object.reference).get_method()
+            payment = payment_method.get_payment_api(self.object.payment_id)
+            refund = payment_method.get_refund_api(self.object.refund_id)
+            payment_method.update(
+                source=self.object, 
+                payment=payment, 
+                refund=refund,
+            )
+            logger.info("Способ оплаты был обновлен пользователем {0}".format(request.user.id)) 
+        except DebitedAmountIsNotEqualsRefunded as e:
+            messages.error(request, e)
+        except Exception as e:
+            messages.error(request, "Ошибка обновления. Попробуйте позже")
+        else:
+            messages.info(request, u"Информация об источнике оплаты успешно обновлена")
+
+        return HttpResponseRedirect(reverse('dashboard:order-detail', args=(self.object.order.number,)))
+
+#vlad
+class DeleteSourceView(DeleteView):
+    """
+    Удалить источние оплты, если в нет нет оплаченых платежей
+    """
+
+    model = Source
+    template_name_suffix = "_confirm_delete_source"
+    template_name = 'oscar/dashboard/orders/confirm_delete_source.html'
+
+    def post(self, request, *args, **kwargs):
+        """
+        Cancel the object in Source
+        """
+        self.object = self.get_object()
+        payment_method = self.object.source_type.name
+        order_number = self.object.order.number
+        self.object.delete()
+
+        logger.info("Способ оплаты был удален пользователем {0}".format(request.user.id)) 
+        messages.info(request, (u'Способ оплаты "{payment_method}" был успешно удален.').format(payment_method=payment_method))
+
+        return HttpResponseRedirect(reverse('dashboard:order-detail', args=(order_number,)))
+
+
+#vlad
+class AddSourceView(CreateView):
+    
+    template_name = "oscar/dashboard/orders/add_source.html"
+    model = Source
+    order_model = Order
+    form_class = NewSourceForm
+
+    def dispatch(self, request, *args, **kwargs):
+        # pylint: disable=attribute-defined-outside-init
+        self.order = get_object_or_404(
+            self.order_model, number=kwargs["number"]
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["order"] = self.order
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["order"] = self.order
+        return kwargs
+
+    def form_valid(self, form):
+
+        try:
+            form_edited = form.save(commit=False)
+            form_edited.amount_debited = D(0)
+            form_edited.amount_refunded = D(0)
+            form_edited.refundable = False
+            form_edited.paid = False
+            form_edited.order = form.order
+            form_edited.currency = form.order.currency
+            form_edited.reference = form.instance.source_type.code
+            form_edited.save()
+            messages.success(self.request, "Способ оплаты был успешно добавлен!")
+        except Exception as e:
+            messages.error(self.request, "Ошибка при добавлении способа оплаты!")
+    
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('dashboard:order-detail', args=(self.order.number,))
+
+#vlad
+class AddTransactionView(CreateView):
+
+    template_name = "oscar/dashboard/orders/add_transaction.html"
+    model = Transaction
+    order_model = Order
+    form_class = NewTransactionForm
+
+    def dispatch(self, request, *args, **kwargs):
+        # pylint: disable=attribute-defined-outside-init
+        self.order = get_object_or_404(
+            self.order_model, number=kwargs["number"]
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["order"] = self.order
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["order"] = self.order
+        return kwargs
+
+    def form_valid(self, form):
+
+        try:
+            source = form.cleaned_data.get('source')
+            amount = form.cleaned_data.get('amount')
+            reference = "Добавлено пользователем:" + str(self.request.user.first_name) + "(id=" + str(self.request.user.id) + ")"
+            status = form.cleaned_data.get('status')
+            paid = form.cleaned_data.get('paid')
+            code = form.cleaned_data.get('code')
+            txn_type = form.cleaned_data.get('txn_type')
+
+            if txn_type == 'Refund':
+                source.new_refund(amount, reference, status, paid, code)
+            elif txn_type == 'Payment':
+                source.new_payment(amount, reference, status, paid, code)
+
+            messages.success(self.request, "Новая транзакция была успешно добавлена!")
+        except Exception as e:
+            messages.error(self.request, "Невозможно добавить транзакцию!")
+    
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('dashboard:order-detail', args=(self.order.number,))
+
+#vlad
+class RefundTransactionView(DetailView):
+    """
+    Отменить транзакцию и подать на возврат
+    """
+
+    model = Transaction
+    template_name_suffix = "_confirm_refund"
+    template_name = 'oscar/dashboard/orders/confirm_refund.html'
+
+    def post(self, request, *args, **kwargs):
+        """
+        Fetch the latest status from docdata.
+        """
+        self.object = self.get_object()
+        amount = request.POST.get('amount')
+
+        # try:
+        payment_method = PaymentManager(self.object.source.reference).get_method()
+        
+        refund = payment_method.refund(
+            transaction=self.object, 
+            amount=amount,
+        )
+        payment_method.create_refund_transaction(refund, self.object.source)
+
+        logger.info('Транзакция №{0} была отменена пользователем #{1}'.format(self.object.id ,request.user.id)) 
+        # except Exception as e:
+        #     messages.error(request, "Возврат не удался")
+        # else:
+        #     messages.info(request, u"Возврат совершен!")
+
+        return HttpResponseRedirect(reverse('dashboard:order-detail', args=(self.object.source.order.number,)))
+    
+
+

@@ -14,15 +14,9 @@
             <i class="fas fa-shopping-cart"></i>
             {% trans "Basket" %}
             {% if not request.basket.is_empty %}
-                {% if request.basket.is_tax_known %}
-                    {% blocktrans with total=request.basket.total_incl_tax|currency:request.basket.currency %}
-                        Total: {{ total }}
-                    {% endblocktrans %}
-                {% else %}
-                    {% blocktrans with total=request.basket.total_excl_tax|currency:request.basket.currency %}
-                        Total: {{ total }}
-                    {% endblocktrans %}
-                {% endif %}
+                {% blocktrans with total=request.basket.total|currency:request.basket.currency %}
+                    Total: {{ total }}
+                {% endblocktrans %}
             {% endif %}
         </a>
     {% endblock %}
@@ -53,6 +47,10 @@
                         </li>
                    {% endblock %}
                </ul>
+            {% endblock %}
+
+            {% block add_address %}
+                <a style="background-color: #fff; border-radius: 10px; width: 140px; margin-right: 20px;" class="dropdown-item" href="{% url 'address:delivery-address' %}">{% trans "Add address" %}</a>
             {% endblock %}
 
             {% block nav_extra %}

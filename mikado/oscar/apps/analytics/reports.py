@@ -1,5 +1,3 @@
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core.loading import get_class, get_model
 
 ReportGenerator = get_class("dashboard.reports.reports", "ReportGenerator")
@@ -14,7 +12,7 @@ class ProductReportCSVFormatter(ReportCSVFormatter):
 
     def generate_csv(self, response, products):
         writer = self.get_csv_writer(response)
-        header_row = [_("Product"), _("Views"), _("Basket additions"), _("Purchases")]
+        header_row = ["Продукт", "Просмотры", "Дополнения корзины", "Покупки"]
         writer.writerow(header_row)
 
         for record in products:
@@ -33,7 +31,7 @@ class ProductReportHTMLFormatter(ReportHTMLFormatter):
 
 class ProductReportGenerator(ReportGenerator):
     code = "product_analytics"
-    description = _("Product analytics")
+    description = "Аналитика продукта"
     model_class = ProductRecord
 
     formatters = {
@@ -54,15 +52,15 @@ class UserReportCSVFormatter(ReportCSVFormatter):
     def generate_csv(self, response, users):
         writer = self.get_csv_writer(response)
         header_row = [
-            _("Name"),
-            _("Date registered"),
-            _("Product views"),
-            _("Basket additions"),
-            _("Orders"),
-            _("Order lines"),
-            _("Order items"),
-            _("Total spent"),
-            _("Date of last order"),
+            "Имя",
+            "Дата регистрации",
+            "Просмотры товара",
+            "Дополнения корзины",
+            "Заказы",
+            "Позиции заказа",
+            "Товары в заказе",
+            "Сумма всех заказов",
+            "Дата последнего заказа",
         ]
         writer.writerow(header_row)
 
@@ -87,7 +85,7 @@ class UserReportHTMLFormatter(ReportHTMLFormatter):
 
 class UserReportGenerator(ReportGenerator):
     code = "user_analytics"
-    description = _("User analytics")
+    description = "Аналитика пользователя"
     queryset = UserRecord._default_manager.select_related().all()
 
     formatters = {

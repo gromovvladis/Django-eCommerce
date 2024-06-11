@@ -1,0 +1,50 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n %}
+{% load l10n %}
+
+{% block body_class %}Refund money{% endblock %}
+
+{% block title %}
+    Отменить оплату по заказу №{{ transaction.source.order.number }}?
+    | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">{% trans "Orders" %}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard:order-detail' number=transaction.source.order.number %}">{{ transaction.source.order.number }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% trans "Подтвердите возврат" %}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block navtext %}
+Отменить оплату по заказу №{{ transaction.source.order.number }}?
+{% endblock %}
+
+{% block dashboard_content %}
+    <div class="table-header">
+        <h2>{% trans "Возврат средств" %}</h2>
+    </div>
+    <form action="" method="post" class="well">
+        {% csrf_token %}
+        {{ form }}
+        <br>
+        <p>Отменить транзакцию и вернуть деньги клиенту?</p>
+        <p><strong>Это действие нельзя отменить!</strong></p>
+        <div style="border: 1px solid red; color: red; padding: 5px; margin: 0 0 1em 0; max-width: 500px;">
+          После отмены заказ перейдет в статус "Не оплачен" (сделаю потом)
+        </div>
+
+        <input style="margin-bottom:15px ;" name="amount" step="0.01" type="number" min="1" max="{{ transaction.source.amount_available_for_refund|unlocalize }}" value="{{ transaction.source.amount_available_for_refund|unlocalize }}" placeholder="Сумма к возврату"/>
+        <br>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger">Вернуть указанную сумму</button>
+            {% trans "or" %} <a href="{% url 'dashboard:order-detail' number=transaction.source.order.number %}">Отмена (вернуться на страницу заказа)</a>.
+        </div>
+    </form>
+{% endblock %}

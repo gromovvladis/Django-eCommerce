@@ -47,3 +47,14 @@ class UnableToTakePayment(PaymentError):
     expiry date has passed).  The message passed here will be shown to the end
     user.
     """
+
+
+class UnableToRefund(PaymentError):
+    """
+    Exception
+    """
+
+class DebitedAmountIsNotEqualsRefunded(PaymentError):
+    """
+    Exception
+    """

@@ -1,0 +1,59 @@
+{% load currency_filters %}
+{% load i18n %}
+{% load purchase_info_tags %}
+
+{% purchase_info_for_product request product as session %}
+
+{% if session.price.exists %}
+    {% if product.is_parent %}
+        {% if session.price.variations_price  %}
+        {% purchase_info_min_price session.price.variations_price.items as min_price %}
+            <div>
+                <span class="v-prices d-flex flex-column align-start">
+                    <span class="v-prices__price no-wrap py-1 ">
+                    <span class="v-prices__price-before">от</span>
+                    {{ min_price|currency:session.price.currency }}
+                    </span>
+                </span>
+            </div> 
+        {% endif %}
+    {% else %}
+        {% if session.price.exists %}
+            {% if session.price.money == 0 %}
+                <div>
+                    <span class="v-prices d-flex flex-column align-start">
+                        <span class="v-prices__price no-wrap py-1">
+                            <span class="v-prices__price-before"></span>
+                            0 Р
+                            <span class="price--abb"></span>
+                        </span>
+                    </span>
+                </div>
+            {% else %}
+                <div>
+                    <span class="v-prices d-flex flex-column align-start">
+                        {% if session.price.old_price %}
+                            <span class="dish__mobile-total-price shrink">
+                                <span class="v-prices__price no-wrap pb-1">
+                                    {{ session.price.money|currency:session.price.currency }}
+                                </span>
+                            </span>    
+                            <div class="dish__mobile-total d-flex align-center mt-05">
+                                <span class="dish__mobile-total-label dish__profit">Цена по акции</span>
+                            </div>
+                            
+                        {% else %}
+                            <span class="v-prices__price no-wrap pb-1">
+                                {{ session.price.money|currency:session.price.currency }}
+                            </span>
+                        {% endif %}
+                    </span>
+                </div>
+            {% endif %}
+        {% else %}
+            <p class="price_color">&nbsp;</p>
+        {% endif %}
+    {% endif %}
+{% else %}
+    {% trans 'Unavailable' %}
+{% endif %}

@@ -4,12 +4,10 @@ from haystack.generic_views import FacetedSearchView as BaseFacetedSearchView
 
 from oscar.core.loading import get_class
 
-FacetMunger = get_class("search.facets", "FacetMunger")
 base_sqs = get_class("search.facets", "base_sqs")
 
 
 class BaseSearchView(BaseFacetedSearchView):
-    facet_fields = settings.OSCAR_SEARCH_FACETS["fields"].keys()
     paginate_by = settings.OSCAR_PRODUCTS_PER_PAGE
 
     def get_queryset(self):
@@ -27,22 +25,5 @@ class BaseSearchView(BaseFacetedSearchView):
             suggestion = form.get_suggestion()
             if suggestion != context["query"]:
                 context["suggestion"] = suggestion
-
-        # Convert facet data into a more useful data structure
-        if "fields" in context["facets"]:
-            munger = FacetMunger(
-                self.request.get_full_path(),
-                form.selected_multi_facets,
-                self.queryset.facet_counts(),
-                query_type=type(self.queryset.query),
-            )
-            context["facet_data"] = munger.facet_data()
-            has_facets = any(
-                [len(data["results"]) for data in context["facet_data"].values()]
-            )
-            context["has_facets"] = has_facets
-
-        context["selected_facets"] = form.selected_facets
-        context[self.page_kwarg] = context["page_obj"]
-
+                
         return context

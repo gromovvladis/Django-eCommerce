@@ -6,7 +6,6 @@ from django.forms.models import ModelChoiceIterator
 from django.forms.widgets import FileInput
 from django.utils import formats
 from django.utils.encoding import force_str
-from django.utils.translation import gettext as _
 
 
 class ImageInput(FileInput):
@@ -209,7 +208,7 @@ class DateTimePickerInput(DateTimeWidgetMixin, forms.DateTimeInput):
         return ctx
 
 
-class AdvancedSelect(forms.Select):
+class AdvancedSelect(forms.RadioSelect):
     """
     Customised Select widget that allows a list of disabled values to be passed
     to the constructor.  Django's default Select widget doesn't allow this so
@@ -316,7 +315,7 @@ class NullBooleanSelect(forms.NullBooleanSelect):
     def __init__(self, attrs=None):
         super().__init__(attrs)
         self.choices = (
-            ("unknown", _("---------")),
-            ("true", _("Yes")),
-            ("false", _("No")),
+            ("unknown", "---------"),
+            ("true", "Да"),
+            ("false", "Нет"),
         )

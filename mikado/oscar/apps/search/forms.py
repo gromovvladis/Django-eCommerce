@@ -1,9 +1,6 @@
 from collections import defaultdict
-
 from django import forms
-from django.conf import settings
 from django.forms.widgets import Input
-from django.utils.translation import gettext_lazy as _
 
 from haystack.forms import FacetedSearchForm
 
@@ -22,15 +19,6 @@ class SearchInput(Input):
 
     input_type = "search"
 
-
-# Build a dict of valid queries
-VALID_FACET_QUERIES = defaultdict(list)
-for facet in settings.OSCAR_SEARCH_FACETS["queries"].values():
-    name = facet["field"]
-    queries = [t[1] for t in facet["queries"]]
-    VALID_FACET_QUERIES[name].extend(queries)
-
-
 class SearchForm(FacetedSearchForm):
     """
     In Haystack, the search form is used for interpreting
@@ -41,9 +29,9 @@ class SearchForm(FacetedSearchForm):
     # focus on the search widget.
     q = forms.CharField(
         required=False,
-        label=_("Search"),
+        label="Поиск",
         widget=SearchInput(
-            {"placeholder": _("Search"), "tabindex": "1", "class": "form-control"}
+            {"placeholder": "Поиск", "tabindex": "1", "class": "form-control"}
         ),
     )
 
@@ -57,13 +45,13 @@ class SearchForm(FacetedSearchForm):
     TITLE_Z_TO_A = "title-desc"
 
     SORT_BY_CHOICES = [
-        (RELEVANCY, _("Relevancy")),
-        (TOP_RATED, _("Customer rating")),
-        (NEWEST, _("Newest")),
-        (PRICE_HIGH_TO_LOW, _("Price high to low")),
-        (PRICE_LOW_TO_HIGH, _("Price low to high")),
-        (TITLE_A_TO_Z, _("Title A to Z")),
-        (TITLE_Z_TO_A, _("Title Z to A")),
+        (RELEVANCY, "Релевантность"),
+        (TOP_RATED, "Оценка пользователя"),
+        (NEWEST, "Наиболее новые"),
+        (PRICE_HIGH_TO_LOW, "Цена | От большей к меньшей"),
+        (PRICE_LOW_TO_HIGH, "Цена | От меньшей к большей"),
+        (TITLE_A_TO_Z, "Название от А до Я"),
+        (TITLE_Z_TO_A, "Название от Я до А"),
     ]
 
     # Map query params to sorting fields.  Note relevancy isn't included here
@@ -83,7 +71,7 @@ class SearchForm(FacetedSearchForm):
         SORT_BY_MAP[TITLE_Z_TO_A] = "-title_exact"
 
     sort_by = forms.ChoiceField(
-        label=_("Sort by"),
+        label="Сортировать по",
         choices=SORT_BY_CHOICES,
         widget=forms.Select(),
         required=False,

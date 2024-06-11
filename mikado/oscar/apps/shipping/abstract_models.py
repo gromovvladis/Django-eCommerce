@@ -3,8 +3,6 @@ from decimal import Decimal as D
 
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core import loading, prices
 from oscar.models.fields import AutoSlugField
 
@@ -17,20 +15,21 @@ class AbstractBase(models.Model):
     """
 
     code = AutoSlugField(
-        _("Slug"), max_length=128, unique=True, populate_from="name", db_index=True
+        "Ярлык", max_length=128, unique=True, populate_from="name", db_index=True
     )
-    name = models.CharField(_("Name"), max_length=128, unique=True, db_index=True)
-    description = models.TextField(_("Description"), blank=True)
+    name = models.CharField("Имя", max_length=128, unique=True, db_index=True)
+    description = models.TextField("Описание", blank=True)
 
     # We need this to mimic the interface of the Base shipping method
     is_discounted = False
+    default_selected = False
 
     class Meta:
         abstract = True
         app_label = "shipping"
         ordering = ["name"]
-        verbose_name = _("Shipping Method")
-        verbose_name_plural = _("Shipping Methods")
+        verbose_name = "Способ доставки"
+        verbose_name_plural = "Способы доставки"
 
     def __str__(self):
         return self.name
@@ -58,30 +57,30 @@ class AbstractOrderAndItemCharges(AbstractBase):
     """
 
     price_per_order = models.DecimalField(
-        _("Price per order"), decimal_places=2, max_digits=12, default=D("0.00")
+        "Цена за заказ", decimal_places=2, max_digits=12, default=D("0.00")
     )
     price_per_item = models.DecimalField(
-        _("Price per item"), decimal_places=2, max_digits=12, default=D("0.00")
+        "Цена за товар", decimal_places=2, max_digits=12, default=D("0.00")
     )
 
     # If basket value is above this threshold, then shipping is free
     free_shipping_threshold = models.DecimalField(
-        _("Free Shipping"), decimal_places=2, max_digits=12, blank=True, null=True
+        "Бесплатная доставка", decimal_places=2, max_digits=12, blank=True, null=True
     )
 
     class Meta(AbstractBase.Meta):
         abstract = True
         app_label = "shipping"
-        verbose_name = _("Order and Item Charge")
-        verbose_name_plural = _("Order and Item Charges")
+        verbose_name = "Оплата заказа и товара"
+        verbose_name_plural = "Оплаты заказов и товаров"
 
     def calculate(self, basket):
         if (
             self.free_shipping_threshold is not None
-            and basket.total_incl_tax >= self.free_shipping_threshold
+            and basket.total >= self.free_shipping_threshold
         ):
             return prices.Price(
-                currency=basket.currency, excl_tax=D("0.00"), incl_tax=D("0.00")
+                currency=basket.currency, money=D("0.00")
             )
 
         charge = self.price_per_order
@@ -90,7 +89,7 @@ class AbstractOrderAndItemCharges(AbstractBase):
                 charge += line.quantity * self.price_per_item
 
         # Zero tax is assumed...
-        return prices.Price(currency=basket.currency, excl_tax=charge, incl_tax=charge)
+        return prices.Price(currency=basket.currency, money=charge)
 
 
 class AbstractWeightBased(AbstractBase):
@@ -100,19 +99,19 @@ class AbstractWeightBased(AbstractBase):
     # The default weight to use (in kg) when a product doesn't have a weight
     # attribute.
     default_weight = models.DecimalField(
-        _("Default Weight"),
+        "Вес по умолчанию",
         decimal_places=3,
         max_digits=12,
         default=D("0.000"),
         validators=[MinValueValidator(D("0.00"))],
-        help_text=_("Default product weight in kg when no weight attribute is defined"),
+        help_text="Вес продукта по умолчанию в кг, если атрибут веса не определен",
     )
 
     class Meta(AbstractBase.Meta):
         abstract = True
         app_label = "shipping"
-        verbose_name = _("Weight-based Shipping Method")
-        verbose_name_plural = _("Weight-based Shipping Methods")
+        verbose_name = "Метод доставки по весу"
+        verbose_name_plural = "Методы доставки по весу"
 
     def calculate(self, basket):
         # Note, when weighing the basket, we don't check whether the item
@@ -125,7 +124,7 @@ class AbstractWeightBased(AbstractBase):
         charge = self.get_charge(weight)
 
         # Zero tax is assumed...
-        return prices.Price(currency=basket.currency, excl_tax=charge, incl_tax=charge)
+        return prices.Price(currency=basket.currency, money=charge)
 
     def get_charge(self, weight):
         """
@@ -187,21 +186,21 @@ class AbstractWeightBand(models.Model):
         "shipping.WeightBased",
         on_delete=models.CASCADE,
         related_name="bands",
-        verbose_name=_("Method"),
+        verbose_name="Метод",
     )
     upper_limit = models.DecimalField(
-        _("Upper Limit"),
+        "Верхний предел",
         decimal_places=3,
         max_digits=12,
         db_index=True,
         validators=[MinValueValidator(D("0.00"))],
-        help_text=_(
-            "Enter upper limit of this weight band in kg. The lower "
-            "limit will be determined by the other weight bands."
+        help_text=(
+            "Введите верхний предел этой весовой категории в кг. Нижний "
+            "предел будет определяться другими весовыми категориями"
         ),
     )
     charge = models.DecimalField(
-        _("Charge"),
+        "Плата",
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(D("0.00"))],
@@ -224,8 +223,8 @@ class AbstractWeightBand(models.Model):
         abstract = True
         app_label = "shipping"
         ordering = ["method", "upper_limit"]
-        verbose_name = _("Weight Band")
-        verbose_name_plural = _("Weight Bands")
+        verbose_name = "Весовой диапазон"
+        verbose_name_plural = "Весовые диапазоны"
 
     def __str__(self):
-        return _("Charge for weights up to %s kg") % (self.upper_limit,)
+        return "Плата за вес до %s кг" % (self.upper_limit,)

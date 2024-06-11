@@ -6,14 +6,14 @@
 {% load static %}
 
 {% block styles %}
-    <link rel="stylesheet" type="text/css" href="{% static "oscar/css/dashboard.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "css/dashboard.css" %}" />
 {% endblock %}
 
 {% block extrastyles %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static "oscar/js/select2/select2.min.css" %}" />
-    <link rel="stylesheet" href="{% static "oscar/css/select2-bootstrap.min.css" %}" />
-    <link rel="stylesheet" href="{% static "oscar/js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
+    <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
+    <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
+    <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
 {% endblock %}
 
 {% block title %}
@@ -23,7 +23,7 @@
 {% block layout %}
     {% block navbar %}
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-accounts">
-            <a class="navbar-brand" href="#">{{ shop_name }}</a>
+            <a class="navbar-brand" href="{{ homepage_url }}">{{ shop_name }}</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#top_nav_bar" aria-controls="top_nav_bar" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
@@ -101,7 +101,7 @@
             {% include 'oscar/dashboard/partials/alert_messages.html' %}
             {% block header %}
             <div class="page-header">
-                <h1>{% block headertext %}{% endblock %}</h1>
+                <h1>{% block navtext %}{% endblock %}</h1>
             </div>
             {% endblock %}
             <div class="page-content">
@@ -117,25 +117,25 @@
 {# Local scripts #}
 {% block scripts %}
     <!-- Twitter Bootstrap -->
-    <script src="{% static "oscar/js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
+    <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
     <!-- Oscar -->
-    <script src="{% static "oscar/js/oscar/ui.js" %}"></script>
+    <script src="{% static "js/oscar/ui.js" %}"></script>
 {% endblock %}
 
 {% block extrascripts %}
     {{ block.super }}
 
     {# jQuery plugins #}
-    <script src="{% static "oscar/js/mousewheel/jquery.mousewheel.js" %}"></script>
-    <script src="{% static "oscar/js/bootstrap4-datetimepicker/moment-with-locales.min.js" %}"></script>
-    <script src="{% static "oscar/js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.js" %}"></script>
-    <script src="{% static "oscar/js/inputmask/jquery.inputmask.min.js" %}"></script>
-    <script src="{% static "oscar/js/select2/select2.min.js" %}"></script>
-    <script src="{% static "oscar/js/jquery-sortable/jquery-sortable-min.js" %}"></script>
-    <script src="{% static "oscar/js/oscar/dashboard.js" %}"></script>
-    <script src="{% static "oscar/js/oscar/RelatedObjectLookups.js" %}"></script>
-    <script src="{% static "oscar/js/tinymce/tinymce.min.js" %}"></script>
-    <script src="{% static "oscar/js/tinymce/jquery.tinymce.min.js" %}"></script>
+    <script src="{% static "js/mousewheel/jquery.mousewheel.js" %}"></script>
+    <script src="{% static "js/bootstrap4-datetimepicker/moment-with-locales.min.js" %}"></script>
+    <script src="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.js" %}"></script>
+    <script src="{% static "js/inputmask/jquery.inputmask.min.js" %}"></script>
+    <script src="{% static "js/select2/select2.min.js" %}"></script>
+    <script src="{% static "js/jquery-sortable/jquery-sortable-min.js" %}"></script>
+    <script src="{% static "js/oscar/dashboard.js" %}"></script>
+    <script src="{% static "js/oscar/RelatedObjectLookups.js" %}"></script>
+    <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
+    <script src="{% static "js/tinymce/jquery.tinymce.min.js" %}"></script>
 {% endblock %}
 
 {% block onbodyload %}

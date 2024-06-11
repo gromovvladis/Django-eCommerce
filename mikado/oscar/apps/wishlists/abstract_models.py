@@ -1,9 +1,6 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.crypto import get_random_string
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
-
 from oscar.core.compat import AUTH_USER_MODEL
 
 
@@ -19,35 +16,23 @@ class AbstractWishList(models.Model):
         AUTH_USER_MODEL,
         related_name="wishlists",
         on_delete=models.CASCADE,
-        verbose_name=_("Owner"),
+        verbose_name="Владелец",
     )
-    name = models.CharField(
-        verbose_name=_("Name"), default=_("Default"), max_length=255
-    )
+    # name = models.CharField(
+    #     verbose_name="Имя", default="По умолчанию", max_length=255
+    # )
 
     #: This key acts as primary key and is used instead of an int to make it
     #: harder to guess
     key = models.CharField(
-        _("Key"), max_length=6, db_index=True, unique=True, editable=False
+        "Ключ", max_length=6, db_index=True, unique=True, editable=False
     )
 
     # Oscar core does not support public or shared wishlists at the moment, but
     # all the right hooks should be there
-    PUBLIC, PRIVATE, SHARED = ("Public", "Private", "Shared")
-    VISIBILITY_CHOICES = (
-        (PRIVATE, _("Private - Only the owner can see the wish list")),
-        (
-            SHARED,
-            _(
-                "Shared - Only the owner and people with access to the"
-                " obfuscated link can see the wish list"
-            ),
-        ),
-        (PUBLIC, _("Public - Everybody can see the wish list")),
-    )
-    visibility = models.CharField(
-        _("Visibility"), max_length=20, default=PRIVATE, choices=VISIBILITY_CHOICES
-    )
+    # PUBLIC, PRIVATE, SHARED = ("Public", "Private", "Shared")
+    # visibility = models.CharField(
+    #     "Доступность", max_length=20, default=PUBLIC)
 
     # Convention: A user can have multiple wish lists. The last created wish
     # list for a user shall be their "default" wish list.
@@ -56,11 +41,11 @@ class AbstractWishList(models.Model):
     # That is a rare enough case to handle it by convention instead of a
     # BooleanField.
     date_created = models.DateTimeField(
-        _("Date created"), auto_now_add=True, editable=False, db_index=True
+        "Дата создания", auto_now_add=True, editable=False, db_index=True
     )
 
     def __str__(self):
-        return "%s's Wish List '%s'" % (self.owner, self.name)
+        return "%s - Избранное" % (self.owner)
 
     def save(self, *args, **kwargs):
         if not self.pk or kwargs.get("force_insert", False):
@@ -79,13 +64,18 @@ class AbstractWishList(models.Model):
             if not cls._default_manager.filter(key=key).exists():
                 return key
 
-    def is_allowed_to_see(self, user):
-        if user == self.owner:
+    # def is_allowed_to_see(self, user):
+    #     if user == self.owner:
+    #         return True
+    #     elif self.visibility == self.PUBLIC:
+    #         return True
+    #     elif self.visibility == self.SHARED and user.is_authenticated:
+    #         return self.shared_emails.filter(email=user.email).exists()
+    #     return False
+    
+    def is_have_this_product(self, product):
+        if len(self.lines.filter(product=product)) != 0:
             return True
-        elif self.visibility == self.PUBLIC:
-            return True
-        elif self.visibility == self.SHARED and user.is_authenticated:
-            return self.shared_emails.filter(email=user.email).exists()
         return False
 
     def is_allowed_to_edit(self, user):
@@ -99,10 +89,11 @@ class AbstractWishList(models.Model):
             "owner",
             "date_created",
         )
-        verbose_name = _("Wish List")
+        verbose_name = "Избранное"
 
     def get_absolute_url(self):
-        return reverse("customer:wishlists-detail", kwargs={"key": self.key})
+        # return reverse("customer:wishlist-detail", kwargs={"key": self.key})
+        return reverse("customer:wishlist-detail")
 
     def add(self, product):
         """
@@ -111,17 +102,17 @@ class AbstractWishList(models.Model):
         lines = self.lines.filter(product=product)
         if len(lines) == 0:
             self.lines.create(product=product, title=product.get_title())
-        else:
-            line = lines[0]
-            line.quantity += 1
-            line.save()
+        # else:
+        #     line = lines[0]
+        #     line.quantity += 1
+        #     line.save()
 
     def get_shared_url(self):
         return reverse("wishlists:detail", kwargs={"key": self.key})
 
-    @property
-    def is_shareable(self):
-        return self.visibility in [self.PUBLIC, self.SHARED]
+    # @property
+    # def is_shareable(self):
+    #     return self.visibility in [self.PUBLIC, self.SHARED]
 
 
 class AbstractLine(models.Model):
@@ -133,22 +124,23 @@ class AbstractLine(models.Model):
         "wishlists.WishList",
         on_delete=models.CASCADE,
         related_name="lines",
-        verbose_name=_("Wish List"),
+        verbose_name="Избранное",
     )
     product = models.ForeignKey(
         "catalogue.Product",
-        verbose_name=_("Product"),
+        verbose_name="Продукт",
         related_name="wishlists_lines",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
-    quantity = models.PositiveIntegerField(_("Quantity"), default=1)
+    # quantity = models.PositiveIntegerField("Количество", default=1)
     #: Store the title in case product gets deleted
-    title = models.CharField(pgettext_lazy("Product title", "Title"), max_length=255)
+    title = models.CharField(("Название продукта", "Название"), max_length=255)
 
     def __str__(self):
-        return "%sx %s on %s" % (self.quantity, self.title, self.wishlist.name)
+        # return "%sx %s on %s" % (self.quantity, self.title, self.wishlist.name)
+        return "%s on %s" % (self.title, self.wishlist)
 
     def get_title(self):
         if self.product:
@@ -162,27 +154,27 @@ class AbstractLine(models.Model):
         # Enforce sorting by order of creation.
         ordering = ["pk"]
         unique_together = (("wishlist", "product"),)
-        verbose_name = _("Wish list line")
+        verbose_name = "Позиция избранного"
 
 
-class AbstractWishListSharedEmail(models.Model):
-    """
-    An email which is allowed to view and possibly edit the wishlist, if shared.
-    The user will have to login/create an account with this email in order to view it.
-    """
+# class AbstractWishListSharedEmail(models.Model):
+#     """
+#     An email which is allowed to view and possibly edit the wishlist, if shared.
+#     The user will have to login/create an account with this email in order to view it.
+#     """
 
-    wishlist = models.ForeignKey(
-        "wishlists.WishList",
-        on_delete=models.CASCADE,
-        related_name="shared_emails",
-        verbose_name=_("Wish List"),
-    )
-    email = models.EmailField(verbose_name=_("Email"))
+#     wishlist = models.ForeignKey(
+#         "wishlists.WishList",
+#         on_delete=models.CASCADE,
+#         related_name="shared_emails",
+#         verbose_name="Избранное",
+#     )
+#     email = models.EmailField(verbose_name="Email")
 
-    def __str__(self):
-        return "%s - %s" % (self.wishlist.name, self.email)
+#     def __str__(self):
+#         return "%s - %s" % (self.wishlist.name, self.email)
 
-    class Meta:
-        abstract = True
-        app_label = "wishlists"
-        verbose_name = _("Wish list shared email")
+#     class Meta:
+#         abstract = True
+#         app_label = "wishlists"
+#         verbose_name = "Избранное email"

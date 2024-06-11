@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.encoding import smart_str
-from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import View
 
 from oscar.core.utils import safe_referrer
@@ -27,15 +26,55 @@ class PostActionMixin:
                 getattr(self, method_name)(model)
                 return self.response
             else:
-                messages.error(request, _("Invalid form submission"))
+                messages.error(request, "Неверная отправка формы")
                 return self.get(request, *args, **kwargs)
 
         # There may be no fallback implementation at super().post
         try:
             return super().post(request, *args, **kwargs)
         except AttributeError:
-            messages.error(request, _("Invalid form submission"))
+            messages.error(request, "Неверная отправка формы")
             return self.get(request, *args, **kwargs)
+
+
+class NotifEditMixin:
+    """
+    Mixin for views that have a bulk editing facility.  This is normally in the
+    form of tabular data where each row has a checkbox.  The UI allows a number
+    of rows to be selected and then some 'action' to be performed on them.
+    """
+
+    action_param = "action"
+
+    # Permitted methods that can be used to act on the selected objects
+    actions = None
+    checkbox_object_name = None
+
+    def get_error_url(self, request):
+        return safe_referrer(request, ".")
+
+    def get_success_url(self, request):
+        return safe_referrer(request, ".")
+
+    def post(self, request, *args, **kwargs):
+        # Dynamic dispatch pattern - we forward POST requests onto a method
+        # designated by the 'action' parameter.  The action has to be in a
+        # whitelist to avoid security issues.
+        action = request.POST.get("data-behaviours").lower()
+        if not action or action not in self.actions:
+            messages.error(self.request, "Недопустимое действие")
+            return redirect(self.get_error_url(request))
+        
+        id = request.POST.get("data-notification")
+        if not id:
+            messages.error(
+                self.request,
+                "Вам нужно выбрать несколько %ss" % id,
+            )
+            return redirect(self.get_error_url(request))
+
+        object = self.get_object(id)
+        return getattr(self, action)(request, object)
 
 
 class BulkEditMixin:

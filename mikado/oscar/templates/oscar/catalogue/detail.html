@@ -5,213 +5,209 @@
 {% load reviews_tags %}
 {% load product_tags %}
 {% load display_tags %}
-{% load i18n %}
+{% load static %}
+{% load svg_tags %}
 {% load purchase_info_tags %}
 
 {% block title %}
     {{ product.get_meta_title }} | {{ block.super }}
 {% endblock %}
 
-{% block description %}
-    {{ product.get_meta_description }}
-{% endblock %}
+{% block wrapper_class %}menu fill-width fill-height grow-1 pb-2 px-sm-2 pt-sm-2 pb-sm-6{% endblock %}
+
+{% block app_class %}v-app---dish{% endblock %}
+{% block nav_class %}v-app__nav--dish{% endblock %}
+
+{% block sticky_address %}{% endblock %}
 
 {% block breadcrumbs %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ homepage_url }}">{% trans "Home" %}</a></li>
-            {% with category=product.get_categories.first %}
-                {% for c in category.get_ancestors_and_self %}
-                    <li class="breadcrumb-item"><a href="{{ c.get_absolute_url }}">{{ c.name }}</a></li>
-                {% endfor %}
-                <li class="breadcrumb-item active" aria-current="page">{{ product.get_title }}</li>
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
 
-                {% get_back_button as backbutton %}
-                    {% if backbutton %}
-                        <li class="ml-auto">
-                            <a href="{{ backbutton.url }}">
-                                <i class="fas fa-arrow-left"></i> {{ backbutton.title }}
-                            </a>
-                        </li>
-                    {% endif %}
-            {% endwith %}
-        </ol>
-    </nav>
+        {% with category=product.get_categories.first %}
+            {% for c in category.get_ancestors_and_self %}
+                <a href="{{ c.get_absolute_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">{{ c.name }}</a>
+            {% endfor %}
+            {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+            <span class="v-bread__link" aria-current="page">{{ product.get_title }}</span>
+        {% endwith %}
+    </div>
 {% endblock %}
 
-{% block header %}
-{% endblock header %}
+{% block nav %}{% endblock %}
 
 {% block content %}
+    <div class="menu__wrapper d-flex flex-column">
+        {% comment %}------------- страница товара ---------------{% endcomment %}
+        <div class="dish-page pb-sm-2 pt-md-0">
+            {% comment %} <div itemscope="itemscope" itemtype="http://schema.org/Product" class="dish-page__wrapper d-flex flex-column flex-md-row pd-0 pd-sm-2"> {% endcomment %}
+            <div itemscope="itemscope" itemtype="http://schema.org/Product" class="dish-page__wrapper d-flex flex-column flex-md-row pd-0">
+            
+                {% purchase_info_for_product request product as session %}
+                {% currency_symbol session.price.currency as currency_symbol %}
+            
+                {% comment %}------------- изображения товара ---------------{% endcomment %}
+                <div class="dish-page__image pos-relative">
+                    <div class="v-carousel__wrap fill-width fill-height" style="position: relative;">
+                        <div class="v-carousel">
+                            <div class="v-carousel__inner d-flex">
+                                <div class="v-carousel__item">
+                                    <div class="fill-width fill-height">
+                                        <div class="v-dish-image fill-width">
+                                        <div class="v-images-chunks" style="position: relative;">
+                                            <div class="v-image">
+                                            <div class="v-image__inner v-image__inner--detail">
+                                                {% block product_gallery %}
+                                                    {% include "oscar/catalogue/partials/gallery.html" %}
+                                                {% endblock %}
+                                            </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% iffeature "wishlists" %}
+                        {% include "oscar/catalogue/partials/add_to_wishlist.html" %}
+                    {% endiffeature %} 
+                </div>
 
-<article class="product_page"><!-- Start of product page -->
+                <div class="dish-page__content d-flex flex-column shrink px-2 mt-2 px-sm-0 mt-sm-0 pl-md-2">
+                    <div class="dish-page__content-wrapper d-flex flex-column fill-width fill-height">
+                        {% comment %}------------- заголовок + вес ---------------{% endcomment %}
+                        <header class="dish-page__header d-flex shrink align-end align-md-end pt-sm-1">
+                            <span itemprop="name"><h1>{{ product.get_title }}</h1></span>
+                            <meta itemprop="description" content="{{ product.get_meta_description }}" />
+                            <div role="separator" class="v-spacer"></div>
+                            {% if user.is_staff %}
+                                <a class="float-right d-none d-md-block" href="{% url 'dashboard:catalogue-product' pk=product.id %}">
+                                    {% comment %} <small><i class="fas fa-pencil-alt"></i>Редактировать</small> {% endcomment %}
+                                    {% icon file_name='interface/edit' size=22 stroke="#111"%}
+                                </a>
+                            {% endif %}
+                            <span class="ml-2 shrink v-weight">
+                                {% if product.has_weight %}
+                                    <span>{{ product.weight }}</span>
+                                    <span>г</span>
+                                {% endif %}
+                            </span>
+                        </header>
 
-    <div class="row">
-
-        {% block product_gallery %}
-        <div class="col-sm-6">
-            {% include "oscar/catalogue/partials/gallery.html" %}
-        </div>
-        {% endblock %}
-
-        {% block product_main %}
-        <div class="col-sm-6 product_main">
-            {% comment %}
-                This is a bit clunky here.  Better to have some kind of JS-driven dashboard menu that
-                pops out when clicked.  A bit like the Django-Debug-Toolbar button
-            {% endcomment %}
-            {% if user.is_staff %}
-                <a class="float-right d-none d-md-block" href="{% url 'dashboard:catalogue-product' pk=product.id %}">
-                    <small><i class="fas fa-pencil-alt"></i> {% trans "Edit this product" %}</small>
-                </a>
-            {% endif %}
-            <h1>{{ product.get_title }}</h1>
-
-            {% block product_stock_record %}
-                {% include "oscar/catalogue/partials/stock_record.html" with verbose=1 %}
-            {% endblock %}
-
-            {% iffeature "reviews" %}
-                {% include "oscar/catalogue/reviews/partials/review_stars.html" %}
-            {% endiffeature %}
-
-            <hr/>
-
-            {% comment %} {% if not product.is_parent %}
-                {% block product_basket_form %}
-                    {% include "oscar/catalogue/partials/add_to_basket_form.html" %}
-                {% endblock %}
-            {% else %}
-                {% block variants %}
-                    <h2>{% trans 'Variants:' %}</h2>
-                    {% for child in product.children.public %}
-                        {% purchase_info_for_product request child as child_session %}
-                        {% if child_session.availability.is_available_to_buy %}
-                            <a href="{{ child.get_absolute_url }}">{{ child.get_title }}</a><br>
+                        {% if not session.availability.is_available_to_buy %}
+                            <span class="dish__not-available pr-1 mb-1">Временно не доставляем</span>
                         {% endif %}
-                    {% endfor %}
-                {% endblock %}
-            {% endif %} {% endcomment %}
 
-            {% block product_basket_form %}
-                {% include "oscar/catalogue/partials/add_to_basket_form.html" %}
-            {% endblock %}
-           
-        </div><!-- /col-sm-6 -->
-        {% endblock %}
+                        {% comment %}------------- если есть скидка ---------------{% endcomment %}                        
+                        <div class="d-flex mt-1 align-end">
+                            <div class="mr-1 dish-page__price{% if session.price.old_price %} new-price{% endif %}">
+                                <span data-id="dish-price-main">{{ session.price.money|formate_price }}</span>
+                                <span> {{ currency_symbol }}</span>
+                            </div>
+                            <div class="dish-page__old-price {% if not session.price.old_price %}d-none{% endif %}">
+                                <span  data-id="dish-old-price-main">{{ session.price.old_price|formate_price }}</span>
+                                <span> {{ currency_symbol }}</span>
+                            </div>
+                        </div>
+                        
 
-    </div><!-- /row -->
+                        <div class="dish-page__scroll-block d-flex flex-column grow-1 scrollbar--white mt-md-1 pb-md-2">
+                            {% comment %}------------- состав ---------------{% endcomment %}
+                            {% if product.has_compound %}
+                                <div class="dish-page__ingredients mt-2">
+                                        <h3>Состав:</h3><div class="fill-width mt-1">
+                                        <span>{{ product.compound }}</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% comment %}------------- описание ---------------{% endcomment %}
+                            <div class="dish-page__consist mt-2">
+                                <p>{{ product.description|safe }}</p>
+                            </div>
+                
+                            {% comment %}------------- калории жиры и углеводы ---------------{% endcomment %}
+                            {% comment %} <div class="dish-page__nutritional d-flex flex-wrap justify-space-between mt-2">
+                                {% for av in product.get_kbzhu_values %}
+                                    <div class="dish-page__nutritional-item d-flex flex-column align-center justify-center no-wrap">
+                                        <span>{{ av.value_as_html }}</span><label>{{ av.attribute.name }}</label>
+                                    </div>
+                                {% endfor %}
+                            </div> {% endcomment %}
+                
+                            {% block product_basket_form %}
+                                {% include "oscar/catalogue/partials/add_to_basket_form.html" with currency_symbol=currency_symbol%}
+                            {% endblock %}
+                        
+                    </div>
 
-    {% block product_description %}
-        {% if product.description %}
-        <div id="product_description" class="sub-header">
-            <h2>{% trans "Product Description" %}</h2>
-        </div>
-        <p>{{ product.description|safe }}</p>
-        {% endif %}
-    {% endblock %}
-
-    {% block product_info %}
-    <div class="sub-header">
-        <h2>{% trans "Product Information" %}</h2>
-    </div>
-    <table class="table table-striped">
-        {% if product.upc %}
-        <tr>
-            <th>{% trans "UPC" %}</th><td>{{ product.upc }}</td>
-        </tr>
-        {% endif %}
-        <tr>
-            <th>{% trans "Product Type" %}</th><td>{{ product.get_product_class.name }}</td>
-        </tr>
-
-        {% purchase_info_for_product request product as session %}
-        {% if session.price.exists %}
-            <tr>
-                <th>{% trans "Price (excl. tax)" %}</th><td>{{ session.price.excl_tax|currency:session.price.currency }}</td>
-            </tr>
-            {% if session.price.is_tax_known %}
-                <tr>
-                    <th>{% trans "Price (incl. tax)" %}</th><td>{{ session.price.incl_tax|currency:session.price.currency }}</td>
-                </tr>
-                <tr>
-                    <th>{% trans "Tax" %}</th><td>{{ session.price.tax|currency:session.price.currency }}</td>
-                </tr>
-            {% endif %}
-            <tr>
-                <th>{% trans "Availability" %}</th>
-                <td>{{ session.availability.message }}</td>
-            </tr>
-        {% endif %}
-        {% for av in product.get_attribute_values %}
-            <tr>
-                <th>{{ av.attribute.name }}</th>
-                <td>{{ av.value_as_html }}</td>
-            </tr>
-        {% endfor %}
-        {% iffeature "reviews" %}
-            <tr>
-                <th>{% trans "Number of reviews" %}</th>
-                <td>{{ product.num_approved_reviews }}</td>
-            </tr>
-        {% endiffeature %}
-    </table>
-    {% endblock %}
-
-    {% iffeature "reviews" %}
-        {% block product_review %}
-        <section>
-            <div id="reviews" class="sub-header">
-                {% if product.num_approved_reviews > 3 %}
-                    <a href="{% url 'catalogue:reviews-list' product_slug=product.slug product_pk=product.id %}" class="btn float-right">{% trans "See all reviews" %}</a>
-                {% endif %}
-                <h2>{% trans "Customer Reviews" %}</h2>
-            </div>
-
-            {% if product.num_approved_reviews == 0 %}
-                <p>
-                    {% if product|is_review_permitted:user %}
-                        {% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id as add_review_url %}
-                            {% blocktrans %}This product does not have any reviews yet -
-                            <a href="{{ add_review_url }}#addreview">be the first to write one</a>.
-                        {% endblocktrans %}
-                    {% else %}
-                        {% trans "This product does not have any reviews yet" %}.
+                    {% comment %}------------- добавить в корзину + цена ---------------{% endcomment %}
+                    {% if session.availability.is_available_to_buy %}
+                        <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/Offer" class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
+                            <button id="add_to_cart_btn" for="add_to_basket_form" type="submit" data-id="dish-submit-button" class="v-button fill-width v-button--main justify-center shrink">
+                                <span class="v-button__wrapper">
+                                    <span class="v-button__value">В корзину за 
+                                        <span  data-id="dish-price-button">
+                                            {% if session.price.exists %}
+                                                {{ session.price.money|formate_price }}
+                                            {% endif %}
+                                        </span>
+                                        <span>{{ currency_symbol }}</span>
+                                    </span>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="add_to_cart_line_mark mr-1">
+                                        <path class="add_to_cart_line" d="M4 12.6111L8.92308 17.5L20 6.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>      
+                                    <span class="v-button__loading">Добавлено</span>
+                                </span>
+                            </button>
+                            <span id="add_to_cart_btn_errors" class="add-to-cart-error" ></span>
+                        </div>    
                     {% endif %}
-                </p>
-            {% else %}
-                <ol class="list-unstyled review-list">
-                    {% for review in product.reviews.approved.all|slice:":3" %}
-                        <li>
-                        {% include 'oscar/catalogue/partials/review.html' %}
-                        </li>
-                    {% endfor %}
-                </ol>
-            {% endif %}
-        </section>
-        {% endblock product_review %}
-    {% endiffeature %}
-
-    {% with recommended_products=product.sorted_recommended_products|slice:":6" %}
-        {% if recommended_products %}
-            <div class="sub-header">
-                <h2>{% trans "Recommended items" %}</h2>
+                </div>
             </div>
-            <ul class="row list-unstyled mx-0">
-                {% for product in recommended_products %}
-                <li class="col-sm-4 col-md-3 col-lg-3">
-                    {% render_product product %}
-                </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+        </div>
 
-    {% recently_viewed_products current_product=product %}
-
-</article><!-- End of product page -->
+        {% with recommended_products=product.sorted_recommended_products|slice:":6" %}
+            {% if recommended_products %}
+                <div class="dish-page__related mt-3 px-2 px-sm-0 mt-md-4">
+                    <h2>C этим товаром часто покупают</h2>
+                    <div class="v-dishes mt-1 mt-md-2 row">
+                        {% for product in recommended_products %}
+                            <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-3 col-lg-3">
+                                {% render_product product %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+    
+        {% recently_viewed_products current_product=product %}
+    </div>
 {% endblock content %}
 
 {% block extrascripts %}
     {{ block.super }}
+    <script>
+        var url_product = "{% url 'basket:add' pk=product.pk  %}"
+    </script>
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-wishlist.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+{% endblock %}
+
+{% block SVG %}
+    <svg style="display: none">
+        <symbol id="remove-from-wishlist" fill="#9b9b9b" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8.96173 18.9109L9.42605 18.3219L8.96173 18.9109ZM12 5.50063L11.4596 6.02073C11.601 6.16763 11.7961 6.25063 12 6.25063C12.2039 6.25063 12.399 6.16763 12.5404 6.02073L12 5.50063ZM15.0383 18.9109L15.5026 19.4999L15.0383 18.9109ZM9.42605 18.3219C7.91039 17.1271 6.25307 15.9603 4.93829 14.4798C3.64922 13.0282 2.75 11.3345 2.75 9.1371H1.25C1.25 11.8026 2.3605 13.8361 3.81672 15.4758C5.24723 17.0866 7.07077 18.3752 8.49742 19.4999L9.42605 18.3219ZM2.75 9.1371C2.75 6.98623 3.96537 5.18252 5.62436 4.42419C7.23607 3.68748 9.40166 3.88258 11.4596 6.02073L12.5404 4.98053C10.0985 2.44352 7.26409 2.02539 5.00076 3.05996C2.78471 4.07292 1.25 6.42503 1.25 9.1371H2.75ZM8.49742 19.4999C9.00965 19.9037 9.55954 20.3343 10.1168 20.6599C10.6739 20.9854 11.3096 21.25 12 21.25V19.75C11.6904 19.75 11.3261 19.6293 10.8736 19.3648C10.4213 19.1005 9.95208 18.7366 9.42605 18.3219L8.49742 19.4999ZM15.5026 19.4999C16.9292 18.3752 18.7528 17.0866 20.1833 15.4758C21.6395 13.8361 22.75 11.8026 22.75 9.1371H21.25C21.25 11.3345 20.3508 13.0282 19.0617 14.4798C17.7469 15.9603 16.0896 17.1271 14.574 18.3219L15.5026 19.4999ZM22.75 9.1371C22.75 6.42503 21.2153 4.07292 18.9992 3.05996C16.7359 2.02539 13.9015 2.44352 11.4596 4.98053L12.5404 6.02073C14.5983 3.88258 16.7639 3.68748 18.3756 4.42419C20.0346 5.18252 21.25 6.98623 21.25 9.1371H22.75ZM14.574 18.3219C14.0479 18.7366 13.5787 19.1005 13.1264 19.3648C12.6739 19.6293 12.3096 19.75 12 19.75V21.25C12.6904 21.25 13.3261 20.9854 13.8832 20.6599C14.4405 20.3343 14.9903 19.9037 15.5026 19.4999L14.574 18.3219Z"/>
+        </symbol>
+        <symbol id="add-to-wishlist" fill="#d22225" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 9.1371C2 14 6.01943 16.5914 8.96173 18.9109C10 19.7294 11 20.5 12 20.5C13 20.5 14 19.7294 15.0383 18.9109C17.9806 16.5914 22 14 22 9.1371C22 4.27416 16.4998 0.825464 12 5.50063C7.50016 0.825464 2 4.27416 2 9.1371Z"/>
+        </symbol>
+    </svg>
 {% endblock %}

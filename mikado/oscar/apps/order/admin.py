@@ -31,18 +31,15 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     list_display = (
         "number",
-        "total_incl_tax",
-        "site",
+        "total",
         "user",
         "date_placed",
     )
     readonly_fields = (
         "number",
         "basket",
-        "total_incl_tax",
-        "total_excl_tax",
-        "shipping_incl_tax",
-        "shipping_excl_tax",
+        "total",
+        "shipping",
     )
     inlines = [LineInline]
 
@@ -52,7 +49,7 @@ class LineAdmin(admin.ModelAdmin):
 
 
 class LinePriceAdmin(admin.ModelAdmin):
-    list_display = ("order", "line", "price_incl_tax", "quantity")
+    list_display = ("order", "line", "price", "quantity")
 
 
 class ShippingEventTypeAdmin(admin.ModelAdmin):

@@ -1,6 +1,6 @@
 from django.apps import apps
 from django.urls import include, path, re_path
-from django.utils.translation import gettext_lazy as _
+
 
 from oscar.core.application import OscarConfig
 from oscar.core.loading import get_class
@@ -9,7 +9,7 @@ from oscar.core.loading import get_class
 class CatalogueOnlyConfig(OscarConfig):
     label = "catalogue"
     name = "oscar.apps.catalogue"
-    verbose_name = _("Catalogue")
+    verbose_name = "Каталог"
 
     namespace = "catalogue"
 
@@ -20,21 +20,19 @@ class CatalogueOnlyConfig(OscarConfig):
         super().ready()
 
         self.detail_view = get_class("catalogue.views", "ProductDetailView")
-        self.catalogue_view = get_class("catalogue.views", "CatalogueView")
         self.category_view = get_class("catalogue.views", "ProductCategoryView")
         self.range_view = get_class("offer.views", "RangeDetailView")
 
     def get_urls(self):
         urls = super().get_urls()
         urls += [
-            path("", self.catalogue_view.as_view(), name="index"),
             re_path(
-                r"^(?P<product_slug>[\w-]*)_(?P<pk>\d+)/$",
+                r"^(?P<category_slug>[\w-]+(/[\w-]+)*)/(?P<product_slug>[\w-]*)/$",
                 self.detail_view.as_view(),
                 name="detail",
             ),
             re_path(
-                r"^category/(?P<category_slug>[\w-]+(/[\w-]+)*)_(?P<pk>\d+)/$",
+                r"^(?P<category_slug>[\w-]+(/[\w-]+)*)/$",
                 self.category_view.as_view(),
                 name="category",
             ),
@@ -48,7 +46,7 @@ class CatalogueOnlyConfig(OscarConfig):
 class CatalogueReviewsOnlyConfig(OscarConfig):
     label = "catalogue"
     name = "oscar.apps.catalogue"
-    verbose_name = _("Catalogue")
+    verbose_name = "Каталог Отзывы"
 
     # pylint: disable=attribute-defined-outside-init, unused-import
     def ready(self):

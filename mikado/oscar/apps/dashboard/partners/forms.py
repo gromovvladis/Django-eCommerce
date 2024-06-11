@@ -1,21 +1,18 @@
 from django import forms
 from django.contrib.auth.models import Permission
 from django.contrib.auth.password_validation import validate_password
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
-
 from oscar.core.compat import existing_user_fields, get_user_model
 from oscar.core.loading import get_class, get_model
 
 User = get_user_model()
 Partner = get_model("partner", "Partner")
 PartnerAddress = get_model("partner", "PartnerAddress")
-EmailUserCreationForm = get_class("customer.forms", "EmailUserCreationForm")
+PhoneUserCreationForm = get_class("customer.forms", "PhoneUserCreationForm")
 
 
 class PartnerSearchForm(forms.Form):
     name = forms.CharField(
-        required=False, label=pgettext_lazy("Partner's name", "Name")
+        required=False, label=("Название точки продажи", "Название")
     )
 
 
@@ -33,16 +30,16 @@ class PartnerCreateForm(forms.ModelForm):
 
 
 ROLE_CHOICES = (
-    ("staff", _("Full dashboard access")),
-    ("limited", _("Limited dashboard access")),
+    ("staff", "Полный доступ к панели управления"),
+    ("limited", "Ограниченный доступ к панели управления"),
 )
 
 
-class NewUserForm(EmailUserCreationForm):
+class NewUserForm(PhoneUserCreationForm):
     role = forms.ChoiceField(
         choices=ROLE_CHOICES,
         widget=forms.RadioSelect,
-        label=_("User role"),
+        label="Роль пользователя",
         initial="limited",
     )
 
@@ -65,10 +62,7 @@ class NewUserForm(EmailUserCreationForm):
 
     class Meta:
         model = User
-        fields = existing_user_fields(["first_name", "last_name", "email"]) + [
-            "password1",
-            "password2",
-        ]
+        fields = existing_user_fields(["first_name", "last_name", "email"])
 
 
 class ExistingUserForm(forms.ModelForm):
@@ -80,13 +74,13 @@ class ExistingUserForm(forms.ModelForm):
     """
 
     role = forms.ChoiceField(
-        choices=ROLE_CHOICES, widget=forms.RadioSelect, label=_("User role")
+        choices=ROLE_CHOICES, widget=forms.RadioSelect, label="Роль пользователя"
     )
     password1 = forms.CharField(
-        label=_("Password"), widget=forms.PasswordInput, required=False
+        label="Пароль", widget=forms.PasswordInput, required=False
     )
     password2 = forms.CharField(
-        required=False, label=_("Confirm Password"), widget=forms.PasswordInput
+        required=False, label="Подтвердите пароль", widget=forms.PasswordInput
     )
 
     def clean_password2(self):
@@ -94,7 +88,7 @@ class ExistingUserForm(forms.ModelForm):
         password2 = self.cleaned_data.get("password2", "")
 
         if password1 != password2:
-            raise forms.ValidationError(_("The two password fields didn't match."))
+            raise forms.ValidationError("Два поля пароля не совпадают.")
         validate_password(password2, self.instance)
         return password2
 
@@ -132,12 +126,12 @@ class ExistingUserForm(forms.ModelForm):
 
 class UserEmailForm(forms.Form):
     # We use a CharField so that a partial email address can be entered
-    email = forms.CharField(label=_("Email address"), max_length=100)
+    email = forms.CharField(label="Email", max_length=100)
 
 
 class PartnerAddressForm(forms.ModelForm):
     name = forms.CharField(
-        required=False, max_length=128, label=pgettext_lazy("Partner's name", "Name")
+        required=False, max_length=128, label=("Название точки продажи", "Название")
     )
 
     class Meta:
@@ -147,8 +141,5 @@ class PartnerAddressForm(forms.ModelForm):
             "line2",
             "line3",
             "line4",
-            # "state",
-            # "postcode",
-            # "country",
         )
         model = PartnerAddress

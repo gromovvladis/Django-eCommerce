@@ -1,6 +1,7 @@
 {% extends "oscar/layout.html" %}
 
 {% load i18n product_tags %}
+{% load static %}
 
 {% block title %}
     {{ wishlist_title }} | {{ block.super }}
@@ -15,7 +16,7 @@
     </nav>
 {% endblock breadcrumbs %}
 
-{% block headertext %}
+{% block navtext %}
     {{ wishlist_title }}
 {% endblock %}
 
@@ -40,4 +41,9 @@
             <p class="nonefound">{% trans "This wish list is empty." %}</p>
         {% endif %}
     </div>
+{% endblock %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
 {% endblock %}

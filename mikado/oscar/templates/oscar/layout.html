@@ -1,68 +1,161 @@
 {% extends "oscar/base.html" %}
 {% load static %}
+{% load svg_tags %}
+{% load category_tags %}
 
 {% block styles %}
-    <link rel="stylesheet" type="text/css" href="{% static "oscar/css/styles.css" %}" />
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "css/planet/planet-styles.css" %}" />
 {% endblock %}
 
 {% block layout %}
-    {# Top-horizontal bar with account, notifictions, dashboard links #}
-    {% include "oscar/partials/nav_accounts.html" %}
-
-    {# Site logo/title, mini-basket, browse dropdown and searchbox #}
-    <header class="header container">
-        <div class="page_inner">
-            <div class="row justify-content-between">
-                {% include "oscar/partials/brand.html" %}
-                {# Mini-basket wrapped in a block so some templates can now display it #}
-                {% block mini_basket %}{% include "oscar/partials/mini_basket.html" %}{% endblock %}
-            </div>
-        </div>
-        {% block navigation %}
-            {% include "oscar/partials/nav_primary.html" %}
-        {% endblock %}
-    </header>
-
-    {# Main content of page - other layout templates may override this block #}
-    {% block content_wrapper %}
-        <div class="container page">
-            <div class="page_inner">
-                {% block breadcrumbs %}{% endblock %}
-                {% block header %}
-                    <div class="page-header">
-                        <h1>{% block headertext %}{% endblock %}</h1>
-                    </div>
-                {% endblock %}
-                {% include "oscar/partials/alert_messages.html" %}
-                {% block subnavigation %}{% endblock %}
-                <div class="content">
-                    {% block subheader %}{% endblock subheader %}
-
-                    {# Div exists for AJAX updates to entire content section #}
-                    <div id="content_inner">{% block content %}{% endblock %}</div>
+    {% comment %}------------- header + контент + footer (начало) ---------------{% endcomment %}
+    <div id="app" class="v-app {% block app_class %}{% endblock %}"> 
+        {% comment %}------------- начало хедера ---------------{% endcomment %}
+        {% block main_header %}
+            
+            <header class="v-app__header container py-3">
+                <div class="v-app__header-wrapper d-flex align-center py-0 fill-height justify-space-between">
+                    {% include 'oscar/includes/header.html' %}
                 </div>
-            </div>
+            </header>
+
+            <nav class="v-app__nav {% block nav_class %}{% endblock %}"> 
+                <div class="v-app-nav d-flex align-center py-0 fill-height">
+                                        
+                    {% comment %} ------------- кнопка назад --------------- {% endcomment %}
+                    <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink">
+                        <span class="v-button__wrapper" style="opacity:1;">
+                            <span class="d-flex">
+                                {% icon file_name='interface/arrow-left' size=24 stroke='#000'%}
+                            </span>
+                        </span>
+                    </button>
+
+                    {% comment %} ------------- кнопка корзина --------------- {% endcomment %}
+                    <button data-id="nav-basket-btn" class="v-app-nav__button d-none d-sm-flex mr-1" onclick="window.location.href='{% url 'basket:summary' %}'">
+                        <div class="d-flex aling-center mr-1">
+                            {% icon file_name='header/cart' size=17 stroke='#fff'%}
+                        </div>
+                        Корзина
+                        <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
+                    </button>
+
+                    <div role="separator" class="v-spacer"></div>
+
+                    <ul class="cats_header fill-width fill-height">
+                        <li class="v-app-nav__title d-flex d-sm-none text-center">
+                            {% block nav_title %}{% endblock %}
+                        </li>
+                        {% category_tree as tree_categories %}
+                        {% if tree_categories %}
+                            {% for tree_category in tree_categories %}
+                            {% comment %}------------- категория item ---------------{% endcomment %} 
+                            <li>
+                                <a class="cat_item {% if tree_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ tree_category.url }}" data-id="categories-tabs-item-hits">
+                                {{ tree_category.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        {% endif %}
+                        {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
+                        <button type="button" onclick="window.location.href='{% url 'search:search-page' %}'" data-id="nav-search-icon-button"
+                            class="v-button v-app-nav__button--search v-button--small justify-center mr-2 shrink">
+                            <span class="v-button__wrapper" style="opacity:1;">
+                                <span class="d-flex">
+                                    {% icon file_name='header/search' size=20 fill='#111'%}
+                                </span>
+                            </span>
+                        </button>
+                    </ul>
+
+                    <div class="v-app-nav__title v-app-nav__title--center d-flex d-sm-none text-center">
+                        {% block nav_title_center %}{% endblock %}
+                    </div>
+
+                    <button type="button" data-id="empty-cart" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2">
+                        <span class="v-button__wrapper">
+                            <span class="d-flex">
+                                {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
+                            </span>
+                        </span>
+                    </button>
+
+                </div> 
+            </nav>
+
+        {% endblock main_header %}
+
+        {% comment %}------------- мобильная версия нижняя полоска с иконками меню, корзина и тд. ---------------{% endcomment %}
+        {% block app_mobile_sticker %}
+            {% include 'oscar/includes/app_mobile_sticker.html' %}
+        {% endblock app_mobile_sticker %}
+
+        {% comment %}------------- навигация + основной контент ---------------{% endcomment %}
+        <div class="v-app__wrapper">
+            <main class="v-app__content">
+
+                {% comment %} карусель {% endcomment %}
+                {% block carousel %}{% endblock %}
+
+                {% comment %} категории + контент {% endcomment %}
+                <div class="d-flex align-start pd-0 fill-height container">
+                    <div class="{% block wrapper_class %}{% endblock %}">
+
+                        {% block sticky_address %}
+                            <div class="stiky-address-button d-sm-none py-2">
+                                <a href="{% url 'address:delivery-address' %}" data-id="address-button"
+                                    class="v-address-button fill-width">
+                                    {% icon file_name='map/location-arrow' class_str="v-address-button__icon shrink mx-1" size=24 stroke='#fff'%}
+                                    <div class="d-flex flex-column justify-space-between align-center fill-width mr-2">
+                                        <span class="v-address-button__text">
+                                            Адрес доставки
+                                        </span>
+                                    </div>
+                                </a>
+                            </div> 
+                        {% endblock %}
+
+                        {% block breadcrumbs %}{% endblock %}
+                
+                        {# Main content of page - other layout templates may override this block #}
+                        {% block content %}{% endblock %}
+                
+                        {% if not user.is_authenticated %}
+                            {% block auth %}
+                                <div id="auth_modal" class="d-none"></div>
+                                <script>
+                                    var url_auth_api = "{% url 'customer:api-login' %}"
+                                    var url_auth = "{% url 'customer:login' %}"
+                                </script>
+                                <script type="application/javascript" src="{% static "js/auth/auth.js" %}"></script>
+                            {% endblock %}
+                        {% endif %}
+                
+                    </div>
+                </div>
+            </main>
+
+            {% comment %}------------- footer ---------------{% endcomment %}
+            {% block main_footer %}
+                {% include 'oscar/includes/footer.html' %}
+            {% endblock %}
         </div>
+
+    </div>
+
+    {% block cookie %}
+        <div id="we_use_cookie"></div>
     {% endblock %}
 
-    {% include "oscar/partials/footer.html" %}
 {% endblock %}
 
 {# Local scripts #}
 {% block scripts %}
     {{ block.super }}
-    <!-- Twitter Bootstrap -->
-    <script src="{% static "oscar/js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
-    <!-- Oscar -->
-    <script src="{% static "oscar/js/oscar/ui.js" %}"></script>
-{% endblock %}
-
-{% block extrascripts %}
-    {% include "oscar/partials/extrascripts.html" %}
-    {{ block.super }}
-{% endblock %}
-
-{% block onbodyload %}
-    {{ block.super }}
-    oscar.init();
+    <script>
+        var url_get_cookie = "{% url 'home:cookies' %}";
+    </script>
+    <script type="application/javascript" src="{% static "js/cookie/cookies/cookie-main.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/footer/footer.js" %}"></script>
 {% endblock %}

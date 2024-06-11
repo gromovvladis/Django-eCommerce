@@ -3,7 +3,6 @@ import posixpath
 
 from django.conf import settings
 
-
 # pylint: disable=unused-argument
 def get_image_upload_path(instance, filename):
     return posixpath.join(

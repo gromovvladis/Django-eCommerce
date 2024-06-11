@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin
@@ -14,13 +13,10 @@ from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import BulkEditMixin
 
-UserSearchForm, ProductAlertSearchForm, ProductAlertUpdateForm = get_classes(
-    "dashboard.users.forms",
-    ("UserSearchForm", "ProductAlertSearchForm", "ProductAlertUpdateForm"),
-)
+UserSearchForm = get_class("dashboard.users.forms","UserSearchForm")
 PasswordResetForm = get_class("customer.forms", "PasswordResetForm")
 UserTable = get_class("dashboard.users.tables", "UserTable")
-ProductAlert = get_model("customer", "ProductAlert")
+# ProductAlert = get_model("customer", "ProductAlert")
 User = get_user_model()
 
 
@@ -34,7 +30,7 @@ class IndexView(BulkEditMixin, FormMixin, SingleTableView):
     form_class = UserSearchForm
     table_class = UserTable
     context_table_name = "users"
-    desc_template = _("%(main_filter)s %(email_filter)s %(name_filter)s")
+    desc_template = "%(main_filter)s %(email_filter)s %(name_filter)s"
     description = ""
 
     def dispatch(self, request, *args, **kwargs):
@@ -69,7 +65,7 @@ class IndexView(BulkEditMixin, FormMixin, SingleTableView):
     def apply_search(self, queryset):
         # Set initial queryset description, used for template context
         self.desc_ctx = {
-            "main_filter": _("All users"),
+            "main_filter": "Все пользователи",
             "email_filter": "",
             "name_filter": "",
         }
@@ -85,7 +81,7 @@ class IndexView(BulkEditMixin, FormMixin, SingleTableView):
         if data["email"]:
             email = data["email"]
             queryset = queryset.filter(email__istartswith=email)
-            self.desc_ctx["email_filter"] = _(" with email matching '%s'") % email
+            self.desc_ctx["email_filter"] = " с email соответствующим '%s'" % email
         if data["name"]:
             # If the value is two words, then assume they are first name and
             # last name
@@ -97,7 +93,7 @@ class IndexView(BulkEditMixin, FormMixin, SingleTableView):
                     last_name__icontains=part
                 )
             queryset = queryset.filter(condition).distinct()
-            self.desc_ctx["name_filter"] = _(" with name matching '%s'") % data["name"]
+            self.desc_ctx["name_filter"] = " с именем соответствующим '%s'" % data["name"]
 
         return queryset
 
@@ -122,7 +118,7 @@ class IndexView(BulkEditMixin, FormMixin, SingleTableView):
             if not user.is_superuser:
                 user.is_active = value
                 user.save()
-        messages.info(self.request, _("Users' status successfully changed"))
+        messages.info(self.request, "Пользовательский статус был успешно изменен")
         return redirect("dashboard:users-index")
 
 
@@ -158,81 +154,81 @@ class PasswordResetView(SingleObjectMixin, FormView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        messages.success(self.request, _("A password reset email has been sent"))
+        messages.success(self.request, "Письмо для сброса пароля отправлено.")
         return reverse("dashboard:user-detail", kwargs={"pk": self.object.id})
 
 
-class ProductAlertListView(ListView):
-    model = ProductAlert
-    form_class = ProductAlertSearchForm
-    context_object_name = "alerts"
-    template_name = "oscar/dashboard/users/alerts/list.html"
-    paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
-    base_description = _("All Alerts")
-    description = ""
+# class ProductAlertListView(ListView):
+#     model = ProductAlert
+#     form_class = ProductAlertSearchForm
+#     context_object_name = "alerts"
+#     template_name = "oscar/dashboard/users/alerts/list.html"
+#     paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+#     base_description = "Все уведомления"
+#     description = ""
 
-    def get_queryset(self):
-        queryset = self.model.objects.all().order_by("-date_created")
-        self.description = self.base_description
+#     def get_queryset(self):
+#         queryset = self.model.objects.all().order_by("-date_created")
+#         self.description = self.base_description
 
-        self.form = self.form_class(self.request.GET)
-        if not self.form.is_valid():
-            return queryset
+#         self.form = self.form_class(self.request.GET)
+#         if not self.form.is_valid():
+#             return queryset
 
-        data = self.form.cleaned_data
+#         data = self.form.cleaned_data
 
-        if data["status"]:
-            queryset = queryset.filter(status=data["status"])
-            self.description += _(" with status matching '%s'") % data["status"]
+#         if data["status"]:
+#             queryset = queryset.filter(status=data["status"])
+#             self.description += " с статусом соответствующим '%s'" % data["status"]
 
-        if data["name"]:
-            # If the value is two words, then assume they are first name and
-            # last name
-            parts = data["name"].split()
-            if len(parts) >= 2:
-                queryset = queryset.filter(
-                    user__first_name__istartswith=parts[0],
-                    user__last_name__istartswith=parts[1],
-                ).distinct()
-            else:
-                queryset = queryset.filter(
-                    Q(user__first_name__istartswith=parts[0])
-                    | Q(user__last_name__istartswith=parts[-1])
-                ).distinct()
-            self.description += _(" with customer name matching '%s'") % data["name"]
+#         if data["name"]:
+#             # If the value is two words, then assume they are first name and
+#             # last name
+#             parts = data["name"].split()
+#             if len(parts) >= 2:
+#                 queryset = queryset.filter(
+#                     user__first_name__istartswith=parts[0],
+#                     user__last_name__istartswith=parts[1],
+#                 ).distinct()
+#             else:
+#                 queryset = queryset.filter(
+#                     Q(user__first_name__istartswith=parts[0])
+#                     | Q(user__last_name__istartswith=parts[-1])
+#                 ).distinct()
+#             self.description += " с именем пользователя соответствующим '%s'" % data["name"]
 
-        if data["email"]:
-            queryset = queryset.filter(
-                Q(user__email__icontains=data["email"])
-                | Q(email__icontains=data["email"])
-            )
-            self.description += _(" with customer email matching '%s'") % data["email"]
+#         if data["email"]:
+#             queryset = queryset.filter(
+#                 Q(user__email__icontains=data["email"])
+#                 | Q(email__icontains=data["email"])
+#             )
+#             self.description += " с email пользователя соответствующим '%s'" % data["email"]
 
-        return queryset
+#         return queryset
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["form"] = self.form
-        context["queryset_description"] = self.description
-        return context
-
-
-class ProductAlertUpdateView(UpdateView):
-    template_name = "oscar/dashboard/users/alerts/update.html"
-    model = ProductAlert
-    form_class = ProductAlertUpdateForm
-    context_object_name = "alert"
-
-    def get_success_url(self):
-        messages.success(self.request, _("Product alert saved"))
-        return reverse("dashboard:user-alert-list")
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context["form"] = self.form
+#         context["queryset_description"] = self.description
+#         return context
 
 
-class ProductAlertDeleteView(DeleteView):
-    model = ProductAlert
-    template_name = "oscar/dashboard/users/alerts/delete.html"
-    context_object_name = "alert"
+# class ProductAlertUpdateView(UpdateView):
+#     template_name = "oscar/dashboard/users/alerts/update.html"
+#     model = ProductAlert
+#     form_class = ProductAlertUpdateForm
+#     context_object_name = "alert"
 
-    def get_success_url(self):
-        messages.warning(self.request, _("Product alert deleted"))
-        return reverse("dashboard:user-alert-list")
+#     def get_success_url(self):
+#         messages.success(self.request, "Уведомление товара сохранено")
+#         return reverse("dashboard:user-alert-list")
+
+
+# class ProductAlertDeleteView(DeleteView):
+#     model = ProductAlert
+#     template_name = "oscar/dashboard/users/alerts/delete.html"
+#     context_object_name = "alert"
+
+#     def get_success_url(self):
+#         messages.warning(self.request, "Уведомление товара удалено")
+#         return reverse("dashboard:user-alert-list")

@@ -1,16 +1,42 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
 
+{% load svg_tags %}
+{% load static %}
 
-{% load i18n %}
+{% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
 
-{% block extra_breadcrumbs %}
-    <li class="breadcrumb-item">
-        <a href="{% url 'customer:address-list' %}">{% trans 'Address book' %}</a>
-    </li>
+{% block nav_title_center %}{{ page_title }}{% endblock %}
+
+{% block breadcrumbs %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center px-2 my-2">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <a href="{% url 'customer:summary' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Личный кабинет</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <a href="{% url 'customer:address-list' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Адрес доставки</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
+    </div>
 {% endblock %}
 
 {% block tabcontent %}
-    {% with style='horizontal' %}
-        {% include "oscar/partials/form.html" %}
-    {% endwith %}
+    <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">    
+        {% include "oscar/partials/add-edit-address-form.html" %}
+    </div>
 {% endblock tabcontent %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script>
+        var csrf_token = "{{csrf_token}}";
+        var url_delivery_zones = "{% url 'shipping:delivery-zones' %}";
+        var url_delivery = "{% url 'shipping:delivery-time' %}";
+    </script>
+    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
+    <script type="application/javascript" src="{% static "js/delivery/delivery.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/address/edit-address.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/profile/profile-links.js" %}"></script>
+{% endblock %}

@@ -1,5 +1,5 @@
-import django.dispatch
+from django.dispatch import Signal
 
-basket_addition = django.dispatch.Signal()
-voucher_addition = django.dispatch.Signal()
-voucher_removal = django.dispatch.Signal()
+basket_addition = Signal()
+voucher_addition = Signal()
+voucher_removal = Signal()

@@ -1,4 +1,7 @@
-from phonenumber_field.phonenumber import PhoneNumber
+
+
+from django.conf import settings
+from oscar.apps.shipping.methods import NoShippingRequired
 
 
 class CheckoutSessionData(object):
@@ -22,6 +25,7 @@ class CheckoutSessionData(object):
         """
         Ensure a namespace within the session dict is initialised
         """
+        key = self.request.session[self.SESSION_KEY]
         if namespace not in self.request.session[self.SESSION_KEY]:
             self.request.session[self.SESSION_KEY][namespace] = {}
 
@@ -64,15 +68,6 @@ class CheckoutSessionData(object):
         """
         self.request.session[self.SESSION_KEY] = {}
 
-    # Guest checkout
-    # ==============
-
-    def set_guest_email(self, email):
-        self._set("guest", "email", email)
-
-    def get_guest_email(self):
-        return self._get("guest", "email")
-
     # Shipping address
     # ================
     # Options:
@@ -83,24 +78,11 @@ class CheckoutSessionData(object):
     def reset_shipping_data(self):
         self._flush_namespace("shipping")
 
-    def ship_to_user_address(self, address):
-        """
-        Use an user address (from an address book) as the shipping address.
-        """
-        self.reset_shipping_data()
-        self._set("shipping", "user_address_id", address.id)
-
     def ship_to_new_address(self, address_fields):
         """
         Use a manually entered address as the shipping address
         """
         self._unset("shipping", "new_address_fields")
-        phone_number = address_fields.get("phone_number")
-        if phone_number:
-            # Phone number is stored as a PhoneNumber instance. As we store
-            # strings in the session, we need to serialize it.
-            address_fields = address_fields.copy()
-            address_fields["phone_number"] = phone_number.as_international
         self._set("shipping", "new_address_fields", address_fields)
 
     def new_shipping_address_fields(self):
@@ -109,33 +91,26 @@ class CheckoutSessionData(object):
         """
         return self._get("shipping", "new_address_fields")
 
-    def shipping_user_address_id(self):
-        """
-        Return user address id
-        """
-        return self._get("shipping", "user_address_id")
-
-    # Legacy accessor
-    user_address_id = shipping_user_address_id
-
     def is_shipping_address_set(self):
         """
         Test whether a shipping address has been stored in the session.
 
         This can be from a new address or re-using an existing address.
         """
+        shipping_method = self.shipping_method_code(self.request.basket)
+        if shipping_method == NoShippingRequired().code:
+            return True
+
         new_fields = self.new_shipping_address_fields()
         has_new_address = new_fields is not None
-        user_address_id = self.shipping_user_address_id()
-        has_old_address = user_address_id is not None and user_address_id > 0
-        return has_new_address or has_old_address
+        return has_new_address
 
     # Shipping method
     # ===============
 
     def use_free_shipping(self):
         """
-        Set "free shipping" code to session
+        Set "Бесплатная доставка" code to session
         """
         self._set("shipping", "method_code", "__free__")
 
@@ -166,6 +141,36 @@ class CheckoutSessionData(object):
 
     def payment_method(self):
         return self._get("payment", "method")
+    
+
+    # Order note
+    # ==================
+
+    def set_order_note(self, order_note):
+        self._set("submission", "order_note", order_note)
+
+    def order_note(self):
+        return self._get("submission", "order_note",)
+
+
+    # Order time
+    # ==================
+
+    def set_order_time(self, order_time):
+        order_time = order_time.strftime("%Y-%m-%d %H:%M") 
+        self._set("submission", "order_time", order_time)
+
+    def order_time(self):
+        return self._get("submission", "order_time",)
+    
+    # email or charge
+    # ==================
+
+    def set_email_or_change(self, email_or_change):
+        self._set("submission", "email_or_change", email_or_change)
+
+    def email_or_change(self):
+        return self._get("submission", "email_or_change",)
 
     # Submission methods
     # ==================

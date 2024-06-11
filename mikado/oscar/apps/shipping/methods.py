@@ -1,7 +1,4 @@
 from decimal import Decimal as D
-
-from django.utils.translation import gettext_lazy as _
-
 from oscar.core import prices
 
 
@@ -18,6 +15,8 @@ class Base(object):
     #: Used to store this method in the session.  Each shipping method should
     #:  have a unique code.
     code = "__default__"
+
+    default_selected = False
 
     #: The name of the shipping method, shown to the customer during checkout
     name = "Default shipping"
@@ -51,24 +50,53 @@ class Free(Base):
     This shipping method specifies that shipping is free.
     """
 
+    def __init__(self, default_selected=False):
+        self.default_selected = default_selected
+
     code = "free-shipping"
-    name = _("Free shipping")
+    name = "Бесплатная доставка"
 
     def calculate(self, basket):
         # If the charge is free then tax must be free (musn't it?) and so we
         # immediately set the tax to zero
-        return prices.Price(currency=basket.currency, excl_tax=D("0.00"), tax=D("0.00"))
+        return prices.Price(currency=basket.currency, money=D("0.00"))
 
 
-class NoShippingRequired(Free):
+class FixedDiscount(Base):
     """
     This is a special shipping method that indicates that no shipping is
     actually required (e.g. for digital goods).
     """
 
     code = "no-shipping-required"
-    name = _("No shipping required")
+    name = "Доставка не нужна"
 
+
+
+
+class NoShippingRequired(Free):
+    """
+    This shipping method indicates that shipping costs a fixed price and
+    requires no special calculation.
+    """
+    code = "self-pick-up"
+    name = "Самовывоз"
+
+    # Charges can be either declared by subclassing and overriding the
+    # class attributes or by passing them to the constructor
+    pickup_discount = None
+
+    def __init__(self, pickup_discount=0, default_selected=False):
+        if pickup_discount is not None:
+            self.pickup_discount = pickup_discount
+        self.default_selected = default_selected
+
+    def calculate(self, basket):
+        discount = basket.total * self.pickup_discount / 100
+        return prices.Price(
+            currency=basket.currency,
+            money= -discount,
+        )
 
 class FixedPrice(Base):
     """
@@ -77,26 +105,22 @@ class FixedPrice(Base):
     """
 
     code = "fixed-price-shipping"
-    name = _("Fixed price shipping")
+    name = "Доставка с фиксированной ценой"
 
     # Charges can be either declared by subclassing and overriding the
     # class attributes or by passing them to the constructor
-    charge_excl_tax = None
-    charge_incl_tax = None
+    charge = None
 
-    def __init__(self, charge_excl_tax=None, charge_incl_tax=None):
-        if charge_excl_tax is not None:
-            self.charge_excl_tax = charge_excl_tax
-        if charge_incl_tax is not None:
-            self.charge_incl_tax = charge_incl_tax
+    def __init__(self, charge=None, default_selected=False):
+        if charge is not None:
+            self.charge = charge
+        self.default_selected = default_selected
 
     def calculate(self, basket):
         return prices.Price(
             currency=basket.currency,
-            excl_tax=self.charge_excl_tax,
-            incl_tax=self.charge_incl_tax,
+            money=self.charge,
         )
-
 
 # pylint: disable=abstract-method
 class OfferDiscount(Base):
@@ -107,9 +131,10 @@ class OfferDiscount(Base):
 
     is_discounted = True
 
-    def __init__(self, method, offer):
+    def __init__(self, method, offer, default_selected=False):
         self.method = method
         self.offer = offer
+        self.default_selected = default_selected
 
     # Forwarded properties
 
@@ -147,60 +172,3 @@ class OfferDiscount(Base):
         discount applied.
         """
         return self.method.calculate(basket)
-
-
-class TaxExclusiveOfferDiscount(OfferDiscount):
-    """
-    Wrapper class which extends OfferDiscount to be exclusive of tax.
-    """
-
-    def calculate(self, basket):
-        base_charge = self.method.calculate(basket)
-        discount = self.offer.shipping_discount(
-            base_charge.excl_tax, base_charge.currency
-        )
-        excl_tax = base_charge.excl_tax - discount
-        return prices.Price(
-            currency=base_charge.currency,
-            excl_tax=excl_tax,
-            tax_code=base_charge.tax_code,
-        )
-
-    def discount(self, basket):
-        base_charge = self.method.calculate(basket)
-        return self.offer.shipping_discount(base_charge.excl_tax, base_charge.currency)
-
-
-class TaxInclusiveOfferDiscount(OfferDiscount):
-    """
-    Wrapper class which extends OfferDiscount to be inclusive of tax.
-    """
-
-    def calculate(self, basket):
-        base_charge = self.method.calculate(basket)
-        discount = self.offer.shipping_discount(
-            base_charge.incl_tax, base_charge.currency
-        )
-        incl_tax = base_charge.incl_tax - discount
-        excl_tax = self.calculate_excl_tax(base_charge, incl_tax)
-        return prices.Price(
-            currency=base_charge.currency,
-            excl_tax=excl_tax,
-            incl_tax=incl_tax,
-            tax_code=base_charge.tax_code,
-        )
-
-    def calculate_excl_tax(self, base_charge, incl_tax):
-        """
-        Return the charge excluding tax (but including discount).
-        """
-        if incl_tax == D("0.00"):
-            return D("0.00")
-        # We assume we can linearly scale down the excl tax price before
-        # discount.
-        excl_tax = base_charge.excl_tax * (incl_tax / base_charge.incl_tax)
-        return excl_tax.quantize(D("0.01"))
-
-    def discount(self, basket):
-        base_charge = self.method.calculate(basket)
-        return self.offer.shipping_discount(base_charge.incl_tax, base_charge.currency)

@@ -4,19 +4,25 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse, reverse_lazy
-from django.utils.translation import gettext_lazy as _
+from django.urls import reverse_lazy
 from django.views import generic
 
+from oscar.apps.customer.mixins import RegisterUserPhoneMixin
 from oscar.apps.customer.utils import get_password_reset_url
 from oscar.core.compat import get_user_model
-from oscar.core.loading import get_class, get_classes, get_model, get_profile_class
-from oscar.core.utils import safe_referrer
+from oscar.core.loading import get_class, get_classes, get_model
+from django.template.loader import render_to_string
 from oscar.views.generic import PostActionMixin
+from django.contrib.sites.models import Site
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+
+import sys
+sys.path.append(".")
+
+from apps.sms_auth.providers.base import Smsaero
+from apps.sms_auth.services import GeneratorService
 
 from . import signals
 
@@ -24,17 +30,14 @@ PageTitleMixin, RegisterUserMixin = get_classes(
     "customer.mixins", ["PageTitleMixin", "RegisterUserMixin"]
 )
 CustomerDispatcher = get_class("customer.utils", "CustomerDispatcher")
-EmailAuthenticationForm, EmailUserCreationForm, OrderSearchForm = get_classes(
+PhoneAuthenticationForm, PhoneSmsForm, PhoneUserCreationForm, OrderSearchForm = get_classes(
     "customer.forms",
-    ["EmailAuthenticationForm", "EmailUserCreationForm", "OrderSearchForm"],
+    ["PhoneAuthenticationForm", "PhoneSmsForm", "PhoneUserCreationForm", "OrderSearchForm"],
 )
-ProfileForm, ConfirmPasswordForm = get_classes(
-    "customer.forms", ["ProfileForm", "ConfirmPasswordForm"]
-)
+ProfileForm = get_class("customer.forms", "ProfileForm")
 UserAddressForm = get_class("address.forms", "UserAddressForm")
 Order = get_model("order", "Order")
 UserAddress = get_model("address", "UserAddress")
-Email = get_model("communication", "Email")
 
 User = get_user_model()
 
@@ -58,85 +61,52 @@ class AccountSummaryView(generic.RedirectView):
 
     pattern_name = settings.OSCAR_ACCOUNTS_REDIRECT_URL
     permanent = False
+ 
 
+class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
+    """
+    Resiter via sms.
+    """
+    permission_classes = [AllowAny]
 
-class AccountRegistrationView(RegisterUserMixin, generic.FormView):
-    form_class = EmailUserCreationForm
-    template_name = "oscar/customer/registration.html"
+    template_name = "oscar/customer/auth_modal.html"
+    auth_form_class = PhoneAuthenticationForm
     redirect_field_name = "next"
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect(settings.LOGIN_REDIRECT_URL)
-        return super().get(request, *args, **kwargs)
+        context = self.get_context_data()
+        auth_modal = render_to_string(self.template_name, context, request=request)
+        return http.JsonResponse({"auth_modal": auth_modal}, status = 202)
 
-    def get_logged_in_redirect(self):
-        return reverse("customer:summary")
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["initial"] = {
-            "email": self.request.GET.get("email", ""),
-            "redirect_url": self.request.GET.get(self.redirect_field_name, ""),
-        }
-        kwargs["host"] = self.request.get_host()
-        return kwargs
 
     def get_context_data(self, *args, **kwargs):
-        ctx = super().get_context_data(*args, **kwargs)
-        ctx["cancel_url"] = safe_referrer(self.request, "")
+        ctx = {}
+        ctx["auth_form"] = self.get_auth_form()
         return ctx
 
-    def form_valid(self, form):
-        self.register_user(form)
-        return redirect(form.cleaned_data["redirect_url"])
-
-
-class AccountAuthView(RegisterUserMixin, generic.TemplateView):
-    """
-    This is actually a slightly odd double form view that allows a customer to
-    either login or register.
-    """
-
-    template_name = "oscar/customer/login_registration.html"
-    login_prefix, registration_prefix = "login", "registration"
-    login_form_class = EmailAuthenticationForm
-    registration_form_class = EmailUserCreationForm
-    redirect_field_name = "next"
-
-    def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect(settings.LOGIN_REDIRECT_URL)
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, *args, **kwargs):
-        ctx = super().get_context_data(*args, **kwargs)
-        if "login_form" not in kwargs:
-            ctx["login_form"] = self.get_login_form()
-        if "registration_form" not in kwargs:
-            ctx["registration_form"] = self.get_registration_form()
-        return ctx
 
     def post(self, request, *args, **kwargs):
-        # Use the name of the submit button to determine which form to validate
-        if "login_submit" in request.POST:
-            return self.validate_login_form()
-        elif "registration_submit" in request.POST:
-            return self.validate_registration_form()
-        return http.HttpResponseBadRequest()
+        if request.POST.get('action') == "sms":
+            return self.validate_sms_form()
+        if request.POST.get('action') == "auth":
+            return self.validate_auth_form()
+        return http.JsonResponse({"errors": "Bad responce"}, status=400)
 
-    # LOGIN
 
-    def get_login_form(self, bind_data=False):
-        return self.login_form_class(**self.get_login_form_kwargs(bind_data))
+    # AUTH
+    def get_auth_form(self, bind_data=False):
+        return self.auth_form_class(**self.get_auth_form_kwargs(bind_data))
 
-    def get_login_form_kwargs(self, bind_data=False):
+
+    def get_auth_form_kwargs(self, bind_data=False):
         kwargs = {}
         kwargs["request"] = self.request
         kwargs["host"] = self.request.get_host()
-        kwargs["prefix"] = self.login_prefix
         kwargs["initial"] = {
             "redirect_url": self.request.GET.get(self.redirect_field_name, ""),
+            "username": self.request.POST.get("username"),
         }
         if bind_data and self.request.method in ("POST", "PUT"):
             kwargs.update(
@@ -147,97 +117,86 @@ class AccountAuthView(RegisterUserMixin, generic.TemplateView):
             )
         return kwargs
 
-    def validate_login_form(self):
-        form = self.get_login_form(bind_data=True)
+
+    def validate_auth_form(self):
+        form = self.get_auth_form(bind_data=True)
         if form.is_valid():
+            
             user = form.get_user()
 
-            # Grab a reference to the session ID before logging in
-            old_session_key = self.request.session.session_key
+            if user is not None:
+                # Grab a reference to the session ID before logging in
+                old_session_key = self.request.session.session_key
+                auth_login(self.request, user, backend="apps.user.auth_backends.PhoneBackend")
+                # Raise signal robustly (we don't want exceptions to crash the
+                # request handling). We use a custom signal as we want to track the
+                # session key before calling login (which cycles the session ID).
+                signals.user_logged_in.send_robust(
+                    sender=self,
+                    request=self.request,
+                    user=user,
+                    old_session_key=old_session_key,
+                )
 
-            auth_login(self.request, form.get_user())
+                url = self.get_auth_success_url(form)
 
-            # Raise signal robustly (we don't want exceptions to crash the
-            # request handling). We use a custom signal as we want to track the
-            # session key before calling login (which cycles the session ID).
-            signals.user_logged_in.send_robust(
-                sender=self,
-                request=self.request,
-                user=user,
-                old_session_key=old_session_key,
-            )
+                return http.JsonResponse({"secceded": url}, status=200)
 
-            msg = self.get_login_success_message(form)
-            if msg:
-                messages.success(self.request, msg)
+        return http.JsonResponse({"errors": "Код не верный"}, status=404)
 
-            return redirect(self.get_login_success_url(form))
 
-        ctx = self.get_context_data(login_form=form)
-        return self.render_to_response(ctx)
-
-    # pylint: disable=unused-argument
-    def get_login_success_message(self, form):
-        return _("Welcome back")
-
-    def get_login_success_url(self, form):
+    def get_auth_success_url(self, form):
+        
+        url_domain = Site.objects.get_current().domain
         redirect_url = form.cleaned_data["redirect_url"]
+        
         if redirect_url:
-            return redirect_url
+            return url_domain + redirect_url
+        
+        return url_domain
 
-        # Redirect staff members to dashboard as that's the most likely place
-        # they'll want to visit if they're logging in.
-        if self.request.user.is_staff:
-            return reverse("dashboard:index")
 
-        return settings.LOGIN_REDIRECT_URL
-
-    # REGISTRATION
-
-    def get_registration_form(self, bind_data=False):
-        return self.registration_form_class(
-            **self.get_registration_form_kwargs(bind_data)
-        )
-
-    def get_registration_form_kwargs(self, bind_data=False):
-        kwargs = {}
-        kwargs["host"] = self.request.get_host()
-        kwargs["prefix"] = self.registration_prefix
-        kwargs["initial"] = {
-            "redirect_url": self.request.GET.get(self.redirect_field_name, ""),
-        }
-        if bind_data and self.request.method in ("POST", "PUT"):
-            kwargs.update(
-                {
-                    "data": self.request.POST,
-                    "files": self.request.FILES,
-                }
-            )
-        return kwargs
-
-    def validate_registration_form(self):
-        form = self.get_registration_form(bind_data=True)
+    def validate_sms_form(self):
+        form = self.get_auth_form(bind_data=True)
         if form.is_valid():
-            self.register_user(form)
+            try:
+                phone = form.get_phone()
 
-            msg = self.get_registration_success_message(form)
-            messages.success(self.request, msg)
+                sms_generator = GeneratorService(phone)
+                
+                sms_code = sms_generator.process()
+                sms_message = sms_code.message
 
-            return redirect(self.get_registration_success_url(form))
+                auth_service = Smsaero(phone, sms_message)
+                sms_result = auth_service.send_sms()
 
-        ctx = self.get_context_data(registration_form=form)
-        return self.render_to_response(ctx)
+                if sms_result == 'secceded':
+                    return http.JsonResponse({"secceded": "Смс выслано"}, status=200)
 
-    # pylint: disable=unused-argument
-    def get_registration_success_message(self, form):
-        return _("Thanks for registering!")
+            except Exception as e:
+                return http.JsonResponse({"errors": e.message}, status=403)
 
-    def get_registration_success_url(self, form):
-        redirect_url = form.cleaned_data["redirect_url"]
-        if redirect_url:
-            return redirect_url
+        return http.JsonResponse({"errors": "Укажите корректный номер телефона"}, status=400)
+    
 
-        return settings.LOGIN_REDIRECT_URL
+class AccountAuthView(generic.TemplateView, AccountAuthModalView):
+    """
+    Resiter via sms.
+    """
+
+    template_name = "oscar/customer/auth.html"
+    auth_form_class = PhoneAuthenticationForm
+    redirect_field_name = "next"
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(settings.LOGIN_REDIRECT_URL)
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx["auth_form"] = self.get_auth_form()
+        return ctx
 
 
 class LogoutView(generic.RedirectView):
@@ -259,70 +218,40 @@ class LogoutView(generic.RedirectView):
 # =============
 
 
-class ProfileView(PageTitleMixin, generic.TemplateView):
-    template_name = "oscar/customer/profile/profile.html"
-    page_title = _("Profile")
-    active_tab = "profile"
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["profile_fields"] = self.get_profile_fields(self.request.user)
-        return ctx
-
-    def get_profile_fields(self, user):
-        field_data = []
-
-        # Check for custom user model
-        for field_name in User._meta.additional_fields:
-            field_data.append(self.get_model_field_data(user, field_name))
-
-        # Check for profile class
-        profile_class = get_profile_class()
-        if profile_class:
-            try:
-                profile = profile_class.objects.get(user=user)
-            except ObjectDoesNotExist:
-                profile = profile_class(user=user)
-
-            field_names = [f.name for f in profile._meta.local_fields]
-            for field_name in field_names:
-                if field_name in ("user", "id"):
-                    continue
-                field_data.append(self.get_model_field_data(profile, field_name))
-
-        return field_data
-
-    def get_model_field_data(self, model_class, field_name):
-        """
-        Extract the verbose name and value for a model's field value
-        """
-        field = model_class._meta.get_field(field_name)
-        if field.choices:
-            value = getattr(model_class, "get_%s_display" % field_name)()
-        else:
-            value = getattr(model_class, field_name)
-        return {
-            "name": getattr(field, "verbose_name"),
-            "value": value,
-        }
-
-
-class ProfileUpdateView(PageTitleMixin, generic.FormView):
+class ProfileView(PageTitleMixin, generic.UpdateView):
     form_class = ProfileForm
     template_name = "oscar/customer/profile/profile_form.html"
-    page_title = _("Edit Profile")
+    page_title = "Профиль"
     active_tab = "profile"
+    model = User
+    context_object_name = 'user'
     success_url = reverse_lazy("customer:profile-view")
+
+    def get_object(self):
+        return self.request.user
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["summary"] = "Профиль"
+        ctx["content_open"] = False
+        return ctx
+
+    
+    def get_initial(self):
+        return {
+            "name": self.request.user.first_name,
+            "email": self.request.user.email,
+        }
 
     def form_valid(self, form):
-        # Grab current user instance before we save form.  We may need this to
+        # Grab current user instance before we save form. We may need this to
         # send a warning email if the email address is changed.
-        try:
+        try: 
             old_user = User.objects.get(id=self.request.user.id)
         except User.DoesNotExist:
             old_user = None
@@ -338,10 +267,10 @@ class ProfileUpdateView(PageTitleMixin, generic.FormView):
             # Email address has changed - send a confirmation email to the old
             # address including a password reset link in case this is a
             # suspicious change.
+            old_user.is_email_verified = False
             self.send_email_changed_email(old_user, new_email)
 
-        messages.success(self.request, _("Profile updated"))
-        return redirect(self.get_success_url())
+        return http.JsonResponse({'message': "Информация успешно обновлена"},status=200)
 
     def send_email_changed_email(self, old_user, new_email):
         user = self.request.user
@@ -353,94 +282,59 @@ class ProfileUpdateView(PageTitleMixin, generic.FormView):
         }
         CustomerDispatcher().send_email_changed_email_for_user(old_user, extra_context)
 
-
-class ProfileDeleteView(PageTitleMixin, generic.FormView):
-    form_class = ConfirmPasswordForm
-    template_name = "oscar/customer/profile/profile_delete.html"
-    page_title = _("Delete profile")
-    active_tab = "profile"
-    success_url = settings.OSCAR_HOMEPAGE
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        return kwargs
-
-    def form_valid(self, form):
-        self.request.user.delete()
-        messages.success(
-            self.request,
-            _("Your profile has now been deleted. Thanks for using the site."),
-        )
-        return redirect(self.get_success_url())
+    # def get_success_url(self):
+    #     return reverse("customer:profile-view")
 
 
-class ChangePasswordView(PageTitleMixin, generic.FormView):
-    form_class = PasswordChangeForm
-    template_name = "oscar/customer/profile/change_password_form.html"
-    page_title = _("Change Password")
-    active_tab = "profile"
-    success_url = reverse_lazy("customer:profile-view")
+# class ProfileDeleteView(PageTitleMixin, generic.FormView):
+#     form_class = ConfirmPasswordForm
+#     template_name = "oscar/customer/profile/profile_delete.html"
+#     page_title = "Удалить профиль"
+#     active_tab = "profile"
+#     success_url = settings.OSCAR_HOMEPAGE
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["user"] = self.request.user
-        return kwargs
+#     def get_form_kwargs(self):
+#         kwargs = super().get_form_kwargs()
+#         kwargs["user"] = self.request.user
+#         return kwargs
 
-    def form_valid(self, form):
-        form.save()
-        update_session_auth_hash(self.request, self.request.user)
-        messages.success(self.request, _("Password updated"))
-
-        self.send_password_changed_email()
-
-        return redirect(self.get_success_url())
-
-    def send_password_changed_email(self):
-        user = self.request.user
-        extra_context = {
-            "user": user,
-            "reset_url": get_password_reset_url(self.request.user),
-            "request": self.request,
-        }
-        CustomerDispatcher().send_password_changed_email_for_user(user, extra_context)
+#     def form_valid(self, form):
+#         self.request.user.delete()
+#         messages.success(
+#             self.request, "Ваш профиль удален. Спасибо за использование сайта."
+#         )
+#         return redirect(self.get_success_url())
 
 
-# =============
-# Email history
-# =============
+# class ChangePasswordView(PageTitleMixin, generic.FormView):
+#     form_class = PasswordChangeForm
+#     template_name = "oscar/customer/profile/change_password_form.html"
+#     page_title = "Изменить пароль"
+#     active_tab = "profile"
+#     success_url = reverse_lazy("customer:profile-view")
 
+#     def get_form_kwargs(self):
+#         kwargs = super().get_form_kwargs()
+#         kwargs["user"] = self.request.user
+#         return kwargs
 
-class EmailHistoryView(PageTitleMixin, generic.ListView):
-    context_object_name = "emails"
-    template_name = "oscar/communication/email/email_list.html"
-    paginate_by = settings.OSCAR_EMAILS_PER_PAGE
-    page_title = _("Email History")
-    active_tab = "emails"
+#     def form_valid(self, form):
+#         form.save()
+#         update_session_auth_hash(self.request, self.request.user)
+#         messages.success(self.request, "Пароль обновлен")
 
-    def get_queryset(self):
-        """
-        Return Queryset of :py:class:`Email <oscar.apps.customer.abstract_models.AbstractEmail>`
-        instances, that has been sent to the currently authenticated user.
-        """
-        return Email._default_manager.filter(user=self.request.user)
+#         self.send_password_changed_email()
 
+#         return redirect(self.get_success_url())
 
-class EmailDetailView(PageTitleMixin, generic.DetailView):
-    """Customer email"""
-
-    template_name = "oscar/communication/email/email_detail.html"
-    context_object_name = "email"
-    active_tab = "emails"
-
-    def get_object(self, queryset=None):
-        return get_object_or_404(
-            Email, user=self.request.user, id=self.kwargs["email_id"]
-        )
-
-    def get_page_title(self):
-        """Append email subject to page title"""
-        return "%s: %s" % (_("Email"), self.object.subject)
+#     def send_password_changed_email(self):
+#         user = self.request.user
+#         extra_context = {
+#             "user": user,
+#             "reset_url": get_password_reset_url(self.request.user),
+#             "request": self.request,
+#         }
+#         CustomerDispatcher().send_password_changed_email_for_user(user, extra_context)
 
 
 # =============
@@ -458,11 +352,11 @@ class OrderHistoryView(PageTitleMixin, generic.ListView):
     paginate_by = settings.OSCAR_ORDERS_PER_PAGE
     model = Order
     form_class = OrderSearchForm
-    page_title = _("Order History")
-    active_tab = "orders"
+    page_title = "История заказов"
+    active_tab = "history"
 
     def get(self, request, *args, **kwargs):
-        if "date_from" in request.GET:
+        if "date_range" in request.GET:
             self.form = self.form_class(self.request.GET)
             if not self.form.is_valid():
                 self.object_list = self.get_queryset()
@@ -472,7 +366,7 @@ class OrderHistoryView(PageTitleMixin, generic.ListView):
 
             # If the user has just entered an order number, try and look it up
             # and redirect immediately to the order detail page.
-            if data["order_number"] and not (data["date_to"] or data["date_from"]):
+            if data["order_number"] and not data["date_range"]:
                 try:
                     order = Order.objects.get(
                         number=data["order_number"], user=self.request.user
@@ -498,12 +392,21 @@ class OrderHistoryView(PageTitleMixin, generic.ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["form"] = self.form
+        ctx["content_open"] = True
+        ctx["summary"] = "Профиль"
         return ctx
 
 
 class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
     model = Order
-    active_tab = "orders"
+    active_tab = "history"
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx["summary"] = "Профиль"
+        ctx["content_open"] = True
+        ctx["online_payments"] = settings.ONLINE_PAYMENTS
+        return ctx
 
     def get_template_names(self):
         return ["oscar/customer/order/order_detail.html"]
@@ -512,7 +415,7 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
         """
         Order number as page title
         """
-        return "%s #%s" % (_("Order"), self.object.number)
+        return "%s №%s" % ("Заказ", self.object.number)
 
     def get_object(self, queryset=None):
         return get_object_or_404(
@@ -544,13 +447,13 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
         total_quantity = sum([line.quantity for line in lines_to_add])
         is_quantity_allowed, reason = basket.is_quantity_allowed(total_quantity)
         if not is_quantity_allowed:
-            messages.warning(self.request, reason)
+            # messages.warning(self.request, reason)
             self.response = redirect("customer:order-list")
             return
 
         # Add any warnings
-        for warning in warnings:
-            messages.warning(self.request, warning)
+        # for warning in warnings:
+            # messages.warning(self.request, warning)
 
         for line in lines_to_add:
             options = []
@@ -563,24 +466,20 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
 
         if len(lines_to_add) > 0:
             self.response = redirect("basket:summary")
-            messages.info(
-                self.request,
-                _(
-                    "All available lines from order %(number)s "
-                    "have been added to your basket"
-                )
-                % {"number": order.number},
-            )
+            # messages.info(
+            #     self.request,
+            #         "Все доступные позиции из заказа %(number)s "
+            #         "были добавлены в вашу корзину"
+            #     % {"number": order.number},
+            # )
         else:
             self.response = redirect("customer:order-list")
-            messages.warning(
-                self.request,
-                _(
-                    "It is not possible to re-order order %(number)s "
-                    "as none of its lines are available to purchase"
-                )
-                % {"number": order.number},
-            )
+            # messages.warning(
+            #     self.request,
+            #         "Невозможно повторить заказ %(number)s"
+            #         "поскольку ни одна из его позиций не доступна для заказа"
+            #     % {"number": order.number},
+            # )
 
 
 class OrderLineView(PostActionMixin, generic.DetailView):
@@ -615,28 +514,12 @@ class OrderLineView(PostActionMixin, generic.DetailView):
                 options.append({"option": attribute.option, "value": attribute.value})
         basket.add_product(line.product, line.quantity, options)
 
-        if line.quantity > 1:
-            msg = _(
-                "%(qty)d copies of '%(product)s' have been added to your basket"
-            ) % {"qty": line.quantity, "product": line.product}
-        else:
-            msg = _("'%s' has been added to your basket") % line.product
+        # if line.quantity > 1:
+        #     msg = "%(qty)d шт. товара '%(product)s' были добавлены в вашу корзину" % {"qty": line.quantity, "product": line.product}
+        # else:
+        #     msg = "'%s' добавлен в вашу корзину" % line.product
 
-        messages.info(self.request, msg)
-
-
-class AnonymousOrderDetailView(generic.DetailView):
-    model = Order
-    template_name = "oscar/customer/anon_order.html"
-
-    def get_object(self, queryset=None):
-        # Check URL hash matches that for order to prevent spoof attacks
-        order = get_object_or_404(
-            self.model, user=None, number=self.kwargs["order_number"]
-        )
-        if not order.check_verification_hash(self.kwargs["hash"]):
-            raise http.Http404()
-        return order
+        # messages.info(self.request, msg)
 
 
 # ------------
@@ -651,11 +534,17 @@ class AddressListView(PageTitleMixin, generic.ListView):
     template_name = "oscar/customer/address/address_list.html"
     paginate_by = settings.OSCAR_ADDRESSES_PER_PAGE
     active_tab = "addresses"
-    page_title = _("Address Book")
+    page_title = "Адресная книга"
 
     def get_queryset(self):
         """Return customer's addresses"""
         return UserAddress._default_manager.filter(user=self.request.user)
+    
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx["content_open"] = True
+        ctx["summary"] = "Профиль"
+        return ctx
 
 
 class AddressCreateView(PageTitleMixin, generic.CreateView):
@@ -663,8 +552,12 @@ class AddressCreateView(PageTitleMixin, generic.CreateView):
     model = UserAddress
     template_name = "oscar/customer/address/address_form.html"
     active_tab = "addresses"
-    page_title = _("Add a new address")
+    page_title = "Добавить новый адрес"
     success_url = reverse_lazy("customer:address-list")
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -673,11 +566,13 @@ class AddressCreateView(PageTitleMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Add a new address")
+        ctx["title"] = "Добавить новый адрес"
+        ctx["summary"] = "Профиль"
+        ctx["content_open"] = True
         return ctx
 
     def get_success_url(self):
-        messages.success(self.request, _("Address '%s' created") % self.object.summary)
+        # messages.success(self.request, _("Address '%s' created") % self.object.summary)
         return super().get_success_url()
 
 
@@ -686,7 +581,7 @@ class AddressUpdateView(PageTitleMixin, generic.UpdateView):
     model = UserAddress
     template_name = "oscar/customer/address/address_form.html"
     active_tab = "addresses"
-    page_title = _("Edit address")
+    page_title = "Изменить адрес"
     success_url = reverse_lazy("customer:address-list")
 
     def get_form_kwargs(self):
@@ -696,51 +591,36 @@ class AddressUpdateView(PageTitleMixin, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = _("Edit address")
+        ctx["title"] = "Изменить адрес"
+        ctx["summary"] = "Профиль"
+        ctx["content_open"] = True
         return ctx
 
     def get_queryset(self):
         return self.request.user.addresses.all()
 
     def get_success_url(self):
-        messages.success(self.request, _("Address '%s' updated") % self.object.summary)
         return super().get_success_url()
 
 
 class AddressDeleteView(PageTitleMixin, generic.DeleteView):
     model = UserAddress
     template_name = "oscar/customer/address/address_delete.html"
-    page_title = _("Delete address?")
+    page_title = "Удалить адрес?"
     active_tab = "addresses"
     context_object_name = "address"
     success_url = reverse_lazy("customer:address-list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = "Удалить адрес"
+        ctx["summary"] = "Профиль"
+        ctx["content_open"] = True
+        return ctx
 
     def get_queryset(self):
         return UserAddress._default_manager.filter(user=self.request.user)
 
     def get_success_url(self):
-        messages.success(self.request, _("Address '%s' deleted") % self.object.summary)
+        messages.success(self.request, "Адрес '%s' удален" % self.object.summary)
         return super().get_success_url()
-
-
-class AddressChangeStatusView(generic.RedirectView):
-    """
-    Sets an address as default_for_(billing|shipping)
-    """
-
-    url = reverse_lazy("customer:address-list")
-    permanent = False
-
-    def get(self, request, *args, pk=None, action=None, **kwargs):
-        address = get_object_or_404(UserAddress, user=self.request.user, pk=pk)
-        #  We don't want the user to set an address as the default shipping
-        #  address, though they should be able to set it as their billing
-        #  address.
-        # if address.country.is_shipping_country:
-        #     setattr(address, "is_%s" % action, True)
-        # elif action == "default_for_billing":
-        #     setattr(address, "is_default_for_billing", True)
-        # else:
-        #     messages.error(request, _("We do not ship to this country"))
-        address.save()
-        return super().get(request, *args, **kwargs)

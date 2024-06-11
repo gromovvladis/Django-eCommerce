@@ -122,6 +122,7 @@ def get_annotated_list(depth=None, parent=None):
             url=node._get_absolute_url(tree_slug),
             num_to_close=[],
             level=node_depth - start_depth,
+            primary_image=node.primary_image,
         )
         annotated_categories.append(info)
 

@@ -1,58 +1,86 @@
-{% extends "oscar/layout.html" %}
+{% extends "oscar/customer/baseaccountpage.html" %}
+{% load currency_filters %}
+{% load static %}
+{% load svg_tags %}
+{% load purchase_info_tags %}
+{% load reviews_tags %}
 
-{% load history_tags %}
-{% load i18n %}
+{% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
 
-{% block title %}
-    {% trans "All reviews" %} | {{ product.title }} | {{ block.super }}
-{% endblock %}
+{% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{{ homepage_url }}">{% trans "Home" %}</a>
-            </li>
-            {% with category=product.categories.all.0 %}
-                {% for c in category.get_ancestors_and_self %}
-                    <li class="breadcrumb-item">
-                        <a href="{{ c.get_absolute_url }}">{{ c.name }}</a>
-                    </li>
-                {% endfor %}
-                <li class="breadcrumb-item">
-                    <a href="{{ product.get_absolute_url }}">{{ product.title }}</a>
-                </li>
-            {% endwith %}
-            <li class="breadcrumb-item active" aria-current="page">{% trans "All reviews" %}</li>
-        </ol>
-    </nav>
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <a href="{% url 'customer:summary' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Личный кабинет</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
+    </div>
 {% endblock %}
 
-{% block headertext %}
-    {% trans "Customer reviews" %}
-{% endblock  %}
-
-{% block content %}
-
-    <section>
-        {% include 'oscar/catalogue/reviews/review_product.html' %}
+{% block tabcontent %}
+    <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
+        
+        <div class="v-order__title d-flex justify-start mb-2 align-center">
+            <div class="d-none d-sm-flex">
+                <h1>Отзывы к товару "{{ product.title }}"</h1>
+            </div>
+        </div>
 
         {% if reviews %}
-            <form method="get" class="form-inline">
-                {% include "oscar/partials/form_fields_inline.html" with form=form %}
-                <button type="submit" class="btn btn-secondary">{% trans "Go" %}</button>
-            </form>
+            <div class="fill-width mb-2">
+                <div class="cabinet-orders fill-width grow-1">
+                    <div class="cabinet__promo-wrapper fill-width d-flex flex-column">
+                        <ul class="v-orders-list d-flex flex-column fill-width fill-width">
+                            {% for review in reviews %}
+                                <li class="v-orders-list-item fill-width">
+                                    <div class="v-orders-list-item fill-width">
+                                        <div class="d-flex flex-column fill-width py-3">
+                                            <div class="d-flex justify-space-between align-center fill-width">
+                                                <span class="v-orders-list-item__title"> Отзыв к заказу №{{ review.order.number }} </span>
+                                            </div>
 
-            <hr>
+                                            <div class="profile-feedback_rating-area d-flex justify-start mt-2">
+                                                {% for star in '12345'|make_list %}
+                                                    <div class="order-rating{% if review|stars:star %} selected{% endif %}"></div>
+                                                {% endfor %}
+                                            </div>
 
-            {% for review in reviews %}
-                {% include 'oscar/catalogue/partials/review.html' %}
-            {% endfor %}
-            {% include 'oscar/partials/pagination.html' %}
+                                            {% block order_contents %}
+                                                <div class="v-order-checkout__items">
+                                                    {% for line in review.order.basket.all_lines %}
+                                                        {% purchase_info_for_line request line as session %}
+                                                            <span>{{ line.product.get_title }} ({{ line.quantity }}){% if not forloop.last %},{% endif %}</span>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endblock order_contents %}
 
+                                            <div class="d-flex justify-space-between align-center align-start fill-width pt-1">
+                                                <div class="v-orders-list-item__status d-flex align-center">
+                                                    <span>{{ review.body }}</span>
+                                                </div>
+                                                <span class="v-orders-list-item__date text--grey-dark"> {{ review.date_created }} </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% include "oscar/partials/pagination.html" %}
         {% else %}
-            <p>{% trans "This product does not have any reviews yet." %}</p>
+            <p>Список отзывов пуст</p>
         {% endif %}
+    </div>
+{% endblock tabcontent %}
 
-    </section>
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/profile/profile-links.js" %}"></script>
 {% endblock %}

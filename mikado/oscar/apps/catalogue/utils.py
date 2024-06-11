@@ -8,7 +8,6 @@ import zlib
 from django.core.exceptions import FieldError
 from django.core.files import File
 from django.db.transaction import atomic
-from django.utils.translation import gettext_lazy as _
 from PIL import Image
 
 from oscar.apps.catalogue.exceptions import (
@@ -61,7 +60,7 @@ class Importer(object):
                 except IOError as e:
                     stats["num_invalid"] += 1
                     raise ImageImportError(
-                        _("%(filename)s is not a valid image (%(error)s)")
+                        ("%(filename)s - некорректное изображение (%(error)s)")
                         % {"filename": filename, "error": e}
                     )
                 except FieldError as e:
@@ -69,10 +68,10 @@ class Importer(object):
             if image_dir != dirname:
                 shutil.rmtree(image_dir)
         else:
-            raise InvalidImageArchive(_("%s is not a valid image archive") % dirname)
+            raise InvalidImageArchive(("%s некорректное изображение архива") % dirname)
         self.logger.info(
-            "Finished image import: %(num_processed)d imported,"
-            " %(num_skipped)d skipped" % stats
+            "Файл импортирован: %(num_processed)d,"
+            " %(num_skipped)d пропустить" % stats
         )
 
     def _get_image_files(self, dirname):
