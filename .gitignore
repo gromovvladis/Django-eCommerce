@@ -14,7 +14,7 @@ __pycache__
 /pyvenv.cfg
 /pip-selfcheck.json
 
-# Vagrant
+# Vagrant 
 .vagrant
 
 # Temporary/OS files
