@@ -30,7 +30,7 @@
                                             <div class="v-dish-order__picture">
                                                 <a href="{{ product.get_absolute_url }}" class="d-block" data-id="dish-order-image-link">
                                                     <div class="v-dish-image fill-width">
-                                                        <div class="v-images-chunks" style="position: relative;">
+                                                        <div class="v-images-chunks pos-relative">
                                                             <div class="v-image">
                                                                 <div class="v-image__inner" style="padding-bottom: 100%;">
                                                                     {% with image=product.primary_image %}
@@ -80,7 +80,7 @@
                 
                 <div class="v-collection__banner fill-width shrink px-2">
                     <a href="{{ promo_cat.get_absolute_url }}" class="v-collection__banner-wrapper d-flex fill-width" data-id="collection-link">
-                        <div class="v-images-chunks fill-width" style="position: relative;">
+                        <div class="v-images-chunks fill-width pos-relative">
                             <div class="v-image">
                                 <div class="v-image__inner" style="padding-bottom: 27%;">
                                     {% with image=promo_cat.primary_image %}

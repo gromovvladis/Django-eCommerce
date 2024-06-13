@@ -14,12 +14,12 @@
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
-        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+        <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
-        <a href="{% url 'customer:summary' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Личный кабинет</a>
+        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Личный кабинет</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
         <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
     </div>
@@ -49,7 +49,7 @@
                                                 class="d-block router-link-exact-active router-link-active"
                                                 data-id="dish-order-image-link">
                                                 <div class="v-dish-image fill-width">
-                                                    <div class="v-images-chunks" style="position: relative;">
+                                                    <div class="v-images-chunks pos-relative">
                                                         <div class="v-image">
                                                             <div class="v-image__inner" style="padding-bottom: 72.072%;">
                                                                 {% if product %}

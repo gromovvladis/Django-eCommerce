@@ -48,41 +48,38 @@ if (basket_summary){
             $(basket_summary).submit()
         });
     })
-}
 
-$(basket_summary).submit(function () {
-    var form = $(this);
-    $(form).addClass('loading');
-    $.ajax({
-        data: $(this).serialize(), 
-        type: $(this).attr('method'), 
-        url: document.URL,
-        success: function (response){
-            $(form).removeClass('loading');
-            if (response.status == 202){
-                $(basket_totals).html(response.responseJSON.new_totals);
-                $(cart_nums).html(response.responseJSON.new_nums);
-                getUpsellMaseeges();
+    $(basket_summary).submit(function () {
+        var form = $(this);
+        $(form).addClass('loading');
+        $.ajax({
+            data: $(this).serialize(), 
+            type: $(this).attr('method'), 
+            url: document.URL,
+            success: function (response){
+                $(form).removeClass('loading');
+                if (response.status == 202){
+                    $(basket_totals).html(response.new_totals);
+                    $(cart_nums).html(response.new_nums);
+                    getUpsellMaseeges();
+                }
+            },
+            error: function (response){
+                console.log(response)
             }
-        },
-        error: function (response){
-            console.log(response)
-        }
+        });
+        return false;  
     });
-    return false;  
-});
-
+}
 
 function getUpsellMaseeges(){
     $.ajax({
         data: $(this).serialize(), 
         type: 'GET', 
         url: url_upsell_masseges,
-        complete: function (response){
-            if (response.status == 202){
-                $(upsell_messages).empty();
-                $(upsell_messages).html(response.responseJSON.upsell_messages);
-            }
+        success: function (response){
+            $(upsell_messages).empty();
+            $(upsell_messages).html(response.upsell_messages);
         },
     });
 }
@@ -97,8 +94,8 @@ $(empty_cart).on('click', function(){
         data: $(this).serialize(), 
         type: 'POST', 
         url: url_empty_basket,
-        complete: function (response){
-            window.location.href = response.responseJSON.url;
+        success: function (response){
+            window.location.href = response.url;
         },
     });
 })

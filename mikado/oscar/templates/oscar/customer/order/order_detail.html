@@ -12,14 +12,14 @@
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
-        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+        <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
-        <a href="{% url 'customer:summary' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Личный кабинет</a>
+        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Личный кабинет</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
-        <a href="{% url 'customer:order-list' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Заказы</a>
+        <a href="{% url 'customer:order-list' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Заказы</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
         <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
     </div>
@@ -63,7 +63,7 @@
                                     class="d-block router-link-exact-active router-link-active"
                                     data-id="dish-order-image-link">
                                     <div class="v-dish-image fill-width">
-                                        <div class="v-images-chunks" style="position: relative;">
+                                        <div class="v-images-chunks pos-relative">
                                             <div class="v-image">
                                                 <div class="v-image__inner" style="padding-bottom: 72.072%;">
                                                     {% with image=product.primary_image %}
@@ -126,14 +126,12 @@
                     {% endif %}
                 {% endwith %}
             {% endfor %}
-
             {% include 'oscar/customer/order/order_totals.html' %}
-
         </div>
 
         {% block shipping_info %}
 
-            <div class="v-checkout__datail">
+            <div class="v-checkout__datail  pb-2">
                 {% if order.shipping_address %}
 
                     <div class="v-order__subtitle mb-1 mb-sm-2">
@@ -169,7 +167,7 @@
                         <h2>Адрес самовывоза</h2>
                     </div>
 
-                    <a href="{% url 'address:pickup-address' %}" class="mb-2">
+                    <a href="{% url 'address:pickup-address' %}" class="v-checkout__detail-text mb-2">
                         <address> Красноясрк, ул. 9 Мая 77,
                             <br>
                             ТРЦ "Планета" Фудкорд Mikado

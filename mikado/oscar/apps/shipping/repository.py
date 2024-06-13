@@ -54,6 +54,21 @@ class Repository(object):
 
         # Assume first returned method is default
         return shipping_methods[0]
+    
+    def get_shipping_method(self, method):
+
+        shipping_method = None
+
+        for mtd in self.methods:
+            if mtd.code == method:
+                shipping_method = mtd
+                break
+
+        if (shipping_method is None):
+            raise ImproperlyConfigured("Нет такого метода доставки")
+
+        # Assume first returned method is default
+        return shipping_method
 
     # Helpers
 

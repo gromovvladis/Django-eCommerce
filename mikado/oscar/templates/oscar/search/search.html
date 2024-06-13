@@ -8,7 +8,7 @@
     Поиск | {{ block.super }}
 {% endblock %}
 
-{% block wrapper_class %}search d-flex fill-width flex-column justify-start grow-1 fill-height pb-3 pb-sm-6 pt-sm-2{% endblock %}
+{% block wrapper_class %}search d-flex fill-width flex-column justify-start grow-1 fill-height pb-3 pb-sm-6 pt-sm-2 px-sm-2{% endblock %}
 
 {% block app_class %}v-app---search{% endblock %}
 {% block nav_class %}v-app__nav--search{% endblock %}
@@ -19,11 +19,12 @@
 {% block sticky_address %}{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center px-1 py-1 pb-2 mb-md-1 mt-md-1">
-        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+        <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
         <span class="v-bread__link" aria-current="page">Поиск{{ query }}</span>
     </div>
@@ -31,7 +32,7 @@
 
 
 {% block content %}
-    <div class="d-flex fill-width px-2 px-md-2">
+    <div class="d-flex fill-width">
         {% comment %}------------- название категории ---------------{% endcomment %}
         <div class="search__input-wrapper d-flex fill-width px-md-0 flex-column">
 
@@ -39,7 +40,7 @@
                 <h1>Поиск</h1>
             </div>
             
-            <div class="search__input d-flex fill-width">
+            <div class="search__input d-flex fill-width px-2 px-sm-0">
                 <div id="search_form" class="d-flex fill-width py-2 px-md-0">
                     <div class="v-input-search fill-width">
                         {% icon file_name='interface/search' size=24 fill="#111"%}
@@ -55,7 +56,7 @@
                 </div>
             </div>
 
-            <div id="search_result" class="v-dishes v-dishes--search mt-1 fill-width"></div>
+            <div id="search_result" class="v-dishes v-dishes--search mt-1 fill-width px-2 px-sm-0"></div>
         </div>
     </div>
 {% endblock %}

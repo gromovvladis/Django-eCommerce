@@ -4,7 +4,6 @@ from .settings import *
 # SECURE
 # =============
 
-
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -14,30 +13,6 @@ HOST_SCHEME = "https://"
 
 SECRET_KEY='UtjFCuyjDKmWHe25neauXzHi2eZoRXg6RMbT5JyAdPiAcBP6Rra1'
 
-# =============
-# STATIC
-# =============
-
-STATIC_ROOT = location('public/static')
-STATICFILES_DIRS = (
-    location('static/'),
-)
-STATIC_PRIVATE_ROOT = location('static')
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-)
-
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        # "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
-}
 
 # =============
 # Redis

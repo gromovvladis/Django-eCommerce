@@ -22,15 +22,15 @@
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
-        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+        <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
 
         {% with category=product.get_categories.first %}
             {% for c in category.get_ancestors_and_self %}
-                <a href="{{ c.get_absolute_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">{{ c.name }}</a>
+                <a href="{{ c.get_absolute_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">{{ c.name }}</a>
             {% endfor %}
             {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
             <span class="v-bread__link" aria-current="page">{{ product.get_title }}</span>
@@ -52,13 +52,13 @@
             
                 {% comment %}------------- изображения товара ---------------{% endcomment %}
                 <div class="dish-page__image pos-relative">
-                    <div class="v-carousel__wrap fill-width fill-height" style="position: relative;">
+                    <div class="v-carousel__wrap fill-width fill-height pos-relative">
                         <div class="v-carousel">
                             <div class="v-carousel__inner d-flex">
                                 <div class="v-carousel__item">
                                     <div class="fill-width fill-height">
                                         <div class="v-dish-image fill-width">
-                                        <div class="v-images-chunks" style="position: relative;">
+                                        <div class="v-images-chunks pos-relative">
                                             <div class="v-image">
                                             <div class="v-image__inner v-image__inner--detail">
                                                 {% block product_gallery %}

@@ -20,6 +20,7 @@ class CheckoutConfig(OscarConfig):
         
         self.checkoutview_view = get_class("checkout.views", "CheckoutView")
         self.payment_details_view = get_class("checkout.views", "PaymentDetailsView")
+        self.update_totals_view = get_class("checkout.views", "UpdateTotalsView")
         self.thankyou_view = get_class("checkout.views", "ThankYouView")
 
         self.add_voucher_view = get_class("checkout.views", "VoucherAddView")
@@ -39,6 +40,7 @@ class CheckoutConfig(OscarConfig):
                 name="payment-details",
             ),
             path("thank-you/", self.thankyou_view.as_view(), name="thank-you"),
+            path("api/update-totals/", self.update_totals_view.as_view(), name="update-totals"),
             path("vouchers/add/", self.add_voucher_view.as_view(), name="vouchers-add"),
             path(
                 "vouchers/<int:pk>/remove/",

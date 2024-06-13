@@ -1,8 +1,5 @@
-from gettext import ngettext
 from django import http
 from django.conf import settings
-from django.contrib import messages
-from django.utils.html import strip_tags
 from django.utils.timezone import now
 from django.views import generic
 from django.db.models import Q
@@ -72,14 +69,14 @@ class UpdateView(NotifEditMixin, generic.View):
         if num_unread == 0:
             num_unread = ""
 
-        return http.JsonResponse({"action": 'archive', "num_unread": num_unread}, status=200)
+        return http.JsonResponse({"action": 'archive', "num_unread": num_unread, "status": 200}, status=200)
 
     def delete(self, request, notification):
         notification.delete()
         nums_total = Notification.objects.filter(
             recipient=request.user, location="Archive"
         ).count() 
-        return http.JsonResponse({"action": 'delete', "nums_total": nums_total}, status=200)
+        return http.JsonResponse({"action": 'delete', "nums_total": nums_total, "status": 200}, status=200)
 
 
 class DetailView(PageTitleMixin, generic.DetailView):

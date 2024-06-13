@@ -25,7 +25,7 @@ $(add_form_dalail).submit(function () {
             $(cart_nums).html(response.cart_nums);
         },
         error: function (response) {
-            $(errors_cart).html(response.responseJSON.errors);
+            $(errors_cart).html(response.errors);
         },
         complete: function(){
             $(add_cart_btn).attr("disabled", false);

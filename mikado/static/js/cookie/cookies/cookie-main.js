@@ -25,6 +25,6 @@ function getBack(){
     action_back();
     action_back = null;
   } else {
-    window.location.href = document.referrer    
+    history.back();   
   }
 }

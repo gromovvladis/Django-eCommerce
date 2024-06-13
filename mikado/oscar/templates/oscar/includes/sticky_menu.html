@@ -15,13 +15,13 @@
               <a href="{{ tree_category.url }}" class="v-categories-tabs__link d-flex align-center{% if tree_category.pk == category.pk %} v-categories-tabs__link--active{% endif %}" data-id="categories-tabs-item-hits">
                 <div class="v-categories-tabs__icon shrink mr-2">
                   <div class="v-dish-image fill-width shrink v-dish-image--no-loader">
-                    <div class="v-images-chunks" style="position: relative;"> 
+                    <div class="v-images-chunks pos-relative"> 
                       <div class="v-image">
                         <div class="v-image__inner" style="padding-bottom: 100%;">
                           {% with image=tree_category.primary_image %}
                               {% oscar_thumbnail image.original "x155" upscale=False as thumb %}
                               <div class="v-dish-image fill-width">
-                                  <div class="v-images-chunks" style="position: relative;">
+                                  <div class="v-images-chunks pos-relative">
                                       <div class="v-image">
                                           <div class="v-image__inner" style="padding-bottom: 100%;">
                                               <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" class="img-thumbnail w-auto mx-auto my-0">

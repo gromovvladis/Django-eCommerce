@@ -14,13 +14,6 @@ HOST_SCHEME = "http://"
 SECRET_KEY='UtjFCuyjDKmWHe15neauXzHi2rZoRTg6RMbT5JyAdPiAcBP6Rra1'
 
 # =============
-# MEDIA
-# =============
-
-MEDIA_ROOT = location("public/media")
-
-
-# =============
 # Yoomaney settings
 # =============
 

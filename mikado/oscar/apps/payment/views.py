@@ -28,7 +28,7 @@ class UpdatePayment(APIView):
             source = PaymentManager.get_last_source(pk)
             pay_id = source.payment_id
         except Exception as e:
-            return http.JsonResponse({'error': 'pk not valid'}, status=400)
+            return http.JsonResponse({'error': 'pk not valid', "status": 400}, status=400)
         
         if pay_id:
             try:
@@ -43,7 +43,7 @@ class UpdatePayment(APIView):
                 status = payment_method.update(source, payment_api, refund_api)
 
             except Exception as e:
-               return http.JsonResponse({'error': 'fail api payment'}, status=400)
+               return http.JsonResponse({'error': 'fail api payment', "status": 400}, status=400)
 
         return http.JsonResponse({'status': status}, status=200)
 
@@ -79,10 +79,10 @@ class YookassaPaymentStatus(APIView):
                         source=source, 
                         payment=payment_api,
                     )
-                    return http.JsonResponse({'success': 'ok'}, status=200)
+                    return http.JsonResponse({'success': 'ok', "status": 200}, status=200)
                 
                 except Exception:
-                    return http.JsonResponse({'error': 'fail'}, status=400)
+                    return http.JsonResponse({'error': 'fail', "status": 400}, status=400)
                 
             elif "refund" in event_type and source:
                 try:
@@ -91,21 +91,21 @@ class YookassaPaymentStatus(APIView):
                         source=source, 
                         refund=refund_api,
                     )
-                    return http.JsonResponse({'success': 'ok'}, status=200)
+                    return http.JsonResponse({'success': 'ok', "status": 200}, status=200)
                 
                 except Exception:
-                    return http.JsonResponse({'error': 'fail'}, status=400)
+                    return http.JsonResponse({'error': 'fail', "status": 400}, status=400)
                 
             else:
                 logger.error(
                     "Транзакция не имеет тип refund или payment её статус: %s",
                     event_type
                 )
-                return http.JsonResponse({'error': 'fail'}, status=400)
+                return http.JsonResponse({'error': 'fail', "status": 400}, status=400)
         else:
             logger.error(
                 "Не удалось получить источник платежа или IP недопустимый. Источник:%s, IP: %s",
                 event_type,
                 request.ip
             )
-            return http.JsonResponse({'error': 'fail'}, status=400)
+            return http.JsonResponse({'error': 'fail', "status": 400}, status=400)

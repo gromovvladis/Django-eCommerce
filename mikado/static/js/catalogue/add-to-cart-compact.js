@@ -21,7 +21,7 @@ function findNewForms(){
                 $(cart_nums_compact).html(response.cart_nums); 
             },
             error: function(response){
-                $(btn).parent().parent().parent().parent().find('[data-id="add-to-cart-help-text-compact"]').html(response.responseJSON.errors)
+                $(btn).parent().parent().parent().parent().find('[data-id="add-to-cart-help-text-compact"]').html(response.errors)
             },
             complete: function (){
                 $(btn).attr("disabled", false);

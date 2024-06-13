@@ -9,10 +9,7 @@ AbstractAddressForm = get_class("address.forms", "AbstractAddressForm")
 
 
 class CheckoutVoucherForm(forms.Form):
-    code = forms.CharField(max_length=128, label="Промокод")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    code = forms.CharField(max_length=128, label="Промокод", widget=forms.TextInput(attrs={'class' : 'v-input'}))
 
     def clean_code(self):
         return self.cleaned_data["code"].strip().upper()
@@ -74,26 +71,26 @@ class CheckoutForm(AbstractAddressForm, forms.Form):
         
         widgets = {
             'line1': forms.TextInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'class' : 'v-input d-flex align-center v-input__padding',
                 'placeholder': "Введите адрес доставки"
             }),
             'line2': forms.NumberInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'class' : 'v-input d-flex align-center v-input__padding',
                 'min': 1,
                 'max': 1000,
             }),
             'line3': forms.NumberInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'class' : 'v-input d-flex align-center v-input__padding',
                 'min': 1,
                 'max': 100,
             }),
             'line4': forms.NumberInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'class' : 'v-input d-flex align-center v-input__padding',
                 'min': 1,
                 'max': 100,
             }),
             'notes': forms.Textarea(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__dirty v-input__padding',
+                'class' : 'v-input d-flex align-center v-input__padding',
                 'rows': 2,
             }),
         }

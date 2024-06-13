@@ -39,10 +39,10 @@ OSCAR_DELETE_IMAGE_FILES = True
 OSCAR_MISSING_IMAGE_URL = "image_not_found.jpg"
 
 # Address settings
-OSCAR_REQUIRED_ADDRESS_FIELDS = (
-    "line1",
-    "line2",
-)
+# OSCAR_REQUIRED_ADDRESS_FIELDS = (
+#     "line1",
+#     "line2",
+# )
 
 # Pagination settings
 

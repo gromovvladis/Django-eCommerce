@@ -2,10 +2,10 @@
 {% load category_tags %}
 
 {% comment %} ------------- кнопка назад --------------- {% endcomment %}
-<button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink">
-    <span class="v-button__wrapper" style="opacity:1;">
+<button onclick="getBack(); return false" data-id="back-main-btn" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink">
+    <span class="v-button__wrapper">
         <span class="d-flex">
-            {% icon file_name='interface/arrow-left' size=24 stroke='#000'%}
+            {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
         </span>
     </span>
 </button>
@@ -36,7 +36,7 @@
     </span>
 </button>
 
-<button type="button" data-id="empty-cart" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink">
+<button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink">
     <span class="v-button__wrapper">
         <span class="d-flex">
             {% icon file_name='interface/empty' size=20 stroke="#d32225"%}

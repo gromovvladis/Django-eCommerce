@@ -22,6 +22,45 @@ location = lambda x: os.path.join(
 DEBUG = config("DEBUG", default=False, cast=bool)
 INTERNAL_IPS = ['127.0.0.1', '::1']
 
+
+# =============
+# MEDIA
+# =============
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = location('public/media')
+
+# =============
+# STATIC
+# =============
+
+STATIC_URL = 'static/'
+
+STATIC_ROOT = location('public/static')
+STATICFILES_DIRS = (
+    location('static'),
+)
+
+# STATIC_PRIVATE_ROOT = location('static')
+STATIC_PRIVATE_ROOT = location('public/static')
+
+ICON_DIR = location('static/svg')
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
 # =============
 # HOSTS
 # =============
@@ -39,6 +78,7 @@ DATABASES = {
     "default": {
         "ENGINE": config("DATABASE_ENGINE"),
         "NAME": Path(__file__).resolve().parent.parent.parent / config("DATABASE_NAME"),
+        # "NAME": config("DATABASE_NAME"),
         "USER": config("DATABASE_USER"),
         "PASSWORD": config("DATABASE_PASSWORD"),
         "HOST": config("DATABASE_HOST"),
@@ -57,17 +97,6 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 DATE_FORMAT = 'd E Y'
-
-# =============
-# MEDIA
-# =============
-
-MEDIA_URL = '/media/'
-# =============
-# STATIC
-# =============
-
-STATIC_URL = '/static/'
 
 # =============
 # TEMPLATES

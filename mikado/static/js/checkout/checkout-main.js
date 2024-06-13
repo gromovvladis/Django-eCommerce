@@ -13,7 +13,7 @@ var shipping_method_buttons = $('[data-id="delivery-method-button"]');
 var delivery_method_block = $('[data-id="delivery-method-block"]');
 var delivery_time_block = $('[data-id="delivery-time-block"]');
 
-
+var checkout_totals = $('#checkout_totals');
 var all_fields = $('[data-id="v-input-field"]');
 var payment_method = $('#id_payment_method');
 var email_or_change_block = $(all_fields).filter('[data-field="v-email-field"]');
@@ -43,7 +43,22 @@ $(shipping_method_buttons).on('click', function(){
     } else {
         $(address_fields).removeClass('d-none');
     }
+    getNewTotals(selectedMethod)
 })
+
+// обновление итогов
+function getNewTotals(selectedMethod){
+    $.ajax({
+        data: {'shipping_method': selectedMethod}, 
+        type: 'GET', 
+        url: url_update_totals,
+        success: function (response){
+            if (response.status == 202){
+                $(checkout_totals).html(response.totals);
+            }
+        },
+    });
+}
 
 // не отправлять форму enter-ом
 $('#place_order_form').on('keypress', 'input', function(event) {
@@ -83,6 +98,7 @@ $(delivery_time_btn).on('click', function(){
 $(all_fields).each(function(){
     var wrapper = $(this);
     var input_field = $(this).find('.v-input');
+    console.log($(input_field).val())
     if($(input_field).val() != ""){
         wrapper.addClass('v-input__label-active')
     }

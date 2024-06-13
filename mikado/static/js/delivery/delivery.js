@@ -26,7 +26,7 @@ var suggestView;
 var cleanButton;
 var cleanButtonHTML;
 var deliveryZones;
-var addressValid
+var addressValid;
 
 // подсказки при поиске запрос в Яндекс
 ymaps.ready(function () {
@@ -230,6 +230,9 @@ function createMap(addressInfo=null) {
                 closeButton.events.add('click', function () {
                     geoObject = null;
                     $(checkoutMapContainer).removeClass('open');
+                    setTimeout(() => {
+                        action_back = null;
+                      }, 900);
                 });
     
 
@@ -593,6 +596,7 @@ $(open_map).on('click', function(){
     createMap($(address_line1).val());
     $(checkoutMapContainer).addClass('open');
     $(address_line1).blur();
+    action_back = function(){}
 })
 
 $(window).resize(function(){

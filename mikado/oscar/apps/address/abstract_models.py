@@ -11,7 +11,7 @@ class AbstractAddress(models.Model):
 
     # We use quite a few lines of an address as they are often quite long and
     # it's easier to just hide the unnecessary ones than add extra ones.
-    line1 = models.CharField("Улица, дом", max_length=255, blank=False)
+    line1 = models.CharField("Улица, дом", max_length=255, blank=True, null=True)
     line2 = models.PositiveIntegerField("Квартира", blank=True, null=True)
     line3 = models.PositiveIntegerField("Подъезд", blank=True, null=True)
     line4 = models.PositiveIntegerField("Этаж", blank=True, null=True)

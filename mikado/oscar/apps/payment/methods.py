@@ -1,8 +1,5 @@
 import uuid
-
 from django.urls import reverse_lazy
-
-
 from django.conf import settings
 import logging
 from oscar.apps.order.abstract_models import PaymentEventQuantity
@@ -10,7 +7,7 @@ from oscar.apps.payment.exceptions import DebitedAmountIsNotEqualsRefunded, Unab
 from oscar.apps.payment.models import Source, Transaction
 from oscar.apps.order.models import Order, PaymentEvent, PaymentEventType
 from django.contrib import messages
-
+from django.contrib.sites.models import Site
 
 from yookassa import Refund
 from yookassa import Payment
@@ -22,7 +19,6 @@ from yookassa.domain.request import RefundRequestBuilder
 from yookassa.domain.response.refund_response import RefundResponse
 from yookassa.domain.response.payment_response import PaymentResponse
 
-from django.contrib.sites.models import Site
 
 logger = logging.getLogger("oscar.payment")
 

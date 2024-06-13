@@ -625,7 +625,11 @@ class AbstractProduct(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.get_title())
+            if self.is_child and not self.title:
+                self.slug = slugify(self.get_title() + self.variant)
+            else:
+                self.slug = slugify(self.get_title())
+
         super().save(*args, **kwargs)
         self.attr.save()
 

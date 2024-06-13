@@ -1,5 +1,4 @@
 {% load currency_filters %}
-{% load i18n %}
 {% load purchase_info_tags %}
 
 {% purchase_info_for_product request product as session %}
@@ -54,6 +53,4 @@
             <p class="price_color">&nbsp;</p>
         {% endif %}
     {% endif %}
-{% else %}
-    {% trans 'Unavailable' %}
 {% endif %}
