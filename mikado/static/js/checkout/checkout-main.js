@@ -12,6 +12,7 @@ var submit_btn = $('#submit_order');
 var shipping_method_buttons = $('[data-id="delivery-method-button"]');
 var delivery_method_block = $('[data-id="delivery-method-block"]');
 var delivery_time_block = $('[data-id="delivery-time-block"]');
+var time_title = $('[data-id="order-time-title"]');
 
 var checkout_totals = $('#checkout_totals');
 var all_fields = $('[data-id="v-input-field"]');
@@ -40,8 +41,10 @@ $(shipping_method_buttons).on('click', function(){
     AjaxTimeFromAddress($(address_line1).val());
     if (selectedMethod == "self-pick-up"){
         $(address_fields).addClass('d-none');
+        $(time_title).html('Время самовывоза');
     } else {
         $(address_fields).removeClass('d-none');
+        $(time_title).html('Время доставки');
     }
     getNewTotals(selectedMethod)
 })

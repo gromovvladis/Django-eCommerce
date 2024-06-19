@@ -62,4 +62,4 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 # =============
 
 Configuration.account_id = 396529
-Configuration.secret_key = 'test_xWpaTgVQo-SeX7cgxtpX0iJZ76M-v9Zyam82yOgKa9M'
+Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'

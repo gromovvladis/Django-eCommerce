@@ -171,7 +171,7 @@ function createMap(addressInfo=null) {
                     layout: ZoomLayout,
                     position: {
                         bottom: "245px",
-                        right:'10px',
+                        right:'14px',
                     },
                 }
             });
@@ -184,7 +184,7 @@ function createMap(addressInfo=null) {
                     ),
                     position: {
                         bottom: '190px',
-                        right: '10px'
+                        right: '14px'
                     }
                 }
             });
@@ -221,6 +221,10 @@ function createMap(addressInfo=null) {
                             '<button type="button" data-id="delivery-map-close-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg heigh="24px" width="24px" stroke="#000" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
                         ),
                         float: 'left',
+                        position: {
+                            top: '8px',
+                            left: '14px'
+                        }
                     }
                 });
 
@@ -243,6 +247,10 @@ function createMap(addressInfo=null) {
                             '<button type="button" data-id="delivery-map-clean-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg width="22" height="22" stroke="#b60808" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10L7.70141 19.3578C7.87432 20.3088 8.70258 21 9.66915 21H14.3308C15.2974 21 16.1257 20.3087 16.2986 19.3578L18 10" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
                         ),
                         float: 'right',
+                        position: {
+                            top: '8px',
+                            right: '14px'
+                        }
                     },            
                 });
 
