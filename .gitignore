@@ -41,7 +41,7 @@ db.sqlite
 *.pdf
 TODO
 venv
-/config/settings/
+production.py
 
 # Test files
 .coverage
