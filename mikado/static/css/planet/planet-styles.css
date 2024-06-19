@@ -12685,10 +12685,10 @@ input[type="number"]:focus {
     transform: translateY(-50%) rotate(180deg)
 }
 
-.v-h-nav--button svg {
+/* .v-h-nav--button svg {
     width: 32px;
     height: 32px
-}
+} */
 
 .v-h-nav--button:hover {
     background-color: hsl(0, 0%, 100%)
