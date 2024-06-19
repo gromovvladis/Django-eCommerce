@@ -27,6 +27,7 @@ __pycache__
 db.sqlite
 /logs/
 .log
+public
 
 # IDE files
 .project
@@ -34,6 +35,7 @@ db.sqlite
 .settings
 .idea
 .vscode
+
 
 # Docs
 /docs/build/*
