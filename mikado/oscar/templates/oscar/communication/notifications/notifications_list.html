@@ -11,12 +11,12 @@
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center my-2 mx-md-0">
-        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+        <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
-        <a href="{% url 'customer:summary' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Личный кабинет</a>
+        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Личный кабинет</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
         <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
     </div>
@@ -35,10 +35,10 @@
                 {% else %}
                     <a href="{% url 'customer:notifications-inbox' %}">
                         <div class="d-flex">
-                            <h3>Непрочитанные</h3>
-                            <div class="d-flex align-center ml-1">
+                            <div class="d-flex align-center mr-1">
                                 <span data-id="notifications-nums" class="notif-badge d-flex justify-center align-center">{{ num_unread_notifications }}</span>
                             </div>
+                            <h3>Непрочитанные</h3>
                         </div>
                     </a>
                 {% endif %}
@@ -46,7 +46,6 @@
         </div>
 
     {% if notifications %}
-        {% include "oscar/partials/pagination.html" %}
         <form action="{% url 'customer:notifications-update' %}" method="post" class="fill-width mb-2" data-id="profile-notifications-form">
             {% csrf_token %}
             <div class="cabinet-orders fill-width grow-1">
@@ -95,7 +94,7 @@
         <p data-id="notification-empty"></p>
         {% include "oscar/partials/pagination.html" %}
         {% else %}
-            <p class="mt-2">Список уведолений пуст</p>
+            <p>Список уведолений пуст</p>
         {% endif %}
     </div>
 {% endblock tabcontent %}

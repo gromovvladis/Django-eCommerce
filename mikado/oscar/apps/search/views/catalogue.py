@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, redirect
 
+from django.core.cache import cache
 from oscar.core.loading import get_class, get_model
 
 BrowseCategoryForm = get_class("search.forms", "BrowseCategoryForm")
@@ -77,7 +78,13 @@ class ProductCategoryView(BaseSearchView):
                 return HttpResponsePermanentRedirect(expected_path)
 
     def get_category(self):
-        return get_object_or_404(Category, slug=self.kwargs["category_slug"])
+        category = cache.get("category_%s" % self.kwargs["category_slug"])
+
+        if not category:
+            category = get_object_or_404(Category, slug=self.kwargs["category_slug"])
+            cache.set("category_%s" % self.kwargs["category_slug"], category, 3600)
+
+        return category
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

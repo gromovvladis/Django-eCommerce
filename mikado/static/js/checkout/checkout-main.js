@@ -12,8 +12,9 @@ var submit_btn = $('#submit_order');
 var shipping_method_buttons = $('[data-id="delivery-method-button"]');
 var delivery_method_block = $('[data-id="delivery-method-block"]');
 var delivery_time_block = $('[data-id="delivery-time-block"]');
+var time_title = $('[data-id="order-time-title"]');
 
-
+var checkout_totals = $('#checkout_totals');
 var all_fields = $('[data-id="v-input-field"]');
 var payment_method = $('#id_payment_method');
 var email_or_change_block = $(all_fields).filter('[data-field="v-email-field"]');
@@ -40,10 +41,27 @@ $(shipping_method_buttons).on('click', function(){
     AjaxTimeFromAddress($(address_line1).val());
     if (selectedMethod == "self-pick-up"){
         $(address_fields).addClass('d-none');
+        $(time_title).html('Время самовывоза');
     } else {
         $(address_fields).removeClass('d-none');
+        $(time_title).html('Время доставки');
     }
+    getNewTotals(selectedMethod)
 })
+
+// обновление итогов
+function getNewTotals(selectedMethod){
+    $.ajax({
+        data: {'shipping_method': selectedMethod}, 
+        type: 'GET', 
+        url: url_update_totals,
+        success: function (response){
+            if (response.status == 202){
+                $(checkout_totals).html(response.totals);
+            }
+        },
+    });
+}
 
 // не отправлять форму enter-ом
 $('#place_order_form').on('keypress', 'input', function(event) {
@@ -54,11 +72,15 @@ $('#place_order_form').on('keypress', 'input', function(event) {
 
 // время для адреса из адресной книги
 function AjaxTimeFromAddress(initAddress){
-    ymaps.ready(function () {
-        ymaps.geocode(initAddress, {results: 1}).then(function (res) {
-            AjaxTime(res.geoObjects.get(0).geometry.getCoordinates(), true); 
+    if (initAddress != ""){
+        ymaps.ready(function () {
+            ymaps.geocode(initAddress, {results: 1}).then(function (res) {
+                AjaxTime(res.geoObjects.get(0).geometry.getCoordinates(), true); 
+            });
         });
-    });
+    } else {
+        AjaxPickUpTime();
+    }
 }
 
 // выбрана доставка.самовывоз как можно скорее
@@ -67,7 +89,7 @@ $(delivery_time_btn).on('click', function(){
     var delivery_time_method = $(this).attr("data-type");
     if (delivery_time_method == "now"){
         var Time = new Date();
-        Time.setMinutes(Time.getMinutes() + del_time);
+        Time.setUTCMinutes(Time.getMinutes() + del_time);
         $(order_time).val(Time.toLocaleString());
         AjaxTimeFromAddress($(address_line1).val());
         $(delivery_time).removeClass('hidden');

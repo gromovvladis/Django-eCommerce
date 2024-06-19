@@ -1,15 +1,13 @@
-<a href="{% url "customer:order-list" %}" class="mb-2">
+<a href="{% url 'customer:order-list' %}" class="mb-2">
     <div class="v-order-checkout__items">
-        {% for line in order.basket.all_lines %}
-            <span class="text--info">{{ line.product.get_title }} ({{ line.quantity }}){% if not forloop.last %},{% endif %}</span>
-        {% endfor %}
+        {{ order }}
     </div>
 </a>
 <h3 class="mt-4 mb-2">Ваш заказ уже в работе!</h3>
 <div class="d-flex flex-column">
-    <span class="mt-1">{{ order.sources.first }}</span>
-    <span class="mt-1">Статус заказа: {{ order.status }}</span>
-    <span class="mt-1">Метод доставки: {{ order.shipping_method }}</span>
-    <span class="mt-1">Время: {{ order.order_time }}</span>
+    <span class="mt-1">Оплата: {{ source }}</span>
+    <span class="mt-1">Статус заказа: {{ status }}</span>
+    <span class="mt-1">Метод доставки: {{ shipping_method }}</span>
+    <span class="mt-1">Время: {{ order_time }}</span>
 </div>
-<h3 class="mt-4">Сумма: {{ order.total }}</h3>
+<h3 class="mt-4">Сумма: {{ total }} ₽</h3>

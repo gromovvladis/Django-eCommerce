@@ -16,12 +16,12 @@
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 ">
-        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="mr-1 pd-0">
+        <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
-        <a href="{% url 'home:actions' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Акции</a>
+        <a href="{% url 'home:actions' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Акции</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
         <span class="v-bread__link" aria-current="page">{{ summary }}</span>
     </div>
@@ -39,7 +39,7 @@
                             <div class="v-image__inner v-image__inner--action">
                                 {% with image=action.primary_image %}
                                     {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                    <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" class="img-thumbnail w-auto mx-auto my-0">
+                                    <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                 {% endwith %}
                             </div>
                         </div>

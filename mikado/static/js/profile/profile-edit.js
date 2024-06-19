@@ -28,7 +28,6 @@ $(profile_form).submit(function () {
         type: $(this).attr('method'), 
         url: $(this).attr('action'),
         complete: function (response) {
-            console.log(response)
             $(profile_msg).html(response.responseJSON.message);
             $(profile_btn).html('Сохранить настройки');
             $(profile_btn).attr("disabled", false);

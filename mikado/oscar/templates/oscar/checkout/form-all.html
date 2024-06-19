@@ -67,7 +67,7 @@
         
         
                 {% comment %} основная форма {% endcomment %}
-                <form action="{% url 'checkout:checkoutview' %}" method="post" id="place_order_form">
+                <form action="{% url 'checkout:checkoutview' %}" method="post" id="place_order_form" novalidate>
                     {% csrf_token %}
                     {% include "oscar/partials/render_field.html" with field=form.method_code %}
                     <div class="v-delivery mb-4" id="address_fields">
@@ -141,7 +141,7 @@
         
         
                     <div class="v-order__subtitle mb-1 mb-sm-2">
-                        <h2>Время доставки</h2>
+                        <h2 data-id="order-time-title">Время доставки</h2>
                     </div>
         
         

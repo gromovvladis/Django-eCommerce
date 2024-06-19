@@ -15,16 +15,14 @@
 {% block app_class %}v-app---checkout{% endblock %}
 {% block nav_class %}v-app__nav--checkout{% endblock %}
 
-{% block sticky_address %}{% endblock %}
-
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
-        <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+        <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
-        <a href="{% url 'basket:summary' %}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Корзина</a>
+        <a href="{% url 'basket:summary' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Корзина</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
         <span class="v-bread__link" aria-current="page">Оформление заказа</span>
     </div>
@@ -149,6 +147,7 @@
     <script>
         var csrf_token = "{{ csrf_token }}";
         var url_voucher = "{% url 'checkout:vouchers-add' %}";
+        var url_update_totals = "{% url 'checkout:update-totals' %}";
         var url_delivery = "{% url 'shipping:delivery-time' %}";
         var url_pickup = "{% url 'shipping:pickup-time' %}";
         var url_delivery_later = "{% url 'shipping:delivery-later' %}";

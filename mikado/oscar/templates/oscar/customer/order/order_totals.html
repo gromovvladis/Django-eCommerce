@@ -5,7 +5,7 @@
     <div class="v-order__total_and_discounts d-flex flex-column mt-3">
 
         {% block discount_totals %}
-            {% if order.basket_discounts %}
+            {% if order.basket_discounts or order.shipping != 0 %}
                 <div class="v-prices__price_discounts">
 
                     <span class="d-flex justify-space-between no-wrap">
@@ -15,22 +15,36 @@
                         </span>
                     </span>
 
-                    {% for discount in order.basket_discounts %}
+                    {% if order.basket_discounts %}
+                        {% for discount in order.basket_discounts %}
+                            <span class="d-flex justify-space-between no-wrap">
+                                <div class="d-flex align-end">
+                                    <span class="mr-1">
+                                        {{ discount.offer_name }}
+                                    </span>
+                                    {% if discount.description %}
+                                        <br/><small>({{ discount.description }})</small>
+                                    {% endif %}
+                                </div>
+                                <span class="v-prices__price-before">
+                                    - {{ discount.amount|currency:basket.currency }}
+                                </span>
+                            </span>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if order.shipping != 0 %}
                         <span class="d-flex justify-space-between no-wrap">
                             <div class="d-flex align-end">
                                 <span class="mr-1">
-                                    {{ discount.offer_name }}
+                                    {{ order.shipping_method }}
                                 </span>
-                                {% if discount.description %}
-                                    <br/><small>({{ discount.description }})</small>
-                                {% endif %}
                             </div>
                             <span class="v-prices__price-before">
-                                - {{ discount.amount|currency:basket.currency }}
+                                {{ order.shipping|currency:basket.currency }}
                             </span>
                         </span>
-                    {% endfor %}
-
+                    {% endif %}
                 </div>
             {% endif %}
         {% endblock %}
@@ -40,7 +54,7 @@
             <div role="separator" class="v-spacer"></div>
             <span class="v-prices d-flex flex-column align-start v-prices--big">
                 <span class="v-prices__price no-wrap">
-                    {{ order.basket_total|currency:basket.currency }}
+                    {{ order.total|currency:basket.currency }}
                 </span>
             </span>
         </div>

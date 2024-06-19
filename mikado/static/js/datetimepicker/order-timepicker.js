@@ -20,10 +20,11 @@ let minMinutes = 0;
 
 var today = new Date();
 var hoursMore = 2
-if (today.getMinutes() > 20){hoursMore = 3}
+if (today.getUTCMinutes() > 20){hoursMore = 3}
 
 var minDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() + hoursMore, 0, 0);
-var maxDate = new Date().setDate(minDate.getDate() + 14);
+var maxDate = new Date();
+maxDate.setUTCDate(minDate.getUTCDate() + 14);
 var selectedDate = new Date(minDate);
 var selectedTime = new Date(minDate).getTime();
 

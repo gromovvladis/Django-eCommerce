@@ -7,6 +7,10 @@ var basket_totals = $('[data-id="cart-totals"]');
 var upsell_messages = $('#upsell_messages');
 var cart_nums = $('[data-id="cart-nums"]');
 
+var cart_nums = $('[data-id="cart-nums"]');
+var cartWrapper = $(".v-cart-wrapper");
+var cartTotals = $(".v-cart__info");
+
 if (basket_summary){
     var forms = $(basket_summary).find('[data-id="cart-item-form"]');
     $(forms).each(function(){
@@ -48,41 +52,39 @@ if (basket_summary){
             $(basket_summary).submit()
         });
     })
-}
 
-$(basket_summary).submit(function () {
-    var form = $(this);
-    $(form).addClass('loading');
-    $.ajax({
-        data: $(this).serialize(), 
-        type: $(this).attr('method'), 
-        url: document.URL,
-        success: function (response){
-            $(form).removeClass('loading');
-            if (response.status == 202){
-                $(basket_totals).html(response.responseJSON.new_totals);
-                $(cart_nums).html(response.responseJSON.new_nums);
-                getUpsellMaseeges();
+    $(basket_summary).submit(function () {
+        var form = $(this);
+        $(form).addClass('loading');
+        $.ajax({
+            data: $(this).serialize(), 
+            type: $(this).attr('method'), 
+            url: document.URL,
+            success: function (response){
+                $(form).removeClass('loading');
+                if (response.status == 202){
+                    $(basket_totals).html(response.new_totals);
+                    $(cart_nums).html(response.new_nums);
+                    getUpsellMaseeges();
+                    CartTotalHeight();
+                }
+            },
+            error: function (response){
+                console.log(response)
             }
-        },
-        error: function (response){
-            console.log(response)
-        }
+        });
+        return false;  
     });
-    return false;  
-});
-
+}
 
 function getUpsellMaseeges(){
     $.ajax({
         data: $(this).serialize(), 
         type: 'GET', 
         url: url_upsell_masseges,
-        complete: function (response){
-            if (response.status == 202){
-                $(upsell_messages).empty();
-                $(upsell_messages).html(response.responseJSON.upsell_messages);
-            }
+        success: function (response){
+            $(upsell_messages).empty();
+            $(upsell_messages).html(response.upsell_messages);
         },
     });
 }
@@ -97,8 +99,15 @@ $(empty_cart).on('click', function(){
         data: $(this).serialize(), 
         type: 'POST', 
         url: url_empty_basket,
-        complete: function (response){
-            window.location.href = response.responseJSON.url;
+        success: function (response){
+            window.location.href = response.url;
         },
     });
 })
+
+
+function CartTotalHeight(){
+    $(cartWrapper).css('--padding-cart', $(cartTotals).outerHeight(true) + "px");
+}
+
+CartTotalHeight();

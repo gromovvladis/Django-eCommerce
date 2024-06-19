@@ -369,12 +369,13 @@ class UserForm(forms.ModelForm):
         """
 
         email = normalise_email(self.cleaned_data["email"])
-        if (
-            User._default_manager.filter(email__iexact=email)
-            .exclude(id=self.user.id)
-            .exists()
-        ):
-            raise ValidationError("Пользователь с таким адресом электронной почты уже существует")
+        if email:
+            if (
+                User._default_manager.filter(email__iexact=email)
+                .exclude(id=self.user.id)
+                .exists()
+            ):
+                raise ValidationError("Пользователь с таким адресом электронной почты уже существует")
         # Save the email unaltered
         return email
 

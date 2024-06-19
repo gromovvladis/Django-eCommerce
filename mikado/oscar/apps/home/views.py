@@ -4,6 +4,7 @@ from django.http import Http404
 from oscar.core.loading import get_model
 from django.views.generic import  ListView, DetailView
 from django.db.models import Count
+from django.core.cache import cache
 
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -35,7 +36,14 @@ class HomeView(ListView):
     template_name = "oscar/home/homepage.html"
 
     def get_queryset(self):
-        return Action.objects.all()
+
+        actions = cache.get('actions_all')
+
+        if not actions:
+            actions = Action.objects.all().filter(is_active=True).order_by('order').distinct()
+            cache.set("actions_all", actions, 3600)
+
+        return actions
 
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -43,7 +51,14 @@ class HomeView(ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["summary"] = "Главная"
-        ctx["promo_cats"] =  PromoCategory.objects.all().filter(is_active=True).order_by('order').distinct()
+
+        promo_cats = cache.get('promo_cats_all')
+
+        if not promo_cats:
+            promo_cats = PromoCategory.objects.all().filter(is_active=True).order_by('order').distinct()
+            cache.set("promo_cats_all", promo_cats, 3600)
+
+        ctx["promo_cats"] = promo_cats
         return ctx
 
 
@@ -76,7 +91,14 @@ class ActionsView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["actions"] = Action.objects.all().filter(is_active=True).order_by('order').distinct()
+        
+        actions = cache.get('actions_all')
+
+        if not actions:
+            actions = Action.objects.all().filter(is_active=True).order_by('order').distinct()
+            cache.set("actions_all", actions, 3600)
+
+        ctx["actions"] = actions
         ctx["summary"] = "Акции"
         return ctx
 

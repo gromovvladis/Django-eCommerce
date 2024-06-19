@@ -12,17 +12,15 @@
 
 {% block wrapper_class %}checkout fill-width px-2 py-3 pb-sm-4 pt-sm-2 checkout__container{% endblock %}
 
-{% block app_class %}v-app---checkout{% endblock %}
-{% block nav_class %}v-app__nav--checkout{% endblock %}
-
-{% block sticky_address %}{% endblock %}
+{% block app_class %}v-app---thank{% endblock %}
+{% block nav_class %}v-app__nav--thank{% endblock %}
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center my-2">
-        <button onclick="window.location.href='{{ homepage_url }}'" data-id="delivery-bread-main-link" class="pd-0 mr-1">
+        <button onclick="window.location.href='{{ homepage_url }}'" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="delivery-bread-main-link" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
         <span class="v-bread__link" aria-current="page">Заказ №{{ order.number }}</span>
     </div>
@@ -51,7 +49,7 @@
 
                     {% block shipping_info %}
 
-                        <div class="v-checkout__datail">
+                        <div class="v-checkout__datail pb-2">
                             {% if order.shipping_address %}
     
                                 <div class="v-order__subtitle mb-1 mb-sm-2">
@@ -87,7 +85,7 @@
                                     <h2>Адрес самовывоза</h2>
                                 </div>
     
-                                <a href="{% url 'address:pickup-address' %}" class="mb-2">
+                                <a href="{% url 'address:pickup-address' %}" class="v-checkout__detail-text mb-2">
                                     <address> Красноясрк, ул. 9 Мая 77,
                                         <br>
                                         ТРЦ "Планета" Фудкорд Mikado
@@ -162,7 +160,7 @@
             
                     {% comment %} totals {% endcomment %}
                     <div id="checkout_totals">
-                        {% include 'oscar/checkout/thank_you_totals.html' with order=order  %}
+                        {% include 'oscar/customer/order/order_totals.html' %}
                     </div>
 
                 </div>

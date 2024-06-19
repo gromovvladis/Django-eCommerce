@@ -96,6 +96,7 @@ class BasketView(ModelFormSetView):
                 }, request=self.request)
 
             return http.JsonResponse({
+                "status": 202,
                 "new_totals": new_totals,
                 "new_nums": self.request.basket.num_items,
                 }, status=202)
@@ -116,6 +117,7 @@ class BasketView(ModelFormSetView):
         if is_ajax(self.request):
             return http.JsonResponse({
                 "errors": formset.errors,
+                "status": 404,
                 }, status=404)
 
         return super().formset_invalid(formset)
@@ -178,13 +180,13 @@ class EmptyBasketView(View):
         url=reverse("basket:summary"),
 
         if not basket.id:
-            return http.JsonResponse({"url": url}, status = 403)
+            return http.JsonResponse({"url": url, "status": 403}, status = 403)
         try:
             basket.delete()
         except Exception as e:
             pass
         
-        return http.JsonResponse({"url": url}, status = 200)
+        return http.JsonResponse({"url": url, "status": 200}, status = 200)
 
 
 class GetUpsellMasseges(View):
@@ -205,7 +207,7 @@ class GetUpsellMasseges(View):
 
     def get(self, request, *args, **kwargs):
         upsell_messages = render_to_string("oscar/basket/partials/upsell_messages.html",{"upsell_messages": self.get_upsell_messages(request.basket)}, request=self.request)
-        return http.JsonResponse({"upsell_messages": upsell_messages}, status = 202)
+        return http.JsonResponse({"upsell_messages": upsell_messages, "status": 202}, status = 202)
     
     
 class BasketAddView(FormView):
@@ -245,7 +247,7 @@ class BasketAddView(FormView):
         self.request.session["add_to_basket_form_post_data_%s" % self.product.pk] = (
             serialized_data.decode("latin-1")
         )
-        return http.JsonResponse({"errors":",".join(clean_msgs)}, status=404)
+        return http.JsonResponse({"errors":",".join(clean_msgs), "status": 404}, status=404)
 
     def form_valid(self, form):
 
@@ -265,6 +267,7 @@ class BasketAddView(FormView):
         
         return http.JsonResponse({
             "cart_nums": form.basket.num_items,
+            "status": 200
             }, status=200)
 
     def get_success_message(self, form):

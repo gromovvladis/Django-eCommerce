@@ -14,7 +14,6 @@ from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 from django.template.loader import render_to_string
 from oscar.views.generic import PostActionMixin
-from django.contrib.sites.models import Site
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 
@@ -92,7 +91,7 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
             return self.validate_sms_form()
         if request.POST.get('action') == "auth":
             return self.validate_auth_form()
-        return http.JsonResponse({"errors": "Bad responce"}, status=400)
+        return http.JsonResponse({"errors": "Bad responce", "status": 400}, status=400)
 
 
     # AUTH
@@ -140,20 +139,17 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
 
                 url = self.get_auth_success_url(form)
 
-                return http.JsonResponse({"secceded": url}, status=200)
+                return http.JsonResponse({"secceded": url, "status": 200}, status=200)
 
-        return http.JsonResponse({"errors": "Код не верный"}, status=404)
+        return http.JsonResponse({"errors": "Код не верный", "status": 400}, status=404)
 
 
-    def get_auth_success_url(self, form):
-        
-        url_domain = Site.objects.get_current().domain
+    def get_auth_success_url(self, form):    
         redirect_url = form.cleaned_data["redirect_url"]
-        
         if redirect_url:
-            return url_domain + redirect_url
+            return redirect_url
         
-        return url_domain
+        return settings.LOGIN_REDIRECT_URL
 
 
     def validate_sms_form(self):
@@ -171,12 +167,12 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
                 sms_result = auth_service.send_sms()
 
                 if sms_result == 'secceded':
-                    return http.JsonResponse({"secceded": "Смс выслано"}, status=200)
+                    return http.JsonResponse({"secceded": "Смс выслано", "status": 200}, status=200)
 
             except Exception as e:
-                return http.JsonResponse({"errors": e.message}, status=403)
+                return http.JsonResponse({"errors": e.message, "status": 403}, status=403)
 
-        return http.JsonResponse({"errors": "Укажите корректный номер телефона"}, status=400)
+        return http.JsonResponse({"errors": "Укажите корректный номер телефона", "status": 400}, status=400)
     
 
 class AccountAuthView(generic.TemplateView, AccountAuthModalView):
@@ -270,7 +266,10 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
             old_user.is_email_verified = False
             self.send_email_changed_email(old_user, new_email)
 
-        return http.JsonResponse({'message': "Информация успешно обновлена"},status=200)
+        return http.JsonResponse({"message": "Информация успешно обновлена"}, status=200)
+
+    def form_invalid(self, form):
+        return http.JsonResponse({"message":", ".join(form.errors)}, status=402)
 
     def send_email_changed_email(self, old_user, new_email):
         user = self.request.user
@@ -281,60 +280,6 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
             "request": self.request,
         }
         CustomerDispatcher().send_email_changed_email_for_user(old_user, extra_context)
-
-    # def get_success_url(self):
-    #     return reverse("customer:profile-view")
-
-
-# class ProfileDeleteView(PageTitleMixin, generic.FormView):
-#     form_class = ConfirmPasswordForm
-#     template_name = "oscar/customer/profile/profile_delete.html"
-#     page_title = "Удалить профиль"
-#     active_tab = "profile"
-#     success_url = settings.OSCAR_HOMEPAGE
-
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#         kwargs["user"] = self.request.user
-#         return kwargs
-
-#     def form_valid(self, form):
-#         self.request.user.delete()
-#         messages.success(
-#             self.request, "Ваш профиль удален. Спасибо за использование сайта."
-#         )
-#         return redirect(self.get_success_url())
-
-
-# class ChangePasswordView(PageTitleMixin, generic.FormView):
-#     form_class = PasswordChangeForm
-#     template_name = "oscar/customer/profile/change_password_form.html"
-#     page_title = "Изменить пароль"
-#     active_tab = "profile"
-#     success_url = reverse_lazy("customer:profile-view")
-
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#         kwargs["user"] = self.request.user
-#         return kwargs
-
-#     def form_valid(self, form):
-#         form.save()
-#         update_session_auth_hash(self.request, self.request.user)
-#         messages.success(self.request, "Пароль обновлен")
-
-#         self.send_password_changed_email()
-
-#         return redirect(self.get_success_url())
-
-#     def send_password_changed_email(self):
-#         user = self.request.user
-#         extra_context = {
-#             "user": user,
-#             "reset_url": get_password_reset_url(self.request.user),
-#             "request": self.request,
-#         }
-#         CustomerDispatcher().send_password_changed_email_for_user(user, extra_context)
 
 
 # =============
@@ -418,6 +363,9 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
         return "%s №%s" % ("Заказ", self.object.number)
 
     def get_object(self, queryset=None):
+        dfbdfb = get_object_or_404(
+            self.model, user=self.request.user, number=self.kwargs["order_number"]
+        )
         return get_object_or_404(
             self.model, user=self.request.user, number=self.kwargs["order_number"]
         )
@@ -466,21 +414,8 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
 
         if len(lines_to_add) > 0:
             self.response = redirect("basket:summary")
-            # messages.info(
-            #     self.request,
-            #         "Все доступные позиции из заказа %(number)s "
-            #         "были добавлены в вашу корзину"
-            #     % {"number": order.number},
-            # )
         else:
             self.response = redirect("customer:order-list")
-            # messages.warning(
-            #     self.request,
-            #         "Невозможно повторить заказ %(number)s"
-            #         "поскольку ни одна из его позиций не доступна для заказа"
-            #     % {"number": order.number},
-            # )
-
 
 class OrderLineView(PostActionMixin, generic.DetailView):
     """Customer order line"""

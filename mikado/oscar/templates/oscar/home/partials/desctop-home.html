@@ -30,12 +30,12 @@
                                             <div class="v-dish-order__picture">
                                                 <a href="{{ product.get_absolute_url }}" class="d-block" data-id="dish-order-image-link">
                                                     <div class="v-dish-image fill-width">
-                                                        <div class="v-images-chunks" style="position: relative;">
+                                                        <div class="v-images-chunks pos-relative">
                                                             <div class="v-image">
                                                                 <div class="v-image__inner" style="padding-bottom: 100%;">
                                                                     {% with image=product.primary_image %}
                                                                         {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                                                        <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" class="img-thumbnail w-auto mx-auto my-0">
+                                                                        <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                                                     {% endwith %}
                                                                 </div>
                                                             </div>
@@ -80,12 +80,12 @@
                 
                 <div class="v-collection__banner fill-width shrink px-2">
                     <a href="{{ promo_cat.get_absolute_url }}" class="v-collection__banner-wrapper d-flex fill-width" data-id="collection-link">
-                        <div class="v-images-chunks fill-width" style="position: relative;">
+                        <div class="v-images-chunks fill-width pos-relative">
                             <div class="v-image">
                                 <div class="v-image__inner" style="padding-bottom: 27%;">
                                     {% with image=promo_cat.primary_image %}
                                         {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                        <img src="{{ thumb.url }}" alt="{{ promo_cat.title }}" class="img-thumbnail w-auto mx-auto my-0">
+                                        <img src="{{ thumb.url }}" alt="{{ promo_cat.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                     {% endwith %}
                                 </div>
                             </div>

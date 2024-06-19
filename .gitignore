@@ -24,6 +24,9 @@ __pycache__
 .~lock.*
 *.DS_Store
 .python-version
+db.sqlite
+public/media
+public/static
 
 # IDE files
 .project
@@ -32,12 +35,14 @@ __pycache__
 .idea
 .vscode
 
+
 # Docs
 /docs/build/*
 /src/oscar/static/
 *.pdf
 TODO
 venv
+production.py
 
 # Test files
 .coverage

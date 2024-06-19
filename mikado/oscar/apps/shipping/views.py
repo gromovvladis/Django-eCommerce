@@ -18,6 +18,7 @@ class DelievryTimeView(APIView):
         minutes = round(float(yandex_time) / 60) + 60
         return Response({
             "delivery_time": minutes,
+            "status": 200,
             }, status=200)
 
 
@@ -29,6 +30,7 @@ class PickUpTimeView(APIView):
         minutes =  60
         return Response({
             "pickup_time": minutes,
+            "status": 200,
             }, status=200)
 
 
@@ -50,8 +52,8 @@ class DeliveryLaterView(APIView):
         data = {
             'minHours': 10,
             'maxHours': 22,
-            'minDate': format(time_now.replace(minute=0) + datetime.timedelta(hours=hours_delta),'%m.%d.%Y %H:%M'),
-            'maxDate': format(time_now.replace(minute=59, hour=22) + datetime.timedelta(days=14),'%m.%d.%Y %H:%M')
+            'minDate': format(time_now.replace(minute=0) + datetime.timedelta(hours=hours_delta),'%Y-%m-%dT%H:%M'),
+            'maxDate': format(time_now.replace(minute=59, hour=22) + datetime.timedelta(days=14),'%Y-%m-%dT%H:%M')
         }
         return http.JsonResponse({"datapicker": data}, status = 200)
     
@@ -66,5 +68,5 @@ class DeliveryZonesView(APIView):
     def get(self, request, *args, **kwargs):
         dir = settings.STATIC_PRIVATE_ROOT
         filename = 'delivery_zones.geojson'
-        json_file = json.loads(open(dir + '\\js\\delivery\\geojson\\' + filename, 'rb').read())
+        json_file = json.loads(open(dir + '/js/delivery/geojson/' + filename, 'rb').read())
         return http.JsonResponse(json_file, status=202)

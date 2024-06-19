@@ -2,10 +2,11 @@ import xml.etree.ElementTree as ET
 
 from django import template
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 register = template.Library()
 
-ICON_DIR = "mikado/mikado/static/svg"
+ICON_DIR = settings.ICON_DIR
 
 @register.simple_tag
 def icon(file_name, class_str=None, size=None, fill=None, stroke=None):

@@ -6,7 +6,7 @@
 
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <meta name="description" content="{% block description %}{% endblock %}" />
-        <meta name="viewport" content="{% block viewport %}width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=0{% endblock %}" />
+        <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
 
         {% block favicon %}
             <link rel="shortcut icon" href="{% static "favicon.ico" %}" />
@@ -58,11 +58,11 @@
         {% block extrascripts %}{% endblock %}
 
         {# Block for body onload functions #}
-        <script>
+        {% comment %} <script>
             $(function() {
                 {% block onbodyload %}{% endblock %}
             });
-        </script>
+        </script> {% endcomment %}
 
         {# Page meta-data - this is populated by the 'metadata' template context processor #}
     </body>

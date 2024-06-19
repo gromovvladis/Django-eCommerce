@@ -11,6 +11,7 @@ from urllib.parse import unquote
 
 from django.template.loader import render_to_string
 
+from oscar.apps.basket.views import Repository
 from oscar.apps.payment.models import Source, SourceType
 from oscar.core.loading import get_class, get_classes, get_model
 
@@ -139,12 +140,24 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         #payment form
         ctx["methods"] = self._methods
 
+        method = self.get_default_shipping_method(self.request.basket)
+        ctx["shipping_method"] = method
+
+        shipping_charge = method.calculate(self.request.basket)
+        ctx["shipping_charge"] = shipping_charge
+
         #promocode
         ctx["voucher_form"] = self.get_voucher_form()
 
         return ctx
 
-    
+    def get_default_shipping_method(self, basket):
+        return Repository().get_default_shipping_method(
+            basket=self.request.basket,
+            user=self.request.user,
+            request=self.request,
+        )
+
     def get_success_response(self):
         return redirect(self.get_success_url())
 
@@ -230,9 +243,9 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
 
     
     def form_invalid(self, form):
-        messages.error(
-            self.request, "Ошибка при оформлении заказа, пожалуйста, попробуйте еще раз."
-        )
+        # messages.error(
+        #     self.request, "Ошибка при оформлении заказа, пожалуйста, попробуйте еще раз."
+        # )
         return super().form_invalid(form)
 
     
@@ -668,6 +681,24 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         return [self.template_name_preview] if self.preview else [self.template_name]
 
 
+class UpdateTotalsView(View):
+
+    def get(self, request, *args, **kwargs):
+        try:
+
+            new_method = request.GET.get('shipping_method')
+            shipping_method = self.get_shipping_method(new_method)
+            shipping_charge = shipping_method.calculate(self.request.basket)
+
+            new_totals = render_to_string("oscar/checkout/checkout_totals.html",{
+                "basket": self.request.basket, "shipping_method": shipping_method, 'shipping_charge': shipping_charge}, request=self.request)
+            return http.JsonResponse({'totals': new_totals, 'status': 202}, status=202)
+        except Exception:
+            return http.JsonResponse({'totals': 'error', 'status': 200}, status=200)
+
+    def get_shipping_method(self, new_method):
+        return Repository().get_shipping_method(method=new_method)
+
 # =========
 # Thank you
 # =========
@@ -830,4 +861,5 @@ class VoucherRemoveView(View):
             }
             status=202
 
+        _dict['status'] = status
         return http.JsonResponse(_dict, status=status)

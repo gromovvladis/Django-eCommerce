@@ -14,15 +14,53 @@ HOST_SCHEME = "http://"
 SECRET_KEY='UtjFCuyjDKmWHe15neauXzHi2rZoRTg6RMbT5JyAdPiAcBP6Rra1'
 
 # =============
-# MEDIA
-# =============
-
-MEDIA_ROOT = location("public/media")
-
-
-# =============
 # Yoomaney settings
 # =============
 
 Configuration.account_id = 396529
-Configuration.secret_key = 'test_xWpaTgVQo-SeX7cgxtpX0iJZ76M-v9Zyam82yOgKa9M'
+Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'
+
+# =============
+# STATIC
+# =============
+
+STATIC_PRIVATE_ROOT = location('static')
+ICON_DIR = location('static/svg')
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
+
+# =============
+# DATABASES
+# =============
+
+DATABASES = {
+    "default": {
+        "ENGINE": config("DATABASE_ENGINE"),
+        "NAME": Path(__file__).resolve().parent.parent.parent / config("DATABASE_NAME"),
+        "USER": config("DATABASE_USER"),
+        "PASSWORD": config("DATABASE_PASSWORD"),
+        "HOST": config("DATABASE_HOST"),
+        "PORT": config("DATABASE_PORT"),
+        'ATOMIC_REQUESTS': True,
+    }
+}
+
+# =============
+# MIDDLEWARE
+# =============
+
+MIDDLEWARE += ['whitenoise.middleware.WhiteNoiseMiddleware']

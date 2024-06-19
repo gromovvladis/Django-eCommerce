@@ -22,8 +22,6 @@ function authModalLoaded(){
     var phoneInput = document.querySelector('#id_username');
     var codeInput = document.querySelector('#id_password');
     redirectURL = document.querySelector('#id_redirect_url');
-
-    // var password_groug = $('#form_group_id_password')
     var password_groug = $('#auth_id_password')
     
     $('#auth_form').submit(function () {

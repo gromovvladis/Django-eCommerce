@@ -22,6 +22,20 @@ location = lambda x: os.path.join(
 DEBUG = config("DEBUG", default=False, cast=bool)
 INTERNAL_IPS = ['127.0.0.1', '::1']
 
+
+# =============
+# MEDIA
+# =============
+
+MEDIA_URL = 'media/'
+
+# =============
+# STATIC
+# =============
+
+STATIC_URL = 'static/'
+
+
 # =============
 # HOSTS
 # =============
@@ -30,22 +44,6 @@ INTERNAL_IPS = ['127.0.0.1', '::1']
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
 
-
-# =============
-# DATABASES
-# =============
-
-DATABASES = {
-    "default": {
-        "ENGINE": config("DATABASE_ENGINE"),
-        "NAME": Path(__file__).resolve().parent.parent.parent / config("DATABASE_NAME"),
-        "USER": config("DATABASE_USER"),
-        "PASSWORD": config("DATABASE_PASSWORD"),
-        "HOST": config("DATABASE_HOST"),
-        "PORT": config("DATABASE_PORT"),
-        'ATOMIC_REQUESTS': True,
-    }
-}
 
 # =============
 # TIME + LANG
@@ -57,17 +55,6 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 DATE_FORMAT = 'd E Y'
-
-# =============
-# MEDIA
-# =============
-
-MEDIA_URL = '/media/'
-# =============
-# STATIC
-# =============
-
-STATIC_URL = '/static/'
 
 # =============
 # TEMPLATES
@@ -110,7 +97,6 @@ TEMPLATES = [
 MIDDLEWARE = [
     # static
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 
     # django
     'django.contrib.sessions.middleware.SessionMiddleware',

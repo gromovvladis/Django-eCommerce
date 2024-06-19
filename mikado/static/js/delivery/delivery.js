@@ -26,7 +26,8 @@ var suggestView;
 var cleanButton;
 var cleanButtonHTML;
 var deliveryZones;
-var addressValid
+var addressValid;
+var offsetBtns = 150;
 
 // подсказки при поиске запрос в Яндекс
 ymaps.ready(function () {
@@ -123,6 +124,59 @@ function createMap(addressInfo=null) {
                 controls: [],
             }, {suppressMapOpenBlock: true});
 
+            if (mapContainer.getAttribute('data-full-screen')){
+
+                closeButton = new ymaps.control.Button({     
+                    options: {
+                        // noPlacemark: true,
+                        layout: ymaps.templateLayoutFactory.createClass(
+                            '<button type="button" data-id="delivery-map-close-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg heigh="24px" width="24px" stroke="#000" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
+                        ),
+                        float: 'left',
+                        position: {
+                            top: '8px',
+                            left: '14px'
+                        }
+                    }
+                });
+
+
+                map.controls.add(closeButton);
+
+                closeButton.events.add('click', function () {
+                    geoObject = null;
+                    $(checkoutMapContainer).removeClass('open');
+                    setTimeout(() => {
+                        action_back = null;
+                      }, 900);
+                });
+    
+
+                cleanButton = new ymaps.control.Button({     
+                    options: {
+                        // noPlacemark: true,
+                        layout: ymaps.templateLayoutFactory.createClass(
+                            '<button type="button" data-id="delivery-map-clean-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg width="22" height="22" stroke="#b60808" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10L7.70141 19.3578C7.87432 20.3088 8.70258 21 9.66915 21H14.3308C15.2974 21 16.1257 20.3087 16.2986 19.3578L18 10" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
+                        ),
+                        float: 'right',
+                        position: {
+                            top: '8px',
+                            right: '14px'
+                        }
+                    },            
+                });
+
+                map.controls.add(cleanButton);
+                cleanButton.events.add('click', function () {
+                    cleanSelected();  
+                });
+
+                offsetBtns = document.documentElement.clientHeight / 2 - 60;
+                console.log(offsetBtns);
+            }
+            
+
+
             //кнопки зума
             ZoomLayout = ymaps.templateLayoutFactory.createClass(
                 '<div id="zoom-in" class="v-map-custom-controls--zoom-in"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
@@ -170,8 +224,8 @@ function createMap(addressInfo=null) {
                 options: {
                     layout: ZoomLayout,
                     position: {
-                        bottom: "245px",
-                        right:'10px',
+                        bottom: (offsetBtns + 55) + "px",
+                        right:'14px',
                     },
                 }
             });
@@ -183,8 +237,8 @@ function createMap(addressInfo=null) {
                         '<div id="geolocation" class="v-map-custom-controls--geolocation"><svg viewBox="-1 -1 26 26" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.925 1.78443C21.5328 1.18151 23.1029 2.75156 22.5 4.35933L16.0722 21.5C15.3574 23.4061 12.5838 23.1501 12.23 21.1453L10.8664 13.418L3.1391 12.0544C1.13427 11.7006 0.878261 8.92697 2.78443 8.21216L19.925 1.78443ZM20.6273 3.65708L3.48668 10.0848L11.2139 11.4485C12.0417 11.5945 12.6898 12.2426 12.8359 13.0704L14.1996 20.7977L20.6273 3.65708Z" fill="#0F0F0F"/></svg></div>'
                     ),
                     position: {
-                        bottom: '190px',
-                        right: '10px'
+                        bottom: offsetBtns + "px",
+                        right: '14px'
                     }
                 }
             });
@@ -211,46 +265,6 @@ function createMap(addressInfo=null) {
             map.controls.add(zoomControl);
             map.controls.add(geolocationControl);
 
-
-            if (mapContainer.getAttribute('data-full-screen')){
-
-                closeButton = new ymaps.control.Button({     
-                    options: {
-                        // noPlacemark: true,
-                        layout: ymaps.templateLayoutFactory.createClass(
-                            '<button type="button" data-id="delivery-map-close-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg heigh="24px" width="24px" stroke="#000" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
-                        ),
-                        float: 'left',
-                    }
-                });
-
-
-                map.controls.add(closeButton);
-
-                closeButton.events.add('click', function () {
-                    geoObject = null;
-                    $(checkoutMapContainer).removeClass('open');
-                });
-    
-
-                cleanButton = new ymaps.control.Button({     
-                    options: {
-                        // noPlacemark: true,
-                        layout: ymaps.templateLayoutFactory.createClass(
-                            '<button type="button" data-id="delivery-map-clean-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg width="22" height="22" stroke="#b60808" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10L7.70141 19.3578C7.87432 20.3088 8.70258 21 9.66915 21H14.3308C15.2974 21 16.1257 20.3087 16.2986 19.3578L18 10" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
-                        ),
-                        float: 'right',
-                    },            
-                });
-
-                map.controls.add(cleanButton);
-                cleanButton.events.add('click', function () {
-                    cleanSelected();  
-                });
-
-                geolocationControl.options.set('position', {bottom: '265px', right: '10px'})
-                zoomControl.options.set('position', {bottom: '320px', right: '10px'})
-            }
 
             $(saveButton).on('click', function () {
                 $(checkoutMapContainer).removeClass('open');
@@ -593,6 +607,7 @@ $(open_map).on('click', function(){
     createMap($(address_line1).val());
     $(checkoutMapContainer).addClass('open');
     $(address_line1).blur();
+    action_back = function(){}
 })
 
 $(window).resize(function(){

@@ -24,10 +24,10 @@
                 <div class="v-app-nav d-flex align-center py-0 fill-height">
                                         
                     {% comment %} ------------- кнопка назад --------------- {% endcomment %}
-                    <button onclick="getBack(); return false" data-id="delivery-bread-main-link" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink">
-                        <span class="v-button__wrapper" style="opacity:1;">
+                    <button onclick="getBack(); return false" data-id="back-main-btn" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink">
+                        <span class="v-button__wrapper">
                             <span class="d-flex">
-                                {% icon file_name='interface/arrow-left' size=24 stroke='#000'%}
+                                {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
                             </span>
                         </span>
                     </button>
@@ -73,7 +73,7 @@
                         {% block nav_title_center %}{% endblock %}
                     </div>
 
-                    <button type="button" data-id="empty-cart" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2">
+                    <button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2">
                         <span class="v-button__wrapper">
                             <span class="d-flex">
                                 {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
@@ -102,19 +102,7 @@
                 <div class="d-flex align-start pd-0 fill-height container">
                     <div class="{% block wrapper_class %}{% endblock %}">
 
-                        {% block sticky_address %}
-                            <div class="stiky-address-button d-sm-none py-2">
-                                <a href="{% url 'address:delivery-address' %}" data-id="address-button"
-                                    class="v-address-button fill-width">
-                                    {% icon file_name='map/location-arrow' class_str="v-address-button__icon shrink mx-1" size=24 stroke='#fff'%}
-                                    <div class="d-flex flex-column justify-space-between align-center fill-width mr-2">
-                                        <span class="v-address-button__text">
-                                            Адрес доставки
-                                        </span>
-                                    </div>
-                                </a>
-                            </div> 
-                        {% endblock %}
+                        {% block sticky_address %}{% endblock %}
 
                         {% block breadcrumbs %}{% endblock %}
                 
