@@ -25,6 +25,7 @@ __pycache__
 *.DS_Store
 .python-version
 db.sqlite
+/logs/
 
 # IDE files
 .project
@@ -39,6 +40,7 @@ db.sqlite
 *.pdf
 TODO
 venv
+/config/settings/
 
 # Test files
 .coverage
