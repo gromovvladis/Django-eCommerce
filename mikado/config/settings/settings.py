@@ -28,7 +28,6 @@ INTERNAL_IPS = ['127.0.0.1', '::1']
 # =============
 
 MEDIA_URL = 'media/'
-MEDIA_ROOT = location('public/media')
 
 # =============
 # STATIC
@@ -36,30 +35,6 @@ MEDIA_ROOT = location('public/media')
 
 STATIC_URL = 'static/'
 
-STATIC_ROOT = location('public/static')
-STATICFILES_DIRS = (
-    location('static'),
-)
-
-STATIC_PRIVATE_ROOT = location('static')
-# STATIC_PRIVATE_ROOT = location('public/static')
-
-ICON_DIR = location('static/svg')
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-)
-
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        # "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
-}
 
 # =============
 # HOSTS
@@ -69,23 +44,6 @@ STORAGES = {
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
 
-
-# =============
-# DATABASES
-# =============
-
-DATABASES = {
-    "default": {
-        "ENGINE": config("DATABASE_ENGINE"),
-        "NAME": Path(__file__).resolve().parent.parent.parent / config("DATABASE_NAME"),
-        # "NAME": config("DATABASE_NAME"),
-        "USER": config("DATABASE_USER"),
-        "PASSWORD": config("DATABASE_PASSWORD"),
-        "HOST": config("DATABASE_HOST"),
-        "PORT": config("DATABASE_PORT"),
-        'ATOMIC_REQUESTS': True,
-    }
-}
 
 # =============
 # TIME + LANG
@@ -139,7 +97,6 @@ TEMPLATES = [
 MIDDLEWARE = [
     # static
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 
     # django
     'django.contrib.sessions.middleware.SessionMiddleware',
