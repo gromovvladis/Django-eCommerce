@@ -35,10 +35,10 @@
                 {% else %}
                     <a href="{% url 'customer:notifications-inbox' %}">
                         <div class="d-flex">
-                            <h3>Непрочитанные</h3>
-                            <div class="d-flex align-center ml-1">
+                            <div class="d-flex align-center mr-1">
                                 <span data-id="notifications-nums" class="notif-badge d-flex justify-center align-center">{{ num_unread_notifications }}</span>
                             </div>
+                            <h3>Непрочитанные</h3>
                         </div>
                     </a>
                 {% endif %}
@@ -46,7 +46,6 @@
         </div>
 
     {% if notifications %}
-        {% include "oscar/partials/pagination.html" %}
         <form action="{% url 'customer:notifications-update' %}" method="post" class="fill-width mb-2" data-id="profile-notifications-form">
             {% csrf_token %}
             <div class="cabinet-orders fill-width grow-1">

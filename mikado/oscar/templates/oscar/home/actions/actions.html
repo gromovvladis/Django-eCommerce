@@ -24,6 +24,20 @@
     </div>
 {% endblock %}
 
+{% block sticky_address %}
+    <div class="stiky-address-button d-sm-none pb-2">
+        <a href="{% url 'address:delivery-address' %}" data-id="address-button"
+            class="v-address-button fill-width">
+            {% icon file_name='map/location-arrow' class_str="v-address-button__icon shrink mx-1" size=24 stroke='#fff'%}
+            <div class="d-flex flex-column justify-space-between align-center fill-width mr-2">
+                <span class="v-address-button__text">
+                    Адрес доставки
+                </span>
+            </div>
+        </a>
+    </div> 
+{% endblock %}
+
 {% block nav_title_center %}{{ summary }}{% endblock %}
 
 {% block content %}
@@ -44,14 +58,14 @@
                                             <div class="v-image__inner" style="padding-bottom: 45%;">
                                                 {% with image=action.primary_image %}
                                                     {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                                    <img src="{{ thumb.url }}" alt="{{ action.title }}" class="img-thumbnail w-auto mx-auto my-0">
+                                                    <img src="{{ thumb.url }}" alt="{{ action.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                                 {% endwith %}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <h3 class="v-actions__actions-action-title mt-2">{{ action.title }}</h3>
-                                <p class="short-description short-description--nowrap mt-1">{{ action.description|safe }}</p>
+                                <div class="short-description short-description--nowrap mt-1">{{ action.description|safe }}</div>
                             </div>
                         </a>
                     </div> 
@@ -60,10 +74,10 @@
 
 
 
-            <div class="d-none d-sm-flex mb-2 mt-4">
+            <div class="d-none d-sm-flex mt-4">
                 <h1>Спецпредложения</h1>
             </div>
-            <div class="row">
+            <div class="row mt-2">
                 {% for offer in offers %}
                     {% if offer.is_available %}
                         <div class="v-actions__actions-col col col-12 col-xs-12 col-sm-6 col-md-6 col-lg-6">
@@ -75,14 +89,14 @@
                                                 <div class="v-image__inner" style="padding-bottom: 45%;">
                                                     {% with image=offer.primary_image %}
                                                         {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                                        <img src="{{ thumb.url }}" alt="{{ offer.name }}" class="img-thumbnail w-auto mx-auto my-0">
+                                                        <img src="{{ thumb.url }}" alt="{{ offer.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                                     {% endwith %}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <h3 class="v-actions__actions-action-title mt-2">{{ offer.name }}</h3>
-                                    <p class="short-description short-description--nowrap mt-1">{{ offer.description|safe }}</p>
+                                    <div class="short-description short-description--nowrap mt-1">{{ offer.description|safe }}</div>
                                 </div>
                             </a>
                         </div> 

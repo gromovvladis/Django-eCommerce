@@ -35,7 +35,7 @@
                                                                 <div class="v-image__inner" style="padding-bottom: 100%;">
                                                                     {% with image=product.primary_image %}
                                                                         {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                                                        <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" class="img-thumbnail w-auto mx-auto my-0">
+                                                                        <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                                                     {% endwith %}
                                                                 </div>
                                                             </div>
@@ -85,7 +85,7 @@
                                 <div class="v-image__inner" style="padding-bottom: 27%;">
                                     {% with image=promo_cat.primary_image %}
                                         {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                        <img src="{{ thumb.url }}" alt="{{ promo_cat.title }}" class="img-thumbnail w-auto mx-auto my-0">
+                                        <img src="{{ thumb.url }}" alt="{{ promo_cat.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                     {% endwith %}
                                 </div>
                             </div>

@@ -39,7 +39,7 @@
                             <div class="v-image__inner v-image__inner--action">
                                 {% with image=action.primary_image %}
                                     {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                    <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" class="img-thumbnail w-auto mx-auto my-0">
+                                    <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                 {% endwith %}
                             </div>
                         </div>

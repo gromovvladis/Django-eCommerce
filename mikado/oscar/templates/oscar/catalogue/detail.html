@@ -18,8 +18,6 @@
 {% block app_class %}v-app---dish{% endblock %}
 {% block nav_class %}v-app__nav--dish{% endblock %}
 
-{% block sticky_address %}{% endblock %}
-
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
@@ -37,8 +35,6 @@
         {% endwith %}
     </div>
 {% endblock %}
-
-{% block nav %}{% endblock %}
 
 {% block content %}
     <div class="menu__wrapper d-flex flex-column">

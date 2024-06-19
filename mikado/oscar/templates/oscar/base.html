@@ -58,11 +58,11 @@
         {% block extrascripts %}{% endblock %}
 
         {# Block for body onload functions #}
-        <script>
+        {% comment %} <script>
             $(function() {
                 {% block onbodyload %}{% endblock %}
             });
-        </script>
+        </script> {% endcomment %}
 
         {# Page meta-data - this is populated by the 'metadata' template context processor #}
     </body>

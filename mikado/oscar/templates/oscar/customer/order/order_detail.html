@@ -68,7 +68,7 @@
                                                 <div class="v-image__inner" style="padding-bottom: 72.072%;">
                                                     {% with image=product.primary_image %}
                                                         {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
-                                                        <img src="{{ thumb.url }}" alt="{{ product.get_title }}"/>
+                                                        <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy"/>
                                                     {% endwith %}
                                                 </div>
                                             </div>
