@@ -52,8 +52,8 @@ class DeliveryLaterView(APIView):
         data = {
             'minHours': 10,
             'maxHours': 22,
-            'minDate': format(time_now.replace(minute=0) + datetime.timedelta(hours=hours_delta),'%m.%d.%Y %H:%M'),
-            'maxDate': format(time_now.replace(minute=59, hour=22) + datetime.timedelta(days=14),'%m.%d.%Y %H:%M')
+            'minDate': format(time_now.replace(minute=0) + datetime.timedelta(hours=hours_delta),'%Y-%m-%dT%H:%M'),
+            'maxDate': format(time_now.replace(minute=59, hour=22) + datetime.timedelta(days=14),'%Y-%m-%dT%H:%M')
         }
         return http.JsonResponse({"datapicker": data}, status = 200)
     

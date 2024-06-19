@@ -69,11 +69,15 @@ $('#place_order_form').on('keypress', 'input', function(event) {
 
 // время для адреса из адресной книги
 function AjaxTimeFromAddress(initAddress){
-    ymaps.ready(function () {
-        ymaps.geocode(initAddress, {results: 1}).then(function (res) {
-            AjaxTime(res.geoObjects.get(0).geometry.getCoordinates(), true); 
+    if (initAddress != ""){
+        ymaps.ready(function () {
+            ymaps.geocode(initAddress, {results: 1}).then(function (res) {
+                AjaxTime(res.geoObjects.get(0).geometry.getCoordinates(), true); 
+            });
         });
-    });
+    } else {
+        AjaxPickUpTime();
+    }
 }
 
 // выбрана доставка.самовывоз как можно скорее
@@ -82,7 +86,7 @@ $(delivery_time_btn).on('click', function(){
     var delivery_time_method = $(this).attr("data-type");
     if (delivery_time_method == "now"){
         var Time = new Date();
-        Time.setMinutes(Time.getMinutes() + del_time);
+        Time.setUTCMinutes(Time.getMinutes() + del_time);
         $(order_time).val(Time.toLocaleString());
         AjaxTimeFromAddress($(address_line1).val());
         $(delivery_time).removeClass('hidden');
@@ -98,7 +102,6 @@ $(delivery_time_btn).on('click', function(){
 $(all_fields).each(function(){
     var wrapper = $(this);
     var input_field = $(this).find('.v-input');
-    console.log($(input_field).val())
     if($(input_field).val() != ""){
         wrapper.addClass('v-input__label-active')
     }

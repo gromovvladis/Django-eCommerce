@@ -11309,7 +11309,7 @@ input[type="number"]:focus {
     line-height: 1.125rem;
     font-weight: 400;
     font-style: normal;
-    color: var(--color-primary);
+    color: var(--color-secondary);
     padding: 0
 }
 

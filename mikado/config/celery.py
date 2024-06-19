@@ -1,10 +1,11 @@
 import logging
 import os
 
+from django.conf import settings
 from celery import Celery
 from celery.signals import setup_logging
-from decouple import config
-# from celery.schedules import crontab 
+
+from django.apps import apps 
 
 CELERY_LOGGER_NAME = "celery"
 
@@ -18,13 +19,13 @@ def setup_celery_logging(loglevel=None, **kwargs):
     if loglevel:
         logging.getLogger(CELERY_LOGGER_NAME).setLevel(loglevel)
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mikado.config.settings")
+app = Celery("mikado-celery")
+app.config_from_object(settings, namespace="CELERY")
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", config("DJANGO_SETTINGS_MODULE"))
-app = Celery("Mikado")
-app.config_from_object("django.conf:defaults", namespace="CELERY")
+# app.autodiscover_tasks(lambda: [n.name for n in apps.get_app_configs()])
 app.autodiscover_tasks()
 
-
-
-
-
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')

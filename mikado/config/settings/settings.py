@@ -41,8 +41,8 @@ STATICFILES_DIRS = (
     location('static'),
 )
 
-# STATIC_PRIVATE_ROOT = location('static')
-STATIC_PRIVATE_ROOT = location('public/static')
+STATIC_PRIVATE_ROOT = location('static')
+# STATIC_PRIVATE_ROOT = location('public/static')
 
 ICON_DIR = location('static/svg')
 

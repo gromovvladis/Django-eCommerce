@@ -5,7 +5,7 @@ from .models import PhoneCode
 from celery import shared_task
 
 
-celery_conf = importlib.import_module(conf.SMS_CELERY_FILE_NAME)
+# celery_conf = importlib.import_module(conf.SMS_CELERY_FILE_NAME)
 # app = getattr(celery_conf, "Celery")
 
 

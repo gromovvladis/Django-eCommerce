@@ -268,6 +268,9 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
 
         return http.JsonResponse({"message": "Информация успешно обновлена"}, status=200)
 
+    def form_invalid(self, form):
+        return http.JsonResponse({"message":", ".join(form.errors)}, status=402)
+
     def send_email_changed_email(self, old_user, new_email):
         user = self.request.user
         extra_context = {

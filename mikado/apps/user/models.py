@@ -159,6 +159,14 @@ class User(AbstractUser, PermissionsMixin):
         Return the short name for the user.
         """
         return self.first_name
+    
+    def get_name_and_phone(self):
+        name = self.get_full_name()
+        if name:
+            return "%s (%s)" % (name, self.username)
+        
+        return "%s" % self.username
+        
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         """
