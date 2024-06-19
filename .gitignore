@@ -26,6 +26,7 @@ __pycache__
 .python-version
 db.sqlite
 /logs/
+.log
 
 # IDE files
 .project
