@@ -18005,7 +18005,7 @@ ymaps[class*="search__suggest-item_selected_yes"] {
     } */
 
     .v-order__form {
-        padding: 2rem 0;
+        padding: 1rem 0;
     }
 
     .v-order__info-wrapper {
@@ -18032,12 +18032,12 @@ ymaps[class*="search__suggest-item_selected_yes"] {
         padding: 2rem
     } */
 
-    .v-order__form{
+    /* .v-order__form{
         padding: 2rem 0;
         background: unset;
         border-radius: unset;
         box-shadow: none;
-    }
+    } */
 
     .v-order__info-wrapper {
         border-radius: 30px;
