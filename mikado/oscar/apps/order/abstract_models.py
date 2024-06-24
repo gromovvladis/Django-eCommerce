@@ -804,7 +804,7 @@ class AbstractLine(models.Model):
             )
 
         try:
-            basket_line = basket.lines.first(product=self.product)
+            basket_line = basket.lines.get(product_id=self.product.id)
         except basket.lines.model.DoesNotExist:
             desired_qty = self.quantity
         else:

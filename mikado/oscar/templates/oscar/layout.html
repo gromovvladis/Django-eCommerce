@@ -33,13 +33,13 @@
                     </button>
 
                     {% comment %} ------------- кнопка корзина --------------- {% endcomment %}
-                    <button data-id="nav-basket-btn" class="v-app-nav__button d-none d-sm-flex mr-1" onclick="window.location.href='{% url 'basket:summary' %}'">
+                    <a data-id="nav-basket-btn" class="v-app-nav__button d-none d-sm-flex mr-1" href='{% url 'basket:summary' %}'>
                         <div class="d-flex aling-center mr-1">
                             {% icon file_name='header/cart' size=17 stroke='#fff'%}
                         </div>
                         Корзина
                         <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
-                    </button>
+                    </a>
 
                     <div role="separator" class="v-spacer"></div>
 
