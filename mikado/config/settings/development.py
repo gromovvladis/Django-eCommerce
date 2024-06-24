@@ -21,27 +21,20 @@ Configuration.account_id = 396529
 Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'
 
 # =============
+# MEDIA
+# =============
+
+MEDIA_ROOT = location('public/media')
+
+# =============
 # STATIC
 # =============
 
 STATIC_PRIVATE_ROOT = location('static')
 ICON_DIR = location('static/svg')
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+STATICFILES_DIRS = (
+    location('static'),
 )
-
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        # "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-    },
-}
-
 
 # =============
 # DATABASES

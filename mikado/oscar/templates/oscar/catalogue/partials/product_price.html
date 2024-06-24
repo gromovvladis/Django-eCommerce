@@ -7,9 +7,9 @@
     {% if product.is_parent %}
         {% if session.price.variations_price  %}
         {% purchase_info_min_price session.price.variations_price.items as min_price %}
-            <div>
+            <div class="py-1 mr-1">
                 <span class="v-prices d-flex flex-column align-start">
-                    <span class="v-prices__price no-wrap py-1 mr-1">
+                    <span class="v-prices__price no-wrap">
                     <span class="v-prices__price-before">от</span>
                     {{ min_price|currency:session.price.currency }}
                     </span>
@@ -19,9 +19,9 @@
     {% else %}
         {% if session.price.exists %}
             {% if session.price.money == 0 %}
-                <div>
+                <div class="py-1 mr-1">
                     <span class="v-prices d-flex flex-column align-start">
-                        <span class="v-prices__price no-wrap py-1  mr-1">
+                        <span class="v-prices__price no-wrap">
                             <span class="v-prices__price-before"></span>
                             0 Р
                             <span class="price--abb"></span>
@@ -30,7 +30,7 @@
                 </div>
             {% else %}
                 <div>
-                    <span class="v-prices d-flex flex-column align-start">
+                    <span class="v-prices d-flex flex-column align-start mr-1">
                         {% if session.price.old_price %}
                             <span class="dish__mobile-total-price shrink">
                                 <span class="v-prices__price no-wrap py-1">

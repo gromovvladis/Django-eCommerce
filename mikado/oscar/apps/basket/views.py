@@ -54,6 +54,9 @@ class BasketView(ModelFormSetView):
                         lines.update()
                     except Exception as e:
                         pass
+                    
+            self.request.basket.reset_offer_applications()
+            Applicator().apply(self.request.basket, self.request.user, self.request)
 
         return lines
 

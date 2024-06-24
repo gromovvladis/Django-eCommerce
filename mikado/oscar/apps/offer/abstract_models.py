@@ -766,6 +766,10 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
             if not price:
                 # Avoid zero price products
                 continue
+
+            if line.line_price_incl_discounts == 0:
+                continue
+
             line_tuples.append((price, line))
 
         # We sort lines to be cheapest first to ensure consistent applications
@@ -885,7 +889,7 @@ class AbstractCondition(BaseOfferMixin, models.Model):
         """
         Determines whether the condition can be applied to a given basket line
         """
-        if not line.stockrecord_id or line.quantity < 1:
+        if not line.stockrecord_id or line.quantity < 1 or line.line_price_incl_discounts == 0:
             return False
         product = line.product
         return self.range.contains_product(product) and product.is_discountable
@@ -902,6 +906,9 @@ class AbstractCondition(BaseOfferMixin, models.Model):
             price = unit_price(offer, line)
             if not price:
                 continue
+            if line.line_price_incl_discounts == 0:
+                continue
+            
             line_tuples.append((price, line))
         key = operator.itemgetter(0)
         if most_expensive_first:

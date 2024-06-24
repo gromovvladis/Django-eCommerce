@@ -134,7 +134,7 @@ class AbsoluteDiscountBenefit(Benefit):
         app_label = "offer"
         proxy = True
         verbose_name = "Абсолютная скидка"
-        verbose_name_plural = "Абсолютнаые скидки"
+        verbose_name_plural = "Абсолютные скидки"
 
     def apply(
         self,
@@ -160,9 +160,6 @@ class AbsoluteDiscountBenefit(Benefit):
         for price, line in line_tuples:
             if num_affected_items >= max_affected_items:
                 break
-            #vlad
-            if price <= line.discount_value:
-                continue
             qty = min(
                 line.quantity_without_offer_discount(offer),
                 max_affected_items - num_affected_items,
@@ -219,6 +216,8 @@ class FixedUnitDiscountBenefit(AbsoluteDiscountBenefit):
         num_affected_items = 0
         lines_to_discount = []
         for price, line in line_tuples:
+            if line.line_price_incl_discounts == 0:
+                continue
             if num_affected_items >= max_affected_items:
                 break
             qty = min(
@@ -348,6 +347,10 @@ class MultibuyDiscountBenefit(Benefit):
             return ZERO_DISCOUNT
 
         # Cheapest line gives free product
+        # for discount, line in line_tuples:
+        #     if line.line_price_incl_discounts > 0:
+        #         break
+
         discount, line = line_tuples[0]
         if line.quantity_with_offer_discount(offer) == 0:
             apply_discount(line, discount, 1, offer)

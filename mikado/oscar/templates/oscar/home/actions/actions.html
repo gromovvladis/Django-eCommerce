@@ -24,20 +24,6 @@
     </div>
 {% endblock %}
 
-{% block sticky_address %}
-    <div class="stiky-address-button d-sm-none pb-2">
-        <a href="{% url 'address:delivery-address' %}" data-id="address-button"
-            class="v-address-button fill-width">
-            {% icon file_name='map/location-arrow' class_str="v-address-button__icon shrink mx-1" size=24 stroke='#fff'%}
-            <div class="d-flex flex-column justify-space-between align-center fill-width mr-2">
-                <span class="v-address-button__text">
-                    Адрес доставки
-                </span>
-            </div>
-        </a>
-    </div> 
-{% endblock %}
-
 {% block nav_title_center %}{{ summary }}{% endblock %}
 
 {% block content %}

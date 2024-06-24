@@ -25,8 +25,10 @@ __pycache__
 *.DS_Store
 .python-version
 db.sqlite
-public/media
-public/static
+/public/
+/public/*
+/public/static/
+/public/media/
 
 # IDE files
 .project
