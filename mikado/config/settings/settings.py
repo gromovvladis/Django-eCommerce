@@ -276,6 +276,11 @@ INSTALLED_APPS = [
     'oscar.apps.dashboard.communications.apps.CommunicationsDashboardConfig',
     'oscar.apps.dashboard.shipping.apps.ShippingDashboardConfig',
 
+    'oscar.apps.dashboard.payments.apps.PaymentsDashboardConfig',
+    'oscar.apps.dashboard.crm.apps.CRMDashboardConfig',
+    'oscar.apps.dashboard.delivery.apps.DeliveryDashboardConfig',
+    'oscar.apps.dashboard.telegram.apps.TelegramDashboardConfig',
+
     #vlad
     'rest_framework',
     'celery',

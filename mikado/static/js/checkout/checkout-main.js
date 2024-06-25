@@ -20,7 +20,7 @@ var payment_method = $('#id_payment_method');
 var email_or_change_block = $(all_fields).filter('[data-field="v-email-field"]');
 var email_or_change_field = $(email_or_change_block).find('#email_field_label');
 
-const OFFLINE_PAYMENT = ['COURIER-CASH'];
+const OFFLINE_PAYMENT = ['CASH'];
 const ONLINE_PAYMENT = ['SBP', 'CARD'];
 
 // инициализация адреса

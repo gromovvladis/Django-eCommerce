@@ -31,6 +31,11 @@ class DashboardConfig(OscarDashboardConfig):
         self.vouchers_app = apps.get_app_config("vouchers_dashboard")
         self.comms_app = apps.get_app_config("communications_dashboard")
         self.shipping_app = apps.get_app_config("shipping_dashboard")
+        
+        self.payments_app = apps.get_app_config("payments_dashboard")
+        self.delivery_app = apps.get_app_config("delivery_dashboard")
+        self.crm_app = apps.get_app_config("crm_dashboard")
+        self.telegram_app = apps.get_app_config("telegram_dashboard")
 
     def get_urls(self):
         from django.contrib.auth import views as auth_views
@@ -49,9 +54,13 @@ class DashboardConfig(OscarDashboardConfig):
             path("vouchers/", include(self.vouchers_app.urls[0])),
             path("comms/", include(self.comms_app.urls[0])),
             path("shipping/", include(self.shipping_app.urls[0])),
+
+            path("payments/", include(self.payments_app.urls[0])),
+            path("delivery/", include(self.delivery_app.urls[0])),
+            path("crm/", include(self.crm_app.urls[0])),
+            path("telegram/", include(self.telegram_app.urls[0])),
+
             path("login/", self.login_view.as_view(), name="login"),
-            path(
-                "logout/", auth_views.LogoutView.as_view(next_page="/"), name="logout"
-            ),
+            path("logout/", auth_views.LogoutView.as_view(next_page="/"), name="logout"),
         ]
         return self.post_process_urls(urls)

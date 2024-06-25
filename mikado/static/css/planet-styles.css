@@ -14872,9 +14872,9 @@ ymaps[class*="search__suggest-item_selected_yes"] {
     position: absolute;
     left: 10px;
     top: 10px;
-    line-height: 30px;
-    width: 53px;
-    border-radius: 13px;
+    line-height: 28px;
+    width: 52px;
+    border-radius: 12px;
     background-color: #fff;
     justify-content: center;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, .07);
@@ -14883,7 +14883,7 @@ ymaps[class*="search__suggest-item_selected_yes"] {
 @media screen and (min-width:480px) {
     
     .weight-wrapper {
-        right: 15px;
+        left: 15px;
         top: 15px;
     }
 

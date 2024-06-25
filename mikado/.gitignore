@@ -27,6 +27,7 @@ __pycache__
 db.sqlite
 /public/static/*
 /public/media/*
+/whoosh_index/*
 
 # IDE files
 .project

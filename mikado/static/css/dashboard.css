@@ -17450,6 +17450,22 @@ readers do not read off random characters that represent icons */
   content: "\f3bf";
 }
 
+.fa-payments::before {
+  content: "\f2c2";
+}
+
+.fa-delivery::before {
+  content: "\f0d1";
+}
+
+.fa-telegram::before {
+  content: "\f1d8";
+}
+
+.fa-tillypad::before {
+  content: "\f109";
+}
+
 .sr-only,
 .fa-sr-only {
   position: absolute;
