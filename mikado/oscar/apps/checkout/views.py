@@ -136,6 +136,8 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         if self.request.user.is_authenticated:
             # Look up address book data
             ctx["addresses"] = self.get_available_addresses()
+       
+        ctx["min_amount_order"] = 500
         
         #payment form
         ctx["methods"] = self._methods

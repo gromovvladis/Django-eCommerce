@@ -1,0 +1,19 @@
+{% load currency_filters %}
+
+{% if not record.get_prices %}
+    -
+{% else %}
+    {% if record.get_prices|length > 1 %}
+        {% for price in record.get_prices %}
+            {% if forloop.first %}
+                от {{ price|currency }}
+                <br>
+            {% else %}
+                до {{ price|currency }}
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {{ record.get_prices.pop|currency }}
+    {% endif %}
+    
+{% endif %}

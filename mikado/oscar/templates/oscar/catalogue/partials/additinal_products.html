@@ -6,7 +6,7 @@
     <p class="v-dish-actions__block-name mb-2">Добавить ингредиенты:</p>
     <ul class="v-dish-toppings d-flex flex-wrap">
         {% for field in form %}
-            {% if field.field.widget.attrs.good %}
+            {% if field.field.widget.attrs.additional %}
                 <li class="v-dish-toppings__item d-flex">
                     <div data-id="additional-product" class="v-dish-toppings__card d-flex flex-column align-center grow-1 pos-relative">
                         

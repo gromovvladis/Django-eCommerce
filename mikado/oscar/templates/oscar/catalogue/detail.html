@@ -83,7 +83,6 @@
                             <div role="separator" class="v-spacer"></div>
                             {% if user.is_staff %}
                                 <a class="float-right d-none d-md-block" href="{% url 'dashboard:catalogue-product' pk=product.id %}">
-                                    {% comment %} <small><i class="fas fa-pencil-alt"></i>Редактировать</small> {% endcomment %}
                                     {% icon file_name='interface/edit' size=22 stroke="#111"%}
                                 </a>
                             {% endif %}

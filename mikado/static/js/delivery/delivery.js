@@ -401,11 +401,6 @@ function ZonesInit(json, initAddress=null) {
     }
 }
 
-// проверка адреса в зоне доставки
-function AddressInZones(coords) {
-    return deliveryZones.searchContaining(coords).get(0);
-}
-
 // создать плейсмарк
 function createPlacemark(coords) {
     return new ymaps.Placemark(coords, {}, {
@@ -460,6 +455,16 @@ function addressCaptured(info){
         suggestView = null;
     }
     $(saveButton).attr('disabled', true);
+}
+
+
+
+
+// это должен делать сервер
+
+// проверка адреса в зоне доставки
+function AddressInZones(coords) {
+    return deliveryZones.searchContaining(coords).get(0);
 }
 
 // выбор метода запроса в зависимости от 
@@ -556,6 +561,12 @@ function AjaxDeliveryTime(address) {
     });
 }
 
+
+
+
+
+
+
 // очистить адрес
 function cleanSelected(){
     del_time = 0;
@@ -582,6 +593,7 @@ function cleanSelected(){
     $(saveButton).attr('disabled', true);
     if (cleanButton){
         cleanButton.state.set({disabled:false});
+        validateCheckout();
     }
     if (!suggestView){
         suggestView = new ymaps.SuggestView(address_line1, {
@@ -610,6 +622,7 @@ $(open_map).on('click', function(){
     action_back = function(){}
 })
 
+// изменение ширины seggestview
 $(window).resize(function(){
     if (suggestView){
         suggestView.options.set('width', suggest_container.offsetWidth);

@@ -8,6 +8,7 @@ AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Category = get_model("catalogue", "Category")
 Option = get_model("catalogue", "Option")
+Additional = get_model("catalogue", "Additional")
 Product = get_model("catalogue", "Product")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
@@ -68,11 +69,7 @@ class ProductAdmin(admin.ModelAdmin):
 class ProductAttributeAdmin(admin.ModelAdmin):
     list_display = ("name", "code", "product_class", "type")
     prepopulated_fields = {"code": ("name",)}
-
-
-class OptionAdmin(admin.ModelAdmin):
-    pass
-
+    
 
 class ProductAttributeValueAdmin(admin.ModelAdmin):
     list_display = ("product", "attribute", "value")
@@ -99,7 +96,8 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductAttribute, ProductAttributeAdmin)
 admin.site.register(ProductAttributeValue, ProductAttributeValueAdmin)
 admin.site.register(AttributeOptionGroup, AttributeOptionGroupAdmin)
-admin.site.register(Option, OptionAdmin)
+admin.site.register(Option)
+admin.site.register(Additional)
 admin.site.register(ProductImage)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(ProductCategory)

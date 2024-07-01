@@ -310,7 +310,10 @@
     display: flex;
     align-items: center;
     flex: 1;
-    font-size: 14px;
+    background-color: #eee;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
     text-align: center
 }
 
@@ -533,7 +536,7 @@
     --adp-pointer-size: 10px;
     --adp-poiner-border-radius: 2px;
     --adp-pointer-offset: 14px;
-    --adp-cell-border-radius: 5px;
+    --adp-cell-border-radius: 50%;
     --adp-cell-background-color-hover: var(--adp-background-color-hover);
     --adp-cell-background-color-selected: #24a66e;
     --adp-cell-background-color-selected-hover: #2bb277;
@@ -555,7 +558,7 @@
     --adp-mobile-font-size: 16px;
     --adp-mobile-nav-height: 40px;
     --adp-mobile-width: 320px;
-    --adp-mobile-day-cell-height: 38px;
+    --adp-mobile-day-cell-height: 40px;
     --adp-mobile-month-cell-height: 48px;
     --adp-mobile-year-cell-height: 64px
 }

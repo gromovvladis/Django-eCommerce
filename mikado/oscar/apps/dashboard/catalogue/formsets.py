@@ -11,6 +11,8 @@ StockRecord = get_model("partner", "StockRecord")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductImage = get_model("catalogue", "ProductImage")
 ProductRecommendation = get_model("catalogue", "ProductRecommendation")
+Additional = get_model("catalogue", "Additional")
+ProductAdditional = get_model("catalogue", "ProductAdditional")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 AttributeOption = get_model("catalogue", "AttributeOption")
 
@@ -19,6 +21,8 @@ AttributeOption = get_model("catalogue", "AttributeOption")
     ProductCategoryForm,
     ProductImageForm,
     ProductRecommendationForm,
+    ProductAdditionalForm,
+    ProductClassAdditionalForm,
     ProductAttributesForm,
     AttributeOptionForm,
 ) = get_classes(
@@ -28,6 +32,8 @@ AttributeOption = get_model("catalogue", "AttributeOption")
         "ProductCategoryForm",
         "ProductImageForm",
         "ProductRecommendationForm",
+        "ProductAdditionalForm",
+        "ProductClassAdditionalForm",
         "ProductAttributesForm",
         "AttributeOptionForm",
     ),
@@ -146,7 +152,7 @@ BaseProductRecommendationFormSet = inlineformset_factory(
     Product,
     ProductRecommendation,
     form=ProductRecommendationForm,
-    extra=5,
+    extra=6,
     fk_name="primary",
 )
 
@@ -156,6 +162,34 @@ class ProductRecommendationFormSet(BaseProductRecommendationFormSet):
     def __init__(self, product_class, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        
+BaseProductAdditionalFormSet = inlineformset_factory(
+    Product,
+    ProductAdditional,
+    form=ProductAdditionalForm,
+    extra=6,
+    fk_name="primary_product",
+)
+
+class ProductAdditionalFormSet(BaseProductAdditionalFormSet):
+    # pylint: disable=unused-argument
+    def __init__(self, product_class, user, *args, **kwargs):
+        # form_kwargs = {"product_class": product_class}
+        # super().__init__(form_kwargs=form_kwargs, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+BaseProductClassAdditionalFormSet = inlineformset_factory(
+    ProductClass,
+    ProductAdditional,
+    form=ProductClassAdditionalForm,
+    extra=3,
+    fk_name="primary_class",
+)
+
+class ProductClassAdditionalFormSet(BaseProductClassAdditionalFormSet):
+    # pylint: disable=unused-argument
+    def __init__(self, product_class, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 ProductAttributesFormSet = inlineformset_factory(
     ProductClass, ProductAttribute, form=ProductAttributesForm, extra=3

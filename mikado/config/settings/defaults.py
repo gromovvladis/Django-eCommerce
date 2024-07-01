@@ -96,7 +96,7 @@ OSCAR_HIDDEN_FEATURES = []
 # Menu structure of the dashboard navigation
 OSCAR_DASHBOARD_NAVIGATION = [
     {
-        "label": "Панель управления",
+        "label": "Статистика",
         "icon": "fas fa-list",
         "url_name": "dashboard:index",
     },
@@ -109,32 +109,32 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:catalogue-product-list",
             },
             {
-                "label": "Типы продуктов",
-                "url_name": "dashboard:catalogue-class-list",
-            },
-            {
                 "label": "Категории",
                 "url_name": "dashboard:catalogue-category-list",
+            },
+            {
+                "label": "Типы продуктов",
+                "url_name": "dashboard:catalogue-class-list",
             },
             {
                 "label": "Ассортименты",
                 "url_name": "dashboard:range-list",
             },
-            # {
-            #     "label": "Дополнительные товары",
-            #     "url_name": "dashboard:additionals",
-            # },
             {
-                "label": "Оповещения о малых остатках",
-                "url_name": "dashboard:stock-alert-list",
+                "label": "Дополнительные товары",
+                "url_name": "dashboard:catalogue-additional-list",
             },
             {
-                "label": "Опиции",
+                "label": "Опции",
                 "url_name": "dashboard:catalogue-option-list",
             },
             {
                 "label": "Группы параметров атрибутов",
                 "url_name": "dashboard:catalogue-attribute-option-group-list",
+            },
+            {
+                "label": "Оповещения о малых остатках",
+                "url_name": "dashboard:stock-alert-list",
             },
         ],
     },
@@ -143,8 +143,8 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "icon": "fas fa-shopping-cart",
         "children": [
             # {
-            #     "label": "Невыполненные заказы",
-            #     "url_name": "dashboard:order-processing-list",
+            #     "label": "Активные заказы",
+            #     "url_name": "dashboard:order-active-list",
             # },
             {
                 "label": "Все заказы",
@@ -172,10 +172,18 @@ OSCAR_DASHBOARD_NAVIGATION = [
             #     "label": "Персонал",
             #     "url_name": "dashboard:staff-index",
             # },
+            # {
+            #     "label": "SMS Aero",
+            #     "url_name": "dashboard:sms-aero",
+            # },
+            # {
+            #     "label": "Отправленные СМС",
+            #     "url_name": "dashboard:sended-sms",
+            # },
         ],
     },
     {
-        "label": "Предложения",
+        "label": "Скидки",
         "icon": "fas fa-bullhorn",
         "children": [
             {
@@ -187,7 +195,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:voucher-list",
             },
             {
-                "label": "Набор промокодов",
+                "label": "Наборы промокодов",
                 "url_name": "dashboard:voucher-set-list",
             },
         ],
@@ -217,11 +225,6 @@ OSCAR_DASHBOARD_NAVIGATION = [
             #     "url_name": "dashboard:reviews-orders-list",
             # },
         ],
-    },
-    {
-        "label": "Отчеты",
-        "icon": "fas fa-chart-bar",
-        "url_name": "dashboard:reports-index",
     },
     {
         "label": "Оплата",
@@ -271,11 +274,11 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:crm-price-list",
             },
             {
-                "label": "Курьеры Tillypad",
+                "label": "Курьеры",
                 "url_name": "dashboard:crm-couriers",
             },
             {
-                "label": "Доставки Tillypad",
+                "label": "Доставки",
                 "url_name": "dashboard:crm-delivery",
             },
         ],
@@ -293,10 +296,15 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:telegram-errors",
             },
             {
-                "label": "Rурьеры",
+                "label": "Курьеры",
                 "url_name": "dashboard:telegram-couriers",
             },
         ],
+    },
+    {
+        "label": "Отчеты",
+        "icon": "fas fa-chart-bar",
+        "url_name": "dashboard:reports-index",
     },
 ]
 OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION = "oscar.apps.dashboard.nav.default_access_fn"

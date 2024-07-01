@@ -374,7 +374,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
             "status": order.status,
         }
         if order.shipping_address:
-            row["shipping_address_name"] = order.shipping_address.name
+            row["shipping_address_name"] = order.shipping_address.line1
         return row
 
     def download_selected_orders(self, request, orders):

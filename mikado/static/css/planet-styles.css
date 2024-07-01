@@ -8370,7 +8370,7 @@ html.drawer .v-app__side {
 }
 
 .v-image__inner--topping img{
-    height: calc(100% + 10px);
+    height: calc(100% + 15px);
 }
 
 @media screen and (min-width:480px) {
@@ -10059,7 +10059,7 @@ html.drawer .v-app__side {
 .v-dish-image {
     background: #fff url(../../svg/loading/loading.svg) no-repeat 50%;
     background-size: 35px 35px;
-    overflow: hidden;
+    /* overflow: hidden; */
     isolation: isolate
 }
 
@@ -10694,11 +10694,11 @@ html.drawer .v-app__side {
 
 .v-error-list__error {
     font-family: Onest, sans-serif;
-    font-size: .75rem;
-    line-height: .875rem;
+    font-size: .9rem;
+    line-height: 1rem;
     font-weight: 400;
     font-style: normal;
-    color: var(--color-primary);
+    color: var(--color-secondary);
     position: relative;
     padding-left: 1rem
 }
@@ -10712,7 +10712,7 @@ html.drawer .v-app__side {
     height: 4px;
     border-radius: 50%;
     overflow: hidden;
-    background-color: var(--color-primary);
+    background-color: var(--color-secondary);
     -webkit-transform: translateY(-50%);
     transform: translateY(-50%)
 }
@@ -14873,7 +14873,7 @@ ymaps[class*="search__suggest-item_selected_yes"] {
     left: 10px;
     top: 10px;
     line-height: 28px;
-    width: 52px;
+    width: 50px;
     border-radius: 12px;
     background-color: #fff;
     justify-content: center;
@@ -17913,6 +17913,11 @@ ymaps[class*="search__suggest-item_selected_yes"] {
     height: 0;
     width: 0;
     z-index: -500;
+    margin-top: 0;
+}
+
+.v-order__delivery-time.active{
+    margin-top: 1rem;
 }
 
 .v-order__delivery-time,

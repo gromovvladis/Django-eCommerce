@@ -93,7 +93,7 @@ class User(AbstractUser, PermissionsMixin):
     is_staff = models.BooleanField(
         "Статус сотрудника",
         default=False,
-        help_text="Повар \ Курьер \ Менеджер и т.д.",
+        help_text="Повар, Курьер, Менеджер и т.д.",
     )
     is_active = models.BooleanField(
         "Активен",

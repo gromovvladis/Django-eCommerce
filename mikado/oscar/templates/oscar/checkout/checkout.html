@@ -117,16 +117,20 @@
                     </div>
 
                     {% comment %} ошибки и валидация {% endcomment %}
-                    {% comment %} <div class="v-error-list d-flex mt-3 v-error-list--frame">
-                        <div class="d-flex flex-column fill-width" id="place_order_hints">
-                            <span class="v-error-list__error d-flex fill-width" id="place_order_hints_address"></span>
+                    <div class="v-error-list d-flex mt-2 v-error-list--frame d-nonr" data-id="checkout-error-list">
+                        <div class="d-flex flex-column fill-width">
+                            <span class="v-error-list__error d-flex fill-width">Укажите адрес доставки</span>
+                            <span class="v-error-list__error d-flex fill-width">Укажите номер квартиры</span>
+                            <span class="v-error-list__error d-flex fill-width">Укажите подъезд</span>
+                            <span class="v-error-list__error d-flex fill-width">Укажите этаж</span>
+                            <span class="v-error-list__error d-flex fill-width">Минимальная сумма заказа {{ min_amount_order }} ₽</span>
                         </div>
-                    </div> {% endcomment %}
+                    </div>
 
 
                     {% comment %} кнопка подтверждения {% endcomment %}       
                     <div class="mt-3">
-                        <button id="submit_order" form="place_order_form" type="submit" data-test-id="order-submit-btn" class="v-button fill-width v-button--main justify-center shrink">
+                        <button id="submit_order" disabled form="place_order_form" type="submit" data-test-id="order-submit-btn" class="v-button fill-width v-button--main justify-center shrink">
                             <span class="v-button__wrapper">
                                 <span class="v-button__value"> 
                                     Оформить заказ

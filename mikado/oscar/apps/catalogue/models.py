@@ -35,16 +35,25 @@ if not is_model_registered("catalogue", "ProductCategory"):
 
 # ======================================================
 
-# if not is_model_registered("catalogue", "Additional"):
 
-#     class Additional(AbstractAdditional):
-#         pass
+if not is_model_registered("catalogue", "ProductAdditional"):
 
-#     __all__.append("Additional")
+    class ProductAdditional(AbstractProductAdditional):
+        pass
+
+    __all__.append("ProductAdditional")
+    
+
+if not is_model_registered("catalogue", "Additional"):
+
+    class Additional(AbstractAdditional):
+        pass
+
+    __all__.append("Additional")
+    
 
 
 # =============================================
-
 
 
 if not is_model_registered("catalogue", "Product"):

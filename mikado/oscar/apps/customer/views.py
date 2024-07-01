@@ -404,13 +404,18 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
             # messages.warning(self.request, warning)
 
         for line in lines_to_add:
+            additionals = []
             options = []
             for attribute in line.attributes.all():
                 if attribute.option:
                     options.append(
                         {"option": attribute.option, "value": attribute.value}
                     )
-            basket.add_product(line.product, line.quantity, options)
+                else:   
+                    additionals.append(
+                        {"additional": attribute.additional, "value": attribute.value}
+                    )
+            basket.add_product(line.product, line.quantity, options, additionals)
 
         if len(lines_to_add) > 0:
             self.response = redirect("basket:summary")

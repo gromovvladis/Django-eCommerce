@@ -17,6 +17,7 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
         "catalogue-product-list": (["is_staff"], ["partner.dashboard_access"]),
         "catalogue-product-delete": (["is_staff"], ["partner.dashboard_access"]),
         "catalogue-product-lookup": (["is_staff"], ["partner.dashboard_access"]),
+        "catalogue-additional-lookup": (["is_staff"], ["partner.dashboard_access"]),
     }
 
     # pylint: disable=attribute-defined-outside-init
@@ -26,6 +27,9 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
         )
         self.product_lookup_view = get_class(
             "dashboard.catalogue.views", "ProductLookupView"
+        )
+        self.additional_lookup_view = get_class(
+            "dashboard.catalogue.views", "AdditionalLookupView"
         )
         self.product_create_redirect_view = get_class(
             "dashboard.catalogue.views", "ProductCreateRedirectView"
@@ -94,6 +98,17 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
             "dashboard.catalogue.views", "OptionDeleteView"
         )
 
+        self.additionals_list_view = get_class("dashboard.catalogue.views", "AdditionalListView")
+        self.additionals_create_view = get_class(
+            "dashboard.catalogue.views", "AdditionalCreateView"
+        )
+        self.additionals_update_view = get_class(
+            "dashboard.catalogue.views", "AdditionalUpdateView"
+        )
+        self.additionals_delete_view = get_class(
+            "dashboard.catalogue.views", "AdditionalDeleteView"
+        )
+
     def get_urls(self):
         urls = [
             path(
@@ -131,6 +146,11 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 "product-lookup/",
                 self.product_lookup_view.as_view(),
                 name="catalogue-product-lookup",
+            ),
+            path(
+                "additional-lookup/",
+                self.additional_lookup_view.as_view(),
+                name="catalogue-additional-lookup",
             ),
             path(
                 "categories/",
@@ -205,7 +225,7 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 "attribute-option-group/<str:pk>/delete/",
                 self.attribute_option_group_delete_view.as_view(),
                 name="catalogue-attribute-option-group-delete",
-            ),
+            ),            
             path(
                 "option/", self.option_list_view.as_view(), name="catalogue-option-list"
             ),
@@ -223,6 +243,24 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 "option/<str:pk>/delete/",
                 self.option_delete_view.as_view(),
                 name="catalogue-option-delete",
+            ),
+            path(
+                "additionals/", self.additionals_list_view.as_view(), name="catalogue-additional-list"
+            ),
+            path(
+                "additionals/create/",
+                self.additionals_create_view.as_view(),
+                name="catalogue-additional-create",
+            ),
+            path(
+                "additionals/<str:pk>/update/",
+                self.additionals_update_view.as_view(),
+                name="catalogue-additional-update",
+            ),
+            path(
+                "additionals/<str:pk>/delete/",
+                self.additionals_delete_view.as_view(),
+                name="catalogue-additional-delete",
             ),
         ]
         return self.post_process_urls(urls)

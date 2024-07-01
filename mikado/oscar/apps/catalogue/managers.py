@@ -141,3 +141,11 @@ class CategoryQuerySet(MP_NodeQuerySet):
         Excludes non-public categories
         """
         return self.filter(is_public=True, ancestors_are_public=True)
+
+
+class AdditionalQuerySet(MP_NodeQuerySet):
+    def browsable(self):
+        """
+        Excludes non-public categories
+        """
+        return self.filter(is_public=True)

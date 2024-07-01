@@ -67,6 +67,7 @@ if (basket_summary){
                     $(cart_nums).html(response.new_nums);
                     getUpsellMaseeges();
                     CartTotalHeight();
+                    console.log('1');
                 }
             },
             error: function (response){
