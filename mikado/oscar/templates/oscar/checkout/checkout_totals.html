@@ -10,7 +10,7 @@
                 <div class="v-prices__price_discounts">
 
                     <span class="d-flex justify-space-between no-wrap">
-                        До скидки
+                        Заказ
                         <span class="v-prices__price-before">
                             {{ basket.total_excl_discounts|currency:basket.currency }}
                         </span>
@@ -70,16 +70,15 @@
             {% endif %} 
         {% endblock %}
 
-        <div class="v-order__info-total d-flex align-end total">
+        {% order_totals_and_shipping basket shipping_charge.money as basket_totals %}
+        <div class="v-order__info-total d-flex align-end total" data-min-amount="{% if basket_totals >= min_amount_order %}true{% else %}false{% endif %}">
             Итого
             <div role="separator" class="v-spacer"></div>
             <span class="v-prices d-flex flex-column align-start v-prices--big">
                 <span class="v-prices__price no-wrap">
-                    {% order_totals_and_shipping basket shipping_method as basket_totals %}
                     {{ basket_totals|currency:basket.currency }}
                 </span>
             </span>
         </div>
     </div>
-
 {% endwith %}

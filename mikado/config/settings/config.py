@@ -28,6 +28,7 @@ class Shop(OscarConfig):
         self.shipping_app = apps.get_app_config("shipping")
         self.address_app = apps.get_app_config("address")
         self.payment_app = apps.get_app_config("payment")
+        self.delivery_app = apps.get_app_config("delivery")
 
         # self.password_reset_form = get_class("customer.forms", "PasswordResetForm")
         # self.set_password_form = SetPasswordForm
@@ -50,6 +51,7 @@ class Shop(OscarConfig):
             path("shipping/", self.shipping_app.urls),
             path("address/", self.address_app.urls),
             path("payment/", self.payment_app.urls),
+            path("delivery/", self.delivery_app.urls),
             # Password reset - as we're using Django's default view functions,
             # we can't namespace these urls as that prevents
             # the reverse function from working.

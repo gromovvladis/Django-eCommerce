@@ -1,6 +1,8 @@
 from decimal import Decimal as D
 from oscar.core import prices
+from oscar.core.loading import get_model
 
+DeliveryZona = get_model("delivery", "DeliveryZona")
 
 class Base(object):
     """
@@ -28,7 +30,7 @@ class Base(object):
     #: Whether the charge includes a discount
     is_discounted = False
 
-    def calculate(self, basket):
+    def calculate(self, basket, zona_id=None):
         """
         Return the shipping charge for the given basket
         """
@@ -56,7 +58,7 @@ class Free(Base):
     code = "free-shipping"
     name = "Бесплатная доставка"
 
-    def calculate(self, basket):
+    def calculate(self, basket, zona_id=None):
         # If the charge is free then tax must be free (musn't it?) and so we
         # immediately set the tax to zero
         return prices.Price(currency=basket.currency, money=D("0.00"))
@@ -70,8 +72,6 @@ class FixedDiscount(Base):
 
     code = "no-shipping-required"
     name = "Доставка не нужна"
-
-
 
 
 class NoShippingRequired(Free):
@@ -91,12 +91,13 @@ class NoShippingRequired(Free):
             self.pickup_discount = pickup_discount
         self.default_selected = default_selected
 
-    def calculate(self, basket):
+    def calculate(self, basket, zona_id=None):
         discount = basket.total * self.pickup_discount / 100
         return prices.Price(
             currency=basket.currency,
             money= -discount,
         )
+
 
 class FixedPrice(Base):
     """
@@ -116,11 +117,60 @@ class FixedPrice(Base):
             self.charge = charge
         self.default_selected = default_selected
 
-    def calculate(self, basket):
+    def calculate(self, basket, zona_id=None):
         return prices.Price(
             currency=basket.currency,
             money=self.charge,
         )
+
+
+class ZonaBasedShipping(Base):
+    """
+    This shipping method indicates that shipping costs a fixed price and
+    requires no special calculation.
+    """
+
+    code = "zona-shipping"
+    name = "Доставка"
+
+    def __init__(self, default_selected=False):
+        self.default_selected = default_selected
+        self.zones = DeliveryZona.objects.filter(isHide=False, isAvailable=True)
+
+    def calculate(self, basket, zona_id=None):
+        shipping_charge = 0
+        if zona_id:
+            zona_id = int(zona_id)
+            if zona_id > 0:
+                shipping_charge = self.getZonaCharge(zona_id)
+
+        return prices.Price(
+            currency=basket.currency,
+            money=shipping_charge,
+        )
+    
+    def getZonaCharge(self, zona_id):
+        charge = 0
+        try:
+            zona = self.zones.get(number=zona_id)
+            charge = zona.delivery_price
+        except Exception:
+            return 0
+        
+        return charge
+    
+
+    def minAmountOrder(self, zona_id):
+        amount = 700
+        try:
+            zona = self.zones.get(number=zona_id)
+            amount = zona.order_price
+        except Exception:
+            return 700
+        
+        return amount
+    
+
 
 # pylint: disable=abstract-method
 class OfferDiscount(Base):
@@ -166,9 +216,9 @@ class OfferDiscount(Base):
         """
         return self.method.description
 
-    def calculate_excl_discount(self, basket):
+    def calculate_excl_discount(self, basket, zonaId):
         """
         Returns the shipping charge for the given basket without
         discount applied.
         """
-        return self.method.calculate(basket)
+        return self.method.calculate(basket, zonaId)

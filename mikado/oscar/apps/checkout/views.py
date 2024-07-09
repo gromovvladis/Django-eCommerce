@@ -42,6 +42,11 @@ PaymentManager = get_class("payment.methods", "PaymentManager")
 logger = logging.getLogger("oscar.checkout")
 
 
+ZonesUtils = get_class("delivery.utils", "ZonesUtils")
+zones_utils = ZonesUtils()
+zones_polygone = zones_utils.getZonesPolygon()
+
+
 class IndexView(CheckoutSessionMixin, generic.FormView):
     """
     Check pre-cond and redirect to checkout
@@ -132,20 +137,29 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
 
         #shipping address form
         ctx = super().get_context_data(**kwargs)
-        #shipping method form
-        if self.request.user.is_authenticated:
-            # Look up address book data
-            ctx["addresses"] = self.get_available_addresses()
        
-        ctx["min_amount_order"] = 500
-        
-        #payment form
-        ctx["methods"] = self._methods
+        shipping_charge = 0
+        min_amount_order = 700
 
         method = self.get_default_shipping_method(self.request.basket)
         ctx["shipping_method"] = method
 
-        shipping_charge = method.calculate(self.request.basket)
+        #shipping method form
+        if self.request.user.is_authenticated:
+            # Look up address book data
+            address = self.get_available_addresses()
+            ctx["addresses"] = address
+            if address.coords_lat and address.coords_long:
+                zona_id = zones_utils.getZonaId([address.coords_lat, address.coords_long], zones_polygone)
+                shipping_charge = method.calculate(self.request.basket, zona_id)
+                min_amount_order = method.minAmountOrder(zona_id)
+       
+
+        #payment form
+        ctx["methods"] = self._methods
+        
+        ctx["min_amount_order"] = min_amount_order
+
         ctx["shipping_charge"] = shipping_charge
 
         #promocode
@@ -687,14 +701,16 @@ class UpdateTotalsView(View):
 
     def get(self, request, *args, **kwargs):
         try:
-
             new_method = request.GET.get('shipping_method')
+            zona_id = request.GET.get('zona_id')
             shipping_method = self.get_shipping_method(new_method)
-            shipping_charge = shipping_method.calculate(self.request.basket)
+            shipping_charge = shipping_method.calculate(self.request.basket, zona_id)
+            min_amount_order = shipping_method.minAmountOrder(zona_id)
+            min_order_html = "Минимальная сумма заказа для доставки %s ₽" % min_amount_order
 
             new_totals = render_to_string("oscar/checkout/checkout_totals.html",{
-                "basket": self.request.basket, "shipping_method": shipping_method, 'shipping_charge': shipping_charge}, request=self.request)
-            return http.JsonResponse({'totals': new_totals, 'status': 202}, status=202)
+                "basket": self.request.basket, "shipping_method": shipping_method, 'shipping_charge': shipping_charge, 'min_amount_order': min_amount_order}, request=self.request)
+            return http.JsonResponse({'totals': new_totals, 'min_order': min_order_html, 'status': 202}, status=202)
         except Exception:
             return http.JsonResponse({'totals': 'error', 'status': 200}, status=200)
 

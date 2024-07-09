@@ -136,7 +136,8 @@
 .air-datepicker-body--day-names {
     display: grid;
     grid-template-columns: repeat(7, var(--adp-day-cell-width));
-    margin: 8px 0 3px
+    /* margin: 8px 0 3px */
+    margin-bottom: 5px;
 }
 
 .air-datepicker-body--day-name {
@@ -299,7 +300,7 @@
     grid-column-gap: 12px;
     align-items: center;
     position: relative;
-    padding: 0 var(--adp-time-padding-inner)
+    /* padding: 0 var(--adp-time-padding-inner) */
 }
 
 .-only-timepicker- .air-datepicker-time {
@@ -499,7 +500,7 @@
     --adp-font-size: 16px;
     --adp-width: 246px;
     --adp-z-index: 600;
-    --adp-padding: 10px;
+    --adp-padding: 15px;
     --adp-grid-areas: "nav" "body" "timepicker" "buttons";
     --adp-transition-duration: .1s;
     --adp-transition-ease: ease-out;
@@ -536,7 +537,7 @@
     --adp-pointer-size: 10px;
     --adp-poiner-border-radius: 2px;
     --adp-pointer-offset: 14px;
-    --adp-cell-border-radius: 50%;
+    --adp-cell-border-radius: 15px;
     --adp-cell-background-color-hover: var(--adp-background-color-hover);
     --adp-cell-background-color-selected: #24a66e;
     --adp-cell-background-color-selected-hover: #2bb277;
@@ -557,7 +558,7 @@
     --adp-time-day-period-color: var(--adp-color-secondary);
     --adp-mobile-font-size: 16px;
     --adp-mobile-nav-height: 40px;
-    --adp-mobile-width: 320px;
+    --adp-mobile-width: 310px;
     --adp-mobile-day-cell-height: 40px;
     --adp-mobile-month-cell-height: 48px;
     --adp-mobile-year-cell-height: 64px

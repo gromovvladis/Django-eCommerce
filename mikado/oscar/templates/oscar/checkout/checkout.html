@@ -48,35 +48,6 @@
                         <h2>Ваш заказ</h2>
                     </div>
             
-                    {% comment %} приборы {% endcomment %}
-                    {% comment %} <div class="v-cutlery d-flex align-center justify-space-between mb-3 mb-sm-4 readonly">
-                        
-                        <div class="d-flex align-center mr-2">
-                            <svg class="v-cutlery__icon mr-1 shrink">
-                                <use xlink:href="/img/icons.svg#catlery_32"></use>
-                            </svg>
-                            <p class="v-cutlery__text">Добавить приборы</p>
-                        </div>
-            
-                        <div class="v-order-button">
-                            <div class="v-order-button--dec">
-                                <button disabled="disabled" data-test-id="order-button-minus" class="v-order-button--elem">
-                                    <svg>
-                                        <use xlink:href="/img/icons.svg#minus_24"></use>
-                                    </svg>
-                                </button>
-                                <span class="v-order-button--elem v-order-button--value"> 39 </span>
-                            </div>
-                            <button disabled="disabled" data-test-id="order-button-plus" class="v-order-button--elem">
-                                <svg>
-                                    <use xlink:href="/img/icons.svg#plus_24"></use>
-                                </svg>
-                            </button>
-                        </div>
-            
-                    </div> {% endcomment %}
-            
-            
                     {% comment %} promocode {% endcomment %}
                     <div class="v-promo mb-3 mb-sm-4">
                         <form class="v-promo__input-wrapper d-flex align-center g-2" id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
@@ -117,13 +88,13 @@
                     </div>
 
                     {% comment %} ошибки и валидация {% endcomment %}
-                    <div class="v-error-list d-flex mt-2 v-error-list--frame d-nonr" data-id="checkout-error-list">
+                    <div class="v-error-list d-flex flex-column mt-2 v-error-list--frame d-none" data-id="checkout-error-list">
                         <div class="d-flex flex-column fill-width">
-                            <span class="v-error-list__error d-flex fill-width">Укажите адрес доставки</span>
-                            <span class="v-error-list__error d-flex fill-width">Укажите номер квартиры</span>
-                            <span class="v-error-list__error d-flex fill-width">Укажите подъезд</span>
-                            <span class="v-error-list__error d-flex fill-width">Укажите этаж</span>
-                            <span class="v-error-list__error d-flex fill-width">Минимальная сумма заказа {{ min_amount_order }} ₽</span>
+                            <span data-error="address" class="v-error-list__error d-flex fill-width d-none">Укажите адрес доставки</span>
+                            <span data-error="flat" class="v-error-list__error d-flex fill-width d-none">Укажите номер квартиры</span>
+                            <span data-error="enter" class="v-error-list__error d-flex fill-width d-none">Укажите подъезд</span>
+                            <span data-error="floor" class="v-error-list__error d-flex fill-width d-none">Укажите этаж</span>
+                            <span data-error="amount" class="v-error-list__error d-flex fill-width d-none">Минимальная сумма заказа для доставки {{ min_amount_order }} ₽</span>
                         </div>
                     </div>
 
@@ -152,10 +123,9 @@
         var csrf_token = "{{ csrf_token }}";
         var url_voucher = "{% url 'checkout:vouchers-add' %}";
         var url_update_totals = "{% url 'checkout:update-totals' %}";
-        var url_delivery = "{% url 'shipping:delivery-time' %}";
-        var url_pickup = "{% url 'shipping:pickup-time' %}";
-        var url_delivery_later = "{% url 'shipping:delivery-later' %}";
-        var url_delivery_zones = "{% url 'shipping:delivery-zones' %}";
+        var url_time = "{% url 'delivery:delivery-now' %}";
+        var url_delivery_later = "{% url 'delivery:delivery-later' %}";
+        var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
     </script>
     <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
     <script type="application/javascript" src="{% static "js/datetimepicker/air-datepicker.js" %}"></script>

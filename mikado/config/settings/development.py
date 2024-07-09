@@ -21,6 +21,12 @@ Configuration.account_id = 396529
 Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'
 
 # =============
+# Yandex settings
+# =============
+
+YANDEX_API_KEY = "27bbbf17-40e2-4c01-a257-9b145870aa2a"
+
+# =============
 # MEDIA
 # =============
 

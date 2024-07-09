@@ -225,8 +225,6 @@ class AbstractBasket(models.Model):
         return self.strategy.fetch_for_product(product)
 
 
-
-
     def add_product(self, product, quantity=1, options=None, additionals=None):
         """
         Add a product to the basket
@@ -264,7 +262,6 @@ class AbstractBasket(models.Model):
     add = add_product
 
 
-
     def remove_product(self, product, quantity=1, options=None):
         """
         Remove a product from the basket
@@ -285,7 +282,6 @@ class AbstractBasket(models.Model):
 
     remove_product.alters_data = True
     add = remove_product
-
 
 
     def get_line(self, product, quantity=1, options=None, additionals=None):
@@ -345,7 +341,6 @@ class AbstractBasket(models.Model):
         )
 
         return line, created
-
 
 
     def applied_offers(self):
@@ -514,7 +509,7 @@ class AbstractBasket(models.Model):
         """
         Test if this basket is empty
         """
-        return self.id is None or self.num_lines == 0
+        return self.id is None or self.num_items == 0
 
     @property
     def total(self):

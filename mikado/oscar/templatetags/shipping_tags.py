@@ -4,12 +4,12 @@ register = template.Library()
 
 
 @register.simple_tag
-def shipping_charge(method, basket):
+def shipping_charge(method, basket, zonaId=None):
     """
     Template tag for calculating the shipping charge for a given shipping
     method and basket, and injecting it into the template context.
     """
-    return method.calculate(basket)
+    return method.calculate(basket, zonaId)
 
 
 @register.simple_tag
@@ -22,24 +22,18 @@ def shipping_charge_discount(method, basket):
 
 
 @register.simple_tag
-def shipping_charge_excl_discount(method, basket):
+def shipping_charge_excl_discount(method, basket, zonaId):
     """
     Template tag for calculating the shipping charge (excluding discounts) for
     a given shipping method and basket, and injecting it into the template
     context.
     """
-    return method.calculate_excl_discount(basket)
+    return method.calculate_excl_discount(basket, zonaId)
 
 @register.simple_tag
-def order_totals_and_shipping(basket, shipping_method):
+def order_totals_and_shipping(basket, shipping_charge):
     """
     Template tag for calculating the shipping charge for a given shipping
     method and basket, and injecting it into the template context.
     """
-    basket_total = basket.total
-
-    if shipping_method.code == 'self-pick-up':
-        discount = basket_total * shipping_method.pickup_discount / 100
-        basket_total -= discount
-
-    return basket_total
+    return basket.total + shipping_charge

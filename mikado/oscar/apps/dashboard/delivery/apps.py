@@ -15,6 +15,7 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
     permissions_map = {
         "delivery-stats": (["is_staff"], ["partner.dashboard_access"]),
         "delivery-map": (["is_staff"], ["partner.dashboard_access"]),
+        "delivery-zones": (["is_staff"], ["partner.dashboard_access"]),
         "delivery-couriers-list": (["is_staff"], ["partner.dashboard_access"]),
         "delivery-kitchen": (["is_staff"], ["partner.dashboard_access"]),
         "delivery-couriers": (["is_staff"], ["partner.dashboard_access"]),
@@ -24,6 +25,11 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
     def ready(self):
         self.delivery_stats_view = get_class("dashboard.delivery.views", "DeliveryStatsView")
         self.delivery_map_view = get_class("dashboard.delivery.views", "DeliveryMapView")
+        self.delivery_zona_view = get_class("dashboard.delivery.views", "DeliveryZonaView")
+        self.delivery_zones_view = get_class("dashboard.delivery.views", "DeliveryZonesView")
+        self.delivery_zones_create_view = get_class("dashboard.delivery.views", "DeliveryZonesCreateView")
+        self.delivery_zones_update_view = get_class("dashboard.delivery.views", "DeliveryZonesUpdateView")
+        self.delivery_zones_delete_view = get_class("dashboard.delivery.views", "DeliveryZonesDeleteView")
         self.delivery_couriers_list_view = get_class("dashboard.delivery.views", "DeliveryCouriersListView")
         self.delivery_kitchen_view = get_class("dashboard.delivery.views", "DeliveryKitchenView")
         self.delivery_couriers_view = get_class("dashboard.delivery.views", "DeliveryCouriersView")
@@ -32,6 +38,11 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
         urls = [
             path("", self.delivery_stats_view.as_view(), name="delivery-stats"),
             path("map/", self.delivery_map_view.as_view(), name="delivery-map"),
+            path("zona/", self.delivery_zona_view.as_view(), name="delivery-zona"),
+            path("zones/", self.delivery_zones_view.as_view(), name="delivery-zones"),
+            path("zones/create/", self.delivery_zones_create_view.as_view(), name="delivery-create-zona"),
+            path("zones/<int:pk>/update/", self.delivery_zones_update_view.as_view(), name="delivery-update-zona"),
+            path("zones/<int:pk>/delete/", self.delivery_zones_delete_view.as_view(), name="delivery-delete-zona"),
             path("couriers-list/", self.delivery_couriers_list_view.as_view(), name="delivery-couriers-list"),
             path("kitchen/", self.delivery_kitchen_view.as_view(), name="delivery-kitchen"),
             path("couriers/", self.delivery_couriers_view.as_view(), name="delivery-couriers"),

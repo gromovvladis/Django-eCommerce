@@ -367,7 +367,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
     def get_row_values(self, order):
         row = {
             "number": order.number,
-            "customer": order.email,
+            "customer": order.user,
             "num_items": order.num_items,
             "date": format_datetime(order.date_placed, "DATETIME_FORMAT"),
             "value": order.total,

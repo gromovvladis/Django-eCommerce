@@ -4209,7 +4209,7 @@ input[type=button].btn-block {
   position: relative;
   display: flex;
   align-items: baseline;
-  /* flex-direction: column; */
+  flex-direction: column;
   min-width: 0;
   word-wrap: break-word;
   background-color: #fff;
@@ -18131,3 +18131,127 @@ caption {
   font-size: 1rem;
 }
 /*# sourceMappingURL=dashboard.css.map */
+
+
+
+.delivery__map {
+  width: 100%;
+  height: 450px;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+
+.v-map {
+  background: #fff url(../../svg/loading/loading.svg) no-repeat 50%;
+  background-size: 48px 48px;
+  height: 100%;
+  width: 100%;
+}
+
+
+.v-map__wrapper{
+  height: 100%;
+  width: 100%;
+}
+
+
+.delivery-balloon__minutes {
+  font-family: Onest, sans-serif;
+  font-size: .9rem;
+  line-height: 1rem;
+  font-weight: 500;
+  white-space: nowrap
+}
+
+.delivery-balloon__text {
+  font-family: Onest, sans-serif;
+  color: #dfdfdf;
+  font-size: .75rem;
+  line-height: .75rem;
+}
+
+.balloon-pin {
+  position: absolute;
+  bottom: -38px;
+  left: 38px
+}
+
+
+.balloon-pin__icon {
+  fill: var(--color-primary);
+  filter: drop-shadow(0 0 5px #b21f2d);
+  border-radius: 50%
+}
+
+
+.icon-delivery__svg {
+  fill: #530000;
+  border-radius: 50%
+}
+
+.icon-delivery__svg_error {
+  fill: #b21f2d;
+}
+
+.icon-delivery__title {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  display: block;
+  padding: 12px 20px;
+  transform: translateX(calc(-50% + 12px));
+  background-color: #140e38;
+  border-radius: 15px;
+  font-family: Onest, sans-serif;
+  font-size: .9rem;;
+  color: #fff;
+  white-space: nowrap
+}
+
+.icon-delivery__title_error {
+  background: #b21f2d;
+  font-family: Onest, sans-serif;
+  font-size: .9rem;;
+  white-space: normal;
+  width: 120px
+}
+
+.icon-delivery__title:after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: calc(50% - 10px);
+  border: 10px solid transparent;
+  border-top: 10px solid #140e38;
+}
+
+.icon-delivery__title_error:after {
+  border-top: 10px solid #b21f2d;
+}
+
+
+.pin-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  fill: #530000;
+  width: 25px;
+  height: 25px;
+  filter: drop-shadow(0 0 3px #fff)
+}
+
+.pin-icon__loader {
+  width: 32px;
+  height: 32px;
+  left: -4px;
+  top: -6px;
+}
+
+.pin-icon__loader circle {
+  stroke: #b21f2d;;
+}
+
+

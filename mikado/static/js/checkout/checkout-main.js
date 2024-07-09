@@ -1,14 +1,18 @@
 var address_fields = $('#address_fields');
+var submit_btn = $('#submit_order'); 
+
 var checkout_errors = $('[data-id="checkout-error-list"]');
-
-var delivery_time_btn = $('[data-id="delivery-time"]');
-var delivery_time_now_btn = $(delivery_time_btn).find('#delivery_time_now');
-var delivery_time_later_btn = $(delivery_time_btn).find('#delivery_time_later');
-
-var delivery_time_later = $('#delivery_time_later');
+var error_address = $(checkout_errors).find('[data-error="address"]');
+var error_flat = $(checkout_errors).find('[data-error="flat"]');
+var error_enter = $(checkout_errors).find('[data-error="enter"]');
+var error_floor = $(checkout_errors).find('[data-error="floor"]');
+var error_amount = $(checkout_errors).find('[data-error="amount"]');
+var minAmountValidate = true;
+var AddressValideted = true;
 
 var order_time = $('#id_order_time'); 
-var submit_btn = $('#submit_order'); 
+var delivery_time_btn = $('[data-id="delivery-time"]');
+var delivery_time_later = $('#delivery_time_later');
 
 var shipping_method_buttons = $('[data-id="delivery-method-button"]');
 var delivery_method_block = $('[data-id="delivery-method-block"]');
@@ -20,7 +24,6 @@ var all_fields = $('[data-id="v-input-field"]');
 var payment_method = $('#id_payment_method');
 var email_or_change_block = $(all_fields).filter('[data-field="v-email-field"]');
 var email_or_change_field = $(email_or_change_block).find('#email_field_label');
-var selectedShippingMethod;
 
 const OFFLINE_PAYMENT = ['CASH'];
 const ONLINE_PAYMENT = ['SBP', 'CARD'];
@@ -38,69 +41,31 @@ $(document).ready(function () {
 
 // смена метода доставки
 $(shipping_method_buttons).on('click', function(){
-    selectedShippingMethod = this.value;
-    $(shipping_method).val(selectedShippingMethod)
+    shippingMethod = this.value;
+    $(shipping_method).val(shippingMethod)
     $(delivery_method_block).offset({'left':$(this).offset().left});
-    AjaxTimeFromAddress($(address_line1).val(), selectedShippingMethod);
-    if (selectedShippingMethod == "self-pick-up"){
+    GetTime({address:$(address_line1).val(), shippingMethod: shippingMethod}).then(function(result) {
+        timeCaptured(result);
+    });
+    if (shippingMethod == "self-pick-up"){
         $(address_fields).addClass('d-none');
         $(time_title).html('Время самовывоза');
     } else {
         $(address_fields).removeClass('d-none');
         $(time_title).html('Время доставки');
     }
-    getNewTotals(selectedShippingMethod);
-    validateCheckout();
+    getNewTotals(shippingMethod);
 })
-
-// обновление итогов
-function getNewTotals(selectedMethod){
-    $.ajax({
-        data: {'shipping_method': selectedMethod}, 
-        type: 'GET', 
-        url: url_update_totals,
-        success: function (response){
-            if (response.status == 202){
-                $(checkout_totals).html(response.totals);
-            }
-        },
-    });
-}
-
-// не отправлять форму enter-ом
-$('#place_order_form').on('keypress', 'input', function(event) {
-    if (event.which == 13) {
-        event.preventDefault();
-    }
-});
-
-// время для адреса из адресной книги
-function AjaxTimeFromAddress(initAddress, selectedShippingMethod=null){
-    if (initAddress != ""){
-        ymaps.ready(function () {
-            ymaps.geocode(initAddress, {results: 1}).then(function (res) {
-                AjaxTime(res.geoObjects.get(0).geometry.getCoordinates(), true); 
-            });
-        });
-    }
-    else if (selectedShippingMethod == "free-shipping"){
-        $(delivery_time).addClass('active');
-        $(delivery_time).html("Введите адрес доставки");
-    }     
-    else {
-        AjaxPickUpTime();
-    }
-}
 
 // выбрана доставка.самовывоз как можно скорее
 $(delivery_time_btn).on('click', function(){
     $(delivery_time_block).offset({'left':$(this).offset().left});
     var delivery_time_method = $(this).attr("data-type");
     if (delivery_time_method == "now"){
-        var Time = new Date();
-        Time.setUTCMinutes(Time.getMinutes() + del_time);
-        $(order_time).val(Time.toLocaleString());
-        AjaxTimeFromAddress($(address_line1).val(), selectedShippingMethod);
+        GetTime({address:$(address_line1).val(), shippingMethod: shippingMethod}).then(function(result) {
+            $(order_time).val(result.timeUTC);
+            timeCaptured(result);
+        });
         $(delivery_time).removeClass('hidden');
         $(delivery_time).addClass('active');
         $(delivery_time_later).addClass('hidden');
@@ -111,8 +76,42 @@ $(delivery_time_btn).on('click', function(){
         $(delivery_time).addClass('hidden');
         $(delivery_time).removeClass('active');
     }
-    validateCheckout();
 });
+
+// обновление итогов
+function getNewTotals(selectedMethod, zonaId=null){
+    console.log('getNewTotals')
+    $.ajax({
+        data: {
+            'shipping_method': selectedMethod,
+            "zona_id": zonaId
+        }, 
+        type: 'GET', 
+        url: url_update_totals,
+        success: function (response){
+            if (response.status == 202){
+                $(checkout_totals).html(response.totals);
+                $(error_amount).html(response.min_order);
+            }
+        },
+        complete: function(){
+            validateCheckout();
+        }
+    });
+}
+
+// сдача или чек
+$(payment_method).change(function(){
+    if (OFFLINE_PAYMENT.includes(this.value)){
+        $(email_or_change_field).html('Нужна сдача с ...');
+        $(email_or_change_block).removeClass('d-none-i');
+    } else if (ONLINE_PAYMENT.includes(this.value)) {
+        $(email_or_change_field).html('E-mail для получения чеков');
+        $(email_or_change_block).removeClass('d-none-i');
+    } else {
+        $(email_or_change_block).addClass('d-none-i');
+    }
+})
 
 // лейблы при заполнении текста
 $(all_fields).each(function(){
@@ -128,52 +127,106 @@ $(all_fields).each(function(){
         if($(input_field).val() == ""){
             wrapper.removeClass('v-input__label-active');
         }
-        validateCheckout();
+        validateAddress();
+        checkValid();
     })
 })
 
-// сдача или чек
-$(payment_method).change(function(){
-    if (OFFLINE_PAYMENT.includes(this.value)){
-        $(email_or_change_field).html('Нужна сдача с ...');
-        $(email_or_change_block).removeClass('d-none-i');
-    } else if (ONLINE_PAYMENT.includes(this.value)) {
-        $(email_or_change_field).html('E-mail для получения чеков');
-        $(email_or_change_block).removeClass('d-none-i');
-    } else {
-        $(email_or_change_block).addClass('d-none-i');
+// не отправлять форму enter-ом
+$('#place_order_form').on('keypress', 'input', function(event) {
+    if (event.which == 13) {
+        event.preventDefault();
     }
-})
- 
-// Валидация
-function validateCheckout(error=null){
-    var valideted = true
-    selectedShippingMethod = $(shipping_method).val();
-    if (selectedShippingMethod == "free-shipping"){
-        // if ($(address_line1).attr('captured') == "false"){
-        //     valideted = false;
-        //     $(checkout_errors).append($('<span class="v-error-list__error d-flex fill-width">Укажите адрес доставки</span>'));
-        // }
-        // if ($(address_line2).val() > 999 || $(address_line2).val() < 1){
-        //     valideted = false;
-        //     $(checkout_errors).append($('<span class="v-error-list__error d-flex fill-width">Укажите номер квартиры</span>'));
-        // }
-        // if ($(address_line3).val() > 99 || $(address_line3).val() < 1){
-        //     valideted = false;
-        //     $(checkout_errors).append($('<span class="v-error-list__error d-flex fill-width">Укажите подъезд</span>'));
-        // }
-        // if ($(address_line4).val() > 99 || $(address_line4).val() < 1){
-        //     valideted = false;
-        //     $(checkout_errors).append($('<span class="v-error-list__error d-flex fill-width">Укажите этаж</span>'));
-        // }
-    }
+});
 
-    if (valideted){
-        $(checkout_errors).removeClass("d-none");
-        $(checkout_errors).html();
-        $(submit_btn).removeAttr("disabled");
+validate = () => {
+    validateCheckout();
+}
+
+// валидаия по мин заказу и адрессу
+function validateCheckout(){
+    console.log('validateCheckout')
+    validateAddress();
+    validateTotals();
+    checkValid();
+}
+
+
+function checkValid (){
+    console.log('checkValid')
+    if (minAmountValidate && AddressValideted){
+        console.log('checkValid VALID')
+        $(submit_btn).attr("disabled", false);
+        $(checkout_errors).addClass('d-none');
     } else {
-        $(checkout_errors).removeClass("d-none");
+        console.log('checkValid NO VALID')
         $(submit_btn).attr("disabled", true);
+        $(checkout_errors).removeClass('d-none');    
     }
 }
+
+// Валидация по адреса
+function validateAddress(){
+    AddressValideted = true
+    shippingMethod = $(shipping_method).val();
+    if (shippingMethod == "zona-shipping"){
+
+        if (!$(address_line1).val() || $(address_line1).attr('captured') == "false"){
+            AddressValideted = false;
+            error_address.removeClass('d-none');
+        } else {
+            error_address.addClass('d-none');
+        }
+
+        if ($(address_line2).val() > 1000 || $(address_line2).val() < 1){
+            AddressValideted = false;
+            error_flat.removeClass('d-none');
+        } else {
+            error_flat.addClass('d-none');
+        }
+
+        if ($(address_line3).val() > 100 || $(address_line3).val() < 1){
+            AddressValideted = false;
+            error_enter.removeClass('d-none');
+        } else {
+            error_enter.addClass('d-none');
+        }
+
+        if ($(address_line4).val() > 100 || $(address_line4).val() < 1){
+            AddressValideted = false;
+            error_floor.removeClass('d-none');
+        } else {
+            error_floor.addClass('d-none');
+        }
+    }
+}
+
+// Валидация по сумме заказа
+function validateTotals(){
+    minAmountValidate = true;
+    if ($(checkout_totals).find('[data-min-amount]').attr("data-min-amount") == "false" && shippingMethod == "zona-shipping"){
+        minAmountValidate = false;
+        $(error_amount).removeClass('d-none')
+    } else {
+        $(error_amount).addClass('d-none') 
+    }
+}
+
+
+// начисляем стоимость доствки в зависмости от зоны
+function shippingCharge(zonaId=null){
+    console.log("ShippingCharge");
+    console.log(zonaId);
+    getNewTotals(shippingMethod, zonaId);
+}
+
+// таймер обновления времени доставки к адрессу каждые 5 минут
+// function updateTimes(){
+//     int_id = setInterval(function() {
+//         console.log('upd timer')
+//         GetTime({adrs:$(address_line1).val(), shippingMethod:shippingMethod}).then(function(result) {
+//             timeCaptured(result);
+//         });
+//     }, 300000);  
+// }
+// updateTimes();

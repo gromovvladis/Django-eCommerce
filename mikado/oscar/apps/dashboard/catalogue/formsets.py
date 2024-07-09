@@ -188,7 +188,8 @@ BaseProductClassAdditionalFormSet = inlineformset_factory(
 
 class ProductClassAdditionalFormSet(BaseProductClassAdditionalFormSet):
     # pylint: disable=unused-argument
-    def __init__(self, product_class, user, *args, **kwargs):
+    # def __init__(self, product_class, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 ProductAttributesFormSet = inlineformset_factory(

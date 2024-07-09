@@ -244,6 +244,10 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:delivery-map",
             },
             {
+                "label": "Зоны доставки",
+                "url_name": "dashboard:delivery-zones",
+            },
+            {
                 "label": "Курьеры",
                 "url_name": "dashboard:delivery-couriers-list",
             },

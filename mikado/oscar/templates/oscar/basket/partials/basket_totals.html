@@ -10,7 +10,7 @@
 
             <div class="v-prices__price_discounts">
                 <span class="no-wrap">
-                    До скидки:
+                    Заказ:
                     <span class="v-prices__price-before">
                         {{ basket.total_excl_discounts|currency:basket.currency }}
                     </span>
@@ -45,7 +45,7 @@
     {% endwith %}
 
     <span class="v-prices__price no-wrap">
-        <span class="v-prices__price-before" style="display: none;"></span>
+        {% comment %} <span class="v-prices__price-before" style="display: none;"></span> {% endcomment %}
         {{ order_total.money|currency:basket.currency }}
     </span>
 </span>

@@ -474,7 +474,7 @@ class AddressListView(PageTitleMixin, generic.ListView):
     template_name = "oscar/customer/address/address_list.html"
     paginate_by = settings.OSCAR_ADDRESSES_PER_PAGE
     active_tab = "addresses"
-    page_title = "Адресная книга"
+    page_title = "Адрес доставки"
 
     def get_queryset(self):
         """Return customer's addresses"""
