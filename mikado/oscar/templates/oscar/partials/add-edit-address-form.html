@@ -7,6 +7,7 @@
             <button id="submit_address" type="button" data-id="delivery-map-submit-btn" class="v-button fill-width v-button--main justify-center shrink" disabled="disabled">
                 <span class="v-button__wrapper">
                     <span class="v-button__value"> Доставить на этот адрес </span>
+                    <span class="v-button__value v-button__value--saved"> Адрес сохранен </span>
                 </span>
             </button>
         </div>
@@ -39,18 +40,12 @@
             <h1>Адрес доставки</h1>
         </div>
 
-        {% comment %} <div class="v-order__subtitle mb-1 mb-sm-2">
-            <h1>Адрес доставки</h1>
-        </div> {% endcomment %}
-
         {% comment %} line1 {% endcomment %}
         <div id="suggest_container" class="v-delivery__address-wrapper v-input mb-1">
             <div class="d-flex v-delivery--input">
                 {% include "oscar/partials/render_field.html" with field=form.line1 data_id="address-input" %}
             </div>
         </div>
-        {% comment %} <span id="line1_hints" class="v-delivery__address-hint d-inline-block mt-1 mb-1 pl-2 d-none"></span> {% endcomment %}
-
 
         <div class="mt-0 row">
 
@@ -118,6 +113,7 @@
                 <button id="save_address" type="submit" disabled class="v-button fill-width v-button--main justify-center shrink">
                     <span class="v-button__wrapper">
                         <span class="v-button__value"> Сохранить адрес </span>
+                        <span class="v-button__value v-button__value--saved"> Адрес сохранен </span>
                     </span>
                 </button>
             </div>

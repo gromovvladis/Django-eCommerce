@@ -1,6 +1,5 @@
 # pylint: disable=attribute-defined-outside-init
-from .yandex_map import YandexMap
-from .utils import ZonesUtils
+from .maps import Map
 
 import datetime
 import json
@@ -11,21 +10,18 @@ from oscar.core.loading import get_class, get_model
 
 from django.conf import settings
 
-from .yandex_map import YandexMap
-from .utils import ZonesUtils
-
 from django import http
 from django.views.generic import View
 
-api_key = settings.YANDEX_API_KEY
 DeliveryZona = get_model("delivery", "DeliveryZona")
+ZonesUtils = get_class("delivery.zones", "ZonesUtils")
 
+_dir = settings.STATIC_PRIVATE_ROOT
 
 class DeliveryNowView(View):
 
     permission_classes = [AllowAny]
-    yandex_map = YandexMap(api_key)
-    zones_utils = ZonesUtils()
+    map = Map()
  
     def post(self, request, *args, **kwargs):
         
@@ -36,7 +32,8 @@ class DeliveryNowView(View):
             coords = request.POST.get('coords')
             address = request.POST.get('address')
             zona_id = request.POST.get('zonaId')
-            result = self.delivery(coords, address, zona_id, basket)
+            rote_time = request.POST.get('roteTime')
+            result = self.delivery(coords, address, zona_id, rote_time, basket)
         else: 
             result = self.pickup(basket)
 
@@ -58,7 +55,7 @@ class DeliveryNowView(View):
         }
     
     
-    def delivery(self, coords, address, zona_id, basket):
+    def delivery(self, coords, address, zona_id, rote_time, basket):
 
         if not coords:
             geoObject = self.getGeoobject(address)
@@ -70,14 +67,18 @@ class DeliveryNowView(View):
 
         if not address or not coords:
             return {"error": "Адрес не найден"}
+        
+        zones = ZonesUtils.getAvailableZones()
 
-        if zona_id is None:
-            zona_id = self.getZonaId(coords)
+        # if not zona_id or zona_id == "0":
+        if not zona_id:
+            zona_id = ZonesUtils.getZonaId(coords, zones)
 
-        if zona_id == 0 or zona_id == "0":
+        # if not zona_id:
+        if not zona_id or zona_id == "0":
             return {"error": "Адрес вне зоны доставки"}
             
-        if not self.IsZonaAvailable(zona_id):
+        if not ZonesUtils.IsZonaAvailable(zona_id, zones):
             return {
                 "coords": coords,
                 "address": address,
@@ -85,8 +86,7 @@ class DeliveryNowView(View):
                 "delivery_time_text": "Доставка по данному адресу временно не осуществляется", # Доставим через Х мин.
             }
         
-
-        min_order = self.getMinOrderForZona(zona_id)
+        min_order = ZonesUtils.getMinOrderForZona(zona_id, zones)
       
         if not self.IsWorkingTime():
             return {
@@ -98,7 +98,7 @@ class DeliveryNowView(View):
                 "delivery_time_text": "Заказ возможен на отложенное время",
             }
 
-        order_minutes = self.deliveryTime(coords, zona_id, basket)
+        order_minutes = self.deliveryTime(coords, zona_id, rote_time, basket)
         delivery_time_text = "Доставим через %s мин." % order_minutes
         time_utc = format(datetime.datetime.today() + datetime.timedelta(minutes=order_minutes),'%d.%m.%Y %H:%M')
         
@@ -114,43 +114,25 @@ class DeliveryNowView(View):
 
 
 # ===================
-#  Yandex
+#  Yandex / 2Gis Maps
 # ===================
 
     def getGeoobject(self, addressInfo):
         """Получает геобъект по адресу или координатам"""
-        geoObject = self.yandex_map.geocode(addressInfo)
+        geoObject = self.map.geocode(addressInfo)
         return geoObject
 
 
     def getCoords(self, geoObject):
         """Получает координы обекта по геобъекту"""
-        coordinates = self.yandex_map.coordinates(geoObject)
+        coordinates = self.map.coordinates(geoObject)
         return coordinates
 
 
     def getAddress(self, geoObject):
         """Получает адрес по геобъекту"""
-        address = self.yandex_map.address(geoObject)
+        address = self.map.address(geoObject)
         return address
-
-# ===================
-#  Delivery zones Utils
-# ===================
-
-    def getZonaId(self, coords):
-        """Получает координы обекта, возвращает id зоны доставки, либо 0, если адрес вне зоны доставки"""
-        return self.zones_utils.getZonaId(coords)
-    
-
-    def IsZonaAvailable(self, zona_id):
-        """Проверяет достпуна ли доставка в эту зону в данный момент"""
-        return self.zones_utils.IsZonaAvailable(zona_id)
-
-
-    def getMinOrderForZona(self, zona_id):
-        """Сумма минимального заказа для зоны доставки"""
-        return self.zones_utils.getMinOrderForZona(zona_id)
 
 # ===================
 #  ???
@@ -164,13 +146,34 @@ class DeliveryNowView(View):
 #  ???
 # ===================
 
-    def deliveryTime(self, coords, zona_id, basket):
+    def deliveryTime(self, coords, zona_id, rote_time, basket):
         """Получает координы обекта, до которого нужно простроить маршрут. 
         Маршрут строим от точки, которая будет задана в корзине у стокрекорд партнера 
         Возвращает инфорамию о поездке (растояние, время)"""
+
+        coock_time = self.coockingTime(basket)
+
+        # if not rote_time:
+        try:
+            line = basket.lines.first()
+            partner = line.stockrecord.partner
+            partner_address = partner.addresses.first()
+            start_point = [partner_address.coords_long, partner_address.coords_lat]
+        except Exception:
+            start_point = [56.050918, 92.904378]
+            
+        end_points = []
+        end_points.append(coords.split(','))
+        rote_time = self.map.routeTime(start_point, end_points)
+        # else:
+        #     rote_time = int(rote_time[:rote_time.find('.')]) // 60
+
+        return rote_time + coock_time
+
+
+    def coockingTime(self, basket):
         return 50
-        # roteTime = self.yandex_map.routeTime(coords, zona_id)
-        # return roteTime
+
 
 
 class DeliveryLaterView(APIView):
@@ -203,11 +206,8 @@ class DeliveryZonesGeoJsonView(APIView):
     """
 
     permission_classes = [AllowAny]
-    dir = settings.STATIC_PRIVATE_ROOT
+    
 
     def get(self, request, *args, **kwargs):
-        filename = 'delivery_zones.geojson'
-        json_file = json.loads(open(self.dir + '/js/delivery/geojson/' + filename, 'rb').read())
+        json_file = json.loads(open(_dir + '/js/delivery/geojson/delivery_zones.geojson', 'rb').read())
         return http.JsonResponse(json_file, status=202)
-
-

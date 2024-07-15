@@ -2,7 +2,7 @@ var address_line1 = document.querySelector('#id_line1');
 var coords_long = document.querySelector('#id_coords_long');
 var coords_lat = document.querySelector('#id_coords_lat');
 var line1_hints = $('#line1_hints');
-var suggest_container = document.querySelector('#suggest_container');
+var suggest_list = $('#suggest_list');
 var saveButton = $('#submit_address');
 var deliveryControls = $('#delivery_map_controls');
 
@@ -15,20 +15,6 @@ var checkoutMapContainer = document.querySelector('.checkout__map');
 
 const DELIVERYBOUNDS = [[56.120657, 92.640634], [55.946021, 93.258483]];
 const MAPCENTER = [56.008331, 92.878786];
-var suggestParams = {
-    boundedBy: DELIVERYBOUNDS,
-    strictBounds: true,
-    container: suggest_container,
-    width: suggest_container.offsetWidth,
-    offset:[0, 5],
-    results: 10,
-    zIndex: 490,
-    // provider: {
-    //     suggest: (function (request, options) {
-    //         return ymaps.suggest("Красноярск" + ", " + request)
-    //     })
-    // }
-}
 
 var validate = () => {};
 var shippingCharge = () => {};
@@ -36,7 +22,7 @@ var map;
 var placemark;
 var addressInfo;
 var customControl;
-var suggestView;
+// var suggestView;
 var cleanButton;
 var deliveryZones;
 var LayoutPin
@@ -51,11 +37,11 @@ var offsetBtns = 150;
 
 // подсказки при поиске запрос в Яндекс
 ymaps.ready(function () {
+
+    CreateSuggestView();
     
-    if ($(address_line1).attr('captured')){
-        suggestView = new ymaps.SuggestView(address_line1, suggestParams);
-        suggestView.events.add('select', function(e){suggestViewSelected(e)});
-    }
+    // if (!$(address_line1).attr('captured')){
+    // }
 
     CustomControlClass = function (options) {
         CustomControlClass.superclass.constructor.call(this, options);
@@ -125,49 +111,75 @@ ymaps.ready(function () {
     
 });
 
-// подсказка выбрана
-function suggestViewSelected(e){
-    $(address_line1).val(e.get('item').displayName)
-    var selected=e.get('item').value;
-    ymaps.geocode(selected,{
-        results:1,
-    }).then(function(res){
-        var info=res.geoObjects.get(0);
-        switch (info.properties.get('metaDataProperty.GeocoderMetaData.precision')) {
-            case 'exact':
-                hint = ''
-                break;
-            case 'number':
-            case 'near':
-            case 'range':
-            case 'street':
-                hint = 'Уточните номер дома';
-                break;
-            case 'other':
-            default:
-                hint = 'Уточните адрес';
-        }
+// Создание suggestView
+function CreateSuggestView(){
 
-        if (hint) {
-            $(line1_hints).html(hint);
-            $(line1_hints).removeClass('d-none');
-        } else  {
-            var crd = info.geometry.getCoordinates();
-            var adr = info.getAddressLine();
-            addressCaptured(crd, adr);
-            movePlacemark(crd, adr);
-            map.setCenter(crd, 14);
+    address_line1.addEventListener('input', function() {
+        const query = this.value;
+
+        if (query.length > 2) {
+            $.ajax({
+                url: 'https://catalog.api.2gis.com/3.0/suggests',
+                dataType: 'json',
+                data: {
+                    q: query,
+                    // polygon: "POLYGON((92.640634 56.120657,93.258483 55.946021))",
+                    sort_point: "92.878786,56.008331",
+                    type: "building, street",
+                    suggest_type: "address",
+                    fields: "items.point",
+                    key: '6013c28d-62ae-4764-a509-f403d2ee92c6'
+                },
+                success: function (response) {
+                    console.log(response);
+                    const suggestions = response.result.items;
+                    suggest_list.html('');
+                    suggestions.forEach(suggestion => {
+                        const li = $('<li></li>');
+                        li.text(suggestion.name);
+                        suggest_list.append(li);
+                    });
+                },
+                error: function (error) {
+                    console.error('Error fetching suggestions:', error);
+                }
+            });
         }
     });
 }
 
+// подсказка выбрана
+function suggestViewSelected(info){
+
+    switch (info.properties.get('metaDataProperty.GeocoderMetaData.precision')) {
+        case 'exact':
+            hint = ''
+            break;
+        case 'number':
+        case 'near':
+        case 'range':
+        case 'street':
+            hint = 'Уточните номер дома';
+            break;
+        case 'other':
+        default:
+            hint = 'Уточните адрес';
+    }
+
+    if (hint) {
+        $(line1_hints).html(hint);
+        $(line1_hints).removeClass('d-none');
+    } else  {
+        var coords = info.address
+        var address = info.coords
+        addressCaptured(coords, address);
+        movePlacemark(coords, address);
+        map.setCenter(coords, 14);
+    }
+}
 
 
-
-// ====================  MAP  ===========================
-
-
-
+// ================================   MAP   ==========================================
 
 
 // создаем карту при вводе адреса, при расчете маршрута и предоставим возможность выбора адреса по карте
@@ -496,11 +508,7 @@ function ZonesInit(json) {
     });
 }
 
-
-
 // ====================  ADDRESS RESOLVER  ===========================
-
-
 
 
 // время можно показывать пользователю на странице и менять в ордер тайм
@@ -527,7 +535,7 @@ function timeCaptured(result){
     
 }
 
-// запрос времени доставки на сервере 
+// запрос времени доставки на сервере со временем
 function GetTime({coords, address, shippingMethod, zonaId} = {}){
     console.log('GetTime')
 
@@ -537,47 +545,35 @@ function GetTime({coords, address, shippingMethod, zonaId} = {}){
         coords = coords.join(",")
     }
 
-    var rote_crt;
-    if (coords){
-        rote_crt = coords;
-    } else {
-        rote_crt = address;
-    }
-
-    return ymaps.route([[56.050918, 92.904378], rote_crt]).then(function (route) {
-        roteTime = route.getJamsTime();
-        console.log(roteTime);
-        return $.ajax({
-            data: {
-                "coords": coords,
-                "address": address,
-                "shipping_method": shippingMethod,
-                "zonaId": zonaId,
-                "roteTime": roteTime,
-            }, 
-            type: 'POST', 
-            headers: { "X-CSRFToken": csrf_token },
-            url: url_time,
-            error: function (response) {
-                console.log('error GetTime');
-                $(delivery_time).removeClass('active');
-            },
-            success: function (response) {
-                var deferred = $.Deferred();
-                switch (response.status) {
-                    case 200:
-                        deferred.resolve(response);
-                        break;
-                    default:
-                        deferred.reject();
-                        break;
-                }
-                console.log('GetTime success')
-                return deferred.promise();
-            },
-        }); 
-    });
-
+    return $.ajax({
+        data: {
+            "coords": coords,
+            "address": address,
+            "shipping_method": shippingMethod,
+            "zonaId": zonaId,
+            "roteTime": roteTime,
+        }, 
+        type: 'POST', 
+        headers: { "X-CSRFToken": csrf_token },
+        url: url_time,
+        error: function (response) {
+            console.log('error GetTime');
+            $(delivery_time).removeClass('active');
+        },
+        success: function (response) {
+            var deferred = $.Deferred();
+            switch (response.status) {
+                case 200:
+                    deferred.resolve(response);
+                    break;
+                default:
+                    deferred.reject();
+                    break;
+            }
+            console.log('GetTime success')
+            return deferred.promise();
+        },
+    }); 
 }
 
 // проверка адреса в зоне доставки
@@ -594,10 +590,10 @@ function getZonaId(coords) {
 function addressCaptured(coords, address){
     console.log("addressCaptured");
 
-    if (suggestView){
-        suggestView.destroy();
-        suggestView = null;
-    }
+    // if (suggestView){
+    //     suggestView.destroy();
+    //     suggestView = null;
+    // }
 
     $(address_line1).attr('readonly', true);
 
@@ -620,7 +616,6 @@ function addressCaptured(coords, address){
 
 
 
-
 // очистить адрес
 function cleanAddress(){
     console.log("cleanAddress");
@@ -631,10 +626,10 @@ function cleanAddress(){
     $(deliveryControls).addClass('d-none');
     $(saveButton).attr('disabled', true);
 
-    if (!suggestView){
-        suggestView = new ymaps.SuggestView(address_line1, suggestParams);
-        suggestView.events.add('select', function(e){suggestViewSelected(e)});
-    }
+    // if (!suggestView){
+    //     suggestView = new ymaps.SuggestView(address_line1, suggestParams);
+    //     suggestView.events.add('select', function(e){suggestViewSelected(e)});
+    // }
 
     if (map){
         map.geoObjects.remove(placemark);
@@ -672,9 +667,9 @@ $(open_map).on('click', function(){
 })
 
 // изменение ширины seggestview
-$(window).resize(function(){
-    if (suggestView){
-        suggestView.options.set('width', suggest_container.offsetWidth);
-    }
-});
+// $(window).resize(function(){
+//     if (suggestView){
+//         suggestView.options.set('width', suggest_container.offsetWidth);
+//     }
+// });
 

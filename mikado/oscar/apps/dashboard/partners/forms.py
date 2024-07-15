@@ -138,8 +138,7 @@ class PartnerAddressForm(forms.ModelForm):
         fields = (
             "name",
             "line1",
-            "line2",
-            "line3",
-            "line4",
+            "coords_long",
+            "coords_lat",
         )
         model = PartnerAddress

@@ -58,15 +58,18 @@
                             </li>
                             {% endfor %}
                         {% endif %}
+                        
+                        <div role="separator" class="v-spacer"></div>
+
                         {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
-                        <button type="button" onclick="window.location.href='{% url 'search:search-page' %}'" data-id="nav-search-icon-button"
-                            class="v-button v-app-nav__button--search v-button--small justify-center mr-2 shrink">
-                            <span class="v-button__wrapper" style="opacity:1;">
+                        <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
+                            class="v-button v-app-nav__button--search v-button--small justify-center mr-1 shrink">
+                            <span class="v-button__wrapper">
                                 <span class="d-flex">
                                     {% icon file_name='header/search' size=20 fill='#111'%}
                                 </span>
                             </span>
-                        </button>
+                        </a>
                     </ul>
 
                     <div class="v-app-nav__title v-app-nav__title--center d-flex d-sm-none text-center">
@@ -102,9 +105,11 @@
                 <div class="d-flex align-start pd-0 fill-height container">
                     <div class="{% block wrapper_class %}{% endblock %}">
 
+                        {% block breadcrumbs %}{% endblock %}
+
                         {% block sticky_address %}{% endblock %}
 
-                        {% block breadcrumbs %}{% endblock %}
+                        {% include "oscar/partials/alert_messages.html" %}
                 
                         {# Main content of page - other layout templates may override this block #}
                         {% block content %}{% endblock %}

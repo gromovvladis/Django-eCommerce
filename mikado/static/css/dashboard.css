@@ -16698,6 +16698,7 @@ readers do not read off random characters that represent icons */
 
 .fa-plus-circle::before {
   content: "\f055";
+  margin-right: .5rem;
 }
 
 .fa-face-grin-tongue-wink::before {

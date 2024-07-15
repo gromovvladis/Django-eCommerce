@@ -1,18 +1,10 @@
 # pylint: disable=attribute-defined-outside-init
-import datetime
-from decimal import Decimal as D
-from decimal import InvalidOperation
-
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, Q, Sum, fields
-from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView, CreateView, View, TemplateView
+from django.views.generic import UpdateView, DeleteView, CreateView, View
 
-from django_tables2 import SingleTableMixin, SingleTableView
+from django_tables2 import SingleTableView
 from oscar.apps.dashboard.catalogue.views import CategoryListMixin
 from oscar.core.loading import get_class, get_model
 

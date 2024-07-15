@@ -1,8 +1,8 @@
+import json
+from django.conf import settings
 from django.db import models
-from oscar.core.loading import get_class
 
-ZonesUtils = get_class("delivery.utils", "ZonesUtils")
-zones_utils = ZonesUtils() 
+_dir = settings.STATIC_PRIVATE_ROOT
 
 class AbstractDeliveryZona(models.Model):
     """
@@ -36,4 +36,41 @@ class AbstractDeliveryZona(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        zones_utils.update_json() 
+        self.update_json() 
+
+    @classmethod
+    def update_json(cls):
+
+        all_zones = cls.objects.all()
+        zones_list = []
+
+        for zona in all_zones:
+
+            coords = []
+
+            for crd in zona.coords.split('],'):
+                crd = crd.replace("]", "").replace("[", "")
+                crd = crd.split(",")
+                coords.append((float(crd[0]), float(crd[1])))
+
+            zones_list.append({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        coords
+                    ],
+                },
+                "properties": {
+                    "number": zona.number,
+                    "available": zona.isAvailable
+                }
+            })
+
+        _json = {
+            "type": "FeatureCollection",
+            "features": zones_list
+        }
+
+        file = open(_dir + '/js/delivery/geojson/delivery_zones.geojson', 'w')
+        json.dump(_json, file)

@@ -44,7 +44,7 @@ $(shipping_method_buttons).on('click', function(){
     shippingMethod = this.value;
     $(shipping_method).val(shippingMethod)
     $(delivery_method_block).offset({'left':$(this).offset().left});
-    GetTime({address:$(address_line1).val(), shippingMethod: shippingMethod}).then(function(result) {
+    GetTime({address:$(address_line1).val(), coords:[$(coords_long).val(), $(coords_lat).val()], shippingMethod: shippingMethod}).then(function(result) {
         timeCaptured(result);
     });
     if (shippingMethod == "self-pick-up"){
@@ -62,7 +62,7 @@ $(delivery_time_btn).on('click', function(){
     $(delivery_time_block).offset({'left':$(this).offset().left});
     var delivery_time_method = $(this).attr("data-type");
     if (delivery_time_method == "now"){
-        GetTime({address:$(address_line1).val(), shippingMethod: shippingMethod}).then(function(result) {
+        GetTime({address:$(address_line1).val(), coords:[$(coords_long).val(), $(coords_lat).val()], shippingMethod: shippingMethod}).then(function(result) {
             $(order_time).val(result.timeUTC);
             timeCaptured(result);
         });
@@ -171,7 +171,7 @@ function validateAddress(){
     shippingMethod = $(shipping_method).val();
     if (shippingMethod == "zona-shipping"){
 
-        if (!$(address_line1).val() || $(address_line1).attr('captured') == "false"){
+        if (!$(address_line1).val() || $(address_line1).attr('captured') == "false" || $(address_line1).attr('valid') == "false"){
             AddressValideted = false;
             error_address.removeClass('d-none');
         } else {
@@ -204,7 +204,7 @@ function validateAddress(){
 // Валидация по сумме заказа
 function validateTotals(){
     minAmountValidate = true;
-    if ($(checkout_totals).find('[data-min-amount]').attr("data-min-amount") == "false" && shippingMethod == "zona-shipping"){
+    if ($(checkout_totals).find('[data-min-order]').attr("data-min-order") == "false" && shippingMethod == "zona-shipping"){
         minAmountValidate = false;
         $(error_amount).removeClass('d-none')
     } else {
@@ -212,13 +212,16 @@ function validateTotals(){
     }
 }
 
-
 // начисляем стоимость доствки в зависмости от зоны
 function shippingCharge(zonaId=null){
     console.log("ShippingCharge");
-    console.log(zonaId);
     getNewTotals(shippingMethod, zonaId);
 }
+
+// loading spiner
+$(submit_btn).on('click', function(){
+    $(this).addClass('sending');
+})
 
 // таймер обновления времени доставки к адрессу каждые 5 минут
 // function updateTimes(){

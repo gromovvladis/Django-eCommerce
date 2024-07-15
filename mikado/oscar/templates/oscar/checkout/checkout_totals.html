@@ -71,7 +71,7 @@
         {% endblock %}
 
         {% order_totals_and_shipping basket shipping_charge.money as basket_totals %}
-        <div class="v-order__info-total d-flex align-end total" data-min-amount="{% if basket_totals >= min_amount_order %}true{% else %}false{% endif %}">
+        <div class="v-order__info-total d-flex align-end total" data-min-order="{% if basket_totals >= min_order.money %}true{% else %}false{% endif %}">
             Итого
             <div role="separator" class="v-spacer"></div>
             <span class="v-prices d-flex flex-column align-start v-prices--big">

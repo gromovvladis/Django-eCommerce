@@ -19,23 +19,25 @@
                             </div>
                         </div>
 
-                        <div class="weight-wrapper d-flex align-center"> 
-                            <span class="v-weight v-weight--additional">
-                                <span>{{ field.field.widget.attrs.weight|safe }}</span>
-                                <span>г</span>
-                            </span>
-                        </div>
-
                         <div class="topping-description px-1 pb-1 fill-width d-flex align-center flex-column pos-relative">
     
+
                             <p class="v-dish-toppings__name mt-2">{{ field.label|safe }}</p>
-                            
+                            {% comment %} <span class="v-weight v-weight--additional">
+                                <span>{{ field.field.widget.attrs.weight|safe }}</span>
+                                <span>г</span>
+                            </span> {% endcomment %}
+
                             <div role="separator" class="v-spacer"></div>
     
                             <span data-id="v-dish-toppings-price" class="v-prices d-flex flex-column align-start mt-1 v-prices--red v-prices--small">
                                 <span class="v-prices__price v-prices__price--topping no-wrap">
                                     <span data-id="additional-product-price">{{ field.field.widget.attrs.price|formate_price }}</span>
                                     <span>{{ currency_symbol }}</span>
+                                    <span class="v-weight v-weight--additional">
+                                        <span>/&nbsp;&nbsp;{{ field.field.widget.attrs.weight|safe }}</span>
+                                        <span>г</span>
+                                    </span>
                                 </span>
                             </span>
     

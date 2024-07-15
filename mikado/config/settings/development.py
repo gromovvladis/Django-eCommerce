@@ -21,10 +21,11 @@ Configuration.account_id = 396529
 Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'
 
 # =============
-# Yandex settings
+# MAP settings
 # =============
 
 YANDEX_API_KEY = "27bbbf17-40e2-4c01-a257-9b145870aa2a"
+GIS_API_KEY = "6013c28d-62ae-4764-a509-f403d2ee92c6"
 
 # =============
 # MEDIA
