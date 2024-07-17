@@ -6,7 +6,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
 
 from oscar.apps.shipping.methods import NoShippingRequired
-from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 
 from . import exceptions
@@ -15,6 +14,8 @@ Repository = get_class("shipping.repository", "Repository")
 SurchargeApplicator = get_class("checkout.applicator", "SurchargeApplicator")
 OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 CheckoutSessionData = get_class("checkout.utils", "CheckoutSessionData")
+Map = get_class("delivery.maps", "Map")
+ZonesUtils = get_class("delivery.zones", "ZonesUtils")
 ShippingAddress = get_model("order", "ShippingAddress")
 UserAddress = get_model("address", "UserAddress")
 
@@ -107,7 +108,7 @@ class CheckoutSessionMixin(object):
         if request.basket.is_empty:
             raise exceptions.FailedPreCondition(
                 url=reverse("basket:summary"),
-                message="Для оформления заказа вам необходимо добавить некоторые товары в корзину",
+                message="Для оформления заказа вам необходимо добавить товары в корзину",
             )
 
     def check_basket_is_valid(self, request):
@@ -147,11 +148,12 @@ class CheckoutSessionMixin(object):
             # Even without shipping being required, we still need to check that
             # a shipping method code has been set.
             if not self.checkout_session.is_shipping_method_set(self.request.basket):
+                messages.error(self.request, "Выберите способ доставки")
                 raise exceptions.FailedPreCondition(
-                    url=reverse("checkout:shipping-method"),
+                    url=reverse("checkout:checkoutview"),
                 )
             return
-        
+            
         shipping_method = self.get_shipping_method(request.basket)
         if shipping_method and shipping_method.code == NoShippingRequired().code:
             return
@@ -166,19 +168,19 @@ class CheckoutSessionMixin(object):
         if not self.checkout_session.is_shipping_address_set():
             raise exceptions.FailedPreCondition(
                 url=reverse("checkout:checkoutview"),
-                message="Пожалуйста, выберите адрес доставки",
+                message="Пожалуйста, укажите адрес доставки",
             )
 
         # Check that the previously chosen shipping address is still valid
-        shipping_address = self.get_shipping_address(basket=self.request.basket)
-        if not shipping_address:
-            raise exceptions.FailedPreCondition(
-                url=reverse("checkout:checkoutview"),
-                message=(
-                    "Ранее выбранный вами адрес доставки "
-                    "больше недействителен. Пожалуйста, выберите другой"
-                ),
-            )
+        # shipping_address = self.get_shipping_address(basket=self.request.basket)
+        # if not shipping_address:
+        #     raise exceptions.FailedPreCondition(
+        #         url=reverse("checkout:checkoutview"),
+        #         message=(
+        #             "Ранее выбранный вами адрес доставки "
+        #             "больше недействителен. Пожалуйста, выберите другой"
+        #         ),
+        #     )
 
     def check_a_valid_shipping_method_is_captured(self):
         # Check that shipping method has been set
@@ -189,69 +191,35 @@ class CheckoutSessionMixin(object):
             )
 
         # Check that a *valid* shipping method has been set
-        shipping_address = self.get_shipping_address(basket=self.request.basket)
-        shipping_method = self.get_shipping_method(
-            basket=self.request.basket, shipping_address=shipping_address
-        )
-        if not shipping_method:
-            raise exceptions.FailedPreCondition(
-                url=reverse("checkout:shipping-method"),
-                message=(
-                    "Ранее выбранный вами способ доставки: "
-                    "больше недействителен. Пожалуйста, выберите другой"
-                ),
-            )
+        # shipping_address = self.get_shipping_address(basket=self.request.basket)
+        # shipping_method = self.get_shipping_method(
+        #     basket=self.request.basket, shipping_address=shipping_address
+        # )
+        # if not shipping_method:
+        #     raise exceptions.FailedPreCondition(
+        #         url=reverse("checkout:shipping-method"),
+        #         message=(
+        #             "Ранее выбранный вами способ доставки: "
+        #             "больше недействителен. Пожалуйста, выберите другой"
+        #         ),
+        #     )
 
-    def check_payment_data_is_captured(self, request):
-        # We don't collect payment data by default so we don't have anything to
-        # validate here. If your shop requires forms to be submitted on the
-        # payment details page, then override this method to check that the
-        # relevant data is available. Often just enforcing that the preview
-        # view is only accessible from a POST request is sufficient.
-        pass
+    def check_payment_method_is_captured(self, request):
+        payment_method = self.checkout_session.payment_method()
+        if not payment_method:
+            return False
+        
+        return True
 
-    # Re-usable skip conditions
+    def check_order_time_is_captured(self, request):
+        time = self.get_order_time(self.request.basket)
+        if not time:
+            return False
+        
+        return True
 
-    def skip_unless_basket_requires_shipping(self, request):
-        # Check to see that a shipping address is actually required.  It may
-        # not be if the basket is purely downloads
-        if not request.basket.is_shipping_required():
-            raise exceptions.PassedSkipCondition(
-                # url=reverse("checkout:shipping-method")
-                url=reverse("checkout:checkoutview")
-            )
-
-    def skip_unless_payment_is_required(self, request):
-        # Check to see if payment is actually required for this order.
-        shipping_address = self.get_shipping_address(request.basket)
-        shipping_method = self.get_shipping_method(request.basket, shipping_address)
-        if shipping_method:
-            shipping_charge = shipping_method.calculate(request.basket)
-        else:
-            # It's unusual to get here as a shipping method should be set by
-            # the time this skip-condition is called. In the absence of any
-            # other evidence, we assume the shipping charge is zero.
-            shipping_charge = prices.Price(
-                currency=request.basket.currency, money=D("0.00")
-            )
-
-        surcharges = SurchargeApplicator(request).get_applicable_surcharges(
-            basket=request.basket, shipping_charge=shipping_charge
-        )
-        total = self.get_order_totals(request.basket, shipping_charge, surcharges)
-        if total.money == D("0.00"):
-            raise exceptions.PassedSkipCondition(url=reverse("checkout:preview"))
 
     # Helpers
-
-    def get_context_data(self, **kwargs):
-        # Use the proposed submission as template context data.  Flatten the
-        # order kwargs so they are easily available too.
-        ctx = super().get_context_data()
-        ctx.update(self.build_submission(**kwargs))
-        ctx.update(kwargs)
-        ctx.update(ctx["order_kwargs"])
-        return ctx
 
     def build_submission(self, **kwargs):
         """
@@ -266,37 +234,48 @@ class CheckoutSessionMixin(object):
         basket = kwargs.pop("basket", self.request.basket)
         shipping_address = self.get_shipping_address(basket)
         shipping_method = self.get_shipping_method(basket, shipping_address)
-        if shipping_method and shipping_method.code == NoShippingRequired().code:
-            shipping_address = None 
         order_note = self.get_order_note(basket)
         order_time = self.get_order_time(basket)
         email_or_change = self.get_email_or_change(basket)
+
+        if not shipping_method:
+            total = shipping_charge = surcharges = min_order = None
+        elif shipping_method.code == NoShippingRequired().code:
+            shipping_address = None 
+            shipping_charge, min_order = 0, 0
+        elif shipping_address:
+            if shipping_address.coords_lat and shipping_address.coords_long:
+                shipping_charge, min_order = shipping_method.calculate(basket, shipping_address)
+            elif shipping_address.line1:
+                map = Map()
+                geoObject = map.geocode(address=shipping_address.line1)
+                coords = map.coordinates(geoObject)
+                zona_id = ZonesUtils.getZonaId(coords)
+                shipping_charge, min_order = shipping_method.calculate(basket, zona_id)
+
         submission = {
             "user": self.request.user,
             "basket": basket,
             "shipping_address": shipping_address,
             "shipping_method": shipping_method,
             "order_note": order_note,
+            # "min_order": min_order,
             "order_time": order_time,
             "email_or_change": email_or_change,
+            "shipping_charge": shipping_charge,
             "order_kwargs": {},
             "payment_kwargs": {},
         }
 
-        if not shipping_method:
-            total = shipping_charge = surcharges = None
-        else:
-            shipping_charge = shipping_method.calculate(basket)
-            surcharges = SurchargeApplicator(
-                self.request, submission
-            ).get_applicable_surcharges(
-                self.request.basket, shipping_charge=shipping_charge
-            )
-            total = self.get_order_totals(
-                basket, shipping_charge=shipping_charge, surcharges=surcharges, **kwargs
-            )
+        surcharges = SurchargeApplicator(
+            self.request, submission
+        ).get_applicable_surcharges(
+            self.request.basket, shipping_charge=shipping_charge
+        )
+        total = self.get_order_totals(
+            basket, shipping_charge=shipping_charge, surcharges=surcharges, **kwargs
+        )
 
-        submission["shipping_charge"] = shipping_charge
         submission["order_total"] = total
         submission["surcharges"] = surcharges
 
@@ -326,7 +305,7 @@ class CheckoutSessionMixin(object):
         if not basket.is_shipping_required():
             return None
         
-        addr_data = self.checkout_session.new_shipping_address_fields()
+        addr_data = self.checkout_session.session_shipping_address_fields()
         if addr_data:
             # Load address data into a blank shipping address model
             return ShippingAddress(**addr_data)
@@ -350,14 +329,19 @@ class CheckoutSessionMixin(object):
             if method.code == code:
                 return method
             
+
+    # =======================
+
     def get_order_note(self, basket, **kwargs):
         return self.checkout_session.order_note()
 
     def get_order_time(self, basket, **kwargs):
         return self.checkout_session.order_time()
-         
+
     def get_email_or_change(self, basket, **kwargs):
         return self.checkout_session.email_or_change()
+         
+    # ========================
 
     def get_order_totals(self, basket, shipping_charge, surcharges=None, **kwargs):
         """
@@ -366,3 +350,59 @@ class CheckoutSessionMixin(object):
         return OrderTotalCalculator(self.request).calculate(
             basket, shipping_charge, surcharges, **kwargs
         )
+
+    # =======================
+
+
+
+
+
+    # def get_context_data(self, **kwargs):
+        # Use the proposed submission as template context data.  Flatten the
+        # order kwargs so they are easily available too.
+        # ctx = super().get_context_data()
+        # ctx.update(self.build_submission(**kwargs))
+        # ctx.update(kwargs)
+        # ctx.update(ctx["order_kwargs"])
+        # return ctx
+
+
+    # def check_payment_data_is_captured(self, request):
+    #     # We don't collect payment data by default so we don't have anything to
+    #     # validate here. If your shop requires forms to be submitted on the
+    #     # payment details page, then override this method to check that the
+    #     # relevant data is available. Often just enforcing that the preview
+    #     # view is only accessible from a POST request is sufficient.
+    #     pass
+
+    # Re-usable skip conditions
+
+    # def skip_unless_basket_requires_shipping(self, request):
+    #     # Check to see that a shipping address is actually required.  It may
+    #     # not be if the basket is purely downloads
+    #     if not request.basket.is_shipping_required():
+    #         raise exceptions.PassedSkipCondition(
+    #             # url=reverse("checkout:shipping-method")
+    #             url=reverse("checkout:checkoutview")
+    #         )
+
+    # def skip_unless_payment_is_required(self, request):
+    #     # Check to see if payment is actually required for this order.
+    #     shipping_address = self.get_shipping_address(request.basket)
+    #     shipping_method = self.get_shipping_method(request.basket, shipping_address)
+    #     if shipping_method:
+    #         shipping_charge, _ = shipping_method.calculate(request.basket, shipping_address)
+    #     else:
+    #         # It's unusual to get here as a shipping method should be set by
+    #         # the time this skip-condition is called. In the absence of any
+    #         # other evidence, we assume the shipping charge is zero.
+    #         shipping_charge = prices.Price(
+    #             currency=request.basket.currency, money=D("0.00")
+    #         )
+
+    #     surcharges = SurchargeApplicator(request).get_applicable_surcharges(
+    #         basket=request.basket, shipping_charge=shipping_charge
+    #     )
+    #     total = self.get_order_totals(request.basket, shipping_charge, surcharges)
+    #     if total.money == D("0.00"):
+    #         raise exceptions.PassedSkipCondition(url=reverse("checkout:preview"))

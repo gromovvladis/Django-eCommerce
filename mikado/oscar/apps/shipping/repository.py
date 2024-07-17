@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 from oscar.apps.shipping.methods import OfferDiscount
 from oscar.core.loading import get_classes
 
-Free, NoShippingRequired = get_classes("shipping.methods", ["Free", "NoShippingRequired"])
+ZonaBasedShipping, NoShippingRequired = get_classes("shipping.methods", ["ZonaBasedShipping", "NoShippingRequired"])
 
 
 class Repository(object):
@@ -18,7 +18,7 @@ class Repository(object):
     # instantiated shipping methods.
 
     methods = (
-        Free(True), #first if default
+        ZonaBasedShipping(True), #first if default
         NoShippingRequired(5)
     )
 

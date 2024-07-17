@@ -10,13 +10,14 @@
 {% block nav_title %}Оформление заказа{% endblock %}
 {% block nav_title_center %}Оформление заказа{% endblock %}
 
-{% block wrapper_class %}checkout fill-width px-2 py-3 pb-sm-4 pt-sm-2 checkout__container{% endblock %}
+{% block wrapper_class %}checkout fill-width pd-2 pb-sm-4 pt-sm-2 checkout__container{% endblock %}
 
 {% block app_class %}v-app---checkout{% endblock %}
 {% block nav_class %}v-app__nav--checkout{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+    {% comment %} <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0"> {% endcomment %}
+    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-1 mx-md-0">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
@@ -48,35 +49,6 @@
                         <h2>Ваш заказ</h2>
                     </div>
             
-                    {% comment %} приборы {% endcomment %}
-                    {% comment %} <div class="v-cutlery d-flex align-center justify-space-between mb-3 mb-sm-4 readonly">
-                        
-                        <div class="d-flex align-center mr-2">
-                            <svg class="v-cutlery__icon mr-1 shrink">
-                                <use xlink:href="/img/icons.svg#catlery_32"></use>
-                            </svg>
-                            <p class="v-cutlery__text">Добавить приборы</p>
-                        </div>
-            
-                        <div class="v-order-button">
-                            <div class="v-order-button--dec">
-                                <button disabled="disabled" data-test-id="order-button-minus" class="v-order-button--elem">
-                                    <svg>
-                                        <use xlink:href="/img/icons.svg#minus_24"></use>
-                                    </svg>
-                                </button>
-                                <span class="v-order-button--elem v-order-button--value"> 39 </span>
-                            </div>
-                            <button disabled="disabled" data-test-id="order-button-plus" class="v-order-button--elem">
-                                <svg>
-                                    <use xlink:href="/img/icons.svg#plus_24"></use>
-                                </svg>
-                            </button>
-                        </div>
-            
-                    </div> {% endcomment %}
-            
-            
                     {% comment %} promocode {% endcomment %}
                     <div class="v-promo mb-3 mb-sm-4">
                         <form class="v-promo__input-wrapper d-flex align-center g-2" id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
@@ -105,7 +77,7 @@
                     {% block order_contents %}
                         <div class="v-order-checkout__items">
                             {% for line in basket.all_lines %}
-                                <span>{{ line.product.get_title }} ({{ line.quantity }}){% if not forloop.last %},{% endif %}</span>
+                                <span>{{ line.product.get_title }} <span>( {{ line.quantity }} шт. )</span>{% if not forloop.last %}, {% endif %}</span>
                             {% endfor %}
                         </div>
                     {% endblock order_contents %}
@@ -117,16 +89,20 @@
                     </div>
 
                     {% comment %} ошибки и валидация {% endcomment %}
-                    {% comment %} <div class="v-error-list d-flex mt-3 v-error-list--frame">
-                        <div class="d-flex flex-column fill-width" id="place_order_hints">
-                            <span class="v-error-list__error d-flex fill-width" id="place_order_hints_address"></span>
+                    <div class="v-error-list d-flex flex-column mt-2 v-error-list--frame d-none" data-id="checkout-error-list">
+                        <div class="d-flex flex-column fill-width">
+                            <span data-error="address" class="v-error-list__error d-flex fill-width d-none">Укажите адрес доставки</span>
+                            <span data-error="flat" class="v-error-list__error d-flex fill-width d-none">Укажите номер квартиры</span>
+                            <span data-error="enter" class="v-error-list__error d-flex fill-width d-none">Укажите подъезд</span>
+                            <span data-error="floor" class="v-error-list__error d-flex fill-width d-none">Укажите этаж</span>
+                            <span data-error="amount" class="v-error-list__error d-flex fill-width d-none">Минимальная сумма заказа для доставки {{ min_order.money }} ₽</span>
                         </div>
-                    </div> {% endcomment %}
+                    </div>
 
 
                     {% comment %} кнопка подтверждения {% endcomment %}       
                     <div class="mt-3">
-                        <button id="submit_order" form="place_order_form" type="submit" data-test-id="order-submit-btn" class="v-button fill-width v-button--main justify-center shrink">
+                        <button id="submit_order" disabled form="place_order_form" type="submit" data-test-id="order-submit-btn" class="v-button fill-width v-button--main button-order justify-center shrink">
                             <span class="v-button__wrapper">
                                 <span class="v-button__value"> 
                                     Оформить заказ
@@ -148,13 +124,12 @@
         var csrf_token = "{{ csrf_token }}";
         var url_voucher = "{% url 'checkout:vouchers-add' %}";
         var url_update_totals = "{% url 'checkout:update-totals' %}";
-        var url_delivery = "{% url 'shipping:delivery-time' %}";
-        var url_pickup = "{% url 'shipping:pickup-time' %}";
-        var url_delivery_later = "{% url 'shipping:delivery-later' %}";
-        var url_delivery_zones = "{% url 'shipping:delivery-zones' %}";
+        var url_time = "{% url 'delivery:delivery-now' %}";
+        var url_delivery_later = "{% url 'delivery:delivery-later' %}";
+        var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
     </script>
-    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
     <script type="application/javascript" src="{% static "js/datetimepicker/air-datepicker.js" %}"></script>
+    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
     <script type="application/javascript" src="{% static "js/delivery/delivery.js" %}"></script>
     <script type="application/javascript" src="{% static "js/checkout/checkout-main.js" %}"></script>
     <script type="application/javascript" src="{% static "js/datetimepicker/order-timepicker.js" %}"></script>

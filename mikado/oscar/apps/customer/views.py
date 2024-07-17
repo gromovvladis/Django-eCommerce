@@ -395,22 +395,27 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
         total_quantity = sum([line.quantity for line in lines_to_add])
         is_quantity_allowed, reason = basket.is_quantity_allowed(total_quantity)
         if not is_quantity_allowed:
-            # messages.warning(self.request, reason)
+            messages.warning(self.request, reason)
             self.response = redirect("customer:order-list")
             return
 
         # Add any warnings
-        # for warning in warnings:
-            # messages.warning(self.request, warning)
+        for warning in warnings:
+            messages.warning(self.request, warning)
 
         for line in lines_to_add:
+            additionals = []
             options = []
             for attribute in line.attributes.all():
                 if attribute.option:
                     options.append(
                         {"option": attribute.option, "value": attribute.value}
                     )
-            basket.add_product(line.product, line.quantity, options)
+                else:   
+                    additionals.append(
+                        {"additional": attribute.additional, "value": attribute.value}
+                    )
+            basket.add_product(line.product, line.quantity, options, additionals)
 
         if len(lines_to_add) > 0:
             self.response = redirect("basket:summary")
@@ -449,12 +454,12 @@ class OrderLineView(PostActionMixin, generic.DetailView):
                 options.append({"option": attribute.option, "value": attribute.value})
         basket.add_product(line.product, line.quantity, options)
 
-        # if line.quantity > 1:
-        #     msg = "%(qty)d шт. товара '%(product)s' были добавлены в вашу корзину" % {"qty": line.quantity, "product": line.product}
-        # else:
-        #     msg = "'%s' добавлен в вашу корзину" % line.product
+        if line.quantity > 1:
+            msg = "%(qty)d шт. - '%(product)s' были добавлены в вашу корзину" % {"qty": line.quantity, "product": line.product}
+        else:
+            msg = "'%s' добавлен в вашу корзину" % line.product
 
-        # messages.info(self.request, msg)
+        messages.info(self.request, msg)
 
 
 # ------------
@@ -469,7 +474,7 @@ class AddressListView(PageTitleMixin, generic.ListView):
     template_name = "oscar/customer/address/address_list.html"
     paginate_by = settings.OSCAR_ADDRESSES_PER_PAGE
     active_tab = "addresses"
-    page_title = "Адресная книга"
+    page_title = "Адрес доставки"
 
     def get_queryset(self):
         """Return customer's addresses"""

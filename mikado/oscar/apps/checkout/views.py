@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 
 from oscar.apps.basket.views import Repository
 from oscar.apps.payment.models import Source, SourceType
+from oscar.core import prices
 from oscar.core.loading import get_class, get_classes, get_model
 
 from django.views.generic import FormView, View
@@ -82,36 +83,47 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
 
 
     def get_initial(self):
-        initial = self.checkout_session.new_shipping_address_fields()
-        if initial:
-            initial = initial.copy()   
-        else:
-            initial = {}
-        initial['payment_method'] = self.checkout_session.payment_method()
+
+        initial = {}
+        
         if self.request.COOKIES.get('order_note'):
             initial['order_note'] = unquote(unquote(self.request.COOKIES.get('order_note')))
+        
         user_address = self.get_available_addresses()
+
         if user_address:
-            initial['notes'] = user_address.notes
             initial['line1'] = user_address.line1
             initial['line2'] = user_address.line2
             initial['line3'] = user_address.line3
             initial['line4'] = user_address.line4
+            initial['notes'] = user_address.notes
         else:
-            if self.request.COOKIES.get('notes'):
-                initial['notes'] = unquote(unquote(self.request.COOKIES.get('notes')))
             if self.request.COOKIES.get('line1'):
                 initial['line1'] = unquote(unquote(self.request.COOKIES.get('line1')))
             if self.request.COOKIES.get('line2'):
                 initial['line2'] = unquote(unquote(self.request.COOKIES.get('line2')))
-            if self.request.COOKIES.get('line3'):
+            if self.request.COOKIES.get('notes'):
                 initial['line3'] = unquote(unquote(self.request.COOKIES.get('line3')))
-            if self.request.COOKIES.get('line4'):
+            if self.request.COOKIES.get('line3'):
                 initial['line4'] = unquote(unquote(self.request.COOKIES.get('line4')))
+            if self.request.COOKIES.get('line4'):
+                initial['notes'] = unquote(unquote(self.request.COOKIES.get('notes')))
 
         initial['order_time'] = format(datetime.datetime.today().replace(minute=0) + datetime.timedelta(hours=3),'%d.%m.%Y %H:%M')
         
         return initial
+    
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests: instantiate a form instance with the passed
+        POST variables and then check if it's valid.
+        """
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
 
     
     def get_form_kwargs(self):
@@ -130,20 +142,28 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
     
     def get_context_data(self, **kwargs):
 
-        #shipping address form
-        ctx = super().get_context_data(**kwargs)
-        #shipping method form
-        if self.request.user.is_authenticated:
-            # Look up address book data
-            ctx["addresses"] = self.get_available_addresses()
-        
-        #payment form
-        ctx["methods"] = self._methods
+        ctx = super().get_context_data(**kwargs) 
+
+        shipping_charge = prices.Price(currency=self.request.basket.currency, money=0)
+        min_order = prices.Price(currency=self.request.basket.currency, money=700)
 
         method = self.get_default_shipping_method(self.request.basket)
         ctx["shipping_method"] = method
 
-        shipping_charge = method.calculate(self.request.basket)
+        #shipping method form
+        if self.request.user.is_authenticated:
+            # Look up address book data
+            address = self.get_available_addresses()
+            ctx["addresses"] = address
+            if address and address.coords_lat and address.coords_long: 
+                shipping_charge, min_order = method.calculate(self.request.basket, address)
+       
+
+        #payment form
+        ctx["methods"] = self._methods
+        
+        ctx["min_order"] = min_order
+
         ctx["shipping_charge"] = shipping_charge
 
         #promocode
@@ -189,68 +209,79 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
 
      
     def get(self, request, *args, **kwargs):
-        # These skip and pre conditions can't easily be factored out into the
-        # normal pre-conditions as they do more than run a test and then raise
-        # an exception on failure.
-
-        # Check that shipping is required at all
-        if not request.basket.is_shipping_required():
-            # No shipping required - we store a special code to indicate so.
-            self.checkout_session.use_shipping_method(NoShippingRequired().code)
-
-        # Save shipping methods as instance var as we need them both here
-        # and when setting the context vars.
         self._methods = self.get_available_shipping_methods()
         if len(self._methods) == 0:
             # No shipping methods available for given address
-            # messages.warning(
-            #     request,
-            #     "Доставка недоступна по выбранному вами адресу — пожалуйста выберете другой адрес"
-            # )
+            messages.warning(
+                request,
+                "Доставка недоступна по выбранному вами адресу — пожалуйста выберете другой адрес"
+            )
             return redirect("checkout:checkoutview")
-        elif len(self._methods) == 1:
-            # Only one shipping method - set this and redirect onto the next
-            # step
-            self.checkout_session.use_shipping_method(self._methods[0].code)
-            
+
         return super().get(request, *args, **kwargs)
 
 
     def form_valid(self, form):
-        # Store the address details in the session and redirect to next step
 
         address_fields = dict(
             (k, v) for (k, v) in form.instance.__dict__.items() if not k.startswith("_")
         )
-        self.checkout_session.ship_to_new_address(address_fields)
 
-        # Save the code for the chosen shipping method in the session
-        # and continue to the next step.
-        self.checkout_session.use_shipping_method(form.cleaned_data["method_code"])
+        # нужна проверак полей алреса
+        if not self.is_shipping_address_set(address_fields):
+            messages.error(self.request, "Введенный адрес некорректен")
+            return redirect("checkout:checkoutview")
 
-        # Check that shipping address has been completed
-        #переделай is_shipping_address_set
-        if not self.checkout_session.is_shipping_address_set():
-            # messages.error(self.request, "Пожалуйста, введите корректный адрес доставки")
+        # нужна проверка суммы минимального заказа при доставке
+        if not self.is_min_order_set(form.instance, form.cleaned_data["method_code"]):
+            messages.error(self.request, "Сумма заказа меньше минимальной")
             return redirect("checkout:checkoutview")
         
+        # нужна проверка корректности времени
+        if not self.is_time_set(form.cleaned_data['order_time']): 
+            messages.error(self.request, "Данное время заказа более не доступно")
+            return redirect("checkout:checkoutview")
         
-         # Store payment method in the CheckoutSessionMixin.checkout_session (a CheckoutSessionData object)
+        # Store payment method in the CheckoutSessionMixin.checkout_session (a CheckoutSessionData object)
+        self.checkout_session.set_session_address(address_fields)
         self.checkout_session.pay_by(form.cleaned_data['payment_method'])
+        self.checkout_session.use_shipping_method(form.cleaned_data["method_code"])
         self.checkout_session.set_order_note(form.cleaned_data['order_note'])
         self.checkout_session.set_order_time(form.cleaned_data['order_time'])
         self.checkout_session.set_email_or_change(form.cleaned_data['email_or_change'])
+        
 
+    def is_shipping_address_set(self, address_fields):
+        requred_fields = ['line1', 'line2', 'line3', 'line4', 'coords_long', 'coords_lat']
+        for field in address_fields.items():
+            if field[0] in requred_fields and not field[1]:
+                return False
+
+        return True
+
+    def is_min_order_set(self, shipping_address, shipping_method):
+        if shipping_method == "zona-shipping":
+            method = Repository().get_shipping_method(shipping_method)
+            shipping_charge, min_order = method.calculate(self.request.basket, shipping_address)
+            if min_order.money > self.request.basket.total:
+                return False
+
+        return True
+
+    # переделай
+    def is_time_set(self, order_time):
+        return False
+    
     
     def form_invalid(self, form):
-        # messages.error(
-        #     self.request, "Ошибка при оформлении заказа, пожалуйста, попробуйте еще раз."
-        # )
+        messages.error(
+            self.request, "Ошибка при оформлении заказа, пожалуйста, попробуйте еще раз."
+        )
         return super().form_invalid(form)
-
-    
+ 
     def get_success_url(self):
         return str(self.success_url)
+    
 
 
 class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
@@ -278,7 +309,10 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
     pre_conditions = [
         "check_basket_is_not_empty",
         "check_basket_is_valid",
+
         "check_shipping_data_is_captured",
+        "check_payment_method_is_captured", # переделай
+        "check_order_time_is_captured", # переделай
     ]
 
     # If preview=True, then we render a preview template that shows all order
@@ -286,11 +320,6 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
 
     def get(self, request, *args, **kwargs):
         return self.handle_place_order_submission(request)
-
-
-    def get_payment_method_display(self, payment_method):
-        return dict(settings.WEBSHOP_PAYMENT_CHOICES).get(payment_method)
- 
     
     def handle_place_order_submission(self, request):
         """
@@ -313,7 +342,6 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         # Start the payment process!
         # This jumps to handle_payment()
         return self.submit(**submission)
-    
 
     def submit(
         self,
@@ -324,6 +352,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         shipping_charge,
         order_note,
         order_time,
+        # min_order,
         email_or_change,
         order_total,
         payment_kwargs=None,
@@ -331,12 +360,12 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         surcharges=None,
     ):
         
-        method = self.checkout_session.payment_method()
+        payment_method = self.checkout_session.payment_method()
 
-        if method is None:
-             method = 'CASH'
+        if payment_method is None:
+             payment_method = 'CASH'
 
-        payment_kwargs['payment_method'] =  method
+        payment_kwargs['payment_method'] =  payment_method
         
         if order_kwargs is None:
             order_kwargs = {}
@@ -379,7 +408,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
                 shipping_method,
                 shipping_charge,
                 order_total,
-                method,
+                payment_method,
                 order_note,
                 order_time,
                 surcharges,
@@ -420,7 +449,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
                 order_total, 
                 source, 
                 order,
-                method,
+                payment_method,
                 email_or_change,
                 **payment_kwargs
             )
@@ -484,6 +513,8 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         signals.post_payment.send_robust(sender=self, view=self, order=order)
         return self.handle_successful_order(order)
 
+    def get_payment_method_display(self, payment_method):
+        return dict(settings.WEBSHOP_PAYMENT_CHOICES).get(payment_method)
 
     def add_source_and_create_order(
             self,
@@ -685,14 +716,15 @@ class UpdateTotalsView(View):
 
     def get(self, request, *args, **kwargs):
         try:
-
             new_method = request.GET.get('shipping_method')
+            zona_id = request.GET.get('zona_id')
             shipping_method = self.get_shipping_method(new_method)
-            shipping_charge = shipping_method.calculate(self.request.basket)
+            shipping_charge, min_order = shipping_method.calculate(self.request.basket, zona_id)
+            min_order_html = "Минимальная сумма заказа для доставки %s ₽" % min_order.money
 
             new_totals = render_to_string("oscar/checkout/checkout_totals.html",{
-                "basket": self.request.basket, "shipping_method": shipping_method, 'shipping_charge': shipping_charge}, request=self.request)
-            return http.JsonResponse({'totals': new_totals, 'status': 202}, status=202)
+                "basket": self.request.basket, "shipping_method": shipping_method, 'shipping_charge': shipping_charge, 'min_order': min_order}, request=self.request)
+            return http.JsonResponse({'totals': new_totals, 'min_order': min_order_html, 'status': 202}, status=202)
         except Exception:
             return http.JsonResponse({'totals': 'error', 'status': 200}, status=200)
 

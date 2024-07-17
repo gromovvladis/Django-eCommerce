@@ -96,7 +96,7 @@ OSCAR_HIDDEN_FEATURES = []
 # Menu structure of the dashboard navigation
 OSCAR_DASHBOARD_NAVIGATION = [
     {
-        "label": "Панель управления",
+        "label": "Статистика",
         "icon": "fas fa-list",
         "url_name": "dashboard:index",
     },
@@ -109,28 +109,32 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:catalogue-product-list",
             },
             {
-                "label": "Типы продуктов",
-                "url_name": "dashboard:catalogue-class-list",
-            },
-            {
                 "label": "Категории",
                 "url_name": "dashboard:catalogue-category-list",
+            },
+            {
+                "label": "Типы продуктов",
+                "url_name": "dashboard:catalogue-class-list",
             },
             {
                 "label": "Ассортименты",
                 "url_name": "dashboard:range-list",
             },
             {
-                "label": "Оповещения о малых остатках",
-                "url_name": "dashboard:stock-alert-list",
+                "label": "Дополнительные товары",
+                "url_name": "dashboard:catalogue-additional-list",
             },
             {
-                "label": "Опиции",
+                "label": "Опции",
                 "url_name": "dashboard:catalogue-option-list",
             },
             {
                 "label": "Группы параметров атрибутов",
                 "url_name": "dashboard:catalogue-attribute-option-group-list",
+            },
+            {
+                "label": "Оповещения о малых остатках",
+                "url_name": "dashboard:stock-alert-list",
             },
         ],
     },
@@ -138,8 +142,12 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "label": "Заказы",
         "icon": "fas fa-shopping-cart",
         "children": [
+            # {
+            #     "label": "Активные заказы",
+            #     "url_name": "dashboard:order-active-list",
+            # },
             {
-                "label": "Заказы",
+                "label": "Все заказы",
                 "url_name": "dashboard:order-list",
             },
             {
@@ -160,10 +168,22 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Клиенты",
                 "url_name": "dashboard:users-index",
             },
+            # {
+            #     "label": "Персонал",
+            #     "url_name": "dashboard:staff-index",
+            # },
+            # {
+            #     "label": "SMS Aero",
+            #     "url_name": "dashboard:sms-aero",
+            # },
+            # {
+            #     "label": "Отправленные СМС",
+            #     "url_name": "dashboard:sended-sms",
+            # },
         ],
     },
     {
-        "label": "Предложения",
+        "label": "Скидки",
         "icon": "fas fa-bullhorn",
         "children": [
             {
@@ -175,7 +195,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:voucher-list",
             },
             {
-                "label": "Набор промокодов",
+                "label": "Наборы промокодов",
                 "url_name": "dashboard:voucher-set-list",
             },
         ],
@@ -193,8 +213,95 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:comms-list",
             },
             {
-                "label": "Отзывы клиентов",
+                "label": "Шаблоны SMS",
+                "url_name": "dashboard:comms-list",
+            },
+            {
+                "label": "Отзывы к товарам",
                 "url_name": "dashboard:reviews-list",
+            },
+            # {
+            #     "label": "Отзывы к заказам",
+            #     "url_name": "dashboard:reviews-orders-list",
+            # },
+        ],
+    },
+    {
+        "label": "Оплата",
+        "icon": "fas fa-payments",
+        "url_name": "dashboard:payments-list",
+    },
+    {
+        "label": "Доставка",
+        "icon": "fas fa-delivery",
+        "children": [
+            {
+                "label": "Статистика",
+                "url_name": "dashboard:delivery-stats",
+            },
+            {
+                "label": "Карта",
+                "url_name": "dashboard:delivery-map",
+            },
+            {
+                "label": "Зоны доставки",
+                "url_name": "dashboard:delivery-zones",
+            },
+            {
+                "label": "Курьеры",
+                "url_name": "dashboard:delivery-couriers-list",
+            },
+            {
+                "label": "Заказы на кухне",
+                "url_name": "dashboard:delivery-kitchen",
+            },
+            {
+                "label": "Заказы в доставке",
+                "url_name": "dashboard:delivery-couriers",
+            },
+        ],
+    },
+    {
+        "label": "Tillypad",
+        "icon": "fas fa-tillypad",
+        "children": [
+            {
+                "label": "Отправленные заказы",
+                "url_name": "dashboard:crm-orders",
+            },
+            {
+                "label": "Стоп-лист",
+                "url_name": "dashboard:crm-stop-list",
+            },
+            {
+                "label": "Прейскурант",
+                "url_name": "dashboard:crm-price-list",
+            },
+            {
+                "label": "Курьеры",
+                "url_name": "dashboard:crm-couriers",
+            },
+            {
+                "label": "Доставки",
+                "url_name": "dashboard:crm-delivery",
+            },
+        ],
+    },
+    {
+        "label": "Телеграм",
+        "icon": "fas fa-telegram",
+        "children": [
+            {
+                "label": "Aдмин",
+                "url_name": "dashboard:telegram-admin",
+            },
+            {
+                "label": "Oшибки",
+                "url_name": "dashboard:telegram-errors",
+            },
+            {
+                "label": "Курьеры",
+                "url_name": "dashboard:telegram-couriers",
             },
         ],
     },
@@ -254,9 +361,7 @@ SMS_AUTH_SETTINGS = {
     "SMS_AUTH_PROVIDER_LOGIN": "s.gromovvladis@gmail.com",
     "SMS_AUTH_PROVIDER_API_TOKEN": "eZKAeSTM6ElHOWJ7Sry6sSSexq9R2faM",
     "SMS_AUTH_PROVIDER_URL": "https://gate.smsaero.ru/v2",
-    
     "SMS_USER_SERIALIZER": "api.serializers.DefaultUserSerializer",
-    "SMS_USER_ALREADY_EXIST": "Пользователь с указаными номером уже существует"
 
 }
 
@@ -309,7 +414,7 @@ OSCAR_ORDER_STATUS_CASCADE = {
 WEBSHOP_PAYMENT_CHOICES = (
     ('SBP', 'Yoomoney'),
     ('CARD', 'Карта'),
-    ('COURIER-CASH', 'Наличными курьеру при получении'),
+    ('CASH', 'Наличными курьеру при получении'),
     ('COURIER-CARD', 'Картой курьеру при получении'),
 )
 
@@ -319,12 +424,12 @@ ONLINE_PAYMENTS = [
 ]
 
 OFFLINE_PAYMENTS = [
-    'COURIER-CASH',
+    'CASH',
     'COURIER-CARD',
 ]
 
 CASH_PAYMENTS = [
-    'COURIER-CASH',
+    'CASH',
 ]
 
 PAYMENT_STATUS = {

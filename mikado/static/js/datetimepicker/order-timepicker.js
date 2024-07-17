@@ -58,30 +58,41 @@ datapicker = new AirDatepicker('#delivery_time_later', {
     minDate: minDate,
     maxDate: maxDate,
 
+    onShow(isFinished){
+        if (isFinished == false){
+            console.log('AirDatepickerTime')
+            AirDatepickerTime()
+        }
+    }
+
 });
 
-$.ajax({
-    type: 'GET',
-    dataType: 'json', 
-    url: url_delivery_later,
-    success: function (response) {
-        minHours = response.datapicker.minHours;
-        maxHours = response.datapicker.maxHours;
-        minDate = new Date(response.datapicker.minDate);
-        maxDate = new Date(response.datapicker.maxDate);
-        selectedDate = new Date(minDate);
-        selectedTime = new Date(minDate).getTime();
+function AirDatepickerTime(){       
+    $.ajax({
+        type: 'GET',
+        dataType: 'json', 
+        url: url_delivery_later,
+        success: function (response) {
+            minHours = response.datapicker.minHours;
+            maxHours = response.datapicker.maxHours;
+            minDate = new Date(response.datapicker.minDate);
+            maxDate = new Date(response.datapicker.maxDate);
+            selectedDate = new Date(minDate);
+            selectedTime = new Date(minDate).getTime();
 
-        datapicker.update({        
-            minHours: minHours,
-            maxHours: maxHours,
-            selectedDates: selectedDate,
-            selectedTime: selectedTime,
-            minDate: minDate,
-            maxDate: maxDate,
-        });
-    },
-    error: function (response) {
-        console.log('error');
-    },
-});
+            datapicker.update({        
+                minHours: minHours,
+                maxHours: maxHours,
+                selectedDates: selectedDate,
+                selectedTime: selectedTime,
+                minDate: minDate,
+                maxDate: maxDate,
+            });
+        },
+        error: function (response) {
+            console.log('error');
+        },
+    });
+}
+
+AirDatepickerTime();

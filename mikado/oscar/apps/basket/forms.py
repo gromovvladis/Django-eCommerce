@@ -81,23 +81,21 @@ def _option_checkbox_field(form, product, option):
     )
 
 
-def _good_integer_field(form, product, option):
+def _good_field(form, product, additional):
     return forms.IntegerField(
-        label=option.name, 
-        required=option.required,
+        label=additional.name, 
         initial=0,
-        help_text=option.help_text, 
+        required=False,
         widget=forms.widgets.NumberInput(attrs={
-            'good': True,
-            'img': option.primary_image,
-            'price': option.price, 
-            'old_price': option.old_price,
-            'weight': option.weight,
+            'additional': True,
+            'img': additional.primary_image,
+            'price': additional.price, 
+            'old_price': additional.old_price,
+            'weight': additional.weight,
             'min': 0,
-            'max': option.max_amount,
+            'max': additional.max_amount,
             'readonly': True,
         }),
-
     )
 
 
@@ -184,7 +182,6 @@ class AddToBasketForm(forms.Form):
         Option.RADIO: _option_radio_field,
         Option.MULTI_SELECT: _option_multi_select_field,
         Option.CHECKBOX: _option_checkbox_field,
-        Option.GOOD: _good_integer_field,
     }
 
     quantity = forms.IntegerField(initial=1, min_value=1, label="Количество")
@@ -240,6 +237,9 @@ class AddToBasketForm(forms.Form):
         """
         for option in product.options:
             self._add_option_field(product, option)
+        
+        for additional in product.additionals:
+            self._add_additional_field(product, additional)
             
 
     def _add_option_field(self, product, option):
@@ -254,6 +254,15 @@ class AddToBasketForm(forms.Form):
         )
         self.fields[option.code] = option_field
 
+    def _add_additional_field(self, product, additional):
+        """
+        Creates the appropriate form field for the product option.
+
+        This is designed to be overridden so that specific widgets can be used
+        for certain types of options.
+        """
+        additional_field = _good_field(self, product, additional)
+        self.fields[additional.code] = additional_field
 
     # Cleaning
 
@@ -337,6 +346,19 @@ class AddToBasketForm(forms.Form):
                 if option.required or value not in EMPTY_VALUES:
                     options.append({"option": option, "value": value})
         return options
+    
+    
+    def cleaned_additionals(self):
+        """
+        Return submitted options in a clean format
+        """
+        additionals = []
+        for additional in self.product.additionals:
+            if additional.code in self.cleaned_data:
+                value = self.cleaned_data[additional.code]
+                if value not in EMPTY_VALUES and value > 0:
+                    additionals.append({"additional": additional, "value": value})
+        return additionals
 
 
 class SimpleAddToBasketMixin:

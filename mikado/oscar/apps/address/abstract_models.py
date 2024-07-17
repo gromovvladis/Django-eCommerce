@@ -16,6 +16,9 @@ class AbstractAddress(models.Model):
     line3 = models.PositiveIntegerField("Подъезд", blank=True, null=True)
     line4 = models.PositiveIntegerField("Этаж", blank=True, null=True)
 
+    coords_long = models.CharField("Координаты долгота", max_length=255, blank=True, null=True)
+    coords_lat = models.CharField("Координаты широта", max_length=255, blank=True, null=True)
+
     # A field only used for searching addresses - this contains all the
     # `search_fields`.  This is effectively a poor man's Solr text field.
     search_text = models.TextField(

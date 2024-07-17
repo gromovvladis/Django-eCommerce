@@ -3,7 +3,7 @@
 <div id="messages">
 {% if messages %}
     {% for message in messages %}
-        <div class="alert {% for tag in message.tags|split %}alert-{% if tag == 'error' %}danger{% else %}{{ tag }}{% endif %} {% endfor %} my-2 px-2 py-3">
+        <div class="alert {% for tag in message.tags|split %}alert-{% if tag == 'error' %}danger{% else %}{{ tag }}{% endif %} {% endfor %}mb-2 mt-sm-2 px-2 py-2">
             {% if 'safe' in message.tags %}
                 {{ message|safe }}
             {% else %}

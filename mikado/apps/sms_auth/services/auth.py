@@ -1,10 +1,8 @@
 from django.contrib.auth import get_user_model
 
-from ..api.exceptions import SMSCodeNotFoundException
 from ..conf import conf
 from ..models import PhoneCode
 from ..utils import SmsService
-from django.contrib import messages
 
 User = get_user_model()
 

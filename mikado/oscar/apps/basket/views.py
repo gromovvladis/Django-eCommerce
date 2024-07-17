@@ -255,7 +255,7 @@ class BasketAddView(FormView):
     def form_valid(self, form):
 
         self.request.basket.add_product(
-            form.product, form.cleaned_data["quantity"], form.cleaned_options()
+            form.product, form.cleaned_data["quantity"], form.cleaned_options(), form.cleaned_additionals()
         )
         
         # Send signal for basket addition

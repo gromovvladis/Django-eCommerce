@@ -221,6 +221,7 @@ class OrderCreator(object):
         order_line = Line._default_manager.create(**line_data)
         self.create_line_price_models(order, order_line, basket_line)
         self.create_line_attributes(order, order_line, basket_line)
+        self.create_line_additionals(order, order_line, basket_line)
         self.create_line_discount_models(order, order_line, basket_line)
         self.create_additional_line_models(order, order_line, basket_line)
 
@@ -273,9 +274,21 @@ class OrderCreator(object):
         Creates the batch line attributes.
         """
         for attr in basket_line.attributes.all():
-            order_line.attributes.create(
-                option=attr.option, type=attr.option.code, value=attr.value
-            )
+            if attr.option:
+                order_line.attributes.create(
+                    option=attr.option, type=attr.option.code, value=attr.value
+                )
+
+    # pylint: disable=unused-argument
+    def create_line_additionals(self, order, order_line, basket_line):
+        """
+        Creates the batch line attributes.
+        """
+        for attr in basket_line.attributes.all():
+            if attr.additional:
+                order_line.attributes.create(
+                    additional=attr.additional, type=attr.additional.code, value=attr.value
+                )
 
     def create_discount_model(self, order, discount):
         """

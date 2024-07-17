@@ -8,9 +8,6 @@ from oscar.core.loading import get_class, get_model
 
 Product = get_model("catalogue", "product")
 Category = get_model("catalogue", "category")
-# ProductAlert = get_model("customer", "ProductAlert")
-# ProductAlertForm = get_class("customer.forms", "ProductAlertForm")
-
 
 class ProductDetailView(DetailView):
     context_object_name = "product"
@@ -66,23 +63,7 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(**kwargs)
-        # ctx["alert_form"] = self.get_alert_form()
-        # ctx["has_active_alert"] = self.get_alert_status()
-        # return ctx
-
-    # def get_alert_status(self):
-    #     # Check if this user already have an alert for this product
-    #     has_alert = False
-    #     if self.request.user.is_authenticated:
-    #         alerts = ProductAlert.objects.filter(
-    #             product=self.object, user=self.request.user, status=ProductAlert.ACTIVE
-    #         )
-    #         has_alert = alerts.exists()
-    #     return has_alert
-
-    # def get_alert_form(self):
-    #     return ProductAlertForm(user=self.request.user, product=self.object)
-
+  
     def send_signal(self, request, response, product):
         self.view_signal.send(
             sender=self,
@@ -115,9 +96,4 @@ class ProductDetailView(DetailView):
             "oscar/%s/detail.html" % self.template_folder,
         ]
 
-
-
-
-# Import catalogue and category view from search app
-# CatalogueView = get_class("search.views", "CatalogueView")
 ProductCategoryView = get_class("search.views", "ProductCategoryView")

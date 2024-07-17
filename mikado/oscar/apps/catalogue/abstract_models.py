@@ -27,8 +27,8 @@ from oscar.models.fields import AutoSlugField, NullCharField
 from oscar.models.fields.slugfield import SlugField
 from oscar.utils.models import get_image_upload_path
 
-CategoryQuerySet, ProductQuerySet = get_classes(
-    "catalogue.managers", ["CategoryQuerySet", "ProductQuerySet"]
+CategoryQuerySet, ProductQuerySet, AdditionalQuerySet = get_classes(
+    "catalogue.managers", ["CategoryQuerySet", "ProductQuerySet", "AdditionalQuerySet"]
 )
 ProductAttributesContainer = get_class(
     "catalogue.product_attributes", "ProductAttributesContainer"
@@ -97,6 +97,16 @@ class AbstractProductClass(models.Model):
     #: Note that you can also set options on a per-product level.
     options = models.ManyToManyField(
         "catalogue.Option", blank=True, verbose_name="Опиция"
+    )
+
+    class_additionals = models.ManyToManyField(
+        "catalogue.Additional",
+        through="ProductAdditional",
+        blank=True,
+        verbose_name="Дополнительные товары класса",
+        help_text=(
+            "Доп товары"
+        ),
     )
 
     class Meta:
@@ -340,6 +350,23 @@ class AbstractCategory(MP_Node):
 
     def get_num_children(self):
         return self.get_children().count()
+    
+    def get_num_products(self):
+        cats = self
+        cats_list = []
+
+        if self.has_children():
+            cats = self.get_ancestors_and_self()
+            for cat in cats:
+                cats_list.append(cat.id)
+        else: 
+            cats_list.append(cats.id)
+  
+        Product = get_model('catalogue', 'Product')
+        prod_nums = Product.objects.filter(categories__in=cats_list).count()
+
+        return prod_nums
+
 
 
 class AbstractProductCategory(models.Model):
@@ -469,11 +496,21 @@ class AbstractProduct(models.Model):
     product_options = models.ManyToManyField(
         "catalogue.Option",
         blank=True,
-        verbose_name="Варианты продукта",
+        verbose_name="Опции продукта",
         help_text=(
             "Параметры — это значения, которые могут быть связаны с элементом, "
             "когда товар добавляется в корзину покупателя. Это может быть "
             "что-то вроде персонализированного сообщения для печати на футболке"
+        ),
+    )
+
+    product_additionals = models.ManyToManyField(
+        "catalogue.Additional",
+        through="ProductAdditional",
+        blank=True,
+        verbose_name="Дополнительные товары продукта",
+        help_text=(
+            "Доп товары"
         ),
     )
 
@@ -674,6 +711,14 @@ class AbstractProduct(models.Model):
         """
         pclass_options = self.get_product_class().options.all()
         return pclass_options | self.product_options.all()
+    
+    @property
+    def additionals(self):
+        """
+        Returns a set of all valid options for this product.
+        It's possible to have options product class-wide, and per product.
+        """
+        return self.get_product_class().class_additionals.all() | self.product_additionals.all()
 
     @cached_property
     def has_options(self):
@@ -683,7 +728,7 @@ class AbstractProduct(models.Model):
         # has_product_options = getattr(self, "has_product_options", None)
         # if has_product_class_options is not None and has_product_options is not None:
         #     return has_product_class_options or has_product_options
-        options = self.options.exclude(type='good')
+        options = self.options.all()
         if options:
             return True
         return False
@@ -696,8 +741,8 @@ class AbstractProduct(models.Model):
         # has_product_options = getattr(self, "has_product_options", None)
         # if has_product_class_options is not None and has_product_options is not None:
         #     return has_product_class_options or has_product_options
-        goods = self.options.filter(type='good')
-        if goods:
+        additionals_qs = self.additionals
+        if additionals_qs:
             return True
         return False
     
@@ -710,8 +755,8 @@ class AbstractProduct(models.Model):
     
     @cached_property
     def has_weight(self):
-        compound = self.attributes.filter(code='weight')
-        if compound:
+        weight = self.attributes.filter(code='weight')
+        if weight:
             return True
         return False
     
@@ -752,6 +797,30 @@ class AbstractProduct(models.Model):
         attributes = self.get_attribute_values()
         pairs = [attribute.summary() for attribute in attributes]
         return ", ".join(pairs)
+
+    def get_prices(self):
+        """
+        Get list of stockrecord prices
+        """
+        prices = []
+        stockrecords = []
+
+        if self.id:
+
+            if self.is_parent:
+                childs = self.children.all()
+                for child in childs:
+                    stockrecords += child.stockrecords.values_list('price')
+            else: 
+                stockrecords += self.stockrecords.values_list('price')
+
+            if stockrecords:
+                for stc in stockrecords:
+                    prices.append(stc[0])
+
+                prices = set([min(prices), max(prices)])
+
+        return prices
 
     def get_title(self):
         """
@@ -1376,7 +1445,6 @@ class AbstractAttributeOption(models.Model):
     Examples: In a Language group, English, Greek, French
     """
 
-
     group = models.ForeignKey(
         "catalogue.AttributeOptionGroup",
         on_delete=models.CASCADE,
@@ -1432,8 +1500,6 @@ class AbstractOption(models.Model):
     MULTI_SELECT = "multi_select"
     CHECKBOX = "checkbox"
 
-    GOOD = "good"
-
     TYPE_CHOICES = (
         (TEXT, "Текст"),
         (INTEGER, "Целое число"),
@@ -1443,7 +1509,6 @@ class AbstractOption(models.Model):
         (RADIO, "Радио кнопка"),
         (MULTI_SELECT, "Multi select"),
         (CHECKBOX, "Флажок"),
-        (GOOD, "Дополнительный товар"),
         
     )
 
@@ -1455,7 +1520,7 @@ class AbstractOption(models.Model):
     type = models.CharField(
         "Тип", max_length=255, default=TEXT, choices=TYPE_CHOICES
     )
-    required = models.BooleanField("Требуется ли эта опция?", default=False)
+    required = models.BooleanField("Обязательная ли эта опция?", default=False)
     option_group = models.ForeignKey(
         "catalogue.AttributeOptionGroup",
         blank=True,
@@ -1480,47 +1545,6 @@ class AbstractOption(models.Model):
         db_index=True,
     )
 
-    description = models.TextField("Описание", blank=True)
-
-    price_currency = models.CharField(
-        "Валюта", max_length=12, default=get_default_currency
-    )
-        
-    price = models.DecimalField(
-        "Цена",
-        decimal_places=2,
-        max_digits=12, 
-        default=0,
-        help_text="Цена продажи",
-    )
-
-    old_price = models.DecimalField(
-        "Цена до скидки",
-        decimal_places=2,
-        max_digits=12, 
-        blank=True,
-        null=True,
-        help_text="Цена до скидки. Оставить пустым, если скидки нет",
-    )
-
-    weight = models.IntegerField(
-        "Вес",
-        default=0,
-        db_index=True,
-        help_text="Вес дополнительного товара",
-    )
-
-    max_amount = models.IntegerField(
-        "Максимальное количество",
-        default=0,
-        db_index=True,
-        help_text="Максимальное количество доп. товара, которое может быть добавлено к основному товару",
-    )
-
-    img = models.ImageField(
-        "Изображение", upload_to="catalogue", blank=True, null=True, max_length=255
-    )
-
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
@@ -1535,10 +1559,6 @@ class AbstractOption(models.Model):
     @property
     def is_select(self):
         return self.type in [self.SELECT, self.MULTI_SELECT]
-
-    @property
-    def is_good(self):
-        return self.type in [self.GOOD]
 
     @property
     def is_radio(self):
@@ -1576,6 +1596,133 @@ class AbstractOption(models.Model):
             )
         return super().clean()
 
+    class Meta:
+        abstract = True
+        app_label = "catalogue"
+        ordering = ["order", "name"]
+        verbose_name = "Опция"
+        verbose_name_plural = "Опиции"
+
+    def __str__(self):
+        return self.name
+
+
+
+class AbstractProductAdditional(models.Model):
+    """
+    'Through' model for product additional
+    """
+    primary_class = models.ForeignKey(
+        "catalogue.ProductClass",
+        on_delete=models.CASCADE,
+        # related_name="class_additionals",
+        verbose_name="Основной класс",
+        blank=True,
+        null=True,
+    )
+
+    primary_product = models.ForeignKey(
+        "catalogue.Product",
+        on_delete=models.CASCADE,
+        # related_name="product_additionals",
+        verbose_name="Основной продукт",
+        blank=True,
+        null=True,
+    )
+
+    additional_product = models.ForeignKey(
+        "catalogue.Additional",
+        on_delete=models.CASCADE,
+        # related_name="product_additional",
+        verbose_name="Рекомендуемый продукт",
+    )
+    ranking = models.PositiveSmallIntegerField(
+        "Порядок",
+        default=0,
+        db_index=True,
+        help_text=(
+            "Определяет порядок товаров. Товар с более высоким значением"
+            "Значение появится перед значением с более низким рейтингом."
+        ),
+    )
+
+    class Meta:
+        abstract = True
+        app_label = "catalogue"
+        ordering = ["primary_class", "primary_product", "-ranking"]
+        unique_together = ("primary_class", "primary_product", "additional_product")
+        verbose_name = "Дополнительный товар"
+        verbose_name_plural = "Дополнительные товары"
+
+
+
+class AbstractAdditional(models.Model):
+    """
+    An additional that can be selected for a particular item when the product
+    is added to the basket. 
+    """
+
+    name = models.CharField("Имя", max_length=128, db_index=True)
+    code = AutoSlugField("Код", max_length=128, unique=True, populate_from="name")
+    upc = models.CharField("Уникальный код товара в базе", max_length=128, unique=True)
+
+    order = models.IntegerField(
+        "Порядок",
+        null=True,
+        blank=True,
+        help_text="Управляет порядком опций продукта на страницах сведений о продукте.",
+    )
+
+    is_public = models.BooleanField(
+        "Является общедоступным",
+        default=True,
+        help_text="Показывать этот продукт в результатах поиска и каталогах.",
+    )
+
+    description = models.TextField("Описание", blank=True)
+
+    price_currency = models.CharField(
+        "Валюта", max_length=12, default=get_default_currency
+    )
+        
+    price = models.DecimalField(
+        "Цена",
+        decimal_places=2,
+        max_digits=12, 
+        default=0,
+        help_text="Цена продажи",
+    )
+
+    old_price = models.DecimalField(
+        "Цена до скидки",
+        decimal_places=2,
+        max_digits=12, 
+        blank=True,
+        null=True,
+        help_text="Цена до скидки. Оставить пустым, если скидки нет",
+    )
+
+    weight = models.IntegerField(
+        "Вес",
+        default=0,
+        help_text="Вес дополнительного товара",
+    )
+
+    max_amount = models.IntegerField(
+        "Максимальное количество",
+        default=1,
+        help_text="Максимальное количество доп. товара, которое может быть добавлено к основному товару",
+    )
+
+    img = models.ImageField(
+        "Изображение", upload_to="catalogue", blank=True, null=True, max_length=255
+    )
+
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
+
+    objects = AdditionalQuerySet.as_manager()
+
     @cached_property
     def primary_image(self):
         """
@@ -1592,8 +1739,8 @@ class AbstractOption(models.Model):
         abstract = True
         app_label = "catalogue"
         ordering = ["order", "name"]
-        verbose_name = "Опция"
-        verbose_name_plural = "Опиция"
+        verbose_name = "Дополнительный товар"
+        verbose_name_plural = "Дополнительные товары"
 
     def __str__(self):
         return self.name

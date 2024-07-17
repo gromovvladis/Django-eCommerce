@@ -1,8 +1,17 @@
 var set_address_form = $('#set_address');
 
+// инициализация адреса
+$(document).ready(function () {
+    var adr = Cookies.get('line1');
+    if (adr){
+        $(line1).attr('readonly', true);
+        $(line1).attr('captured', true);
+        createMap(adr);
+    }
+});
+
+
 $(set_address_form).submit(function () {
-    $(save_address_btn).attr("disabled", true);
-    $(save_address_btn).html('Адрес сохранен');
     $.ajax({
         data: $(this).serialize(), 
         type: $(this).attr('method'), 
@@ -17,12 +26,8 @@ $(set_address_form).on('keypress', 'input', function(event) {
     }
 });
 
-// инициализация адреса
-$(document).ready(function () {
-    var addressCockie = Cookies.get('line1');
-    if (addressCockie){
-        $(address_line1).attr('readonly', true);
-        $(address_line1).attr('captured', true);
-        createMap(addressCockie);
-    }
+$(saveButton).on('click', function () {
+    setTimeout(function() {
+        $(set_address_form).submit();
+    }, 0);
 });

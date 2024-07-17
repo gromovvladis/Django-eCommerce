@@ -28,11 +28,11 @@
                                 </div>
                             </div>
                         </div>
-                        {% if product.has_weight %}
+                        {% comment %} {% if product.has_weight %}
                             <div class="weight-wrapper d-flex align-center">
                                 <div class="v-weight">{{ product.weight }} г</div>
                             </div>
-                        {% endif %}
+                        {% endif %} {% endcomment %}
                     </a>
                 {% endwith %}
             {% endblock %}
@@ -43,7 +43,13 @@
                     <div class="d-flex fill-height fill-width">
                         <a href="{{ product.get_absolute_url }}" title="{{ product.get_title }}" class="d-flex flex-column fill-height fill-width px-2 py-0 px-sm-2" data-id="dish-item-link">
                             
-                            <h3 class="dish__name">{{ product.get_title|truncatewords:4 }}</h3>
+                            <div class="dish_name-wrapper d-flex align-start">
+                                <h3 class="dish__name">{{ product.get_title|truncatewords:4 }}</h3>
+                                <div role="separator" class="v-spacer"></div>
+                                {% if product.has_weight %}
+                                    <div class="v-weight">{{ product.weight }} г</div>
+                                {% endif %}
+                            </div>
 
                             {% if product.short_desc %}
                                 <div class="d-flex align-center mt-1">

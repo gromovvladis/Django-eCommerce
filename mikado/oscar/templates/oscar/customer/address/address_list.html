@@ -5,9 +5,9 @@
 {% load svg_tags %}
 {% load purchase_info_tags %}
 
-{% block title %}{{ page_title }}Адрес доставки | {{ block.super }}{% endblock %}
+{% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
 
-{% block nav_title_center %}Адрес доставки{% endblock %}
+{% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
@@ -24,7 +24,7 @@
 
 {% block tabcontent %}
     <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
-        {% comment %} <div class="v-order__title d-flex justify-space-between mb-2 justify-start align-center"> {% endcomment %}
+        
         <div class="d-none d-sm-flex mb-2">
             <h1>Адрес</h1>
         </div>

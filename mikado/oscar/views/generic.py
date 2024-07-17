@@ -149,6 +149,9 @@ class ObjectLookupView(View):
     # pylint: disable=unused-argument
     def lookup_filter(self, qs, term):
         return qs
+    
+    # def custom_filter(self, qs, term):
+    #     return qs
 
     def paginate(self, qs, page, page_limit):
         total = qs.count()
@@ -182,6 +185,9 @@ class ObjectLookupView(View):
         else:
             if q:
                 qs = self.lookup_filter(qs, q)
+            # else: 
+            #     qs = self.custom_filter(qs)
+
             qs, more = self.paginate(qs, page, page_limit)
 
         return JsonResponse(

@@ -1,6 +1,4 @@
-
-
-from django.conf import settings
+from oscar.apps.shipping.methods import NoShippingRequired
 from oscar.apps.shipping.methods import NoShippingRequired
 
 
@@ -72,38 +70,37 @@ class CheckoutSessionData(object):
     # ================
     # Options:
     # 1. No shipping required (eg digital products)
-    # 2. Ship to new address (entered in a form)
+    # 2. Ship to session address (entered in a form)
     # 3. Ship to an address book address (address chosen from list)
 
     def reset_shipping_data(self):
         self._flush_namespace("shipping")
 
-    def ship_to_new_address(self, address_fields):
+    def set_session_address(self, address_fields):
         """
         Use a manually entered address as the shipping address
         """
-        self._unset("shipping", "new_address_fields")
-        self._set("shipping", "new_address_fields", address_fields)
+        self._unset("shipping", "session_address_fields")
+        self._set("shipping", "session_address_fields", address_fields)
 
-    def new_shipping_address_fields(self):
+    def session_shipping_address_fields(self):
         """
         Return shipping address fields
         """
-        return self._get("shipping", "new_address_fields")
+        return self._get("shipping", "session_address_fields")
 
     def is_shipping_address_set(self):
         """
         Test whether a shipping address has been stored in the session.
 
-        This can be from a new address or re-using an existing address.
+        This can be from a session address or re-using an existing address.
         """
         shipping_method = self.shipping_method_code(self.request.basket)
         if shipping_method == NoShippingRequired().code:
             return True
 
-        new_fields = self.new_shipping_address_fields()
-        has_new_address = new_fields is not None
-        return has_new_address
+        return self.session_shipping_address_fields()
+    
 
     # Shipping method
     # ===============
@@ -132,6 +129,23 @@ class CheckoutSessionData(object):
         Test if a valid shipping method is stored in the session
         """
         return self.shipping_method_code(basket) is not None
+
+
+    # Submission methods
+    # ==================
+
+    def set_order_number(self, order_number):
+        self._set("submission", "order_number", order_number)
+
+    def get_order_number(self):
+        return self._get("submission", "order_number")
+
+    def set_submitted_basket(self, basket):
+        self._set("submission", "basket_id", basket.id)
+
+    def get_submitted_basket_id(self):
+        return self._get("submission", "basket_id")
+
 
     # Payment methods
     # ===============
@@ -171,18 +185,3 @@ class CheckoutSessionData(object):
 
     def email_or_change(self):
         return self._get("submission", "email_or_change",)
-
-    # Submission methods
-    # ==================
-
-    def set_order_number(self, order_number):
-        self._set("submission", "order_number", order_number)
-
-    def get_order_number(self):
-        return self._get("submission", "order_number")
-
-    def set_submitted_basket(self, basket):
-        self._set("submission", "basket_id", basket.id)
-
-    def get_submitted_basket_id(self):
-        return self._get("submission", "basket_id")

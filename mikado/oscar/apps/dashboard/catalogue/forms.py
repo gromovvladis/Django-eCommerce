@@ -14,10 +14,13 @@ StockRecord = get_model("partner", "StockRecord")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductImage = get_model("catalogue", "ProductImage")
 ProductRecommendation = get_model("catalogue", "ProductRecommendation")
+ProductAdditional = get_model("catalogue", "ProductAdditional")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 AttributeOption = get_model("catalogue", "AttributeOption")
 Option = get_model("catalogue", "Option")
+Additional = get_model("catalogue", "Additional")
 ProductSelect = get_class("dashboard.catalogue.widgets", "ProductSelect")
+AdditionalSelect = get_class("dashboard.catalogue.widgets", "AdditionalSelect")
 (RelatedFieldWidgetWrapper, RelatedMultipleFieldWidgetWrapper) = get_classes(
     "dashboard.widgets",
     ("RelatedFieldWidgetWrapper", "RelatedMultipleFieldWidgetWrapper"),
@@ -206,6 +209,19 @@ def _attr_image_field(attribute):
     return forms.ImageField(label=attribute.name, required=attribute.required)
 
 
+def _attr_additional_field(attribute):
+    return forms.IntegerField(label=attribute.name, initial=0)
+
+
+
+
+
+
+
+
+
+
+
 class ProductForm(SEOFormMixin, forms.ModelForm):
     FIELD_FACTORIES = {
         "text": _attr_text_field,
@@ -227,8 +243,11 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         model = Product
         fields = [
             "title",
+            "variant",
             "upc",
+            "short_description",
             "description",
+            "order",
             "is_public",
             "is_discountable",
             "structure",
@@ -256,6 +275,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         else:
             # Only set product class for non-child products
             self.instance.product_class = product_class
+            del self.fields["variant"]
         self.add_attribute_fields(product_class, self.instance.is_parent)
 
         if "slug" in self.fields:
@@ -318,9 +338,9 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         Deletes any fields not needed for child products. Override this if
         you want to e.g. keep the description field.
         """
-        for field_name in ["description", "is_discountable"]:
+        for field_name in ["description", "short_description", "is_discountable"]:
             if field_name in self.fields:
-                del self.fields[field_name]
+                del self.fields[field_name]                
 
     def _post_clean(self):
         """
@@ -334,6 +354,17 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
                 value = self.cleaned_data[field_name]
                 setattr(self.instance.attr, attribute.code, value)
         super()._post_clean()
+
+
+
+
+
+
+
+
+
+
+
 
 
 class StockAlertSearchForm(forms.Form):
@@ -377,6 +408,34 @@ class ProductRecommendationForm(forms.ModelForm):
         fields = ["primary", "recommendation", "ranking"]
         widgets = {
             "recommendation": ProductSelect,
+        }
+
+
+class ProductAdditionalForm(forms.ModelForm):
+    # def __init__(self, *args, data=None, **kwargs):
+    #     product_class = kwargs.pop('product_class')
+    #     class_addit = product_class.class_additionals.all()
+    #     id_list = []
+    #     for add in class_addit:
+    #         id_list.append(add.id)
+    #     super().__init__(*args, **kwargs)
+    #     if id_list:
+    #         self.fields['additional_product'].queryset = self.fields['additional_product'].queryset.exclude(id__in=class_addit)
+    
+    class Meta:
+        model = ProductAdditional
+        fields = ["primary_product", "additional_product", "ranking"]
+        widgets = {
+            "additional_product": AdditionalSelect,
+        }
+
+
+class ProductClassAdditionalForm(forms.ModelForm):
+    class Meta:
+        model = ProductAdditional
+        fields = ["primary_class", "additional_product", "ranking"]
+        widgets = {
+            "additional_product": AdditionalSelect,
         }
 
 
@@ -449,4 +508,8 @@ class OptionForm(forms.ModelForm):
     class Meta:
         model = Option
         fields = ["name", "type", "required", "order", "help_text", "option_group"]
-        # fields = ["name", "type", "required", "order", "help_text"]
+
+class AdditionalForm(forms.ModelForm):
+    class Meta:
+        model = Additional
+        fields = ["name", "upc", "order", "description", "price_currency", "price", "old_price", "weight", "max_amount", "img"]

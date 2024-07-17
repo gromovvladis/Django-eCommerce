@@ -110,6 +110,13 @@
                                         </a>
                                     </li>
                                 {% endif %}
+                                {% if not parent %}
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#product_additional" data-toggle="tab">
+                                            Дополнительные товары
+                                        </a>
+                                    </li>
+                                {% endif %}
                                 <li class="nav-item">
                                     <a class="nav-link" href="#seo" data-toggle="tab">
                                         {% trans 'Search engine optimisation' %}
@@ -340,6 +347,39 @@
                                 {% endblock recommended_products_content %}
                             </div>
                         {% endblock recommended_products %}
+
+                        {% block additional_products %}
+                            <div class="tab-pane" id="product_additional">
+
+                                <div class="tab-pane active">
+                                    <div class="table-header">
+                                        <h3>Дополнительные товары типа продукта '{{ product_class }}'</h3>
+                                    </div>
+                                    <div class="card card-body product-details">
+                                        {% if class_additionals %}
+                                            {% for addit in class_additionals %}
+                                                {{ addit }}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                {% block additional_products_content %}
+                                    <table class="table table-striped table-bordered">
+                                        <caption>Дополнительные товары</caption>
+                                        {{ additional_formset.management_form }}
+                                        {{ additional_formset.non_form_errors }}
+                                        {% for additional_form in additional_formset %}
+                                            <tr>
+                                                <td class="form-inline">
+                                                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=additional_form %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                {% endblock additional_products_content %}
+                            </div>
+                        {% endblock additional_products %}
 
                         {% block seo %}
                             <div class="tab-pane" id="seo">

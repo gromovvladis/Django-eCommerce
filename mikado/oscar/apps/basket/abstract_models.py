@@ -216,7 +216,7 @@ class AbstractBasket(models.Model):
         self._lines = None
 
     # pylint: disable=unused-argument
-    def get_stock_info(self, product, options):
+    def get_stock_info(self, product, options, additionals):
         """
         Hook for implementing strategies that depend on product options
         """
@@ -225,9 +225,7 @@ class AbstractBasket(models.Model):
         return self.strategy.fetch_for_product(product)
 
 
-
-
-    def add_product(self, product, quantity=1, options=None):
+    def add_product(self, product, quantity=1, options=None, additionals=None):
         """
         Add a product to the basket
 
@@ -240,12 +238,16 @@ class AbstractBasket(models.Model):
           created: whether the line was created or updated
 
         """
-        line, created = self.get_line(product, quantity, options)
+        line, created = self.get_line(product, quantity, options, additionals)
 
         if created:
             for option_dict in options:
                 line.attributes.create(
                     option=option_dict["option"], value=option_dict["value"]
+                )
+            for additional_dict in additionals:
+                line.attributes.create(
+                    additional=additional_dict["additional"], value=additional_dict["value"]
                 )
 
         else:
@@ -258,7 +260,6 @@ class AbstractBasket(models.Model):
 
     add_product.alters_data = True
     add = add_product
-
 
 
     def remove_product(self, product, quantity=1, options=None):
@@ -283,16 +284,18 @@ class AbstractBasket(models.Model):
     add = remove_product
 
 
-
-    def get_line(self, product, quantity=1, options=None):
+    def get_line(self, product, quantity=1, options=None, additionals=None):
         if options is None:
             options = []
+        if additionals is None:
+            additionals = []
+
         if not self.id:
             self.save()
 
         # Ensure that all lines are the same currency
         price_currency = self.currency
-        stock_info = self.get_stock_info(product, options)
+        stock_info = self.get_stock_info(product, options, additionals)
 
         if not stock_info.price.exists:
             raise ValueError("Strategy hasn't found a price for product %s" % product)
@@ -317,7 +320,7 @@ class AbstractBasket(models.Model):
 
         # Line reference is used to distinguish between variations of the same
         # product (eg T-shirts with different personalisations)
-        line_ref = self._create_line_reference(product, stock_info.stockrecord, options)
+        line_ref = self._create_line_reference(product, stock_info.stockrecord, options, additionals)
 
         # Determine price to store (if one exists).  It is only stored for
         # audit and sometimes caching.
@@ -338,7 +341,6 @@ class AbstractBasket(models.Model):
         )
 
         return line, created
-
 
 
     def applied_offers(self):
@@ -450,24 +452,33 @@ class AbstractBasket(models.Model):
     # Helpers
     # =======
 
-    def _create_line_reference(self, product, stockrecord, options):
+    def _create_line_reference(self, product, stockrecord, options, additionals):
         """
         Returns a reference string for a line based on the item
         and its options.
         """
         base = "%s_%s" % (product.id, stockrecord.id)
 
-        if not options:
+        if not options and not additionals:
             return base
             
+        repr_list = []
+
         if options:
-            repr_options = [
-                {"option": repr(option["option"]), "value": repr(option["value"])}
+            repr_list += [
+                {"key": repr(option["option"]), "value": repr(option["value"])}
                 for option in options
             ]
-            repr_options.sort(key=itemgetter("option"))
 
-        return "%s_%s" % (base, zlib.crc32(repr(repr_options).encode("utf8")))
+        if additionals:
+            repr_list += [
+                {"key": repr(additional["additional"]), "value": repr(additional["value"])}
+                for additional in additionals
+            ]
+        
+        repr_list.sort(key=itemgetter("key"))
+
+        return "%s_%s" % (base, zlib.crc32(repr(repr_list).encode("utf8")))
     
 
     def _get_total(self, model_property):
@@ -498,7 +509,7 @@ class AbstractBasket(models.Model):
         """
         Test if this basket is empty
         """
-        return self.id is None or self.num_lines == 0
+        return self.id is None or self.num_items == 0
 
     @property
     def total(self):
@@ -913,18 +924,16 @@ class AbstractLine(models.Model):
         ops = []
         d = ""
         for attribute in self.attributes.all():
+            if attribute.option:
+                value = attribute.value
+                if isinstance(value, list):
+                    ops.append(
+                        "%s:  %s"
+                        % (attribute.option.name, (", ".join([str(v) for v in value])))
+                    )
+                else:
+                    ops.append("%s:  %s" % (attribute.option.name, value))
 
-            if attribute.option.type == "good":
-                continue
-
-            value = attribute.value
-            if isinstance(value, list):
-                ops.append(
-                    "%s:  %s"
-                    % (attribute.option.name, (", ".join([str(v) for v in value])))
-                )
-            else:
-                ops.append("%s:  %s" % (attribute.option.name, value))
         if ops:
             d = "%s" % ("\n".join(ops))
         return d
@@ -934,10 +943,10 @@ class AbstractLine(models.Model):
         addit = []
         d = ""
         for attribute in self.attributes.all():
-            if attribute.option.type == "good":
+            if attribute.additional:
                 value = attribute.value
                 if value > 0:
-                    addit.append("%s (%s)" % (attribute.option.name, value))
+                    addit.append("%s (%s)" % (attribute.additional.name, value))
             if addit:
                 d = "%s" % (", ".join(addit))
         return d
@@ -946,8 +955,8 @@ class AbstractLine(models.Model):
     def additions_total(self):
         total = D("0.00")
         for attribute in self.attributes.all():
-            if attribute.option.type == "good":
-                total += attribute.value * attribute.option.price 
+            if attribute.additional:
+                total += attribute.value * attribute.additional.price 
 
         return total
     
@@ -964,7 +973,7 @@ class AbstractLine(models.Model):
         old_price = None
         if self.stockrecord.old_price:
             additions_total = self.additions_total
-            old_price = self.stockrecord.old_price  + additions_total
+            old_price = self.stockrecord.old_price + additions_total
 
         return old_price
 
@@ -981,9 +990,11 @@ class AbstractLineAttribute(models.Model):
         verbose_name="Позиция",
     )
     option = models.ForeignKey(
-        "catalogue.Option", on_delete=models.CASCADE, verbose_name="Опция"
+        "catalogue.Option", on_delete=models.CASCADE, verbose_name="Опция", null=True
     )
-
+    additional = models.ForeignKey(
+        "catalogue.Additional", on_delete=models.CASCADE, verbose_name="Дополнительный товар"
+    )
 
     value = models.JSONField("Значение", encoder=DjangoJSONEncoder)
 

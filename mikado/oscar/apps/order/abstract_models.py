@@ -631,18 +631,15 @@ class AbstractLine(models.Model):
         ops = []
         d = ""
         for attribute in self.attributes.all():
-
-            if attribute.option.type == "good":
-                continue
-
-            value = attribute.value
-            if isinstance(value, list):
-                ops.append(
-                    "%s:  %s"
-                    % (attribute.option.name, (", ".join([str(v) for v in value])))
-                )
-            else:
-                ops.append("%s:  %s" % (attribute.option.name, value))
+            if attribute.option:
+                value = attribute.value
+                if isinstance(value, list):
+                    ops.append(
+                        "%s:  %s"
+                        % (attribute.option.name, (", ".join([str(v) for v in value])))
+                    )
+                else:
+                    ops.append("%s:  %s" % (attribute.option.name, value))
         if ops:
             d = "%s" % ("\n".join(ops))
         return d
@@ -652,10 +649,10 @@ class AbstractLine(models.Model):
         addit = []
         d = ""
         for attribute in self.attributes.all():
-            if attribute.option.type == "good":
+            if attribute.additional:
                 value = attribute.value
                 if value > 0:
-                    addit.append("%s (%s)" % (attribute.option.name, value))
+                    addit.append("%s (%s)" % (attribute.additional.name, value))
             if addit:
                 d = "%s" % (", ".join(addit))
         return d
@@ -836,6 +833,13 @@ class AbstractLineAttribute(models.Model):
         on_delete=models.SET_NULL,
         related_name="line_attributes",
         verbose_name="Опция",
+    )
+    additional = models.ForeignKey(
+        "catalogue.Additional",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="line_additionals",
+        verbose_name="Доп. товар",
     )
 
     type = models.CharField("Тип", max_length=128)

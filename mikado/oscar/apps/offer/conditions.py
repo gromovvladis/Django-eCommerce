@@ -65,6 +65,7 @@ class CountCondition(Condition):
     def is_partially_satisfied(self, offer, basket):
         num_matches = self._get_num_matches(basket, offer)
         return 0 < num_matches < self.value
+        # return 0 <= num_matches < self.value
 
     def get_upsell_message(self, offer, basket):
         num_matches = self._get_num_matches(basket, offer)
@@ -168,6 +169,7 @@ class CoverageCondition(Condition):
 
     def is_partially_satisfied(self, offer, basket):
         return 0 < self._get_num_covered_products(basket, offer) < self.value
+        # return 0 <= self._get_num_covered_products(basket, offer) < self.value
 
     def consume_items(self, offer, basket, affected_lines):
         """
@@ -273,6 +275,7 @@ class ValueCondition(Condition):
     def is_partially_satisfied(self, offer, basket):
         value_of_matches = self._get_value_of_matches(offer, basket)
         return D("0.00") < value_of_matches < self.value
+        # return D("0.00") <= value_of_matches < self.value
 
     def get_upsell_message(self, offer, basket):
         value_of_matches = self._get_value_of_matches(offer, basket)

@@ -249,6 +249,7 @@ INSTALLED_APPS = [
     'oscar.apps.checkout.apps.CheckoutConfig',
     'oscar.apps.address.apps.AddressConfig',
     'oscar.apps.shipping.apps.ShippingConfig',
+    'oscar.apps.delivery.apps.DeliveryConfig',
     'oscar.apps.catalogue.apps.CatalogueConfig',
     'oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig',
     'oscar.apps.communication.apps.CommunicationConfig',
@@ -275,6 +276,11 @@ INSTALLED_APPS = [
     'oscar.apps.dashboard.vouchers.apps.VouchersDashboardConfig',
     'oscar.apps.dashboard.communications.apps.CommunicationsDashboardConfig',
     'oscar.apps.dashboard.shipping.apps.ShippingDashboardConfig',
+
+    'oscar.apps.dashboard.payments.apps.PaymentsDashboardConfig',
+    'oscar.apps.dashboard.crm.apps.CRMDashboardConfig',
+    'oscar.apps.dashboard.delivery.apps.DeliveryDashboardConfig',
+    'oscar.apps.dashboard.telegram.apps.TelegramDashboardConfig',
 
     #vlad
     'rest_framework',

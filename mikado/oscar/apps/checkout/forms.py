@@ -67,6 +67,8 @@ class CheckoutForm(AbstractAddressForm, forms.Form):
             "line3",
             "line4",
             "notes",
+            "coords_long",
+            "coords_lat",
         ]
         
         widgets = {
@@ -93,4 +95,6 @@ class CheckoutForm(AbstractAddressForm, forms.Form):
                 'class' : 'v-input d-flex align-center v-input__padding',
                 'rows': 2,
             }),
+            'coords_long': forms.HiddenInput(),
+            'coords_lat': forms.HiddenInput(),
         }

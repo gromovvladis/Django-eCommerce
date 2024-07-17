@@ -32,8 +32,8 @@ def notify_admin_about_new_order(sender, view, **kwargs):
         'order_id': kwargs['order'].id,
     }
 
-    _notify_admin_about_new_order.delay(ctx)
-    _notify_user_about_new_order.delay(ctx)
+    # _notify_admin_about_new_order.delay(ctx)
+    # _notify_user_about_new_order.delay(ctx)
 
 post_payment.connect(notify_admin_about_new_order) 
 
@@ -48,6 +48,6 @@ def notify_user_about_order_status(sender, order, **kwargs):
         'order_id': kwargs['order'].id,
     }
 
-    _notify_user_about_order_status.delay(ctx)
+    # _notify_user_about_order_status.delay(ctx)
     
 order_status_changed.connect(notify_user_about_order_status)
