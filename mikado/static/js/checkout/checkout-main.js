@@ -7,8 +7,9 @@ var error_flat = $(checkout_errors).find('[data-error="flat"]');
 var error_enter = $(checkout_errors).find('[data-error="enter"]');
 var error_floor = $(checkout_errors).find('[data-error="floor"]');
 var error_amount = $(checkout_errors).find('[data-error="amount"]');
-var minAmountValidate = true;
-var AddressValideted = true;
+
+var amountValid = true;
+var addressValid = true;
 
 var order_time = $('#id_order_time'); 
 var delivery_time_btn = $('[data-id="delivery-time"]');
@@ -30,10 +31,10 @@ const ONLINE_PAYMENT = ['SBP', 'CARD'];
 
 // инициализация адреса
 $(document).ready(function () {
-    var addressInital = $(address_line1).val();
+    var addressInital = $(line1).val();
     if (addressInital) {
-        $(address_line1).attr('readonly', true);
-        $(address_line1).attr('captured', true);
+        $(line1).attr('readonly', true);
+        $(line1).attr('captured', true);
         createMap(addressInital);
     }
     validateCheckout();
@@ -44,7 +45,7 @@ $(shipping_method_buttons).on('click', function(){
     shippingMethod = this.value;
     $(shipping_method).val(shippingMethod)
     $(delivery_method_block).offset({'left':$(this).offset().left});
-    GetTime({address:$(address_line1).val(), coords:[$(coords_long).val(), $(coords_lat).val()], shippingMethod: shippingMethod}).then(function(result) {
+    GetTime({address:$(line1).val(), coords:[$(lon).val(), $(lat).val()], shippingMethod: shippingMethod}).then(function(result) {
         timeCaptured(result);
     });
     if (shippingMethod == "self-pick-up"){
@@ -62,7 +63,7 @@ $(delivery_time_btn).on('click', function(){
     $(delivery_time_block).offset({'left':$(this).offset().left});
     var delivery_time_method = $(this).attr("data-type");
     if (delivery_time_method == "now"){
-        GetTime({address:$(address_line1).val(), coords:[$(coords_long).val(), $(coords_lat).val()], shippingMethod: shippingMethod}).then(function(result) {
+        GetTime({address:$(line1).val(), coords:[$(lon).val(), $(lat).val()], shippingMethod: shippingMethod}).then(function(result) {
             $(order_time).val(result.timeUTC);
             timeCaptured(result);
         });
@@ -154,7 +155,7 @@ function validateCheckout(){
 
 function checkValid (){
     console.log('checkValid')
-    if (minAmountValidate && AddressValideted){
+    if (amountValid && addressValid){
         console.log('checkValid VALID')
         $(submit_btn).attr("disabled", false);
         $(checkout_errors).addClass('d-none');
@@ -167,45 +168,53 @@ function checkValid (){
 
 // Валидация по адреса
 function validateAddress(){
-    AddressValideted = true
+    addressValid = true
     shippingMethod = $(shipping_method).val();
     if (shippingMethod == "zona-shipping"){
 
-        if (!$(address_line1).val() || $(address_line1).attr('captured') == "false" || $(address_line1).attr('valid') == "false"){
-            AddressValideted = false;
+        if (!$(line1).val() || $(line1).attr('captured') == "false" || $(line1).attr('valid') == "false"){
+            addressValid = false;
             error_address.removeClass('d-none');
+            $(line1_container).addClass("not-valid");
         } else {
             error_address.addClass('d-none');
+            $(line1_container).removeClass("not-valid");
         }
 
-        if ($(address_line2).val() > 1000 || $(address_line2).val() < 1){
-            AddressValideted = false;
+        if ($(line2).val() > 1000 || $(line2).val() < 1){
+            addressValid = false;
             error_flat.removeClass('d-none');
+            $(line2).addClass("not-valid");
         } else {
             error_flat.addClass('d-none');
+            $(line2).removeClass("not-valid");
         }
 
-        if ($(address_line3).val() > 100 || $(address_line3).val() < 1){
-            AddressValideted = false;
+        if ($(line3).val() > 100 || $(line3).val() < 1){
+            addressValid = false;
             error_enter.removeClass('d-none');
+            $(line3).addClass("not-valid");
         } else {
             error_enter.addClass('d-none');
+            $(line3).removeClass("not-valid");
         }
 
-        if ($(address_line4).val() > 100 || $(address_line4).val() < 1){
-            AddressValideted = false;
+        if ($(line4).val() > 100 || $(line4).val() < 1){
+            addressValid = false;
             error_floor.removeClass('d-none');
+            $(line4).addClass("not-valid");
         } else {
             error_floor.addClass('d-none');
+            $(line4).removeClass("not-valid");
         }
     }
 }
 
 // Валидация по сумме заказа
 function validateTotals(){
-    minAmountValidate = true;
+    amountValid = true;
     if ($(checkout_totals).find('[data-min-order]').attr("data-min-order") == "false" && shippingMethod == "zona-shipping"){
-        minAmountValidate = false;
+        amountValid = false;
         $(error_amount).removeClass('d-none')
     } else {
         $(error_amount).addClass('d-none') 
@@ -227,7 +236,7 @@ $(submit_btn).on('click', function(){
 // function updateTimes(){
 //     int_id = setInterval(function() {
 //         console.log('upd timer')
-//         GetTime({adrs:$(address_line1).val(), shippingMethod:shippingMethod}).then(function(result) {
+//         GetTime({adrs:$(line1).val(), shippingMethod:shippingMethod}).then(function(result) {
 //             timeCaptured(result);
 //         });
 //     }, 300000);  

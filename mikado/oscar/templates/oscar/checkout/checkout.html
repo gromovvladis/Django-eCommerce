@@ -77,7 +77,7 @@
                     {% block order_contents %}
                         <div class="v-order-checkout__items">
                             {% for line in basket.all_lines %}
-                                <span>{{ line.product.get_title }} ({{ line.quantity }}){% if not forloop.last %},{% endif %}</span>
+                                <span>{{ line.product.get_title }} <span>( {{ line.quantity }} шт. )</span>{% if not forloop.last %}, {% endif %}</span>
                             {% endfor %}
                         </div>
                     {% endblock order_contents %}
@@ -129,9 +129,8 @@
         var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
     </script>
     <script type="application/javascript" src="{% static "js/datetimepicker/air-datepicker.js" %}"></script>
-    {% comment %} <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script> {% endcomment %}
-    {% comment %} <script type="application/javascript" src="{% static "js/delivery/delivery.js" %}"></script> {% endcomment %}
-    <script type="application/javascript" src="{% static "js/delivery/delivery-2gis.js" %}"></script>
+    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
+    <script type="application/javascript" src="{% static "js/delivery/delivery.js" %}"></script>
     <script type="application/javascript" src="{% static "js/checkout/checkout-main.js" %}"></script>
     <script type="application/javascript" src="{% static "js/datetimepicker/order-timepicker.js" %}"></script>
     <script type="application/javascript" src="{% static "js/checkout/voucher.js" %}"></script>

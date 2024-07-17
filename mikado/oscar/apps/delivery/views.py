@@ -58,11 +58,11 @@ class DeliveryNowView(View):
     def delivery(self, coords, address, zona_id, rote_time, basket):
 
         if not coords:
-            geoObject = self.getGeoobject(address)
+            geoObject = self.getGeoobject(address=address)
             coords = self.getCoords(geoObject)
 
         if not address:
-            geoObject = self.getGeoobject(coords)
+            geoObject = self.getGeoobject(coords=coords.split(","))
             address = self.getAddress(geoObject)
 
         if not address or not coords:
@@ -70,11 +70,9 @@ class DeliveryNowView(View):
         
         zones = ZonesUtils.getAvailableZones()
 
-        # if not zona_id or zona_id == "0":
         if not zona_id:
-            zona_id = ZonesUtils.getZonaId(coords, zones)
+            zona_id = ZonesUtils.getZonaId(coords.split(","), zones)
 
-        # if not zona_id:
         if not zona_id or zona_id == "0":
             return {"error": "Адрес вне зоны доставки"}
             
@@ -117,9 +115,9 @@ class DeliveryNowView(View):
 #  Yandex / 2Gis Maps
 # ===================
 
-    def getGeoobject(self, addressInfo):
+    def getGeoobject(self, address=None, coords=None):
         """Получает геобъект по адресу или координатам"""
-        geoObject = self.map.geocode(addressInfo)
+        geoObject = self.map.geocode(address, coords)
         return geoObject
 
 
@@ -135,7 +133,7 @@ class DeliveryNowView(View):
         return address
 
 # ===================
-#  ???
+#  WOrk Time
 # ===================    
 
     def IsWorkingTime(coords):
@@ -143,7 +141,7 @@ class DeliveryNowView(View):
         return True
 
 # ===================
-#  ???
+#  Timers
 # ===================
 
     def deliveryTime(self, coords, zona_id, rote_time, basket):
@@ -165,14 +163,15 @@ class DeliveryNowView(View):
         end_points = []
         end_points.append(coords.split(','))
         rote_time = self.map.routeTime(start_point, end_points)
-        # else:
-        #     rote_time = int(rote_time[:rote_time.find('.')]) // 60
+
 
         return rote_time + coock_time
 
 
     def coockingTime(self, basket):
         return 50
+
+
 
 
 

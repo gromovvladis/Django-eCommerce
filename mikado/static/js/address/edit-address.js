@@ -1,7 +1,7 @@
 var saveAddress = $('#save_address');
-var address_line2 = $('#id_line2');
-var address_line3 = $('#id_line3');
-var address_line4 = $('#id_line4');
+var line2 = $('#id_line2');
+var line3 = $('#id_line3');
+var line4 = $('#id_line4');
 var checkout_errors = $('[data-id="checkout-error-list"]');
 var error_address = $(checkout_errors).find('[data-error="address"]');
 var error_flat = $(checkout_errors).find('[data-error="flat"]');
@@ -36,12 +36,13 @@ $('#edit-address').on('keypress', 'input', function(event) {
 
 // инициализация адреса
 $(document).ready(function () {
-    var addressInital = $(address_line1).val();
-    if (addressInital) {
-        $(address_line1).attr('readonly', true);
-        $(address_line1).attr('captured', true);
-        createMap(addressInital);
+    var adr = $(line1).val();
+    if (adr) {
+        $(line1).attr('readonly', true);
+        $(line1).attr('captured', true);
+        createMap(adr);
     }
+    validateAddress()
 });
 
 validate = () => {
@@ -50,40 +51,54 @@ validate = () => {
 
 // Валидация по адреса
 function validateAddress(){
-    console.log("validate")
-    var Addressvalideted = true
 
-    if (!$(address_line1).val() || $(address_line1).attr('captured') == "false"){
-        Addressvalideted = false;
+    var valid = true;
+    
+    console.log("validate " + valid);
+
+    if (!$(line1).val() || $(line1).attr('captured') == "false" || $(line1).attr('valid') == "false"){
+        console.log('line1 invalid')
+        valid = false;
         error_address.removeClass('d-none');
+        $(line1_container).addClass("not-valid");
     } else {
         error_address.addClass('d-none');
+        $(line1_container).removeClass("not-valid");
     }
 
-    if ($(address_line2).val() > 1000 || $(address_line2).val() < 1){
-        Addressvalideted = false;
+    if ($(line2).val() > 1000 || $(line2).val() < 1){
+        console.log('line2 invalid')
+        valid = false;
         error_flat.removeClass('d-none');
+        $(line2).addClass("not-valid");
     } else {
         error_flat.addClass('d-none');
+        $(line2).removeClass("not-valid");
     }
 
-    if ($(address_line3).val() > 100 || $(address_line3).val() < 1){
-        Addressvalideted = false;
+    if ($(line3).val() > 100 || $(line3).val() < 1){
+        console.log('line3 invalid')
+        valid = false;
         error_enter.removeClass('d-none');
+        $(line3).addClass("not-valid");
     } else {
         error_enter.addClass('d-none');
+        $(line3).removeClass("not-valid");
     }
 
-    if ($(address_line4).val() > 100 || $(address_line4).val() < 1){
-        Addressvalideted = false;
+    if ($(line4).val() > 100 || $(line4).val() < 1){
+        console.log('line4 invalid')
+        valid = false;
         error_floor.removeClass('d-none');
+        $(line4).addClass("not-valid");
     } else {
         error_floor.addClass('d-none');
+        $(line4).removeClass("not-valid");
     }
 
-    console.log('validateAddress' + Addressvalideted)
+    console.log("validate " +  valid)
 
-    if (Addressvalideted){
+    if (valid){
         $(saveAddress).attr("disabled", false);
         $(checkout_errors).addClass('d-none');
     } else {
@@ -91,3 +106,4 @@ function validateAddress(){
         $(checkout_errors).removeClass('d-none');    
     }
 }
+

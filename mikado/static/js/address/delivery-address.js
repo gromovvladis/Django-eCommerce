@@ -2,12 +2,12 @@ var set_address_form = $('#set_address');
 
 // инициализация адреса
 $(document).ready(function () {
-    // var addressCockie = Cookies.get('line1');
-    // if (addressCockie){
-    //     $(address_line1).attr('readonly', true);
-    //     $(address_line1).attr('captured', true);
-    //     createMap(addressCockie);
-    // }
+    var adr = Cookies.get('line1');
+    if (adr){
+        $(line1).attr('readonly', true);
+        $(line1).attr('captured', true);
+        createMap(adr);
+    }
 });
 
 

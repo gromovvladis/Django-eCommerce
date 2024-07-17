@@ -42,7 +42,7 @@ class ZonesUtils:
         """Получает координы обекта, возвращает id зоны доставки, либо 0, если адрес вне зоны доставки"""
         zones = self.getZonesPolygon(zones)
 
-        coords_point = Point(coords[1], coords[0])
+        coords_point = Point(coords[0], coords[1])
 
         for zonaId, zona in zones.items():
             if coords_point.within(zona):

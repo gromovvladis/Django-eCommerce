@@ -248,7 +248,7 @@ class CheckoutSessionMixin(object):
                 shipping_charge, min_order = shipping_method.calculate(basket, shipping_address)
             elif shipping_address.line1:
                 map = Map()
-                geoObject = map.geocode(shipping_address.line1)
+                geoObject = map.geocode(address=shipping_address.line1)
                 coords = map.coordinates(geoObject)
                 zona_id = ZonesUtils.getZonaId(coords)
                 shipping_charge, min_order = shipping_method.calculate(basket, zona_id)
