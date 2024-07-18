@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from django.db import transaction
 from django.utils import timezone
-
+from .conf import conf
 
 class SmsService(ABC):
     @classmethod
@@ -19,7 +19,6 @@ class SmsService(ABC):
 
 
 def valid_to():
-    from .conf import conf
 
     now = timezone.now()
     delta = conf.SMS_TIMELIFE
@@ -29,7 +28,6 @@ def valid_to():
 
 
 def resend_at():
-    from .conf import conf
 
     now = timezone.now()
     delta = conf.SMS_TIMERESEND
@@ -46,8 +44,7 @@ def random_n(n) -> int:
 
 
 def random_code() -> int:
-    from .conf import conf
-
+    
     code = random_n(conf.SMS_AUTH_CODE_LEN)
 
     if conf.SMS_DEBUG:
