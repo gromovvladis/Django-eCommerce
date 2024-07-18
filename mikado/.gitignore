@@ -14,7 +14,6 @@ logs/*
 /share
 /pyvenv.cfg
 /pip-selfcheck.json
-.env
 
 # Vagrant 
 .vagrant
@@ -27,6 +26,7 @@ logs/*
 *.DS_Store
 .python-version
 db.sqlite
+*.env
 /public/static/*
 /public/media/*
 /whoosh_index/*

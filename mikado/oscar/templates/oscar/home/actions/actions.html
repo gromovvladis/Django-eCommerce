@@ -30,65 +30,71 @@
     <div class="action__wrapper d-flex flex-column">
         <div class="v-actions__actions">
 
-            <div class="d-none d-sm-flex mb-2">
-                <h1>Акции</h1>
-            </div>
-            <div class="row">
-                {% for action in actions %}
-                    <div class="v-actions__actions-col col col-12 col-xs-12 col-sm-6 col-md-6 col-lg-6">
-                        <a href="{{ action.get_absolute_url }}" data-id="action-link">
-                            <div class="v-actions__actions-action d-flex flex-column fill-height fill-width">
-                                <div class="v-actions__actions-action-picture fill-width">
-                                    <div class="v-images-chunks fill-width">
-                                        <div class="v-image">
-                                            <div class="v-image__inner" style="padding-bottom: 45%;">
-                                                {% with image=action.primary_image %}
-                                                    {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                                    <img src="{{ thumb.url }}" alt="{{ action.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
-                                                {% endwith %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <h3 class="v-actions__actions-action-title mt-2">{{ action.title }}</h3>
-                                <div class="short-description short-description--nowrap mt-1">{{ action.description|safe }}</div>
-                            </div>
-                        </a>
-                    </div> 
-                {% endfor %}           
-            </div>
-
-
-
-            <div class="d-none d-sm-flex mt-4">
-                <h1>Спецпредложения</h1>
-            </div>
-            <div class="row mt-2">
-                {% for offer in offers %}
-                    {% if offer.is_available %}
+            {% if actions %}
+                <div class="d-none d-sm-flex mb-2">
+                    <h1>Акции</h1>
+                </div>
+                <div class="row">
+                    {% for action in actions %}
                         <div class="v-actions__actions-col col col-12 col-xs-12 col-sm-6 col-md-6 col-lg-6">
-                            <a href="{{ offer.get_absolute_url }}" data-id="action-link">
+                            <a href="{{ action.get_absolute_url }}" data-id="action-link">
                                 <div class="v-actions__actions-action d-flex flex-column fill-height fill-width">
                                     <div class="v-actions__actions-action-picture fill-width">
                                         <div class="v-images-chunks fill-width">
                                             <div class="v-image">
                                                 <div class="v-image__inner" style="padding-bottom: 45%;">
-                                                    {% with image=offer.primary_image %}
+                                                    {% with image=action.primary_image %}
                                                         {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
-                                                        <img src="{{ thumb.url }}" alt="{{ offer.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                                        <img src="{{ thumb.url }}" alt="{{ action.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                                     {% endwith %}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <h3 class="v-actions__actions-action-title mt-2">{{ offer.name }}</h3>
-                                    <div class="short-description short-description--nowrap mt-1">{{ offer.description|safe }}</div>
+                                    <h3 class="v-actions__actions-action-title mt-2">{{ action.title }}</h3>
+                                    <div class="short-description short-description--nowrap mt-1">{{ action.description|safe }}</div>
                                 </div>
                             </a>
                         </div> 
-                    {% endif %} 
-                {% endfor %}           
-            </div>
+                    {% endfor %}           
+                </div>
+            {% endif %}
+
+            {% if offers %}
+                <div class="d-none d-sm-flex mt-4">
+                    <h1>Спецпредложения</h1>
+                </div>
+                <div class="row mt-2">
+                    {% for offer in offers %}
+                        {% if offer.is_available %}
+                            <div class="v-actions__actions-col col col-12 col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                                <a href="{{ offer.get_absolute_url }}" data-id="action-link">
+                                    <div class="v-actions__actions-action d-flex flex-column fill-height fill-width">
+                                        <div class="v-actions__actions-action-picture fill-width">
+                                            <div class="v-images-chunks fill-width">
+                                                <div class="v-image">
+                                                    <div class="v-image__inner" style="padding-bottom: 45%;">
+                                                        {% with image=offer.primary_image %}
+                                                            {% oscar_thumbnail image.original "x755" upscale=False as thumb %}
+                                                            <img src="{{ thumb.url }}" alt="{{ offer.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                                        {% endwith %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h3 class="v-actions__actions-action-title mt-2">{{ offer.name }}</h3>
+                                        <div class="short-description short-description--nowrap mt-1">{{ offer.description|safe }}</div>
+                                    </div>
+                                </a>
+                            </div> 
+                        {% endif %} 
+                    {% endfor %}           
+                </div>
+            {% endif %}
+
+            {% if not actions and not offers %}
+                <p>На данный момент нет активных акций</p>
+            {% endif %}
 
         </div>
     </div>

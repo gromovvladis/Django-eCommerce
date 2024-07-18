@@ -52,6 +52,14 @@ HOST_SCHEME = "http://"
 SECRET_KEY='UtjFCuyjDKmWHe15neauXzHi2rZoRTg6RMbT5JyAdPiAcBP6Rra1'
 
 # =============
+# SMS AERO
+# =============
+
+SMS_AUTH_SETTINGS["SMS_DEBUG"] = True
+SMS_AUTH_SETTINGS["SMS_AUTH_PROVIDER_LOGIN"] = "s.gromovvladis@gmail.com"
+SMS_AUTH_SETTINGS["SMS_AUTH_PROVIDER_API_TOKEN"] = "eZKAeSTM6ElHOWJ7Sry6sSSexq9R2faM"
+
+# =============
 # Yoomaney settings
 # =============
 

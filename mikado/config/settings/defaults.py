@@ -355,14 +355,9 @@ SMS_AUTH_SETTINGS = {
     "SMS_CELERY_FILE_NAME": "run_celery",
     "SMS_AUTH_PROVIDER_FROM": "Mikado",
     "SMS_AUTH_MESSAGE": "Код для входа на сайт:",
-    "SMS_DEBUG": True,
     "SMS_DEBUG_CODE": 1111,
-
-    "SMS_AUTH_PROVIDER_LOGIN": "s.gromovvladis@gmail.com",
-    "SMS_AUTH_PROVIDER_API_TOKEN": "eZKAeSTM6ElHOWJ7Sry6sSSexq9R2faM",
     "SMS_AUTH_PROVIDER_URL": "https://gate.smsaero.ru/v2",
     "SMS_USER_SERIALIZER": "api.serializers.DefaultUserSerializer",
-
 }
 
 # Order processing
