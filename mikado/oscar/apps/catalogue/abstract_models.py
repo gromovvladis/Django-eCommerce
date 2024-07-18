@@ -1715,7 +1715,7 @@ class AbstractAdditional(models.Model):
     )
 
     img = models.ImageField(
-        "Изображение", upload_to="catalogue", blank=True, null=True, max_length=255
+        "Изображение", upload_to="additionals", blank=True, null=True, max_length=255
     )
 
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)

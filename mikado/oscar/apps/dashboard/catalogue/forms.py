@@ -209,19 +209,6 @@ def _attr_image_field(attribute):
     return forms.ImageField(label=attribute.name, required=attribute.required)
 
 
-def _attr_additional_field(attribute):
-    return forms.IntegerField(label=attribute.name, initial=0)
-
-
-
-
-
-
-
-
-
-
-
 class ProductForm(SEOFormMixin, forms.ModelForm):
     FIELD_FACTORIES = {
         "text": _attr_text_field,
@@ -354,15 +341,6 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
                 value = self.cleaned_data[field_name]
                 setattr(self.instance.attr, attribute.code, value)
         super()._post_clean()
-
-
-
-
-
-
-
-
-
 
 
 
