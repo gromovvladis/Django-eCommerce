@@ -10103,7 +10103,7 @@ html.drawer .v-app__side {
 
 
 .v-dish-image {
-    background: #fff url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #fff url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 35px 35px;
     /* overflow: hidden; */
     isolation: isolate
@@ -11819,7 +11819,7 @@ input[type="number"]:focus {
     position: relative;
     overflow: hidden;
     padding-bottom: 44.1379310345%;
-    background: #efefef url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #efefef url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px;
     border-radius: 20px
 }
@@ -13033,7 +13033,7 @@ input[type="number"]:focus {
 } */
 
 .v-dishes.search__loading {
-    background: url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px;
     height: 100px;
     overflow: hidden;
@@ -15442,7 +15442,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 
 .v-main-carousel .v-carousel__item {
-    background: #efefef url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #efefef url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px
 }
 
@@ -15638,7 +15638,7 @@ ymaps[class*="search__suggest-item_selected"] {
     overflow: hidden;
     position: relative;
     border-radius: 16px;
-    background: #efefef url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #efefef url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px
 }
 
@@ -15665,7 +15665,7 @@ ymaps[class*="search__suggest-item_selected"] {
     position: relative;
     overflow: hidden;
     padding-bottom: 44.1379310345%;
-    background: #efefef url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #efefef url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px;
     border-radius: 20px
 }
@@ -16702,7 +16702,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-banner-image {
-    background: #efefef url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #efefef url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px;
     overflow: hidden
 }
@@ -16809,7 +16809,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-map {
-    background: #fff url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #fff url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px;
 }
 
@@ -17233,7 +17233,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-actions__actions-action-picture {
     position: relative;
-    background: #efefef url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #efefef url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px;
     border-radius: 20px;
     overflow: hidden;
@@ -17268,7 +17268,7 @@ ymaps[class*="search__suggest-item_selected"] {
     overflow: hidden;
     position: relative;
     border-radius: 20px;
-    background: #efefef url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #efefef url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px
 }
 
@@ -17471,7 +17471,7 @@ ymaps[class*="search__suggest-item_selected"] {
     max-width: 88px;
     -ms-flex-negative: 0;
     flex-shrink: 0;
-    background: #efefef url(../../svg/loading/loading.svg) no-repeat 50%;
+    background: #efefef url(../../static/svg/loading/loading.svg) no-repeat 50%;
     background-size: 48px 48px;
     overflow: hidden
 }

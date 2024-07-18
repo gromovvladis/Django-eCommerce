@@ -1,6 +1,44 @@
 from .settings import *
 
 # =============
+# DATABASES
+# =============
+
+DATABASES = {
+    "default": {
+        "ENGINE": config("DATABASE_ENGINE"),
+        "NAME": Path(__file__).resolve().parent.parent.parent / config("DATABASE_NAME"),
+        "USER": config("DATABASE_USER"),
+        "PASSWORD": config("DATABASE_PASSWORD"),
+        "HOST": config("DATABASE_HOST"),
+        "PORT": config("DATABASE_PORT"),
+        'ATOMIC_REQUESTS': True,
+    }
+}
+
+# =============
+# MIDDLEWARE
+# =============
+
+MIDDLEWARE += ['whitenoise.middleware.WhiteNoiseMiddleware']
+
+# =============
+# MEDIA
+# =============
+
+MEDIA_ROOT = location('public/media')
+
+# =============
+# STATIC
+# =============
+
+STATIC_PRIVATE_ROOT = location('static')
+ICON_DIR = location('static/svg')
+STATICFILES_DIRS = (
+    location('static'),
+)
+
+# =============
 # SECURE
 # =============
 
@@ -26,41 +64,3 @@ Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'
 
 YANDEX_API_KEY = "27bbbf17-40e2-4c01-a257-9b145870aa2a"
 GIS_API_KEY = "6013c28d-62ae-4764-a509-f403d2ee92c6"
-
-# =============
-# MEDIA
-# =============
-
-MEDIA_ROOT = location('public/media')
-
-# =============
-# STATIC
-# =============
-
-STATIC_PRIVATE_ROOT = location('static')
-ICON_DIR = location('static/svg')
-STATICFILES_DIRS = (
-    location('static'),
-)
-
-# =============
-# DATABASES
-# =============
-
-DATABASES = {
-    "default": {
-        "ENGINE": config("DATABASE_ENGINE"),
-        "NAME": Path(__file__).resolve().parent.parent.parent / config("DATABASE_NAME"),
-        "USER": config("DATABASE_USER"),
-        "PASSWORD": config("DATABASE_PASSWORD"),
-        "HOST": config("DATABASE_HOST"),
-        "PORT": config("DATABASE_PORT"),
-        'ATOMIC_REQUESTS': True,
-    }
-}
-
-# =============
-# MIDDLEWARE
-# =============
-
-MIDDLEWARE += ['whitenoise.middleware.WhiteNoiseMiddleware']
