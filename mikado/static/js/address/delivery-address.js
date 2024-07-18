@@ -12,6 +12,7 @@ $(document).ready(function () {
 
 
 $(set_address_form).submit(function () {
+    console.log('Form submitted');
     $.ajax({
         data: $(this).serialize(), 
         type: $(this).attr('method'), 

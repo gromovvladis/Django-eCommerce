@@ -157,7 +157,7 @@ function CreateSuggestView(){
                 $($(suggests).get(0).children[selection]).addClass('hover');
                 scrollToElement(selection, true);
             }
-        } else if (event.key === 'Enter') {
+        } else if (event.key === 'Enter' && li_list.length > 0) {
             suggestViewSelected(li_list[selection]);
             selection = 0;
         }
@@ -233,6 +233,7 @@ function getSuggestList(query){
 // подсказка выбрана
 function suggestViewSelected(suggestion){
     var hint;
+    console.log(suggestion)
     switch (suggestion.type) {
         case 'building':
         case 'branch':

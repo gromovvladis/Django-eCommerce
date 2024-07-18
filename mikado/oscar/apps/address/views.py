@@ -28,6 +28,7 @@ class SetAddressView(PageTitleMixin, generic.CreateView):
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return super().post(request, *args, **kwargs)
+        return http.JsonResponse({"saved": "cookies"}, status=200)
     
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
