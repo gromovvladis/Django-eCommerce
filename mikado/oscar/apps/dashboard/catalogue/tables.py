@@ -181,6 +181,11 @@ class OptionTable(DashboardTable):
 
 
 class AdditionalTable(DashboardTable):
+    img = TemplateColumn(
+        verbose_name="Изображение",
+        template_name="oscar/dashboard/catalogue/additional_row_image.html",
+        orderable=False,
+    )
     name = TemplateColumn(
         verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/additional_row_name.html",

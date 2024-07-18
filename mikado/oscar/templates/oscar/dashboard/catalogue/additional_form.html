@@ -37,7 +37,7 @@
 {% block navtext %}{{ title }}{% endblock %}
 
 {% block dashboard_content %}
-    <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors">
+    <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="row">
