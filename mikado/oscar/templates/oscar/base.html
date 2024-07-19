@@ -53,14 +53,14 @@
         {% block SVG %}
         {% endblock %}
 
+        {# External JS scripts #}
+        {% block extrascripts %}{% endblock %}
+
         {% compress js %}
             {# Local scripts #}
             {% block scripts %}{% endblock %}
         {% endcompress %}
             
-        {# External JS scripts #}
-        {% block extrascripts %}{% endblock %}
-        
         {# Block for body onload functions #}
         <script>$(function() { {% block onbodyload %}{% endblock %} })</script>
 
