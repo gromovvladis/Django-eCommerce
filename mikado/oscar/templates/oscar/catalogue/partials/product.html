@@ -3,10 +3,10 @@
 {% load reviews_tags %}
 {% load purchase_info_tags %}
 {% load svg_tags %}
-{% load cache %}
+{% comment %} {% load cache %} {% endcomment %}
 
 {% block product %}
-    {% cache 1800 product product_comapact product.id %}
+    {% comment %} {% cache 1800 product product_comapact product.id %} {% endcomment %}
     {% purchase_info_for_product request product as session %}
         {% comment %}------------- категории item ---------------{% endcomment %}
         <div class="dish d-flex flex-column v-card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
@@ -82,5 +82,5 @@
                 </div>
             </div>
         </div>
-    {% endcache %}
+    {% comment %} {% endcache %} {% endcomment %}
 {% endblock %}
