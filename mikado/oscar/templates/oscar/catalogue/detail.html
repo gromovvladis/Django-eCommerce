@@ -179,7 +179,7 @@
     {% endcache %}
 {% endblock content %}
 
-{% block extrascripts %}
+{% block scripts %}
     {{ block.super }}
     <script>
         var url_product = "{% url 'basket:add' pk=product.pk  %}"

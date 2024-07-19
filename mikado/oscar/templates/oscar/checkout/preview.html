@@ -160,13 +160,12 @@
 
 {% endblock content %}
 
-{% block extrascripts %}
+{% block scripts %}
     {{ block.super }}
     <script>
         action_back = function(){window.location.href="{{ homepage_url }}"}
     </script>
 {% endblock %}
-
 
 {% block SVG %}
     <svg style="display: none">

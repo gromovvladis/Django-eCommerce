@@ -56,11 +56,12 @@
         {% compress js %}
             {# Local scripts #}
             {% block scripts %}{% endblock %}
-            {# Additional JS scripts #}
-            {% block extrascripts %}{% endblock %}
-            {# Block for body onload functions #}
         {% endcompress %}
             
+        {# External JS scripts #}
+        {% block extrascripts %}{% endblock %}
+        
+        {# Block for body onload functions #}
         <script>$(function() { {% block onbodyload %}{% endblock %} })</script>
 
     </body>
