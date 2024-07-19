@@ -1,0 +1,69 @@
+{% load image_tags %}
+{% load product_tags %}
+{% load svg_tags %}
+
+<div class="d-flex flex-column fill-width mb-5 mb-md-8">
+
+    <div class="home__subtitle mb-2 mb-md-2 d-flex align-center">
+        <h2>{{ promo_cat.title }}</h2>
+        <div role="separator" class="v-spacer"></div>
+        <a href="{{ promo_cat.get_absolute_url }}" class="home__category-link" data-test-id="home-categories-link-new" data-id="new"> 
+            Смотреть все 
+        </a>
+    </div>
+
+    <div class="v-dish-slider fill-width v-dish-slider--dish-small">
+        <div class="v-h-nav--wrapper" data-id="slider-action" data-per-page="3">
+
+            <button type="button" class="v-h-nav--button" data-id="swiper-prev">
+                {% icon file_name='interface/arrow-home' stroke="#000" %}
+            </button>
+
+            <div class="v-h-nav" data-id="slider-swiper">
+                <div class="v-h-nav--inner swiper-wrapper">                                   
+                    {% if promo_cat.has_products %}
+                        {% for product in promo_cat.all_products|slice:":6" %}
+                            <div class="v-h-nav--item v-h-nav--width swiper-slide">
+                                <div class="v-dish-order d-flex fill-width fill-height mb-1 v-dish-order--info">
+                                    <div class="v-dish-order__picture">
+                                        <a href="{{ product.get_absolute_url }}" class="d-block" data-id="dish-order-image-link">
+                                            <div class="v-dish-image fill-width">
+                                                <div class="v-images-chunks pos-relative">
+                                                    <div class="v-image">
+                                                        <div class="v-image__inner" style="padding-bottom: 100%;">
+                                                            {% with image=product.primary_image %}
+                                                                {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
+                                                                <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                                            {% endwith %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>                                                
+                                    </div>                                            
+                                    <a href="{{ product.get_absolute_url }}" class="v-dish-order__content d-flex flex-column fill-width">
+                                        <div class="d-flex align-start fill-width">
+                                            <div class="v-dish-order__name-wrapper d-flex flex-column fill-width">
+                                                <span class="v-dish-order__name mb-1" data-id="dish-order-link">{{ product.title }}</span>
+                                                {% if product.short_desc %}
+                                                    <span class="short-description">{{ product.short_desc }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div role="separator" class="v-spacer"></div>
+                                        {% include "oscar/catalogue/partials/product_price.html" %}
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <button type="button" class="v-h-nav--button right"data-id="swiper-next"> 
+                {% icon file_name='interface/arrow-home' stroke="#000" %}
+            </button>
+
+        </div>
+    </div>
+</div>

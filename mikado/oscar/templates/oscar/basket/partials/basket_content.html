@@ -5,7 +5,6 @@
 {% load widget_tweaks %}
 {% load svg_tags %}
 
-
 <div class="cart-page__wrapper d-flex flex-column flex-md-row pd-0 pd-sm-2">
     <div class="v-cart__block pos-relative d-flex flex-column fill-width">
 
@@ -29,7 +28,6 @@
                     <form method="post" data-id="basket-formset" class="v-cart-form d-flex flex-column fill-width basket_summary">
                         {% csrf_token %}
                         {{ formset.management_form }}
-                        {% comment %} <div class="d-flex flex-column fill-width shrink pb-2"> {% endcomment %}
                         <div class="d-flex flex-column fill-width shrink">
                             <div class="v-cart-items shrink">
                                 {% for form in formset %}
@@ -40,7 +38,7 @@
                                             <div class="v-dish-order d-flex fill-width">
 
                                                 <div class="v-dish-order__picture">
-                                                    <a href="{{ product.get_absolute_url }}" aria-current="page"
+                                                    <a href="{{ product.get_absolute_url }}" aria-label="{{ product.get_title }}
                                                         class="d-block router-link-exact-active router-link-active"
                                                         data-id="dish-order-image-link">
                                                         <div class="v-dish-image fill-width">
@@ -86,15 +84,13 @@
                                                     <div class="d-flex fill-width mt-1 pos-relative align-center">
 
                                                         <div class="v-order-button" data-id="order-buttons">
-                                                            <div class="v-order-button--dec">
-                                                                <button type="button" data-id="order-button-minus" class="v-order-button--elem">
-                                                                    <svg viewBox="0 0 24 24" fill="none">
-                                                                        <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                                    </svg>
-                                                                </button>
-                                                                {% render_field form.quantity class="v-order-button--elem v-order-button--value" readonly="readonly" data-id="quantity-input" %}
-                                                            </div>
-                                                            <button type="button" data-id="order-button-plus" class="v-order-button--elem">
+                                                            <button type="button" data-id="order-button-minus" class="v-order-button--elem" aria-label="Уменьшить">
+                                                                <svg viewBox="0 0 24 24" fill="none">
+                                                                    <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                </svg>
+                                                            </button>
+                                                            {% render_field form.quantity class="v-order-button--elem v-order-button--value" readonly="readonly" data-id="quantity-input" %}
+                                                            <button type="button" data-id="order-button-plus" class="v-order-button--elem" aria-label="Увеличить">
                                                                 <svg viewBox="0 0 24 24" fill="none">
                                                                     <path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                                                 </svg>

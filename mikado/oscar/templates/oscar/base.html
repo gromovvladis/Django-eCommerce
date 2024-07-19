@@ -1,4 +1,6 @@
 {% load static %}
+{% load compress %}
+
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"ru" }}">
     <head>
@@ -13,10 +15,11 @@
         {% endblock %}
 
         {# Block where global CSS will go. #}
-        {% block styles %}{% endblock %}
-
-        {# Additional CSS - specific to certain pages #}
-        {% block extrastyles %}{% endblock %}
+        {% compress css %}
+            {% block styles %}{% endblock %}
+            {# Additional CSS - specific to certain pages #}
+            {% block extrastyles %}{% endblock %}
+        {% endcompress %}
 
         {% block extrahead %}{% endblock %}
 
@@ -50,20 +53,15 @@
         {% block SVG %}
         {% endblock %}
 
-        {# Local scripts #}
-        {% block scripts %}
-        {% endblock %}
+        {% compress js %}
+            {# Local scripts #}
+            {% block scripts %}{% endblock %}
+            {# Additional JS scripts #}
+            {% block extrascripts %}{% endblock %}
+            {# Block for body onload functions #}
+        {% endcompress %}
+            
+        <script>$(function() { {% block onbodyload %}{% endblock %} })</script>
 
-        {# Additional JS scripts #}
-        {% block extrascripts %}{% endblock %}
-
-        {# Block for body onload functions #}
-        <script>
-            $(function() {
-                {% block onbodyload %}{% endblock %}
-            });
-        </script>
-
-        {# Page meta-data - this is populated by the 'metadata' template context processor #}
     </body>
 </html>

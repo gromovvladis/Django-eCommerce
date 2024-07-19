@@ -12,10 +12,11 @@ from rest_framework.permissions import AllowAny
 from oscar.views import sort_queryset
 from django.template.loader import render_to_string
 
+from user_agents import parse
+
 ConditionalOffer = get_model("offer", "ConditionalOffer")
 Action = get_model("home", "Action")
 PromoCategory = get_model("home", "PromoCategory")
-
 
 class GetCookiesView(APIView):
 
@@ -51,6 +52,9 @@ class HomeView(ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["summary"] = "Главная"
+        
+        agent = parse(self.request.META['HTTP_USER_AGENT'])
+        ctx["is_mobile"] = agent.is_mobile
 
         promo_cats = cache.get('promo_cats_all')
 

@@ -32,10 +32,16 @@ MEDIA_ROOT = location('public/media')
 # STATIC
 # =============
 
+COMPRESS_ROOT = location('public/static/cache')
 STATIC_PRIVATE_ROOT = location('static')
 ICON_DIR = location('static/svg')
 STATICFILES_DIRS = (
     location('static'),
+)
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 # =============

@@ -18,7 +18,7 @@
             {% icon file_name='interface/arrow-left' size=24 stroke="#fff"%}
           </a>
 
-          <button onclick="window.location.href='{% url 'address:pickup-address' %}'" class="v-button v-button--main mt-md-0">
+          <button onclick="window.location.href='{% url 'address:pickup-address' %}'" class="v-button v-button--main mt-md-0" aria-label="Адрес самовывоза">
             <span class="v-app-footer__pickup_desktop ml-1">Смотреть на карте</span>
             {% icon file_name='map/location-pin' size=32 fill="#fff" %}
           </button>
@@ -81,17 +81,17 @@
         <div class="v-app-footer__copyright d-flex flex-column align-start justify-center pt-2">
           <div class="v-app-footer__bootom_links fill-width d-flex justify-space-between align-end">
             <div class="v-app-footer__bootom_links_and_social d-flex">
-              <a href="{{ homepage_url }}" class="v-app-footer__bootom_logo mr-2">
+              <a href="{{ homepage_url }}" class="v-app-footer__bootom_logo mr-2" aria-label="Домашняя страница">
                 {% icon file_name='footer/logo' size=25 fill="#24a66e"%}
               </a>
               <a href="#" data-id="footer-actions-link" class="mr-2">Служба поддержики</a>
               <a href="#" data-id="footer-about-link">Сотрудничество</a>
             </div>
             <div class="d-flex">
-              <a href="#" class="v-app-footer__bootom_social d-flex align-center justify-center mr-1">
+              <a href="#" class="v-app-footer__bootom_social d-flex align-center justify-center mr-1" aria-label="Телеграм">
                 {% icon file_name='footer/telegram' size=24 fill="#fff"%}
               </a>
-              <a href="#" class="v-app-footer__bootom_social d-flex align-center justify-center">
+              <a href="#" class="v-app-footer__bootom_social d-flex align-center justify-center" aria-label="Вконтакте">
                 {% icon file_name='footer/vk' size=24 fill="#fff"%}
               </a>
             </div>

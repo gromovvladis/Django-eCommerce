@@ -290,6 +290,7 @@ INSTALLED_APPS = [
     'smsaero',
     'apps.sms_auth.apps.SmsConfig',
     'apps.user.apps.UserConfig',
+    'compressor',
 
     # 3rd-party apps that Oscar depends on
     'widget_tweaks',

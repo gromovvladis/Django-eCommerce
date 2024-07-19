@@ -28,6 +28,7 @@ dill==0.3.8
 distlib==0.3.8
 distro==1.9.0
 Django==4.2.11
+django-appconf==1.0.6
 django-celery-beat==2.6.0
 django-celery-results==2.5.1
 django-debug-toolbar==4.2.0
@@ -42,6 +43,7 @@ django-tables2==2.7.0
 django-timezone-field==6.1.0
 django-treebeard==4.7.1
 django-widget-tweaks==1.5.0
+django_compressor==4.5
 djangorestframework==3.15.1
 exceptiongroup==1.2.0
 executing==2.0.1
@@ -94,10 +96,12 @@ python-stdnum==1.20
 pytils==0.4.1
 pytz==2024.1
 PyYAML==6.0.1
+rcssmin==1.1.2
 redis==5.0.3
 regex==2024.4.28
 requests==2.31.0
 rich==13.7.1
+rjsmin==1.2.2
 shapely==2.0.4
 six==1.16.0
 smsaero-api==2.2.0
@@ -113,7 +117,9 @@ traitlets==5.14.2
 types-python-dateutil==2.9.0.20240316
 typing_extensions==4.10.0
 tzdata==2024.1
+ua-parser==0.18.0
 urllib3==2.2.1
+user-agents==2.2.0
 userpath==1.9.2
 vine==5.1.0
 virtualenv==20.25.1

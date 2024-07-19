@@ -1,25 +1,20 @@
-{% load i18n %}
 {% load image_tags %}
 
 {% with all_images=product.get_all_images %}
-    {# use length rather then count as the images get queried anyways #}
 
     {% if all_images|length > 1 %}
 
         <div id="product_gallery" class="carousel slide">
-
             <div class="img-thumbnail">
                 <div class="carousel-inner">
                 {% for image in all_images %}
                     <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        {% oscar_thumbnail image.original "x720" upscale=False as thumb %}
+                        {% oscar_thumbnail image.original "x550" upscale=False as thumb %}
                         <img src="{{ thumb.url }}" loading="lazy" class="img-fluid" alt="{{ product.get_title }}" />
                     </div>
                 {% endfor %}
                 </div>
             </div>
-
-
         </div>
 
     {% else %}

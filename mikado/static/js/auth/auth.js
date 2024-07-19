@@ -1,16 +1,20 @@
 var auth_modal = $('#auth_modal');
 var modalLoaded = false;
-var redirectURL
+var redirectURL;
 
-$.ajax({
-    type: 'GET', 
-    url: url_auth_api,
-    success: function (response) {
-        $(auth_modal).html(response.auth_modal);
-        authModalLoaded();
-    },
-});
-
+function loadAuthModal(redirect_url) {
+    $.ajax({
+        type: 'GET', 
+        url: url_auth_api,
+        success: function (response) {
+            $(auth_modal).html(response.auth_modal);
+            authModalLoaded();
+            $(auth_modal).toggleClass('d-none');
+            $(document.body).toggleClass('fixed');
+            redirectURL.value = redirect_url;
+        },
+    });
+}
 
 function authModalLoaded(){
     var btn_sms = $('#sms_form_btn');
@@ -172,14 +176,9 @@ function authModalLoaded(){
 function openAuthModal(redirect_url=''){
     if (modalLoaded){
         $(auth_modal).toggleClass('d-none');
-        redirectURL.value = redirect_url;
         $(document.body).toggleClass('fixed');
+        redirectURL.value = redirect_url;
     } else {
-        if (redirect_url){
-            window.location.href = redirect_url;
-        } else{
-            window.location.href = url_auth;
-        }
+        loadAuthModal(redirect_url)
     }
 }
-                    

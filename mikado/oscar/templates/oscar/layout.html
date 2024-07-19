@@ -24,7 +24,7 @@
                 <div class="v-app-nav d-flex align-center py-0 fill-height">
                                         
                     {% comment %} ------------- кнопка назад --------------- {% endcomment %}
-                    <button onclick="getBack(); return false" data-id="back-main-btn" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink">
+                    <button onclick="getBack(); return false" data-id="back-main-btn" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink" aria-label="Назад">
                         <span class="v-button__wrapper">
                             <span class="d-flex">
                                 {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
@@ -59,17 +59,19 @@
                             {% endfor %}
                         {% endif %}
                         
-                        <div role="separator" class="v-spacer"></div>
+                        <li role="separator" class="v-spacer"></li>
 
                         {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
-                        <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
-                            class="v-button v-app-nav__button--search v-button--small justify-center mr-1 shrink">
-                            <span class="v-button__wrapper">
-                                <span class="d-flex">
-                                    {% icon file_name='header/search' size=20 fill='#111'%}
+                        <li>
+                            <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
+                                class="v-button v-app-nav__button--search v-button--small justify-center mr-1 shrink" aria-label="Поиск">
+                                <span class="v-button__wrapper">
+                                    <span class="d-flex">
+                                        {% icon file_name='header/search' size=20 fill='#111'%}
+                                    </span>
                                 </span>
-                            </span>
-                        </a>
+                            </a>
+                        </li>
                     </ul>
 
                     <div class="v-app-nav__title v-app-nav__title--center d-flex d-sm-none text-center">

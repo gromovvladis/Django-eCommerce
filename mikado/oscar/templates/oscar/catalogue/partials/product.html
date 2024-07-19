@@ -1,94 +1,86 @@
 {% load display_tags %}
-{% load i18n %}
-{% load static %}
 {% load image_tags %}
 {% load reviews_tags %}
 {% load purchase_info_tags %}
-
 {% load svg_tags %}
+{% load cache %}
 
 {% block product %}
-{% purchase_info_for_product request product as session %}
+    {% cache 1800 product product_comapact product.id %}
+    {% purchase_info_for_product request product as session %}
+        {% comment %}------------- категории item ---------------{% endcomment %}
+        <div class="dish d-flex flex-column v-card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
+            <div class="dish-wrapper grow-1">
 
-    {% comment %}------------- категории item ---------------{% endcomment %}
-    <div class="dish d-flex flex-column v-card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
-        <div class="dish-wrapper grow-1">
-
-            {% comment %}------------- картинка категории ---------------{% endcomment %}
-            {% block product_image %}
-                {% with image=product.primary_image %}
-                    {% oscar_thumbnail image.original "x550" upscale=False as thumb %}
-                    <a href="{{ product.get_absolute_url }}" class="dish-item-image pos-relative" data-id="dish-item-image-link">
-                        <div class="v-dish-image v-dish-image--product fill-width">
-                            <div class="v-images-chunks fill-height pos-relative">
-                                <div class="fill-height pos-relative none-select">
-                                    <div class="v-image__inner v-image__inner--product">
-                                        <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                {% comment %}------------- картинка товара ---------------{% endcomment %}
+                {% block product_image %}
+                    {% with image=product.primary_image %}
+                        {% oscar_thumbnail image.original "x350" upscale=False as thumb %}
+                        <a href="{{ product.get_absolute_url }}" class="dish-item-image pos-relative" data-id="dish-item-image-link" aria-label="{{ product.get_title }}">
+                            <div class="v-dish-image v-dish-image--product fill-width">
+                                <div class="v-images-chunks fill-height pos-relative">
+                                    <div class="fill-height pos-relative none-select">
+                                        <div class="v-image__inner v-image__inner--product">
+                                            <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        {% comment %} {% if product.has_weight %}
-                            <div class="weight-wrapper d-flex align-center">
-                                <div class="v-weight">{{ product.weight }} г</div>
-                            </div>
-                        {% endif %} {% endcomment %}
-                    </a>
-                {% endwith %}
-            {% endblock %}
+                        </a>
+                    {% endwith %}
+                {% endblock %}
 
-            <div class="pos-relative product-description d-flex flex-column">
-                {% comment %} ------------- название категории --------------- {% endcomment %}
-                <div class="grow-1 pd-0 v-card__text mt-2">
-                    <div class="d-flex fill-height fill-width">
-                        <a href="{{ product.get_absolute_url }}" title="{{ product.get_title }}" class="d-flex flex-column fill-height fill-width px-2 py-0 px-sm-2" data-id="dish-item-link">
-                            
-                            <div class="dish_name-wrapper d-flex align-start">
-                                <h3 class="dish__name">{{ product.get_title|truncatewords:4 }}</h3>
-                                <div role="separator" class="v-spacer"></div>
-                                {% if product.has_weight %}
-                                    <div class="v-weight">{{ product.weight }} г</div>
-                                {% endif %}
-                            </div>
-
-                            {% if product.short_desc %}
-                                <div class="d-flex align-center mt-1">
-                                    <span class="short-description">{{ product.short_desc }}</span>
-                                </div>
-                            {% endif %}
+                <div class="pos-relative product-description d-flex flex-column">
+                    {% comment %} ------------- название категории --------------- {% endcomment %}
+                    <div class="grow-1 pd-0 v-card__text mt-2">
+                        <div class="d-flex fill-height fill-width">
+                            <a href="{{ product.get_absolute_url }}" title="{{ product.get_title }}" class="d-flex flex-column fill-height fill-width px-2 py-0 px-sm-2" data-id="dish-item-link">
                                 
-                            <div role="separator" class="v-spacer"></div>
-    
-                        </a>
+                                <div class="dish_name-wrapper d-flex align-start">
+                                    <h3 class="dish__name">{{ product.get_title|truncatewords:4 }}</h3>
+                                    <div role="separator" class="v-spacer"></div>
+                                    {% if product.has_weight %}
+                                        <div class="v-weight">{{ product.weight }} г</div>
+                                    {% endif %}
+                                </div>
+
+                                {% if product.short_desc %}
+                                    <div class="d-flex align-center mt-1">
+                                        <span class="short-description">{{ product.short_desc }}</span>
+                                    </div>
+                                {% endif %}
+                                    
+                                <div role="separator" class="v-spacer"></div>
+                            </a>
+                        </div>
                     </div>
-                </div>
-    
-                {% comment %} ------------- цена --------------- {% endcomment %}
-                
-                <div class="align-center fill-width px-sm-2 pb-sm-2 v-card__actions d-flex align-end">
+        
+                    {% comment %} ------------- цена --------------- {% endcomment %}
                     
-                    {% include "oscar/catalogue/partials/product_price.html" %}
-    
-                    <div role="separator" class="v-spacer"></div>
-    
-                    {% comment %} ------------- кнопка добавить --------------- {% endcomment %}
-                    {% if not product.is_parent and not product.has_options %}
-                        {% include "oscar/catalogue/partials/add_to_basket_form_compact.html" %}
-                    {% else %}
-                        <a href="{{ product.get_absolute_url }}" data-id="dish-item-submit-button-0" class="v-button v-button--dish justify-center">
-                            <span class="v-button__wrapper">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="d-sm-none">
-                                    <path d="M6 12H18M12 6V18" stroke="#d32225" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                                <span class="v-button__value d-none d-sm-inline">Выбрать</span>
-                            </span>
-                        </a>
-                    {% endif %}
+                    <div class="align-center fill-width px-sm-2 pb-sm-2 v-card__actions d-flex align-end">
+                        {% include "oscar/catalogue/partials/product_price.html" %}
+                        <div role="separator" class="v-spacer"></div>
+                        {% comment %} ------------- кнопка добавить --------------- {% endcomment %}
+                        {% if session.availability.is_available_to_buy and session.price.exists %}
+                            {% if not product.is_parent and not product.has_options %}
+                                {% include "oscar/catalogue/partials/add_to_basket_form_compact.html" %}
+                            {% else %}
+                                <a href="{{ product.get_absolute_url }}" data-id="dish-item-submit-button-0" class="v-button v-button--dish justify-center" aria-label="Выбрать вариант">
+                                    <span class="v-button__wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="d-sm-none">
+                                            <path d="M6 12H18M12 6V18" stroke="#d32225" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span class="v-button__value d-none d-sm-inline">Выбрать</span>
+                                    </span>
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <span class="dish__not-available pl-2 mb-1 text-end">Временно недоступно</span>
+                        {% endif %}
+                    </div>
+                    <span class="add-to-cart-error" data-id="add-to-cart-help-text-compact"></span>
                 </div>
-                <span class="add-to-cart-error" data-id="add-to-cart-help-text-compact"></span>
             </div>
-
         </div>
-    </div>
-
+    {% endcache %}
 {% endblock %}
