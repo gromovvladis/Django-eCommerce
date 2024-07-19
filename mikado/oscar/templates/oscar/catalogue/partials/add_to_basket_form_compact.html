@@ -1,26 +1,20 @@
 {% load basket_tags %}
-{% load i18n %}
 {% load purchase_info_tags %}
 
 {% purchase_info_for_product request product as session %}
-
-{% if session.availability.is_available_to_buy and session.price.exists %}
-    {% basket_form request product 'single' as basket_form %}
-    <form data-id="add-to-cart-form-compact" action="{% url 'basket:add' pk=product.pk %}" method="post" class="v-form--dish">
-        {% csrf_token %}
-        <input type="hidden" name="quantity" value="1" id="id_quantity">
-        <button type="submit" data-id="add-to-cart-btn-compact" class="v-button v-button--dish justify-center">
-            <span class="v-button__wrapper">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="d-sm-none add_to_cart_line_plus">
-                    <path d="M6 12H18M12 6V18" stroke="#d32225" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="add_to_cart_line_mark">
-                    <path class="add_to_cart_line" d="M4 12.6111L8.92308 17.5L20 6.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span data-id="add-to-cart-btn-span" class="v-button__value d-none d-sm-inline">Добавить</span>
-            </span>
-        </button>
-    </form>
-{% else %}
-    <span class="dish__not-available pl-2 mb-1 text-end">Временно не доставляем</span>
-{% endif %}
+{% basket_form request product 'single' as basket_form %}
+<form data-id="add-to-cart-form-compact" action="{% url 'basket:add' pk=product.pk %}" method="post" class="v-form--dish">
+    {% csrf_token %}
+    <input type="hidden" name="quantity" value="1" id="id_quantity">
+    <button type="submit" data-id="add-to-cart-btn-compact" class="v-button v-button--dish justify-center" aria-label="Добавить в корзину">
+        <span class="v-button__wrapper">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="d-sm-none add_to_cart_line_plus">
+                <path d="M6 12H18M12 6V18" stroke="#d32225" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="add_to_cart_line_mark">
+                <path class="add_to_cart_line" d="M4 12.6111L8.92308 17.5L20 6.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span data-id="add-to-cart-btn-span" class="v-button__value d-none d-sm-inline">Добавить</span>
+        </span>
+    </button>
+</form>

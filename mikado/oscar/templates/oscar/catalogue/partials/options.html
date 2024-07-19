@@ -1,38 +1,28 @@
-{% load i18n %}
 {% load widget_tweaks %}
 
 {% for field in form %}
 
     {% if not field.field.widget.attrs.variant and not field.field.widget.attrs.good %}
+        <div class="d-flex">
+            <div class="v-tabs-button d-flex fill">
 
-    <div class="d-flex mt-1">
-        <div class="v-tabs-button d-flex fill">
-            
-            {% comment %} <div class="v-tabs-button__active-block" style="width: 194px; height: 44px; left: 0px;">
-                <div class="fill-width fill-height"></div>
-            </div> {% endcomment %}
+                {% block errors %}
+                    {% for error in field.errors %}
+                        <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                    {% endfor %}
+                {% endblock %}
 
-            {% block errors %}
-                {% for error in field.errors %}
-                    <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
-                {% endfor %}
-            {% endblock %}
+                {% render_field field class+="form-control" %}
 
-            {% render_field field class+="form-control" %}
-
-            {% comment %} <button data-test-id="tab-button-0" class="v-tabs-button__button active">30 см</button>
-            <button data-test-id="tab-button-1" class="v-tabs-button__button">40 см</button> {% endcomment %}
-            {% block help_text %}
-                {% if field.help_text %}
-                    <small class="form-text text-muted">
-                        {# We allow HTML within form help fields #}
-                        {{ field.help_text|safe }}
-                    </small>
-                {% endif %}
-            {% endblock %}
-            
+                {% block help_text %}
+                    {% if field.help_text %}
+                        <small class="form-text text-muted">
+                            {{ field.help_text|safe }}
+                        </small>
+                    {% endif %}
+                {% endblock %}
+                
+            </div>
         </div>
-    </div>
-
     {% endif %}
 {% endfor %}

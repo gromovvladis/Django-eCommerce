@@ -42,15 +42,17 @@
 
 {% block content %}
     <div class="home__wrapper d-flex flex-column">
+        
         {% block mobile_categories %}
             {% include "oscar/home/partials/mobile-categories.html" %}
         {% endblock %}
 
-        <div class="home-desc__wrapper d-none mt-2">
+        {% if not is_mobile %}
             {% block desctop_home %}
                 {% include "oscar/home/partials/desctop-home.html" with promo_cats=promo_cats %}
-            {% endblock %}  
-        </div>
+            {% endblock %}
+        {% endif %}
+        
     </div>
 {% endblock content %}
 

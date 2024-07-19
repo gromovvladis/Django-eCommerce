@@ -1,9 +1,8 @@
-{% load i18n %}
 {% load widget_tweaks %}
 
 {% if form.is_bound and not form.is_valid %}
     <div class="alert alert-danger">
-        <strong>{% trans "Oops! We found some errors" %}</strong> - {% trans "please check the error messages below and try again" %}
+        <strong>Что-то пошло не так...</strong> - проверьте ошибки ниже и повторите снова
     </div>
 {% endif %}
 
@@ -14,7 +13,6 @@
         </div>
     {% endfor %}
 {% endif %}
-
 
 {% for field in form  %}
     {% if field.is_hidden %}
@@ -31,7 +29,7 @@
                 </div>
             </div>
             <div class="v-auth-agreement__title filll-width mt-1 text-center" >
-                <span id="error_{{ field.auto_id}}"></span>
+                <span class="text--red" id="error_{{ field.auto_id}}"></span>
             </div>
         </div>
     {% endif %}

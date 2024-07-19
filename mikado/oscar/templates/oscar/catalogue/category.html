@@ -1,18 +1,24 @@
-{% extends "oscar/catalogue/browse.html" %}
+{% extends "oscar/layout.html" %}
 
 {% load history_tags %}
 {% load svg_tags %}
 {% load product_tags %}
+{% load cache %}
+{% load static %}
 
 {% block title %}
     {{ category.get_meta_title }} | {{ block.super }}
 {% endblock %}
 
+{% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pb-sm-6{% endblock %}
+{% block app_class %}v-app---category{% endblock %}
+{% block nav_class %}v-app__nav--category{% endblock %}
 {% block nav_title %}{{ category.get_meta_title }}{% endblock %}
 
 {% block description %}
     {{ category.get_meta_description }}
 {% endblock %}
+
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">
@@ -32,7 +38,7 @@
     </div>
   
     {% comment %}------------- содержимое категории ---------------{% endcomment %}
-    <div>
+    {% cache 1800 products category category.id %} 
         {% if products %}
         <div class="v-dishes row">
             {% for product in products %}
@@ -45,6 +51,11 @@
         {% else %}
             <p class="py-2">Ничего не найдено</p>
         {% endif %}
-    </div>
+    {% endcache %}
  
+{% endblock %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
 {% endblock %}

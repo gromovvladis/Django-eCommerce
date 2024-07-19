@@ -1,0 +1,55 @@
+{% load image_tags %}
+{% load product_tags %}
+{% load svg_tags %}
+
+<div class="v-collection d-flex flex-column fill-width mb-5 mb-md-8">
+    <div class="v-collection__wrapper d-flex flex-column fill-width">
+        
+        <div class="v-collection__banner fill-width shrink px-2">
+            <a href="{{ promo_cat.get_absolute_url }}" class="v-collection__banner-wrapper d-flex fill-width" data-id="collection-link">
+                <div class="v-images-chunks fill-width pos-relative">
+                    <div class="v-image">
+                        <div class="v-image__inner" style="padding-bottom: 27%;">
+                            {% with image=promo_cat.primary_image %}
+                                {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
+                                <img src="{{ thumb.url }}" alt="{{ promo_cat.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="v-collection__slider d-flex flex-column fill-width">
+            <div class="v-dish-slider fill-width v-dish-slider--dish-large">
+                <div class="v-h-nav--wrapper content-inside" data-id="slider-action" data-per-page="4">
+
+                    <button type="button" class="v-h-nav--button d-none" data-id="swiper-prev">
+                        {% icon file_name='interface/arrow-home' stroke="#000" %}
+                    </button>
+
+                    <div class="v-h-nav" data-id="slider-swiper">
+                        <div class="v-h-nav--inner swiper-wrapper">
+                            {% if promo_cat.has_products %}
+                                {% for product in promo_cat.all_products|slice:":8" %}
+                                    <div class="v-h-nav--item swiper-slide">
+                                        <div class="dish d-flex flex-column v-card elevation-none">
+                                            <div class="d-flex flex-column grow-1">
+                                                {% render_product product %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="v-h-nav--button right d-none" data-id="swiper-next">
+                        {% icon file_name='interface/arrow-home' stroke="#000" %}
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

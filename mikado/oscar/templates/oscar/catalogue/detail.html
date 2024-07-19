@@ -8,6 +8,7 @@
 {% load static %}
 {% load svg_tags %}
 {% load purchase_info_tags %}
+{% load cache %}
 
 {% block title %}
     {{ product.get_meta_title }} | {{ block.super }}
@@ -37,153 +38,145 @@
 {% endblock %}
 
 {% block content %}
-    <div class="menu__wrapper d-flex flex-column">
-        {% comment %}------------- страница товара ---------------{% endcomment %}
-        <div class="dish-page pb-sm-2 pt-md-0">
-            {% comment %} <div itemscope="itemscope" itemtype="http://schema.org/Product" class="dish-page__wrapper d-flex flex-column flex-md-row pd-0 pd-sm-2"> {% endcomment %}
-            <div itemscope="itemscope" itemtype="http://schema.org/Product" class="dish-page__wrapper d-flex flex-column flex-md-row pd-0">
-            
-                {% purchase_info_for_product request product as session %}
-                {% currency_symbol session.price.currency as currency_symbol %}
-            
-                {% comment %}------------- изображения товара ---------------{% endcomment %}
-                <div class="dish-page__image pos-relative">
-                    <div class="v-carousel__wrap fill-width fill-height pos-relative">
-                        <div class="v-carousel">
-                            <div class="v-carousel__inner d-flex">
-                                <div class="v-carousel__item">
-                                    <div class="fill-width fill-height">
-                                        <div class="v-dish-image fill-width">
-                                        <div class="v-images-chunks pos-relative">
-                                            <div class="v-image">
-                                            <div class="v-image__inner v-image__inner--detail">
-                                                {% block product_gallery %}
-                                                    {% include "oscar/catalogue/partials/gallery.html" %}
-                                                {% endblock %}
+    {% cache 1800 product detail product.id %}
+        <div class="menu__wrapper d-flex flex-column">
+            {% comment %}------------- страница товара ---------------{% endcomment %}
+            <div class="dish-page pb-sm-2 pt-md-0">
+                <div itemscope="itemscope" itemtype="http://schema.org/Product" class="dish-page__wrapper d-flex flex-column flex-md-row pd-0">
+                
+                    {% purchase_info_for_product request product as session %}
+                    {% currency_symbol session.price.currency as currency_symbol %}
+                
+                    {% comment %}------------- изображения товара ---------------{% endcomment %}
+                    <div class="dish-page__image pos-relative">
+                        <div class="v-carousel__wrap fill-width fill-height pos-relative">
+                            <div class="v-carousel">
+                                <div class="v-carousel__inner d-flex">
+                                    <div class="v-carousel__item">
+                                        <div class="fill-width fill-height">
+                                            <div class="v-dish-image fill-width">
+                                            <div class="v-images-chunks pos-relative">
+                                                <div class="v-image">
+                                                <div class="v-image__inner v-image__inner--detail">
+                                                    {% block product_gallery %}
+                                                        {% include "oscar/catalogue/partials/gallery.html" %}
+                                                    {% endblock %}
+                                                </div>
+                                                </div>
                                             </div>
                                             </div>
-                                        </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        {% iffeature "wishlists" %}
+                            {% include "oscar/catalogue/partials/add_to_wishlist.html" %}
+                        {% endiffeature %} 
                     </div>
-                    {% iffeature "wishlists" %}
-                        {% include "oscar/catalogue/partials/add_to_wishlist.html" %}
-                    {% endiffeature %} 
-                </div>
 
-                <div class="dish-page__content d-flex flex-column shrink px-2 mt-2 px-sm-0 mt-sm-0 pl-md-2">
-                    <div class="dish-page__content-wrapper d-flex flex-column fill-width fill-height">
-                        {% comment %}------------- заголовок + вес ---------------{% endcomment %}
-                        <header class="dish-page__header d-flex shrink align-end align-md-end pt-sm-1">
-                            <span itemprop="name"><h1>{{ product.get_title }}</h1></span>
-                            <meta itemprop="description" content="{{ product.get_meta_description }}" />
-                            <div role="separator" class="v-spacer"></div>
-                            {% if user.is_staff %}
-                                <a class="float-right d-none d-md-block" href="{% url 'dashboard:catalogue-product' pk=product.id %}">
-                                    {% icon file_name='interface/edit' size=22 stroke="#111"%}
-                                </a>
-                            {% endif %}
-                            <span class="ml-2 shrink v-weight">
-                                {% if product.has_weight %}
-                                    <span>{{ product.weight }}</span>
-                                    <span>г</span>
+                    <div class="dish-page__content d-flex flex-column shrink px-2 mt-2 px-sm-0 mt-sm-0 pl-md-2">
+                        <div class="dish-page__content-wrapper d-flex flex-column fill-width fill-height">
+                            {% comment %}------------- заголовок + вес ---------------{% endcomment %}
+                            <header class="dish-page__header d-flex shrink align-end align-md-end pt-sm-1">
+                                <span itemprop="name"><h1>{{ product.get_title }}</h1></span>
+                                <meta itemprop="description" content="{{ product.get_meta_description }}"/>
+                                <div role="separator" class="v-spacer"></div>
+                                {% if user.is_staff %}
+                                    <a class="float-right d-none d-md-block" href="{% url 'dashboard:catalogue-product' pk=product.id %}">
+                                        {% icon file_name='interface/edit' size=22 stroke="#111"%}
+                                    </a>
                                 {% endif %}
-                            </span>
-                        </header>
+                                <span class="ml-2 shrink v-weight">
+                                    {% if product.has_weight %}
+                                        <span>{{ product.weight }}</span>
+                                        <span>г</span>
+                                    {% endif %}
+                                </span>
+                            </header>
 
-                        {% if not session.availability.is_available_to_buy %}
-                            <span class="dish__not-available pr-1 mb-1">Временно не доставляем</span>
-                        {% endif %}
+                            {% if not session.availability.is_available_to_buy %}
+                                <span class="dish__not-available pr-1 mb-1">Временно не доставляем</span>
+                            {% endif %}
 
-                        {% comment %}------------- если есть скидка ---------------{% endcomment %}                        
-                        <div class="d-flex mt-1 align-end">
-                            <div class="mr-1 dish-page__price{% if session.price.old_price %} new-price{% endif %}">
-                                <span data-id="dish-price-main">{{ session.price.money|formate_price }}</span>
-                                <span> {{ currency_symbol }}</span>
+                            {% comment %}------------- если есть скидка ---------------{% endcomment %}                        
+                            <div class="d-flex mt-1 align-end">
+                                <div class="mr-1 dish-page__price{% if session.price.old_price %} new-price{% endif %}">
+                                    <span data-id="dish-price-main">{{ session.price.money|formate_price }}</span>
+                                    <span> {{ currency_symbol }}</span>
+                                </div>
+                                <div class="dish-page__old-price {% if not session.price.old_price %}d-none{% endif %}">
+                                    <span  data-id="dish-old-price-main">{{ session.price.old_price|formate_price }}</span>
+                                    <span> {{ currency_symbol }}</span>
+                                </div>
                             </div>
-                            <div class="dish-page__old-price {% if not session.price.old_price %}d-none{% endif %}">
-                                <span  data-id="dish-old-price-main">{{ session.price.old_price|formate_price }}</span>
-                                <span> {{ currency_symbol }}</span>
-                            </div>
-                        </div>
-                        
+                            
+                            <div class="dish-page__scroll-block d-flex flex-column grow-1 scrollbar--white mt-md-1 pb-md-2">
+                                {% comment %}------------- описание ---------------{% endcomment %}
+                                <div class="dish-page__consist mt-2">
+                                    <p>{{ product.description|safe }}</p>
+                                </div>
 
-                        <div class="dish-page__scroll-block d-flex flex-column grow-1 scrollbar--white mt-md-1 pb-md-2">
-                            {% comment %}------------- состав ---------------{% endcomment %}
-                            {% if product.has_compound %}
+                                {% comment %}------------- состав ---------------{% endcomment %}
+                                {% if product.has_compound %}
                                 <div class="dish-page__ingredients mt-2">
-                                        <h3>Состав:</h3><div class="fill-width mt-1">
-                                        <span>{{ product.compound }}</span>
+                                    <h2>Состав:</h2>
+                                    <div class="fill-width mt-1">
+                                        <p>{{ product.compound }}</p>
                                     </div>
                                 </div>
-                            {% endif %}
-                            
-                            {% comment %}------------- описание ---------------{% endcomment %}
-                            <div class="dish-page__consist mt-2">
-                                <p>{{ product.description|safe }}</p>
-                            </div>
-                
-                            {% comment %}------------- калории жиры и углеводы ---------------{% endcomment %}
-                            {% comment %} <div class="dish-page__nutritional d-flex flex-wrap justify-space-between mt-2">
-                                {% for av in product.get_kbzhu_values %}
-                                    <div class="dish-page__nutritional-item d-flex flex-column align-center justify-center no-wrap">
-                                        <span>{{ av.value_as_html }}</span><label>{{ av.attribute.name }}</label>
-                                    </div>
-                                {% endfor %}
-                            </div> {% endcomment %}
-                
-                            {% block product_basket_form %}
-                                {% include "oscar/catalogue/partials/add_to_basket_form.html" with currency_symbol=currency_symbol%}
-                            {% endblock %}
-                        
-                    </div>
+                                {% endif %}
 
-                    {% comment %}------------- добавить в корзину + цена ---------------{% endcomment %}
-                    {% if session.availability.is_available_to_buy %}
-                        <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/Offer" class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
-                            <button id="add_to_cart_btn" for="add_to_basket_form" type="submit" data-id="dish-submit-button" class="v-button fill-width v-button--main justify-center shrink">
-                                <span class="v-button__wrapper">
-                                    <span class="v-button__value">В корзину за 
-                                        <span  data-id="dish-price-button">
-                                            {% if session.price.exists %}
-                                                {{ session.price.money|formate_price }}
-                                            {% endif %}
+                                {% block product_basket_form %}
+                                    {% include "oscar/catalogue/partials/add_to_basket_form.html" with currency_symbol=currency_symbol%}
+                                {% endblock %}
+                            </div>
+
+                            {% comment %}------------- добавить в корзину + цена ---------------{% endcomment %}
+                            {% if session.availability.is_available_to_buy %}
+                                <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/Offer" class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
+                                    <button id="add_to_cart_btn" for="add_to_basket_form" type="submit" data-id="dish-submit-button" class="v-button fill-width v-button--main justify-center shrink">
+                                        <span class="v-button__wrapper">
+                                            <span class="v-button__value">В корзину за 
+                                                <span  data-id="dish-price-button">
+                                                    {% if session.price.exists %}
+                                                        {{ session.price.money|formate_price }}
+                                                    {% endif %}
+                                                </span>
+                                                <span>{{ currency_symbol }}</span>
+                                            </span>
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="add_to_cart_line_mark mr-1">
+                                                <path class="add_to_cart_line" d="M4 12.6111L8.92308 17.5L20 6.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>      
+                                            <span class="v-button__loading">Добавлено</span>
                                         </span>
-                                        <span>{{ currency_symbol }}</span>
-                                    </span>
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="add_to_cart_line_mark mr-1">
-                                        <path class="add_to_cart_line" d="M4 12.6111L8.92308 17.5L20 6.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>      
-                                    <span class="v-button__loading">Добавлено</span>
-                                </span>
-                            </button>
-                            <span id="add_to_cart_btn_errors" class="add-to-cart-error" ></span>
-                        </div>    
-                    {% endif %}
+                                    </button>
+                                    <span id="add_to_cart_btn_errors" class="add-to-cart-error" ></span>
+                                </div>    
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        {% with recommended_products=product.sorted_recommended_products|slice:":6" %}
-            {% if recommended_products %}
-                <div class="dish-page__related mt-3 px-2 px-sm-0 mt-md-4">
-                    <h2>C этим товаром часто покупают</h2>
-                    <div class="v-dishes mt-1 mt-md-2 row">
-                        {% for product in recommended_products %}
-                            <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-3 col-lg-3">
-                                {% render_product product %}
-                            </div>
-                        {% endfor %}
+            {% with recommended_products=product.sorted_recommended_products|slice:":6" %}
+                {% if recommended_products %}
+                    <div class="dish-page__related mt-2 px-2 px-sm-0 mt-md-4">
+                        <h2>C этим товаром часто покупают</h2>
+                        <div class="v-dishes mt-2 row">
+                            {% for product in recommended_products %}
+                                <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-3 col-lg-3">
+                                    {% render_product product %}
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
-            {% endif %}
-        {% endwith %}
-    
-        {% recently_viewed_products current_product=product %}
-    </div>
+                {% endif %}
+            {% endwith %}
+        
+            {% recently_viewed_products current_product=product %}
+        </div>
+    {% endcache %}
 {% endblock content %}
 
 {% block extrascripts %}

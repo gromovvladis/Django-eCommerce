@@ -3,8 +3,8 @@
 {% load image_tags %}
 
 <div class="mt-2">
-    <p class="v-dish-actions__block-name mb-2">Добавить ингредиенты:</p>
-    <ul class="v-dish-toppings d-flex flex-wrap">
+    <h2 class="v-dish-actions__block-name">Добавить ингредиенты</h2>
+    <ul class="v-dish-toppings d-flex flex-wrap mt-2">
         {% for field in form %}
             {% if field.field.widget.attrs.additional %}
                 <li class="v-dish-toppings__item d-flex">
@@ -21,12 +21,7 @@
 
                         <div class="topping-description px-1 pb-1 fill-width d-flex align-center flex-column pos-relative">
     
-
                             <p class="v-dish-toppings__name mt-2">{{ field.label|safe }}</p>
-                            {% comment %} <span class="v-weight v-weight--additional">
-                                <span>{{ field.field.widget.attrs.weight|safe }}</span>
-                                <span>г</span>
-                            </span> {% endcomment %}
 
                             <div role="separator" class="v-spacer"></div>
     
@@ -42,15 +37,13 @@
                             </span>
     
                             <div class="v-order-button v-order-button--transparent">
-                                <div class="v-order-button--dec">
-                                    <button type="button" disabled="disabled" data-id="order-button-minus" class="v-order-button--elem">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </button>
-                                    {% render_field field class="v-order-button--elem v-order-button--value remove-arrows" %}
-                                </div>
-                                <button type="button" data-id="order-button-plus" class="v-order-button--elem">
+                                <button type="button" disabled="disabled" data-id="order-button-minus" class="v-order-button--elem" aria-label="Уменьшить">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                {% render_field field class="v-order-button--elem v-order-button--value remove-arrows" aria-label="Количество" readonly="readonly"%}
+                                <button type="button" data-id="order-button-plus" class="v-order-button--elem" aria-label="Увеличить">
                                     <svg viewBox="0 0 24 24" fill="none">
                                         <path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>

@@ -2,6 +2,7 @@ from django.urls import path, re_path
 from oscar.core.application import OscarConfig
 from oscar.core.loading import get_class
 
+from django.views.decorators.cache import cache_page
 
 class HomeConfig(OscarConfig):
     label = "home"
@@ -35,6 +36,6 @@ class HomeConfig(OscarConfig):
                 self.promocat_detail_view.as_view(),
                 name="promo-detail",
             ),
-            path("api/cookies/", self.cookies_view.as_view(), name="cookies"),
+            path("api/cookies/", cache_page(60 * 60 * 12)(self.cookies_view.as_view()), name="cookies"),
         ]
         return self.post_process_urls(urls)

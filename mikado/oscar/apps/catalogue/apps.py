@@ -1,5 +1,5 @@
 from django.apps import apps
-from django.urls import include, path, re_path
+from django.urls import include, re_path
 
 
 from oscar.core.application import OscarConfig
