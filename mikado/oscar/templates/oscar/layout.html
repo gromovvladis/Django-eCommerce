@@ -116,17 +116,10 @@
                         {# Main content of page - other layout templates may override this block #}
                         {% block content %}{% endblock %}
                 
-                        {% if not user.is_authenticated %}
-                            {% block auth %}
-                                <div id="auth_modal" class="d-none"></div>
-                                <script>
-                                    var url_auth_api = "{% url 'customer:api-login' %}"
-                                    var url_auth = "{% url 'customer:login' %}"
-                                </script>
-                                <script type="application/javascript" src="{% static "js/auth/auth.js" %}"></script>
-                            {% endblock %}
-                        {% endif %}
-                
+                        {% block auth %}
+                            <div id="auth_modal" class="d-none"></div>
+                        {% endblock %}
+    
                     </div>
                 </div>
             </main>
@@ -151,6 +144,14 @@
     <script>
         var url_get_cookie = "{% url 'home:cookies' %}";
     </script>
+    {% if not user.is_authenticated %}
+        <script>
+            var url_auth_api = "{% url 'customer:api-login' %}"
+            var url_auth = "{% url 'customer:login' %}"
+        </script>
+        <script type="application/javascript" src="{% static "js/auth/auth.js" %}"></script>
+    {% endblock %}
+{% endif %}
     <script type="application/javascript" src="{% static "js/cookie/cookies/cookie-main.js" %}"></script>
     <script type="application/javascript" src="{% static "js/footer/footer.js" %}"></script>
 {% endblock %}
