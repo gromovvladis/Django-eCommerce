@@ -51,7 +51,7 @@
             
                     {% comment %} promocode {% endcomment %}
                     <div class="v-promo mb-3 mb-sm-4">
-                        <form class="v-promo__input-wrapper d-flex align-center g-2" id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
+                        <form class="v-promo__input-wrapper d-flex align-center g-1 g-sm-2" id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
                             <div data-id="v-input-field" class="v-input d-flex align-center fill-width v-input__padding{% if voucher_form.initial.code %} v-input__label-active{% endif %}">
                                 <div class="v-input__wrapper">
                                     <div class="v-input__label">Введите промокод</div>
@@ -118,20 +118,22 @@
     </div>
 {% endblock content %}
 
+{% block templatescripts %}
+    {{ block.super }}
+    var csrf_token = "{{ csrf_token }}";
+    var url_voucher = "{% url 'checkout:vouchers-add' %}";
+    var url_update_totals = "{% url 'checkout:update-totals' %}";
+    var url_time = "{% url 'delivery:delivery-now' %}";
+    var url_delivery_later = "{% url 'delivery:delivery-later' %}";
+    var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
+{% endblock %}
+
 {% block extrascripts %}
     <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
 {% endblock %}
 
 {% block scripts %}
     {{ block.super }}
-    <script>
-        var csrf_token = "{{ csrf_token }}";
-        var url_voucher = "{% url 'checkout:vouchers-add' %}";
-        var url_update_totals = "{% url 'checkout:update-totals' %}";
-        var url_time = "{% url 'delivery:delivery-now' %}";
-        var url_delivery_later = "{% url 'delivery:delivery-later' %}";
-        var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
-    </script>
     <script type="application/javascript" src="{% static "js/datetimepicker/air-datepicker.js" %}"></script>
     <script type="application/javascript" src="{% static "js/delivery/delivery.js" %}"></script>
     <script type="application/javascript" src="{% static "js/checkout/checkout-main.js" %}"></script>
@@ -139,4 +141,3 @@
     <script type="application/javascript" src="{% static "js/checkout/voucher.js" %}"></script>
     <script type="application/javascript" src="{% static "js/checkout/cookie-checkout.js" %}"></script>
 {% endblock %}
-

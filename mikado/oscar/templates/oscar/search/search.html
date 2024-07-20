@@ -59,12 +59,14 @@
     </div>
 {% endblock %}
 
+{% block templatescripts %}
+    {{ block.super }}
+    var url_search = "{% url 'search:search' %}";
+    var url_suggestions = "{% url 'search:suggestions' %}";
+{% endblock %}
+
 {% block scripts %}
     {{ block.super }}
-    <script>
-        var url_search = "{% url 'search:search' %}";
-        var url_suggestions = "{% url 'search:suggestions' %}";
-    </script>
     <script src="{% static "js/oscar/ui.js" %}"></script>
     <script type="application/javascript" src="{% static "js/search/search.js" %}"></script>
     <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>

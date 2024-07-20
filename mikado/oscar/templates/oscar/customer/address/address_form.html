@@ -28,17 +28,19 @@
     </div>
 {% endblock tabcontent %}
 
+{% block templatescripts %}
+    {{ block.super }}
+    var csrf_token = "{{csrf_token}}";
+    var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
+    var url_time = "{% url 'delivery:delivery-now' %}";
+{% endblock %}
+
 {% block extrascripts %}
     <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
 {% endblock %}
 
 {% block scripts %}
     {{ block.super }}
-    <script>
-        var csrf_token = "{{csrf_token}}";
-        var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
-        var url_time = "{% url 'delivery:delivery-now' %}";
-    </script>
     <script type="application/javascript" src="{% static "js/delivery/delivery.js" %}"></script>
     <script type="application/javascript" src="{% static "js/address/edit-address.js" %}"></script>
     <script type="application/javascript" src="{% static "js/profile/profile-links.js" %}"></script>

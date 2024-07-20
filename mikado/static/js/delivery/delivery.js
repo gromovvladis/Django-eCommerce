@@ -697,6 +697,7 @@ function addressCaptured(coords, address){
 
     $(line1).attr('readonly', true);
     $(suggests).addClass('d-none');
+    $(line1_container).removeClass("not-valid");
 
     GetTime({coords: coords, address: address, shippingMethod: shippingMethod, zonaId:getZonaId(coords)}).then(function(result) {
         timeCaptured(result);
