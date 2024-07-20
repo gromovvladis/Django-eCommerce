@@ -129,7 +129,7 @@
 
                     <div role="separator" class="v-spacer"></div>
                     
-                    <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href={% url 'checkout:index' %}{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink">
+                    <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink">
                         <span class="v-button__wrapper">
                             <span class="v-button__value"> Оформить заказ
                             </span>
@@ -173,7 +173,7 @@
     </div>
 
     <div class="px-2 pt-1 pb-2 fill-width">
-        <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href={% url 'checkout:index' %}{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink fill-width">        
+        <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink fill-width">        
             <span class="v-button__wrapper">
                 <span class="v-button__value"> Оформить заказ
                 </span>
