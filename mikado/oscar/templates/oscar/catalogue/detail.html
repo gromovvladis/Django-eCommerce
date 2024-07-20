@@ -179,16 +179,6 @@
     {% endcache %}
 {% endblock content %}
 
-{% block scripts %}
-    {{ block.super }}
-    <script>
-        var url_product = "{% url 'basket:add' pk=product.pk  %}"
-    </script>
-    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/catalogue/add-to-wishlist.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
-{% endblock %}
-
 {% block SVG %}
     <svg style="display: none">
         <symbol id="remove-from-wishlist" fill="#9b9b9b" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -198,4 +188,16 @@
             <path d="M2 9.1371C2 14 6.01943 16.5914 8.96173 18.9109C10 19.7294 11 20.5 12 20.5C13 20.5 14 19.7294 15.0383 18.9109C17.9806 16.5914 22 14 22 9.1371C22 4.27416 16.4998 0.825464 12 5.50063C7.50016 0.825464 2 4.27416 2 9.1371Z"/>
         </symbol>
     </svg>
+{% endblock %}
+
+{% block templatescripts %}
+    {{ block.super }}
+    var url_product = "{% url 'basket:add' pk=product.pk  %}";
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-wishlist.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
 {% endblock %}

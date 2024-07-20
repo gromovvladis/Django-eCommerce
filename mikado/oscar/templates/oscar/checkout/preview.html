@@ -1,5 +1,5 @@
-{% extends "oscar/checkout/checkout.html" %}
-{% comment %} {% extends "oscar/layout.html" %} {% endcomment %}
+{% extends "oscar/layout.html" %}
+{% comment %} {% extends "oscar/checkout/checkout.html" %} {% endcomment %}
 {% load currency_filters %}
 {% load image_tags %}
 {% load static %}
@@ -160,13 +160,6 @@
 
 {% endblock content %}
 
-{% block scripts %}
-    {{ block.super }}
-    <script>
-        action_back = function(){window.location.href="{{ homepage_url }}"}
-    </script>
-{% endblock %}
-
 {% block SVG %}
     <svg style="display: none">
         <symbol id="svg-order-cancel" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -176,4 +169,9 @@
             <path fill="#6c2e7c" d="M16.707,7.293a1,1,0,0,0-1.414,0L12,10.586,8.707,7.293A1,1,0,1,0,7.293,8.707L10.586,12,7.293,15.293a1,1,0,1,0,1.414,1.414L12,13.414l3.293,3.293a1,1,0,0,0,1.414-1.414L13.414,12l3.293-3.293A1,1,0,0,0,16.707,7.293Z"/>
         </symbol>
     </svg>
+{% endblock %}
+
+{% block templatescripts %}
+    {{ block.super }}
+    action_back = function(){window.location.href="{{ homepage_url }}"};
 {% endblock %}

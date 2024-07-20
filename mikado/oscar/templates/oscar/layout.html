@@ -1,12 +1,15 @@
 {% extends "oscar/base.html" %}
 {% load static %}
+{% load compress %}
 {% load svg_tags %}
 {% load category_tags %}
 
-{% block styles %}
-    {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static "css/planet-styles.css" %}" />
-{% endblock %}
+{% compress css %}
+    {% block styles %}
+        {{ block.super }}
+        <link rel="stylesheet" type="text/css" href="{% static "css/planet-styles.css" %}" />
+    {% endblock %}
+{% endcompress %}
 
 {% block layout %}
     {% comment %}------------- header + контент + footer (начало) ---------------{% endcomment %}
@@ -107,18 +110,14 @@
                 <div class="d-flex align-start pd-0 fill-height container">
                     <div class="{% block wrapper_class %}{% endblock %}">
 
+                        {% include "oscar/partials/alert_messages.html" %}
+
                         {% block breadcrumbs %}{% endblock %}
 
                         {% block sticky_address %}{% endblock %}
-
-                        {% include "oscar/partials/alert_messages.html" %}
                 
                         {# Main content of page - other layout templates may override this block #}
                         {% block content %}{% endblock %}
-                
-                        {% block auth %}
-                            <div id="auth_modal" class="d-none"></div>
-                        {% endblock %}
     
                     </div>
                 </div>
@@ -128,9 +127,13 @@
             {% block main_footer %}
                 {% include 'oscar/includes/footer.html' %}
             {% endblock %}
-        </div>
 
+        </div>
     </div>
+
+    {% block auth %}
+        <div id="auth_modal" class="d-none"></div>
+    {% endblock %}
 
     {% block cookie %}
         <div id="we_use_cookie"></div>
@@ -138,19 +141,17 @@
 
 {% endblock %}
 
-{# Local scripts #}
-{% block scripts %}
+{% block templatescripts %}
     {{ block.super }}
-    <script>
-        var url_get_cookie = "{% url 'home:cookies' %}";
-    </script>
-    {% if not user.is_authenticated %}
-        <script>
-            var url_auth_api = "{% url 'customer:api-login' %}"
-            var url_auth = "{% url 'customer:login' %}"
-        </script>
-        <script type="application/javascript" src="{% static "js/auth/auth.js" %}"></script>
-    {% endif %}
-    <script type="application/javascript" src="{% static "js/cookie/cookies/cookie-main.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/footer/footer.js" %}"></script>
+    var url_get_cookie = "{% url 'home:cookies' %}";
+    var url_auth_api = "{% url 'customer:api-login' %}";
+    var url_auth = "{% url 'customer:login' %}";
 {% endblock %}
+
+{% compress js %}
+    {% block scripts %}
+        <script type="application/javascript" src="{% static "js/auth/auth.js" %}"></script>
+        <script type="application/javascript" src="{% static "js/cookie/cookies/cookie-main.js" %}"></script>
+        <script type="application/javascript" src="{% static "js/footer/footer.js" %}"></script>
+    {% endblock %}
+{% endcompress %}

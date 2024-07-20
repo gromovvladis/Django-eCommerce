@@ -1,5 +1,4 @@
 {% load static %}
-{% load compress %}
 
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"ru" }}">
@@ -15,12 +14,12 @@
         {% endblock %}
 
         {# Block where global CSS will go. #}
-        {% compress css %}
-            {% block styles %}{% endblock %}
-            {# Additional CSS - specific to certain pages #}
-            {% block extrastyles %}{% endblock %}
-        {% endcompress %}
+        
+        {% block styles %}{% endblock %}
 
+        {# Additional CSS - specific to certain pages #}
+        {% block extrastyles %}{% endblock %}
+        
         {% block extrahead %}{% endblock %}
 
         {% block tracking %}
@@ -32,6 +31,16 @@
 
     <body id="{% block body_id %}default{% endblock %}" class="{% block body_class %}default{% endblock %}">
         
+        {# Main content goes in this 'layout' block #}
+        {% block layout %}{% endblock %}
+        
+        {% block cookie %}
+        {% endblock %}
+            
+        {# SVG #}
+        {% block SVG %}
+        {% endblock %}
+
         {# Scripts loaded from a CDN. #}
         {% block cdn_scripts %}
             <!-- jQuery -->
@@ -40,26 +49,16 @@
             <!-- Cookies -->
             <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.5/js.cookie.min.js"></script>
             <script>window.Cookies || document.write('<script src="{% static "js/cookie/js-cookie.min.js" %}"><\/script>')</script>
-        {% endblock %} 
-        
-        {# Main content goes in this 'layout' block #}
-        {% block layout %}{% endblock %}
-        
-        {% comment %}------------- мы используем куки ---------------{% endcomment %}
-        {% block cookie %}
         {% endblock %}
-            
-        {# SVG #}
-        {% block SVG %}
-        {% endblock %}
+        
+        {# Template vars #}
+        <script>{% block templatescripts %}{% endblock %}</script>
 
         {# External JS scripts #}
         {% block extrascripts %}{% endblock %}
 
-        {% compress js %}
-            {# Local scripts #}
-            {% block scripts %}{% endblock %}
-        {% endcompress %}
+        {# Local scripts #}
+        {% block scripts %}{% endblock %}
             
         {# Block for body onload functions #}
         <script>$(function() { {% block onbodyload %}{% endblock %} })</script>

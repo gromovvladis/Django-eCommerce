@@ -6,12 +6,12 @@ from .settings import *
 
 DATABASES = {
     "default": {
-        "ENGINE": config("DATABASE_ENGINE"),
-        "NAME": Path(__file__).resolve().parent.parent.parent / config("DATABASE_NAME"),
-        "USER": config("DATABASE_USER"),
-        "PASSWORD": config("DATABASE_PASSWORD"),
-        "HOST": config("DATABASE_HOST"),
-        "PORT": config("DATABASE_PORT"),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": Path(__file__).resolve().parent.parent.parent / "db.sqlite",
+        "USER": None,
+        "PASSWORD": None,
+        "HOST": None,
+        "PORT": None,
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -48,6 +48,7 @@ STATICFILES_FINDERS = (
 # SECURE
 # =============
 
+ALLOWED_HOSTS = ("127.0.0.1",)
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False

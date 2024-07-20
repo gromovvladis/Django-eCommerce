@@ -33,7 +33,7 @@
                 <ul class="navbar-nav">
                     {% comment %} <li class="nav-item">
                         <a class="nav-link disabled" href="#">
-                            {% trans "Welcome" %} <em>{{ user.get_full_name|default:request.user.email }}</em>
+                            Привет, <em>{{ user.get_full_name|default:request.user.username }}</em>
                         </a>
                     </li> {% endcomment %}
                     <li class="nav-item">
@@ -124,7 +124,6 @@
 
 {% block extrascripts %}
     {{ block.super }}
-
     {# jQuery plugins #}
     <script src="{% static "js/mousewheel/jquery.mousewheel.js" %}"></script>
     <script src="{% static "js/bootstrap4-datetimepicker/moment-with-locales.min.js" %}"></script>

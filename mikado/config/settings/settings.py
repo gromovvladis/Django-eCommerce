@@ -14,14 +14,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 location = lambda x: os.path.join(
     os.path.dirname(BASE_DIR), x)
 
-
 # =============
 # DEBUG
 # =============
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 INTERNAL_IPS = ['127.0.0.1', '::1']
-
 
 # =============
 # MEDIA
@@ -34,16 +32,6 @@ MEDIA_URL = 'media/'
 # =============
 
 STATIC_URL = 'static/'
-
-
-# =============
-# HOSTS
-# =============
-
-
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=Csv())
-
 
 # =============
 # TIME + LANG
@@ -88,7 +76,6 @@ TEMPLATES = [
         }
     }
 ]
-
 
 # =============
 # MIDDLEWARE

@@ -17420,7 +17420,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .search__input {
     position: sticky;
     top: 64px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.95);
     z-index: 5;
 }
 
@@ -17447,7 +17447,8 @@ ymaps[class*="search__suggest-item_selected"] {
 @media screen and (min-width:768px) {
     .search__input {
         top: 70px;
-        border-radius: 0 0 10px 10px;
+        /* border-radius: 0 0 10px 10px; */
+        background: rgba(255, 255, 255, 1);
     }
 
     .search__not-found {

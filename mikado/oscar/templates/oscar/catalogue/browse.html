@@ -55,11 +55,6 @@
     </div>
 {% endblock content %}
 
-{% block onbodyload %}
-    {{ block.super }}
-    {% comment %} oscar.search.init(); {% endcomment %}
-{% endblock %}
-
 {% block scripts %}
     {{ block.super }}
     <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>

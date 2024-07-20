@@ -37,12 +37,14 @@
     </div>
 {% endblock content %}
 
+{% block templatescripts %}
+    {{ block.super }}
+    var url_empty_basket = "{% url 'basket:empty' %}";
+    var url_upsell_masseges = "{% url 'basket:upsell' %}";
+{% endblock %}
+
 {% block scripts %}
     {{ block.super }}
-    <script>
-        var url_empty_basket = "{% url 'basket:empty' %}";
-        var url_upsell_masseges = "{% url 'basket:upsell' %}";
-    </script>
     <script type="application/javascript" src="{% static "js/basket/basket-main.js" %}"></script>
 {% endblock %}
 

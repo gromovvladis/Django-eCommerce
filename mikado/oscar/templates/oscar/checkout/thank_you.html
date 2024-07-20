@@ -181,23 +181,6 @@
     {% endif %}
 {% endblock %}
 
-{% block scripts %}
-    {{ block.super }}
-    <script>
-        action_back = function(){window.location.href="{{ homepage_url }}"}
-    </script>
-
-    {% if order.status == "Ожидает оплаты" %}
-        <script>
-            var csrf_token = "{{ csrf_token }}";
-            var update_payment_url = "{% url 'payment:update' pk=order.pk %}";
-        </script>
-        <script type="application/javascript" src="{% static "js/thank-you/thank-you.js" %}"></script>
-    {% endif %}
-
-{% endblock %}
-
-
 {% block SVG %}
     <svg style="display: none">
         <symbol id="svg-order-cancel" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -220,4 +203,16 @@
             <path fill="#6c2e7c" d="M16.293,8.293,10,14.586,7.707,12.293a1,1,0,0,0-1.414,1.414l3,3a1,1,0,0,0,1.414,0l7-7a1,1,0,0,0-1.414-1.414Z"/>
         </symbol>
     </svg>
+{% endblock %}
+
+{% block templatescripts %}
+    {{ block.super }}
+    action_back = function(){window.location.href="{{ homepage_url }}"};
+    var csrf_token = "{{ csrf_token }}";
+    var update_payment_url = "{% url 'payment:update' pk=order.pk %}";
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/thank-you/thank-you.js" %}"></script>
 {% endblock %}
