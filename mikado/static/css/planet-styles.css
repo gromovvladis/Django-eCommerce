@@ -8426,7 +8426,7 @@ html.drawer .v-app__side {
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
-    --size: 48px;
+    --size: 44px;
 }
 
 .v-input-textarea {
@@ -10567,8 +10567,8 @@ html.drawer .v-app__side {
 .dish__not-available,
 .dish__profit {
     font-family: Onest, sans-serif;
-    font-size: .75rem;
-    line-height: .875rem;
+    font-size: .9rem;
+    line-height: 1rem;
     font-weight: 400;
     font-style: normal
 }
@@ -13871,7 +13871,7 @@ ymaps[class*="search__suggest-item_selected"] {
     font-weight: 400;
     font-style: normal;
     padding: .25rem 1rem;
-    min-height: 48px;
+    min-height: 44px;
     color: #000
 }
 
@@ -14422,9 +14422,9 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
 
-    .v-app---home .v-app-nav__button--search {
+    /* .v-app---home .v-app-nav__button--search {
         display: none !important
-    }
+    } */
 
     .v-app---home .v-app-nav .cats {
         left: unset;
@@ -15520,7 +15520,7 @@ ymaps[class*="search__suggest-item_selected"] {
 @media screen and (max-width:768px) {
 
     .container--carousel {
-        padding: 0.5rem 0 0;
+        padding: 0;
     }
 
     .v-carousel__navs {

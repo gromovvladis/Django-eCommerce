@@ -36,10 +36,10 @@
         {% endif %}
         {% comment %} ------------- корзина --------------- {% endcomment %}
         <button data-id="mobile-cart-button" onclick="window.location.href='{% url 'basket:summary' %}'">
-            <div class="d-flex pos-relative">
+            <span class="d-flex pos-relative">
                 {% icon file_name='app_mobile_sticker/cart' size=24 stroke='#999'%}
                 <span data-id="cart-nums" class="badge d-flex justify-center align-center">{% if request.basket.num_items > 0 %}{{ request.basket.num_items }}{% endif %}</span>
-            </div>
+            </span>
             <span class="mt-1">
                 Корзина
             </span>

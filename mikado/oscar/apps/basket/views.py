@@ -43,20 +43,22 @@ class BasketView(ModelFormSetView):
         Return list of :py:class:`Line <oscar.apps.basket.abstract_models.AbstractLine>`
         instances associated with the current basket.
         """
+        updated = False
         lines = self.request.basket.all_lines()
 
         # переделай. когда товаров к корзине больше чем можем продать нужно чтобы они автоматически уменьшались. если форма не валидная то хоть чтонибудб делай.
         if not is_ajax(self.request):
             for line in lines:
                 if line.quantity == 0:
+                    updated = True
                     try:
                         lines.get(id=line.id).delete()
                         lines.update()
-                    except Exception as e:
+                    except Exception:
                         pass
-                    
-            self.request.basket.reset_offer_applications()
-            Applicator().apply(self.request.basket, self.request.user, self.request)
+            if updated:
+                self.request.basket.reset_offer_applications()
+                Applicator().apply(self.request.basket, self.request.user, self.request)
 
         return lines
 

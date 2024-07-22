@@ -6,13 +6,13 @@
     <div class="v-collection__wrapper d-flex flex-column fill-width">
         
         <div class="v-collection__banner fill-width shrink px-2">
-            <a href="{{ promo_cat.get_absolute_url }}" class="v-collection__banner-wrapper d-flex fill-width" data-id="collection-link">
+            <a href="{{ promo_cat.get_absolute_url }}" class="v-collection__banner-wrapper d-flex fill-width" data-id="collection-link" aria-label="{{ promo_cat.get_title }}">
                 <div class="v-images-chunks fill-width pos-relative">
                     <div class="v-image">
                         <div class="v-image__inner" style="padding-bottom: 27%;">
                             {% with image=promo_cat.primary_image %}
                                 {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
-                                <img src="{{ thumb.url }}" alt="{{ promo_cat.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                <img src="{{ thumb.url }}" alt="{{ promo_cat.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                             {% endwith %}
                         </div>
                     </div>
@@ -22,7 +22,7 @@
 
         <div class="v-collection__slider d-flex flex-column fill-width">
             <div class="v-dish-slider fill-width v-dish-slider--dish-large">
-                <div class="v-h-nav--wrapper content-inside" data-id="slider-action" data-per-page="4">
+                <div class="v-h-nav--wrapper content-inside" data-id="slider-action" data-per-page="8">
 
                     <button type="button" class="v-h-nav--button d-none" data-id="swiper-prev">
                         {% icon file_name='interface/arrow-home' stroke="#000" %}

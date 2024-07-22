@@ -79,11 +79,11 @@
                         <div class="dish-page__content-wrapper d-flex flex-column fill-width fill-height">
                             {% comment %}------------- заголовок + вес ---------------{% endcomment %}
                             <header class="dish-page__header d-flex shrink align-end align-md-end pt-sm-1">
-                                <span itemprop="name"><h1>{{ product.get_title }}</h1></span>
+                                <h1>{{ product.get_title }}</h1>
                                 <meta itemprop="description" content="{{ product.get_meta_description }}"/>
                                 <div role="separator" class="v-spacer"></div>
                                 {% if user.is_staff %}
-                                    <a class="float-right d-none d-md-block" href="{% url 'dashboard:catalogue-product' pk=product.id %}">
+                                    <a href="{% url 'dashboard:catalogue-product' pk=product.id %}" class="float-right d-none d-md-block">
                                         {% icon file_name='interface/edit' size=22 stroke="#111"%}
                                     </a>
                                 {% endif %}
@@ -96,7 +96,7 @@
                             </header>
 
                             {% if not session.availability.is_available_to_buy %}
-                                <span class="dish__not-available pr-1 mb-1">Временно не доставляем</span>
+                                <span class="dish__not-available pr-1 my-1">Временно не доставляем</span>
                             {% endif %}
 
                             {% comment %}------------- если есть скидка ---------------{% endcomment %}                        
@@ -135,7 +135,7 @@
                             {% comment %}------------- добавить в корзину + цена ---------------{% endcomment %}
                             {% if session.availability.is_available_to_buy %}
                                 <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/Offer" class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
-                                    <button id="add_to_cart_btn" for="add_to_basket_form" type="submit" data-id="dish-submit-button" class="v-button fill-width v-button--main justify-center shrink">
+                                    <button id="add_to_cart_btn" type="submit" data-id="dish-submit-button" class="v-button fill-width v-button--main justify-center shrink">
                                         <span class="v-button__wrapper">
                                             <span class="v-button__value">В корзину за 
                                                 <span  data-id="dish-price-button">
@@ -197,7 +197,7 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/catalogue/add-to-wishlist.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+    <script  src="{% static "js/catalogue/add-to-cart.js" %}"></script>
+    <script  src="{% static "js/catalogue/add-to-wishlist.js" %}"></script>
+    <script  src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
 {% endblock %}

@@ -41,7 +41,7 @@ class HomeView(ListView):
         actions = cache.get('actions_all')
 
         if not actions:
-            actions = Action.objects.all().filter(is_active=True).order_by('order').distinct()
+            actions = Action.objects.filter(is_active=True).only('img', 'slug', 'title')
             cache.set("actions_all", actions, 3600)
 
         return actions
@@ -56,13 +56,15 @@ class HomeView(ListView):
         agent = parse(self.request.META['HTTP_USER_AGENT'])
         ctx["is_mobile"] = agent.is_mobile
 
-        promo_cats = cache.get('promo_cats_all')
+        if not agent.is_mobile:
+            promo_cats = []
+            promo_cats = cache.get('promo_cats_all')
+            if not promo_cats:
+                promo_cats = PromoCategory.objects.filter(is_active=True).prefetch_related('products_related')
+                cache.set("promo_cats_all", promo_cats, 3600)
 
-        if not promo_cats:
-            promo_cats = PromoCategory.objects.all().filter(is_active=True).order_by('order').distinct()
-            cache.set("promo_cats_all", promo_cats, 3600)
+            ctx["promo_cats"] = promo_cats
 
-        ctx["promo_cats"] = promo_cats
         return ctx
 
 
@@ -99,7 +101,7 @@ class ActionsView(ListView):
         actions = cache.get('actions_all')
 
         if not actions:
-            actions = Action.objects.all().filter(is_active=True).order_by('order').distinct()
+            actions = Action.objects.prefetch_related('products_related').filter(is_active=True)
             cache.set("actions_all", actions, 3600)
 
         ctx["actions"] = actions

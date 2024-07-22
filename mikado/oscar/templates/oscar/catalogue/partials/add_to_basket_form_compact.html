@@ -5,7 +5,7 @@
 {% basket_form request product 'single' as basket_form %}
 <form data-id="add-to-cart-form-compact" action="{% url 'basket:add' pk=product.pk %}" method="post" class="v-form--dish">
     {% csrf_token %}
-    <input type="hidden" name="quantity" value="1" id="id_quantity">
+    {% comment %} <input type="hidden" name="quantity" value="1" id="id_quantity_compact"> {% endcomment %}
     <button type="submit" data-id="add-to-cart-btn-compact" class="v-button v-button--dish justify-center" aria-label="Добавить в корзину">
         <span class="v-button__wrapper">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="d-sm-none add_to_cart_line_plus">

@@ -29,7 +29,7 @@ class CatalogueView(BaseSearchView):
             return super().get(request, *args, **kwargs)
         except Http404:
             # Redirect to page one.
-            messages.error(request, "Указанный номер недействителен.")
+            messages.error(request, "Категория не найдена.")
             return redirect("catalogue:index")
 
     def get_context_data(self, *args, **kwargs):
@@ -63,7 +63,7 @@ class ProductCategoryView(BaseSearchView):
         try:
             return super().get(request, *args, **kwargs)
         except Http404:
-            messages.error(request, "Указанный номер недействителен.")
+            messages.error(request, "Категория не найдена.")
             return redirect(self.category.get_absolute_url())
 
     def is_viewable(self, category, request):

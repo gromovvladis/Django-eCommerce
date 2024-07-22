@@ -709,14 +709,12 @@ class AbstractProduct(models.Model):
         Returns a set of all valid options for this product.
         It's possible to have options product class-wide, and per product.
         """
-        pclass_options = self.get_product_class().options.all()
-        return pclass_options | self.product_options.all()
+        return self.get_product_class().options.all() | self.product_options.all()
     
     @property
     def additionals(self):
         """
-        Returns a set of all valid options for this product.
-        It's possible to have options product class-wide, and per product.
+        Returns a set of all additionals for this product.
         """
         return self.get_product_class().class_additionals.all() | self.product_additionals.all()
 
@@ -724,10 +722,11 @@ class AbstractProduct(models.Model):
     def has_options(self):
         # Extracting annotated value with number of product class options
         # from product list queryset.
-        # has_product_class_options = getattr(self, "has_product_class_options", None)
-        # has_product_options = getattr(self, "has_product_options", None)
-        # if has_product_class_options is not None and has_product_options is not None:
-        #     return has_product_class_options or has_product_options
+        has_product_class_options = getattr(self, "has_product_class_options", None)
+        has_product_options = getattr(self, "has_product_options", None)
+        if has_product_class_options is not None and has_product_options is not None:
+            return has_product_class_options or has_product_options
+        
         options = self.options.all()
         if options:
             return True
@@ -737,36 +736,36 @@ class AbstractProduct(models.Model):
     def has_additions(self):
         # Extracting annotated value with number of product class options
         # from product list queryset.
-        # has_product_class_options = getattr(self, "has_product_class_options", None)
-        # has_product_options = getattr(self, "has_product_options", None)
-        # if has_product_class_options is not None and has_product_options is not None:
-        #     return has_product_class_options or has_product_options
-        additionals_qs = self.additionals
-        if additionals_qs:
+        # has_product_class_additionals = getattr(self, "has_product_class_additionals", None)
+        # has_product_additionals = getattr(self, "has_product_additionals", None)
+        # if has_product_class_additionals is not None and has_product_additionals is not None:
+            # return has_product_class_additionals or has_product_additionals
+        additionals = self.additionals.all()
+        if additionals:
             return True
         return False
     
-    @cached_property
-    def has_compound(self):
-        compound = self.attributes.filter(code='compound')
-        if compound:
-            return True
-        return False
+    # @cached_property
+    # def has_compound(self):
+    #     compound = self.attributes.filter(code='compound')
+    #     if compound:
+    #         return True
+    #     return False
     
+    # @property
+    # def compound(self):
+        # return self.attribute_values.filter(attribute__code='compound').first().value_as_text
+
     @cached_property
     def has_weight(self):
-        weight = self.attributes.filter(code='weight')
-        if weight:
+        if self.attributes.filter(code='weight'):
             return True
         return False
     
-    @property
-    def compound(self):
-        return self.attribute_values.filter(attribute__code='compound').first().value_as_text
 
     @property
     def weight(self):
-        return self.attribute_values.filter(attribute__code='weight').first().value
+        return self.attribute_values.get(attribute__code='weight').value
     
     @property
     def short_desc(self):
@@ -1047,6 +1046,7 @@ class AbstractProductAttribute(models.Model):
     code = models.SlugField(
         "Код",
         max_length=128,
+        unique=True
     )
 
     # Attribute types

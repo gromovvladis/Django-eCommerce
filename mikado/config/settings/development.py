@@ -59,6 +59,16 @@ HOST_SCHEME = "http://"
 SECRET_KEY='UtjFCuyjDKmWHe15neauXzHi2rZoRTg6RMbT5JyAdPiAcBP6Rra1'
 
 # =============
+# CACHES
+# =============
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+
+# =============
 # SMS AERO
 # =============
 

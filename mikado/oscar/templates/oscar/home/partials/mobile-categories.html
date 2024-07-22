@@ -6,7 +6,6 @@
 {% cache 1800 tree_categories %}
     {% category_tree as tree_categories %}
     {% if tree_categories %}
-    {% comment %} <div class="v-categories d-flex flex-wrap pd-sm-3"> {% endcomment %}
         <div class="v-categories d-flex flex-wrap pd-sm-3{% if not is_mobile %} d-sm-none{% endif %}">
             {% for tree_category in tree_categories %} 
                 <div class="v-categories__tab-wrapper d-flex align-center">
@@ -17,7 +16,7 @@
                                 <div class="fill-height pos-relative none-select">
                                     <div class="v-image__inner v-image__inner--category">
                                         {% with image=tree_category.primary_image %}
-                                            {% oscar_thumbnail image.original "x280" upscale=False as thumb %}
+                                            {% oscar_thumbnail image.original "x320" upscale=False as thumb %}
                                             <img src="{{ thumb.url }}" alt="Изображение {{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                         {% endwith %}
                                     </div>
