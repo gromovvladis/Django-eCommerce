@@ -6,7 +6,7 @@
     Адрес доставки | {{ block.super }}
 {% endblock %}
  
-{% block wrapper_class %}delivery wrapper--small fill-width pd-2 pb-sm-8 delivery-address{% endblock %}
+{% block wrapper_class %}delivery wrapper--small fill-width pd-2 pb-sm-4 delivery-address{% endblock %}
 
 {% block app_class %}v-app---delivery{% endblock %}
 {% block nav_class %}v-app__nav--delivery{% endblock %}
@@ -138,14 +138,14 @@
 {% endblock %}
 
 {% block extrascripts %}
-    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
+    <script  src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
 {% endblock %}
 
 {% block scripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/delivery/delivery.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/address/cookie-address.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/address/delivery-address.js" %}"></script>
+    <script  src="{% static "js/delivery/delivery.js" %}"></script>
+    <script  src="{% static "js/address/cookie-address.js" %}"></script>
+    <script  src="{% static "js/address/delivery-address.js" %}"></script>
 {% endblock %}
 
 {% block onbodyload %}

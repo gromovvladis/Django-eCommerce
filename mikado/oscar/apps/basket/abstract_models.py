@@ -18,9 +18,7 @@ from oscar.models.fields.slugfield import SlugField
 OfferApplications = get_class("offer.results", "OfferApplications")
 Unavailable = get_class("partner.availability", "Unavailable")
 LineDiscountRegistry = get_class("basket.utils", "LineDiscountRegistry")
-OpenBasketManager, SavedBasketManager = get_classes(
-    "basket.managers", ["OpenBasketManager", "SavedBasketManager"]
-)
+OpenBasketManager = get_class("basket.managers", "OpenBasketManager")
 
 
 class AbstractBasket(models.Model):
@@ -33,6 +31,7 @@ class AbstractBasket(models.Model):
     owner = models.ForeignKey(
         AUTH_USER_MODEL,
         null=True,
+        db_index=True,
         related_name="baskets",
         on_delete=models.CASCADE,
         verbose_name="Владелец",
@@ -41,10 +40,9 @@ class AbstractBasket(models.Model):
     # Basket statuses
     # - Frozen is for when a basket is in the process of being submitted
     #   and we need to prevent any changes to it.
-    OPEN, MERGED, SAVED, FROZEN, SUBMITTED = (
+    OPEN, MERGED, FROZEN, SUBMITTED = (
         "Open",
         "Merged",
-        "Saved",
         "Frozen",
         "Submitted",
     )
@@ -70,7 +68,7 @@ class AbstractBasket(models.Model):
     date_submitted = models.DateTimeField("Дата подтверждения", null=True, blank=True)
 
     # Only if a basket is in one of these statuses can it be edited
-    editable_statuses = (OPEN, SAVED)
+    editable_statuses = (OPEN,)
 
     class Meta:
         abstract = True
@@ -80,7 +78,7 @@ class AbstractBasket(models.Model):
 
     objects = models.Manager()
     open = OpenBasketManager()
-    saved = SavedBasketManager()
+    # saved = SavedBasketManager()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -137,7 +135,7 @@ class AbstractBasket(models.Model):
         if self._lines is None:
             self._lines = (
                 self.lines.select_related("product", "stockrecord")
-                .prefetch_related("attributes", "product__images")
+                .prefetch_related("attributes", "product__images", "product__categories", "product__stockrecords")
                 .order_by(self._meta.pk.name)
             )
         return self._lines

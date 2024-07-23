@@ -64,7 +64,7 @@
                     <div class="v-input__label">Телефон</div>
                     <div class="v-input__control d-flex align-center">
                         <label>
-                            <input value="{{ request.user.username }}" readonly="readonly" data-id="profile-phone-input" type="text">
+                            <input value="{{ request.user.username }}" readonly data-id="profile-phone-input" type="text">
                         </label>
                     </div>
                 </div>
@@ -101,6 +101,6 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/profile/profile-edit.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/profile/profile.js" %}"></script>
+    <script  src="{% static "js/profile/profile-edit.js" %}"></script>
+    <script  src="{% static "js/profile/profile.js" %}"></script>
 {% endblock %}

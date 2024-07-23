@@ -72,7 +72,6 @@ class CheapCategoryInfo(dict, metaclass=CategoryFieldPassThroughMetaClass):
 def get_annotated_list(depth=None, parent=None):
     """
     Gets an annotated list from a tree branch.
-
     Borrows heavily from treebeard's get_annotated_list
     """
     # 'depth' is the backwards-compatible name for the template tag,

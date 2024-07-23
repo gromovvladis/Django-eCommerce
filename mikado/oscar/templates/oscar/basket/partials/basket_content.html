@@ -18,7 +18,8 @@
 
         {% if not basket.is_empty %}
 
-            <div class="v-cart-wrapper d-flex flex-column justify-start fill-height scrollbar--white px-2 pl-sm-0 pr-sm-1">
+            {% comment %} <div class="v-cart-wrapper d-flex flex-column justify-start fill-height scrollbar--white px-2 pl-sm-0 pr-sm-1"> {% endcomment %}
+            <div class="v-cart-wrapper d-flex flex-column justify-start fill-height scrollbar--white px-2 px-sm-0">
 
                 <div class="upsell-messages" id="upsell_messages">
                     {% include 'oscar/basket/partials/upsell_messages.html' with editable=1 %}
@@ -38,18 +39,16 @@
                                             <div class="v-dish-order d-flex fill-width">
 
                                                 <div class="v-dish-order__picture">
-                                                    <a href="{{ product.get_absolute_url }}" aria-label="{{ product.get_title }}
+                                                    <a href="{{ product.get_absolute_url }}" aria-label="{{ product.get_title }}"
                                                         class="d-block router-link-exact-active router-link-active"
                                                         data-id="dish-order-image-link">
                                                         <div class="v-dish-image fill-width">
-                                                            <div class="v-images-chunks pos-relative">
-                                                                <div class="v-image">
-                                                                    <div class="v-image__inner" style="padding-bottom: 72.072%;">
-                                                                        {% with image=product.primary_image %}
-                                                                            {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
-                                                                            <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy"/>
-                                                                        {% endwith %}
-                                                                    </div>
+                                                            <div class="v-image pos-relative">
+                                                                <div class="v-image__inner" style="padding-bottom: 72.072%;">
+                                                                    {% with image=product.primary_image %}
+                                                                        {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
+                                                                        <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy"/>
+                                                                    {% endwith %}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -71,25 +70,23 @@
                                                         </button>
                                                     </div>
 
-                                                    <div class="v-dish-order__toppings d-flex fill-width">
-                                                        <div class="d-flex flex-wrap" data-id="dish-order-toppings">
-                                                            <span class="d-flex">{{ line.variants }}</span>
-                                                            <span class="d-flex">{{ line.options }}</span>
-                                                            <span class="d-flex">{{ line.additions }}</span>
-                                                        </div>
+                                                    <div class="v-dish-order__toppings d-flex fill-width flex-wrap" data-id="dish-order-toppings">
+                                                        <span class="d-flex">{{ line.variants }}</span>
+                                                        <span class="d-flex">{{ line.options }}</span>
+                                                        <span class="d-flex">{{ line.additions }}</span>
                                                     </div>                                        
                                                 
                                                     <div role="separator" class="v-spacer"></div>
 
                                                     <div class="d-flex fill-width mt-1 pos-relative align-center">
 
-                                                        <div class="v-order-button" data-id="order-buttons">
+                                                        <div class="v-order-button pos-relative" data-id="order-buttons">
                                                             <button type="button" data-id="order-button-minus" class="v-order-button--elem" aria-label="Уменьшить">
                                                                 <svg viewBox="0 0 24 24" fill="none">
                                                                     <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                                                 </svg>
                                                             </button>
-                                                            {% render_field form.quantity class="v-order-button--elem v-order-button--value" readonly="readonly" data-id="quantity-input" %}
+                                                            {% render_field form.quantity class="v-order-button--elem v-order-button--value" readonly="true" data-id="quantity-input" %}
                                                             <button type="button" data-id="order-button-plus" class="v-order-button--elem" aria-label="Увеличить">
                                                                 <svg viewBox="0 0 24 24" fill="none">
                                                                     <path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -130,9 +127,8 @@
                     <div role="separator" class="v-spacer"></div>
                     
                     <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink">
-                        <span class="v-button__wrapper">
-                            <span class="v-button__value"> Оформить заказ
-                            </span>
+                        <span class="v-button__value">
+                             Оформить заказ
                         </span>
                     </button>
 
@@ -144,14 +140,12 @@
         {% else %}
             <div data-test-id="alert-modal-overlay" class="v-alert v-alert--blur d-flex align-center justify-center">
                 <div class="v-alert__block d-flex flex-column justify-center align-center pd-2 pd-sm-3">
-                    <div class="v-alert__text text-center">
+                    <span class="v-alert__text text-center">
                         У вас пока нет<br>товаров в корзине
-                    </div>
+                    </span>
                     <button type="button" onclick="window.location.href='{{ homepage_url }}'" data-id="alert-modal-submit-button" class="v-button fill-width mt-3 v-button--main justify-center shrink">
-                        <span class="v-button__wrapper">
-                            <span class="v-button__value"> 
-                                На главную страницу 
-                            </span>
+                        <span class="v-button__value">
+                            На главную страницу 
                         </span>
                     </button>
                 </div>
@@ -165,7 +159,7 @@
     
     <div class="v-cart__submit d-flex align-end fill-width">
         <div class="v-cart__total d-flex flex-column fill-width">
-            <span class="v-cart__title pd-0 pd-sm-2" style="border-bottom: 2px solid #efefef;">Сумма заказа</span>
+            <span class="v-cart__title pd-0 pd-sm-2" style="border-bottom: 1px solid #efefef;">Сумма заказа</span>
             <div data-id="cart-totals" class="pd-0 pd-sm-2">
                 {% include 'oscar/basket/partials/basket_totals.html' with editable=1 %}
             </div>
@@ -174,9 +168,8 @@
 
     <div class="px-2 pt-1 pb-2 fill-width">
         <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink fill-width">        
-            <span class="v-button__wrapper">
-                <span class="v-button__value"> Оформить заказ
-                </span>
+            <span class="v-button__value">
+                 Оформить заказ
             </span>
         </button>
     </div>

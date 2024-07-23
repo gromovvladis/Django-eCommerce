@@ -103,7 +103,9 @@ class AbstractAction(models.Model):
         """
         Return a queryset of products in this action
         """
-        return self.products_related.all()
+        
+        return self.products_related.select_related("parent", "product_class").prefetch_related("stockrecords", "images", "parent__product_class", "categories").all()
+    
 
     
 class AbstractPromoCategory(models.Model):
@@ -204,8 +206,9 @@ class AbstractPromoCategory(models.Model):
         """
         Return a queryset of products in this action
         """
-        return self.products_related.all()
-    
+        return self.products_related.select_related("parent", "product_class").prefetch_related("stockrecords", "images", "parent__product_class", "categories").all()
+
+
     def get_absolute_url(self):
         return reverse(
             "home:promo-detail", kwargs={"action_slug": self.full_slug}

@@ -2880,7 +2880,7 @@ pre {
         padding-right: 0 !important
     }
 
-    .mb-sm-0 {
+    .dish-page__header d-flex shrink align-end align-md-end pt-sm-1m-0 {
         margin-bottom: 0 !important
     }
 
@@ -6945,7 +6945,7 @@ pre {
     left: 0;
     right: 0;
     height: 64px;
-    background: rgba(255, 255, 255, 0.95);
+    background: #fff;
     /* background: rgba(255, 255, 255, 0.8); */
     /* backdrop-filter: blur(15px); */
     color: #000;
@@ -8426,11 +8426,24 @@ html.drawer .v-app__side {
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
-    --size: 48px;
+    --size: 44px;
+    scrollbar-width: none;
 }
 
 .v-input-textarea {
     height: unset !important;
+    scrollbar-width: none;
+
+}
+
+.v-text-area{
+    scroll-padding-top: 10px;
+}
+
+.v-input-textarea::-webkit-scrollbar,
+.v-input::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 .v-input__wrapper {
@@ -10568,7 +10581,7 @@ html.drawer .v-app__side {
 .dish__profit {
     font-family: Onest, sans-serif;
     font-size: .75rem;
-    line-height: .875rem;
+    line-height: .9rem;
     font-weight: 400;
     font-style: normal
 }
@@ -10802,7 +10815,7 @@ html.drawer .v-app__side {
     -ms-flex-pack: center;
     justify-content: center;
     min-width: unset;
-    border-radius: 30px;
+    border-radius: 15px;
     background: #fafafa;
     -ms-flex-negative: 0;
     flex-shrink: 0;
@@ -11061,15 +11074,13 @@ input[type="number"]:focus {
 
 .v-cart-form.loading .v-order-button::after {
     content: "";
-    height: 100%;
+    position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
-    opacity: 0.3;
     background-color: #fff;
-    position: absolute;
-    width: 100%;
+    opacity: 0.15;
 }
 
 .v-cart {
@@ -11207,9 +11218,9 @@ input[type="number"]:focus {
         display: block;
     }
 
-    .v-cart__header {
+    /* .v-cart__header {
         border-bottom: 1px solid #efefef
-    }
+    } */
 
     .v-cart__clear {
         display: -webkit-box;
@@ -12072,9 +12083,8 @@ input[type="number"]:focus {
     -webkit-box-pack: center;
     -ms-flex-pack: center;
     justify-content: center;
-    font-size: 3rem;
-    width: 54px;
-    height: 54px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     background-color: #ffffff82;
     pointer-events: all;
@@ -13871,7 +13881,7 @@ ymaps[class*="search__suggest-item_selected"] {
     font-weight: 400;
     font-style: normal;
     padding: .25rem 1rem;
-    min-height: 48px;
+    min-height: 44px;
     color: #000
 }
 
@@ -13917,13 +13927,14 @@ ymaps[class*="search__suggest-item_selected"] {
     -webkit-transform: translateY(-50%);
     transform: translateY(-50%);
     -webkit-transition: .1s !important;
-    transition: .1s !important
+    transition: .1s !important;
 }
 
 .v-app .v-input__label-active .v-input__label {
-    top: calc(50% - .7rem);
+    top: calc(22px - .7rem);
+    /* top: calc(50% - .7rem); */
     -webkit-transform: scale(.8) translateY(-50%);
-    transform: scale(.8) translateY(-50%)
+    transform: scale(.8)  translateY(-50%)
 }
 
 .v-app .v-input__padding input,
@@ -14422,9 +14433,9 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
 
-    .v-app---home .v-app-nav__button--search {
+    /* .v-app---home .v-app-nav__button--search {
         display: none !important
-    }
+    } */
 
     .v-app---home .v-app-nav .cats {
         left: unset;
@@ -14553,9 +14564,9 @@ ymaps[class*="search__suggest-item_selected"] {
     border-top: 1px solid #efefef
 }
 
-.v-app .v-cart-items--item:first-child {
-    border-top: unset
-}
+/* .v-app .v-cart-items--item:first-of-type {
+    border-top: 0;
+} */
 
 .v-app .v-deferred {
     max-width: 392px
@@ -15507,7 +15518,56 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .upsell-messages {
     font-size: 1rem;
+
 }
+
+.upsell-header{
+    display: flex;
+    align-items: end;
+    padding-top: 1rem;
+    border-top: 1px solid #efefef;
+}
+
+.upsell-messages h3{
+    color: var(--color-secondary);
+    margin-left: .5rem;
+    line-height: unset;
+}
+
+.upsell-scroll{
+    display: flex;
+    margin-bottom: 1rem;
+    overflow-x: scroll;
+    margin-top: 1rem;
+    scrollbar-width: none;
+    width: 100%;
+}
+
+.upsell-scroll::-webkit-scrollbar {
+    height: 0;
+    width: 0;
+}
+
+.upsell-item{
+    padding: 1.25rem;
+    background-color: rgb(243, 243, 247);
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    margin-right: 1rem;
+    flex: 0 0 auto;
+    transition: .15s linear all;
+}
+
+.upsell-item:last-child{
+    margin-right: 0;
+}
+
+.upsell-item:hover{
+    background-color: rgb(248, 248, 248);
+    transform: scale(0.95);
+}
+
 
 @media screen and (min-width:1220px) {
 
@@ -15520,7 +15580,7 @@ ymaps[class*="search__suggest-item_selected"] {
 @media screen and (max-width:768px) {
 
     .container--carousel {
-        padding: 0.5rem 0 0;
+        padding: 0;
     }
 
     .v-carousel__navs {
@@ -16033,8 +16093,8 @@ ymaps[class*="search__suggest-item_selected"] {
     padding: .25rem;
     pointer-events: none;
     z-index: 0;
-    -webkit-transition: left .2s ease-in-out;
-    transition: left .2s ease-in-out
+    -webkit-transition: left .15s ease-in-out;
+    transition: left .15s ease-in-out
 }
 
 .v-tabs-button__active-block div {
@@ -16581,7 +16641,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .cart-page__totals {
         display: block;
-        width: 320px;
+        width: 300px;
         background: #fff;
         border-radius: 40px;
         overflow: hidden;
@@ -16627,7 +16687,7 @@ ymaps[class*="search__suggest-item_selected"] {
         box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
         margin: 0;
         height: unset;
-        width: calc(100% - 320px);
+        width: calc(100% - 300px - 1rem);
     }
 
     /* .dish-page__wrapper {
@@ -16676,6 +16736,14 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 @media screen and (min-width:1024px) {
+    
+    .cart-page__totals{
+        width: 330px;
+    }
+
+    .cart-page__wrapper{
+        width: calc(100% - 330px - 1rem);
+    }
 
     .dish-page__related h2 {
         font-size: 1.375rem;
@@ -17381,8 +17449,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .offer-dish,
-    .v-actions__action-detail-content h1,
-    .v-actions__action-detail-text {
+    .v-actions__action-detail-content h1 {
         font-family: Onest, sans-serif;
         font-weight: 500;
         font-style: normal

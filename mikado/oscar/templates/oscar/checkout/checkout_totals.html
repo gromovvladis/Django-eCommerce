@@ -32,14 +32,14 @@
                         {% if voucher_discounts %}
                             {% for discount in voucher_discounts %}
 
-                                <span class="d-flex justify-space-between no-wrap">
+                                <div class="d-flex justify-space-between no-wrap">
                                     {% if discount.voucher.voucher_set %}
                                         {{ discount.voucher.voucher_set.name }} ({{ discount.voucher.code }})
                                     {% else %}
                                         {{ discount.voucher.name }} ({{ discount.voucher.code }})
                                     {% endif %}
 
-                                    <div class="d-flex">
+                                    <span class="d-flex">
                                         <span class="v-prices__price-before">
                                             - {{ discount.discount|currency:basket.currency }}
                                         </span>
@@ -50,8 +50,8 @@
                                                 <input type="submit" value="Удалить" class="text--red" />
                                             </form>
                                         {% endif %}
-                                    </div>
-                                </span>
+                                    </span>
+                                </div>
 
                             {% endfor %}
                         {% endif %}

@@ -12,7 +12,7 @@
     {% comment %}------------- вариации + доп опции ---------------{% endcomment %}
     <form id="add_to_basket_form" action="{% url 'basket:add' pk=product.pk  %}" method="post">
         {% csrf_token %}
-        <input type="hidden" name="quantity" value="1" id="id_quantity">
+        {% comment %} <input type="hidden" name="quantity" value="1" id="id_quantity"> {% endcomment %}
 
         {% if form.is_bound and not form.is_valid %}
             <div class="alert alert-danger">
@@ -20,7 +20,7 @@
             </div>
         {% endif %}
         
-        <div class="v-dish-actions fill-width d-flex flex-column mt-2">
+        <div class="v-dish-actions fill-width d-flex flex-column">
             {% comment %}------------- вариации + поля опций---------------{% endcomment %}
             {% if product.is_parent %}
                 {% include "oscar/catalogue/partials/variants.html" with form=basket_form %}

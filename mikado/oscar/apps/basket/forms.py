@@ -184,7 +184,7 @@ class AddToBasketForm(forms.Form):
         Option.CHECKBOX: _option_checkbox_field,
     }
 
-    quantity = forms.IntegerField(initial=1, min_value=1, label="Количество")
+    quantity = forms.IntegerField(initial=1, min_value=1, label="Количество", required=False)
 
     def __init__(self, basket, product, *args, **kwargs):
         # Note, the product passed in here isn't necessarily the product being
@@ -281,6 +281,9 @@ class AddToBasketForm(forms.Form):
     def clean_quantity(self):
         # Check that the proposed new line quantity is sensible
         qty = self.cleaned_data["quantity"]
+        if not qty:
+            qty = 1
+            
         basket_threshold = settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD
         if basket_threshold:
             total_basket_quantity = self.basket.num_items
@@ -366,7 +369,7 @@ class SimpleAddToBasketMixin:
         super().__init__(*args, **kwargs)
         if "quantity" in self.fields:
             self.fields["quantity"].initial = 1
-            self.fields["quantity"].widget = forms.HiddenInput()
+            # self.fields["quantity"].widget = forms.HiddenInput()
 
 
 class SimpleAddToBasketForm(SimpleAddToBasketMixin, AddToBasketForm):

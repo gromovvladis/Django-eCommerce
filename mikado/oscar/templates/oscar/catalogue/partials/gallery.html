@@ -1,36 +1,44 @@
 {% load image_tags %}
 
+<div id="product_gallery">
+    <div class="carousel-inner">
+        <div class="carousel-item">
+        {% with image=product.primary_image %}
+            {% oscar_thumbnail image.original "440x400" upscale=False as thumb %}
+            <img src="{{ thumb.url }}" loading="lazy" class="img-fluid" alt="{{ product.get_title }}" />
+        {% endwith %}
+        </div>
+    </div>
+</div>
+
+{% comment %} 
 {% with all_images=product.get_all_images %}
 
     {% if all_images|length > 1 %}
 
         <div id="product_gallery" class="carousel slide">
-            <div class="img-thumbnail">
-                <div class="carousel-inner">
-                {% for image in all_images %}
-                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        {% oscar_thumbnail image.original "x550" upscale=False as thumb %}
-                        <img src="{{ thumb.url }}" loading="lazy" class="img-fluid" alt="{{ product.get_title }}" />
-                    </div>
-                {% endfor %}
+            <div class="carousel-inner">
+            {% for image in all_images %}
+                <div class="carousel-item">
+                    {% oscar_thumbnail image.original "x550" upscale=False as thumb %}
+                    <img src="{{ thumb.url }}" loading="lazy" class="img-fluid" alt="{{ product.get_title }}" />
                 </div>
+            {% endfor %}
             </div>
         </div>
 
     {% else %}
 
-        <div id="product_gallery" class="carousel">
-            <div class="img-thumbnail">
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                    {% with image=product.primary_image %}
-                        {% oscar_thumbnail image.original "440x400" upscale=False as thumb %}
-                        <img src="{{ thumb.url }}" loading="lazy" class="img-fluid" alt="{{ product.get_title }}" />
-                    {% endwith %}
-                    </div>
+        <div id="product_gallery">
+            <div class="carousel-inner">
+                <div class="carousel-item">
+                {% with image=product.primary_image %}
+                    {% oscar_thumbnail image.original "440x400" upscale=False as thumb %}
+                    <img src="{{ thumb.url }}" loading="lazy" class="img-fluid" alt="{{ product.get_title }}" />
+                {% endwith %}
                 </div>
             </div>
         </div>
 
     {% endif %}
-{% endwith %}
+{% endwith %} {% endcomment %}

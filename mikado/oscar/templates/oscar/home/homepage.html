@@ -7,7 +7,7 @@
     {% if summary %}{{ summary }} |{% endif %} {{ block.super }}
 {% endblock %}
 
-{% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pd-sm-0 pt-sm-2 pb-sm-6{% endblock %}
+{% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pd-sm-0 pt-sm-2 pb-sm-4{% endblock %}
 
 {% block app_class %}v-app---home{% endblock %}
 {% block nav_class %}v-app__nav--home{% endblock %}
@@ -58,7 +58,7 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/slider/slider.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/slider/homepage-sliders.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+    <script  src="{% static "js/slider/slider.js" %}"></script>
+    <script  src="{% static "js/slider/homepage-sliders.js" %}"></script>
+    <script  src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
 {% endblock %}

@@ -6,7 +6,7 @@
     Корзина | {{ block.super }}
 {% endblock %}
 
-{% block wrapper_class %}fill-width fill-height px-sm-2 pb-sm-2 pt-md-2{% endblock %}
+{% block wrapper_class %}fill-width fill-height pd-sm-2 pb-sm-4{% endblock %}
 
 {% block app_class %}v-app---cart{% endblock %}
 {% block nav_class %}v-app__nav--cart{% endblock %}
@@ -45,6 +45,6 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/basket/basket-main.js" %}"></script>
+    <script  src="{% static "js/basket/basket-main.js" %}"></script>
 {% endblock %}
 

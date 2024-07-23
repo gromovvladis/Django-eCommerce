@@ -125,7 +125,6 @@ class Structured(Base):
         if stockrecord is None:
             stockrecord = self.select_stockrecord(product)
         return PurchaseInfo(
-            
             price=self.pricing_policy(product, stockrecord),
             availability=self.availability_policy(product, stockrecord),
             stockrecord=stockrecord,

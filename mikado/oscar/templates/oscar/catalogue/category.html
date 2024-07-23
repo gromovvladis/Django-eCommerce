@@ -10,7 +10,7 @@
     {{ category.get_meta_title }} | {{ block.super }}
 {% endblock %}
 
-{% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pb-sm-6{% endblock %}
+{% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pb-sm-4{% endblock %}
 {% block app_class %}v-app---category{% endblock %}
 {% block nav_class %}v-app__nav--category{% endblock %}
 {% block nav_title %}{{ category.get_meta_title }}{% endblock %}
@@ -39,9 +39,9 @@
   
     {% comment %}------------- содержимое категории ---------------{% endcomment %}
     {% cache 1800 products category category.id %} 
-        {% if products %}
-        <div class="v-dishes row">
-            {% for product in products %}
+    {% if products %}
+    <div class="v-dishes row">
+        {% for product in products %}
                 <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
                     {% render_product product.object %}
                 </div>
@@ -57,5 +57,5 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+    <script  src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
 {% endblock %}

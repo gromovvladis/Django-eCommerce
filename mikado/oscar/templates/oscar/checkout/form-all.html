@@ -37,10 +37,10 @@
                 </div>
                 
                 {% comment %} коментарий к заказу {% endcomment %}
-                <div data-id="v-input-field" class="v-input v-text-area d-flex align-center mb-2 v-input__padding{% if form.initial.order_note %} v-input__label-active{% endif %}">
+                <div data-id="v-input-field" class="v-input v-input-textarea d-flex align-center mb-2 v-input__padding{% if form.initial.order_note %} v-input__label-active{% endif %}">
                     <div class="v-input__wrapper">
                         <div class="v-input__label">Комментарий к заказу</div>
-                        <div class="v-input__control d-flex align-center">
+                        <div class="v-input__control d-flex align-center" contenteditable>
                         {% include "oscar/partials/render_field.html" with field=form.order_note form_id="place_order_form" data_id="order-input-comment" %}
                         </div>
                     </div>
@@ -56,7 +56,7 @@
                                         <div class="fill-width fill-height"></div>
                                     </div>
                                     {% for method in methods %}
-                                        <button class="v-tabs-button__button{% if method.default_selected %} active{% endif %}" {% if method.default_selected %}selected{% endif %} data-id="delivery-method-button" name="method_code" value="{{ method.code }}">{{ method.name }}</button>
+                                        <button class="v-tabs-button__button{% if method.default_selected %} active{% endif %}" data-id="delivery-method-button" name="method_code" value="{{ method.code }}">{{ method.name }}</button>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -130,11 +130,11 @@
                         </div>
         
                         {% comment %} notes {% endcomment %}
-                        <div data-id="v-input-field" class="v-input v-text-area d-flex align-center mt-1 mt-sm-2 v-input__padding{% if form.initial.notes %} v-input__label-active{% endif %}">
+                        <div data-id="v-input-field" class="v-input v-input-textarea d-flex align-center mt-1 mt-sm-2 v-input__padding{% if form.initial.notes %} v-input__label-active{% endif %}">
                             <div class="v-input__wrapper">
                                 <div class="v-input__label">Комментарий курьеру</div> 
-                                <div class="v-input__control d-flex align-center">
-                                    {% include "oscar/partials/render_field.html" with field=form.notes data_id="delivery-input-note" %}
+                                <div class="v-input__control d-flex align-center" contenteditable>
+                                    {% include "oscar/partials/render_field.html" with field=form.notes data_id="delivery-input-note"%}
                                 </div>
                             </div>
                         </div>

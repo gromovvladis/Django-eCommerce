@@ -334,7 +334,7 @@ function createMap(address=null) {
                     // map = null;
                     setTimeout(() => {
                         action_back = null;
-                      }, 900);
+                      }, 700);
                 });
     
                 cleanButton = new ymaps.control.Button({     
@@ -695,7 +695,7 @@ function getZonaId(coords) {
 function addressCaptured(coords, address){
     console.log("addressCaptured");
 
-    $(line1).attr('readonly', true);
+    $(line1).prop('readonly', true);
     $(suggests).addClass('d-none');
     $(line1_container).removeClass("not-valid");
 
@@ -720,7 +720,7 @@ function addressCaptured(coords, address){
 function cleanAddress(){
     console.log("cleanAddress");
     $(line1).val('');
-    $(line1).attr('readonly', false);
+    $(line1).prop('readonly', false);
     $(hints).addClass('d-none');
     $(delivery_time).removeClass('active');
     $(controls).addClass('d-none');

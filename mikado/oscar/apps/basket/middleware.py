@@ -136,7 +136,7 @@ class BasketMiddleware:
         if request._basket_cache is not None:
             return request._basket_cache
 
-        num_items_merged = 0
+        # num_items_merged = 0
         manager = Basket.open
         cookie_key = self.get_cookie_key(request)
         cookie_basket = self.get_cookie_basket(cookie_key, request, manager)
@@ -155,7 +155,7 @@ class BasketMiddleware:
                 for other_basket in old_baskets[1:]:
                     self.merge_baskets(basket, other_basket)
                     # count number of items that have been merged
-                    num_items_merged += other_basket.num_items
+                    # num_items_merged += other_basket.num_items
 
             # Assign user onto basket to prevent further SQL queries when
             # basket.owner is accessed.
@@ -163,7 +163,7 @@ class BasketMiddleware:
 
             if cookie_basket:
                 # count number of items in the basket
-                num_items_merged += cookie_basket.num_items
+                # num_items_merged += cookie_basket.num_items
                 self.merge_baskets(basket, cookie_basket)
                 request.cookies_to_delete.append(cookie_key)
 

@@ -22,6 +22,7 @@ var time_title = $('[data-id="order-time-title"]');
 
 var checkout_totals = $('#checkout_totals');
 var all_fields = $('[data-id="v-input-field"]');
+var textares = $('textarea');
 var payment_method = $('#id_payment_method');
 var email_or_change_block = $(all_fields).filter('[data-field="v-email-field"]');
 var email_or_change_field = $(email_or_change_block).find('#email_field_label');
@@ -33,11 +34,18 @@ const ONLINE_PAYMENT = ['SBP', 'CARD'];
 $(document).ready(function () {
     var addressInital = $(line1).val();
     if (addressInital) {
-        $(line1).attr('readonly', true);
+        $(line1).prop('readonly', true);
         $(line1).attr('captured', true);
         createMap(addressInital);
     }
     validateCheckout();
+    $(textares).each(function(){
+        if (this.scrollHeight < 77) {
+            $(this).innerHeight(this.scrollHeight)
+        } else {
+            $(this).innerHeight(77)
+        }
+    });
 });
 
 // смена метода доставки
@@ -132,6 +140,15 @@ $(all_fields).each(function(){
         checkValid();
     })
 })
+
+
+$(textares).each(function(){
+    $(this).on('input scroll', function(){
+        console.log('focusin')
+        $(this).innerHeight(this.scrollHeight)
+    });
+});
+
 
 // не отправлять форму enter-ом
 $('#place_order_form').on('keypress', 'input', function(event) {

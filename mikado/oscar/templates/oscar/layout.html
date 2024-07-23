@@ -7,7 +7,7 @@
 {% compress css %}
     {% block styles %}
         {{ block.super }}
-        <link rel="stylesheet" type="text/css" href="{% static "css/planet-styles.css" %}" />
+        <link rel="stylesheet" href="{% static "css/planet-styles.css" %}" />
     {% endblock %}
 {% endcompress %}
 
@@ -28,10 +28,8 @@
                                         
                     {% comment %} ------------- кнопка назад --------------- {% endcomment %}
                     <button onclick="getBack(); return false" data-id="back-main-btn" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink" aria-label="Назад">
-                        <span class="v-button__wrapper">
-                            <span class="d-flex">
-                                {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
-                            </span>
+                        <span class="v-button__wrapper d-flex">
+                            {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
                         </span>
                     </button>
 
@@ -46,46 +44,45 @@
 
                     <div role="separator" class="v-spacer"></div>
 
-                    <ul class="cats_header fill-width fill-height">
-                        <li class="v-app-nav__title d-flex d-sm-none text-center">
+                    <div class="cats_header fill-height">
+       
+                        <div class="v-app-nav__title d-flex d-sm-none text-center">
                             {% block nav_title %}{% endblock %}
-                        </li>
-                        {% category_tree as tree_categories %}
-                        {% if tree_categories %}
-                            {% for tree_category in tree_categories %}
-                            {% comment %}------------- категория item ---------------{% endcomment %} 
-                            <li>
-                                <a class="cat_item {% if tree_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ tree_category.url }}" data-id="categories-tabs-item-hits">
-                                {{ tree_category.name }}
-                                </a>
-                            </li>
-                            {% endfor %}
-                        {% endif %}
+                        </div>
+
+                        <ul class="d-flex align-center fill-height">
+                            {% category_tree as tree_categories %}
+                            {% if tree_categories %}
+                                {% for tree_category in tree_categories %}
+                                {% comment %}------------- категория item ---------------{% endcomment %} 
+                                <li>
+                                    <a class="cat_item {% if tree_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ tree_category.url }}" data-id="categories-tabs-item-hits">
+                                    {{ tree_category.name }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
                         
-                        <li role="separator" class="v-spacer"></li>
+                        <div role="separator" class="v-spacer"></div>
 
                         {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
-                        <li>
-                            <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
-                                class="v-button v-app-nav__button--search v-button--small justify-center mr-1 shrink" aria-label="Поиск">
-                                <span class="v-button__wrapper">
-                                    <span class="d-flex">
-                                        {% icon file_name='header/search' size=20 fill='#111'%}
-                                    </span>
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
+                        <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
+                            class="v-button v-app-nav__button--search v-button--small justify-center mr-1 shrink" aria-label="Поиск">
+                            <span class="v-button__wrapper d-flex">
+                                {% icon file_name='header/search' size=20 fill='#111'%}
+                            </span>
+                        </a>
+
+                    </div>
 
                     <div class="v-app-nav__title v-app-nav__title--center d-flex d-sm-none text-center">
                         {% block nav_title_center %}{% endblock %}
                     </div>
 
                     <button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2">
-                        <span class="v-button__wrapper">
-                            <span class="d-flex">
-                                {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
-                            </span>
+                        <span class="v-button__wrapper d-flex">
+                            {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
                         </span>
                     </button>
 
@@ -116,7 +113,6 @@
 
                         {% block sticky_address %}{% endblock %}
                 
-                        {# Main content of page - other layout templates may override this block #}
                         {% block content %}{% endblock %}
     
                     </div>
@@ -150,8 +146,8 @@
 
 {% compress js %}
     {% block scripts %}
-        <script type="application/javascript" src="{% static "js/auth/auth.js" %}"></script>
-        <script type="application/javascript" src="{% static "js/cookie/cookies/cookie-main.js" %}"></script>
-        <script type="application/javascript" src="{% static "js/footer/footer.js" %}"></script>
+        <script src="{% static "js/auth/auth.js" %}"></script>
+        <script src="{% static "js/cookie/cookies/cookie-main.js" %}"></script>
+        <script src="{% static "js/footer/footer.js" %}"></script>
     {% endblock %}
 {% endcompress %}

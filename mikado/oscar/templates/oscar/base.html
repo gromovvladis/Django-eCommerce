@@ -13,8 +13,7 @@
             <link rel="shortcut icon" href="{% static "favicon.ico" %}" />
         {% endblock %}
 
-        {# Block where global CSS will go. #}
-        
+        {# Block where global CSS will go. #}        
         {% block styles %}{% endblock %}
 
         {# Additional CSS - specific to certain pages #}
@@ -33,9 +32,6 @@
         
         {# Main content goes in this 'layout' block #}
         {% block layout %}{% endblock %}
-        
-        {% block cookie %}
-        {% endblock %}
             
         {# SVG #}
         {% block SVG %}
@@ -44,10 +40,10 @@
         {# Scripts loaded from a CDN. #}
         {% block cdn_scripts %}
             <!-- jQuery -->
-            <script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
             <script>window.jQuery || document.write('<script src="{% static "js/jquery/jquery.min.js" %}"><\/script>')</script>
             <!-- Cookies -->
-            <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.5/js.cookie.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.5/js.cookie.min.js"></script>
             <script>window.Cookies || document.write('<script src="{% static "js/cookie/js-cookie.min.js" %}"><\/script>')</script>
         {% endblock %}
         
@@ -61,7 +57,7 @@
         {% block scripts %}{% endblock %}
             
         {# Block for body onload functions #}
-        <script>$(function() { {% block onbodyload %}{% endblock %} })</script>
+        <script>$(function(){ {% block onbodyload %}{% endblock %} })</script>
 
     </body>
 </html>

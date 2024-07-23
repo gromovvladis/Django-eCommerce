@@ -94,23 +94,30 @@ class ProductQuerySet(models.query.QuerySet):
         Applies select_related and prefetch_related for commonly related
         models to save on queries
         """
-        Option = get_model("catalogue", "Option")
-        product_class_options = Option.objects.filter(
-            productclass=OuterRef("product_class")
-        )
-        product_options = Option.objects.filter(product=OuterRef("pk"))
+        # Option = get_model("catalogue", "Option")
+        # product_class_options = Option.objects.filter(productclass=OuterRef("product_class"))
+        # product_options = Option.objects.filter(product=OuterRef("pk"))
+        # Additional = get_model("catalogue", "Additional")
+        # product_class_additionals = Additional.objects.filter(productclass=OuterRef("product_class"))
+        # product_additionals = Additional.objects.filter(product=OuterRef("pk"))
         return (
             self.select_related("product_class")
-            .annotate(
-                has_product_class_options=Exists(product_class_options),
-                has_product_options=Exists(product_options),
-            )
+            # .annotate(
+                # has_product_class_options=Exists(product_class_options),
+                # has_product_options=Exists(product_options),
+                # has_product_class_additionals=Exists(product_class_additionals),
+                # has_product_additionals=Exists(product_additionals),
+            # )
             .prefetch_related(
                 "children",
-                "product_options",
-                "product_class__options",
                 "stockrecords",
                 "images",
+                "categories",
+                # "attributes",
+                # "product_options",
+                # "product_class__options",
+                # "product_additionals",
+                # "product_class__class_additionals",
             )
         )
 
