@@ -38,7 +38,7 @@ $('#edit-address').on('keypress', 'input', function(event) {
 $(document).ready(function () {
     var adr = $(line1).val();
     if (adr) {
-        $(line1).attr('readonly', true);
+        $(line1).prop('readonly', true);
         $(line1).attr('captured', true);
         createMap(adr);
     }

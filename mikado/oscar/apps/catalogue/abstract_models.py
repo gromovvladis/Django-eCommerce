@@ -722,10 +722,10 @@ class AbstractProduct(models.Model):
     def has_options(self):
         # Extracting annotated value with number of product class options
         # from product list queryset.
-        has_product_class_options = getattr(self, "has_product_class_options", None)
-        has_product_options = getattr(self, "has_product_options", None)
-        if has_product_class_options is not None and has_product_options is not None:
-            return has_product_class_options or has_product_options
+        # has_product_class_options = getattr(self, "has_product_class_options", None)
+        # has_product_options = getattr(self, "has_product_options", None)
+        # if has_product_class_options is not None and has_product_options is not None:
+        #     return has_product_class_options or has_product_options
         
         options = self.options.all()
         if options:
@@ -739,7 +739,8 @@ class AbstractProduct(models.Model):
         # has_product_class_additionals = getattr(self, "has_product_class_additionals", None)
         # has_product_additionals = getattr(self, "has_product_additionals", None)
         # if has_product_class_additionals is not None and has_product_additionals is not None:
-            # return has_product_class_additionals or has_product_additionals
+        #     return has_product_class_additionals or has_product_additionals
+        
         additionals = self.additionals.all()
         if additionals:
             return True

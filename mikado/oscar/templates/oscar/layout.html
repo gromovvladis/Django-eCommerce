@@ -7,7 +7,7 @@
 {% compress css %}
     {% block styles %}
         {{ block.super }}
-        <link rel="stylesheet" type="text/css" href="{% static "css/planet-styles.css" %}" />
+        <link rel="stylesheet" href="{% static "css/planet-styles.css" %}" />
     {% endblock %}
 {% endcompress %}
 
@@ -28,10 +28,8 @@
                                         
                     {% comment %} ------------- кнопка назад --------------- {% endcomment %}
                     <button onclick="getBack(); return false" data-id="back-main-btn" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink" aria-label="Назад">
-                        <span class="v-button__wrapper">
-                            <span class="d-flex">
-                                {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
-                            </span>
+                        <span class="v-button__wrapper d-flex">
+                            {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
                         </span>
                     </button>
 
@@ -71,10 +69,8 @@
                         {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
                         <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
                             class="v-button v-app-nav__button--search v-button--small justify-center mr-1 shrink" aria-label="Поиск">
-                            <span class="v-button__wrapper">
-                                <span class="d-flex">
-                                    {% icon file_name='header/search' size=20 fill='#111'%}
-                                </span>
+                            <span class="v-button__wrapper d-flex">
+                                {% icon file_name='header/search' size=20 fill='#111'%}
                             </span>
                         </a>
 
@@ -85,10 +81,8 @@
                     </div>
 
                     <button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2">
-                        <span class="v-button__wrapper">
-                            <span class="d-flex">
-                                {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
-                            </span>
+                        <span class="v-button__wrapper d-flex">
+                            {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
                         </span>
                     </button>
 
@@ -119,7 +113,6 @@
 
                         {% block sticky_address %}{% endblock %}
                 
-                        {# Main content of page - other layout templates may override this block #}
                         {% block content %}{% endblock %}
     
                     </div>

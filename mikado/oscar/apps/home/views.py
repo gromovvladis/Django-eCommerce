@@ -41,7 +41,7 @@ class HomeView(ListView):
         actions = cache.get('actions_all')
 
         if not actions:
-            actions = Action.objects.filter(is_active=True).only('img', 'slug', 'title')
+            actions = Action.objects.only('img', 'slug', 'title').filter(is_active=True)
             cache.set("actions_all", actions, 3600)
 
         return actions
@@ -60,7 +60,7 @@ class HomeView(ListView):
             promo_cats = []
             promo_cats = cache.get('promo_cats_all')
             if not promo_cats:
-                promo_cats = PromoCategory.objects.filter(is_active=True).prefetch_related('products_related')
+                promo_cats = PromoCategory.objects.prefetch_related('products_related').filter(is_active=True)
                 cache.set("promo_cats_all", promo_cats, 3600)
 
             ctx["promo_cats"] = promo_cats

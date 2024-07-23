@@ -29,17 +29,13 @@
 {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
 <button type="button" onclick="window.location.href='{% url 'search:search-page' %}'" data-id="nav-search-icon-button"
     class="v-button v-app-nav__button--search d-none-i v-button--small justify-center ml-2 shrink">
-    <span class="v-button__wrapper" style="opacity:1;">
-        <span class="d-flex">
-            {% icon file_name='header/search' size=24 fill='#111'%}
-        </span>
+    <span class="v-button__wrapper d-flex">
+        {% icon file_name='header/search' size=24 fill='#111'%}
     </span>
 </button>
 
 <button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink">
-    <span class="v-button__wrapper">
-        <span class="d-flex">
-            {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
-        </span>
+    <span class="v-button__wrapper d-flex">
+        {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
     </span>
 </button>

@@ -72,7 +72,8 @@ function authModalLoaded(){
             password_groug.addClass('v-input v-input__label-active');
             btn_auth.removeClass('d-none');
             btn_auth.addClass('v-button v-button--main');
-            phoneInput.setAttribute("readonly", "readonly");
+            // phoneInput.setAttribute("readonly", "readonly");
+            phoneInput.readOnly = true;
             var _Seconds = 30;
             int_id = setInterval(function() {
                 if (_Seconds > 0) {

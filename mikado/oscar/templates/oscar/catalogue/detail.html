@@ -5,16 +5,16 @@
 {% load reviews_tags %}
 {% load product_tags %}
 {% load display_tags %}
-{% load static %}
 {% load svg_tags %}
 {% load purchase_info_tags %}
+{% load static %}
 {% load cache %}
 
 {% block title %}
     {{ product.get_meta_title }} | {{ block.super }}
 {% endblock %}
 
-{% block wrapper_class %}menu fill-width fill-height grow-1 pb-2 px-sm-2 pt-sm-2 pb-sm-6{% endblock %}
+{% block wrapper_class %}menu fill-width fill-height grow-1 pb-2 px-sm-2 pt-sm-2 pb-sm-4{% endblock %}
 
 {% block app_class %}v-app---dish{% endblock %}
 {% block nav_class %}v-app__nav--dish{% endblock %}
@@ -100,22 +100,24 @@
                             {% endif %}
 
                             {% comment %}------------- если есть скидка ---------------{% endcomment %}                        
-                            <div class="d-flex mt-1 align-end">
+                            <div class="d-flex mt-1 align-end mb-md-1">
                                 <div class="mr-1 dish-page__price{% if session.price.old_price %} new-price{% endif %}">
                                     <span data-id="dish-price-main">{{ session.price.money|formate_price }}</span>
                                     <span> {{ currency_symbol }}</span>
                                 </div>
                                 <div class="dish-page__old-price {% if not session.price.old_price %}d-none{% endif %}">
-                                    <span  data-id="dish-old-price-main">{{ session.price.old_price|formate_price }}</span>
+                                    <span data-id="dish-old-price-main">{{ session.price.old_price|formate_price }}</span>
                                     <span> {{ currency_symbol }}</span>
                                 </div>
                             </div>
                             
-                            <div class="dish-page__scroll-block d-flex flex-column grow-1 scrollbar--white mt-md-1 pb-md-2">
+                            <div class="dish-page__scroll-block d-flex flex-column grow-1 scrollbar--white">
                                 {% comment %}------------- описание ---------------{% endcomment %}
-                                <div class="dish-page__consist mt-2">
-                                    <p>{{ product.description|safe }}</p>
-                                </div>
+                                {% if product.description %}
+                                    <div class="dish-page__consist mt-2">
+                                        <p>{{ product.description|safe }}</p>
+                                    </div>
+                                {% endif %}
 
                                 {% comment %}------------- состав ---------------{% endcomment %}
                                 {% if product.has_compound %}
@@ -138,7 +140,7 @@
                                     <button id="add_to_cart_btn" type="submit" data-id="dish-submit-button" class="v-button fill-width v-button--main justify-center shrink">
                                         <span class="v-button__wrapper">
                                             <span class="v-button__value">В корзину за 
-                                                <span  data-id="dish-price-button">
+                                                <span data-id="dish-price-button">
                                                     {% if session.price.exists %}
                                                         {{ session.price.money|formate_price }}
                                                     {% endif %}
@@ -173,7 +175,6 @@
                     </div>
                 {% endif %}
             {% endwith %}
-        
             {% recently_viewed_products current_product=product %}
         </div>
     {% endcache %}
@@ -197,7 +198,7 @@
 
 {% block scripts %}
     {{ block.super }}
-    <script  src="{% static "js/catalogue/add-to-cart.js" %}"></script>
-    <script  src="{% static "js/catalogue/add-to-wishlist.js" %}"></script>
+    <script src="{% static "js/catalogue/add-to-cart.js" %}"></script>
+    <script src="{% static "js/catalogue/add-to-wishlist.js" %}"></script>
     <script  src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
 {% endblock %}

@@ -13,8 +13,7 @@
             <link rel="shortcut icon" href="{% static "favicon.ico" %}" />
         {% endblock %}
 
-        {# Block where global CSS will go. #}
-        
+        {# Block where global CSS will go. #}        
         {% block styles %}{% endblock %}
 
         {# Additional CSS - specific to certain pages #}
@@ -58,7 +57,7 @@
         {% block scripts %}{% endblock %}
             
         {# Block for body onload functions #}
-        <script>$(function() { {% block onbodyload %}{% endblock %} })</script>
+        <script>$(function(){ {% block onbodyload %}{% endblock %} })</script>
 
     </body>
 </html>

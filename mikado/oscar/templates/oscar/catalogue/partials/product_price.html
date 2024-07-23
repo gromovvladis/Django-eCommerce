@@ -10,8 +10,7 @@
             <div class="py-1 mr-1">
                 <span class="v-prices d-flex flex-column align-start">
                     <span class="v-prices__price no-wrap">
-                    <span class="v-prices__price-before">от</span>
-                    {{ min_price|currency:session.price.currency }}
+                        от {{ min_price|currency:session.price.currency }}
                     </span>
                 </span>
             </div> 
@@ -22,9 +21,7 @@
                 <div class="py-1 mr-1">
                     <span class="v-prices d-flex flex-column align-start">
                         <span class="v-prices__price no-wrap">
-                            <span class="v-prices__price-before"></span>
                             0 Р
-                            <span class="price--abb"></span>
                         </span>
                     </span>
                 </div>
@@ -32,13 +29,11 @@
                 <div>
                     <span class="v-prices d-flex flex-column align-start mr-1">
                         {% if session.price.old_price %}
-                            <span class="dish__mobile-total-price shrink">
-                                <span class="v-prices__price no-wrap py-1">
-                                    {{ session.price.money|currency:session.price.currency }}
-                                </span>
+                            <span class="dish__mobile-total-price v-prices__price shrink no-wrap py-1">
+                                {{ session.price.money|currency:session.price.currency }}
                             </span>    
-                            <span class="dish__mobile-total d-flex align-center mt-05">
-                                <span class="dish__mobile-total-label dish__profit">Цена по акции</span>
+                            <span class="dish__mobile-total-label dish__profit d-flex align-center mt-05">
+                                Цена по акции
                             </span>
                         {% else %}
                             <span class="v-prices__price no-wrap py-1">

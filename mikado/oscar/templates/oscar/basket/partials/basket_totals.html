@@ -1,14 +1,13 @@
 {% load currency_filters %}
-{% load i18n %}
 {% load shipping_tags %}
 
-<span class="v-prices d-flex flex-column align-start v-prices--big">
+<div class="v-prices d-flex flex-column align-start v-prices--big">
 
     {% with offer_discounts=basket.offer_discounts voucher_discounts=basket.grouped_voucher_discounts %}
         {% block discount_totals %}
             {% if offer_discounts or voucher_discounts %}
 
-            <div class="v-prices__price_discounts">
+            <span class="v-prices__price_discounts">
                 <span class="no-wrap">
                     Заказ:
                     <span class="v-prices__price-before">
@@ -38,14 +37,12 @@
                     {% endfor %}
                 {% endif %}
 
-            </div>
-
+            </span>
             {% endif %}
         {% endblock %}
     {% endwith %}
 
     <span class="v-prices__price no-wrap">
-        {% comment %} <span class="v-prices__price-before" style="display: none;"></span> {% endcomment %}
         {{ order_total.money|currency:basket.currency }}
     </span>
-</span>
+</div>

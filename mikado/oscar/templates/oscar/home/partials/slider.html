@@ -7,7 +7,7 @@
         <div class="v-main-carousel">
             <div class="v-carousel__wrap v-banners v-main-carousel__banners pos-relative" data-id="slider-homepage">
                 <div class="v-carousel">
-                    <div class="v-carousel__inner d-flex" data-id="slider-swiper">
+                    <div class="v-carousel__inner d-flex fill-width fill-height" data-id="slider-swiper">
                         <div class="swiper-wrapper d-flex fill-width fill-height">
                             {% cache 1800 slider_actions %}
                                     {% for slider_item in action_list %} 
@@ -37,10 +37,10 @@
                 </div>
 
                 <div class="v-carousel__navs">
-                    <button class="v-h-nav--button right d-sm-flex" data-id="swiper-next">
+                    <button class="v-h-nav--button right" data-id="swiper-next">
                         {% icon file_name='interface/arrow-home' size=32 stroke="#222" %}
                     </button>
-                    <button class="v-h-nav--button left d-sm-flex" data-id="swiper-prev">
+                    <button class="v-h-nav--button left" data-id="swiper-prev">
                         {% icon file_name='interface/arrow-home' size=32 stroke="#222" %}
                     </button>
                 </div>

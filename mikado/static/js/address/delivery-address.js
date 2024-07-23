@@ -4,7 +4,7 @@ var set_address_form = $('#set_address');
 $(document).ready(function () {
     var adr = Cookies.get('line1');
     if (adr){
-        $(line1).attr('readonly', true);
+        $(line1).prop('readonly', true);
         $(line1).attr('captured', true);
         createMap(adr);
     }

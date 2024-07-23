@@ -39,7 +39,8 @@ $(add_cart_btn).on('click', function(){
     $(add_form_dalail).submit()
 })
 
-if (variants_label){
+
+if ($(variants_label).length > 0){
     $(variants_label).on('click', function(){
         var d_price = parseInt($(this).find('input').attr('data-price'));
         var d_old_price = $(this).find('input').attr('data-old-price');

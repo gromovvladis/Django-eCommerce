@@ -1,6 +1,10 @@
 
 var cart_nums_compact = $('[data-id="cart-nums"]');
 
+$(document).ready(function () {
+    findNewForms();
+});
+
 function findNewForms(){
     var add_cart_form = $("[data-id='add-to-cart-form-compact']");
     $(add_cart_form).submit(function () {
@@ -33,5 +37,3 @@ function findNewForms(){
         return false;  
     });
 }
-
-findNewForms();

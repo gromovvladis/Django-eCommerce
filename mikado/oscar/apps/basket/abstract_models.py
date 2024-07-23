@@ -135,7 +135,7 @@ class AbstractBasket(models.Model):
         if self._lines is None:
             self._lines = (
                 self.lines.select_related("product", "stockrecord")
-                .prefetch_related("attributes", "product__images")
+                .prefetch_related("attributes", "product__images", "product__categories", "product__stockrecords")
                 .order_by(self._meta.pk.name)
             )
         return self._lines

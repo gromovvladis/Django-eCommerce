@@ -1,28 +1,30 @@
 {% load widget_tweaks %}
 
-{% for field in form %}
 
-    {% if not field.field.widget.attrs.variant and not field.field.widget.attrs.good %}
-        <div class="d-flex">
-            <div class="v-tabs-button d-flex fill">
+<div class="d-flex flex-column mt-2">
+    {% for field in form %}
+        {% if not field.field.widget.attrs.variant and not field.field.widget.attrs.good %}
+            <div class="d-flex">
+                <div class="v-tabs-button d-flex fill">
 
-                {% block errors %}
-                    {% for error in field.errors %}
-                        <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
-                    {% endfor %}
-                {% endblock %}
+                    {% block errors %}
+                        {% for error in field.errors %}
+                            <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                        {% endfor %}
+                    {% endblock %}
 
-                {% render_field field class+="form-control" %}
+                    {% render_field field class+="form-control" %}
 
-                {% block help_text %}
-                    {% if field.help_text %}
-                        <small class="form-text text-muted">
-                            {{ field.help_text|safe }}
-                        </small>
-                    {% endif %}
-                {% endblock %}
-                
+                    {% block help_text %}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">
+                                {{ field.help_text|safe }}
+                            </small>
+                        {% endif %}
+                    {% endblock %}
+                    
+                </div>
             </div>
-        </div>
-    {% endif %}
-{% endfor %}
+        {% endif %}
+    {% endfor %}
+</div>
