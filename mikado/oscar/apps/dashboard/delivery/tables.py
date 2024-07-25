@@ -1,5 +1,5 @@
 
-from django_tables2 import A, LinkColumn, TemplateColumn
+from django_tables2 import A, Column, LinkColumn, TemplateColumn
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
@@ -28,19 +28,22 @@ class DeliveryZonesTable(DashboardTable):
         order_by="order_price",
     )
 
-    # isAvailable = Column(
-    #     verbose_name="Доставка доступна",
-    #     accessor=A("isAvailable"),
-    #     orderable="isAvailable",
-    # )
+    isAvailable = TemplateColumn(
+        verbose_name="Доставка доступна",
+        template_name="oscar/dashboard/delivery/deliveryzones_row_isavailable.html",
+        accessor=A("isAvailable"),
+        order_by="isAvailable",
+    )
 
-    # isHide = Column(
-    #     verbose_name="Доставка доступна",
-    #     accessor=A("isHide"),
-    #     orderable="isHide",
-    # )
+    isHide = TemplateColumn(
+        verbose_name="Скрыть на карте",
+        template_name="oscar/dashboard/delivery/deliveryzones_row_ishide.html",
+        accessor=A("isHide"),
+        orderable="isHide",
+    )
 
     actions = TemplateColumn(
+        verbose_name="Действия",
         template_name="oscar/dashboard/delivery/deliveryzones_row_actions.html",
         orderable=False,
     )

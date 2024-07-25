@@ -334,12 +334,12 @@ class Yoomoney(AbstractPaymentMethod):
             receipt.customer = customer_dict
             receipt.tax_system_code = 1
 
-            for line in order.basket.lines.all():
+            for line in order.lines.all():
                 item = {
                     'description': line.title,
                     'quantity': line.quantity,
                         'amount': {
-                            "value": line.line_price_incl_discounts,
+                            "value": line.line_price,
                             "currency": order.currency,
                         },
                     'vat_code': 4,
@@ -394,12 +394,12 @@ class Yoomoney(AbstractPaymentMethod):
                 receipt.customer = customer_dict
                 receipt.tax_system_code = 1
 
-                for line in order.basket.lines.all():
+                for line in order.lines.all():
                     item = {
                         'description': line.title,
                         'quantity': line.quantity,
                             'amount': {
-                                "value": line.line.line_price_incl_discounts,
+                                "value": line.line_price,
                                 "currency": order.currency,
                             },
                         'vat_code': 4,

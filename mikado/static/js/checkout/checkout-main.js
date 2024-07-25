@@ -144,8 +144,8 @@ $(all_fields).each(function(){
 
 $(textares).each(function(){
     $(this).on('input scroll', function(){
-        console.log('focusin')
-        $(this).innerHeight(this.scrollHeight)
+        $(this).innerHeight(0);
+        $(this).innerHeight(this.scrollHeight);
     });
 });
 

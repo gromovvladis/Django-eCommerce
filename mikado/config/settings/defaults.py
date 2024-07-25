@@ -55,6 +55,7 @@ OSCAR_ORDERS_PER_PAGE = 20
 OSCAR_ADDRESSES_PER_PAGE = 20
 OSCAR_STOCK_ALERTS_PER_PAGE = 20
 OSCAR_DASHBOARD_ITEMS_PER_PAGE = 20
+OSCAR_DASHBOARD_PAYMENTS_PER_PAGE = 40
 
 # Reviews
 OSCAR_MODERATE_REVIEWS = False
@@ -229,7 +230,16 @@ OSCAR_DASHBOARD_NAVIGATION = [
     {
         "label": "Оплата",
         "icon": "fas fa-payments",
-        "url_name": "dashboard:payments-list",
+        "children": [
+            {
+                "label": "Список платежей",
+                "url_name": "dashboard:payments-list",
+            },
+            {
+                "label": "Список возвратов",
+                "url_name": "dashboard:refunds-list",
+            },
+        ]
     },
     {
         "label": "Доставка",
