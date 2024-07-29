@@ -67,7 +67,6 @@ if (basket_summary){
                     $(cart_nums).html(response.new_nums);
                     getUpsellMaseeges();
                     CartTotalHeight();
-                    console.log('1');
                 }
             },
             error: function (response){
@@ -76,6 +75,8 @@ if (basket_summary){
         });
         return false;  
     });
+
+    CartTotalHeight();
 }
 
 function getUpsellMaseeges(){
@@ -106,9 +107,7 @@ $(empty_cart).on('click', function(){
     });
 })
 
-
 function CartTotalHeight(){
     $(cartWrapper).css('--padding-cart', $(cartTotals).outerHeight(true) + "px");
 }
 
-CartTotalHeight();

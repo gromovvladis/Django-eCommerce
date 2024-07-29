@@ -1,0 +1,90 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load static %}
+{% load currency_filters %}
+{% load dashboard_tags %}
+{% load render_table from django_tables2 %}
+
+{% block body_class %}{{ block.super }} payment-detal{% endblock %}
+
+{% block title %}{{ title }} | {{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard:index' %}">Панель управления</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header">
+        <h1>{{ title }}</h1>
+        <p>Платеж №{{ payment.id }}</p>
+    </div>
+{% endblock header %}
+
+{% block dashboard_content %}
+
+    {% payment_date payment.created_at as date %}
+    {% payment_order payment.description as number %}
+    <table class="table table-bordered table-hover">
+        <caption><i class="fas fa-payments"></i>Информация о платеже</caption>
+            <tr>
+                <th>ID Платежа</th>
+                <th>Заказ</th>
+                <th>Клиент</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Возможен возврат</th>
+                <th>Дата создания</th>
+                <th>Возврат</th>
+            </tr>
+            <tr>
+                <td>{{ payment.id }}</td>
+                <td>
+                    <div class="d-flex">
+                        <span class="spinner-border-sm {% if payment.paid and payment.refundable %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
+                        <a href="{% url 'dashboard:order-detail' number=number %}">{{ payment.description }}</a>
+                    </div>
+                </td>
+                <td>
+                    <a href="{% url 'dashboard:user-detail' pk=user.id %}">{{ user.get_full_name|default:user.email }}</a>
+                </td>
+                <td>{{ payment.amount.value|currency }}</td>
+                <td>
+                    {% if payment.status == "succeeded" %}
+                        <span class="badge badge-success">Оплачено</span>
+                    {% elif payment.status == "canceled" %}
+                        <span class="badge badge-danger">Не Оплачено</span>
+                    {% elif payment.status == "pending"  %}
+                        <span class="badge badge-pending">Обрабатывается</span>
+                    {% elif payment.status == "waiting_for_capture"  %}
+                        <span class="badge badge-warning">Требует действия</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if payment.refundable %}
+                        <span class="badge badge-info">Да</span>
+                    {% else %}
+                        <span class="badge badge-dark">Нет</span>
+                    {% endif %}
+                </td>
+                <td>{{ date }}</td>
+                <td>
+                    {% if payment.status == "succeeded" and payment.refundable %}
+                        <a href="{% url 'dashboard:refund-transaction' code=payment.id %}">
+                            Оформить возврат
+                        </a>
+                    {% elif payment.status == "succeeded" and not payment.refundable %}
+                        <span>Возвращено: {{ payment.refunded_amount.value|currency }}</span>
+                    {% else %}
+                        <span>Возврат невозможен</span>
+                    {% endif %}
+                </td>
+            </tr>
+    </table>
+
+{% endblock dashboard_content %}

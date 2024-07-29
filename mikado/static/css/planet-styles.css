@@ -15080,7 +15080,7 @@ ymaps[class*="search__suggest-item_selected"] {
     width: 64%;
     border-radius: 20px;
     background-color: #fff;
-    box-shadow: 4px 4px 30px rgba(0, 0, 0, .1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, .05);
     flex-grow: 1;
     flex: 1 1 auto;
     justify-content: space-between;
@@ -15089,7 +15089,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .topping-description {
     border-radius: 20px;
     background-color: #fff;
-    box-shadow: 4px 4px 30px rgba(0, 0, 0, .1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, .05);
     flex-grow: 1;
     flex: 1 1 auto;
     justify-content: space-between;
@@ -16141,8 +16141,8 @@ ymaps[class*="search__suggest-item_selected"] {
 .v-dish-toppings__card {
     background: #fff;
     border-radius: 20px;
-    -webkit-box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
-    box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
+    -webkit-box-shadow: 4px 4px 15px rgba(0, 0, 0, .05);
+    box-shadow: 4px 4px 15px rgba(0, 0, 0, .05);
     overflow: hidden
 }
 
@@ -17770,8 +17770,8 @@ ymaps[class*="search__suggest-item_selected"] {
     top: 0;
     left: 0;
     fill: #530000;
-    width: 25px;
-    height: 25px;
+    width: 24px;
+    height: 24px;
     /* filter: drop-shadow(0 0 5px var(--color-primary)) */
 }
 

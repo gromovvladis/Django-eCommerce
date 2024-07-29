@@ -1,23 +1,15 @@
 {% extends "oscar/layout.html" %}
 
-{% load history_tags %}
 {% load svg_tags %}
 {% load product_tags %}
-{% load cache %}
 {% load static %}
 
-{% block title %}
-    {{ category.get_meta_title }} | {{ block.super }}
-{% endblock %}
-
+{% block title %}{{ category.get_meta_title }} | {{ block.super }}{% endblock %}
 {% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pb-sm-4{% endblock %}
 {% block app_class %}v-app---category{% endblock %}
 {% block nav_class %}v-app__nav--category{% endblock %}
 {% block nav_title %}{{ category.get_meta_title }}{% endblock %}
-
-{% block description %}
-    {{ category.get_meta_description }}
-{% endblock %}
+{% block description %}{{ category.get_meta_description }}{% endblock %}
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
@@ -30,6 +22,7 @@
     </div>
 {% endblock %}
 
+
 {% block content %}
 
     {% comment %}------------- название категории ---------------{% endcomment %}
@@ -38,24 +31,23 @@
     </div>
   
     {% comment %}------------- содержимое категории ---------------{% endcomment %}
-    {% cache 1800 products category category.id %} 
     {% if products %}
     <div class="v-dishes row">
         {% for product in products %}
-                <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
-                    {% render_product product.object %}
-                </div>
-            {% endfor %}
-        </div>
-        {% include "oscar/partials/pagination.html" %}
-        {% else %}
-            <p class="py-2">Ничего не найдено</p>
-        {% endif %}
-    {% endcache %}
+            <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
+                {% render_product product.object %}
+            </div>
+        {% endfor %}
+    </div>
+    {% include "oscar/partials/pagination.html" %}
+    {% else %}
+        <p class="py-2">Ничего не найдено</p>
+    {% endif %}
  
 {% endblock %}
 
+
 {% block scripts %}
     {{ block.super }}
-    <script  src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+    <script src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
 {% endblock %}

@@ -37,7 +37,7 @@
         <p>Отменить транзакцию и вернуть деньги клиенту?</p>
         <p><strong>Это действие нельзя отменить!</strong></p>
         <div style="border: 1px solid red; color: red; padding: 5px; margin: 0 0 1em 0; max-width: 500px;">
-          После отмены заказ перейдет в статус "Не оплачен" (сделаю потом)
+          После отмены заказ перейдет в статус "Отменен"
         </div>
 
         <input style="margin-bottom:15px ;" name="amount" step="0.01" type="number" min="1" max="{{ transaction.source.amount_available_for_refund|unlocalize }}" value="{{ transaction.source.amount_available_for_refund|unlocalize }}" placeholder="Сумма к возврату"/>

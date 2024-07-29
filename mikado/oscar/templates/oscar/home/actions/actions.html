@@ -1,18 +1,14 @@
 {% extends "oscar/layout.html" %}
 
-{% load static %}
 {% load svg_tags %}
 {% load image_tags %}
 {% load cache %}
 
-{% block title %}
-    {% if summary %}{{ summary }} |{% endif %} {{ block.super }}
-{% endblock %}
-
+{% block title %}{{ summary }} | {{ block.super }}{% endblock %}
 {% block wrapper_class %}v-actions d-flex flex-column pd-2 pb-4 pb-sm-4 container{% endblock %}
-
 {% block app_class %}v-app---action{% endblock %}
 {% block nav_class %}v-app__nav--action{% endblock %}
+{% block nav_title_center %}{{ summary }}{% endblock %}
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 ">
@@ -25,13 +21,11 @@
     </div>
 {% endblock %}
 
-{% block nav_title_center %}{{ summary }}{% endblock %}
-
 {% block content %}
-    <div class="action__wrapper d-flex flex-column">
-        <div class="v-actions__actions">
+    {% cache 1800 actions %}
+        <div class="action__wrapper d-flex flex-column">
+            <div class="v-actions__actions">
 
-            {% cache 600 actions %}
                 {% if actions %}
                     <div class="d-none d-sm-flex mb-2">
                         <h1>Акции</h1>
@@ -42,14 +36,12 @@
                                 <a href="{{ action.get_absolute_url }}" data-id="action-link">
                                     <div class="v-actions__actions-action d-flex flex-column fill-height fill-width">
                                         <div class="v-actions__actions-action-picture fill-width">
-                                            <div class="v-images-chunks fill-width">
-                                                <div class="v-image">
-                                                    <div class="v-image__inner" style="padding-bottom: 45%;">
-                                                        {% with image=action.primary_image %}
-                                                            {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
-                                                            <img src="{{ thumb.url }}" alt="{{ action.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
-                                                        {% endwith %}
-                                                    </div>
+                                            <div class="v-image">
+                                                <div class="v-image__inner" style="padding-bottom: 45%;">
+                                                    {% with image=action.primary_image %}
+                                                        {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
+                                                        <img src="{{ thumb.url }}" alt="{{ action.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                                    {% endwith %}
                                                 </div>
                                             </div>
                                         </div>
@@ -61,9 +53,7 @@
                         {% endfor %}           
                     </div>
                 {% endif %}
-            {% endcache %}
-            
-            {% cache 600 offers %}
+
                 {% if offers %}
                     <div class="d-none d-sm-flex mt-4">
                         <h1>Спецпредложения</h1>
@@ -75,14 +65,12 @@
                                     <a href="{{ offer.get_absolute_url }}" data-id="action-link">
                                         <div class="v-actions__actions-action d-flex flex-column fill-height fill-width">
                                             <div class="v-actions__actions-action-picture fill-width">
-                                                <div class="v-images-chunks fill-width">
-                                                    <div class="v-image">
-                                                        <div class="v-image__inner" style="padding-bottom: 45%;">
-                                                            {% with image=offer.primary_image %}
-                                                                {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
-                                                                <img src="{{ thumb.url }}" alt="{{ offer.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
-                                                            {% endwith %}
-                                                        </div>
+                                                <div class="v-image">
+                                                    <div class="v-image__inner" style="padding-bottom: 45%;">
+                                                        {% with image=offer.primary_image %}
+                                                            {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
+                                                            <img src="{{ thumb.url }}" alt="{{ offer.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                                        {% endwith %}
                                                     </div>
                                                 </div>
                                             </div>
@@ -95,13 +83,12 @@
                         {% endfor %}           
                     </div>
                 {% endif %}
-            {% endcache %}
 
-            {% if not actions and not offers %}
-                <p>На данный момент нет активных акций</p>
-            {% endif %}
+                {% if not actions and not offers %}
+                    <p>На данный момент нет активных акций</p>
+                {% endif %}
 
+            </div>
         </div>
-    </div>
+    {% endcache %}
 {% endblock content %}
-

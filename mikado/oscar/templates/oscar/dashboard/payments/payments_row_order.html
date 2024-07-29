@@ -1,0 +1,7 @@
+{% load dashboard_tags %}
+{% payment_order record.description as number %}
+
+<div class="d-flex">
+    <span class="spinner-border-sm {% if record.paid and record.refundable %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
+    <a href="{% url 'dashboard:order-detail' number=number %}">{{ record.description }}</a>
+</div>

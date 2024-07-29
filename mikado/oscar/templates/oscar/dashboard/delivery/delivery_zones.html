@@ -1,7 +1,7 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load category_tags %}
+{% comment %} {% load category_tags %} {% endcomment %}
 {% load static %}
-{% load i18n %}
+{% comment %} {% load i18n %} {% endcomment %}
 {% load render_table from django_tables2 %}
 
 {% block body_class %}{{ block.super }} delivery-zones{% endblock %}
@@ -14,7 +14,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+                <a href="{% url 'dashboard:index' %}">Панель управления</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
                 Зоны доставки

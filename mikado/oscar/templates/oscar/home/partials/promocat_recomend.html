@@ -1,6 +1,7 @@
 {% load image_tags %}
 {% load product_tags %}
 {% load svg_tags %}
+{% load purchase_info_tags %}
 
 <div class="d-flex flex-column fill-width mb-5 mb-md-8">
 
@@ -27,15 +28,13 @@
                                 <a href="{{ product.get_absolute_url }}" class="v-dish-order d-flex fill-width fill-height mb-1 v-dish-order--info" aria-label="{{ product.get_title }}">
                                     <div class="v-dish-order__picture">
                                         <div class="d-block" data-id="dish-order-image-link">
-                                            <div class="v-dish-image fill-width">
-                                                <div class="v-images-chunks pos-relative">
-                                                    <div class="v-image">
-                                                        <div class="v-image__inner" style="padding-bottom: 100%;">
-                                                            {% with image=product.primary_image %}
-                                                                {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
-                                                                <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
-                                                            {% endwith %}
-                                                        </div>
+                                            <div class="v-dish-image fill-width pos-relative">
+                                                <div class="v-image">
+                                                    <div class="v-image__inner" style="padding-bottom: 100%;">
+                                                        {% with image=product.primary_image %}
+                                                            {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
+                                                            <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                                        {% endwith %}
                                                     </div>
                                                 </div>
                                             </div>
@@ -51,6 +50,7 @@
                                             </div>
                                         </div>
                                         <div role="separator" class="v-spacer"></div>
+                                        {% purchase_info_for_product request product as session %}
                                         {% include "oscar/catalogue/partials/product_price.html" %}
                                     </div>
                                 </a>

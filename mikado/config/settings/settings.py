@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 from django.contrib.messages import constants as messages
 from .defaults import *
-from decouple import Csv, config
+from decouple import config
 from datetime import datetime
 
 # =============
@@ -270,14 +270,9 @@ INSTALLED_APPS = [
     'oscar.apps.dashboard.telegram.apps.TelegramDashboardConfig',
 
     #vlad
-    'rest_framework',
-    'celery',
-    'django_celery_beat',
-    'django_celery_results',
     'smsaero',
     'apps.sms_auth.apps.SmsConfig',
     'apps.user.apps.UserConfig',
-    'compressor',
 
     # 3rd-party apps that Oscar depends on
     'widget_tweaks',
@@ -285,12 +280,17 @@ INSTALLED_APPS = [
     'treebeard',
     'sorl.thumbnail',
     'django_tables2',
+    'compressor',
+    'rest_framework',
+    'celery',
+    'django_celery_beat',
+    'django_celery_results',
 
     # Django apps that the sandbox depends on
     'django.contrib.sitemaps',
 
     # 3rd-party apps that the sandbox depends on
-    'django_extensions',
+    # 'django_extensions',
 ]
 if DEBUG:
     INSTALLED_APPS += ['debug_toolbar']

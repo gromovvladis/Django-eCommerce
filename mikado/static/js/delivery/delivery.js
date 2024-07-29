@@ -39,9 +39,9 @@ var li_list = [];
 
 
 // подсказки при поиске 2GIS
-window.onload = () => {
+$(document).ready(function () {
     CreateSuggestView();
-};
+});
 
 // строка с адресом на карте Яндекс и layout
 ymaps.ready(function () {

@@ -1,14 +1,11 @@
 {% extends "oscar/layout.html" %}
 
-{% load static %}
 {% load svg_tags %}
+{% load static %}
+{% load cache %}
 
-{% block title %}
-    {% if summary %}{{ summary }} |{% endif %} {{ block.super }}
-{% endblock %}
-
+{% block title %}{% if summary %}{{ summary }} |{% endif %} {{ block.super }}{% endblock %}
 {% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pd-sm-0 pt-sm-2 pb-sm-4{% endblock %}
-
 {% block app_class %}v-app---home{% endblock %}
 {% block nav_class %}v-app__nav--home{% endblock %}
 
@@ -18,13 +15,15 @@
     <a href="{{ homepage_url }}" data-id="header-logo"
         class="logo_nav d-sm-flex shrink router-link-exact-active router-link-active"
         aria-current="page">
-        {% icon file_name='header/logo'%}
+        {% icon file_name='header/logo' %}
     </a>
 {% endblock %}
 
-{% block carousel %}
-    {% include "oscar/home/partials/slider.html" %}
-{% endblock %}
+{% cache 3600 slider_actions %}
+    {% block carousel %}
+        {% include "oscar/home/partials/slider.html" %}
+    {% endblock %}
+{% endcache %}
 
 {% block sticky_address %}
     <div class="stiky-address-button d-sm-none pb-2">
@@ -43,9 +42,11 @@
 {% block content %}
     <div class="home__wrapper d-flex flex-column">
         
-        {% block mobile_categories %}
-            {% include "oscar/home/partials/mobile-categories.html" %}
-        {% endblock %}
+        {% cache 3600 tree_categories %}
+            {% block mobile_categories %}
+                {% include "oscar/home/partials/mobile-categories.html" %}
+            {% endblock %}
+        {% endcache %}
 
         {% if not is_mobile %}
             {% block desctop_home %}

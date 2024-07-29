@@ -2,6 +2,10 @@ const mapCenter = [56.050325, 92.903791];
 var mapContainer = document.querySelector('#map');
 var map;
 
+$(document).ready(function () {
+    createMap();
+});
+
 function createMap() {
     ymaps.ready(function () {
 
@@ -119,5 +123,3 @@ function createMap() {
         } 
     });
 }
-
-createMap();

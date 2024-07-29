@@ -1,0 +1,60 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load static %}
+{% load currency_filters %}
+{% load dashboard_tags %}
+{% load render_table from django_tables2 %}
+
+{% block body_class %}{{ block.super }} payment-detal{% endblock %}
+
+{% block title %}{{ title }} | {{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard:index' %}">Панель управления</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header">
+        <h1>{{ title }}</h1>
+        <p>Возврат №{{ refund.id }}</p>
+    </div>
+{% endblock header %}
+
+{% block dashboard_content %}
+
+    {% payment_date refund.created_at as date %}
+    <table class="table table-bordered table-hover">
+        <caption><i class="fas fa-payments"></i>Информация о платеже</caption>
+            <tr>
+                <th>ID Возврата</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Дата создания</th>
+                <th>ID Платежа</th>
+            </tr>
+            <tr>
+                <td>{{ refund.id }}</td>
+                <td>{{ refund.amount.value|currency }}</td>
+                <td>
+                    {% if refund.status == "succeeded" %}
+                        <span class="badge badge-success">Возвращено</span>
+                    {% elif refund.status == "canceled" %}
+                        <span class="badge badge-danger">Возврат не удался</span>
+                    {% elif refund.status == "pending"  %}
+                        <span class="badge badge-pending">Обрабатывается</span>
+                    {% endif %}
+                </td>
+                <td>{{ date }}</td>
+                <td>
+                    <a href="{% url 'dashboard:payment-detail' pk=refund.payment_id %}">{{ refund.payment_id }}</a>
+                </td>
+            </tr>
+    </table>
+
+{% endblock dashboard_content %}

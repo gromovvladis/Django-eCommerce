@@ -2,19 +2,13 @@
 
 {% load category_tags %}
 {% load product_tags %}
-{% load static %}
 {% load svg_tags %}
-{% load cache %}
+{% load static %}
 
-{% block title %}
-    {% if summary %}{{ summary }} |{% endif %} {{ block.super }}
-{% endblock %}
-
+{% block title %}{% if summary %}{{ summary }} |{% endif %} {{ block.super }}{% endblock %}
 {% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pb-sm-4{% endblock %}
-
 {% block app_class %}v-app---category{% endblock %}
 {% block nav_class %}v-app__nav--category{% endblock %}
-
 {% block nav_title %}{{ summary }}{% endblock %}
 
 {% block breadcrumbs %}
@@ -36,26 +30,24 @@
         </div>
 
         {% comment %}------------- содержимое категории ---------------{% endcomment %}
-        {% cache 1800 products category product.id %} 
-            <div class="pxv-2">
-                {% if products %}
-                <div class="v-dishes row">
-                    {% for product in products %}
-                        <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
-                            {% render_product product.object %}
-                        </div>
-                    {% endfor %}
-                </div>
-                {% include "oscar/partials/pagination.html" %}
-                {% else %}
-                <p class="py-2">Ничего не найдено</p>
-                {% endif %}
+        <div class="pxv-2">
+            {% if products %}
+            <div class="v-dishes row">
+                {% for product in products %}
+                    <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
+                        {% render_product product.object %}
+                    </div>
+                {% endfor %}
             </div>
-        {% endcache %}
+            {% include "oscar/partials/pagination.html" %}
+            {% else %}
+                <p class="py-2">Ничего не найдено</p>
+            {% endif %}
+        </div>
     </div>
 {% endblock content %}
 
 {% block scripts %}
     {{ block.super }}
-    <script  src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+    <script src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
 {% endblock %}

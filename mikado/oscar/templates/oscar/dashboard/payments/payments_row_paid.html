@@ -1,0 +1,7 @@
+{% load currency_filters %}
+
+{% if record.paid %}
+    <span class="badge badge-info">Да</span>
+{% else %}
+    <span class="badge badge-dark">Нет</span>
+{% endif %}

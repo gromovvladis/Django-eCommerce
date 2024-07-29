@@ -1,0 +1,7 @@
+{% load currency_filters %}
+
+{% if record.isHide %}
+    <span class="badge badge-danger">Да</span>
+{% else %}
+    <span class="badge badge-info">Нет</span>
+{% endif %}

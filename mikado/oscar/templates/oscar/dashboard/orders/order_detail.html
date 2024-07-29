@@ -619,7 +619,7 @@
                                             <td>
 
                                                 {% if txn.txn_type == "Payment" and txn.source_refundable and txn.refundable %}
-                                                    <a href="{% url 'dashboard:refund-transaction' number=order.number pk=txn.id %}">Вернуть деньги</a>
+                                                    <a href="{% url 'dashboard:refund-transaction' pk=txn.id %}">Вернуть деньги</a>
                                                 {% elif txn.txn_type == "Payment" and not txn.source_refundable and txn.refundable %}
                                                     Деньги вовращены
                                                 {% elif txn.txn_type == "Refund" %}

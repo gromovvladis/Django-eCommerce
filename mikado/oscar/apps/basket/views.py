@@ -19,15 +19,18 @@ Applicator = get_class("offer.applicator", "Applicator")
 )
 BasketLineFormSet = get_class("basket.formsets", "BasketLineFormSet")
 Repository = get_class("shipping.repository", "Repository")
-
 OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 BasketMessageGenerator = get_class("basket.utils", "BasketMessageGenerator")
 SurchargeApplicator = get_class("checkout.applicator", "SurchargeApplicator")
 
+Basket = get_model("basket", "Basket")
+Line = get_model("basket", "Line")
+Product = get_model("catalogue", "product")
+
 
 class BasketView(ModelFormSetView):
-    model = get_model("basket", "Line")
-    basket_model = get_model("basket", "Basket")
+    model = Line
+    basket_model = Basket
     formset_class = BasketLineFormSet
     form_class = BasketLineForm
     factory_kwargs = {"extra": 0, "can_delete": True}
@@ -89,9 +92,10 @@ class BasketView(ModelFormSetView):
         return safe_referrer(self.request, "basket:summary")
 
     def formset_valid(self, formset):
-        response = super().formset_valid(formset)
+
         if is_ajax(self.request):
-            self.request.basket = get_model("basket", "Basket").objects.get(
+            self.object_list = formset.save()
+            self.request.basket = Basket.objects.get(
                 id=self.request.basket.id
             )
             self.request.basket.strategy = self.request.strategy
@@ -105,8 +109,8 @@ class BasketView(ModelFormSetView):
                 "new_totals": new_totals,
                 "new_nums": self.request.basket.num_items,
                 }, status=202)
-
-        return response
+        
+        return super().formset_valid(formset)
 
     def formset_invalid(self, formset):
         has_deletion = any(formset._should_delete_form(form) for form in formset.forms)
@@ -223,7 +227,7 @@ class BasketAddView(FormView):
     """
 
     form_class = AddToBasketForm
-    product_model = get_model("catalogue", "product")
+    product_model = Product
     add_signal = basket_addition
     http_method_names = ["post"]
 

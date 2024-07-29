@@ -18,7 +18,7 @@ OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = 100
 OSCAR_RECENTLY_VIEWED_COOKIE_LIFETIME = 7 * 24 * 60 * 60
 OSCAR_RECENTLY_VIEWED_COOKIE_NAME = "history"
 OSCAR_RECENTLY_VIEWED_COOKIE_SECURE = False
-OSCAR_RECENTLY_VIEWED_PRODUCTS = 20
+OSCAR_RECENTLY_VIEWED_PRODUCTS = 10
 
 # Currency
 OSCAR_DEFAULT_CURRENCY = "RUB"
@@ -54,7 +54,8 @@ OSCAR_EMAILS_PER_PAGE = 20
 OSCAR_ORDERS_PER_PAGE = 20
 OSCAR_ADDRESSES_PER_PAGE = 20
 OSCAR_STOCK_ALERTS_PER_PAGE = 20
-OSCAR_DASHBOARD_ITEMS_PER_PAGE = 20
+OSCAR_DASHBOARD_ITEMS_PER_PAGE = 40
+OSCAR_DASHBOARD_PAYMENTS_PER_PAGE = 40
 
 # Reviews
 OSCAR_MODERATE_REVIEWS = False
@@ -229,7 +230,16 @@ OSCAR_DASHBOARD_NAVIGATION = [
     {
         "label": "Оплата",
         "icon": "fas fa-payments",
-        "url_name": "dashboard:payments-list",
+        "children": [
+            {
+                "label": "Список платежей",
+                "url_name": "dashboard:payments-list",
+            },
+            {
+                "label": "Список возвратов",
+                "url_name": "dashboard:refunds-list",
+            },
+        ]
     },
     {
         "label": "Доставка",
@@ -373,18 +383,12 @@ OSCAR_INITIAL_LINE_STATUS = 'Новый заказ'
 
 # This dict defines the new order statuses than an order can move to
 OSCAR_ORDER_STATUS_PIPELINE = {
-
-    'Ожидает оплаты': ('Отменен', 'Оплачен'), 
-    'Оплачен': ('Готовится', 'Отменен',),
-
-    'Обрабатывается': ('Отменен', 'Оплачен', 'Готовится'),
-
-    'Готовится': ('Готов', 'Отменен',),
-
+    'Ожидает оплаты': ('Оплачен', 'Отменен'), 
+    'Оплачен': ('Готовится', 'Отменен'),
+    'Обрабатывается': ('Оплачен', 'Готовится', 'Отменен'),
+    'Готовится': ('Готов', 'Отменен'),
     'Готов': ('Доставляется', 'Завершен', 'Отменен'),
-    
     'Доставляется': ('Завершен', 'Отменен'),
-
     'Отменен': (),
     'Завершен': (),
 }

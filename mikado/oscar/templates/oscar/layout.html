@@ -1,12 +1,12 @@
 {% extends "oscar/base.html" %}
-{% load static %}
-{% load compress %}
+
 {% load svg_tags %}
 {% load category_tags %}
+{% load compress %}
+{% load static %}
 
 {% compress css %}
     {% block styles %}
-        {{ block.super }}
         <link rel="stylesheet" href="{% static "css/planet-styles.css" %}" />
     {% endblock %}
 {% endcompress %}
@@ -42,9 +42,8 @@
                         <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
                     </a>
 
-                    <div role="separator" class="v-spacer"></div>
 
-                    <div class="cats_header fill-height">
+                    <div class="cats_header fill-height fill-width">
        
                         <div class="v-app-nav__title d-flex d-sm-none text-center">
                             {% block nav_title %}{% endblock %}
@@ -79,6 +78,8 @@
                     <div class="v-app-nav__title v-app-nav__title--center d-flex d-sm-none text-center">
                         {% block nav_title_center %}{% endblock %}
                     </div>
+
+                    <div role="separator" class="v-spacer"></div>
 
                     <button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2">
                         <span class="v-button__wrapper d-flex">
@@ -137,12 +138,16 @@
 
 {% endblock %}
 
-{% block templatescripts %}
-    {{ block.super }}
-    var url_get_cookie = "{% url 'home:cookies' %}";
-    var url_auth_api = "{% url 'customer:api-login' %}";
-    var url_auth = "{% url 'customer:login' %}";
-{% endblock %}
+{% comment %} {% compress js preload %} {% endcomment %}
+{% compress js %}
+    <script>
+        {% block templatescripts %}
+            var url_get_cookie = "{% url 'home:cookies' %}";
+            var url_auth_api = "{% url 'customer:api-login' %}";
+            var url_auth = "{% url 'customer:login' %}";
+        {% endblock %}
+    </script>;
+{% endcompress %}
 
 {% compress js %}
     {% block scripts %}

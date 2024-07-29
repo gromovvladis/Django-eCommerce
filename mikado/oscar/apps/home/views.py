@@ -57,7 +57,6 @@ class HomeView(ListView):
         ctx["is_mobile"] = agent.is_mobile
 
         if not agent.is_mobile:
-            promo_cats = []
             promo_cats = cache.get('promo_cats_all')
             if not promo_cats:
                 promo_cats = PromoCategory.objects.prefetch_related('products_related').filter(is_active=True)
