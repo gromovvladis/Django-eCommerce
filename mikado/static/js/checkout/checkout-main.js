@@ -174,11 +174,11 @@ function checkValid (){
     console.log('checkValid')
     if (amountValid && addressValid){
         console.log('checkValid VALID')
-        $(submit_btn).attr("disabled", false);
+        $(submit_btn).prop("disabled", false);
         $(checkout_errors).addClass('d-none');
     } else {
         console.log('checkValid NO VALID')
-        $(submit_btn).attr("disabled", true);
+        $(submit_btn).prop("disabled", true);
         $(checkout_errors).removeClass('d-none');    
     }
 }

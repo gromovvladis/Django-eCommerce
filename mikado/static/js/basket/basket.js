@@ -11,7 +11,7 @@ var cart_nums = $('[data-id="cart-nums"]');
 var cartWrapper = $(".v-cart-wrapper");
 var cartTotals = $(".v-cart__info");
 
-if (basket_summary){
+if ($(basket_summary).length > 0){
     var forms = $(basket_summary).find('[data-id="cart-item-form"]');
     $(forms).each(function(){
         var form_item = $(this)
@@ -20,14 +20,18 @@ if (basket_summary){
         var less = $(form_item).find('[data-id="order-button-minus"]');
         var clean = $(form_item).find('[data-id="dish-order-delete-link"]');
 
+        if ($(input_field).val() == $(input_field).attr('max')) {
+            more.prop('disabled', true);
+        }
+
         more.on('click', function(){
             
             if ($(input_field).val() < parseInt($(input_field).attr('max'))){
                 $(input_field).val(parseInt($(input_field).val()) + 1);
-                $(less).attr('disabled', false);
+                $(less).prop('disabled', false);
             }
             if ($(input_field).val() == $(input_field).attr('max')) {
-                $(this).attr('disabled', false);
+                $(this).prop('disabled', true);
             }
             $(form_item).removeClass('empty');
             $(basket_summary).submit()
@@ -36,17 +40,17 @@ if (basket_summary){
         less.on('click', function(){
             if ($(input_field).val() > 0){
                 $(input_field).val(parseInt($(input_field).val()) - 1);
-                $(more).attr('disabled', false);
+                $(more).prop('disabled', false);
             }
             if ($(input_field).val() == 0) {
-                $(this).attr('disabled', true);
+                $(this).prop('disabled', true);
                 $(form_item).addClass('empty');
             }
             $(basket_summary).submit()
         });
 
         clean.on('click', function(){
-            $(less).attr('disabled', true);
+            $(less).prop('disabled', true);
             $(form_item).addClass('empty');
             $(input_field).val(0)
             $(basket_summary).submit()
@@ -110,4 +114,3 @@ $(empty_cart).on('click', function(){
 function CartTotalHeight(){
     $(cartWrapper).css('--padding-cart', $(cartTotals).outerHeight(true) + "px");
 }
-

@@ -99,10 +99,10 @@ function validateAddress(){
     console.log("validate " +  valid)
 
     if (valid){
-        $(saveAddress).attr("disabled", false);
+        $(saveAddress).prop("disabled", false);
         $(checkout_errors).addClass('d-none');
     } else {
-        $(saveAddress).attr("disabled", true);
+        $(saveAddress).prop("disabled", true);
         $(checkout_errors).removeClass('d-none');    
     }
 }

@@ -191,9 +191,18 @@
 12. Собираем статику
     переходим в директорию с файлом manage.py
     python manage.py collectstatic
+    python manage.py compress
 
 
-vladis@5.35.89.111
+13. Обновить изменения с Development в Production
+    ssh vladis@5.35.89.111
+    source venv/bin/activate
+    cd mikado
+    git pull https://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@github.com/gromovvladis/mikado.git
+    python manage.py collectstatic
+    python manage.py compress
+    sudo supervisorctl restart all
+
 
 ============================================= Доп возможности =================================================
 

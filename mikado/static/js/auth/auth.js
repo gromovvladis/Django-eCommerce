@@ -50,13 +50,13 @@ function authModalLoaded(){
     
     function btn_click_func(auth_type){
         if (auth_type == "sms") {
-            $(btn_sms).attr("disabled", true);
+            $(btn_sms).prop("disabled", true);
             btn_sms.html('Отправка');
             error_sms.html('');
             error_auth.html('');
             codeInput.value = "";
         } else {
-            $(btn_auth).attr("disabled", true);
+            $(btn_auth).prop("disabled", true);
             btn_auth.html('Загрузка');
             error_auth.html('');
         }
@@ -81,7 +81,7 @@ function authModalLoaded(){
                 $(btn_sms).text("Повторить SMS: " + _Seconds);
                 } else {
                 clearInterval(int_id);
-                $(btn_sms).attr("disabled", false);
+                $(btn_sms).prop("disabled", false);
                 $(btn_sms).text("Повторить SMS");
                 $(btn_sms).removeClass('v-auth-modal__repeat-text')
                 $(btn_sms).addClass('v-auth-modal__repeat-button')
@@ -94,11 +94,11 @@ function authModalLoaded(){
     
     function error_func(auth_type, response) {
         if (auth_type == "sms") {
-            $(btn_sms).attr("disabled", false);
+            $(btn_sms).prop("disabled", false);
             btn_sms.html('Отправить код');
             error_sms.text(response.responseJSON.errors);
         } else {
-            $(btn_auth).attr("disabled", false);
+            $(btn_auth).prop("disabled", false);
             btn_auth.html('Подтвердить и войти');
             error_auth.text(response.responseJSON.errors);
         }
@@ -131,9 +131,9 @@ function authModalLoaded(){
             phoneInput.value = formatPhoneString();
         }
         if (phoneStr.length == 10){
-            $(btn_sms).attr("disabled", false);
+            $(btn_sms).prop("disabled", false);
         } else {
-            $(btn_sms).attr("disabled", true);
+            $(btn_sms).prop("disabled", true);
         }
     });
     
@@ -158,9 +158,9 @@ function authModalLoaded(){
     codeInput.addEventListener('input', function(){
         codeInput.value = codeInput.value.replace (/\D/g, '');
         if (codeInput.value.length == 4){
-            $(btn_auth).attr("disabled", false);
+            $(btn_auth).prop("disabled", false);
         } else {
-            $(btn_auth).attr("disabled", true); 
+            $(btn_auth).prop("disabled", true); 
         }
     })
     

@@ -12,10 +12,10 @@ var dish_old_price = $('[data-id="dish-old-price-main"]');
 var additioan_products = $('[data-id="additional-product"]');
 var price = $('[data-id="dish-price-button"]');
 var additional_price = 0;
-
+var cart_added = () => {};
 
 $(add_form_dalail).submit(function () {
-    $(add_cart_btn).attr("disabled", true);
+    $(add_cart_btn).prop("disabled", true);
     $(add_cart_btn).addClass('loading');
     $.ajax({
         data: $(this).serialize(), 
@@ -23,12 +23,13 @@ $(add_form_dalail).submit(function () {
         url: url_product,
         success: function (response) {
             $(cart_nums).html(response.cart_nums);
+            cart_added();
         },
         error: function (response) {
             $(errors_cart).html(response.errors);
         },
         complete: function(){
-            $(add_cart_btn).attr("disabled", false);
+            $(add_cart_btn).prop("disabled", false);
             $(add_cart_btn).removeClass('loading');
         }
     });
@@ -79,11 +80,11 @@ if ($(additioan_products).length > 0){
             if ($(input_field).val() < $(input_field).attr('max')){
                 $(input_field).val(parseInt($(input_field).val()) + 1);
                 additional_price += add_price;
-                $(less).attr('disabled', false);
+                $(less).prop('disabled', false);
                 $(price).text(parseInt($(price).text()) + add_price);
             }
             if ($(input_field).val() == $(input_field).attr('max')) {
-                $(this).attr('disabled', true);
+                $(this).prop('disabled', true);
             }
         });
 
@@ -91,11 +92,11 @@ if ($(additioan_products).length > 0){
             if ($(input_field).val() > 0){
                 $(input_field).val(parseInt($(input_field).val()) - 1);
                 additional_price -= add_price
-                $(more).attr('disabled', false);
+                $(more).prop('disabled', false);
                 $(price).text(parseInt($(price).text()) - add_price);
             }
             if ($(input_field).val() == 0) {
-                $(this).attr('disabled', true);
+                $(this).prop('disabled', true);
             }
         });
     })

@@ -11570,8 +11570,8 @@ input[type="number"]:focus {
 }
 
 .v-order-dialog__title {
-    font-size: 1.25rem;
-    line-height: 1.625rem;
+    font-size: 1rem;
+    line-height: 1.25rem;
     color: #000
 }
 
@@ -11585,7 +11585,10 @@ input[type="number"]:focus {
 .v-order-dialog__text {
     font-size: .9rem;
     line-height: 1.25rem;
-    color: #7d7d7d
+    color: #111;
+    padding: 1rem;
+    border-radius: 15px;
+    background-color: rgb(243, 243, 247);
 }
 
 @media screen and (min-width:768px) {
@@ -11605,6 +11608,12 @@ input[type="number"]:focus {
         line-height: 1.5rem;
         font-weight: 500;
         font-style: normal
+    }
+
+    .v-order-dialog__text {
+        font-size: 1rem;
+        max-width: 50%;
+        min-width: 550px;
     }
 }
 

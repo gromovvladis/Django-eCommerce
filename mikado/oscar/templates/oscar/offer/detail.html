@@ -1,9 +1,9 @@
 {% extends "oscar/layout.html" %}
 
-{% load static %}
 {% load product_tags %}
-{% load svg_tags %}
 {% load image_tags %}
+{% load svg_tags %}
+{% load static %}
 
 {% block title %}
     {{ offer.name }} | {{ block.super }}
@@ -34,14 +34,12 @@
     <div class="action__wrapper d-flex flex-column">
         <div class="v-actions__action-detail-header d-flex flex-column align-start">
             <div class="v-actions__action-detail-banner shrink">
-                <div class="v-images-chunks">
-                    <div class="v-image">
-                        <div class="v-image__inner v-image__inner--action">
-                            {% with image=offer.primary_image %}
-                                {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
-                                <img src="{{ thumb.url }}" alt="{{ offer.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
-                            {% endwith %}
-                        </div>
+                <div class="v-image">
+                    <div class="v-image__inner v-image__inner--action">
+                        {% with image=offer.primary_image %}
+                            {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
+                            <img src="{{ thumb.url }}" alt="{{ offer.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                        {% endwith %}
                     </div>
                 </div>
             </div>
@@ -50,18 +48,19 @@
         <div class="v-actions__action-detail-content fill-width d-flex flex-column mt-2 mt-sm-4">
             <h1>{{ offer.name }}</h1>
             {% if offer.description %}
-                <div class="v-actions__action-detail-text mt-2 mt-sm-3">
+                <div class="v-actions__action-detail-text mt-2">
                     <p>{{ offer.description|safe }}</p>
                 </div>
             {% endif %}
-            {% if upsell_message %}
-                <span class="fill-width mt-2 v-order-dialog__text">Условия акции:</span>
-                <span class="fill-width v-order-dialog__text">{{ upsell_message }}</span>
-            {% endif %}
+            <div class="d-flex flex-column" id="action_message">
+                {% if upsell_message %}
+                <span class="fill-width mt-2 v-order-dialog__title">Условия акции:</span>
+                <span class="fill-width mt-2 v-order-dialog__text">{{ upsell_message }}</span>
+                {% endif %}
+            </div>
         </div>
         
         {% if products %}
-            {% comment %} <h2 class="py-2 offer-dish mt-2 text--grey-dark">Товары участвующие в акции</h2> {% endcomment %}
             <div class="v-dishes row fill-width mt-2 mt-sm-4">
                 {% for product in products %}
                     <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
@@ -71,13 +70,19 @@
             </div>
         {% endif %}
 
-        <div class="my-3 d-flex fill-width">
+        <div class="d-flex fill-width my-2 mt-sm-4">
             <a class="v-button v-button--main mt-md-0" href="{% url 'home:actions' %}">Смотреть все акции</a>
         </div>
     </div>
 {% endblock content %}
 
+{% block templatescripts %}
+    {{ block.super }}
+    var url_action_message = "{% url 'offer:upsell' slug=offer.slug %}";
+{% endblock %}
+
 {% block scripts %}
     {{ block.super }}
-    <script  src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+    <script src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+    <script src="{% static "js/actions/action-message.js" %}"></script>
 {% endblock %}

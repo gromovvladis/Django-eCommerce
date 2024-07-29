@@ -48,7 +48,7 @@
             <div class="v-actions__action-detail-content fill-width d-flex flex-column">
                 <h1>{{ action.title }}</h1>
                 {% if action.description %}
-                    <div class="v-actions__action-detail-text mt-2 mt-sm-3">
+                    <div class="v-actions__action-detail-text mt-2">
                         <p>{{ action.description|safe }}</p>
                     </div>
                 {% endif %}
@@ -68,7 +68,7 @@
             {% endif %}
         {% endwith %}
 
-        <div class="my-3 d-flex fill-width">
+        <div class="d-flex fill-width my-2 mt-sm-4">
             <a class="v-button v-button--main mt-md-0" href="{% url 'home:actions' %}">Смотреть все акции</a>
         </div>
 

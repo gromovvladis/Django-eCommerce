@@ -1,7 +1,8 @@
 from django import http
 from django.conf import settings
 from django.shortcuts import get_object_or_404
-from django.views.generic import ListView
+from django.views.generic import ListView, View
+from django.template.loader import render_to_string
 
 from oscar.core.loading import get_model
 
@@ -74,3 +75,18 @@ class RangeDetailView(ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["range"] = self.range
         return ctx
+
+        
+class GetUpsellMasseges(View):
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.offer = ConditionalOffer.active.select_related().get(
+                slug=self.kwargs["slug"]
+            )
+            upsell_message = render_to_string("oscar/offer/partials/upsell_message.html", {"upsell_message": self.offer.get_upsell_message(request.basket)}, request=request)
+        
+        except ConditionalOffer.DoesNotExist:
+            raise http.JsonResponse({"error": 'ConditionalOffer.DoesNotExist', "status": 404}, status = 404)
+        
+        return http.JsonResponse({"upsell_message": upsell_message, "status": 202}, status = 202)
