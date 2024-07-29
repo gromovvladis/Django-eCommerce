@@ -30,7 +30,7 @@ function remove_form_added(remove_form){
 
 
 $(voucher_form).submit(function () {
-    $(voucher_btn).attr("disabled", true);
+    $(voucher_btn).prop("disabled", true);
     $(voucher_btn).html('Проверка');
     $(voucher_message).html('');
     $.ajax({
@@ -41,7 +41,7 @@ $(voucher_form).submit(function () {
             voucher_func(response);
             $(voucher_message).html(response.responseJSON.message);
             $(voucher_btn).html('Применить');
-            $(voucher_btn).attr("disabled", false);
+            $(voucher_btn).prop("disabled", false);
         },
     });
     return false;  
@@ -58,8 +58,8 @@ function voucher_func(response) {
 
 $(code_input).on('keyup', function(event){
     if ($(code_input).val() != "" && event.code != 'Enter'){
-        $(voucher_btn).attr("disabled", false);
+        $(voucher_btn).prop("disabled", false);
     } else {
-        $(voucher_btn).attr("disabled", true);
+        $(voucher_btn).prop("disabled", true);
     }
 })

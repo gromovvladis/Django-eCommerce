@@ -15,11 +15,9 @@
                     {% with image=product.primary_image %}
                         {% oscar_thumbnail image.original "x350" upscale=False as thumb %}
                         <a href="{{ product.get_absolute_url }}" class="dish-item-image pos-relative" data-id="dish-item-image-link" aria-label="{{ product.get_title }}">
-                            <div class="v-dish-image v-dish-image--product fill-width">
-                                <div class="v-images-chunks fill-height pos-relative none-select">
-                                    <div class="v-image__inner v-image__inner--product">
-                                        <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
-                                    </div>
+                            <div class="v-dish-image v-dish-image--product fill-width fill-height pos-relative none-select">
+                                <div class="v-image__inner v-image__inner--product">
+                                    <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                                 </div>
                             </div>
                         </a>

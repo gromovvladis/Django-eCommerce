@@ -1,9 +1,9 @@
-{% load static %}
 {% load image_tags %}
 {% load currency_filters %}
 {% load purchase_info_tags %}
 {% load widget_tweaks %}
 {% load svg_tags %}
+{% load static %}
 
 <div class="cart-page__wrapper d-flex flex-column flex-md-row pd-0 pd-sm-2">
     <div class="v-cart__block pos-relative d-flex flex-column fill-width">
@@ -18,7 +18,6 @@
 
         {% if not basket.is_empty %}
 
-            {% comment %} <div class="v-cart-wrapper d-flex flex-column justify-start fill-height scrollbar--white px-2 pl-sm-0 pr-sm-1"> {% endcomment %}
             <div class="v-cart-wrapper d-flex flex-column justify-start fill-height scrollbar--white px-2 px-sm-0">
 
                 <div class="upsell-messages" id="upsell_messages">

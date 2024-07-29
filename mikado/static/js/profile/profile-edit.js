@@ -20,7 +20,7 @@ $(all_fields).each(function(){
 $(profile_form).submit(function () {
     var profile_btn = $(this).find('button')
     var profile_msg = $(this).find('[data-id="profile-message"]')
-    $(profile_btn).attr("disabled", true);
+    $(profile_btn).prop("disabled", true);
     $(profile_btn).html('Сохранение');
     $(profile_msg).html('');
     $.ajax({
@@ -30,7 +30,7 @@ $(profile_form).submit(function () {
         complete: function (response) {
             $(profile_msg).html(response.responseJSON.message);
             $(profile_btn).html('Сохранить настройки');
-            $(profile_btn).attr("disabled", false);
+            $(profile_btn).prop("disabled", false);
         },
     });
     return false;  

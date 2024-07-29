@@ -8,7 +8,7 @@ $(document).ready(function () {
         url = wishlist_form[0].action;
     
         $(wishlist_form).submit(function () {
-            $(wishlist_btn).attr("disabled", true);
+            $(wishlist_btn).prop("disabled", true);
             $(wishlist_btn).addClass('loading');
             $.ajax({
                 data: $(this).serialize(), 
@@ -17,11 +17,11 @@ $(document).ready(function () {
                 success: function (response) {
                     url = response.url;
                     $(wishlist_btn).html(response.html);
-                    $(wishlist_btn).attr("disabled", false);
+                    $(wishlist_btn).prop("disabled", false);
                     $(wishlist_btn).removeClass('loading');
                 },
                 error: function (response) {
-                    $(wishlist_btn).attr("disabled", false);
+                    $(wishlist_btn).prop("disabled", false);
                     $(wishlist_btn).removeClass('loading');
                     console.log('error');
                 },

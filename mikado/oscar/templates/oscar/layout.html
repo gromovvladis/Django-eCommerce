@@ -2,15 +2,12 @@
 
 {% load svg_tags %}
 {% load category_tags %}
-{% load compress %}
 {% load static %}
 
-{% compress css %}
-    {% block styles %}
-        {{ block.super }}
-        <link rel="stylesheet" href="{% static "css/planet-styles.css" %}" />
-    {% endblock %}
-{% endcompress %}
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "css/planet-styles.css" %}" />
+{% endblock %}
 
 {% block layout %}
     {% comment %}------------- header + контент + footer (начало) ---------------{% endcomment %}
@@ -146,10 +143,13 @@
     var url_auth = "{% url 'customer:login' %}";
 {% endblock %}
 
-{% compress js %}
-    {% block scripts %}
-        <script src="{% static "js/auth/auth.js" %}"></script>
-        <script src="{% static "js/cookie/cookies/cookie-main.js" %}"></script>
-        <script src="{% static "js/footer/footer.js" %}"></script>
-    {% endblock %}
-{% endcompress %}
+{% block scripts %}
+    <script src="{% static "js/auth/auth.js" %}"></script>
+    <script src="{% static "js/cookie/cookies/cookie-main.js" %}"></script>
+    <script src="{% static "js/footer/footer.js" %}"></script>
+{% endblock %}
+
+
+
+
+

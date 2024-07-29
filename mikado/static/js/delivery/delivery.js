@@ -488,10 +488,10 @@ function createMap(address=null) {
         }
 
         if ($(line1).attr('captured')){
-            $(saveButton).attr('disabled', true);
+            $(saveButton).prop('disabled', true);
         } else {
             $(controls).addClass('d-none');
-            $(saveButton).attr('disabled', false);
+            $(saveButton).prop('disabled', false);
         }
     });
 }
@@ -541,7 +541,7 @@ function showBalloon(coords, address=null, captured=false) {
         addressInfo = null;
         $(controls).addClass('d-none');
         mapControl._addressSelected("");
-        $(saveButton).attr('disabled', true);
+        $(saveButton).prop('disabled', true);
 
         placemark.properties.set({
             'error': "Адрес вне зоны доставки",
@@ -571,12 +571,12 @@ function balloonTime(coords, address, zonaId, captured){
 
         if (result.error){
             $(controls).addClass('d-none');
-            $(saveButton).attr('disabled', true);
+            $(saveButton).prop('disabled', true);
         } else {
             addressInfo = {"address": result.address, "coords": result.coords.split(",")};
             mapControl._addressSelected(result.address);
             $(controls).removeClass('d-none');
-            $(saveButton).attr('disabled', false);
+            $(saveButton).prop('disabled', false);
         } 
     });
 }
@@ -703,7 +703,7 @@ function addressCaptured(coords, address){
         timeCaptured(result);
     });
 
-    $(saveButton).attr('disabled', true);
+    $(saveButton).prop('disabled', true);
     $(line1).attr('captured', true);
     $(lon).val(coords[0]);
     $(lat).val(coords[1]);
@@ -724,7 +724,7 @@ function cleanAddress(){
     $(hints).addClass('d-none');
     $(delivery_time).removeClass('active');
     $(controls).addClass('d-none');
-    $(saveButton).attr('disabled', true);
+    $(saveButton).prop('disabled', true);
 
     $(suggests).addClass('d-none');
 

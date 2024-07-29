@@ -1,10 +1,9 @@
-{% load compress %}
 {% load static %}
 
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"ru" }}">
     <head>
-        <title>{% block title %}{{ shop_name }} | Суши, Роллы, Доставка{% endblock %}</title>
+        <title>{% block title %}{{ shop_name }} | Панель управления{% endblock %}</title>
 
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <meta name="description" content="{% block description %}{% endblock %}" />
@@ -14,19 +13,13 @@
             <link rel="shortcut icon" href="{% static "favicon.ico" %}" />
         {% endblock %}
 
-        {# Block where global CSS will go. #}
-        {% compress css %}        
-            {% block styles %}{% endblock %}
-            {# Additional CSS - specific to certain pages #}
-            {% block extrastyles %}{% endblock %}    
-        {% endcompress %}
+        {# Block where global CSS will go. #}        
+        {% block styles %}{% endblock %}
+
+        {# Additional CSS - specific to certain pages #}
+        {% block extrastyles %}{% endblock %}
         
         {% block extrahead %}{% endblock %}
-
-        {% block tracking %}
-            {# Default to using Google analytics #}
-            {% comment %} {% include "oscar/partials/google_analytics.html" %} {% endcomment %}
-        {% endblock %}
 
     </head>
 
@@ -35,18 +28,11 @@
         {# Main content goes in this 'layout' block #}
         {% block layout %}{% endblock %}
             
-        {# SVG #}
-        {% block SVG %}
-        {% endblock %}
-
         {# Scripts loaded from a CDN. #}
         {% block cdn_scripts %}
             <!-- jQuery -->
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
             <script>window.jQuery || document.write('<script src="{% static "js/jquery/jquery.min.js" %}"><\/script>')</script>
-            <!-- Cookies -->
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.5/js.cookie.min.js"></script>
-            <script>window.Cookies || document.write('<script src="{% static "js/cookie/js-cookie.min.js" %}"><\/script>')</script>
         {% endblock %}
         
         {# Template vars #}
@@ -56,9 +42,7 @@
         {% block extrascripts %}{% endblock %}
 
         {# Local scripts #}
-        {% compress js %}
-            {% block scripts %}{% endblock %}
-        {% endcompress %}
+        {% block scripts %}{% endblock %}
             
         {# Block for body onload functions #}
         <script>$(function(){ {% block onbodyload %}{% endblock %} })</script>

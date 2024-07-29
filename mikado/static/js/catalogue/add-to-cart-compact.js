@@ -1,5 +1,4 @@
-
-var cart_nums_compact = $('[data-id="cart-nums"]');
+var cart_added = () => {};
 
 $(document).ready(function () {
     findNewForms();
@@ -7,13 +6,13 @@ $(document).ready(function () {
 
 function findNewForms(){
     var add_cart_form = $("[data-id='add-to-cart-form-compact']");
-    if (add_cart_form.length > 0) {
+    if ($(add_cart_form).length > 0) {
+        var cart_nums_compact = $('[data-id="cart-nums"]');
         $(add_cart_form).submit(function () {
     
             var btn = $(this).find('[data-id="add-to-cart-btn-compact"]').get(0)
             var span = $(btn).find('[data-id="add-to-cart-btn-span"]').get(0)
-        
-            $(btn).attr("disabled", true);
+            $(btn).prop("disabled", true);
             $(btn).addClass('clicked');
             var textBefore = $(span).html();
             $(span).html('Добавлено');
@@ -24,16 +23,16 @@ function findNewForms(){
                 url: $(this).attr('action'),
                 success: function (response) {
                     $(cart_nums_compact).html(response.cart_nums); 
+                    cart_added();
                 },
                 error: function(response){
-                    $(btn).parent().parent().parent().parent().find('[data-id="add-to-cart-help-text-compact"]').html(response.errors)
+                    $(btn).closest('.product-description').find('[data-id="add-to-cart-help-text-compact"]').html(response.errors)
                 },
                 complete: function (){
-                    $(btn).attr("disabled", false);
+                    $(btn).prop("disabled", false);
                     $(btn).removeClass('clicked');
                     $(span).html(textBefore);
-                }
-            
+                }        
             });
             return false;  
         });

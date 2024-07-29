@@ -12,22 +12,22 @@ if ($(additioan_products).length > 0){
         more.on('click', function(){
             if ($(input_field).val() < $(input_field).attr('max')){
                 $(input_field).val(parseInt($(input_field).val()) + 1);
-                $(less).attr('disabled', false);
+                $(less).prop('disabled', false);
                 $(price).text(parseInt($(price).text()) + add_price);
             }
             if ($(input_field).val() == $(input_field).attr('max')) {
-                $(this).attr('disabled', true);
+                $(this).prop('disabled', true);
             }
         });
 
         less.on('click', function(){
             if ($(input_field).val() > 0){
                 $(input_field).val(parseInt($(input_field).val()) - 1);
-                $(more).attr('disabled', false);
+                $(more).prop('disabled', false);
                 $(price).text(parseInt($(price).text()) - add_price);
             }
             if ($(input_field).val() == 0) {
-                $(this).attr('disabled', true);
+                $(this).prop('disabled', true);
             }
         });
     })

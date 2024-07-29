@@ -29,10 +29,17 @@ MIDDLEWARE += ['whitenoise.middleware.WhiteNoiseMiddleware']
 MEDIA_ROOT = location('public/media')
 
 # =============
-# STATIC
+# COMPRESSOR
 # =============
 
 COMPRESS_ROOT = location('public/static/cache')
+COMPRESS_ENABLED = True
+COMPRESS_OFFLINE = False
+
+# =============
+# STATIC
+# =============
+
 STATIC_PRIVATE_ROOT = location('static')
 ICON_DIR = location('static/svg')
 STATICFILES_DIRS = (

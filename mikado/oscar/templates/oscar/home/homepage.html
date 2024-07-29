@@ -19,11 +19,11 @@
     </a>
 {% endblock %}
 
-{% cache 3600 slider_actions %}
-    {% block carousel %}
+{% block carousel %}
+    {% cache 3600 slider_actions %}
         {% include "oscar/home/partials/slider.html" %}
-    {% endblock %}
-{% endcache %}
+    {% endcache %}
+{% endblock %}
 
 {% block sticky_address %}
     <div class="stiky-address-button d-sm-none pb-2">
