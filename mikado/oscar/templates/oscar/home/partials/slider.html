@@ -1,39 +1,34 @@
 {% load image_tags %}
 {% load svg_tags %}
-{% load cache %}
 
 {% if action_list %}
     <div class="container container--carousel">
         <div class="v-main-carousel">
             <div class="v-carousel__wrap v-banners v-main-carousel__banners pos-relative" data-id="slider-homepage">
+                
                 <div class="v-carousel">
                     <div class="v-carousel__inner d-flex fill-width fill-height" data-id="slider-swiper">
                         <div class="swiper-wrapper d-flex fill-width fill-height">
-                            {% cache 1800 slider_actions %}
-                                    {% for slider_item in action_list %} 
-                                        <div class="swiper-slide v-carousel__item">
-                                            <a href="{{ slider_item.get_absolute_url }}" class="d-flex" data-id="carousel-banner" aria-label="{{ slider_item.get_title }}">
-                                                <div class="v-images-chunks fill-width pos-relative">
-                                                    <div class="v-image">
-                                                        <div class="v-image__inner">
-                                                            {% with image=slider_item.primary_image %}
-                                                                {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
-                                                                <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
-                                                            {% endwith %}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </a>
+                            {% for slider_item in action_list %} 
+                                <a class="swiper-slide v-carousel__item d-flex fill-width pos-relative" href="{{ slider_item.get_absolute_url }}" aria-label="{{ slider_item.get_title }}">
+                                    <div class="v-images-chunks fill-width pos-relative">
+                                        <div class="v-image">
+                                            <div class="v-image__inner">
+                                                {% with image=slider_item.primary_image %}
+                                                    {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
+                                                    <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                                {% endwith %}
+                                            </div>
                                         </div>
-                                    {% endfor %}
-                            {% endcache %}
+                                    </div>
+                                </a>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
-
+                    
                 <div class="v-carousel__buttons d-flex justify-center">
-                    <ul class="d-flex justify-center" data-id="slider-pagination">
-                    </ul>
+                    <ul class="d-flex justify-center" data-id="slider-pagination"></ul>
                 </div>
 
                 <div class="v-carousel__navs">

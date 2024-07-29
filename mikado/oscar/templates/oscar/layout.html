@@ -1,12 +1,12 @@
 {% extends "oscar/base.html" %}
-{% load static %}
-{% load compress %}
+
 {% load svg_tags %}
 {% load category_tags %}
+{% load compress %}
+{% load static %}
 
 {% compress css %}
     {% block styles %}
-        {{ block.super }}
         <link rel="stylesheet" href="{% static "css/planet-styles.css" %}" />
     {% endblock %}
 {% endcompress %}
@@ -138,12 +138,16 @@
 
 {% endblock %}
 
-{% block templatescripts %}
-    {{ block.super }}
-    var url_get_cookie = "{% url 'home:cookies' %}";
-    var url_auth_api = "{% url 'customer:api-login' %}";
-    var url_auth = "{% url 'customer:login' %}";
-{% endblock %}
+{% comment %} {% compress js preload %} {% endcomment %}
+{% compress js %}
+    <script>
+        {% block templatescripts %}
+            var url_get_cookie = "{% url 'home:cookies' %}";
+            var url_auth_api = "{% url 'customer:api-login' %}";
+            var url_auth = "{% url 'customer:login' %}";
+        {% endblock %}
+    </script>;
+{% endcompress %}
 
 {% compress js %}
     {% block scripts %}

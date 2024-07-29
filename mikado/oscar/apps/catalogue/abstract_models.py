@@ -676,15 +676,15 @@ class AbstractProduct(models.Model):
 
     # Properties
 
-    @property
+    @cached_property
     def is_standalone(self):
         return self.structure == self.STANDALONE
 
-    @property
+    @cached_property
     def is_parent(self):
         return self.structure == self.PARENT
 
-    @property
+    @cached_property
     def is_child(self):
         return self.structure == self.CHILD
 

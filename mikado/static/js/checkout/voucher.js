@@ -1,8 +1,13 @@
+var voucher_form = $('#voucher_form');
+var voucher_btn = $(voucher_form).find('#voucher_btn');
 var remove_form = $('.voucher-remove-form');
-var checkout_totals = $('#checkout_totals');
-var voucher_btn = $('#voucher_btn');
 var code_input = $('#id_code');
 var voucher_message = $('#voucher_message');
+// var checkout_totals = $('#checkout_totals');
+
+$(document).ready(function () {
+    remove_form_added(remove_form);
+})
 
 function remove_form_added(remove_form){
     $(remove_form).submit(function () {
@@ -23,9 +28,8 @@ function remove_form_added(remove_form){
     });
 } 
 
-remove_form_added(remove_form);
 
-$('#voucher_form').submit(function () {
+$(voucher_form).submit(function () {
     $(voucher_btn).attr("disabled", true);
     $(voucher_btn).html('Проверка');
     $(voucher_message).html('');

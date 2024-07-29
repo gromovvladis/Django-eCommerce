@@ -9,7 +9,7 @@ var variants_block = $('#variant_active_block');
 var dish_price = $('[data-id="dish-price-main"]');
 var dish_old_price = $('[data-id="dish-old-price-main"]');
 
-var additioan_products= $('[data-id="additional-product"]');
+var additioan_products = $('[data-id="additional-product"]');
 var price = $('[data-id="dish-price-button"]');
 var additional_price = 0;
 
@@ -38,7 +38,6 @@ $(add_form_dalail).submit(function () {
 $(add_cart_btn).on('click', function(){
     $(add_form_dalail).submit()
 })
-
 
 if ($(variants_label).length > 0){
     $(variants_label).on('click', function(){
@@ -69,7 +68,7 @@ if ($(variants_label).length > 0){
     })
 }
 
-if (additioan_products){
+if ($(additioan_products).length > 0){
     $(additioan_products).each(function(){
         var input_field = $(this).find('input');
         var add_price = parseInt($(this).find('[data-id="additional-product-price"]').text());
