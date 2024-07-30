@@ -13665,19 +13665,19 @@ html::-webkit-scrollbar-thumb {
 
 .search__suggest{
     border-radius: 15px !important;
-    -webkit-box-shadow: 0px 0px 20px rgba(0, 0, 0, .09);
-    box-shadow: 0px 0px 20px rgba(0, 0, 0, .09);
+    -webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, .09);
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, .09);
     top: 60px;
-    right: 5px;
-    left: 5px;
+    right: 0px;
+    left: 0px;
     z-index: 490;
     background-color: #fff;
-    max-height: 252px;
+    max-height: 265px;
     overflow-y: scroll;
     -ms-overflow-style: none;
     scrollbar-width: none;
     position: absolute;
-    outline: 5px solid #fff;
+    /* outline: 5px solid #fff; */
 }
 
 
@@ -13690,7 +13690,7 @@ html::-webkit-scrollbar-thumb {
 .search__suggest-item {
     font-family: Onest, sans-serif;
     font-size: .9rem;
-    line-height: 1.125rem;
+    line-height: 1.25rem;
     font-weight: 400;
     font-style: normal;
     width: 100%;
@@ -19062,7 +19062,7 @@ ymaps[class*="search__suggest-item_selected"] {
     border-radius: 15px;
     color: #000;
     -webkit-transition: .06s;
-    transition: .06s
+    transition: .06s;
 }
 
 .profile__menu-button svg,

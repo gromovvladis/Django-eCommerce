@@ -1,5 +1,5 @@
 var mapContainer = document.querySelector('#pickup_map');
-const MAPCENTER = [56.008331, 92.878786];
+const MAPCENTER = [56.04933, 92.90671];
 var map;
 
 $(document).ready(function () {

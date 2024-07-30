@@ -1,5 +1,5 @@
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 from decimal import ROUND_UP
 from decimal import Decimal as D
 
@@ -109,7 +109,12 @@ class IndexView(TemplateView):
         return ctx
 
     def get_stats(self):
-        datetime_24hrs_ago = now() - timedelta(hours=24)
+        current_time = now()
+        datetime_24hrs_ago = current_time - timedelta(hours=24)
+        start_of_week = current_time.weekday()
+        datetime_week_ago = current_time - timedelta(days=start_of_week)
+        start_of_month = datetime(year=current_time.year, month=current_time.month, day=1, tzinfo=current_time.tzinfo)
+        datetime_month_ago = current_time - (current_time - start_of_month)
 
         orders = Order.objects.all()
         alerts = StockAlert.objects.all()
@@ -133,15 +138,24 @@ class IndexView(TemplateView):
             products = products.filter(stockrecords__partner_id__in=partners_ids)
 
         orders_last_day = orders.filter(date_placed__gt=datetime_24hrs_ago)
+        orders_last_week = orders.filter(date_placed__gt=datetime_week_ago)
+        orders_last_month = orders.filter(date_placed__gt=datetime_month_ago)
 
         open_alerts = alerts.filter(status=StockAlert.OPEN)
         closed_alerts = alerts.filter(status=StockAlert.CLOSED)
 
         total_lines_last_day = lines.filter(order__in=orders_last_day).count()
+        total_lines_last_week = lines.filter(order__in=orders_last_week).count()
+        total_lines_last_month = lines.filter(order__in=orders_last_month).count()
+
         stats = {
+            "current_time": current_time,
+            "start_of_week": datetime_week_ago,
+            "start_of_month": start_of_month,
+            "hourly_report_dict": self.get_hourly_report(orders),
             "total_orders_last_day": orders_last_day.count(),
             "total_lines_last_day": total_lines_last_day,
-            "average_order_costs": orders_last_day.aggregate(Avg("total"))[
+            "average_order_costs_day": orders_last_day.aggregate(Avg("total"))[
                 "total__avg"
             ]
             or D("0.00"),
@@ -149,12 +163,43 @@ class IndexView(TemplateView):
                 "total__sum"
             ]
             or D("0.00"),
-            "hourly_report_dict": self.get_hourly_report(orders),
             "total_customers_last_day": customers.filter(
                 date_joined__gt=datetime_24hrs_ago,
             ).count(),
             "total_open_baskets_last_day": baskets.filter(
                 date_created__gt=datetime_24hrs_ago
+            ).count(),
+            "total_orders_last_week": orders_last_week.count(),
+            "total_lines_last_week": total_lines_last_week,
+            "average_order_costs_week": orders_last_week.aggregate(Avg("total"))[
+                "total__avg"
+            ]
+            or D("0.00"),
+            "total_revenue_last_week": orders_last_week.aggregate(Sum("total"))[
+                "total__sum"
+            ]
+            or D("0.00"),
+            "total_customers_last_week": customers.filter(
+                date_joined__gt=datetime_week_ago,
+            ).count(),
+            "total_open_baskets_last_week": baskets.filter(
+                date_created__gt=datetime_week_ago
+            ).count(),
+            "total_orders_last_month": orders_last_month.count(),
+            "total_lines_last_month": total_lines_last_month,
+            "average_order_costs_month": orders_last_month.aggregate(Avg("total"))[
+                "total__avg"
+            ]
+            or D("0.00"),
+            "total_revenue_last_month": orders_last_month.aggregate(Sum("total"))[
+                "total__sum"
+            ]
+            or D("0.00"),
+            "total_customers_last_month": customers.filter(
+                date_joined__gt=datetime_month_ago,
+            ).count(),
+            "total_open_baskets_last_month": baskets.filter(
+                date_created__gt=datetime_month_ago
             ).count(),
             "total_products": products.count(),
             "total_open_stock_alerts": open_alerts.count(),

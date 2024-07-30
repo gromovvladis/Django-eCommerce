@@ -141,11 +141,8 @@
 {% block extrascripts %}
     {{ block.super }}
     {% compress js %}
-        <script src="{% static "js/delivery/delivery.js" %}"></script>
-    {% endcompress %}
-    {% compress js %}
+        <script src="{% static "js/address/delivery-address.js" %}" defer></script>
         <script src="{% static "js/address/cookie-address.js" %}" async></script>
-        <script src="{% static "js/address/delivery-address.js" %}" async></script>
     {% endcompress %}
 {% endblock %}
 
