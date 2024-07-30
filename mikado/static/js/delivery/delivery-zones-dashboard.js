@@ -12,44 +12,46 @@ var offsetBtns = 150;
 
 
 // подсказки при поиске запрос в Яндекс
-ymaps.ready(function () {
-
-    LayoutPin = ymaps.templateLayoutFactory.createClass(
-        '<div class="wrapper-icon-delivery">' +
-            
-            '{% if properties.loading  %}' +
+if (window.ymaps){
+    ymaps.ready(function () {
     
-                '<svg class="pin-icon pin-icon__loader" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-                    '<circle cx="12" cy="12" r="6" stroke-width="8" fill="none" stroke-dasharray="100" stroke-dashoffset="80"></circle>' +
-                    '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 0 0" to="360 0 0" dur="2s" repeatCount="indefinite"></animateTransform>' +
+        LayoutPin = ymaps.templateLayoutFactory.createClass(
+            '<div class="wrapper-icon-delivery">' +
+                
+                '{% if properties.loading  %}' +
+        
+                    '<svg class="pin-icon pin-icon__loader" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+                        '<circle cx="12" cy="12" r="6" stroke-width="8" fill="none" stroke-dasharray="100" stroke-dashoffset="80"></circle>' +
+                        '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 0 0" to="360 0 0" dur="2s" repeatCount="indefinite"></animateTransform>' +
+                    '</svg>' +
+        
+                '{% else %}' + 
+        
+                    '<div class="icon-delivery__title {% if properties.error %}icon-delivery__title_error{% endif %}">' +
+                        '{% if properties.error %}' +
+                            '<span>{{ properties.error|default:"Ошибка!" }}</span> ' +
+                        '{% else %}' + 
+                            '<span class="delivery-balloon__minutes">№{{ properties.number }} - {{ properties.description }}</span>' +
+                            '<br>' +
+                            '<span class="delivery-balloon__text">Сумма заказа: {{ properties.order_price }}&nbsp;₽</span>' +
+                            '<br>' +
+                            '<span class="delivery-balloon__text">Стоимость доставки: {{ properties.delivery_price }}&nbsp;₽</span>' +
+                            '<br>' +
+                        '{% endif %}' + 
+                    '</div>' +
+        
+                '{% endif %}' +
+        
+                '<svg class="pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                    '<circle cx="12" cy="10" r="10"></circle>' +
+                    '<circle cx="12" cy="10" r="5" fill="#c21313"></circle>' +
                 '</svg>' +
+        
+            '</div>'
+        )
     
-            '{% else %}' + 
-    
-                '<div class="icon-delivery__title {% if properties.error %}icon-delivery__title_error{% endif %}">' +
-                    '{% if properties.error %}' +
-                        '<span>{{ properties.error|default:"Ошибка!" }}</span> ' +
-                    '{% else %}' + 
-                        '<span class="delivery-balloon__minutes">№{{ properties.number }} - {{ properties.description }}</span>' +
-                        '<br>' +
-                        '<span class="delivery-balloon__text">Сумма заказа: {{ properties.order_price }}&nbsp;₽</span>' +
-                        '<br>' +
-                        '<span class="delivery-balloon__text">Стоимость доставки: {{ properties.delivery_price }}&nbsp;₽</span>' +
-                        '<br>' +
-                    '{% endif %}' + 
-                '</div>' +
-    
-            '{% endif %}' +
-    
-            '<svg class="pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                '<circle cx="12" cy="10" r="10"></circle>' +
-                '<circle cx="12" cy="10" r="5" fill="#c21313"></circle>' +
-            '</svg>' +
-    
-        '</div>'
-    )
-
-});
+    });
+}
 
 
 // создаем карту при вводе адреса, при расчете маршрута и предоставим возможность выбора адреса по карте

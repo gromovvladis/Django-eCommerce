@@ -1,6 +1,8 @@
+var we_use_cookie = $('#we_use_cookie');
+var action_back = null;
+
 $(document).ready(function () {
-  cookieAgree = Cookies.get('cookieAgree');
-  we_use_cookie = $('#we_use_cookie');
+  var cookieAgree = Cookies.get('cookieAgree');
   if (!cookieAgree) {
     $.ajax({
       data: $(this).serialize(), 
@@ -13,12 +15,10 @@ $(document).ready(function () {
   }
 });
 
-function main_cookie(){
+function agree_cookie(){
   Cookies.set('cookieAgree', true, {expires: 1000});
   $(we_use_cookie).empty();
 }
-
-var action_back = null
 
 function getBack(){
   if (action_back) {

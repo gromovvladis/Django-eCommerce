@@ -1,15 +1,15 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
+
 {% load currency_filters %}
-{% load static %}
-{% load svg_tags %}
 {% load purchase_info_tags %}
 {% load reviews_tags %}
 {% load image_tags %}
 {% load display_tags %}
-
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
 
 {% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
-
 {% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
@@ -35,7 +35,6 @@
         </div>
         
         {% if order %}
-
             <div class="fill-width mb-2">
                 <div class="cabinet-orders fill-width grow-1">
                     <div class="cabinet__promo-wrapper fill-width d-flex flex-column">
@@ -130,12 +129,10 @@
                 </div>
             </div>
 
-            
             {% if not order.has_review %}
                 {% block order_review %}
                     <form method="post" class="prodile-feedback__wrapper">
                         {% csrf_token %}
-
                             <div class="d-flex align-center mb-2">
                                 <div class="controls">
 
@@ -177,11 +174,12 @@
         {% else %}
             <p>Невозвожно оставить отзыв к заказу</p>
         {% endif %}
-
     </div>
 {% endblock tabcontent %}
 
-{% block scripts %}
+{% block compress %}
     {{ block.super }}
-    <script  src="{% static "js/profile/profile-links.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/profile/profile-links.js" %}"></script>
+    {% endcompress %}
 {% endblock %}

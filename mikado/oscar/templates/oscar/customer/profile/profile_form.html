@@ -1,7 +1,8 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
 
-{% load static %}
 {% load svg_tags %}
+{% load compress %}
+{% load static %}
 
 {% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
 {% block nav_title_center %}{{ page_title }}{% endblock %}
@@ -22,30 +23,25 @@
 {% block tabcontent %}
     <div class="profile-personal d-flex flex-column fill-height fill-width grow-1">
         <form id="profile_form" class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4" method="post" action="{% url 'customer:profile-view' %}">
-            
             <div class="d-none d-sm-flex mb-1">
                 <h1>Редактировать профиль</h1>
             </div>
-
             {% if form.is_bound and not form.is_valid %}
                 <div class="alert alert-danger mb-2">
                     <strong>Что-то пошло не так :&#40;</strong>
                 </div>
             {% endif %}
-
             <div class="mb-1">
                 <span class="info-message" data-id="profile-message"></span>
             </div>
-
             {% csrf_token %}
-
             {% block errors %}
                 {% for error in field.errors %}
                     <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
                 {% endfor %}
             {% endblock %}
             
-            <div data-id="input-wrapper" class="v-input d-flex align-center{% if request.user.first_name %} v-input__label-active{% endif %} v-input__dirty v-input__padding">
+            <div data-id="input-wrapper" class="v-input d-flex align-center{% if request.user.first_name %} v-input__label-active{% endif %} v-input__padding">
                 <div class="v-input__wrapper">
                     <div class="v-input__label">Имя</div>
                     <div class="v-input__control d-flex align-center">
@@ -59,7 +55,7 @@
                 <span class="error-block mt-2 info-message">{{ form.first_name.errors }}</span>
             {% endif %}
 
-            <div class="v-input d-flex align-center mt-2 v-input__label-active v-input__dirty v-input__padding readonly">
+            <div class="v-input d-flex align-center mt-2 v-input__label-active v-input__padding readonly">
                 <div class="v-input__wrapper">
                     <div class="v-input__label">Телефон</div>
                     <div class="v-input__control d-flex align-center">
@@ -71,7 +67,7 @@
             </div>
 
 
-            <div data-id="input-wrapper"  class="v-input d-flex align-center{% if request.user.email %} v-input__label-active{% endif %} mt-2 v-input__dirty v-input__padding">
+            <div data-id="input-wrapper"  class="v-input d-flex align-center{% if request.user.email %} v-input__label-active{% endif %} mt-2 v-input__padding">
                 <div class="v-input__wrapper">
                     <div class="v-input__label">Почта</div>
                     <div class="v-input__control d-flex align-center">
@@ -99,8 +95,12 @@
     </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script  src="{% static "js/profile/profile-edit.js" %}"></script>
-    <script  src="{% static "js/profile/profile.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/profile/profile-edit.js" %}" async></script>
+    {% endcompress %}
+    {% compress js %}
+        <script src="{% static "js/profile/profile.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}

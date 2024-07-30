@@ -1,16 +1,19 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
+
 {% load currency_filters %}
-{% load static %}
-{% load svg_tags %}
 {% load purchase_info_tags %}
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
 
 {% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
-
 {% block nav_title_center %}{{ page_title }}{% endblock %}
 
-{% block styles %}
+{% block extrastyles %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static "css/air-datepicker.css" %}" />
+    {% compress css %}  
+        <link rel="stylesheet" href="{% static "css/air-datepicker.css" %}"/>
+    {% endcompress %}
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -34,11 +37,9 @@
         </div>
         
         {% if orders %}
-
             {% if form.description %}
                 <h3 class="mb-2">{{ form.description }}</h3>
             {% endif %}
-            
             {% if orders or form.is_bound %}
                 <div class="card card-body bg-light d-flex">
                     <form method="get" class="d-flex fill-width justify-space-between mb-3 mb-sm-2">
@@ -126,7 +127,6 @@
             {% include "oscar/partials/pagination.html" %}
         {% else %}
             {% if form.is_bound %}
-
                 <div class="v-order__title d-flex mb-2 justify-start align-center">
                     <div class="d-flex">
                         <a href="{% url 'customer:order-list' %}" class="v-button fill-width v-button--white v-button--profile justify-center">
@@ -136,12 +136,10 @@
                 </div>
                 <h3 class="mb-2">{{ form.description }}</h3>
                 <p class="text--red">Заказы не найдены</p>
-
             {% else %}  
                 <p>Список заказов пуст</p>
             {% endif %}
         {% endif %}
-
     </div>
 {% endblock tabcontent %}
 
@@ -169,9 +167,15 @@
     </svg>
 {% endblock %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script  src="{% static "js/datetimepicker/air-datepicker.js" %}"></script>
-    <script  src="{% static "js/datetimepicker/filter-time-timepicker.js" %}"></script>
-    <script  src="{% static "js/profile/profile.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/datetimepicker/air-datepicker.js" %}" defer></script>
+    {% endcompress %}
+    {% compress js %}
+        <script src="{% static "js/datetimepicker/filter-time-timepicker.js" %}" defer></script>
+    {% endcompress %}
+    {% compress js %}
+        <script src="{% static "js/profile/profile.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}

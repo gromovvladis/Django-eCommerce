@@ -1,23 +1,18 @@
 {% extends "oscar/layout.html" %}
 
 {% load product_tags %}
-{% load static %}
 {% load svg_tags %}
+{% load compress %}
+{% load static %}
 
-{% block title %}
-    Поиск | {{ block.super }}
-{% endblock %}
-
+{% block title %}Поиск | {{ block.super }}{% endblock %}
 {% block wrapper_class %}search d-flex fill-width flex-column justify-start grow-1 fill-height pb-3 pb-sm-4 pt-sm-2 px-sm-2{% endblock %}
-
 {% block app_class %}v-app---search{% endblock %}
 {% block nav_class %}v-app__nav--search{% endblock %}
-
 {% block nav_title %}Поиск{% endblock %}
 {% block nav_title_center %}Поиск{% endblock %}
 
 {% block breadcrumbs %}
-
     <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
@@ -27,7 +22,6 @@
         <span class="v-bread__link" aria-current="page">Поиск{{ query }}</span>
     </div>
 {% endblock %}
-
 
 {% block content %}
     <div class="d-flex fill-width">
@@ -65,11 +59,12 @@
     var url_suggestions = "{% url 'search:suggestions' %}";
 {% endblock %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script src="{% static "js/oscar/ui.js" %}"></script>
-    <script src="{% static "js/search/search.js" %}"></script>
-    <script src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/oscar/ui.js" %}" defer></script>
+        <script src="{% static "js/search/search.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}

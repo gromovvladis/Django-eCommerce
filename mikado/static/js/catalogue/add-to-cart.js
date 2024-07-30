@@ -1,7 +1,6 @@
 
 var add_cart_btn = $('#add_to_cart_btn');
 var errors_cart = $('#add_to_cart_btn_errors');
-var cart_nums = $('[data-id="cart-nums"]');
 var add_form_dalail = $('#add_to_basket_form');
 
 var variants_label = $('[data-id="tab-button-label"]');

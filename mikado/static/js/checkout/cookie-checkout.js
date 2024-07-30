@@ -1,6 +1,3 @@
-var line2 = $('#id_line2');
-var line3 = $('#id_line3');
-var line4 = $('#id_line4');
 var order_note = $('#id_order_note');
 var notes = $('#id_notes');
 window.onbeforeunload = function() {

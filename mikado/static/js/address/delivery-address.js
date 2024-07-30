@@ -3,13 +3,12 @@ var set_address_form = $('#set_address');
 // инициализация адреса
 $(document).ready(function () {
     var adr = Cookies.get('line1');
-    if (adr){
+    if (adr && $(line1).length > 0) {
         $(line1).prop('readonly', true);
         $(line1).attr('captured', true);
         createMap(adr);
     }
 });
-
 
 $(set_address_form).submit(function () {
     console.log('Form submitted');

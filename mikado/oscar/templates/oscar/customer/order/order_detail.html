@@ -1,13 +1,14 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
+
 {% load currency_filters %}
 {% load display_tags %}
 {% load reviews_tags %}
-{% load svg_tags %}
-{% load static %}
 {% load image_tags %}
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
 
 {% block title %}{{ page_title }}Заказ №{{ order.number }} | {{ block.super }}{% endblock %}
-
 {% block nav_title_center %}Заказ №{{ order.number }}{% endblock %}
 
 {% block breadcrumbs %}
@@ -27,7 +28,6 @@
 
 {% block tabcontent %}
     <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
-        
         <div class="v-order__title d-flex justify-space-between mb-2 justify-start align-center">
             <div class="d-flex">
                 <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
@@ -57,7 +57,6 @@
                 {% with product=line.product %}
                     {% if product %}
                         <div class="v-dish-order d-flex fill-width">
-
                             <div class="v-dish-order__picture">
                                 <a href="{{ product.get_absolute_url }}" aria-current="page"
                                     class="d-block router-link-exact-active router-link-active"
@@ -102,7 +101,6 @@
                                         {% endif %}
                                     {% endiffeature %}
                                 {% endif %}
-                                    
                             
                                 <div role="separator" class="v-spacer"></div>
 
@@ -128,7 +126,6 @@
         </div>
 
         {% block shipping_info %}
-
             <div class="v-checkout__datail  pb-2">
                 {% if order.shipping_address %}
 
@@ -183,11 +180,9 @@
                     <p>{{ request.user.username }}</p>
                 </div>
             </div>
-
         {% endblock %}
 
         {% block payment_info %}
-
             <div class="v-order__subtitle mb-1 mb-sm-2">
                 <h2>Оплата</h2>
             </div>
@@ -206,14 +201,10 @@
                     <span >Статус заказа: </span>
                     <strong><span class="text--info" data-id="payment-status">{{ order.status }}</span></strong>
                 </div>  
-
             {% endfor %}
-
         {% endblock %}
-
     </div>
 {% endblock tabcontent %}
-
 
 {% block SVG %}
     <svg style="display: none">
@@ -239,7 +230,9 @@
     </svg>
 {% endblock %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script  src="{% static "js/profile/profile-links.js" %}"></script>]
+    {% compress js %}
+        <script src="{% static "js/profile/profile-links.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}

@@ -1,7 +1,6 @@
 var wishlist_form = $('#wishlist_form');
 
 $(document).ready(function () {
-
     if($(wishlist_form).length > 0){
 
         var wishlist_btn = $(wishlist_form).find('#wishlist_btn');

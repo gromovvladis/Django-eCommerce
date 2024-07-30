@@ -1,15 +1,13 @@
-var empty_cart = $('[data-id="empty-cart"]');
 var modal_empty_cart = $('[data-id="modal-empty-cart"]');
+var empty_cart = $(modal_empty_cart).find('[data-id="empty-cart"]');
 var open_close_modal = $('[data-id="modal-open-close"]');
 
-var basket_summary = $('[data-id="basket-formset"]');
-var basket_totals = $('[data-id="cart-totals"]');
-var upsell_messages = $('#upsell_messages');
-var cart_nums = $('[data-id="cart-nums"]');
+var cartWrapper = $('[data-id="cart-wrapper"]');
+var basket_summary = $(cartWrapper).find('[data-id="basket-formset"]');
+var upsell_messages = $(cartWrapper).find('#upsell_messages');
 
-var cart_nums = $('[data-id="cart-nums"]');
-var cartWrapper = $(".v-cart-wrapper");
-var cartTotals = $(".v-cart__info");
+var cartTotals = $('[data-id="cart-info"]');
+var basket_totals = $('[data-id="cart-totals"]');
 
 if ($(basket_summary).length > 0){
     var forms = $(basket_summary).find('[data-id="cart-item-form"]');
@@ -98,7 +96,6 @@ function getUpsellMaseeges(){
 $(open_close_modal).on('click', function(){
     $(modal_empty_cart).toggleClass('d-none');
 });
-
 
 $(empty_cart).on('click', function(){
     $.ajax({

@@ -1,25 +1,27 @@
-const mapCenter = [56.050325, 92.903791];
-var mapContainer = document.querySelector('#map');
+var mapContainer = document.querySelector('#pickup_map');
+const MAPCENTER = [56.008331, 92.878786];
 var map;
 
 $(document).ready(function () {
-    createMap();
+    if (window.ymaps && mapContainer) {
+        createPickupMap();
+    }
 });
 
-function createMap() {
+function createPickupMap() {
     ymaps.ready(function () {
 
         if (!map) {
             map = new ymaps.Map(mapContainer, {
-                center: mapCenter,
+                center: MAPCENTER,
                 zoom: 14,
                 controls: [],
             }, {suppressMapOpenBlock: true});
 
             //кнопки зума
             ZoomLayout = ymaps.templateLayoutFactory.createClass(
-                '<div id="zoom-in" class="v-map-custom-controls--zoom-in"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
-                '<div id="zoom-out" class="v-map-custom-controls--zoom-out"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+                '<div id="zoom-in" class="v-map-custom-controls--zoom-in"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12H18M12 6V18" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+                '<div id="zoom-out" class="v-map-custom-controls--zoom-out"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12L18 12" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
                 ,
                 {
 
@@ -73,7 +75,7 @@ function createMap() {
             var geolocationControl = new ymaps.control.GeolocationControl({
                 options: {
                     layout: ymaps.templateLayoutFactory.createClass(
-                        '<div id="geolocation" class="v-map-custom-controls--geolocation"><svg viewBox="-1 -1 26 26" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.925 1.78443C21.5328 1.18151 23.1029 2.75156 22.5 4.35933L16.0722 21.5C15.3574 23.4061 12.5838 23.1501 12.23 21.1453L10.8664 13.418L3.1391 12.0544C1.13427 11.7006 0.878261 8.92697 2.78443 8.21216L19.925 1.78443ZM20.6273 3.65708L3.48668 10.0848L11.2139 11.4485C12.0417 11.5945 12.6898 12.2426 12.8359 13.0704L14.1996 20.7977L20.6273 3.65708Z" fill="#0F0F0F"/></svg></div>'
+                        '<div id="geolocation" class="v-map-custom-controls--geolocation"><svg viewBox="0 0 26 26" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.925 1.78443C21.5328 1.18151 23.1029 2.75156 22.5 4.35933L16.0722 21.5C15.3574 23.4061 12.5838 23.1501 12.23 21.1453L10.8664 13.418L3.1391 12.0544C1.13427 11.7006 0.878261 8.92697 2.78443 8.21216L19.925 1.78443ZM20.6273 3.65708L3.48668 10.0848L11.2139 11.4485C12.0417 11.5945 12.6898 12.2426 12.8359 13.0704L14.1996 20.7977L20.6273 3.65708Z" fill="#0a834f"/></svg></div>'
                     ),
                     position: {
                         bottom: '190px',
@@ -93,8 +95,6 @@ function createMap() {
                     map.panTo(result.geoObjects.position);
                 });
             });
-
-
 
             var controlsPane = new ymaps.pane.StaticPane(map, { zIndex: 420});
             map.panes.append('customControls', controlsPane); 

@@ -1,15 +1,14 @@
 var voucher_form = $('#voucher_form');
 var voucher_btn = $(voucher_form).find('#voucher_btn');
-var remove_form = $('.voucher-remove-form');
+var remove_form = $('[data-id="voucher-remove"]');
 var code_input = $('#id_code');
 var voucher_message = $('#voucher_message');
-// var checkout_totals = $('#checkout_totals');
 
 $(document).ready(function () {
-    remove_form_added(remove_form);
+    delete_promo(remove_form);
 })
 
-function remove_form_added(remove_form){
+function delete_promo(remove_form){
     $(remove_form).submit(function () {
         let btn = $(this).find(".remove_promocode");
         $(btn).attr("disabled", true);
@@ -27,7 +26,6 @@ function remove_form_added(remove_form){
         return false;  
     });
 } 
-
 
 $(voucher_form).submit(function () {
     $(voucher_btn).prop("disabled", true);
@@ -51,8 +49,8 @@ function voucher_func(response) {
     if (response.status == 202){
         $(checkout_totals).html(response.responseJSON.new_totals);
         $(code_input).val('');
-        remove_form = $('.voucher_remove_form');
-        remove_form_added(remove_form);
+        remove_form = $('[data-id="voucher-remove"]');
+        delete_promo(remove_form);
     }
 }
 

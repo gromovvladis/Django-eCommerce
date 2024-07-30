@@ -2,11 +2,14 @@
 
 {% load svg_tags %}
 {% load category_tags %}
+{% load compress %}
 {% load static %}
 
 {% block styles %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static "css/planet-styles.css" %}" />
+    {% compress css %}   
+        <link rel="stylesheet" href="{% static "css/planet-styles.css" %}"/>
+    {% endcompress %}
 {% endblock %}
 
 {% block layout %}
@@ -144,12 +147,15 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{% static "js/auth/auth.js" %}"></script>
-    <script src="{% static "js/cookie/cookies/cookie-main.js" %}"></script>
-    <script src="{% static "js/footer/footer.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/slider/slider.js" %}" defer></script>
+
+        <script src="{% static "js/slider/homepage-sliders.js" %}" defer></script>
+        <script src="{% static "js/catalogue/add-to-cart-compact.js" %}" defer></script>
+        <script src="{% static "js/basket/basket.js" %}" defer></script>
+
+        <script src="{% static "js/auth/auth.js" %}" defer></script>
+        <script src="{% static "js/cookie/cookies/cookie-main.js" %}" defer></script>
+        <script src="{% static "js/footer/footer.js" %}" defer></script>
+    {% endcompress %}
 {% endblock %}
-
-
-
-
-

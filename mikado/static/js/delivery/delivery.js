@@ -4,17 +4,17 @@ var suggests = line1_container.querySelector('#suggest_list');
 var clean_address = line1_container.querySelector('#clean_address');
 var open_map = line1_container.querySelector('#open_map');
 
+var map_container = document.querySelector('.delivery__map');
+var mapdiv = map_container.querySelector('#map');
+var controls = map_container.querySelector('#map_controls');
+var saveButton = map_container.querySelector('#submit_address');
+
 var lon = document.querySelector('#id_coords_long');
 var lat = document.querySelector('#id_coords_lat');
 var shipping_method = document.querySelector('#id_method_code');
 
 var hints = document.querySelector('#line1_hints');
 var delivery_time = document.querySelector('#delivery_time');
-
-var map_container = document.querySelector('.delivery__map');
-var mapdiv = map_container.querySelector('#map');
-var controls = map_container.querySelector('#map_controls');
-var saveButton = map_container.querySelector('#submit_address');
 
 const MAPCENTER = [56.0083, 92.8787];
 const DELIVERYBOUNDS = [[56.1206, 92.6406], [55.9460, 93.2584]];
@@ -40,78 +40,81 @@ var li_list = [];
 
 // подсказки при поиске 2GIS
 $(document).ready(function () {
-    CreateSuggestView();
+    if ($(line1).length > 0) {
+        CreateSuggestView();
+    }
 });
 
 // строка с адресом на карте Яндекс и layout
+
 ymaps.ready(function () {
 
-    CustomControlClass = function (options) {
-        CustomControlClass.superclass.constructor.call(this, options);
-        this._$content = null;
-        this._geocoderDeferred = null;
-    };
-    
-    ymaps.util.augment(CustomControlClass, ymaps.collection.Item, {
-        onAddToMap: function (map) {
-            CustomControlClass.superclass.onAddToMap.call(this, map);
-            this._lastCenter = null;
-            this.getParent().getChildElement(this).then(this._readyToEvent, this);
-        },
+CustomControlClass = function (options) {
+    CustomControlClass.superclass.constructor.call(this, options);
+    this._$content = null;
+    this._geocoderDeferred = null;
+};
 
-        onRemoveFromMap: function (oldMap) {
-            this._lastCenter = null;
-            if (this._$content) {
-                this._$content.remove();
-                this._mapEventGroup.removeAll();
-            }
-            CustomControlClass.superclass.onRemoveFromMap.call(this, oldMap);
-        },
+ymaps.util.augment(CustomControlClass, ymaps.collection.Item, {
+    onAddToMap: function (map) {
+        CustomControlClass.superclass.onAddToMap.call(this, map);
+        this._lastCenter = null;
+        this.getParent().getChildElement(this).then(this._readyToEvent, this);
+    },
 
-        _readyToEvent: function (parentDomContainer) {
-            // Создаем HTML-элемент с текстом.
-            this._$content = $(['<div class="v-delivery-map--address"></div>',].join('')).appendTo(document.querySelector('#map_address'));
-        },
+    onRemoveFromMap: function (oldMap) {
+        this._lastCenter = null;
+        if (this._$content) {
+            this._$content.remove();
+            this._mapEventGroup.removeAll();
+        }
+        CustomControlClass.superclass.onRemoveFromMap.call(this, oldMap);
+    },
 
-        _addressSelected: function (address) {
-            // Создаем HTML-элемент с текстом.
-            this._$content.text(address);
-        },
+    _readyToEvent: function (parentDomContainer) {
+        // Создаем HTML-элемент с текстом.
+        this._$content = $(['<div class="v-delivery-map--address"></div>',].join('')).appendTo(document.querySelector('#map_address'));
+    },
 
-    });
+    _addressSelected: function (address) {
+        // Создаем HTML-элемент с текстом.
+        this._$content.text(address);
+    },
 
-    LayoutPin = ymaps.templateLayoutFactory.createClass(
-        '<div class="wrapper-icon-delivery">' +
-            
-            '{% if properties.loading  %}' +
-    
-                '<svg class="pin-icon pin-icon__loader" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-                    '<circle cx="12" cy="12" r="6" stroke-width="8" fill="none" stroke-dasharray="100" stroke-dashoffset="80"></circle>' +
-                    '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 0 0" to="360 0 0" dur="2s" repeatCount="indefinite"></animateTransform>' +
-                '</svg>' +
-    
-            '{% else %}' + 
-    
-                '<div class="icon-delivery__title {% if properties.error %}icon-delivery__title_error{% endif %}">' +
-                    '{% if properties.error %}' +
-                        '<span>{{ properties.error|default:"Адрес вне зоны доставки" }}</span> ' +
-                    '{% else %}' + 
-                        '<span class="delivery-balloon__minutes">{{ properties.order_minutes }}</span>' +
-                        '<br>' +
-                        '<span class="delivery-balloon__text"> Доставка<br> от&nbsp;{{ properties.min_order }}&nbsp;₽</span>' +
-                    '{% endif %}' +
-                '</div>' +
-    
-            '{% endif %}' +
-    
-            '<svg class="pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                '<circle cx="12" cy="10" r="10"></circle>' +
-                '<circle cx="12" cy="10" r="5" fill="#c21313"></circle>' +
+});
+
+LayoutPin = ymaps.templateLayoutFactory.createClass(
+    '<div class="wrapper-icon-delivery">' +
+        
+        '{% if properties.loading  %}' +
+
+            '<svg class="pin-icon pin-icon__loader" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+                '<circle cx="12" cy="12" r="6" stroke-width="8" fill="none" stroke-dasharray="100" stroke-dashoffset="80"></circle>' +
+                '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 0 0" to="360 0 0" dur="2s" repeatCount="indefinite"></animateTransform>' +
             '</svg>' +
-    
-        '</div>'
-    )
-    
+
+        '{% else %}' + 
+
+            '<div class="icon-delivery__title {% if properties.error %}icon-delivery__title_error{% endif %}">' +
+                '{% if properties.error %}' +
+                    '<span>{{ properties.error|default:"Адрес вне зоны доставки" }}</span> ' +
+                '{% else %}' + 
+                    '<span class="delivery-balloon__minutes">{{ properties.order_minutes }}</span>' +
+                    '<br>' +
+                    '<span class="delivery-balloon__text"> Доставка<br> от&nbsp;{{ properties.min_order }}&nbsp;₽</span>' +
+                '{% endif %}' +
+            '</div>' +
+
+        '{% endif %}' +
+
+        '<svg class="pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<circle cx="12" cy="10" r="10"></circle>' +
+            '<circle cx="12" cy="10" r="5" fill="#c21313"></circle>' +
+        '</svg>' +
+
+    '</div>'
+)
+
 });
 
 // Создание suggestView
@@ -312,12 +315,12 @@ function createMap(address=null) {
                     options: {
                         // noPlacemark: true,
                         layout: ymaps.templateLayoutFactory.createClass(
-                            '<button type="button" data-id="delivery-map-close-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg heigh="24px" width="24px" stroke="#000" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
+                            '<button type="button" data-id="delivery-map-close-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg heigh="24px" width="24px" stroke="#000" viewBox="1 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
                         ),
                         float: 'left',
                         position: {
-                            top: '8px',
-                            left: '14px'
+                            top: '10px',
+                            left: '16px'
                         }
                     }
                 });
@@ -325,28 +328,30 @@ function createMap(address=null) {
                 map.controls.add(closeButton);
 
                 closeButton.events.add('click', function () {
-                    addressInfo = null;
-                    map.geoObjects.remove(placemark);
-                    placemark = null;
+                    
                     $(map_container).removeClass('open');
+                    
+                    map.geoObjects.remove(placemark);
                     $(controls).addClass('d-none');
-                    // map.destroy();
-                    // map = null;
+                    
+                    addressInfo = null;
+                    placemark = null;
+
                     setTimeout(() => {
                         action_back = null;
-                      }, 700);
+                      }, 500);
                 });
     
                 cleanButton = new ymaps.control.Button({     
                     options: {
                         // noPlacemark: true,
                         layout: ymaps.templateLayoutFactory.createClass(
-                            '<button type="button" data-id="delivery-map-clean-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg width="22" height="22" stroke="#b60808" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10L7.70141 19.3578C7.87432 20.3088 8.70258 21 9.66915 21H14.3308C15.2974 21 16.1257 20.3087 16.2986 19.3578L18 10" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
+                            '<button type="button" data-id="delivery-map-clean-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg width="20" height="20" stroke="#b60808" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10L7.70141 19.3578C7.87432 20.3088 8.70258 21 9.66915 21H14.3308C15.2974 21 16.1257 20.3087 16.2986 19.3578L18 10" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
                         ),
                         float: 'right',
                         position: {
-                            top: '8px',
-                            right: '14px'
+                            top: '10px',
+                            right: '16px'
                         }
                     },            
                 });
@@ -361,8 +366,8 @@ function createMap(address=null) {
             
             //кнопки зума
             ZoomLayout = ymaps.templateLayoutFactory.createClass(
-                '<div id="zoom-in" class="v-map-custom-controls--zoom-in"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
-                '<div id="zoom-out" class="v-map-custom-controls--zoom-out"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+                '<div id="zoom-in" class="v-map-custom-controls--zoom-in"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12H18M12 6V18" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+                '<div id="zoom-out" class="v-map-custom-controls--zoom-out"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12L18 12" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
                 ,
                 {
 
@@ -407,7 +412,7 @@ function createMap(address=null) {
                     layout: ZoomLayout,
                     position: {
                         bottom: (offsetBtns + 55) + "px",
-                        right:'14px',
+                        right:'16px',
                     },
                 }
             });
@@ -416,11 +421,11 @@ function createMap(address=null) {
             var geolocationControl = new ymaps.control.GeolocationControl({
                 options: {
                     layout: ymaps.templateLayoutFactory.createClass(
-                        '<div id="geolocation" class="v-map-custom-controls--geolocation"><svg viewBox="-1 -1 26 26" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.925 1.78443C21.5328 1.18151 23.1029 2.75156 22.5 4.35933L16.0722 21.5C15.3574 23.4061 12.5838 23.1501 12.23 21.1453L10.8664 13.418L3.1391 12.0544C1.13427 11.7006 0.878261 8.92697 2.78443 8.21216L19.925 1.78443ZM20.6273 3.65708L3.48668 10.0848L11.2139 11.4485C12.0417 11.5945 12.6898 12.2426 12.8359 13.0704L14.1996 20.7977L20.6273 3.65708Z" fill="#0F0F0F"/></svg></div>'
+                        '<div id="geolocation" class="v-map-custom-controls--geolocation"><svg viewBox="0 0 26 26" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.925 1.78443C21.5328 1.18151 23.1029 2.75156 22.5 4.35933L16.0722 21.5C15.3574 23.4061 12.5838 23.1501 12.23 21.1453L10.8664 13.418L3.1391 12.0544C1.13427 11.7006 0.878261 8.92697 2.78443 8.21216L19.925 1.78443ZM20.6273 3.65708L3.48668 10.0848L11.2139 11.4485C12.0417 11.5945 12.6898 12.2426 12.8359 13.0704L14.1996 20.7977L20.6273 3.65708Z" fill="#0a834f"/></svg></div>'
                     ),
                     position: {
                         bottom: offsetBtns + "px",
-                        right: '14px'
+                        right: '16px'
                     }
                 }
             });

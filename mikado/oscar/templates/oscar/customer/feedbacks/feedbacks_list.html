@@ -1,12 +1,13 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
+
 {% load currency_filters %}
-{% load static %}
-{% load svg_tags %}
 {% load purchase_info_tags %}
 {% load reviews_tags %}
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
 
 {% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
-
 {% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
@@ -24,7 +25,6 @@
 
 {% block tabcontent %}
     <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
-        
         <div class="v-order__title d-flex justify-space-between mb-2 align-center">
             <div class="d-none d-sm-flex">
                 <h1>Отзывы</h1>
@@ -83,11 +83,12 @@
         {% else %}
             <p>Список отзывов пуст</p>
         {% endif %}
-
     </div>
 {% endblock tabcontent %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script  src="{% static "js/profile/profile-links.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/profile/profile-links.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}

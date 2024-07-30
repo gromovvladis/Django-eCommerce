@@ -1,16 +1,13 @@
 {% extends "oscar/layout.html" %}
-{% load static %}
+
 {% load svg_tags %}
+{% load compress %}
+{% load static %}
 
-{% block title %}
-    Адрес самовывоза | {{ block.super }}
-{% endblock %}
- 
+{% block title %}Адрес самовывоза | {{ block.super }}{% endblock %}
 {% block wrapper_class %}delivery wrapper--small fill-width pd-2 pb-sm-4 delivery-address{% endblock %}
-
 {% block app_class %}v-app---delivery{% endblock %}
 {% block nav_class %}v-app__nav--delivery{% endblock %}
-
 {% block nav_title %}Адрес самовывоза{% endblock %}
 
 {% block breadcrumbs %}
@@ -40,7 +37,7 @@
             <div class="delivery__map">
                 <div class="v-map__wrapper fill-width fill-height">
                     <div class="v-map fill-width fill-height">
-                        <div id="map" class="fill-width fill-height"></div>
+                        <div id="pickup_map" class="fill-width fill-height"></div>
                     </div>
                 </div>
             </div>
@@ -92,11 +89,13 @@
     </div>
 {% endblock content %}
 
-{% block extrascripts %}
-    <script  src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
+{% block externalscripts %}
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
 {% endblock %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script  src="{% static "js/delivery/pickup.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/delivery/pickup.js" %}" defer></script>
+    {% endcompress %}
 {% endblock %}
