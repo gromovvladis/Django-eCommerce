@@ -45,7 +45,7 @@
                                         </span>
 
                                         {% if editable %}
-                                            <form class="d-flex align-end voucher-remove-form ml-1" action="{% url 'checkout:vouchers-remove' pk=discount.voucher.id %}" method="POST">
+                                            <form class="d-flex align-end ml-1" action="{% url 'checkout:vouchers-remove' pk=discount.voucher.id %}" method="POST" data-id="voucher-remove">
                                                 {% csrf_token %}
                                                 <input type="submit" value="Удалить" class="text--red" />
                                             </form>

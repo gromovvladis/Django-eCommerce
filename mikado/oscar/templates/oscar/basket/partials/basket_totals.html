@@ -1,48 +1,45 @@
 {% load currency_filters %}
 {% load shipping_tags %}
 
-<div class="v-prices d-flex flex-column align-start v-prices--big">
+{% with offer_discounts=basket.offer_discounts voucher_discounts=basket.grouped_voucher_discounts %}
+    {% block discount_totals %}
+        {% if offer_discounts or voucher_discounts %}
 
-    {% with offer_discounts=basket.offer_discounts voucher_discounts=basket.grouped_voucher_discounts %}
-        {% block discount_totals %}
-            {% if offer_discounts or voucher_discounts %}
+        <span class="v-prices__price_discounts">
+            <span class="no-wrap">
+                Заказ:
+                <span class="v-prices__price-before">
+                    {{ basket.total_excl_discounts|currency:basket.currency }}
+                </span>
+            </span>
 
-            <span class="v-prices__price_discounts">
+            {% for discount in offer_discounts %}
                 <span class="no-wrap">
-                    Заказ:
-                    <span class="v-prices__price-before">
-                        {{ basket.total_excl_discounts|currency:basket.currency }}
+                    {{ discount.name }}:
+                    <span>
+                        -{{ discount.discount|currency:basket.currency }}
                     </span>
                 </span>
+            {% endfor %}
 
-                {% for discount in offer_discounts %}
+            {% if voucher_discounts %}
+                {% for discount in voucher_discounts %}
                     <span class="no-wrap">
-                        {{ discount.name }}
-                        <span>
-                            -{{ discount.discount|currency:basket.currency }}
-                        </span>
+                        {% if discount.voucher.voucher_set %}
+                            {{ discount.voucher.voucher_set.name }} ({{ discount.voucher.code }})
+                        {% else %}
+                            {{ discount.voucher.name }} ({{ discount.voucher.code }})
+                        {% endif %}
+                        <span>- {{ discount.discount|currency:basket.currency }}</span>
                     </span>
                 {% endfor %}
-
-                {% if voucher_discounts %}
-                    {% for discount in voucher_discounts %}
-                        <span class="no-wrap">
-                            {% if discount.voucher.voucher_set %}
-                                {{ discount.voucher.voucher_set.name }} ({{ discount.voucher.code }})
-                            {% else %}
-                                {{ discount.voucher.name }} ({{ discount.voucher.code }})
-                            {% endif %}
-                            <span>- {{ discount.discount|currency:basket.currency }}</span>
-                        </span>
-                    {% endfor %}
-                {% endif %}
-
-            </span>
             {% endif %}
-        {% endblock %}
-    {% endwith %}
 
-    <span class="v-prices__price no-wrap">
-        {{ order_total.money|currency:basket.currency }}
-    </span>
-</div>
+        </span>
+        {% endif %}
+    {% endblock %}
+{% endwith %}
+
+<span class="v-prices__price no-wrap">
+    {{ order_total.money|currency:basket.currency }}
+</span>

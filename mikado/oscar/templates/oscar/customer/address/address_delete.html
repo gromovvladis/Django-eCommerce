@@ -1,10 +1,10 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
 
 {% load svg_tags %}
+{% load compress %}
 {% load static %}
 
 {% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
-
 {% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
@@ -62,9 +62,11 @@
     </div>
 {% endblock tabcontent %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script  src="{% static "js/profile/profile-links.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/profile/profile-links.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}
 
 

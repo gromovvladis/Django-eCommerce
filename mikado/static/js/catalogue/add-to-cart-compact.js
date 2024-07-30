@@ -1,3 +1,4 @@
+var cart_nums = $('[data-id="cart-nums"]');
 var cart_added = () => {};
 
 $(document).ready(function () {
@@ -7,7 +8,6 @@ $(document).ready(function () {
 function findNewForms(){
     var add_cart_form = $("[data-id='add-to-cart-form-compact']");
     if ($(add_cart_form).length > 0) {
-        var cart_nums_compact = $('[data-id="cart-nums"]');
         $(add_cart_form).submit(function () {
     
             var btn = $(this).find('[data-id="add-to-cart-btn-compact"]').get(0)
@@ -22,7 +22,7 @@ function findNewForms(){
                 type: $(this).attr('method'), 
                 url: $(this).attr('action'),
                 success: function (response) {
-                    $(cart_nums_compact).html(response.cart_nums); 
+                    $(cart_nums).html(response.cart_nums); 
                     cart_added();
                 },
                 error: function(response){

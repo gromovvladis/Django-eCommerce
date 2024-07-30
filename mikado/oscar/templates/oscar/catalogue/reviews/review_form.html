@@ -1,15 +1,15 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
+
 {% load currency_filters %}
-{% load static %}
-{% load svg_tags %}
 {% load purchase_info_tags %}
 {% load reviews_tags %}
 {% load image_tags %}
 {% load display_tags %}
-
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
 
 {% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
-
 {% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
@@ -156,7 +156,9 @@
     </div>
 {% endblock tabcontent %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script  src="{% static "js/profile/profile.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/profile/profile.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}

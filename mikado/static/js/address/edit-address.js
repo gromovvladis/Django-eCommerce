@@ -8,6 +8,17 @@ var error_flat = $(checkout_errors).find('[data-error="flat"]');
 var error_enter = $(checkout_errors).find('[data-error="enter"]');
 var error_floor = $(checkout_errors).find('[data-error="floor"]');
 
+// инициализация адреса
+$(document).ready(function () {
+    var adr = $(line1).val();
+    if (adr) {
+        $(line1).prop('readonly', true);
+        $(line1).attr('captured', true);
+        createMap(adr);
+    }
+    validateAddress()
+});
+
 $('[data-id="v-input-field"]').each(function(){
     var wrapper = $(this);
     var input_field = $(this).find('.v-input');
@@ -25,24 +36,11 @@ $('[data-id="v-input-field"]').each(function(){
     })
 })
 
-
 // не отправлять форму enter-ом
 $('#edit-address').on('keypress', 'input', function(event) {
     if (event.which == 13) {
         event.preventDefault();
     }
-});
-
-
-// инициализация адреса
-$(document).ready(function () {
-    var adr = $(line1).val();
-    if (adr) {
-        $(line1).prop('readonly', true);
-        $(line1).attr('captured', true);
-        createMap(adr);
-    }
-    validateAddress()
 });
 
 validate = () => {
@@ -51,11 +49,7 @@ validate = () => {
 
 // Валидация по адреса
 function validateAddress(){
-
     var valid = true;
-    
-    console.log("validate " + valid);
-
     if (!$(line1).val() || $(line1).attr('captured') == "false" || $(line1).attr('valid') == "false"){
         console.log('line1 invalid')
         valid = false;
@@ -106,4 +100,3 @@ function validateAddress(){
         $(checkout_errors).removeClass('d-none');    
     }
 }
-

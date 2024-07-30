@@ -21,14 +21,18 @@ var delivery_time_block = $('[data-id="delivery-time-block"]');
 var time_title = $('[data-id="order-time-title"]');
 
 var checkout_totals = $('#checkout_totals');
-var all_fields = $('[data-id="v-input-field"]');
+var checkout_fields = $('[data-id="v-input-field"]');
 var textares = $('textarea');
 var payment_method = $('#id_payment_method');
-var email_or_change_block = $(all_fields).filter('[data-field="v-email-field"]');
-var email_or_change_field = $(email_or_change_block).find('#email_field_label');
+var line2 = $(checkout_fields).find('#id_line2');
+var line3 = $(checkout_fields).find('#id_line3');
+var line4 = $(checkout_fields).find('#id_line4');
+var email_block = $(checkout_fields).find('[data-field="v-email-field"]');
+var email_field = $(email_block).find('#email_field_label');
 
 const OFFLINE_PAYMENT = ['CASH'];
 const ONLINE_PAYMENT = ['SBP', 'CARD'];
+
 
 // инициализация адреса
 $(document).ready(function () {
@@ -112,18 +116,18 @@ function getNewTotals(selectedMethod, zonaId=null){
 // сдача или чек
 $(payment_method).change(function(){
     if (OFFLINE_PAYMENT.includes(this.value)){
-        $(email_or_change_field).html('Нужна сдача с ...');
-        $(email_or_change_block).removeClass('d-none-i');
+        $(email_field).html('Нужна сдача с ...');
+        $(email_block).removeClass('d-none-i');
     } else if (ONLINE_PAYMENT.includes(this.value)) {
-        $(email_or_change_field).html('E-mail для получения чеков');
-        $(email_or_change_block).removeClass('d-none-i');
+        $(email_field).html('E-mail для получения чеков');
+        $(email_block).removeClass('d-none-i');
     } else {
-        $(email_or_change_block).addClass('d-none-i');
+        $(email_block).addClass('d-none-i');
     }
 })
 
 // лейблы при заполнении текста
-$(all_fields).each(function(){
+$(checkout_fields).each(function(){
     var wrapper = $(this);
     var input_field = $(this).find('.v-input');
     if($(input_field).val() != ""){

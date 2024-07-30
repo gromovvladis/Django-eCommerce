@@ -1,7 +1,7 @@
 var profile_form = $('#profile_form');
-var all_fields = $(profile_form).find('[data-id="input-wrapper"]');
+var profile_fields = $(profile_form).find('[data-id="input-wrapper"]');
 
-$(all_fields).each(function(){
+$(profile_fields).each(function(){
     var wrapper = $(this);
     var input_field = $(this).find('[data-id="profile-input"]');
     if($(input_field).val() != ""){

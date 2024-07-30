@@ -4,16 +4,17 @@ var payment_status = $('[data-id="payment-status"]');
 var payment_svg = $('[data-id="payment-icon-svg"]');
 var waiting_seconds = 15;
 
-interval = setInterval(function() {
-    if (waiting_seconds > 0) {
-        waiting_seconds = waiting_seconds - 3; 
-        get_payment_info();
-    } else {
-        closeModal();
-        $(payment_status).html("Ответ от банка не получен. Обновите страницу")
-    }
-}, 3000);  
-
+if ($(waiting_payment).length > 0) {
+    interval = setInterval(function() {
+        if (waiting_seconds > 0) {
+            waiting_seconds = waiting_seconds - 3; 
+            get_payment_info();
+        } else {
+            closeModal();
+            $(payment_status).html("Ответ от банка не получен. Обновите страницу")
+        }
+    }, 3000);  
+}
 
 function get_payment_info(){
     $.ajax({

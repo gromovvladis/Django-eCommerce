@@ -3,14 +3,12 @@
 {% load product_tags %}
 {% load image_tags %}
 {% load svg_tags %}
+{% load compress %}
 {% load static %}
 
-{% block title %}
-    {{ offer.name }} | {{ block.super }}
-{% endblock %}
-
+{% block title %}{{ offer.name }} | {{ block.super }}{% endblock %}
+{% block nav_title_center %}{{ offer.name }}{% endblock %}
 {% block wrapper_class %}v-actions d-flex flex-column pd-2 pb-sm-4 container pd-0{% endblock %}
-
 {% block app_class %}v-app---action{% endblock %}
 {% block nav_class %}v-app__nav--action{% endblock %}
 
@@ -27,10 +25,7 @@
     </div>
 {% endblock %}
 
-{% block nav_title_center %}{{ offer.name }}{% endblock %}
-
 {% block content %}
-
     <div class="action__wrapper d-flex flex-column">
         <div class="v-actions__action-detail-header d-flex flex-column align-start">
             <div class="v-actions__action-detail-banner shrink">
@@ -81,8 +76,9 @@
     var url_action_message = "{% url 'offer:upsell' slug=offer.slug %}";
 {% endblock %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
-    <script src="{% static "js/actions/action-message.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/actions/action-message.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}

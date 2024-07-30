@@ -3,10 +3,12 @@ var search_btn = $('#search_clean_btn')
 var search_input = $('[data-id="v-input-search-field"]')
 
 $(document).ready(function() {
-    window.autocomplete = new Autocomplete({
-    // form_selector: '.autocomplete-me'
-    })
-    window.autocomplete.setup()
+    if ($(search_result).length > 0) {
+        window.autocomplete = new Autocomplete({
+        // form_selector: '.autocomplete-me'
+        })
+        window.autocomplete.setup()
+    }
 })
 
 function getCsrfToken() {

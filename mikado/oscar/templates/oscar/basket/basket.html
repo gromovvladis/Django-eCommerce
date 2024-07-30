@@ -1,16 +1,12 @@
 {% extends "oscar/layout.html" %}
+
 {% load static %}
 {% load svg_tags %}
 
-{% block title %}
-    Корзина | {{ block.super }}
-{% endblock %}
-
 {% block wrapper_class %}fill-width fill-height pd-sm-2 pb-sm-4{% endblock %}
-
 {% block app_class %}v-app---cart{% endblock %}
 {% block nav_class %}v-app__nav--cart{% endblock %}
-
+{% block title %}Корзина | {{ block.super }}{% endblock %}
 {% block nav_title %}Корзина{% endblock %}
 {% block nav_title_center %}Корзина{% endblock %}
 
@@ -30,10 +26,8 @@
 {% endblock breadcrumbs %}
 
 {% block content %}
-    <div class="v-cart-page d-flex flex-row flex-md-row pd-0">
-        <div class="d-flex align-start pd-0 fill-height container pos-relative">
-            {% include 'oscar/basket/partials/basket_content.html' %}
-        </div>
+    <div class="d-flex flex-row flex-md-row pd-0 align-start fill-height container pos-relative">
+        {% include 'oscar/basket/partials/basket_content.html' %}
     </div>
 {% endblock content %}
 
@@ -42,9 +36,3 @@
     var url_empty_basket = "{% url 'basket:empty' %}";
     var url_upsell_masseges = "{% url 'basket:upsell' %}";
 {% endblock %}
-
-{% block scripts %}
-    {{ block.super }}
-    <script  src="{% static "js/basket/basket.js" %}"></script>
-{% endblock %}
-

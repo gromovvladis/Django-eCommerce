@@ -4,8 +4,9 @@
 {% load currency_filters %}
 {% load product_tags %}
 {% load display_tags %}
-{% load svg_tags %}
 {% load purchase_info_tags %}
+{% load svg_tags %}
+{% load compress %}
 {% load static %}
 {% load cache %}
 
@@ -68,6 +69,7 @@
 
                 <div class="dish-page__content d-flex flex-column shrink px-2 mt-2 px-sm-0 mt-sm-0 pl-md-2">
                     <div class="dish-page__content-wrapper d-flex flex-column fill-width fill-height">
+                    
                         {% cache 1800 product_info product.id %}
                             {% comment %}------------- заголовок + вес ---------------{% endcomment %}
                             <header class="dish-page__header d-flex shrink align-end align-md-end pt-sm-1">
@@ -79,7 +81,7 @@
                                         {% icon file_name='interface/edit' size=22 stroke="#111"%}
                                     </a>
                                 {% endif %}
-                                <span class="ml-2 shrink v-weight">
+                                <span class="v-weight ml-2 shrink">
                                     {% if product.has_weight %}
                                         <span>{{ product.weight }}</span>
                                         <span>г</span>
@@ -93,11 +95,11 @@
 
                             {% comment %}------------- если есть скидка ---------------{% endcomment %}                        
                             <div class="d-flex mt-1 align-end mb-md-1">
-                                <div class="mr-1 dish-page__price{% if session.price.old_price %} new-price{% endif %}">
+                                <div class="dish-page__price{% if session.price.old_price %} new-price{% endif %} mr-1">
                                     <span data-id="dish-price-main">{{ session.price.money|formate_price }}</span>
                                     <span> {{ currency_symbol }}</span>
                                 </div>
-                                <div class="dish-page__old-price {% if not session.price.old_price %}d-none{% endif %}">
+                                <div class="dish-page__old-price{% if not session.price.old_price %} d-none{% endif %}">
                                     <span data-id="dish-old-price-main">{{ session.price.old_price|formate_price }}</span>
                                     <span> {{ currency_symbol }}</span>
                                 </div>
@@ -124,9 +126,7 @@
                                 {% endif %}
                             {% endcache %}
 
-                            {% block product_basket_form %}
-                                {% include "oscar/catalogue/partials/add_to_basket_form.html" with currency_symbol=currency_symbol%}
-                            {% endblock %}
+                            {% include "oscar/catalogue/partials/add_to_basket_form.html" with currency_symbol=currency_symbol %}
                         </div>
 
                         {% comment %}------------- добавить в корзину + цена ---------------{% endcomment %}
@@ -153,6 +153,7 @@
                                 </div>    
                             {% endif %}
                         {% endcache %}
+                        
                     </div>
                 </div>
             </div>
@@ -194,9 +195,10 @@
     var url_product = "{% url 'basket:add' pk=product.pk  %}";
 {% endblock %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script src="{% static "js/catalogue/add-to-cart.js" %}"></script>
-    <script src="{% static "js/catalogue/add-to-wishlist.js" %}"></script>
-    <script src="{% static "js/catalogue/add-to-cart-compact.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/catalogue/add-to-cart.js" %}" async></script>
+        <script src="{% static "js/catalogue/add-to-wishlist.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}

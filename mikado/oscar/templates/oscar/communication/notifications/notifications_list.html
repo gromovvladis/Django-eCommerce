@@ -1,10 +1,10 @@
 {% extends "oscar/customer/baseaccountpage.html" %}
 
 {% load svg_tags %}
+{% load compress %}
 {% load static %}
 
 {% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
-
 {% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
@@ -22,7 +22,6 @@
 
 {% block tabcontent %}
     <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
-        
         <div class="v-order__title d-flex justify-space-between mb-2 align-center">
             <h1>Уведомления</h1>
             <div class="text--info d-flex">
@@ -97,9 +96,13 @@
     </div>
 {% endblock tabcontent %}
 
-{% block scripts %}
+{% block compress %}
     {{ block.super }}
-    <script  src="{% static "js/profile/profile.js" %}"></script>
-    <script  src="{% static "js/profile/notifications.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/profile/profile.js" %}"></script>
+    {% endcompress %}
+    {% compress js %}
+        <script src="{% static "js/profile/notifications.js" %}"></script>
+    {% endcompress %}
 {% endblock %}
 

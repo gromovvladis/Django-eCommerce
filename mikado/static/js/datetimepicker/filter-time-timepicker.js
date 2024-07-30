@@ -1,5 +1,5 @@
-
-let datapicker;
+var filter_fields = $('[data-id="v-input-field"]');
+let datapicker_filter;
 
 var localLang = {
     days: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
@@ -14,7 +14,7 @@ var localLang = {
     firstDay: 1
 };
 
-datapicker = new AirDatepicker('#id_date_range', {
+datapicker_filter = new AirDatepicker('#id_date_range', {
 
     autoClose: false,
     isMobile: true,
@@ -34,9 +34,8 @@ datapicker = new AirDatepicker('#id_date_range', {
 
 });
 
-var all_fields = $('[data-id="v-input-field"]');
 
-$(all_fields).each(function(){
+$(filter_fields).each(function(){
     var wrapper = $(this);
     var input_field = $(this).find('[data-id="order-input"]');
     if($(input_field).val() != ""){

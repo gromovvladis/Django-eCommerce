@@ -1,16 +1,13 @@
 {% extends "oscar/layout.html" %}
-{% load static %}
+
 {% load svg_tags %}
+{% load compress %}
+{% load static %}
 
-{% block title %}
-    Адрес доставки | {{ block.super }}
-{% endblock %}
- 
+{% block title %}Адрес доставки | {{ block.super }}{% endblock %}
 {% block wrapper_class %}delivery wrapper--small fill-width pd-2 pb-sm-4 delivery-address{% endblock %}
-
 {% block app_class %}v-app---delivery{% endblock %}
 {% block nav_class %}v-app__nav--delivery{% endblock %}
-
 {% block nav_title %}Адрес доставки{% endblock %}
 
 {% block breadcrumbs %}
@@ -48,7 +45,7 @@
                             <div class="v-input-search d-flex fill-width justify-space-between align-center">
                                 {% icon file_name='interface/search' size=20 fill="#8a8a8a"%}
                                 <div id="line1_container" class="v-delivery fill-width v-input fill-width">
-                                    <div class="d-flex v-delivery--input">
+                                    <div class="v-delivery--input d-flex">
                                         <input for="set_address" type="text" name="line1" placeholder="Введите улицу и дом" data-id="address-input" id="id_line1" value="{{ address.line1 }}" autocomplete="off" {% if address.readonly %}readonly{% endif %}>
                                         <div class="v-delivery--btn d-flex align-center justify-end">
                                             <button id="clean_address" type="button" class="v-delivery--clear shrink d-flex align-center justify-center fill-height fill-width">
@@ -137,15 +134,19 @@
     var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
 {% endblock %}
 
-{% block extrascripts %}
+{% block externalscripts %}
     <script src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
 {% endblock %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script src="{% static "js/delivery/delivery.js" %}"></script>
-    <script src="{% static "js/address/cookie-address.js" %}"></script>
-    <script src="{% static "js/address/delivery-address.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/delivery/delivery.js" %}"></script>
+    {% endcompress %}
+    {% compress js %}
+        <script src="{% static "js/address/cookie-address.js" %}" async></script>
+        <script src="{% static "js/address/delivery-address.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}

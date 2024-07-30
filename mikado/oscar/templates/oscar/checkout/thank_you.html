@@ -1,17 +1,16 @@
 {% extends "oscar/layout.html" %}
+
 {% load currency_filters %}
 {% load image_tags %}
-{% load static %}
-{% load svg_tags %}
 {% load purchase_info_tags %}
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
 
 {% block title %}Заказ №{{ order.number }} | {{ block.super }}{% endblock %}
-
 {% block nav_title %}Заказ №{{ order.number }}{% endblock %}
 {% block nav_title_center %}Заказ №{{ order.number }}{% endblock %}
-
 {% block wrapper_class %}checkout fill-width pd-2 pb-sm-4 pt-sm-2 checkout__container{% endblock %}
-
 {% block app_class %}v-app---thank{% endblock %}
 {% block nav_class %}v-app__nav--thank{% endblock %}
 
@@ -27,13 +26,10 @@
 {% endblock %}
 
 {% block content %}
-
     <div class="d-flex flex-column mt-md-4">
         <div class="v-order d-flex flex-column flex-md-row align-md-start">
-
             <div class="v-order__wrapper  d-flex flex-column">
                 <div class="v-order__info-wrapper d-flex flex-column fill-width">
-
                     <div class="v-order__title d-flex mb-4 justify-start align-center">
                         <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
                             {% if order.status == "Ожидает оплаты" %}
@@ -48,7 +44,6 @@
                     </div>
 
                     {% block shipping_info %}
-
                         <div class="v-checkout__datail pb-2">
                             {% if order.shipping_address %}
     
@@ -78,20 +73,17 @@
                                         </div>
                                     {% endif %}
                                 {% endwith %}
-    
+
                             {% else %}
-    
                                 <div class="v-order__subtitle mb-1 mb-sm-2">
                                     <h2>Адрес самовывоза</h2>
                                 </div>
-    
                                 <a href="{% url 'address:pickup-address' %}" class="v-checkout__detail-text mb-2">
                                     <address> Красноясрк, ул. 9 Мая 77,
                                         <br>
                                         ТРЦ "Планета" Фудкорд Mikado
                                     </address>
                                 </a>
-    
                             {% endif %}
                         </div>
                         <div class="v-checkout__datail">
@@ -103,7 +95,6 @@
                                 <p>{{ request.user.username }}</p>
                             </div>
                         </div>
-
                     {% endblock %}
 
                     {% block payment_info %}
@@ -128,9 +119,7 @@
                             </div> 
                             
                         {% endfor %}
-
                     {% endblock %}
-
                 </div>
             </div>
 
@@ -142,7 +131,6 @@
                     <div class="v-order__subtitle d-md-none mb-1 mb-sm-2">
                         <h2>Ваш заказ</h2>
                     </div>
-
                     
                     <div class="v-order__subtitle mb-1 mb-sm-1 d-none d-md-block">
                         <h2>Состав заказа</h2>
@@ -165,7 +153,6 @@
 
                 </div>
             </div>  
-
         </div>
     </div>
 
@@ -212,7 +199,9 @@
     var update_payment_url = "{% url 'payment:update' pk=order.pk %}";
 {% endblock %}
 
-{% block scripts %}
+{% block extrascripts %}
     {{ block.super }}
-    <script  src="{% static "js/thank-you/thank-you.js" %}"></script>
+    {% compress js %}
+        <script src="{% static "js/thank-you/thank-you.js" %}"></script>
+    {% endcompress %}
 {% endblock %}
