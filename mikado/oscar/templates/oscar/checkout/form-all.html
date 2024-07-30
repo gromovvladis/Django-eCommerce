@@ -1,9 +1,5 @@
 {% extends "oscar/checkout/checkout.html" %}
 
-{% load currency_filters %}
-{% load static %}
-{% load shipping_tags %}
-
 {% block chekout_form %}
 
         {% if error %}
@@ -37,7 +33,7 @@
                 </div>
                 
                 {% comment %} коментарий к заказу {% endcomment %}
-                <div data-id="v-input-field" class="v-input v-input-textarea d-flex align-center mb-2 v-input__padding{% if form.initial.order_note %} v-input__label-active{% endif %}">
+                <div data-id="v-input-field" class="v-input v-input-textarea d-flex align-center mb-1 mb-sm-2 v-input__padding{% if form.initial.order_note %} v-input__label-active{% endif %}">
                     <div class="v-input__wrapper">
                         <div class="v-input__label">Комментарий к заказу</div>
                         <div class="v-input__control d-flex align-center" contenteditable>
@@ -63,8 +59,6 @@
                         </div>
                     </div>
                 </div>
-                
-        
         
                 {% comment %} основная форма {% endcomment %}
                 <form action="{% url 'checkout:checkoutview' %}" method="post" id="place_order_form" novalidate>
@@ -126,7 +120,6 @@
                                     </div>
                                 </div>
                             </div>
-        
                         </div>
         
                         {% comment %} notes {% endcomment %}
@@ -137,15 +130,12 @@
                                     {% include "oscar/partials/render_field.html" with field=form.notes data_id="delivery-input-note"%}
                                 </div>
                             </div>
-                        </div>
-        
+                        </div>    
                     </div>
-        
-        
+    
                     <div class="v-order__subtitle mb-1 mb-sm-2">
                         <h2 data-id="order-time-title">Время доставки</h2>
                     </div>
-        
         
                     {% comment %} время {% endcomment %}      
                     <div class="d-flex flex-column fill-width">
@@ -169,8 +159,6 @@
                         <input id="delivery_time_later" type="text" class="v-order__delivery-time hidden">
                     </div>
         
-        
-        
                     <div class="v-order__subtitle mt-4">
                         <h2>Способ оплаты</h2>
                     </div>
@@ -181,9 +169,7 @@
                         </div>
                     {% endblock payment_method %}
         
-        
-        
-                    <div data-id="v-input-field" data-field="v-email-field" class="v-input d-flex align-center mt-2 v-input__padding">
+                    <div data-id="v-input-field" data-field="v-email-field" class="v-input d-flex align-center mt-1 mt-sm-2 v-input__padding">
                         <div class="v-input__wrapper">
                             <div class="v-input__label" id="email_field_label">E-mail для получения чеков</div>
                             <div class="v-input__control d-flex align-center">
@@ -191,10 +177,8 @@
                             </div>
                         </div>
                     </div>
-        
+
                 </form>
             </div>
         </div>
-
 {% endblock chekout_form %}
-

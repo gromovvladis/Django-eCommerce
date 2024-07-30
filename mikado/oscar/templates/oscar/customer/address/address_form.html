@@ -42,9 +42,6 @@
 {% block extrascripts %}
     {{ block.super }}
     {% compress js %}
-        <script src="{% static "js/delivery/delivery.js" %}" defer></script>
-    {% endcompress %}
-    {% compress js %}
         <script src="{% static "js/address/edit-address.js" %}" defer></script>
     {% endcompress %}
     {% compress js %}

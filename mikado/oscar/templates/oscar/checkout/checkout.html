@@ -130,15 +130,10 @@
 {% block extrascripts %}
     {{ block.super }}
     {% compress js %}
-        <script src="{% static "js/delivery/delivery.js" %}" defer></script>
-    {% endcompress %}
-    {% compress js %}
-        <script src="{% static "js/checkout/checkout-main.js" %}" defer></script>
-    {% endcompress %}
-    {% compress js %}
         <script src="{% static "js/datetimepicker/air-datepicker.js" %}" defer></script>
     {% endcompress %}
     {% compress js %}
+        <script src="{% static "js/checkout/checkout-main.js" %}" defer></script>
         <script src="{% static "js/datetimepicker/order-timepicker.js" %}" defer></script>
         <script src="{% static "js/checkout/voucher.js" %}" defer></script>
         <script src="{% static "js/checkout/cookie-checkout.js" %}" async></script>
