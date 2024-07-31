@@ -108,6 +108,61 @@ class IndexView(TemplateView):
         }
         return ctx
 
+
+    def get_days_report(self, orders, days=7, segments=10):
+        """
+        Get report of order revenue split up in hourly chunks. A report is
+        generated for the last *hours* (default=24) from the current time.
+        The report provides ``max_revenue`` of the hourly order revenue sum,
+        ``y-range`` as the labelling for the y-axis in a template and
+        ``order_total_hourly``, a list of properties for hourly chunks.
+        *segments* defines the number of labelling segments used for the y-axis
+        when generating the y-axis labels (default=10).
+        """
+        # Get datetime for 24 hours ago
+        day_now = now().replace(hour=0, minute=0, second=0)
+        start_time = day_now - timedelta(days=days)
+
+        order_total_days = []
+        for _ in range(0, days, 1):
+            end_time = start_time + timedelta(days=1)
+            days_orders = orders.filter(
+                date_placed__gte=start_time, date_placed__lt=end_time
+            )
+            total = days_orders.aggregate(Sum("total"))[
+                "total__sum"
+            ] or D("0.0")
+            order_total_days.append({"end_time": end_time, "total": total})
+            start_time = end_time
+
+        max_value = max([x["total"] for x in order_total_days])
+        divisor = 1
+        while divisor < max_value / 50:
+            divisor *= 10
+        max_value = (max_value / divisor).quantize(D("1"), rounding=ROUND_UP)
+        max_value *= divisor
+        if max_value:
+            segment_size = (max_value) / D("100.0")
+            for item in order_total_days:
+                item["percentage"] = int(item["total"] / segment_size)
+
+            y_range = []
+            y_axis_steps = max_value / D(str(segments))
+            for idx in reversed(range(segments + 1)):
+                y_range.append(idx * y_axis_steps)
+        else:
+            y_range = []
+            for item in order_total_days:
+                item["percentage"] = 0
+
+        ctx = {
+            "order_total_days": order_total_days,
+            "max_revenue": max_value,
+            "y_range": y_range,
+        }
+        return ctx
+
+
     def get_stats(self):
         current_time = now()
         datetime_24hrs_ago = current_time - timedelta(hours=24)
@@ -153,6 +208,8 @@ class IndexView(TemplateView):
             "start_of_week": datetime_week_ago,
             "start_of_month": start_of_month,
             "hourly_report_dict": self.get_hourly_report(orders),
+            "week_report_dict": self.get_days_report(orders, 7),
+            "month_report_dict": self.get_days_report(orders, 30),
             "total_orders_last_day": orders_last_day.count(),
             "total_lines_last_day": total_lines_last_day,
             "average_order_costs_day": orders_last_day.aggregate(Avg("total"))[

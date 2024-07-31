@@ -1,5 +1,6 @@
 {% extends 'oscar/dashboard/layout.html' %}
 {% load currency_filters %}
+{% load svg_tags %}
 
 {% block body_class %}{{ block.super }} orders home{% endblock %}
 
@@ -18,35 +19,116 @@
 </div>
 
 <div class="content-block">
-    <div class="row">
-        <aside class="col-md-3 order-graph-details">
-            <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_day }}</span>Заказы</label>
-            <label><span><i class="fas fa-hand-point-right"></i>{{ total_customers_last_day }}</span>Пользователи</label>
-            <label><span><i class="fas fa-users"></i>{{ total_customers }}</span>Клиенты</label>
-            <label><span><i class="fas fa-briefcase"></i>{{ total_products }}</span>Продукты</label>
-        </aside>
-        <div class="col-md-9">
-            <div id="order_graph">
-                <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 24 часа</span></h2></div>
-                <div class="bar-y-axis">
-                    <ul>
-                    {% for y_value in hourly_report_dict.y_range %}
-                        <li><span>{{ y_value|currency }}</span></li>
-                    {% endfor %}
-                    </ul>
+    <div class="slider">
+
+
+        <div class="slider-dashboard" data-id="slider-dashboard">
+            <div class="slider-swiper fill-height" data-id="slider-swiper">
+                <div class="swiper-wrapper d-flex fill-height">
+                    <div class="swiper-slide d-flex">
+                        <aside class="order-graph-details">
+                            <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_day }}</span>Заказы</label>
+                            <label><span><i class="fas fa-hand-point-right"></i>{{ total_customers_last_day }}</span>Пользователи</label>
+                            <label><span><i class="fas fa-users"></i>{{ total_customers }}</span>Клиенты</label>
+                            <label><span><i class="fas fa-briefcase"></i>{{ total_products }}</span>Продукты</label>
+                        </aside>
+                        <div class="graph-right">      
+                            <div class="order_graph">
+                                <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 24 часа</span></h2></div>
+                                <div class="bar-y-axis">
+                                    <ul>
+                                    {% for y_value in hourly_report_dict.y_range %}
+                                        <li><span>{{ y_value|currency }}</span></li>
+                                    {% endfor %}
+                                    </ul>
+                                </div>
+                                <dl class="bar-chart">
+                                    {% for item in hourly_report_dict.order_total_hourly %}
+                                        <dd class="bar-layer">
+                                            <em>{{ item.end_time|time }}</em>
+                                            <span style="height: {{ item.percentage }}%;" >
+                                                <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
+                                            </span>
+                                        </dd>
+                                    {% endfor %}
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide d-flex">
+                        <aside class="order-graph-details">
+                            <label style="text-align: center; background-color: #e8eeff73; font-weight: 600;">{{ start_of_week.date|date:"l" }} - {{ current_time.date|date:"l" }}</label>
+                            <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_week }}</span>Заказы</label>
+                            <label><span><i class="fas fa-hand-point-right"></i>{{ total_customers_last_week }}</span>Пользователи</label>
+                            <label><span><i class="fas fa-users"></i>{{ total_customers }}</span>Клиенты</label>
+                            <label><span><i class="fas fa-briefcase"></i>{{ total_products }}</span>Продукты</label>
+                        </aside>
+                        <div class="graph-right">
+                            <div class="order_graph">
+                                <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 7 дней</span></h2></div>
+                                <div class="bar-y-axis">
+                                    <ul>
+                                    {% for y_value in week_report_dict.y_range %}
+                                        <li><span>{{ y_value|currency }}</span></li>
+                                    {% endfor %}
+                                    </ul>
+                                </div>
+                                <dl class="bar-chart">
+                                    {% for item in week_report_dict.order_total_days %}
+                                        <dd class="bar-layer" style="width: calc(100% / 7);">
+                                            <em style="left:33px;">{{ item.end_time|date:"d.m" }}</em>
+                                            <span style="height: {{ item.percentage }}%;" >
+                                                <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
+                                            </span>
+                                        </dd>
+                                    {% endfor %}
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide d-flex">
+                        <aside class="order-graph-details">
+                            <label style="text-align: center; background-color: #e8eeff73; font-weight: 600;">{{ start_of_month.date|date:"d N" }} - {{ current_time.date|date:"d N" }}</label>
+                            <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_month }}</span>Заказы</label>
+                            <label><span><i class="fas fa-hand-point-right"></i>{{ total_customers_last_month }}</span>Пользователи</label>
+                            <label><span><i class="fas fa-users"></i>{{ total_customers }}</span>Клиенты</label>
+                            <label><span><i class="fas fa-briefcase"></i>{{ total_products }}</span>Продукты</label>
+                        </aside>
+                        <div class="graph-right">
+                            <div class="order_graph">
+                                <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 30 дней</span></h2></div>
+                                <div class="bar-y-axis">
+                                    <ul>
+                                    {% for y_value in month_report_dict.y_range %}
+                                        <li><span>{{ y_value|currency }}</span></li>
+                                    {% endfor %}
+                                    </ul>
+                                </div>
+                                <dl class="bar-chart">
+                                    {% for item in month_report_dict.order_total_days %}
+                                        <dd class="bar-layer" style="width: calc(100% / 30);">
+                                            <em style="left:-10px;">{{ item.end_time|date:"d.m" }}</em>
+                                            <span style="height: {{ item.percentage }}%;" >
+                                                <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
+                                            </span>
+                                        </dd>
+                                    {% endfor %}
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <dl class="bar-chart">
-                    {% for item in hourly_report_dict.order_total_hourly %}
-                        <dd class="bar-layer">
-                            <em>{{ item.end_time|time }}</em>
-                            <span style="height: {{ item.percentage }}%;" >
-                                <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
-                            </span>
-                        </dd>
-                    {% endfor %}
-                </dl>
+            </div>
+            <div class="v-carousel__navs">
+                <button class="v-h-nav--button right" data-id="swiper-next">
+                    {% icon file_name='interface/arrow-home' size=32 stroke="#007bff" %}
+                </button>
+                <button class="v-h-nav--button left" data-id="swiper-prev">
+                    {% icon file_name='interface/arrow-home' size=32 stroke="#007bff" %}
+                </button>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -76,7 +158,7 @@
 
     <div class="col-md-4">
         <table class="table table-striped table-bordered table-hover">
-            <caption><i class="fas fa-shopping-cart"></i> Заказы -<span class="text-primary"> Неделя ( {{ start_of_week.date }} - {{ current_time.date }} )</span></caption>
+            <caption><i class="fas fa-shopping-cart"></i> Заказы -<span class="text-primary"> Неделя ( {{ start_of_week.date|date:"D" }} - {{ current_time.date|date:"D" }} )</span></caption>
             <tr>
                 <th class="col-md-10">Всего заказов</th>
                 <td class="col-md-2" >{{ total_orders_last_week }}</td>
@@ -98,7 +180,7 @@
 
     <div class="col-md-4">
         <table class="table table-striped table-bordered table-hover">
-            <caption><i class="fas fa-shopping-cart"></i> Заказы -<span class="text-primary"> Месяц ( {{ start_of_month.date }} - {{ current_time.date }} )</span></caption>
+            <caption><i class="fas fa-shopping-cart"></i> Заказы -<span class="text-primary"> Месяц ( {{ start_of_month.date|date:"d.m" }} - {{ current_time.date|date:"d.m" }} )</span></caption>
             <tr>
                 <th class="col-md-10">Всего заказов</th>
                 <td class="col-md-2" >{{ total_orders_last_month }}</td>
