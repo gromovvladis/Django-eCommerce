@@ -467,8 +467,8 @@ mark,
 }
 
 .img-dashboard{
-  width: 85px;
-  height: 85px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
   border-radius: 5px;
 }
@@ -2214,7 +2214,8 @@ textarea.form-control {
 .form-inline .form-check {
   width: 100%;
 }
-@media (min-width: 576px) {
+@media (min-width: 660px) {
+/* @media (min-width: 576px) { */
   .form-inline label {
     display: flex;
     align-items: center;
@@ -17981,6 +17982,10 @@ h3.app-ico:before {
   height: 100%;
 }
 
+.justify-space-between{
+  justify-content: space-between;
+}
+
 .table-container {
   width: 100%;
 }
@@ -17988,13 +17993,13 @@ h3.app-ico:before {
 .table thead tr th.asc span:before {
   font-family: "Font Awesome 5 Free";
   font-weight: 900;
-  content: "\f077";
+  content: "⇩";
 }
 
 .table thead tr th.desc span:before {
   font-family: "Font Awesome 5 Free";
   font-weight: 900;
-  content: "\f078";
+  content: "⇧";
 }
 
 .table-header {
@@ -18061,7 +18066,7 @@ caption {
   width: 100%;
   overflow: hidden;
   position: relative;
-  height: 380px;
+  height: 450px;
   margin-bottom: 10px;
 }
 
@@ -18139,8 +18144,9 @@ caption {
 .order_graph {
   position: relative;
   /* padding-bottom: 5em; */
-  width: 99%;
+  /* width: 99%; */
   /* height: 330px; */
+  width: 100%;
   -webkit-box-flex: 0;
   -ms-flex: 0 0 100%;
   flex: 0 0 100%;
@@ -18161,8 +18167,9 @@ caption {
 .order_graph .bar-y-axis {
   position: absolute;
   top: 16px;
+  bottom: 0;
   left: 0px;
-  width: 5em;
+  width: 4.5em;
   margin: 0;
   padding: 0;
   float: left;
@@ -18170,10 +18177,12 @@ caption {
 }
 .order_graph .bar-y-axis li {
   list-style: none;
-  height: 30px;
+  height: calc(100% / 11);
   font-size: .7rem;
   float: right;
   color: #adb5bd;
+  display: flex;
+  align-items: end;
 }
 .order_graph .bar-chart, .order_graph .bar-chart dt, .order_graph .bar-chart dd {
   margin: 0;
@@ -18223,7 +18232,7 @@ caption {
   color: #495057;
   text-align: center;
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: 2px;
 }
 .order_graph .bar-chart span p {
   position: relative;

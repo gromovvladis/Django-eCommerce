@@ -202,6 +202,7 @@
     python manage.py collectstatic
     python manage.py compress
     sudo supervisorctl restart all
+    redis-cli Flushall
 
 
 ============================================= Доп возможности =================================================

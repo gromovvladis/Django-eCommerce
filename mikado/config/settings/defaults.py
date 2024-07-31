@@ -98,12 +98,12 @@ OSCAR_HIDDEN_FEATURES = []
 OSCAR_DASHBOARD_NAVIGATION = [
     {
         "label": "Статистика",
-        "icon": "fas fa-list",
+        "icon": "fas fa-line-chart",
         "url_name": "dashboard:index",
     },
     {
         "label": "Каталог",
-        "icon": "fas fa-sitemap",
+        "icon": "fas fa-list",
         "children": [
             {
                 "label": "Продукты",
@@ -229,7 +229,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
     },
     {
         "label": "Оплата",
-        "icon": "fas fa-payments",
+        "icon": "fas fa-money-bill-transfer",
         "children": [
             {
                 "label": "Список платежей",

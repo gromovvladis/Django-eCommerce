@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from django_tables2 import A, Column, LinkColumn, TemplateColumn
+from django_tables2 import A, LinkColumn, TemplateColumn, BooleanColumn
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
@@ -15,34 +15,19 @@ Additional = get_model("catalogue", "Additional")
 
 class ProductTable(DashboardTable):
     image = TemplateColumn(
-        verbose_name="Изображение",
+        verbose_name='',
         template_name="oscar/dashboard/catalogue/product_row_image.html",
         orderable=False,
     )
     title = TemplateColumn(
-        verbose_name="Заголовок",
+        verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/product_row_title.html",
         order_by="title",
         accessor=A("title"),
     )
-    product_class = Column(
-        verbose_name="Тип продукта",
-        accessor=A("product_class"),
-        order_by="product_class__name",
-    )
     variants = TemplateColumn(
         verbose_name="Варианты",
         template_name="oscar/dashboard/catalogue/product_row_variants.html",
-        orderable=False,
-    )
-    stock_records = TemplateColumn(
-        verbose_name="Товарные записи",
-        template_name="oscar/dashboard/catalogue/product_row_stockrecords.html",
-        orderable=False,
-    )
-    actions = TemplateColumn(
-        verbose_name="Акции",
-        template_name="oscar/dashboard/catalogue/product_row_actions.html",
         orderable=False,
     )
     additionals = TemplateColumn(
@@ -64,24 +49,29 @@ class ProductTable(DashboardTable):
     price = TemplateColumn(
         verbose_name="Цена",
         template_name="oscar/dashboard/catalogue/product_row_price.html",
+        # accessor="get_low_price",
+        order_by="title",
+        orderable=True,
+    )
+    is_public = BooleanColumn(verbose_name="Доступен", accessor="is_public", order_by=("is_public"))
+    actions = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/catalogue/product_row_actions.html",
         orderable=False,
     )
 
-    icon = "fas fa-sitemap"
+    icon = "fas fa-list"
 
     class Meta(DashboardTable.Meta):
         model = Product
-        fields = ("upc", "is_public", "date_updated")
+        fields = ("is_public", "date_updated")
         sequence = (
             "image",
             "title",
-            "product_class",
             "categories",
-            "upc",
             "additionals",
             "options",
             "variants",
-            "stock_records",
             "price",
             "...",
             "is_public",
@@ -89,6 +79,18 @@ class ProductTable(DashboardTable):
             "actions",
         )
         order_by = "-date_updated"
+
+    def order_price(self, queryset, is_descending):
+        queryset = sorted(
+            queryset,
+            key=lambda product: product.get_low_price(),
+            reverse=is_descending
+        )
+
+        self.data.data = queryset
+        self.data._length = len(queryset)
+
+        return queryset, True
 
 
 class CategoryTable(DashboardTable):
