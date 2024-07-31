@@ -12060,7 +12060,7 @@ input[type="number"]:focus {
     transform: scale(1)
 }
 
-.v-carousel__navs {
+/* .v-carousel__navs {
     position: absolute;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -12077,7 +12077,7 @@ input[type="number"]:focus {
     -webkit-box-pack: justify;
     -ms-flex-pack: justify;
     justify-content: space-between
-}
+} */
 
 .v-carousel__navs,
 .v-carousel__navs button {
@@ -12095,7 +12095,7 @@ input[type="number"]:focus {
     justify-content: center;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
+    border-radius: 40%;
     background-color: #ffffff82;
     pointer-events: all;
     -webkit-transition: color .2s linear, background-color .2s linear;
@@ -12894,9 +12894,9 @@ input[type="number"]:focus {
         height: 48px;
         -ms-flex-negative: 0;
         flex-shrink: 0;
-        border-radius: 50%;
-        -webkit-box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
-        box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
+        border-radius: 40%;
+        -webkit-box-shadow: 4px 4px 20px rgba(0, 0, 0, .05);
+        box-shadow: 4px 4px 20px rgba(0, 0, 0, .05);
         opacity: 1;
         position: unset;
         -webkit-transform: unset !important;
@@ -12916,7 +12916,9 @@ input[type="number"]:focus {
         margin-right: unset;
         margin-left: 1rem;
         -webkit-transform: rotate(180deg) !important;
-        transform: rotate(180deg) !important
+        transform: rotate(180deg) !important;
+        -webkit-box-shadow: -4px -4px 20px rgba(0, 0, 0, .05);
+        box-shadow: -4px -4px 20px rgba(0, 0, 0, .05);
     }
 
     .v-dish-slider .v-h-nav--button:active {
@@ -16583,12 +16585,12 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .dish-page .v-carousel__navs button {
     background: #fff !important;
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    border-radius: 40%;
     opacity: 1;
-    -webkit-box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
-    box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
+    -webkit-box-shadow: 4px 4px 20px rgba(0, 0, 0, .05);
+    box-shadow: 4px 4px 20px rgba(0, 0, 0, .05);
     -webkit-transition: .2s ease-in-out;
     transition: .2s ease-in-out
 }
