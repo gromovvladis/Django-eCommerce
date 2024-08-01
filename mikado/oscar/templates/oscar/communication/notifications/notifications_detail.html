@@ -83,7 +83,7 @@
 
 {% block extrascripts %}
     {{ block.super }}
-    {% compress js %}
+    {% compress js inline %}
         <script src="{% static "js/profile/profile-links.js" %}" async></script>
     {% endcompress %}
 {% endblock %}

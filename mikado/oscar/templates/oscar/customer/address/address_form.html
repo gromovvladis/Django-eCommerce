@@ -44,7 +44,7 @@
     {% compress js %}
         <script src="{% static "js/address/edit-address.js" %}" defer></script>
     {% endcompress %}
-    {% compress js %}
+    {% compress js inline %}
         <script src="{% static "js/profile/profile-links.js" %}" defer></script>
     {% endcompress %}
 {% endblock %}

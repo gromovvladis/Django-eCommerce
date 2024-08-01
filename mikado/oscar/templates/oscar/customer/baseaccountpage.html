@@ -3,16 +3,13 @@
 {% load static %}
 
 {% block wrapper_class %}profile fill-width pd-2 pb-sm-4 profile__container{% endblock %}
-
 {% block app_class %}v-app---profile{% endblock %}
 {% block nav_class %}v-app__nav--profile{% endblock %}
 
 {% block content %}
     <div class="profile wrapper--small d-flex flex-column fill-width fill-height">
-        {% comment %} {% include "oscar/partials/alert_messages.html" %} {% endcomment %}
         <div class="profile__wrapper d-flex flex-column fill-width grow-1">
             <div data-id="profile-wrapper" class="profile-wrapper{% if content_open %} open{% endif %} d-flex fill-width pt-0 pt-sm-3">
-                
                 <div class="profile__menu fill-width">
 
                     <div class="d-flex flex-column fill-width pb-sm-3 ml-sm-2">
@@ -28,7 +25,6 @@
                 <div class="profile__content fill-width pl-0 pl-sm-4">
                     {% block tabcontent %}{% endblock tabcontent %}
                 </div>
-
             </div>
         </div>
     </div>

@@ -81,7 +81,7 @@
                                         <a href="{{ product.get_absolute_url }}" aria-current="page"
                                             class="v-dish-order__name router-link-exact-active router-link-active"
                                             data-id="dish-order-link"> 
-                                            {{ line.title }} ( {{ line.quantity }} шт. )
+                                            {{ line.title }} ({{ line.quantity }} шт.)
                                         </a>
                                     </div>
                                 </div>
@@ -232,7 +232,7 @@
 
 {% block extrascripts %}
     {{ block.super }}
-    {% compress js %}
+    {% compress js inline %}
         <script src="{% static "js/profile/profile-links.js" %}" async></script>
     {% endcompress %}
 {% endblock %}

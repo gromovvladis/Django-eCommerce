@@ -66,7 +66,6 @@
                 </div>
             </div>
 
-
             <div data-id="input-wrapper"  class="v-input d-flex align-center{% if request.user.email %} v-input__label-active{% endif %} mt-2 v-input__padding">
                 <div class="v-input__wrapper">
                     <div class="v-input__label">Почта</div>
@@ -80,7 +79,6 @@
             {% if form.email.errors %}
                 <span class="error-block mt-2 info-message">{{ form.email.errors }}</span>
             {% endif %}
-
             
             <div class="profile-personal__submit pos-relative d-flex justify-end pt-4 pt-sm-0 px-sm-0 mt-sm-3">
                 <button type="submit" data-id="profile-personal-submit-button"

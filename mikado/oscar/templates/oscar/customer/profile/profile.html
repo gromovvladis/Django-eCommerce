@@ -2,7 +2,6 @@
 
 {% block tabcontent %}
     <div class="profile wrapper--small d-flex flex-column fill-width fill-height">
-
         <div class="profile__wrapper d-flex flex-column fill-width grow-1">
             
             <div class="d-flex flex-column fill-width pt-sm-4 ml-2">
@@ -65,21 +64,9 @@
                                     </div>
                                 </div>
                             </div>
-
-                            {% comment %} <div class="profile-personal__submit pos-fixed pos-sm-relative d-flex justify-end pt-2 px-2 pt-sm-0 px-sm-0 mt-sm-3">
-                                <button type="submit" disabled="disabled" data-id="profile-personal-submit-button"
-                                    class="v-button fill-width v-button--main justify-center shrink">
-                                    <span class="v-button__wrapper">
-                                        <span class="v-button__value"> Сохранить настройки </span>
-                                    </span>
-                                </button>
-                            </div> {% endcomment %}
-
                         </div>
 
-
                         <div class="d-none d-sm-flex justify-end mt-4">
-                            
                             <div class="profile-personal__button-wrap d-flex mr-2">
                                 <a data-id="profile-logout-btn" href="{% url 'dashboard:logout' %}"
                                     class="v-button fill-width v-button--outline justify-center shrink">
@@ -88,11 +75,9 @@
                                     </span>
                                 </a>
                             </div> 
-
                         </div>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
