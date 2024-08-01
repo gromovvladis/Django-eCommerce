@@ -179,7 +179,7 @@
 
 {% block compress %}
     {{ block.super }}
-    {% compress js %}
+    {% compress js inline %}
         <script src="{% static "js/profile/profile-links.js" %}"></script>
     {% endcompress %}
 {% endblock %}

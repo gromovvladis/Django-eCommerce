@@ -10360,7 +10360,7 @@ html.drawer .v-app__side {
     flex-direction: column;
     font-family: Onest, sans-serif;
     font-size: .9rem;
-    line-height: .875rem;
+    line-height: 1.125rem;
     font-weight: 400;
     font-style: normal;
     color: #7d7d7d;

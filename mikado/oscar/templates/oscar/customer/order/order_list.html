@@ -96,7 +96,7 @@
                                                 <div class="v-order-checkout__items">
                                                     {% for line in order.basket.all_lines %}
                                                         {% purchase_info_for_line request line as session %}
-                                                            <span>{{ line.product.get_title }} ({{ line.quantity }}){% if not forloop.last %},{% endif %}</span>
+                                                            <span>{{ line.product.get_title }} ({{ line.quantity }} шт.){% if not forloop.last %},{% endif %}</span>
                                                     {% endfor %}
                                                 </div>
                                             {% endblock order_contents %}
