@@ -50,7 +50,7 @@
                     Add the current query string to the search form so that the
                     sort order is not reset when searching.
                 {% endcomment %}
-                <div class="d-flex">
+                <div class="d-flex form-row">
                     {% for name, value in request.GET.items %}
                         {% if name not in form.fields %}
                             <input type="hidden" name="{{ name }}" value="{{ value }}"/>
@@ -65,7 +65,7 @@
 
     {% if products %}
         {% block product_list %}
-            <form method="post">
+            <form class="mobile-hidden-thead" method="post">
                 {% csrf_token %}
                 {% render_table products %}
             </form>
@@ -74,7 +74,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h4 class="modal-title"></h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
                         </div>
                         <div class="modal-body text-center">
                             <img class="img-fluid mx-auto" loading="lazy">
