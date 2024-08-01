@@ -170,6 +170,8 @@ class IndexView(TemplateView):
         datetime_week_ago = current_time - timedelta(days=start_of_week)
         start_of_month = datetime(year=current_time.year, month=current_time.month, day=1, tzinfo=current_time.tzinfo)
         datetime_month_ago = current_time - (current_time - start_of_month)
+        datetime_7days_ago = current_time - timedelta(days=7)
+        datetime_30days_ago = current_time - timedelta(days=30)
 
         orders = Order.objects.all()
         alerts = StockAlert.objects.all()
@@ -196,6 +198,9 @@ class IndexView(TemplateView):
         orders_last_week = orders.filter(date_placed__gt=datetime_week_ago)
         orders_last_month = orders.filter(date_placed__gt=datetime_month_ago)
 
+        orders_last_7days = orders.filter(date_placed__gt=datetime_7days_ago)
+        orders_last_30days= orders.filter(date_placed__gt=datetime_30days_ago)
+
         open_alerts = alerts.filter(status=StockAlert.OPEN)
         closed_alerts = alerts.filter(status=StockAlert.CLOSED)
 
@@ -203,10 +208,15 @@ class IndexView(TemplateView):
         total_lines_last_week = lines.filter(order__in=orders_last_week).count()
         total_lines_last_month = lines.filter(order__in=orders_last_month).count()
 
+        total_lines_last_7days = lines.filter(order__in=orders_last_7days).count()
+        total_lines_last_30days = lines.filter(order__in=orders_last_30days).count()
+
         stats = {
             "current_time": current_time,
             "start_of_week": datetime_week_ago,
             "start_of_month": start_of_month,
+            "time_7days_ago": datetime_7days_ago,
+            "time_30days_ago": datetime_30days_ago,
             "hourly_report_dict": self.get_hourly_report(orders),
             "week_report_dict": self.get_days_report(orders, 7),
             "month_report_dict": self.get_days_report(orders, 30),
@@ -227,8 +237,14 @@ class IndexView(TemplateView):
                 date_created__gt=datetime_24hrs_ago
             ).count(),
             "total_orders_last_week": orders_last_week.count(),
+            "total_orders_last_7days": orders_last_7days.count(),
             "total_lines_last_week": total_lines_last_week,
+            "total_lines_last_7days": total_lines_last_7days,
             "average_order_costs_week": orders_last_week.aggregate(Avg("total"))[
+                "total__avg"
+            ]
+            or D("0.00"),
+            "average_order_costs_7days": orders_last_7days.aggregate(Avg("total"))[
                 "total__avg"
             ]
             or D("0.00"),
@@ -236,15 +252,31 @@ class IndexView(TemplateView):
                 "total__sum"
             ]
             or D("0.00"),
+            "total_revenue_last_7days": orders_last_7days.aggregate(Sum("total"))[
+                "total__sum"
+            ]
+            or D("0.00"),
             "total_customers_last_week": customers.filter(
                 date_joined__gt=datetime_week_ago,
+            ).count(),
+            "total_customers_last_7days": customers.filter(
+                date_joined__gt=datetime_7days_ago,
             ).count(),
             "total_open_baskets_last_week": baskets.filter(
                 date_created__gt=datetime_week_ago
             ).count(),
+            "total_open_baskets_last_7days": baskets.filter(
+                date_created__gt=datetime_7days_ago
+            ).count(),
             "total_orders_last_month": orders_last_month.count(),
+            "total_orders_last_30days": orders_last_30days.count(),
             "total_lines_last_month": total_lines_last_month,
+            "total_lines_last_30days": total_lines_last_30days,
             "average_order_costs_month": orders_last_month.aggregate(Avg("total"))[
+                "total__avg"
+            ]
+            or D("0.00"),
+            "average_order_costs_30days": orders_last_30days.aggregate(Avg("total"))[
                 "total__avg"
             ]
             or D("0.00"),
@@ -252,11 +284,21 @@ class IndexView(TemplateView):
                 "total__sum"
             ]
             or D("0.00"),
+            "total_revenue_last_30days": orders_last_30days.aggregate(Sum("total"))[
+                "total__sum"
+            ]
+            or D("0.00"),
             "total_customers_last_month": customers.filter(
                 date_joined__gt=datetime_month_ago,
             ).count(),
+            "total_customers_last_30days": customers.filter(
+                date_joined__gt=datetime_30days_ago,
+            ).count(),
             "total_open_baskets_last_month": baskets.filter(
                 date_created__gt=datetime_month_ago
+            ).count(),
+            "total_open_baskets_last_30days": baskets.filter(
+                date_created__gt=datetime_30days_ago
             ).count(),
             "total_products": products.count(),
             "total_open_stock_alerts": open_alerts.count(),

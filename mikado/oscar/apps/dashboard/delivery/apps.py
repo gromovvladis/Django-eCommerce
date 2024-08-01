@@ -30,6 +30,10 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
         self.delivery_zones_create_view = get_class("dashboard.delivery.views", "DeliveryZonesCreateView")
         self.delivery_zones_update_view = get_class("dashboard.delivery.views", "DeliveryZonesUpdateView")
         self.delivery_zones_delete_view = get_class("dashboard.delivery.views", "DeliveryZonesDeleteView")
+        
+        self.delivery_zones_hide_view = get_class("dashboard.delivery.views", "DeliveryZonesHideView")
+        self.delivery_zones_available_view = get_class("dashboard.delivery.views", "DeliveryZonesAvailableView")
+
         self.delivery_couriers_list_view = get_class("dashboard.delivery.views", "DeliveryCouriersListView")
         self.delivery_kitchen_view = get_class("dashboard.delivery.views", "DeliveryKitchenView")
         self.delivery_couriers_view = get_class("dashboard.delivery.views", "DeliveryCouriersView")
@@ -43,6 +47,10 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
             path("zones/create/", self.delivery_zones_create_view.as_view(), name="delivery-create-zona"),
             path("zones/<int:pk>/update/", self.delivery_zones_update_view.as_view(), name="delivery-update-zona"),
             path("zones/<int:pk>/delete/", self.delivery_zones_delete_view.as_view(), name="delivery-delete-zona"),
+            
+            path("zones/<int:pk>/hide/", self.delivery_zones_hide_view.as_view(), name="delivery-hide-zona"),
+            path("zones/<int:pk>/available/", self.delivery_zones_available_view.as_view(), name="delivery-available-zona"),
+
             path("couriers-list/", self.delivery_couriers_list_view.as_view(), name="delivery-couriers-list"),
             path("kitchen/", self.delivery_kitchen_view.as_view(), name="delivery-kitchen"),
             path("couriers/", self.delivery_couriers_view.as_view(), name="delivery-couriers"),

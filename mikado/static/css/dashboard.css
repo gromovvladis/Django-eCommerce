@@ -17861,7 +17861,7 @@ h3.app-ico:before {
 .navbar.navbar-primary {
   border-top: 1px solid #000;
   position: sticky;
-  z-index: 10000;
+  z-index: 1000;
   top: 0px;
 }
 .navbar.navbar-primary #bottom_nav_bar {
@@ -17996,6 +17996,11 @@ h3.app-ico:before {
   content: "⇩";
 }
 
+.asc a,
+.desc a {
+  color: #bd2130;
+}
+
 .table thead tr th.desc span:before {
   font-family: "Font Awesome 5 Free";
   font-weight: 900;
@@ -18079,6 +18084,12 @@ caption {
       height: 100%;
       position: relative;
 
+}
+
+.simple-button{
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 /* .swiper-wrapper{

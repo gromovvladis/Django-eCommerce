@@ -14,7 +14,7 @@ class DeliveryZonaForm(forms.ModelForm):
         model = DeliveryZona
         fields = [
             "number",
-            "description",
+            "name",
             "order_price",
             "delivery_price",
             "coords",

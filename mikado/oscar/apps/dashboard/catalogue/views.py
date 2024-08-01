@@ -575,10 +575,10 @@ class StockAlertListView(generic.ListView):
             self.form = StockAlertSearchForm(self.request.GET)
             if self.form.is_valid():
                 status = self.form.cleaned_data["status"]
-                self.description = 'Оповещения со статусом "%s"' % status
+                self.description = 'Уведомление со статусом "%s"' % status
                 return self.model.objects.filter(status=status)
         else:
-            self.description = "Все оповещения"
+            self.description = "Все уведомления"
             self.form = StockAlertSearchForm()
         return self.model.objects.all()
 
@@ -707,7 +707,6 @@ class AdditionalLookupView(ObjectLookupView):
     #         id_list.append(add.id)
 
     #     return qs.filter(pk__notin=id_list)
-
 
 
 class ProductClassCreateUpdateView(generic.UpdateView):
