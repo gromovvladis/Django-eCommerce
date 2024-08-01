@@ -6,6 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
 
 from oscar.apps.shipping.methods import NoShippingRequired
+from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 
 from . import exceptions
@@ -242,7 +243,8 @@ class CheckoutSessionMixin(object):
             total = shipping_charge = surcharges = min_order = None
         elif shipping_method.code == NoShippingRequired().code:
             shipping_address = None 
-            shipping_charge, min_order = 0, 0
+            shipping_charge = min_order = prices.Price(currency=basket.currency, money=D("0.00"))
+
         elif shipping_address:
             if shipping_address.coords_lat and shipping_address.coords_long:
                 shipping_charge, min_order = shipping_method.calculate(basket, shipping_address)

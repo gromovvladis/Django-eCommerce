@@ -226,14 +226,15 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         address_fields = dict(
             (k, v) for (k, v) in form.instance.__dict__.items() if not k.startswith("_")
         )
+        shipping_method = form.cleaned_data["method_code"]
 
         # нужна проверак полей алреса
-        if not self.is_shipping_address_set(address_fields):
+        if  not self.is_shipping_address_set(address_fields, shipping_method):
             messages.error(self.request, "Введенный адрес некорректен")
             return redirect("checkout:checkoutview")
 
         # нужна проверка суммы минимального заказа при доставке
-        if not self.is_min_order_set(form.instance, form.cleaned_data["method_code"]):
+        if not self.is_min_order_set(form.instance, shipping_method):
             messages.error(self.request, "Сумма заказа меньше минимальной")
             return redirect("checkout:checkoutview")
         
@@ -245,17 +246,18 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         # Store payment method in the CheckoutSessionMixin.checkout_session (a CheckoutSessionData object)
         self.checkout_session.set_session_address(address_fields)
         self.checkout_session.pay_by(form.cleaned_data['payment_method'])
-        self.checkout_session.use_shipping_method(form.cleaned_data["method_code"])
+        self.checkout_session.use_shipping_method(shipping_method)
         self.checkout_session.set_order_note(form.cleaned_data['order_note'])
         self.checkout_session.set_order_time(form.cleaned_data['order_time'])
         self.checkout_session.set_email_or_change(form.cleaned_data['email_or_change'])
         
 
-    def is_shipping_address_set(self, address_fields):
-        requred_fields = ['line1', 'line2', 'line3', 'line4', 'coords_long', 'coords_lat']
-        for field in address_fields.items():
-            if field[0] in requred_fields and not field[1]:
-                return False
+    def is_shipping_address_set(self, address_fields, shipping_method):
+        if shipping_method == "zona-shipping":
+            requred_fields = ['line1', 'line2', 'line3', 'line4', 'coords_long', 'coords_lat']
+            for field in address_fields.items():
+                if field[0] in requred_fields and not field[1]:
+                    return False
 
         return True
 

@@ -63,9 +63,10 @@ class Free(Base):
     name = "Бесплатная доставка"
 
     def calculate(self, basket, address=None):
+        """"Returns the shipping charges and minimum order price"""
         # If the charge is free then tax must be free (musn't it?) and so we
         # immediately set the tax to zero
-        return prices.Price(currency=basket.currency, money=D("0.00")), prices.Price(currency=basket.currency, money=D("700.00"))
+        return prices.Price(currency=basket.currency, money=D("0.00")), prices.Price(currency=basket.currency, money=D("0.00"))
 
 
 class FixedDiscount(Base):
@@ -96,8 +97,10 @@ class NoShippingRequired(Free):
         self.default_selected = default_selected
 
     def calculate(self, basket, address=None):
+        """"Returns the shipping charges and minimum order price"""
+
         discount = basket.total * self.pickup_discount / 100
-        return prices.Price(currency=basket.currency, money=-discount), prices.Price(currency=basket.currency, money=D("700.00"))
+        return prices.Price(currency=basket.currency, money=-discount), prices.Price(currency=basket.currency, money=D("0"))
 
 
 class FixedPrice(Base):
@@ -119,6 +122,7 @@ class FixedPrice(Base):
         self.default_selected = default_selected
 
     def calculate(self, basket, address=None):
+        """"Returns the shipping charges and minimum order price"""
         return prices.Price(currency=basket.currency, money=self.charge), prices.Price(currency=basket.currency, money=D("700.00"))
 
 
@@ -136,7 +140,8 @@ class ZonaBasedShipping(Base):
 
 
     def calculate(self, basket, address):
-
+        """"Returns the shipping charges and minimum order price"""
+        
         zona_id = 0
         shipping_charge = 0
         min_order = 700
