@@ -270,7 +270,7 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
 
     # переделай
     def is_time_set(self, order_time):
-        return False
+        return True
     
     
     def form_invalid(self, form):
