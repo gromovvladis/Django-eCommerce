@@ -1,4 +1,3 @@
-{% load i18n %}
 {% load django_tables2 %}
 
 <p>
@@ -7,44 +6,31 @@
 
         {% if creating %}
             {% if product.title %}
-                {% blocktrans %}
-                    Created product variant '{{ name }}'.
-                {% endblocktrans %}
+                Создан вариант '{{ name }}'.
             {% else %}
-                {% blocktrans %}
-                    Created variant of '{{ parent_name }}'.
-                {% endblocktrans %}
+                Создан вариант продукта '{{ parent_name }}'.
             {% endif %}
         {% else %}
             {% if product.title %}
-                {% blocktrans %}
-                    Updated product variant '{{ name }}'.
-                {% endblocktrans %}
+                Вариант '{{ name }}' обновлен.
             {% else %}
-                {% blocktrans %}
-                    Updated a variant of '{{ parent_name }}'.
-                {% endblocktrans %}
+                Вариант продукта '{{ parent_name }}' обновлен.
             {% endif %}
         {% endif %}
 
     {% else %}
 
         {% if creating %}
-            {% blocktrans %}
-                Created product '{{ name }}'.
-            {% endblocktrans %}
+            Создан продукт '{{ name }}'.
         {% else %}
-            {% blocktrans %}
-                Updated product '{{ name }}'.
-            {% endblocktrans %}
+            Продукт '{{ name }}' обновлен.
         {% endif %}
 
     {% endif %}
 {% endwith %}
-
 </p>
 
 <p>
-    <a href="{% url 'dashboard:catalogue-product' pk=product.pk %}{% querystring %}" class="btn btn-success">{% trans "Edit again" %}</a>
-    <a href="{{ product.get_absolute_url }}" class="btn btn-success">{% trans "View it on the site" %}</a>
+    <a href="{% url 'dashboard:catalogue-product' pk=product.pk %}{% querystring %}" class="btn btn-success">Редактировать снова</a>
+    <a href="{{ product.get_absolute_url }}" class="btn btn-success">Смотреть на сайте</a>
 </p>

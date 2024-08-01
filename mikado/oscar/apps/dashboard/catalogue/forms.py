@@ -77,7 +77,7 @@ class ProductClassSelectForm(forms.Form):
     """
 
     product_class = forms.ModelChoiceField(
-        label="Создать новый тип продукта",
+        label="Создать продукт",
         empty_label="-- Выберите тип продукта --",
         queryset=ProductClass.objects.all(),
     )
@@ -93,8 +93,14 @@ class ProductClassSelectForm(forms.Form):
 
 
 class ProductSearchForm(forms.Form):
-    upc = forms.CharField(max_length=64, required=False, label="Товарный код продукта UPC")
-    title = forms.CharField(max_length=255, required=False, label="Название продукта")
+    upc = forms.CharField(max_length=64, required=False, label="Код UPC")
+    title = forms.CharField(max_length=255, required=False, label="Имя продукта")
+    categories = forms.ModelMultipleChoiceField(
+        label="Категория",
+        queryset=Category.objects.all(),
+        required=False,
+        # empty_label="-----",
+    )
 
     def clean(self):
         cleaned_data = super().clean()

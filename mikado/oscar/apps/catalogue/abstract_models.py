@@ -821,6 +821,9 @@ class AbstractProduct(models.Model):
                 prices = set([min(prices), max(prices)])
 
         return prices
+    
+    def get_low_price(self):
+        return self.get_prices().pop() if self.get_prices().pop() else None
 
     def get_title(self):
         """

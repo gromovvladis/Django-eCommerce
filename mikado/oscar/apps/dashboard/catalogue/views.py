@@ -98,6 +98,8 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form
         ctx["productclass_form"] = self.productclass_form_class()
+
+        cats = Category.objects.first()
         return ctx
 
     def get_description(self, form):
@@ -175,6 +177,11 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         if title:
             queryset = queryset.filter(
                 Q(title__icontains=title) | Q(children__title__icontains=title)
+            )
+        categories = data.get("categories")
+        if categories:
+            queryset = queryset.filter(
+                Q(categories__in=categories) | Q(children__categories__in=categories)
             )
 
         return queryset.distinct()
@@ -568,10 +575,10 @@ class StockAlertListView(generic.ListView):
             self.form = StockAlertSearchForm(self.request.GET)
             if self.form.is_valid():
                 status = self.form.cleaned_data["status"]
-                self.description = 'Оповещения со статусом "%s"' % status
+                self.description = 'Уведомление со статусом "%s"' % status
                 return self.model.objects.filter(status=status)
         else:
-            self.description = "Все оповещения"
+            self.description = "Все уведомления"
             self.form = StockAlertSearchForm()
         return self.model.objects.all()
 
@@ -700,7 +707,6 @@ class AdditionalLookupView(ObjectLookupView):
     #         id_list.append(add.id)
 
     #     return qs.filter(pk__notin=id_list)
-
 
 
 class ProductClassCreateUpdateView(generic.UpdateView):

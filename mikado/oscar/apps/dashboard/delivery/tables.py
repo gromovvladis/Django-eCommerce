@@ -11,7 +11,7 @@ DeliveryZona = get_model("delivery", "DeliveryZona")
 class DeliveryZonesTable(DashboardTable):
     
     number = LinkColumn("dashboard:delivery-update-zona", args=[A("pk")])
-    description = LinkColumn("dashboard:delivery-update-zona", args=[A("pk")])
+    name = LinkColumn("dashboard:delivery-update-zona", args=[A("pk")])
 
     delivery_price = TemplateColumn(
         verbose_name="Цена доставки",
@@ -43,18 +43,17 @@ class DeliveryZonesTable(DashboardTable):
     )
 
     actions = TemplateColumn(
-        verbose_name="Действия",
+        verbose_name="",
         template_name="oscar/dashboard/delivery/deliveryzones_row_actions.html",
         orderable=False,
     )
 
-    icon = "sitemap"
+    icon = "fas fa-location-dot"
     caption = ngettext_lazy("%s Зона доставки", "%s Зон доставки")
 
 
     class Meta(DashboardTable.Meta):
         model = DeliveryZona
-        fields = ("number", "description", "delivery_price", "order_price", "isAvailable", "isHide")
-        sequence = ("number", "description", "delivery_price", "order_price", "...", "isAvailable", "isHide", "actions")
-        # sequence = ("number", "description", "delivery_price", "order_price", "isAvailable", "...", "isHide", "actions")
+        fields = ("number", "name", "delivery_price", "order_price", "isAvailable", "isHide")
+        sequence = ("number", "name", "delivery_price", "order_price", "...", "isAvailable", "isHide", "actions")
 

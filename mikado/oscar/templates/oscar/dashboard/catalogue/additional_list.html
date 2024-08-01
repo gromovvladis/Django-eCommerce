@@ -1,15 +1,13 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
+
 {% load render_table from django_tables2 %}
 
-{% block title %}
-    Дополнительные товары | {{ block.super }}
-{% endblock %}
+{% block title %}Дополнительные товары | {{ block.super }}{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
             <li class="breadcrumb-item active" aria-current="page">Дополнительные товары</li>
         </ol>
     </nav>

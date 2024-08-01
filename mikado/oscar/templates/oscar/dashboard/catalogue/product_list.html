@@ -1,21 +1,17 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 {% load render_table from django_tables2 %}
 
 {% block body_class %}{{ block.super }} catalogue{% endblock %}
-
-{% block title %}
-    {% trans "Products" %} | {{ block.super }}
-{% endblock %}
+{% block title %}Продукты | {{ block.super }}{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+                <a href="{% url 'dashboard:index' %}">Главная</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
-                {% trans "Products" %}
+                Продукты
             </li>
         </ol>
     </nav>
@@ -23,20 +19,22 @@
 
 {% block header %}
     <div class="page-header">
-        <h1>{% trans "Products" %}</h1>
+        <h1>Продукты</h1>
     </div>
 {% endblock header %}
 
 {% block dashboard_content %}
     {% block create_product %}
         <div class="table-header">
-            <h3><i class="fas fa-sitemap"></i> {% trans "Create new product" %}</h3>
+            <h3><i class="fas fa-square-plus"></i> Создать новый продукт</h3>
         </div>
         <div class="card card-body">
-            <form action="{% url 'dashboard:catalogue-product-create' %}" method="get" class="form-inline">
-                {% include "oscar/dashboard/partials/form_fields_inline.html" with form=productclass_form %}
-                <button class="btn btn-primary" type="submit" data-loading-text="{% trans 'Submitting...' %}">
-                    <i class="fas fa-plus-circle"></i> {% trans "New Product" %}
+            <form action="{% url 'dashboard:catalogue-product-create' %}" method="get" class="form-inline fill-width justify-space-between">
+                <div>
+                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=productclass_form %}
+                </div>
+                <button class="btn btn-primary" type="submit" data-loading-text="Создание продукта...">
+                    <i class="fas fa-plus-circle"></i> Новый продукт
                 </button>
             </form>
         </div>
@@ -44,22 +42,23 @@
 
     {% block search_products %}
         <div class="table-header">
-            <h3><i class="fas fa-search"></i> {% trans "Search Products" %}</h3>
+            <h3><i class="fas fa-search"></i> Поиск</h3>
         </div>
         <div class="card card-body">
-            <form method="get" class="form-inline">
+            <form method="get" class="form-inline fill-width justify-space-between">
                 {% comment %}
                     Add the current query string to the search form so that the
                     sort order is not reset when searching.
                 {% endcomment %}
-                {% for name, value in request.GET.items %}
-                    {% if name not in form.fields %}
-                        <input type="hidden" name="{{ name }}" value="{{ value }}"/>
-                    {% endif %}
-                {% endfor %}
-
-                {% include "oscar/dashboard/partials/form_fields_inline.html" with form=form %}
-                <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Searching...' %}"><i class="fas fa-search"></i> {% trans "Search" %}</button>
+                <div class="d-flex">
+                    {% for name, value in request.GET.items %}
+                        {% if name not in form.fields %}
+                            <input type="hidden" name="{{ name }}" value="{{ value }}"/>
+                        {% endif %}
+                    {% endfor %}
+                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=form %}
+                </div>
+                <button type="submit" class="btn btn-primary" data-loading-text="Поиск..."><i class="fas fa-search"></i> Поиск</button>
             </form>
         </div>
     {% endblock %}

@@ -98,12 +98,12 @@ OSCAR_HIDDEN_FEATURES = []
 OSCAR_DASHBOARD_NAVIGATION = [
     {
         "label": "Статистика",
-        "icon": "fas fa-list",
+        "icon": "fas fa-line-chart",
         "url_name": "dashboard:index",
     },
     {
         "label": "Каталог",
-        "icon": "fas fa-sitemap",
+        "icon": "fas fa-list",
         "children": [
             {
                 "label": "Продукты",
@@ -134,7 +134,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:catalogue-attribute-option-group-list",
             },
             {
-                "label": "Оповещения о малых остатках",
+                "label": "Уведомления о наличии",
                 "url_name": "dashboard:stock-alert-list",
             },
         ],
@@ -185,7 +185,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
     },
     {
         "label": "Скидки",
-        "icon": "fas fa-bullhorn",
+        "icon": "fas fa-percent",
         "children": [
             {
                 "label": "Предложения",
@@ -203,7 +203,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
     },
     {
         "label": "Контент",
-        "icon": "fas fa-folder",
+        "icon": "fas fa-newspaper",
         "children": [
             {
                 "label": "Страницы",
@@ -229,7 +229,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
     },
     {
         "label": "Оплата",
-        "icon": "fas fa-payments",
+        "icon": "fas fa-credit-card",
         "children": [
             {
                 "label": "Список платежей",

@@ -1,7 +1,8 @@
 # pylint: disable=attribute-defined-outside-init
 from django.conf import settings
 from django.contrib import messages
-from django.urls import reverse
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
 from django.views.generic import UpdateView, DeleteView, CreateView, View
 
 from django_tables2 import SingleTableView
@@ -121,7 +122,65 @@ class DeliveryZonaView(APIView):
             return http.JsonResponse({"error": "Зона доставки не найдена"}, status=200)
 
 
+class DeliveryZonesUpdateView(UpdateView):
+    template_name = "oscar/dashboard/delivery/delivery_form.html"
+    model = DeliveryZona
+    form_class = DeliveryZonaForm
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["number"] = self.object.number
+        ctx["title"] = "Обновить зону доставки '%s'" % self.object.number
+        return ctx
+
+    def get_success_url(self):
+        messages.info(self.request, "Зона доставки успешно обновлена")
+        return reverse("dashboard:delivery-zones")
+
+
+class DeliveryZonesHideView(UpdateView):
+    model = DeliveryZona
+
+    def post(self, request, *args, **kwargs):
+        try:
+            zona_id = kwargs.get('pk')
+            zona = self.model.objects.get(number=zona_id)
+            zona.isHide = not zona.isHide
+            zona.save()
+            return self.get_success_url()
+        except Exception:
+            return self.get_error_url()
+
+    def get_success_url(self):
+        messages.info(self.request, "Зона доставки успешно обновлена")
+        return redirect("dashboard:delivery-zones")
+
+    def get_error_url(self):
+        messages.warning(self.request, "Зона доставки не была обновлена")
+        return redirect("dashboard:delivery-zones")
+
+
+
+class DeliveryZonesAvailableView(View):
+    model = DeliveryZona
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            zona_id = kwargs.get('pk')
+            zona = self.model.objects.get(number=zona_id)
+            zona.isAvailable = not zona.isAvailable
+            zona.save()
+            return self.get_success_url()
+        except Exception:
+            return self.get_error_url()
+
+    def get_success_url(self):
+        messages.info(self.request, "Зона доставки успешно обновлена")
+        return redirect("dashboard:delivery-zones")
+
+    def get_error_url(self):
+        messages.warning(self.request, "Зона доставки не была обновлена")
+        return redirect("dashboard:delivery-zones")
 
 
 

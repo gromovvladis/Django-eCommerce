@@ -15,7 +15,7 @@ class AbstractDeliveryZona(models.Model):
     """
 
     number = models.PositiveIntegerField("Номер зоны доставки", unique=True)
-    description = models.CharField("Описание", max_length=255, blank=True, null=True)
+    name = models.CharField("Название", max_length=255, blank=True, null=True)
     order_price = models.PositiveIntegerField("Минимальная цена заказа", default=700)
     delivery_price = models.PositiveIntegerField("Стоимость доставки", default=0)
     coords = models.CharField(
@@ -26,7 +26,6 @@ class AbstractDeliveryZona(models.Model):
     )
     isAvailable = models.BooleanField("Доставка доступна", max_length=255)
     isHide = models.BooleanField("Убрать с карты", max_length=255)
-
 
     def __str__(self):
         return "Зона №%s - %s" % (self.number, self.description)

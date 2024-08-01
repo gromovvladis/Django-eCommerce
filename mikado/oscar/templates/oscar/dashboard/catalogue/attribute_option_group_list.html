@@ -1,16 +1,14 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
+
 {% load render_table from django_tables2 %}
 
-{% block title %}
-    {% trans "Attribute Option Groups" %} | {{ block.super }}
-{% endblock %}
+{% block title %}Группы параметров атрибута | {{ block.super }}{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{% trans "Attribute Option Group" %}</li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Группы параметров атрибута</li>
         </ol>
     </nav>
 {% endblock %}
@@ -18,9 +16,9 @@
 {% block header %}
     <div class="page-header">
         <a href="{% url 'dashboard:catalogue-attribute-option-group-create' %}?{{ querystring }}" class="btn btn-primary float-right">
-            <i class="fas fa-plus-circle"></i> {% trans "Create new Attribute Option Group" %}
+            <i class="fas fa-plus-circle"></i> Создать группу параметров атрибута
         </a>
-        <h1>{% trans "Attribute Option Group" %}</h1>
+        <h1>Группа параметров атрибута</h1>
     </div>
 {% endblock header %}
 
@@ -33,6 +31,6 @@
             </form>
         {% endblock product_list %}
     {% else %}
-        <p>{% trans "No Attribute Option Groups found." %}</p>
+        <p>Группы параметров атрибута не созданы</p>
     {% endif %}
 {% endblock dashboard_content %}

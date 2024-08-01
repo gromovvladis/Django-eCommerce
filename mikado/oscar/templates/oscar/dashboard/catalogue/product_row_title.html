@@ -1,2 +1,4 @@
 {% load django_tables2 %}
 <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ value }}</a>
+<br>
+<span class="text-muted small">UPC: {{ record.upc }}</span>

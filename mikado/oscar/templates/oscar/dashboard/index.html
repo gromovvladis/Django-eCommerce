@@ -15,28 +15,29 @@
 {% block dashboard_content %}
 
 <div class="table-header">
-    <i class="fas fa-signal"></i> Статистика магазина
+    <i class="fas fa-line-chart"></i> Статистика магазина
 </div>
 
 <div class="content-block">
     <div class="slider">
-
-
         <div class="slider-dashboard" data-id="slider-dashboard">
             <div class="slider-swiper fill-height" data-id="slider-swiper">
                 <div class="swiper-wrapper d-flex fill-height">
                     <div class="swiper-slide d-flex">
                         <aside class="order-graph-details">
+                            <label style="text-align: center; color: #fff; background: #007bffb8; font-weight: 600;">{{ current_time.date|date:"d E" }}</label>
+                            <label><span><i class="fas fa-money-check-dollar"></i>{{ total_revenue_last_day|currency }}</span>Заработок</label>
+                            <label><span><i class="fas fa-receipt"></i>{{ average_order_costs_day|currency }}</span>Средний чек</label>
                             <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_day }}</span>Заказы</label>
-                            <label><span><i class="fas fa-hand-point-right"></i>{{ total_customers_last_day }}</span>Пользователи</label>
-                            <label><span><i class="fas fa-users"></i>{{ total_customers }}</span>Клиенты</label>
-                            <label><span><i class="fas fa-briefcase"></i>{{ total_products }}</span>Продукты</label>
+                            <label><span><i class="fas fa-users"></i>{{ total_customers_last_day }}</span>Клиенты</label>
+                            <label><span><i class="fas fa-box-open"></i>{{ total_open_baskets_last_day }}</span>Коризин открыто</label>
+                            <label><span><i class="fas fa-object-ungroup"></i>{{ total_lines_last_day }}</span>Позиций куплено</label>
                         </aside>
                         <div class="graph-right">      
                             <div class="order_graph">
                                 <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 24 часа</span></h2></div>
                                 <div class="bar-y-axis">
-                                    <ul>
+                                    <ul class="fill-height">
                                     {% for y_value in hourly_report_dict.y_range %}
                                         <li><span>{{ y_value|currency }}</span></li>
                                     {% endfor %}
@@ -57,17 +58,19 @@
                     </div>
                     <div class="swiper-slide d-flex">
                         <aside class="order-graph-details">
-                            <label style="text-align: center; background-color: #e8eeff73; font-weight: 600;">{{ start_of_week.date|date:"l" }} - {{ current_time.date|date:"l" }}</label>
-                            <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_week }}</span>Заказы</label>
-                            <label><span><i class="fas fa-hand-point-right"></i>{{ total_customers_last_week }}</span>Пользователи</label>
-                            <label><span><i class="fas fa-users"></i>{{ total_customers }}</span>Клиенты</label>
-                            <label><span><i class="fas fa-briefcase"></i>{{ total_products }}</span>Продукты</label>
+                            <label style="text-align: center; color: #fff; background: #007bffb8; font-weight: 600;">{{ time_7days_ago.date|date:"d E" }} - {{ current_time.date|date:"d E" }}</label>
+                            <label><span><i class="fas fa-money-check-dollar"></i>{{ total_revenue_last_7days|currency }}</span>Заработок</label>
+                            <label><span><i class="fas fa-receipt"></i>{{ average_order_costs_7days|currency }}</span>Средний чек</label>
+                            <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_7days }}</span>Заказы</label>
+                            <label><span><i class="fas fa-users"></i>{{ total_customers_last_7days }}</span>Клиенты</label>
+                            <label><span><i class="fas fa-box-open"></i>{{ total_open_baskets_last_7days }}</span>Коризин открыто</label>
+                            <label><span><i class="fas fa-object-ungroup"></i>{{ total_lines_last_7days }}</span>Позиций куплено</label>
                         </aside>
                         <div class="graph-right">
                             <div class="order_graph">
                                 <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 7 дней</span></h2></div>
                                 <div class="bar-y-axis">
-                                    <ul>
+                                    <ul class="fill-height">
                                     {% for y_value in week_report_dict.y_range %}
                                         <li><span>{{ y_value|currency }}</span></li>
                                     {% endfor %}
@@ -88,17 +91,19 @@
                     </div>
                     <div class="swiper-slide d-flex">
                         <aside class="order-graph-details">
-                            <label style="text-align: center; background-color: #e8eeff73; font-weight: 600;">{{ start_of_month.date|date:"d N" }} - {{ current_time.date|date:"d N" }}</label>
-                            <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_month }}</span>Заказы</label>
-                            <label><span><i class="fas fa-hand-point-right"></i>{{ total_customers_last_month }}</span>Пользователи</label>
-                            <label><span><i class="fas fa-users"></i>{{ total_customers }}</span>Клиенты</label>
-                            <label><span><i class="fas fa-briefcase"></i>{{ total_products }}</span>Продукты</label>
+                            <label style="text-align: center; color: #fff; background: #007bffb8; font-weight: 600;">{{ time_30days_ago.date|date:"d E" }} - {{ current_time.date|date:"d E" }}</label>
+                            <label><span><i class="fas fa-money-check-dollar"></i>{{ total_revenue_last_30days|currency }}</span>Заработок</label>
+                            <label><span><i class="fas fa-receipt"></i>{{ average_order_costs_30days|currency }}</span>Средний чек</label>
+                            <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_30days }}</span>Заказы</label>
+                            <label><span><i class="fas fa-users"></i>{{ total_customers_last_30days }}</span>Клиенты</label>
+                            <label><span><i class="fas fa-box-open"></i>{{ total_open_baskets_last_30days }}</span>Коризин открыто</label>
+                            <label><span><i class="fas fa-object-ungroup"></i>{{ total_lines_last_30days }}</span>Позиций куплено</label>
                         </aside>
                         <div class="graph-right">
                             <div class="order_graph">
                                 <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 30 дней</span></h2></div>
                                 <div class="bar-y-axis">
-                                    <ul>
+                                    <ul class="fill-height">
                                     {% for y_value in month_report_dict.y_range %}
                                         <li><span>{{ y_value|currency }}</span></li>
                                     {% endfor %}
