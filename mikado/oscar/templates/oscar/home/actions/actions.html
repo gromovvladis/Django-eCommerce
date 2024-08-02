@@ -37,7 +37,7 @@
                                     <div class="v-actions__actions-action d-flex flex-column fill-height fill-width">
                                         <div class="v-actions__actions-action-picture fill-width">
                                             <div class="v-image">
-                                                <div class="v-image__inner" style="padding-bottom: 45%;">
+                                                <div class="v-image__inner" style="padding-bottom: 46%;">
                                                     {% with image=action.primary_image %}
                                                         {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
                                                         <img src="{{ thumb.url }}" alt="{{ action.title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
@@ -66,7 +66,7 @@
                                         <div class="v-actions__actions-action d-flex flex-column fill-height fill-width">
                                             <div class="v-actions__actions-action-picture fill-width">
                                                 <div class="v-image">
-                                                    <div class="v-image__inner" style="padding-bottom: 45%;">
+                                                    <div class="v-image__inner" style="padding-bottom: 46%;">
                                                         {% with image=offer.primary_image %}
                                                             {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
                                                             <img src="{{ thumb.url }}" alt="{{ offer.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
