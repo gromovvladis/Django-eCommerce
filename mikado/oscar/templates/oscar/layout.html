@@ -68,7 +68,7 @@
 
                         {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
                         <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
-                            class="v-button v-app-nav__button--search v-button--small justify-center mr-1 shrink" aria-label="Поиск">
+                            class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-1 mr-2 shrink" aria-label="Поиск">
                             <span class="v-button__wrapper d-flex">
                                 {% icon file_name='header/search' size=20 fill='#111'%}
                             </span>
@@ -82,7 +82,7 @@
 
                     <div role="separator" class="v-spacer"></div>
 
-                    <button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2">
+                    <button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2" aria-label="Очистить корзину">
                         <span class="v-button__wrapper d-flex">
                             {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
                         </span>

@@ -105,6 +105,7 @@
     sudo nano /etc/nginx/sites-available/default 
 
     очистить фаил команда: ALT + T
+    после установки сертификата дописать "http2" после "listen 433" - listen 433 ssl http2;
 
     Конфигурация:
         server {
@@ -127,6 +128,12 @@
                 proxy_set_header Host $server_name;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+            http2 on;
+            gzip on;
+            gzip_disable "msie6";
+            gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
+
             }
         }
 

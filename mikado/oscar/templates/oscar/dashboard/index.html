@@ -26,8 +26,8 @@
                     <div class="swiper-slide d-flex">
                         <aside class="order-graph-details">
                             <label style="text-align: center; color: #fff; background: #007bffb8; font-weight: 600;">{{ current_time.date|date:"d E" }}</label>
-                            <label><span><i class="fas fa-money-check-dollar"></i>{{ total_revenue_last_day|currency }}</span>Заработок</label>
-                            <label><span><i class="fas fa-receipt"></i>{{ average_order_costs_day|currency }}</span>Средний чек</label>
+                            <label><span><i class="fas fa-coins"></i>{{ total_revenue_last_day|currency }}</span>Заработок</label>
+                            <label><span><i class="fas fa-cash-register"></i>{{ average_order_costs_day|currency }}</span>Средний чек</label>
                             <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_day }}</span>Заказы</label>
                             <label><span><i class="fas fa-users"></i>{{ total_customers_last_day }}</span>Клиенты</label>
                             <label><span><i class="fas fa-box-open"></i>{{ total_open_baskets_last_day }}</span>Коризин открыто</label>
@@ -59,8 +59,8 @@
                     <div class="swiper-slide d-flex">
                         <aside class="order-graph-details">
                             <label style="text-align: center; color: #fff; background: #007bffb8; font-weight: 600;">{{ time_7days_ago.date|date:"d E" }} - {{ current_time.date|date:"d E" }}</label>
-                            <label><span><i class="fas fa-money-check-dollar"></i>{{ total_revenue_last_7days|currency }}</span>Заработок</label>
-                            <label><span><i class="fas fa-receipt"></i>{{ average_order_costs_7days|currency }}</span>Средний чек</label>
+                            <label><span><i class="fas fa-coins"></i>{{ total_revenue_last_7days|currency }}</span>Заработок</label>
+                            <label><span><i class="fas fa-cash-register"></i>{{ average_order_costs_7days|currency }}</span>Средний чек</label>
                             <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_7days }}</span>Заказы</label>
                             <label><span><i class="fas fa-users"></i>{{ total_customers_last_7days }}</span>Клиенты</label>
                             <label><span><i class="fas fa-box-open"></i>{{ total_open_baskets_last_7days }}</span>Коризин открыто</label>
@@ -92,8 +92,8 @@
                     <div class="swiper-slide d-flex">
                         <aside class="order-graph-details">
                             <label style="text-align: center; color: #fff; background: #007bffb8; font-weight: 600;">{{ time_30days_ago.date|date:"d E" }} - {{ current_time.date|date:"d E" }}</label>
-                            <label><span><i class="fas fa-money-check-dollar"></i>{{ total_revenue_last_30days|currency }}</span>Заработок</label>
-                            <label><span><i class="fas fa-receipt"></i>{{ average_order_costs_30days|currency }}</span>Средний чек</label>
+                            <label><span><i class="fas fa-coins"></i>{{ total_revenue_last_30days|currency }}</span>Заработок</label>
+                            <label><span><i class="fas fa-cash-register"></i>{{ average_order_costs_30days|currency }}</span>Средний чек</label>
                             <label><span><i class="fas fa-shopping-cart"></i>{{ total_orders_last_30days }}</span>Заказы</label>
                             <label><span><i class="fas fa-users"></i>{{ total_customers_last_30days }}</span>Клиенты</label>
                             <label><span><i class="fas fa-box-open"></i>{{ total_open_baskets_last_30days }}</span>Коризин открыто</label>
@@ -126,10 +126,10 @@
             </div>
             <div class="v-carousel__navs">
                 <button class="v-h-nav--button right" data-id="swiper-next">
-                    {% icon file_name='interface/arrow-home' size=32 stroke="#007bff" %}
+                    {% icon file_name='interface/arrow-home' size=20 stroke="#007bff" %}
                 </button>
                 <button class="v-h-nav--button left" data-id="swiper-prev">
-                    {% icon file_name='interface/arrow-home' size=32 stroke="#007bff" %}
+                    {% icon file_name='interface/arrow-home' size=20 stroke="#007bff" %}
                 </button>
             </div>
         </div>

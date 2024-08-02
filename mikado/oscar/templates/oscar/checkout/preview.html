@@ -22,19 +22,16 @@
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
         <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
-        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
         <span class="v-bread__link" aria-current="page">Заказ не оформлен</span>
     </div>
 {% endblock %}
 
 {% block content %}
-
     <div class="d-flex flex-column mt-md-4">
         <div class="v-order d-flex flex-column flex-md-row align-md-start">
-
             <div class="v-order__wrapper  d-flex flex-column">
                 <div class="v-order__info-wrapper d-flex flex-column fill-width">
-
                     <div class="v-order__title d-flex mb-1 justify-start align-center">
                         <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
                             <use xlink:href="#svg-order-cancel"></use>
@@ -45,7 +42,6 @@
                     <span class="mb-3 info-message text--red">{{ error }}</span>
 
                     {% block shipping_info %}
-
                         <div class="v-checkout__datail pb-2">
                             {% if shipping_address %}
                                 <div class="v-order__subtitle mb-1 mb-sm-2">
@@ -94,7 +90,6 @@
                                 <p>{{ request.user.username }}</p>
                             </div>
                         </div>
-
                     {% endblock %}
 
                     {% block payment_info %}
@@ -117,21 +112,18 @@
                                 {% endif %}
                             </span>
                         </div>    
-
                     {% endblock %}
-
                 </div>
             </div>
 
             <div class="v-order__info ml-md-4">
                 <div class="v-order__info-wrapper pt-4">
-            
+
                     <p class="v-order__title d-none d-md-block mb-2"> Ваш заказ </p>
             
                     <div class="v-order__subtitle d-md-none mb-1 mb-sm-2">
                         <h2>Ваш заказ</h2>
                     </div>
-
                     
                     <div class="v-order__subtitle mb-1 mb-sm-1 d-none d-md-block">
                         <h2>Состав заказа</h2>
@@ -154,10 +146,8 @@
                     <a href="#" class="v-button fill-width v-button--main justify-center shrink mt-3">Связаться с поддержкой</a>
                 </div>
             </div>  
-
         </div>
     </div>
-
 {% endblock content %}
 
 {% block SVG %}
