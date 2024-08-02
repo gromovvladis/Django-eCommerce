@@ -2,6 +2,7 @@
 
 {% load category_tags %}
 {% load dashboard_tags %}
+{% load svg_tags %}
 {% comment %} {% load compress %} {% endcomment %}
 {% load static %}
 
@@ -12,7 +13,7 @@
         <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
         <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
 
-        {% comment %} <link rel="stylesheet" href="{% static "js/bootstrap5/bootstrap.bundle.min.css" %}"></script> {% endcomment %}
+        {% comment %} <link rel="stylesheet" href="{% static "js/bootstrap5/bootstrap.min.css" %}"></script> {% endcomment %}
     {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}
 
@@ -21,6 +22,7 @@
 {% endblock %}
 
 {% block layout %}
+
 
     {% block navbar %}
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-accounts">
@@ -55,11 +57,78 @@
 
     <div class="dashboard-wrapper">
 
+                
+
+        
+
         <div class="navbar-menu">
             {% block dashboard_nav %}
                 {% dashboard_navigation user as nav_items %}
-                <div class="navbar-primary-back"></div>
-                <nav class="navbar-expand-lg navbar-dark bg-dark navbar-primary">                    
+                {% comment %} <div class="navbar-primary-back"></div> {% endcomment %}
+                <div class="navbar-expand-lg navbar-dark navbar-primary d-flex flex-column flex-shrink-0 bg-light">
+
+                    <a class="navbar-brand d-flex justify-center p-3 link-dark text-decoration-none"  data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="{{ shop_name }}" href="{{ homepage_url }}">
+                        {% icon file_name='footer/logo' size=25 fill="#838383" %}
+                    </a>
+
+                    <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
+                        
+                        {% comment %} <li class="nav-item">
+                            <a href="#" class="nav-link active py-3 border-bottom" aria-current="page" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
+                            <svg class="bi" width="24" height="24" role="img" aria-label="Home"><use xlink:href="#home"></use></svg>
+                            </a>
+                        </li> {% endcomment %}
+                        
+                        {% for item in nav_items %}
+                        <li class="nav-item">
+                        {% comment %} <li class="nav-item {% if item.has_children %}btn btn-toggle align-items-center rounded{% endif %}"> {% endcomment %}
+                            {% comment %} <a class="nav-link {% if item.has_children %}dropdown-toggle{% endif %}" {% endcomment %}
+                            
+                            <a class="nav-link"
+                                {% if item.has_children %}href="#navbar_{{ forloop.counter }}" role="button"
+                                 data-toggle="collapse" aria-controls="#navbar_{{ forloop.counter }}" 
+                                 aria-expanded="false"{% else %}href="{{ item.url }}"{% endif %}
+                            >
+                                {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+                                <span class="item_text{% if item.has_children %} arrow-dropdown{% endif %}">{{ item.label }}</span>
+                            </a>
+
+                            {% if item.has_children %}
+                                <div class="dropdown-list collapse multi-collapse" id="navbar_{{ forloop.counter }}">
+                                    {% for subitem in item.children %}
+                                        <a class="dropdown-item" href="{{ subitem.url }}">
+                                            {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
+                                            {{ subitem.label }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                        </li>
+
+
+                    {% endfor %}
+                    </ul>
+
+                    <div class="dropdown border-top">
+                        
+                        <a href="#" class="d-flex align-items-center justify-content-center p-3 link-dark text-decoration-none dropdown-toggle" id="dropdownUser3" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="https://github.com/mdo.png" alt="mdo" width="24" height="24" class="rounded-circle">
+                        </a>
+
+                        <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser3">
+                            <li><a class="dropdown-item" href="#">New project...</a></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Sign out</a></li>
+                        </ul>
+
+                    </div>
+                </div>
+
+
+                {% comment %} <nav class="navbar-expand-lg navbar-dark bg-dark navbar-primary">                    
                     <div class="collapse navbar-collapse" id="sidebarMenu">
                         <ul class="navbar-menu">
                             {% for item in nav_items %}
@@ -86,7 +155,7 @@
                             {% endfor %}
                         </ul>
                     </div>
-                </nav>
+                </nav> {% endcomment %}
             {% endblock %}
         </div>
 
