@@ -261,7 +261,6 @@ class CheckoutSessionMixin(object):
             "shipping_address": shipping_address,
             "shipping_method": shipping_method,
             "order_note": order_note,
-            # "min_order": min_order,
             "order_time": order_time,
             "email_or_change": email_or_change,
             "shipping_charge": shipping_charge,

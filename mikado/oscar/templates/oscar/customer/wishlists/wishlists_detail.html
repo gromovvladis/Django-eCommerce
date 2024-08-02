@@ -16,9 +16,9 @@
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
         <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
-        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
         <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Личный кабинет</a>
-        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
         <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
     </div>
 {% endblock %}
@@ -82,7 +82,7 @@
                                                         <form id="wishlist_form" action="{% url 'customer:wishlist-remove-product' product_pk=product.pk %}" method="post" class="v-dish-order__delete d-flex shrink pd-0">
                                                             {% csrf_token %}
                                                             <button id="wishlist_btn" type="submit" class="pr-0 pt-0 pl-1 pb-1">
-                                                                {% icon file_name='interface/close' size=22 stroke="#999"%}
+                                                                {% icon file_name='interface/close' size=22 stroke='#999'%}
                                                             </button>
                                                         </form>
                                                     </div>

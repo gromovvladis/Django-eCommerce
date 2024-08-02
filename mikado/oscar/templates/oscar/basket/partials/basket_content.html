@@ -10,7 +10,7 @@
 
         <header class="v-cart__header d-sm-flex justify-space-between align-center pb-2">
             <p class="v-cart__title">Корзина</p>
-            <button data-id="modal-open-close" class="v-cart__clear">
+            <button data-id="modal-open-close" class="v-cart__clear" aria-label="Очистить корзину">
                 {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
                 <span style="margin-left: .25rem;">Очистить</span>
             </button>
@@ -59,7 +59,7 @@
                                                         </a>
                                                     </div>
                                                     <button type="button" data-id="dish-order-delete-link" class="v-dish-order__delete d-flex shrink pd-0">
-                                                        {% icon file_name='interface/close' size=22 stroke="#999"%}
+                                                        {% icon file_name='interface/close' size=22 stroke='#999'%}
                                                     </button>
                                                 </div>
 

@@ -3773,7 +3773,7 @@ input[type=button].btn-block {
 
 .nav-link {
   display: inline-block;
-  padding: 0.5rem 1rem;
+  padding: 15px 5px;
   white-space: nowrap;
 }
 .nav-link:hover, .nav-link:focus {
@@ -3848,7 +3848,12 @@ input[type=button].btn-block {
 }
 
 .navbar {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  /* position: relative; */
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -17872,12 +17877,14 @@ h3.app-ico:before {
   margin: 0.5rem;
 
 }
+/* 
 .navbar.navbar-primary {
   border-top: 1px solid #000;
   position: sticky;
   z-index: 1000;
   top: 0px;
 }
+
 .navbar.navbar-primary #bottom_nav_bar {
   border-top: 1px solid #000;
   padding: 0.5rem 0;  
@@ -17895,7 +17902,7 @@ h3.app-ico:before {
   border-right: 1px solid #fafafa;
   border-top: 1px solid #fafafa;
   border-bottom: 1px solid #fafafa
-}
+} */
 
 
 .navbar.navbar-primary .navbar-nav .nav-link {
@@ -18098,7 +18105,42 @@ caption {
 }
 
 
+.dashboard-wrapper{
+  height: auto;
+  min-height: 100%;
+  width: 100%;
+  position: relative;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
 
+.dashboard-content{
+  height: 100%;
+  margin-left: 40px;
+  padding-left: 20px;
+}
+
+.navbar-primary-back{
+  background: #1e1e1e;
+  position: fixed;
+  top: 0;
+  bottom: -120px;
+  width: 40px;
+  z-index: 1;
+}
+
+.navbar-primary{
+  position: relative;
+  float: left;
+  z-index: 9990;
+}
+
+.navbar-menu{
+  padding: 0;
+}
+
+.dashboard-wrapper.navbar-open .dashboard-content{
+  margin-left: 160px;
+}
 
 .slider-dashboard{
   position: absolute;
@@ -18171,6 +18213,7 @@ caption {
   border-radius: 40%;
   background-color: #e8eeff73;
   pointer-events: all;
+  padding: 3px;
   -webkit-transition: color .2s linear, background-color .2s linear;
   transition: color .2s linear, background-color .2s linear;
   will-change: color, background-color;
@@ -18352,6 +18395,20 @@ caption {
   font-size: 1rem;
 }
 /*# sourceMappingURL=dashboard.css.map */
+
+
+@media (max-width: 992px) {
+
+  .v-carousel__navs button{
+    left: 40%;
+  }
+
+  
+  .v-h-nav--button.right{
+    right: 20%;
+  }
+
+}
 
 
 @media (max-width: 678px) {

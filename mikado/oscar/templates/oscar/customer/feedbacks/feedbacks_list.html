@@ -16,9 +16,9 @@
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
         <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
-        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
         <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Личный кабинет</a>
-        {% icon file_name='interface/arrow-left' size=24 stroke="#999"%}
+        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
         <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
     </div>
 {% endblock %}

@@ -60,7 +60,7 @@ class ProductTable(DashboardTable):
         orderable=False,
     )
 
-    icon = "fas fa-list"
+    icon = "fas fa-chart-bar"
 
     class Meta(DashboardTable.Meta):
         model = Product
@@ -216,7 +216,7 @@ class AdditionalTable(DashboardTable):
     )
     is_public = BooleanColumn(verbose_name="Доступен", accessor="is_public", order_by=("is_public"))
 
-    icon = "fas fa-list" 
+    icon = "fas fa-chart-bar" 
     caption = ngettext_lazy("%s Дополнительный товар","%s Дополнительных товара")
 
     class Meta(DashboardTable.Meta):

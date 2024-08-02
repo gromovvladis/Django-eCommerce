@@ -111,15 +111,14 @@ class IndexView(TemplateView):
 
     def get_days_report(self, orders, days=7, segments=10):
         """
-        Get report of order revenue split up in hourly chunks. A report is
-        generated for the last *hours* (default=24) from the current time.
+        Get report of order revenue split up in days chunks. A report is
+        generated for the last *days* (default=7 week) from the current time.
         The report provides ``max_revenue`` of the hourly order revenue sum,
         ``y-range`` as the labelling for the y-axis in a template and
         ``order_total_hourly``, a list of properties for hourly chunks.
         *segments* defines the number of labelling segments used for the y-axis
         when generating the y-axis labels (default=10).
         """
-        # Get datetime for 24 hours ago
         # day_now = now().replace(hour=0, minute=0, second=0)
         day_now = now()
         start_time = day_now - timedelta(days=days)

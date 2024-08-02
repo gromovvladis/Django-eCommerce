@@ -2,13 +2,10 @@
 {% load shipping_tags %}
 
 {% with offer_discounts=basket.offer_discounts voucher_discounts=basket.grouped_voucher_discounts %}
-        
     <div class="v-order__total_and_discounts d-flex flex-column mt-3">
-
         {% block discount_totals %}
             {% if offer_discounts or voucher_discounts or shipping_charge.money != 0 %}
                 <div class="v-prices__price_discounts">
-
                     <span class="d-flex justify-space-between no-wrap">
                         Заказ
                         <span class="v-prices__price-before">
@@ -31,7 +28,6 @@
 
                         {% if voucher_discounts %}
                             {% for discount in voucher_discounts %}
-
                                 <div class="d-flex justify-space-between no-wrap">
                                     {% if discount.voucher.voucher_set %}
                                         {{ discount.voucher.voucher_set.name }} ({{ discount.voucher.code }})
@@ -52,7 +48,6 @@
                                         {% endif %}
                                     </span>
                                 </div>
-
                             {% endfor %}
                         {% endif %}
                     {% endif %}
@@ -65,7 +60,6 @@
                             </span>
                         </span>
                     {% endif %} 
-
                 </div>
             {% endif %} 
         {% endblock %}
