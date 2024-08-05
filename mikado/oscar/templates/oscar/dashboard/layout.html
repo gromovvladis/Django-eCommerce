@@ -84,19 +84,24 @@
                         {% comment %} <li class="nav-item {% if item.has_children %}btn btn-toggle align-items-center rounded{% endif %}"> {% endcomment %}
                             {% comment %} <a class="nav-link {% if item.has_children %}dropdown-toggle{% endif %}" {% endcomment %}
                             
-                            <a class="nav-link"
+
+                            <a class="nav-link{% if not item.has_children and request.path == item.url %} active{% endif %}"
                                 {% if item.has_children %}href="#navbar_{{ forloop.counter }}" role="button"
                                  data-toggle="collapse" aria-controls="#navbar_{{ forloop.counter }}" 
                                  aria-expanded="false"{% else %}href="{{ item.url }}"{% endif %}
                             >
-                                {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+                                {% if item.icon %}<i class="{{ item.icon }} mr-2 mr-lg-0 mr-xl-2" style="width: 15px;"></i>{% endif %}
                                 <span class="item_text{% if item.has_children %} arrow-dropdown{% endif %}">{{ item.label }}</span>
                             </a>
 
+                            {% comment %} {{ item.paths }} {% endcomment %}
+                            {% comment %} {% if request.path in item.paths %}show{% endif %} {% endcomment %}
+
+
                             {% if item.has_children %}
-                                <div class="dropdown-list collapse multi-collapse" id="navbar_{{ forloop.counter }}">
+                                <div class="dropdown-list collapse multi-collapse {% if request.path in item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
                                     {% for subitem in item.children %}
-                                        <a class="dropdown-item" href="{{ subitem.url }}">
+                                        <a class="dropdown-item{% if request.path == subitem.url %} active{% endif %}" href="{{ subitem.url }}">
                                             {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
                                             {{ subitem.label }}
                                         </a>

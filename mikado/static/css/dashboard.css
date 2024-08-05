@@ -2348,7 +2348,7 @@ fieldset:disabled a.btn {
 
 .btn-secondary {
   color: #000000;
-  background-color: #d9d9d9;
+  background-color: #f0eded;
   /* color: #fff; */
   /* background-color: #6c757d; */
   /* border-color: #6c757d; */
@@ -2900,7 +2900,7 @@ input[type=button].btn-block {
   .arrow-dropdown::before {
     display: inline-block;
     width: 1.5em;
-    /* margin-right: 5px; */
+    margin-right: 5px;
     line-height: 0;
     content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%280,0,0,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
     transition: transform .35s ease;
@@ -3059,7 +3059,7 @@ input[type=button].btn-block {
 .dropdown-item {
   display: block;
   width: 100%;
-  padding: 5px 5px 10px 30px;
+  padding: 10px 15px;
   /* padding: 0.25rem 1.5rem; */
   clear: both;
   font-weight: 400;
@@ -3068,7 +3068,7 @@ input[type=button].btn-block {
   /* white-space: nowrap; */
   background-color: transparent;
   border: 0;
-  border-radius: 5px;
+  /* border-radius: 5px; */
   font-size: .75rem;
 }
 .dropdown-item:hover, .dropdown-item:focus {
@@ -3804,11 +3804,21 @@ input[type=button].btn-block {
 
 .nav {
   display: flex;
-  flex-wrap: wrap;
   padding-left: 0;
   margin-bottom: 0;
   list-style: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+
+.nav::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+}
+
+
 
 .nav-link {
   color: #222;
@@ -3819,6 +3829,14 @@ input[type=button].btn-block {
   text-align: start;
   font-weight: 500;
 }
+
+@media (min-width: 992px) and (max-width: 1200px){
+  .nav-link {
+    text-align: center;
+  }
+}
+
+
 .nav-link:hover, .nav-link:focus {
   text-decoration: none;
 }
@@ -3862,7 +3880,7 @@ input[type=button].btn-block {
 .nav-pills .nav-link {
   background: none;
   border: 0;
-  border-radius: 0.25rem;
+  /* border-radius: 0.25rem; */
 }
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
@@ -17959,7 +17977,7 @@ h3.app-ico:before {
   }
 
   .dropdown-item{
-    padding: 5px 5px 10px 22px;
+    padding: 10px 10px 10px 27px;
   }
 
   .navbar.navbar-primary .navbar-nav .nav-item {

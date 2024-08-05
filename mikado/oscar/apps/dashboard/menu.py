@@ -55,5 +55,6 @@ def create_menu(menu_items, parent=None):
         if parent is None:
             nodes.append(node)
         else:
+            parent.add_path(node.url)
             parent.add_child(node)
     return nodes

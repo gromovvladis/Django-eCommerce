@@ -33,9 +33,6 @@ $(actions).each(function(){
   var mobile = window.matchMedia('(max-width:1024px)');
   var slider_per_page = 3;
 
-  console.log(!mobile.matches)
-  console.log(mobile)
-
   if ($(this).attr('data-per-page') == 4){
     if (!mobile.matches){
       slider_per_page = 4;
