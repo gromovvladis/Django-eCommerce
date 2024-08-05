@@ -233,7 +233,7 @@ class BasketAddView(FormView):
 
     def post(self, request, *args, **kwargs):
         # pylint: disable=W0201
-        self.product = shortcuts.get_object_or_404(self.product_model, pk=kwargs["pk"])
+        self.product = shortcuts.get_object_or_404(self.product_model, slug=kwargs["slug"])
         return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):

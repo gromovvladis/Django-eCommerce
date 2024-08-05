@@ -23,7 +23,7 @@ class BasketConfig(OscarConfig):
     def get_urls(self):
         urls = [
             path("", self.summary_view.as_view(), name="summary"),
-            path("add/<int:pk>/", self.add_view.as_view(), name="add"),
+            path("add/<str:slug>/", self.add_view.as_view(), name="add"),
             path("empty/", csrf_exempt(self.empty_view.as_view()), name="empty"),
             path("upsell/", self.upsell_view.as_view(), name="upsell"),
         ]

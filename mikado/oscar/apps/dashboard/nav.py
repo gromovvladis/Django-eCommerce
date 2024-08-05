@@ -32,6 +32,7 @@ class Node(object):
         self.url_kwargs = url_kwargs
         self.access_fn = access_fn
         self.children = []
+        self.paths = []
 
     @property
     def is_heading(self):
@@ -43,6 +44,9 @@ class Node(object):
 
     def add_child(self, node):
         self.children.append(node)
+
+    def add_path(self, path):
+        self.paths.append(path)
 
     def is_visible(self, user):
         return self.access_fn is None or self.access_fn(
@@ -63,6 +67,8 @@ class Node(object):
         for child in self.children:
             if child.is_visible(user):
                 node.add_child(child)
+        for path in self.paths:
+            node.add_path(path)
         return node
 
     def has_children(self):

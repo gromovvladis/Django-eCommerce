@@ -5,7 +5,7 @@
 {% purchase_info_for_product request product as session %}
 {% if session.availability.is_available_to_buy and session.price.exists %}
     {% comment %}------------- вариации + доп опции ---------------{% endcomment %}
-    <form id="add_to_basket_form" action="{% url 'basket:add' pk=product.pk  %}" method="post">
+    <form id="add_to_basket_form" action="{% url 'basket:add' slug=product.slug  %}" method="post">
         {% csrf_token %}
         {% cache 1800 product_form product.id %}
             {% basket_form request product as basket_form %}

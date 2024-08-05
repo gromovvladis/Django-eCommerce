@@ -1,4 +1,4 @@
-<form data-id="add-to-cart-form-compact" action="{% url 'basket:add' pk=product.pk %}" method="post" class="v-form--dish">
+<form data-id="add-to-cart-form-compact" action="{% url 'basket:add' slug=product.slug %}" method="post" class="v-form--dish">
     {% csrf_token %}
     <button type="submit" data-id="add-to-cart-btn-compact" class="v-button v-button--dish justify-center" aria-label="Добавить в корзину">
         <span class="v-button__wrapper">
