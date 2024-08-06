@@ -51,11 +51,12 @@
     {% for alert in alerts %}
     <tr>
         <td>
-            <a href="{% url 'dashboard:catalogue-product' alert.stockrecord.product.id %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
-                {{ alert.stockrecord.product.get_title }}
-            </a>
-            <br>
-            <span class="text-muted small">UPC: {{ alert.stockrecord.product.upc }}</span>
+            <div class="d-flex flex-column">
+                <a href="{% url 'dashboard:catalogue-product' alert.stockrecord.product.id %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
+                    {{ alert.stockrecord.product.get_title }}
+                </a>
+                <span class="text-muted small">UPC: {{ alert.stockrecord.product.upc }}</span>
+            </div>
         </td>
         <td>{{ alert.stockrecord.partner.display_name }}</td>
         <td>{{ alert.stockrecord.low_stock_threshold }}</td>

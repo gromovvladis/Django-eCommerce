@@ -98,6 +98,7 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form
         ctx["productclass_form"] = self.productclass_form_class()
+        ctx["sortable_fields"] = self.table_class.Meta.order_by
 
         cats = Category.objects.first()
         return ctx
@@ -173,15 +174,28 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
                     | Q(id__in=matches_upc.values("parent_id"))
                 )
 
-        title = data.get("title")
+        title = data.get("title")        
         if title:
             queryset = queryset.filter(
-                Q(title__icontains=title) | Q(children__title__icontains=title)
+                Q(title__icontains=title) | Q(children__title__icontains=title) | Q(variant__icontains=title)
             )
+        
         categories = data.get("categories")
         if categories:
             queryset = queryset.filter(
                 Q(categories__in=categories) | Q(children__categories__in=categories)
+            )
+        
+        is_public = data.get("is_public")
+        if is_public:
+            queryset = queryset.filter(
+                Q(is_public=is_public)
+            )
+
+        product_class = data.get("product_class")
+        if product_class:
+            queryset = queryset.filter(
+                Q(product_class__in=product_class)
             )
 
         return queryset.distinct()

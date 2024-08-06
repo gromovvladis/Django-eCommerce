@@ -7,12 +7,12 @@
 {% load static %}
 
 {% block styles %}
-    {% compress css %}   
+    {% comment %} {% compress css %}    {% endcomment %}
         <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
         <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
         <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
         <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
-    {% endcompress %}
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}
 
 {% block title %}
@@ -37,30 +37,18 @@
                 {% dashboard_navigation user as nav_items %}
 
                 <div class="navbar-expand-lg navbar-dark navbar-primary flex-column flex-shrink-0 bg-light" data-id="navbar-primary">
-
                     <div class="navbar-header py-3 px-1">
                         {% comment %} <a class="navbar-brand" href="{{ homepage_url }}">
                             {% icon file_name='footer/logo' size=20 fill="#838383" %}
                         </a> {% endcomment %}
                         <button class="navbar-toggler p-0" data-id="navbar-toggler">
-                            {% icon file_name='interface/arrow-right' size=30 stroke='#007bff'%}
+                            {% icon file_name='interface/arrow-home' size=30 stroke='#007bff'%}
                         </button>
                     </div>
 
-
                     <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
-                        
-                        {% comment %} <li class="nav-item">
-                            <a href="#" class="nav-link active py-3 border-bottom" aria-current="page" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
-                            <svg class="bi" width="24" height="24" role="img" aria-label="Home"><use xlink:href="#home"></use></svg>
-                            </a>
-                        </li> {% endcomment %}
-                        
                         {% for item in nav_items %}
                         <li class="nav-item{% if request.path in item.paths %} current-tab{% endif %}">
-                        {% comment %} <li class="nav-item {% if item.has_children %}btn btn-toggle align-items-center rounded{% endif %}"> {% endcomment %}
-                            {% comment %} <a class="nav-link {% if item.has_children %}dropdown-toggle{% endif %}" {% endcomment %}
-                            
                             {% if item.has_children %}
                                 <button class="nav-link" data-target="#navbar_{{ forloop.counter }}"
                                     data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" type="button"
@@ -69,29 +57,7 @@
                                     {% if item.icon %}<i class="{{ item.icon }} mr-2 mr-lg-0 mr-xl-2" style="width: 15px;"></i>{% endif %}
                                     <span class="item_text arrow-dropdown">{{ item.label }}</span>
                                 </button>
-                            {% else %}
-                                <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
-                                    {% if item.icon %}<i class="{{ item.icon }} mr-2 mr-lg-0 mr-xl-2" style="width: 15px;"></i>{% endif %}
-                                    <span class="item_text">{{ item.label }}</span>
-                                </a>
-                            {% endif %}
-
-                            {% comment %} <a class="nav-link{% if item.has_children and request.path in item.paths %} tablet-active{% elif not item.has_children and request.path == item.url %} active{% endif %}"
-                                {% if item.has_children %}data-target="#navbar_{{ forloop.counter }}"
-                                 data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" 
-                                 aria-expanded="{% if request.path in item.paths %}true{% else %}false{% endif %}"{% else %}href="{{ item.url }}"{% endif %}
-                            >
-                                {% if item.icon %}<i class="{{ item.icon }} mr-2 mr-lg-0 mr-xl-2" style="width: 15px;"></i>{% endif %}
-                                <span class="item_text{% if item.has_children %} arrow-dropdown{% endif %}">{{ item.label }}</span>
-                            </a> {% endcomment %}
-
-                            {% comment %} {{ item.paths }} {% endcomment %}
-                            {% comment %} {% if request.path in item.paths %}show{% endif %} {% endcomment %}
-
-
-                            {% if item.has_children %}
                                 <div class="dropdown-list collapse {% if request.path in item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
-                                {% comment %} <div class="dropdown-list collapse {% if request.path in item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}"> {% endcomment %}
                                     {% for subitem in item.children %}
                                         <a class="dropdown-item{% if request.path == subitem.url %} active{% endif %}" href="{{ subitem.url }}">
                                             {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
@@ -99,15 +65,17 @@
                                         </a>
                                     {% endfor %}
                                 </div>
+                            {% else %}
+                                <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
+                                    {% if item.icon %}<i class="{{ item.icon }} mr-2 mr-lg-0 mr-xl-2" style="width: 15px;"></i>{% endif %}
+                                    <span class="item_text">{{ item.label }}</span>
+                                </a>
                             {% endif %}
-
                         </li>
-
-
                     {% endfor %}
                     </ul>
 
-                    <div class="dropdown border-top">
+                    <div class="dropdown border-top"> 
                         
                         <button role="button" class="nav-account d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="nav-account" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <div class="rounded-circle">{{ user.get_img }}</div>
@@ -121,39 +89,8 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'dashboard:logout' %}">Выйти</a></li>
                         </ul>
-
                     </div>
                 </div>
-
-                {% comment %} <nav class="navbar-expand-lg navbar-dark bg-dark navbar-primary">                    
-                    <div class="collapse navbar-collapse" id="sidebarMenu">
-                        <ul class="navbar-menu">
-                            {% for item in nav_items %}
-                                <li class="nav-item {% if item.has_children %}dropright{% endif %}">
-                                    <a class="nav-link {% if item.has_children %}dropdown-toggle{% endif %}"
-                                        href="{% if item.is_heading %}#{% else %}{{ item.url }}{% endif %}"
-                                        {% if item.has_children %}id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"{% endif %}
-                                    >
-                                        {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
-                                        <span class="item_text">{{ item.label }}</span>
-                                    </a>
-        
-                                    {% if item.has_children %}
-                                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                            {% for subitem in item.children %}
-                                                <a class="dropdown-item" href="{{ subitem.url }}">
-                                                    {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
-                                                    {{ subitem.label }}
-                                                </a>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </nav> {% endcomment %}
-                
             {% endblock %}
         </div>
 
@@ -189,7 +126,7 @@
 
 {# Local scripts #}
 {% block scripts %}
-        {% compress js %}
+        {% comment %} {% compress js %} {% endcomment %}
             <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/oscar/ui.js" %}"></script>
             {# jQuery plugins #}
@@ -205,7 +142,7 @@
             <script src="{% static "js/dashboard/dashboard-sliders.js" %}"></script>
             <script src="{% static "js/dashboard/navi.js" %}"></script>
             <script src="{% static "js/tinymce/jquery.tinymce.min.js" %}"></script>
-        {% endcompress %}
+        {% comment %} {% endcompress %} {% endcomment %}
         <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     {% endblock %}

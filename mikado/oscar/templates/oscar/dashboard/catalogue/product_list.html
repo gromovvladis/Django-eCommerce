@@ -24,51 +24,47 @@
 {% endblock header %}
 
 {% block dashboard_content %}
-    {% block create_product %}
-        <div class="table-header">
-            <h3><i class="fas fa-square-plus"></i> Создать новый продукт</h3>
-        </div>
-        <div class="card card-body">
-            <form action="{% url 'dashboard:catalogue-product-create' %}" method="get" class="form-inline fill-width justify-space-between">
-                <div>
-                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=productclass_form %}
-                </div>
-                <button class="btn btn-primary" type="submit" data-loading-text="Создание продукта...">
-                    <i class="fas fa-plus-circle"></i> Новый продукт
-                </button>
-            </form>
-        </div>
-    {% endblock %}
 
     {% block search_products %}
-        <div class="table-header">
-            <h3><i class="fas fa-search"></i> Поиск</h3>
-        </div>
-        <div class="card card-body">
-            <form method="get" class="form-inline fill-width justify-space-between">
-                {% comment %}
-                    Add the current query string to the search form so that the
-                    sort order is not reset when searching.
-                {% endcomment %}
-                <div class="d-flex form-row">
-                    {% for name, value in request.GET.items %}
-                        {% if name not in form.fields %}
-                            <input type="hidden" name="{{ name }}" value="{{ value }}"/>
-                        {% endif %}
-                    {% endfor %}
-                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=form %}
-                </div>
-                <button type="submit" class="btn btn-primary" data-loading-text="Поиск..."><i class="fas fa-search"></i> Поиск</button>
-            </form>
+        <div class="table-wrapper mb-4">
+            <div class="table-header d-flex justify-space-between" data-target="#card-body" 
+            data-toggle="collapse" aria-controls="card-body" aria-expanded="false">
+                <h3><i class="fas fa-search"></i> Поиск и создание</h3>
+                <i class="fas fa-square-plus" style="color: var(--primary);"></i>
+            </div>
+            <div class="card card-body dropdown-list collapse" id="card-body">
+                <h2 class="mb-4">Создание</h2>
+                <form action="{% url 'dashboard:catalogue-product-create' %}" method="get" class="form-inline fill-width justify-space-between">
+                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=productclass_form %}
+                    <button class="btn btn-primary btn-form" type="submit" data-loading-text="Создание продукта...">
+                        <i class="fas fa-plus-circle"></i> Новый продукт
+                    </button>
+                </form>
+                <h2 class="my-4">Поиск</h2>
+                <form method="get" class="form-inline fill-width justify-space-between">
+                    <div class="d-flex form-row">
+                        {% for name, value in request.GET.items %}
+                            {% if name not in form.fields %}
+                                <input type="hidden" name="{{ name }}" value="{{ value }}"/>
+                            {% endif %}
+                        {% endfor %}
+                        {% include "oscar/dashboard/partials/form_fields_inline.html" with form=form %}
+                    </div>
+    
+                    <button type="submit" class="btn btn-primary btn-form mb-3" data-loading-text="Поиск..."><i class="fas fa-search"></i> Поиск</button>
+                </form>
+            </div>
         </div>
     {% endblock %}
 
     {% if products %}
         {% block product_list %}
-            <form class="mobile-hidden-thead" method="post">
+
+            <form class="mobile-table" method="post">
                 {% csrf_token %}
                 {% render_table products %}
             </form>
+
             <div class="modal fade" id="product-image-modal" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -82,6 +78,7 @@
                     </div>
                 </div>
             </div>
+
         {% endblock product_list %}
     {% else %}
         <p class="py-2">Ничего не найдено</p>

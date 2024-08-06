@@ -8,4 +8,5 @@ var Slider = new Swiper($(mainSlider).find('[data-id="slider-swiper"]').get(0), 
     speed: 300,
     loop: true,
     spaceBetween: 50,
+    allowTouchMove: false,
 });

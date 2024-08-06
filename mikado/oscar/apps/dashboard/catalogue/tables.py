@@ -64,7 +64,7 @@ class ProductTable(DashboardTable):
 
     class Meta(DashboardTable.Meta):
         model = Product
-        fields = ("is_public", "date_updated")
+        fields = ("date_updated", "is_public")
         sequence = (
             "image",
             "title",
