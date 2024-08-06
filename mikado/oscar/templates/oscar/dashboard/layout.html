@@ -3,18 +3,16 @@
 {% load category_tags %}
 {% load dashboard_tags %}
 {% load svg_tags %}
-{% comment %} {% load compress %} {% endcomment %}
+{% load compress %}
 {% load static %}
 
 {% block styles %}
-    {% comment %} {% compress css %}    {% endcomment %}
+    {% compress css %}   
         <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
         <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
         <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
         <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
-
-        {% comment %} <link rel="stylesheet" href="{% static "js/bootstrap5/bootstrap.min.css" %}"></script> {% endcomment %}
-    {% comment %} {% endcompress %} {% endcomment %}
+    {% endcompress %}
 {% endblock %}
 
 {% block title %}
@@ -23,53 +21,32 @@
 
 {% block layout %}
 
-
     {% block navbar %}
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-accounts">
             <div class="container fill-width">
-                
-                <button class="navbar-toggler float-right" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="fas fa-bars"></i>
+                <button class="navbar-toggler navbar-toggler--mobile" type="button" data-id="navbar-toggler">
+                    <span class="navbar-toggler-icon"></span>
                 </button>
-
-                {% comment %} <a class="navbar-brand" href="{{ homepage_url }}">{{ shop_name }}</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#top_nav_bar" aria-controls="top_nav_bar" aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="collapse navbar-collapse" id="top_nav_bar">
-                    <ul class="navbar-nav mr-auto"></ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'customer:summary' %}"><i class="fas fa-user"></i> {{ user.get_full_name|default:request.user.get_full_name }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ homepage_url }}"><i class="fas fa-home"></i> Магазин</a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard:logout' %}"><i class="fas fa-sign-out-alt"></i> Выйти</a>
-                        </li>
-                    </ul>
-                </div> {% endcomment %}
-
             </div>
         </nav>
     {% endblock navbar %}
 
     <div class="dashboard-wrapper">
-
-                
-
-        
-
         <div class="navbar-menu">
             {% block dashboard_nav %}
                 {% dashboard_navigation user as nav_items %}
-                {% comment %} <div class="navbar-primary-back"></div> {% endcomment %}
-                <div class="navbar-expand-lg navbar-dark navbar-primary d-flex flex-column flex-shrink-0 bg-light">
 
-                    <a class="navbar-brand d-flex justify-center p-3 link-dark text-decoration-none"  data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="{{ shop_name }}" href="{{ homepage_url }}">
-                        {% icon file_name='footer/logo' size=25 fill="#838383" %}
-                    </a>
+                <div class="navbar-expand-lg navbar-dark navbar-primary flex-column flex-shrink-0 bg-light" data-id="navbar-primary">
+
+                    <div class="navbar-header py-3 px-1">
+                        {% comment %} <a class="navbar-brand" href="{{ homepage_url }}">
+                            {% icon file_name='footer/logo' size=20 fill="#838383" %}
+                        </a> {% endcomment %}
+                        <button class="navbar-toggler p-0" data-id="navbar-toggler">
+                            {% icon file_name='interface/arrow-right' size=30 stroke='#007bff'%}
+                        </button>
+                    </div>
+
 
                     <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
                         
@@ -80,26 +57,41 @@
                         </li> {% endcomment %}
                         
                         {% for item in nav_items %}
-                        <li class="nav-item">
+                        <li class="nav-item{% if request.path in item.paths %} current-tab{% endif %}">
                         {% comment %} <li class="nav-item {% if item.has_children %}btn btn-toggle align-items-center rounded{% endif %}"> {% endcomment %}
                             {% comment %} <a class="nav-link {% if item.has_children %}dropdown-toggle{% endif %}" {% endcomment %}
                             
+                            {% if item.has_children %}
+                                <button class="nav-link" data-target="#navbar_{{ forloop.counter }}"
+                                    data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" type="button"
+                                    aria-expanded="{% if request.path in item.paths %}true{% else %}false{% endif %}"
+                                >
+                                    {% if item.icon %}<i class="{{ item.icon }} mr-2 mr-lg-0 mr-xl-2" style="width: 15px;"></i>{% endif %}
+                                    <span class="item_text arrow-dropdown">{{ item.label }}</span>
+                                </button>
+                            {% else %}
+                                <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
+                                    {% if item.icon %}<i class="{{ item.icon }} mr-2 mr-lg-0 mr-xl-2" style="width: 15px;"></i>{% endif %}
+                                    <span class="item_text">{{ item.label }}</span>
+                                </a>
+                            {% endif %}
 
-                            <a class="nav-link{% if not item.has_children and request.path == item.url %} active{% endif %}"
-                                {% if item.has_children %}href="#navbar_{{ forloop.counter }}" role="button"
-                                 data-toggle="collapse" aria-controls="#navbar_{{ forloop.counter }}" 
-                                 aria-expanded="false"{% else %}href="{{ item.url }}"{% endif %}
+                            {% comment %} <a class="nav-link{% if item.has_children and request.path in item.paths %} tablet-active{% elif not item.has_children and request.path == item.url %} active{% endif %}"
+                                {% if item.has_children %}data-target="#navbar_{{ forloop.counter }}"
+                                 data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" 
+                                 aria-expanded="{% if request.path in item.paths %}true{% else %}false{% endif %}"{% else %}href="{{ item.url }}"{% endif %}
                             >
                                 {% if item.icon %}<i class="{{ item.icon }} mr-2 mr-lg-0 mr-xl-2" style="width: 15px;"></i>{% endif %}
                                 <span class="item_text{% if item.has_children %} arrow-dropdown{% endif %}">{{ item.label }}</span>
-                            </a>
+                            </a> {% endcomment %}
 
                             {% comment %} {{ item.paths }} {% endcomment %}
                             {% comment %} {% if request.path in item.paths %}show{% endif %} {% endcomment %}
 
 
                             {% if item.has_children %}
-                                <div class="dropdown-list collapse multi-collapse {% if request.path in item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
+                                <div class="dropdown-list collapse {% if request.path in item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
+                                {% comment %} <div class="dropdown-list collapse {% if request.path in item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}"> {% endcomment %}
                                     {% for subitem in item.children %}
                                         <a class="dropdown-item{% if request.path == subitem.url %} active{% endif %}" href="{{ subitem.url }}">
                                             {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
@@ -117,21 +109,21 @@
 
                     <div class="dropdown border-top">
                         
-                        <a href="#" class="d-flex align-items-center justify-content-center p-3 link-dark text-decoration-none dropdown-toggle" id="dropdownUser3" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://github.com/mdo.png" alt="mdo" width="24" height="24" class="rounded-circle">
-                        </a>
+                        <button role="button" class="nav-account d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="nav-account" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <div class="rounded-circle">{{ user.get_img }}</div>
+                            <span class="ml-2">{{ user.get_full_name|default:request.user.get_full_name }}</span>
+                        </button>
 
-                        <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser3">
-                            <li><a class="dropdown-item" href="#">New project...</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
-                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <ul class="dropdown-menu text-small shadow-sm" aria-labelledby="nav-account">
+                            <li><a class="dropdown-item" href="#">Задачи: 0</a></li>
+                            <li><a class="dropdown-item" href="{% url 'customer:summary' %}">Аккаунт</a></li>
+                            <li><a class="dropdown-item" href="{{ homepage_url }}">Магазин</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Sign out</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:logout' %}">Выйти</a></li>
                         </ul>
 
                     </div>
                 </div>
-
 
                 {% comment %} <nav class="navbar-expand-lg navbar-dark bg-dark navbar-primary">                    
                     <div class="collapse navbar-collapse" id="sidebarMenu">
@@ -161,9 +153,9 @@
                         </ul>
                     </div>
                 </nav> {% endcomment %}
+                
             {% endblock %}
         </div>
-
 
         <div class="dashboard-content">
             <div class="container container-fluid">
@@ -189,44 +181,33 @@
                             {% block dashboard_content %}{% endblock dashboard_content %}
                         {% endblock content %}
                     </div>
-                </div>
-                
+                </div>  
             </div>
         </div>
-    
     </div>
-
-
 {% endblock %}
 
 {# Local scripts #}
 {% block scripts %}
-    {% comment %} {% compress js %}  {% endcomment %}
-        <!-- Twitter Bootstrap -->
-        <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
-        {% comment %} <script src="{% static "js/bootstrap5/bootstrap.bundle.min.js" %}"></script> {% endcomment %}
-        <!-- Oscar -->
-        <script src="{% static "js/oscar/ui.js" %}"></script>
-        {# jQuery plugins #}
-        <script src="{% static "js/mousewheel/jquery.mousewheel.js" %}"></script>
-        <script src="{% static "js/bootstrap4-datetimepicker/moment-with-locales.min.js" %}"></script>
-        <script src="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.js" %}"></script>
-        <script src="{% static "js/inputmask/jquery.inputmask.min.js" %}"></script>
-        <script src="{% static "js/select2/select2.min.js" %}"></script>
-        <script src="{% static "js/jquery-sortable/jquery-sortable-min.js" %}"></script>
-        <script src="{% static "js/oscar/RelatedObjectLookups.js" %}"></script>
-        <script src="{% static "js/oscar/dashboard.js" %}"></script>
-        <script src="{% static "js/slider/slider.js" %}"></script>
-        <script src="{% static "js/dashboard/dashboard-sliders.js" %}"></script>
-        <script src="{% static "js/tinymce/jquery.tinymce.min.js" %}"></script>
-    {% comment %} {% endcompress %} {% endcomment %}
-    {% comment %} {% compress js %}  {% endcomment %}
+        {% compress js %}
+            <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
+            <script src="{% static "js/oscar/ui.js" %}"></script>
+            {# jQuery plugins #}
+            <script src="{% static "js/mousewheel/jquery.mousewheel.js" %}"></script>
+            <script src="{% static "js/bootstrap4-datetimepicker/moment-with-locales.min.js" %}"></script>
+            <script src="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.js" %}"></script>
+            <script src="{% static "js/inputmask/jquery.inputmask.min.js" %}"></script>
+            <script src="{% static "js/select2/select2.min.js" %}"></script>
+            <script src="{% static "js/jquery-sortable/jquery-sortable-min.js" %}"></script>
+            <script src="{% static "js/oscar/RelatedObjectLookups.js" %}"></script>
+            <script src="{% static "js/oscar/dashboard.js" %}"></script>
+            <script src="{% static "js/slider/slider.js" %}"></script>
+            <script src="{% static "js/dashboard/dashboard-sliders.js" %}"></script>
+            <script src="{% static "js/dashboard/navi.js" %}"></script>
+            <script src="{% static "js/tinymce/jquery.tinymce.min.js" %}"></script>
+        {% endcompress %}
         <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
-    {% comment %} {% endcompress %} {% endcomment %}
-
-
-
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     {% endblock %}
 
 {% block onbodyload %}

@@ -154,6 +154,17 @@ class User(AbstractUser, PermissionsMixin):
         full_name = "%s %s" % (self.first_name, self.last_name)
         return full_name.strip()
 
+    def get_img(self):
+        """
+        Return the user's avatar image.
+        """
+        name = self.get_full_name()
+
+        if name:
+            return name[0]
+
+        return 'А'
+
     def get_short_name(self):
         """
         Return the short name for the user.
