@@ -101,6 +101,19 @@ class ProductSearchForm(forms.Form):
         required=False,
         # empty_label="-----",
     )
+    product_class = forms.ModelMultipleChoiceField(
+        label="Тип продукта",
+        queryset=ProductClass.objects.all(),
+        required=False,
+    )
+    is_public = forms.BooleanField(
+        label="Доступен",
+        # initial=True,
+        required=False,
+        widget=forms.widgets.CheckboxInput(
+            attrs={'checked': True}
+        )
+    )
 
     def clean(self):
         cleaned_data = super().clean()
