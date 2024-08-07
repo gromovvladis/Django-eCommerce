@@ -529,6 +529,8 @@ class AbstractProduct(models.Model):
     rating = models.FloatField("Рейтинг", null=True, editable=False)
 
     order = models.IntegerField("Порядок", null=False, blank=False, default=0)
+    
+    cooking_time = models.IntegerField("Время приготовления", null=False, blank=False, default=20)
 
     date_created = models.DateTimeField(
         "Дата создания", auto_now_add=True, db_index=True

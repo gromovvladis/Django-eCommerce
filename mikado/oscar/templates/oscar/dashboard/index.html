@@ -10,12 +10,12 @@
 {% endblock %}
 
 {% block breadcrumbs %}{% endblock %}
-{% block navtext %}Статистика{% endblock %}
+{% block navtext %}{{ title }}{% endblock %}
 
 {% block dashboard_content %}
 
 <div class="table-header">
-    <i class="fas fa-line-chart"></i> Статистика магазина
+    <i class="fas fa-line-chart"></i> Статистика
 </div>
 
 <div class="content-block">
@@ -314,7 +314,7 @@
                     <td class="col-md-2" >{{ total_open_stock_alerts }}</td>
             </tr>
             <tr>
-                <th class="col-md-10">Закрытие уведомления о конце запасов</th>
+                <th class="col-md-10">Закрытые уведомления о конце запасов</th>
                     <td class="col-md-2" >{{ total_closed_stock_alerts }}</td>
             </tr>
         </table>

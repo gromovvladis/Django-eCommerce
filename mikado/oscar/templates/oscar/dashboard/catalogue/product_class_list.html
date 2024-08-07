@@ -12,7 +12,7 @@
 {% block header %}
     <div class="page-header">
         <a href="{% url 'dashboard:catalogue-class-create' %}" class="btn btn-primary float-right">
-            <i class="fas fa-plus-circle"></i> Создать тип продукта</a>
+            <i class="fas fa-plus-circle"></i><span>&nbsp;Создать тип продукта</span></a>
         <h1>Типы продуктов</h1>
     </div>
 {% endblock header %}
@@ -25,8 +25,8 @@
             <thead>
                 <tr>
                     <th>Имя</th>
-                    <th>Доставка</th>
-                    <th>Отслеживать запасы</th>
+                    <th class="delivery">Доставка</th>
+                    <th class="stock">Отслеживать запасы</th>
                     <th>&nbsp;</th>
                 </tr>
             </thead>
@@ -34,8 +34,8 @@
                 {% for class in classes %}
                     <tr>
                         <td class="name"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.name }}</a></td>
-                        <td data-label="Доставка"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.requires_shipping|yesno:"✔️,✖️" }}</a></td>
-                        <td data-label="Отслеживать запасы"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.track_stock|yesno:"✔️,✖️" }}</a></td>
+                        <td class="delivery" data-label="Доставка"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.requires_shipping|yesno:"✔️,❌" }}</a></td>
+                        <td class="stock" data-label="Отслеживать запасы"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.track_stock|yesno:"✔️,❌" }}</a></td>
                         <td class="actions">
                             <div class="btn-toolbar">
                                 <div class="dropdown">
@@ -55,8 +55,8 @@
                         </td>
                         <td class="toggle-row">
                             <button class="btn btn-secondary" type="button">
-                                <i class="fas fa-toggle-off"></i>
-                                <i class="fas fa-toggle-on"></i>
+                                <i class="fa-solid fa-chevron-up"></i>
+                                <i class="fa-solid fa-chevron-down"></i>
                             </button>
                         </td>
                     </tr>

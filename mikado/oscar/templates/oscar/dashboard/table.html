@@ -2,7 +2,7 @@
 {% load django_tables2 %}
 
 {% block table.thead %}
-    <caption>
+    <caption align="center">
         {% block table.caption %}
             <h3 class="float-left">
                 {% if table.icon %}
@@ -12,7 +12,7 @@
             </h3>
         {% endblock %}
         <button role="button" class="sort-table text-decoration-none dropdown-toggle float-right" id="sort-table" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span>Сортировка</span>
+            <i class="fa-solid fa-arrow-up-short-wide"></i>
         </button>
 
         <div class="dropdown-menu text-small shadow-sm" aria-labelledby="sort-table">
@@ -51,8 +51,8 @@
             {% endfor %}
             <td class="toggle-row">
                 <button class="btn btn-secondary" type="button">
-                    <i class="fas fa-toggle-off"></i>
-                    <i class="fas fa-toggle-on"></i>
+                    <i class="fa-solid fa-chevron-up"></i>
+                    <i class="fa-solid fa-chevron-down"></i>
                 </button>
             </td>
         </tr>

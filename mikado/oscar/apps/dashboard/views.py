@@ -21,6 +21,7 @@ Voucher = get_model("voucher", "Voucher")
 Basket = get_model("basket", "Basket")
 StockAlert = get_model("partner", "StockAlert")
 Product = get_model("catalogue", "Product")
+Category = get_model("catalogue", "Category")
 Order = get_model("order", "Order")
 Line = get_model("order", "Line")
 User = get_user_model()
@@ -163,6 +164,49 @@ class IndexView(TemplateView):
         return ctx
 
 
+    def get_data(self):
+
+        prod_slug = self.request.GET.get('product')
+        cat_slug = self.request.GET.get('category')
+
+        if prod_slug:
+            prod = Product.objects.get(slug=prod_slug)
+            data = {
+                "title": "Статистика для продукта '%s'" % prod.get_title(),
+                "orders": Order.objects.filter(lines__product_id=prod.id),
+                "alerts": StockAlert.objects.filter(stockrecord__product_id=prod.id),
+                "baskets": Basket.objects.filter(lines__product_id=prod.id).filter(status=Basket.OPEN),
+                "customers": User.objects.filter(orders__lines__product_id=prod.id).distinct(),
+                "lines": Line.objects.filter(product_id=prod.id),
+                "products": Product.objects.filter(id=prod.id),
+            }
+        elif cat_slug:
+            cat = Category.objects.get(slug=cat_slug)
+            prod_cat = Product.objects.filter(categories__slug=cat_slug)
+            ids = [prod.id for prod in prod_cat]
+            data = {
+                "title": "Статистика для категории '%s'" % cat.name,
+                "orders": Order.objects.filter(lines__product_id__in=ids),
+                "alerts": StockAlert.objects.filter(stockrecord__product_id__in=ids),
+                "baskets": Basket.objects.filter(lines__product_id__in=ids).filter(status=Basket.OPEN),
+                "customers": User.objects.filter(orders__lines__product_id__in=ids).distinct(),
+                "lines": Line.objects.filter(product_id__in=ids),
+                "products": prod_cat,
+            }
+        else:
+            data = {
+                "title": "Статистика",
+                "orders": Order.objects.all(),
+                "alerts": StockAlert.objects.all(),
+                "baskets": Basket.objects.filter(status=Basket.OPEN),
+                "customers": User.objects.filter(orders__isnull=False).distinct(),
+                "lines": Line.objects.filter(),
+                "products": Product.objects.all(),
+            }
+
+        return data
+
+
     def get_stats(self):
         current_time = now()
         datetime_24hrs_ago = current_time - timedelta(hours=24)
@@ -173,12 +217,14 @@ class IndexView(TemplateView):
         datetime_7days_ago = current_time - timedelta(days=7)
         datetime_30days_ago = current_time - timedelta(days=30)
 
-        orders = Order.objects.all()
-        alerts = StockAlert.objects.all()
-        baskets = Basket.objects.filter(status=Basket.OPEN)
-        customers = User.objects.filter(orders__isnull=False).distinct()
-        lines = Line.objects.filter()
-        products = Product.objects.all()
+        data = self.get_data()
+
+        orders = data['orders']
+        alerts = data['alerts']
+        baskets = data['baskets']
+        customers = data['customers']
+        lines = data['lines']
+        products = data['products']
 
         user = self.request.user
         if not user.is_staff:
@@ -212,6 +258,7 @@ class IndexView(TemplateView):
         total_lines_last_30days = lines.filter(order__in=orders_last_30days).count()
 
         stats = {
+            "title": data["title"],
             "current_time": current_time,
             "start_of_week": datetime_week_ago,
             "start_of_month": start_of_month,

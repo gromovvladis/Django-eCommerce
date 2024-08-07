@@ -13,7 +13,7 @@
 
 {% block header %}
     <div class="page-header">
-        <a href="{% url 'dashboard:range-create' %}" class="btn btn-primary float-right"><i class="fas fa-plus-circle"></i> Создать новый ассортимент</a>
+        <a href="{% url 'dashboard:range-create' %}" class="btn btn-primary float-right"><i class="fas fa-plus-circle"></i><span>&nbsp;Создать ассортимент</span></a>
         <h1>Ассортимент</h1>
     </div>
 {% endblock header %}
@@ -51,7 +51,7 @@
                             {% else %}
                                 <td data-label="Продукты">{{ range.num_products|default:"-" }}</td>
                             {% endif %}
-                            <td data-label="Доступно">{{ range.is_public|yesno:"✔️,✖️" }}</td>
+                            <td data-label="Доступно">{{ range.is_public|yesno:"✔️,❌" }}</td>
                             <td data-label="Дата создания">{{ range.date_created }}</td>
                             <td class="actions">
                                 <div class="btn-toolbar">
@@ -84,15 +84,15 @@
                             </td>
                             <td class="toggle-row">
                                 <button class="btn btn-secondary" type="button">
-                                    <i class="fas fa-toggle-off"></i>
-                                    <i class="fas fa-toggle-on"></i>
+                                    <i class="fa-solid fa-chevron-up"></i>
+                                    <i class="fa-solid fa-chevron-down"></i>
                                 </button>
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             {% else %}
-                <tr><td>Ассортимент не созданы</td></tr>
+                <tr><td class="empty">Ассортименты не созданы</td></tr>
             {% endif %}
         </table>
         {% include "oscar/dashboard/partials/pagination.html" %}

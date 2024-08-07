@@ -47,7 +47,7 @@
                         <th>Граница малых запасов</th>
                         <th>Доступно</th>
                         <th>Дата уведомления</th>
-                        <th>Стутус</th>
+                        <th class="status">Стутус</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -66,7 +66,7 @@
                             <td data-label="Граница малых запасов">{{ alert.stockrecord.low_stock_threshold }}</td>
                             <td data-label="Доступно">{{ alert.stockrecord.net_stock_level }}</td>
                             <td data-label="Дата уведомления">{{ alert.date_created }}</td>
-                            <td data-label="Стутус" class="status">
+                            <td class="status">
                                 <span class="badge {% if alert.status == "Закрыто" %}badge-success{% else %}badge-warning{% endif %}">
                     
                                 {{ alert.status }}
@@ -77,15 +77,15 @@
                             </td>
                             <td class="toggle-row">
                                 <button class="btn btn-secondary" type="button">
-                                    <i class="fas fa-toggle-off"></i>
-                                    <i class="fas fa-toggle-on"></i>
+                                    <i class="fa-solid fa-chevron-up"></i>
+                                    <i class="fa-solid fa-chevron-down"></i>
                                 </button>
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             {% else %}
-                <tr><td>Уведомления о наличии не найдены</td></tr>
+                <tr><td class="empty">Уведомления о наличии не найдены</td></tr>
             {% endif %}
         </table>
         {% include "oscar/dashboard/partials/pagination.html" %}

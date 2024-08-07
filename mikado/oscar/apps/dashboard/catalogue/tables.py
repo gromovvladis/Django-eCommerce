@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from django_tables2 import A, Column, LinkColumn, TemplateColumn, BooleanColumn
+from django_tables2 import A, Column, LinkColumn, TemplateColumn
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
@@ -98,6 +98,7 @@ class ProductTable(DashboardTable):
         verbose_name="Варианты",
         template_name="oscar/dashboard/catalogue/product_row_variants.html",
         orderable=False,
+        attrs = {'th': {'class': 'variants'},}
     )
     additionals = TemplateColumn(
         verbose_name="Доп. товары",
@@ -108,6 +109,13 @@ class ProductTable(DashboardTable):
         verbose_name="Опции",
         template_name="oscar/dashboard/catalogue/product_row_options.html",
         orderable=False,
+        attrs = {'th': {'class': 'options'},}
+    )
+    cooking_time = TemplateColumn(
+        verbose_name="Время приготовления",
+        template_name="oscar/dashboard/catalogue/product_row_time.html",
+        orderable=True,
+        attrs = {'th': {'class': 'cooking_time'},}
     )
     categories = TemplateColumn(
         verbose_name="Категории",
@@ -118,14 +126,26 @@ class ProductTable(DashboardTable):
     price = TemplateColumn(
         verbose_name="Цена",
         template_name="oscar/dashboard/catalogue/product_row_price.html",
-        # accessor="get_low_price",
         order_by="title",
         orderable=True,
+        attrs = {'th': {'class': 'price'},}
     )
-    is_public = BooleanColumn(verbose_name="Доступен", accessor="is_public", order_by=("is_public"))
+    is_public = TemplateColumn(
+        verbose_name="Доступен",
+        template_name="oscar/dashboard/table/boolean.html",
+        accessor="is_public",
+        order_by=("is_public"),
+        attrs = {'th': {'class': 'is_public'},}
+    )
+
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/product_row_actions.html",
+        orderable=False,
+    )
+    statistic = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/catalogue/product_row_statistic.html",
         orderable=False,
     )
 
@@ -142,10 +162,12 @@ class ProductTable(DashboardTable):
             "options",
             "variants",
             "price",
+            "cooking_time",
             "...",
             "is_public",
             "date_updated",
             "actions",
+            "statistic",
         )
         order_by = "-date_updated"
         attrs = {
@@ -191,10 +213,22 @@ class CategoryTable(DashboardTable):
         accessor="get_num_products",
         order_by="product",
     )
-    is_public = BooleanColumn(verbose_name="Доступна", accessor="is_public", order_by=("is_public"))
+    is_public = TemplateColumn(
+        verbose_name="Доступен",
+        template_name="oscar/dashboard/table/boolean.html",
+        accessor="is_public",
+        order_by=("is_public"),
+        attrs = {'th': {'class': 'is_public'},}
+    )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/category_row_actions.html",
+        orderable=False,
+    )
+
+    statistic = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/catalogue/category_row_statistic.html",
         orderable=False,
     )
 
@@ -204,7 +238,7 @@ class CategoryTable(DashboardTable):
     class Meta(DashboardTable.Meta):
         model = Category
         fields = ("image", "name", "description", "is_public")
-        sequence = ("image", "name", "description", "...", "is_public", "actions")
+        sequence = ("image", "name", "description", "...", "is_public", "actions", "statistic")
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
@@ -252,6 +286,14 @@ class OptionTable(DashboardTable):
         orderable=False,
     )
 
+    required = TemplateColumn(
+        verbose_name="Обязательная опция",
+        template_name="oscar/dashboard/table/boolean.html",
+        accessor="required",
+        order_by=("required"),
+        attrs = {'th': {'class': 'required'},}
+    ) 
+
     icon = "fas fa-paperclip"
     caption = ngettext_lazy("%s Опция", "%s Опций")
 
@@ -279,23 +321,37 @@ class AdditionalTable(DashboardTable):
     max_amount = Column(
         verbose_name="Максимум",
         order_by="max_amount",
+        attrs = {'th': {'class': 'max_amount'},},
+    )
+    weight = TemplateColumn(
+        verbose_name="Вес",
+        template_name="oscar/dashboard/catalogue/additional_row_weight.html",
+        order_by="weight",
+        attrs = {'th': {'class': 'weight'},},
     )
     price = TemplateColumn(
         verbose_name="Цена",
         template_name="oscar/dashboard/catalogue/additional_row_price.html",
         order_by="price",
+        attrs = {'th': {'class': 'price'},},
     )
     old_price = TemplateColumn(
         verbose_name="Цена без скидки",
         template_name="oscar/dashboard/catalogue/additional_row_old_price.html",
         order_by="old_price",
+        attrs = {'th': {'class': 'old_price'},},
     )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/additional_row_actions.html",
         orderable=False,
     )
-    is_public = BooleanColumn(verbose_name="Доступен", accessor="is_public", order_by=("is_public"))
+    is_public = TemplateColumn(
+        verbose_name="Доступен",
+        template_name="oscar/dashboard/table/boolean.html",
+        accessor="is_public",
+        order_by=("is_public"),
+        attrs = {'th': {'class': 'is_public'},})
 
     icon = "fas fa-chart-bar" 
     caption = ngettext_lazy("%s Дополнительный товар","%s Дополнительных товара")
