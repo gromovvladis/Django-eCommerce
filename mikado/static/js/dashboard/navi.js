@@ -8,8 +8,10 @@ document.addEventListener('click', function(event) {
     var clickToggler = $(toggler).is(event.target) || $(toggler).has(event.target).length > 0
     if (clickToggler && $(navbar).hasClass('open')) {
       closeNav()
-    } else if((clickNavbar || clickToggler)) {
+    } else if(clickNavbar || clickToggler) {
+      if (window.innerWidth < 1200){
       openNav(event.target)
+      }
     } else {
       closeNav()
     }
@@ -32,7 +34,6 @@ function openNav(event) {
     $(current).find('.dropdown-list').removeClass('collapsing');
     $(current).find('.dropdown-list').addClass('show');
     $(current).find('.nav-link').attr('aria-expanded', true);
-    console.log(event.offsetTop)
     $(navpills).animate({scrollTop: event.offsetTop - 60 }, 10);
   }
   $(navbar).addClass('open');
