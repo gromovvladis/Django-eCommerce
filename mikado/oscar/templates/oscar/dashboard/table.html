@@ -3,32 +3,30 @@
 
 {% block table.thead %}
     <caption>
-        {% comment %} <div class="d-flex justify-space-between"> {% endcomment %}
-            {% block table.caption %}
-                <h3 class="float-left">
-                    {% if table.icon %}
-                        <i class="{{ table.icon }}"></i>
+        {% block table.caption %}
+            <h3 class="float-left">
+                {% if table.icon %}
+                    <i class="{{ table.icon }}"></i>
+                {% endif %}
+                {{ table.get_caption_display }}
+            </h3>
+        {% endblock %}
+        <button role="button" class="sort-table text-decoration-none dropdown-toggle float-right" id="sort-table" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span>Сортировка</span>
+        </button>
+
+        <div class="dropdown-menu text-small shadow-sm" aria-labelledby="sort-table">
+            <div class="sort-table-list d-flex flex-column">
+                {% for column in table.columns %}
+                    {% if column.orderable %}
+                        <span {{ column.attrs.th.as_html }}>
+                            <a href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header }}</a>
+                            <span></span>
+                        </span>
                     {% endif %}
-                    {{ table.get_caption_display }}
-                </h3>
-            {% endblock %}
-            <button role="button" class="sort-table text-decoration-none dropdown-toggle float-right" id="sort-table" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span>Сортировка</span>
-            </button>
-    
-            <div class="dropdown-menu text-small shadow-sm" aria-labelledby="sort-table">
-                <div class="sort-table-list d-flex flex-column">
-                    {% for column in table.columns %}
-                        {% if column.orderable %}
-                            <span {{ column.attrs.th.as_html }}>
-                                <a href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header }}</a>
-                                <span></span>
-                            </span>
-                        {% endif %}
-                    {% endfor %}
-                </div>
+                {% endfor %}
             </div>
-        {% comment %} </div> {% endcomment %}
+        </div>
     </caption>
     <thead>
         <tr>
@@ -49,8 +47,14 @@
         {% block table.tbody.row %}
         <tr {{ row.attrs.as_html }}>
             {% for column, cell in row.items %}
-                <td {{ column.attrs.td.as_html }} data-label="{{ column.header }}">{% if column.localize == None %}{{ cell }}{% else %}{% if column.localize %}{{ cell|localize }}{% else %}{{ cell|unlocalize }}{% endif %}{% endif %}</td>
+                <td {{ column.attrs.td.as_html }} class="{{ column.name }}" data-label="{% if column.header != "Имя" %}{{ column.header }}{% endif %}">{% if column.localize == None %}{{ cell }}{% else %}{% if column.localize %}{{ cell|localize }}{% else %}{{ cell|unlocalize }}{% endif %}{% endif %}</td>
             {% endfor %}
+            <td class="toggle-row">
+                <button class="btn btn-secondary" type="button">
+                    <i class="fas fa-toggle-off"></i>
+                    <i class="fas fa-toggle-on"></i>
+                </button>
+            </td>
         </tr>
         {% endblock table.tbody.row %}
     {% empty %}

@@ -39,7 +39,9 @@
         </div>
     </div>
 
-    {% render_table categories %}
+    <div class="mobile-table">
+        {% render_table categories %}
+    </div>
 
     {% if not child_categories %}
         <p>Нет созданных категорий</p>

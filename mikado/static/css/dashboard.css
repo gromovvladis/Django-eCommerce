@@ -5,7 +5,6 @@
  * Copyright 2011-2022 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
-/* @import url("https://fonts.googleapis.com/css2?family=Galada&family=Onest:wght@100..900&display=swap"); */
 :root {
   --blue: #007bff;
   --indigo: #6610f2;
@@ -33,8 +32,8 @@
   --breakpoint-md: 768px;
   --breakpoint-lg: 992px;
   --breakpoint-xl: 1200px;
-  --font-family-sans-serif: -apple-system, Onest, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-family-monospace: SFMono-Regular, Onest, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* --font-family-sans-serif: -apple-system, Onest, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
+  /* --font-family-monospace: SFMono-Regular, Onest, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; */
 }
 
 *,
@@ -44,7 +43,8 @@
 }
 
 html {
-  font-family: sans-serif;
+  /* font-family: Onest, sans-serif; */
+  font-family: -apple-system, system-ui, BlinkMacSystemFont,"Segoe UI", Roboto, Onest, sans-serif;
   line-height: 1.15;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -56,13 +56,15 @@ article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
 
 body {
   margin: 0;
-  font-family: -apple-system, Onest, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family: -apple-system, system-ui, BlinkMacSystemFont,"Segoe UI", Roboto, Onest, sans-serif;
+  /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
   font-size: 0.8rem;
   font-weight: 400;
   line-height: 1.5;
   color: #212529;
   text-align: left;
-  background-color: #fff;
+  /* background-color: #fff; */
+  background-color: #fcfcfc;
 }
 
 [tabindex="-1"]:focus:not(:focus-visible) {
@@ -420,7 +422,7 @@ hr {
 
 small,
 .small {
-  font-size: 0.875em;
+  font-size: 0.8rem;
   font-weight: 400;
 }
 
@@ -1499,7 +1501,8 @@ pre code {
 .table th,
 .table td {
   padding: 0.75rem;
-  vertical-align: top;
+  vertical-align: center;
+  /* vertical-align: top; */
   border-top: 1px solid #dee2e6;
   font-weight: 400;
 }
@@ -2886,7 +2889,7 @@ input[type=button].btn-block {
   z-index: 1000;
   display: none;
   float: left;
-  min-width: 10rem;
+  min-width: 11rem;
   padding: 0.5rem;
   margin: 0.125rem 0 0;
   font-size: 0.8rem;
@@ -18324,7 +18327,10 @@ caption,
   /* border: 1px solid #ced4da; */
   border-bottom: 1px solid #ffffff;
   color: #212529;
-  padding: 15px 10px 10px 10px;
+  /* padding: 15px 10px; */
+  /* padding: 15px; */
+  /* padding: 1.25rem; */
+  padding: 1rem;
   text-align: left;
   border-radius: 10px 10px 0 0;
   background: #ffffff;
@@ -18902,11 +18908,23 @@ caption {
   stroke: #b21f2d;;
 }
 
+.toggle-row{
+  display: none;
+}
+
+.is_public{
+  text-align: center;
+}
+
+.table .image{
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .mobile-table {
       width: 100%;
       /* display: block; */
-      overflow-x: auto;
+      /* overflow-x: auto; */
   }
 
   .mobile-table thead {
@@ -18916,8 +18934,10 @@ caption {
   .mobile-table tbody tr { 
       display: block;
       position: relative;
-      margin-bottom: 1rem;
-      padding: .5rem 0;
+      padding: .5rem 0 1.5rem;
+      /* padding: .5rem 0; */
+      /* margin-bottom: 1rem; */
+      min-height: 65px;
   }
 
   .mobile-table tbody tr:last-child{
@@ -18928,18 +18948,18 @@ caption {
   .mobile-table tbody td {
       display: block;
       text-align: right;
+      padding-left: 30% !important;
       /* position: relative; */
-      padding-left: 50%;
-      white-space: nowrap;
+      /* white-space: nowrap; */
   }
 
   .mobile-table tbody td::before {
-      content: attr(data-label); /* Используем атрибут data-label для отображения заголовков */
+      content: attr(data-label);
       position: absolute;
       left: 0;
       width: 50%;
       padding-left: 1rem;
-      font-weight: bold;
+      font-weight: 500;
       text-align: left;
   }
 
@@ -18953,16 +18973,46 @@ caption {
   }
 
 
-  .mobile-table .btn-toolbar{
+  .mobile-table table .title a{
+    font-size: 1rem;
+  }
+
+  .mobile-table table .actions,
+  .mobile-table table .toggle-row{
     position: absolute;
     top: 0;
     left: 0;
-    padding: 1rem;
+    padding: 1rem !important;
+  }
+
+  .mobile-table table .actions{
+    left: 50px;
   }
 
   .sort-table{
     display: block;
   }
+
+  .card-body{
+    padding: 1rem;
+  }
+
+  .toggle-row.mobile-open .fa-toggle-off{
+    display: none;
+  }
+
+  .toggle-row:not(.mobile-open) .fa-toggle-on{
+    display: none;
+  }
+
+  .mobile-table table .mobile-open .name{
+    margin-bottom: 15px;
+  }
+
+  .mobile-table table tr:not(.mobile-open) td:not(.image):not(.img):not(.title):not(.name):not(.status):not(.actions):not(.toggle-row){
+    display: none;
+  }
+
 
 }
 

@@ -264,6 +264,7 @@ body.fixed {
 
 body {
     font: 16px Onest, sans-serif;
+    /* font: 16px -apple-system, system-ui, BlinkMacSystemFont,"Segoe UI", Roboto, Onest, sans-serif; */
     min-height: 100%;
     overflow-x: hidden;
     background-color: var(--color-background);
@@ -9013,7 +9014,7 @@ html.drawer .v-app__side {
 }
 
 .v-button--main {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9137,7 +9138,7 @@ html.drawer .v-app__side {
 }
 
 .v-button--dish {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9186,7 +9187,7 @@ html.drawer .v-app__side {
 }
 
 .v-button--outline {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9225,7 +9226,7 @@ html.drawer .v-app__side {
 }
 
 .v-button--grey {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9285,7 +9286,7 @@ html.drawer .v-app__side {
 }
 
 .v-button--white {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9438,7 +9439,7 @@ html.drawer .v-app__side {
 }
 
 .v-address-button {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9545,7 +9546,7 @@ html.drawer .v-app__side {
 
 
 .v-app-nav__title {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -9596,7 +9597,7 @@ html.drawer .v-app__side {
 }
 
 .v-app-nav__button {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.825rem;
     font-weight: 400;
@@ -9749,7 +9750,7 @@ html.drawer .v-app__side {
 
 .v-app-footer__link,
 .v-app-footer__name-block {
-    font-family: Onest, sans-serif;
+    
     font-style: normal;
     color: #ffffff;
     opacity: 0.9;
@@ -9892,7 +9893,7 @@ html.drawer .v-app__side {
 }
 
 .v-app-footer__pickup {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: .875rem;
     font-weight: 500;
@@ -10031,7 +10032,7 @@ html.drawer .v-app__side {
 
 .v-app-mobile a span,
 .v-app-mobile button span {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -10065,7 +10066,7 @@ html.drawer .v-app__side {
 }
 
 .v-app-cookies__text {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10085,7 +10086,7 @@ html.drawer .v-app__side {
 
 /* 
 .v-engineering-string {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -10099,7 +10100,7 @@ html.drawer .v-app__side {
 
 @media screen and (min-width:1024px) {
     .v-engineering-string {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -10152,7 +10153,7 @@ html.drawer .v-app__side {
 
 
 .v-dish-image__amount {
-    font-family: Onest, sans-serif;
+    
     font-size: 2rem;
     line-height: 2.75rem;
     font-weight: 500;
@@ -10189,7 +10190,7 @@ html.drawer .v-app__side {
 } */
 /* 
 .v-categories-tabs__link {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10238,7 +10239,7 @@ html.drawer .v-app__side {
 }
 
 .v-sticky-categories-tabs__title {
-    font-family: Onest, sans-serif;
+    
     font-size: 1.75rem;
     line-height: 2.375rem;
     font-weight: 500;
@@ -10358,7 +10359,7 @@ html.drawer .v-app__side {
 .v-prices__price_discounts {
     display: flex;
     flex-direction: column;
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -10374,7 +10375,7 @@ html.drawer .v-app__side {
 
 .v-nav__title,
 .v-prices__price {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10391,7 +10392,7 @@ html.drawer .v-app__side {
 
 .v-prices__base,
 .v-prices__price-before {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -10420,7 +10421,7 @@ html.drawer .v-app__side {
 }
 
 .v-prices--big .v-prices__price {
-    font-family: Onest, sans-serif;
+    
     font-size: 1.25rem;
     line-height: 1.625rem;
     font-weight: 500;
@@ -10434,7 +10435,7 @@ html.drawer .v-app__side {
 
 .v-prices--mobile .v-prices__price,
 .v-prices--mobile .v-prices__price-before {
-    font-family: Onest, sans-serif;
+    
     font-weight: 400;
     font-style: normal;
     font-weight: 400 !important
@@ -10458,7 +10459,7 @@ html.drawer .v-app__side {
 
     .v-prices--big .v-prices__price,
     .v-prices__price {
-        font-family: Onest, sans-serif;
+        
         font-weight: 500;
         font-style: normal
     }
@@ -10469,7 +10470,7 @@ html.drawer .v-app__side {
     }
 
     .v-prices--small .v-prices__price {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -10477,7 +10478,7 @@ html.drawer .v-app__side {
     }
 
     .v-prices--mobile .v-prices__price {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -10485,7 +10486,7 @@ html.drawer .v-app__side {
     }
 
     .v-prices--mobile .v-prices__price-before {
-        font-family: Onest, sans-serif;
+        
         font-size: .75rem;
         line-height: .875rem;
         font-weight: 400;
@@ -10552,7 +10553,7 @@ html.drawer .v-app__side {
 }
 
 .dish__name {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -10580,7 +10581,7 @@ html.drawer .v-app__side {
 
 .dish__not-available,
 .dish__profit {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .9rem;
     font-weight: 400;
@@ -10602,7 +10603,7 @@ html.drawer .v-app__side {
 }
 
 .dish__mobile-total-label {
-    font-family: Onest, sans-serif;
+    
     font-size: .625rem;
     line-height: .75rem;
     font-weight: 400;
@@ -10623,7 +10624,7 @@ html.drawer .v-app__side {
 
     .dish__mobile-total-label,
     .dish__profit {
-        font-family: Onest, sans-serif;
+        
         font-weight: 400;
         font-style: normal
     }
@@ -10645,7 +10646,7 @@ html.drawer .v-app__side {
 
 .v-cart-additional__title,
 .v-cart-additional__view-all {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10692,7 +10693,7 @@ html.drawer .v-app__side {
 
     .v-cart-additional__title,
     .v-cart-additional__view-all {
-        font-family: Onest, sans-serif;
+        
         font-weight: 500;
         font-style: normal
     }
@@ -10727,7 +10728,7 @@ html.drawer .v-app__side {
 
 .v-special-offer__text,
 .v-special-offer__text-percent {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     font-weight: 400;
     font-style: normal
@@ -10768,7 +10769,7 @@ html.drawer .v-app__side {
 }
 
 .v-error-list__error {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1rem;
     font-weight: 400;
@@ -10794,7 +10795,7 @@ html.drawer .v-app__side {
 
 @media screen and (min-width:768px) {
     .v-error-list__error {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -10886,7 +10887,7 @@ html.drawer .v-app__side {
 }
 
 .v-order-button--value {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10951,7 +10952,7 @@ input[type="number"]:focus {
 }
 
 .v-dish-order__name {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -10964,7 +10965,7 @@ input[type="number"]:focus {
 }
 
 .v-dish-order__toppings {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -10992,7 +10993,7 @@ input[type="number"]:focus {
 }
 
 .v-dish-order__unavailable-text {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11001,7 +11002,7 @@ input[type="number"]:focus {
 }
 
 .v-dish-order__count {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -11140,7 +11141,7 @@ input[type="number"]:focus {
 
 .v-cart__error-notification h2,
 .v-cart__title {
-    font-family: Onest, sans-serif;
+    
     font-weight: 500;
     font-style: normal;
     color: #000
@@ -11153,7 +11154,7 @@ input[type="number"]:focus {
 
 .v-cart__clear {
     display: none;
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11191,7 +11192,7 @@ input[type="number"]:focus {
 }
 
 .v-cart__total-text {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11291,7 +11292,7 @@ input[type="number"]:focus {
 
 .v-auth-agreement__item-title,
 .v-auth-agreement__title {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11363,7 +11364,7 @@ input[type="number"]:focus {
 }
 
 .v-auth-modal__title {
-    font-family: Onest, sans-serif;
+    
     font-size: 1.5rem;
     line-height: 1.625rem;
     font-weight: 500;
@@ -11380,7 +11381,7 @@ input[type="number"]:focus {
 
 .v-auth-modal__message,
 .v-auth-modal__repeat-text {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11392,7 +11393,7 @@ input[type="number"]:focus {
 }
 
 .v-auth-modal__repeat-button {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11474,7 +11475,7 @@ input[type="number"]:focus {
 }
 
 .v-alert__text {
-    font-family: Onest, sans-serif;
+    
     font-size: 1.125rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -11489,7 +11490,7 @@ input[type="number"]:focus {
     }
 
     .v-alert__text {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.25rem;
         line-height: 1.625rem;
         font-weight: 500;
@@ -11519,7 +11520,7 @@ input[type="number"]:focus {
 }
 
 .v-confirm__text {
-    font-family: Onest, sans-serif;
+    
     font-size: 1.125rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -11538,7 +11539,7 @@ input[type="number"]:focus {
     }
 
     .v-confirm__text {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.25rem;
         line-height: 1.625rem;
         font-weight: 500;
@@ -11578,7 +11579,7 @@ input[type="number"]:focus {
 
 .v-order-dialog__text,
 .v-order-dialog__title {
-    font-family: Onest, sans-serif;
+    
     font-weight: 500;
     font-style: normal
 }
@@ -11604,7 +11605,7 @@ input[type="number"]:focus {
     }
 
     .v-order-dialog__title {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -11644,7 +11645,7 @@ input[type="number"]:focus {
 }
 
 .v-categories__tab-name {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -11690,7 +11691,7 @@ input[type="number"]:focus {
 
 @media screen and (min-width:1024px) {
     .v-categories__tab-name {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -11863,7 +11864,7 @@ input[type="number"]:focus {
 
 .v-news-modal__name,
 .v-news-modal__published {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -11872,7 +11873,7 @@ input[type="number"]:focus {
 }
 
 .v-news-modal__content {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11912,7 +11913,7 @@ input[type="number"]:focus {
 
     .v-news-modal__name,
     .v-news-modal__published {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -12173,7 +12174,7 @@ input[type="number"]:focus {
 }
 
 .v-stories-modal__dishes-open-button {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -12253,7 +12254,7 @@ input[type="number"]:focus {
     }
 
     .v-stories-modal__dishes-open-button {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.25rem;
         line-height: 1.625rem;
         font-weight: 500;
@@ -12403,7 +12404,7 @@ input[type="number"]:focus {
 }
 
 .v-dish-info-modal__title {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -12427,7 +12428,7 @@ input[type="number"]:focus {
 
 .v-dish-info-modal__group-item,
 .v-dish-info-modal__group-name {
-    font-family: Onest, sans-serif;
+    
     font-weight: 400;
     font-style: normal
 }
@@ -12467,7 +12468,7 @@ input[type="number"]:focus {
     }
 
     .v-dish-info-modal__title {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -12480,7 +12481,7 @@ input[type="number"]:focus {
 
     .v-dish-info-modal__group-item,
     .v-dish-info-modal__group-name {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -12577,7 +12578,7 @@ input[type="number"]:focus {
 }
 
 .v-payment-modal__title {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -12590,7 +12591,7 @@ input[type="number"]:focus {
 }
 
 .v-payment-modal__group-item-label {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -12629,7 +12630,7 @@ input[type="number"]:focus {
     }
 
     .v-payment-modal__title {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.25rem;
         line-height: 1.625rem;
         font-weight: 500;
@@ -13164,7 +13165,7 @@ input[type="number"]:focus {
 }
 
 .v-special-offer-modal__title {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -13193,7 +13194,7 @@ input[type="number"]:focus {
     }
 
     .v-special-offer-modal__title {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.25rem;
         line-height: 1.625rem;
         font-weight: 500;
@@ -13401,7 +13402,7 @@ html::-webkit-scrollbar-thumb {
 
 /* .v-app .title_48, */
 .v-app h1 {
-    font-family: Onest, sans-serif;
+    
     font-style: normal
 }
 
@@ -13418,7 +13419,7 @@ html::-webkit-scrollbar-thumb {
 
 .v-app .title_28,
 .v-app .title_32 {
-    font-family: Onest, sans-serif;
+    
     font-weight: 500;
     font-style: normal
 }
@@ -13435,7 +13436,7 @@ html::-webkit-scrollbar-thumb {
 
 .v-app .text_20,
 .v-app .title_22 {
-    font-family: Onest, sans-serif;
+    
     font-weight: 500;
     font-style: normal
 }
@@ -13451,7 +13452,7 @@ html::-webkit-scrollbar-thumb {
 
 .v-app .text_16,
 .v-app .text_18 {
-    font-family: Onest, sans-serif;
+    
     line-height: 1.25rem;
     font-weight: 500;
     font-style: normal
@@ -13468,7 +13469,7 @@ html::-webkit-scrollbar-thumb {
 
 .v-app .text_12,
 .v-app .text_14 {
-    font-family: Onest, sans-serif;
+    
     font-weight: 400;
     font-style: normal
 }
@@ -13479,7 +13480,7 @@ html::-webkit-scrollbar-thumb {
 } */
 
 .v-app .button {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -13517,7 +13518,7 @@ html::-webkit-scrollbar-thumb {
 }
 
 .v-app .button--address {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -13540,7 +13541,7 @@ html::-webkit-scrollbar-thumb {
 }
 
 .v-app .button--info {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -13621,7 +13622,7 @@ html::-webkit-scrollbar-thumb {
 
 @media screen and (min-width:768px) {
     .v-app .button {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -13643,7 +13644,7 @@ html::-webkit-scrollbar-thumb {
 
 @media screen and (min-width:1024px) {
     .v-app .button--big {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -13691,7 +13692,7 @@ html::-webkit-scrollbar-thumb {
 
 
 .search__suggest-item {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.25rem;
     font-weight: 400;
@@ -13754,7 +13755,7 @@ ymaps[class*="search__suggest"]::-webkit-scrollbar{
 
 
 ymaps[class*="search__suggest-item"] {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -13821,7 +13822,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-suggest--list-item {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -13839,7 +13840,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-suggest--list-item div {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -13849,7 +13850,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-suggest--list-item div:last-child {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -13888,7 +13889,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-app .v-input input,
 .v-app .v-input textarea {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -13929,7 +13930,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-input__label {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14060,7 +14061,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-input-search input {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14077,7 +14078,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-input-search input::-webkit-input-placeholder {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14086,7 +14087,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-input-search input::-moz-placeholder {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14095,7 +14096,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-input-search input:-ms-input-placeholder {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14104,7 +14105,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-input-search input::-ms-input-placeholder {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14113,7 +14114,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-input-search input::placeholder {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14161,7 +14162,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-switch__label {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14199,7 +14200,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .v-app .v-switch__label {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -14486,7 +14487,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-app .main-phone__link,
 .v-app .main-phone__notification {
-    font-family: Onest, sans-serif;
+    
     font-style: normal;
     color: #e5e5e5
 }
@@ -14512,7 +14513,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-app .working-hours__content,
 .v-app .working-hours__title {
-    font-family: Onest, sans-serif;
+    
     font-style: normal;
     color: #e3e3e3
 }
@@ -14541,7 +14542,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .badge {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -14557,7 +14558,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .notif-badge {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -14596,7 +14597,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-deferred__select {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14611,7 +14612,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-deferred .title {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14641,7 +14642,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-app .v-deferred .day.h,
 .v-app .v-deferred .day span {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14694,7 +14695,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-region-select__label {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14761,7 +14762,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-region-select__list-button {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14827,7 +14828,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-tab button {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14922,7 +14923,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-bread {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -15061,7 +15062,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-weight {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     font-weight: 400;
     font-style: normal;
@@ -15073,7 +15074,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .short-description {
-    font-family: Onest, sans-serif;
+    
     font-size: .8rem;
     line-height: 1rem;
     font-weight: 400;
@@ -15171,7 +15172,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .v-checkbox__name {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -15324,7 +15325,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-stories__name {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -15371,7 +15372,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .v-stories__name {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -15645,7 +15646,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-page-not-found__text-bold,
 .v-page-not-found h1 {
-    font-family: Onest, sans-serif;
+    
     font-weight: 500;
     font-style: normal
 }
@@ -15664,7 +15665,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-page-not-found__phone,
 .v-page-not-found__text {
-    font-family: Onest, sans-serif;
+    
     font-style: normal;
     color: #000
 }
@@ -15677,7 +15678,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .v-page-not-found h1 {
-        font-family: Onest, sans-serif;
+        
         font-size: 3rem;
         line-height: 4rem;
         font-weight: 800;
@@ -15691,7 +15692,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .v-page-not-found__phone,
     .v-page-not-found__text {
-        font-family: Onest, sans-serif;
+        
         font-weight: 500;
         font-style: normal
     }
@@ -15772,7 +15773,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .v-news-item__content,
 .v-news-item__name,
 .v-news-item__published {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -15804,7 +15805,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .v-news-item__name,
     .v-news-item__published {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -15828,7 +15829,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-news__title,
 .v-news__view-all {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -15861,7 +15862,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .v-news__title,
     .v-news__view-all {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -15959,7 +15960,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-page-description__button {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -16019,7 +16020,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .v-page-description__button {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -16045,7 +16046,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .home__category-link,
 .home__subtitle h2 {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -16066,7 +16067,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .home__cat-title h2,
     .home__subtitle h2 {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -16123,7 +16124,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-tabs-button__button {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -16164,7 +16165,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-dish-toppings__name {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -16175,7 +16176,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .v-dish-toppings__name {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -16184,7 +16185,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-dish-actions__block-name {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -16194,7 +16195,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .v-dish-actions__block-name {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -16219,7 +16220,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-accordion__description,
 .v-accordion__title {
-    font-family: Onest, sans-serif;
+    
     font-style: normal
 }
 
@@ -16244,7 +16245,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-accordion__content {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -16265,7 +16266,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .v-accordion__description,
     .v-accordion__title {
-        font-family: Onest, sans-serif;
+        
         line-height: 1.25rem;
         font-weight: 500;
         font-style: normal
@@ -16282,7 +16283,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .v-accordion__content {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -16305,7 +16306,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-dish-combo__dish-name {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -16341,7 +16342,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-dish-combo .v-accordion__title {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -16350,7 +16351,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-dish-combo .v-accordion__description {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -16385,7 +16386,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .v-dish-combo .v-accordion__title {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -16393,7 +16394,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .v-dish-combo .v-accordion__description {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -16450,7 +16451,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .dish-page h1,
 .dish-page h2,
 .dish-page h3 {
-    font-family: Onest, sans-serif;
+    
     font-style: normal
 }
 
@@ -16490,7 +16491,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .dish-page__consist,
 .dish-page__nav .v-weight {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     font-weight: 400;
     font-style: normal
@@ -16511,7 +16512,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .dish-page__ingredients p {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -16536,7 +16537,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .dish-page__nutritional-item span {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -16545,7 +16546,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .dish-page__nutritional-item label {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -16681,7 +16682,7 @@ ymaps[class*="search__suggest-item_selected"] {
     /* .dish-page h2, */
     /* .dish-page h3 { */
     .dish-page h1 {
-        font-family: Onest, sans-serif;
+        
         font-weight: 500;
         font-style: normal
     }
@@ -16711,7 +16712,7 @@ ymaps[class*="search__suggest-item_selected"] {
     } */
 
     .dish-page__nav .v-weight {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -16821,7 +16822,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .menu__filter-button {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -16867,7 +16868,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .menu__filter-button {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -16890,7 +16891,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .page__block,
 .page h1 {
-    font-family: Onest, sans-serif;
+    
     font-style: normal;
     color: #000
 }
@@ -16959,7 +16960,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-map__placemark-text {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -17118,7 +17119,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-address-info__info-result p {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -17156,7 +17157,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .delivery__title {
-    font-family: Onest, sans-serif;
+    
     font-size: 1.75rem;
     line-height: 2.375rem;
     font-weight: 500;
@@ -17187,7 +17188,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-checkout__detail-text {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.2rem;
     font-weight: 400;
@@ -17236,7 +17237,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .delivery__info h1,
 .delivery__info h2,
 .delivery__info h3 {
-    font-family: Onest, sans-serif;
+    
     font-size: 1.25rem;
     line-height: 1.625rem;
     font-weight: 500;
@@ -17251,7 +17252,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .delivery__regions-block,
 .delivery__text-block {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -17298,7 +17299,7 @@ ymaps[class*="search__suggest-item_selected"] {
     .delivery__info h1,
     .delivery__info h2,
     .delivery__info h3 {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -17338,7 +17339,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-actions__actions-action-title {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -17347,7 +17348,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-actions__actions-action-description {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -17371,7 +17372,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .offer-dish,
 .v-actions__action-detail-content h1 {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -17380,7 +17381,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-actions__action-detail-text {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -17412,7 +17413,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-actions__action-detail-dishes-title h2 {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -17430,7 +17431,7 @@ ymaps[class*="search__suggest-item_selected"] {
     } */
 
     .v-actions__actions-action-title {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -17462,7 +17463,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .offer-dish,
     .v-actions__action-detail-content h1 {
-        font-family: Onest, sans-serif;
+        
         font-weight: 500;
         font-style: normal
     }
@@ -17488,7 +17489,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .v-actions__action-detail-dishes-title h2 {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -17514,7 +17515,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .search__not-found {
-    font-family: Onest, sans-serif;
+    
     font-size: 1.25rem;
     line-height: 1.625rem;
     font-weight: 500;
@@ -17531,7 +17532,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .search__not-found {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -17580,7 +17581,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-gift-list__gift-notification,
 .v-gift-list__gift-title {
-    font-family: Onest, sans-serif;
+    
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -17598,7 +17599,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .v-gift-list__gift-notification,
     .v-gift-list__gift-title {
-        font-family: Onest, sans-serif;
+        
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -17672,7 +17673,7 @@ ymaps[class*="search__suggest-item_selected"] {
 /* 
 .self-balloon__title {
     white-space: nowrap;
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     font-weight: 500;
     min-height: 16px
@@ -17683,7 +17684,7 @@ ymaps[class*="search__suggest-item_selected"] {
 } */
 
 .delivery-balloon__minutes {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1rem;
     font-weight: 500;
@@ -17691,7 +17692,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .delivery-balloon__text {
-    font-family: Onest, sans-serif;
+    
     color: #dfdfdf;
     font-size: .75rem;
     line-height: .75rem;
@@ -17739,7 +17740,7 @@ ymaps[class*="search__suggest-item_selected"] {
     transform: translateX(calc(-50% + 12px));
     background-color: #140e38;
     border-radius: 15px;
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;;
     color: #fff;
     white-space: nowrap
@@ -17747,7 +17748,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 /* 
 .delivery-title-text {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;;
     margin-bottom: 4px
 } */
@@ -17755,7 +17756,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .icon-delivery__title_error {
     background: var(--color-secondary);
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;;
     white-space: normal;
     width: 120px
@@ -17831,7 +17832,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-delivery-map--error {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -17859,7 +17860,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-delivery-map--address,
 .v-delivery-map--note {
-    font-family: Onest, sans-serif;
+    
     font-style: normal;
     color: #000
 }
@@ -17938,7 +17939,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-delivery-map--placemark-text {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -17987,7 +17988,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-delivery-map__engineering {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -18024,7 +18025,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .v-delivery-map--address {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -18043,7 +18044,7 @@ ymaps[class*="search__suggest-item_selected"] {
     .v-delivery-map--error,
     .v-delivery-map--note,
     .v-delivery-map__engineering {
-        font-family: Onest, sans-serif;
+        
         line-height: 1.25rem;
         font-weight: 500;
         font-style: normal
@@ -18296,7 +18297,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-cutlery__text {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -18327,7 +18328,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .v-order__subtitle h2,
 .v-order__title,
 .v-order__title h1 {
-    font-family: Onest, sans-serif;
+    
     font-weight: 500;
     font-style: normal;
     color: #000
@@ -18360,7 +18361,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .v-order__delivery-time,
 .v-order__info-list,
 .v-order__info-list .v-prices__price {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -18369,7 +18370,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-order__info-total {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -18390,7 +18391,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-order-checkout__items {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.2rem;
     font-weight: 400;
@@ -18412,7 +18413,7 @@ ymaps[class*="search__suggest-item_selected"] {
 @media screen and (min-width:768px) {
 
     .profile-personal__block .v-order__info-total {
-        /* font-family: Onest, sans-serif; */
+        /*  */
         /* line-height: 1.25rem; */
         font-size: 1.125rem;
         /* font-weight: 500; */
@@ -18433,7 +18434,7 @@ ymaps[class*="search__suggest-item_selected"] {
     .v-order__delivery-time,
     .v-order__subtitle,
     .v-order__subtitle h2 {
-        font-family: Onest, sans-serif;
+        
         line-height: 1.25rem;
         font-weight: 500;
         font-style: normal
@@ -18600,7 +18601,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .v-addresses-list__comment,
 .v-addresses-list__name {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -18622,7 +18623,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .v-addresses-list__comment,
     .v-addresses-list__name {
-        font-family: Onest, sans-serif;
+        
         line-height: 1.25rem;
         font-weight: 500;
         font-style: normal
@@ -18662,7 +18663,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-orders-list-item__title {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -18673,7 +18674,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .v-orders-list-item__address,
 .v-orders-list-item__date,
 .v-orders-list-item__status {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.175rem;
     font-weight: 400;
@@ -18700,7 +18701,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-orders-list-item__details {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.175rem;
     color: #494949;
@@ -18740,7 +18741,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .v-orders-list-item__title {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -18750,7 +18751,7 @@ ymaps[class*="search__suggest-item_selected"] {
     .v-orders-list-item__address,
     .v-orders-list-item__date,
     .v-orders-list-item__status {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -18806,7 +18807,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .profile-feedback__response-text {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -18998,7 +18999,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .profile__user-name,
 .profile__user-phone {
-    font-family: Onest, sans-serif;
+    
     font-style: normal;
     pointer-events: none;
     -webkit-user-select: none;
@@ -19048,7 +19049,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .profile__menu-button,
 .profile__menu-icon {
-    font-family: Onest, sans-serif;
+    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -19118,7 +19119,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .profile__empty {
-    font-family: Onest, sans-serif;
+    
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -19130,7 +19131,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .profile__user-name {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -19153,7 +19154,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .profile__menu-button {
-        font-family: Onest, sans-serif;
+        
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -19183,7 +19184,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .profile__empty {
-        font-family: Onest, sans-serif;
+        
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;
