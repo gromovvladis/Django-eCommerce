@@ -98,9 +98,6 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form
         ctx["productclass_form"] = self.productclass_form_class()
-        ctx["sortable_fields"] = self.table_class.Meta.order_by
-
-        cats = Category.objects.first()
         return ctx
 
     def get_description(self, form):

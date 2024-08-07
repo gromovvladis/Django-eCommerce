@@ -23,7 +23,7 @@
 {% block dashboard_content %}
     {% if additional %}
         {% block product_list %}
-            <form action="." method="post">
+            <form class="mobile-table" action="." method="post">
                 {% csrf_token %}
                 {% render_table additional %}
             </form>

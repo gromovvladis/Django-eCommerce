@@ -13,6 +13,75 @@ Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
 
 
+# ProductClass = get_model("catalogue", "ProductClass")
+# class ProductClassTable(DashboardTable):
+#     name = TemplateColumn(
+#         verbose_name='',
+#         template_name="oscar/dashboard/catalogue/product_row_image.html",
+#         orderable=False,
+#     )
+#     requires_shipping = TemplateColumn(
+#         verbose_name="Имя",
+#         template_name="oscar/dashboard/catalogue/product_row_title.html",
+#         order_by="title",
+#         accessor=A("title"),
+#     )
+#     track_stock = TemplateColumn(
+#         verbose_name="Варианты",
+#         template_name="oscar/dashboard/catalogue/product_row_variants.html",
+#         orderable=False,
+#     )
+#     additionals = TemplateColumn(
+#         verbose_name="Доп. товары",
+#         template_name="oscar/dashboard/catalogue/product_row_additionals.html",
+#         orderable=False,
+#     )
+#     options = TemplateColumn(
+#         verbose_name="Опции",
+#         template_name="oscar/dashboard/catalogue/product_row_options.html",
+#         orderable=False,
+#     )
+#     categories = TemplateColumn(
+#         verbose_name="Категории",
+#         template_name="oscar/dashboard/catalogue/product_row_categories.html",
+#         accessor=A("categories"),
+#         order_by="categories__name",
+#     )
+#     price = TemplateColumn(
+#         verbose_name="Цена",
+#         template_name="oscar/dashboard/catalogue/product_row_price.html",
+#         # accessor="get_low_price",
+#         order_by="title",
+#         orderable=True,
+#     )
+#     is_public = BooleanColumn(verbose_name="Доступен", accessor="is_public", order_by=("is_public"))
+#     actions = TemplateColumn(
+#         verbose_name="",
+#         template_name="oscar/dashboard/catalogue/product_row_actions.html",
+#         orderable=False,
+#     )
+
+#     icon = "fas fa-chart-bar"
+
+#     class Meta(DashboardTable.Meta):
+#         model = ProductClass
+#         fields = ("date_updated", "is_public")
+#         sequence = (
+#             "image",
+#             "title",
+#             "categories",
+#             "additionals",
+#             "options",
+#             "variants",
+#             "price",
+#             "...",
+#             "is_public",
+#             "date_updated",
+#             "actions",
+#         )
+#         order_by = "-date_updated"
+
+
 class ProductTable(DashboardTable):
     image = TemplateColumn(
         verbose_name='',
@@ -79,6 +148,9 @@ class ProductTable(DashboardTable):
             "actions",
         )
         order_by = "-date_updated"
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
 
     def order_price(self, queryset, is_descending):
         queryset = sorted(
@@ -133,6 +205,9 @@ class CategoryTable(DashboardTable):
         model = Category
         fields = ("image", "name", "description", "is_public")
         sequence = ("image", "name", "description", "...", "is_public", "actions")
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
 
 
 class AttributeOptionGroupTable(DashboardTable):
@@ -160,6 +235,9 @@ class AttributeOptionGroupTable(DashboardTable):
         fields = ("name",)
         sequence = ("name", "option_summary", "actions")
         per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
 
 
 class OptionTable(DashboardTable):
@@ -182,6 +260,9 @@ class OptionTable(DashboardTable):
         fields = ("name", "type", "help_text", "order", "required")
         sequence = ("name", "type", "help_text", "order", "required", "actions")
         per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
 
 
 class AdditionalTable(DashboardTable):
@@ -224,3 +305,6 @@ class AdditionalTable(DashboardTable):
         fields = ("img", "name", "price", "old_price", "weight", "max_amount", "is_public")
         sequence = ("img", "name", "price", "old_price", "weight", "max_amount", "is_public", "actions")
         per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }

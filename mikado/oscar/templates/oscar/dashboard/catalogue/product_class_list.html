@@ -19,23 +19,24 @@
 
 {% block dashboard_content %}
     {% if classes %}
+    <div class="mobile-table">
         <table class="table table-striped table-bordered table-hover">
             <caption><i class="fas fa-list"></i> Типы продуктов</caption>
             <thead>
                 <tr>
                     <th>Имя</th>
                     <th>Доставка</th>
-                    <th>Отслеживать остатки</th>
+                    <th>Отслеживать запасы</th>
                     <th>&nbsp;</th>
                 </tr>
             </thead>
             <tbody>
                 {% for class in classes %}
                     <tr>
-                        <td><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.name }}</a></td>
-                        <td><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.requires_shipping|yesno:"✔️,✖️" }}</a></td>
-                        <td><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.track_stock|yesno:"✔️,✖️" }}</a></td>
-                        <td>
+                        <td class="name"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.name }}</a></td>
+                        <td data-label="Доставка"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.requires_shipping|yesno:"✔️,✖️" }}</a></td>
+                        <td data-label="Отслеживать запасы"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.track_stock|yesno:"✔️,✖️" }}</a></td>
+                        <td class="actions">
                             <div class="btn-toolbar">
                                 <div class="dropdown">
                                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -52,10 +53,17 @@
                                 </div>
                             </div>
                         </td>
+                        <td class="toggle-row">
+                            <button class="btn btn-secondary" type="button">
+                                <i class="fas fa-toggle-off"></i>
+                                <i class="fas fa-toggle-on"></i>
+                            </button>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
     {% else %}
         <p>Нет созданных типов продуктов</p>
     {% endif %}
