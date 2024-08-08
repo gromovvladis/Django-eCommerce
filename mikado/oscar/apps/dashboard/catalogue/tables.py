@@ -109,6 +109,7 @@ class ProductTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
+        empty_text = "Нет созданых продуктов"
 
     def order_price(self, queryset, is_descending):
         queryset = sorted(
@@ -132,7 +133,7 @@ class CategoryTable(DashboardTable):
     )
     name = LinkColumn("dashboard:catalogue-category-update", args=[A("pk")], attrs = {'th': {'class': 'name'},})
     description = TemplateColumn(
-        template_code='{{ record.description|default:""|striptags'
+        template_code='{{ record.description|default:"-"|striptags'
         '|cut:"&nbsp;"|truncatewords:6 }}',
         attrs = {'th': {'class': 'description'},}
     )
@@ -184,6 +185,7 @@ class CategoryTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
+        empty_text = "Нет созданых категорий"
 
 
 class AttributeOptionGroupTable(DashboardTable):
@@ -217,6 +219,7 @@ class AttributeOptionGroupTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
+        empty_text = "Нет созданых групп параметров атрибута"
 
 
 class OptionTable(DashboardTable):
@@ -260,6 +263,7 @@ class OptionTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
+        empty_text = "Нет созданых опций"
 
 
 class AdditionalTable(DashboardTable):
@@ -322,3 +326,4 @@ class AdditionalTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
+        empty_text = "Нет созданых дополнительных товаров"

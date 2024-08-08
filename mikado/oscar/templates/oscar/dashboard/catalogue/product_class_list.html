@@ -38,14 +38,22 @@
                     <tr>
                         <td class="name"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.name }}</a></td>
                         <td class="class_options" data-label="Опции">
-                            {% for opt in class.get_options %}
-                                {{ opt.name }}{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
+                            {% if class.get_options %}
+                                {% for opt in class.get_options %}
+                                    {{ opt.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                -
+                            {% endif %}
                         </td>
                         <td class="additionals" data-label="Дополнительные товары">
-                            {% for adt in class.get_additionals %}
-                                {{ adt.name }}{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
+                            {% if class.get_additionals %}
+                                {% for adt in class.get_additionals %}
+                                    {{ adt.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                -
+                            {% endif %}
                         </td>
                         <td class="products" data-label="Продукты">{{ class.products_count }}</td>
                         <td class="delivery" data-label="Доставка">{{ class.requires_shipping|yesno:"✔️,❌" }}</td>
