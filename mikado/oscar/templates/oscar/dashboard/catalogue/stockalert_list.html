@@ -25,13 +25,13 @@
         <h2 class="float-left"><i class="fas fa-cubes-stacked"></i> {{ description }}</h2>
         <div class="float-right">
             <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Фильтры
+                <button class="sort-table dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa-solid fa-arrow-up-short-wide"></i>
                 </button>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="{% url 'dashboard:stock-alert-list' %}">Все</a>
-                    <a class="dropdown-item" href="{% url 'dashboard:stock-alert-list' %}?status=Open">Открытые</a>
-                    <a class="dropdown-item" href="{% url 'dashboard:stock-alert-list' %}?status=Closed">Закрытые</a>
+                <div class="dropdown-menu dropdown-menu-right sort-table-list" aria-labelledby="dropdownMenuButton">
+                    <a class="orderable dropdown-item" href="{% url 'dashboard:stock-alert-list' %}">Все</a>
+                    <a class="orderable dropdown-item" href="{% url 'dashboard:stock-alert-list' %}?status=Open">Открытые</a>
+                    <a class="orderable dropdown-item" href="{% url 'dashboard:stock-alert-list' %}?status=Closed">Закрытые</a>
                 </div>
             </div>
         </div>
@@ -42,11 +42,11 @@
             {% if alerts %} 
                 <thead>
                     <tr>
-                        <th>Продукт</th>
-                        <th>Точка продажи</th>
-                        <th>Граница малых запасов</th>
-                        <th>Доступно</th>
-                        <th>Дата уведомления</th>
+                        <th class="name">Продукт</th>
+                        <th class="partner">Точка продажи</th>
+                        <th class="threshold">Граница малых запасов</th>
+                        <th class="is_public">Доступно</th>
+                        <th class="date_created">Дата уведомления</th>
                         <th class="status">Стутус</th>
                         <th></th>
                     </tr>
@@ -62,10 +62,10 @@
                                     <span class="text-muted small">UPC: {{ alert.stockrecord.product.upc }}</span>
                                 </div>
                             </td>
-                            <td data-label="Точка продажи">{{ alert.stockrecord.partner.display_name }}</td>
-                            <td data-label="Граница малых запасов">{{ alert.stockrecord.low_stock_threshold }}</td>
-                            <td data-label="Доступно">{{ alert.stockrecord.net_stock_level }}</td>
-                            <td data-label="Дата уведомления">{{ alert.date_created }}</td>
+                            <td class="partner" data-label="Точка продажи">{{ alert.stockrecord.partner.display_name }}</td>
+                            <td class="threshold" data-label="Граница малых запасов">{{ alert.stockrecord.low_stock_threshold }}</td>
+                            <td class="is_public" data-label="Доступно">{{ alert.stockrecord.net_stock_level }}</td>
+                            <td class="date_created" data-label="Дата уведомления">{{ alert.date_created }}</td>
                             <td class="status">
                                 <span class="badge {% if alert.status == "Закрыто" %}badge-success{% else %}badge-warning{% endif %}">
                     

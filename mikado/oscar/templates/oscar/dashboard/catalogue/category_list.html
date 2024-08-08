@@ -27,18 +27,19 @@
 {% endblock header %}
 
 {% block dashboard_content %}
-    <div class="alert alert-info">
-        <div>Список:
-            <strong><a href="{% url 'dashboard:catalogue-category-list' %}">Главные категории</a></strong>
-            {% if ancestors %}
+
+    {% if ancestors %}
+        <div class="alert alert-info">
+            <div>
+                <strong><a href="{% url 'dashboard:catalogue-category-list' %}">Категории</a></strong>
                 &gt;
                 {% for ancestor in ancestors %}
                     <strong><a href="{% url 'dashboard:catalogue-category-detail-list' pk=ancestor.pk %}">{{ ancestor.name }}</a></strong>{% if not forloop.last %} > {% endif %}
                 {% endfor %}
-            {% endif %}
+            </div>
         </div>
-    </div>
-
+    {% endif %}
+        
     <div class="mobile-table">
         {% render_table categories %}
     </div>

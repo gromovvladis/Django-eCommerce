@@ -829,7 +829,17 @@ class ProductClassListView(generic.ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["title"] = "Типы продуктов"
+
+        for clsa in ctx["classes"]:
+            dfgd = clsa
+            
         return ctx
+
+    def get_queryset(self):
+        """
+        Build the queryset for this list
+        """
+        return ProductClass.objects.prefetch_related("options", "class_additionals").all()
 
 
 class ProductClassDeleteView(generic.DeleteView):

@@ -25,11 +25,11 @@
             {% if ranges %}
                 <thead>
                     <tr>
-                        <th>Имя</th>
-                        <th>Описание</th>
-                        <th>Продукты</th>
-                        <th>Доступен</th>
-                        <th>Дата создания</th>
+                        <th class="name">Имя</th>
+                        <th class="description">Описание</th>
+                        <th class="products">Продукты</th>
+                        <th class="is_public">Доступен</th>
+                        <th class="date_created">Дата создания</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -43,16 +43,16 @@
                                     {{ range.name }}
                                 {% endif %}
                             </td>
-                            <td data-label="Описание">
+                            <td class="description" data-label="Описание">
                                 {{ range.description|safe }}
                             </td>
                             {% if range.includes_all_products %}
-                                <td data-label="Продукты">Все продукты</td>
+                                <td class="products" data-label="Продукты">Все продукты</td>
                             {% else %}
-                                <td data-label="Продукты">{{ range.num_products|default:"-" }}</td>
+                                <td class="products" data-label="Продукты">{{ range.num_products|default:"-" }}</td>
                             {% endif %}
-                            <td data-label="Доступно">{{ range.is_public|yesno:"✔️,❌" }}</td>
-                            <td data-label="Дата создания">{{ range.date_created }}</td>
+                            <td class="is_public" data-label="Доступен">{{ range.is_public|yesno:"✔️,❌" }}</td>
+                            <td class="date_created" data-label="Дата создания">{{ range.date_created }}</td>
                             <td class="actions">
                                 <div class="btn-toolbar">
                                     <div class="dropdown">

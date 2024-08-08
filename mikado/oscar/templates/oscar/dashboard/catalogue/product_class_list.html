@@ -24,7 +24,10 @@
             <caption><i class="fas fa-list"></i> Типы продуктов</caption>
             <thead>
                 <tr>
-                    <th>Имя</th>
+                    <th class="name">Имя</th>
+                    <th class="class_options">Опции</th>
+                    <th class="additionals">Дополнительные товары</th>
+                    <th class="products">Продукты</th>
                     <th class="delivery">Доставка</th>
                     <th class="stock">Отслеживать запасы</th>
                     <th>&nbsp;</th>
@@ -34,8 +37,19 @@
                 {% for class in classes %}
                     <tr>
                         <td class="name"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.name }}</a></td>
-                        <td class="delivery" data-label="Доставка"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.requires_shipping|yesno:"✔️,❌" }}</a></td>
-                        <td class="stock" data-label="Отслеживать запасы"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.track_stock|yesno:"✔️,❌" }}</a></td>
+                        <td class="class_options" data-label="Опции">
+                            {% for opt in class.get_options %}
+                                {{ opt.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="additionals" data-label="Дополнительные товары">
+                            {% for adt in class.get_additionals %}
+                                {{ adt.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="products" data-label="Продукты">{{ class.products_count }}</td>
+                        <td class="delivery" data-label="Доставка">{{ class.requires_shipping|yesno:"✔️,❌" }}</td>
+                        <td class="stock" data-label="Отслеживать запасы">{{ class.track_stock|yesno:"✔️,❌" }}</td>
                         <td class="actions">
                             <div class="btn-toolbar">
                                 <div class="dropdown">
