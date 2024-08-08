@@ -36,23 +36,29 @@
                         <div class="graph-right">      
                             <div class="order_graph">
                                 <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 24 часа</span></h2></div>
-                                <div class="bar-y-axis">
-                                    <ul class="fill-height">
-                                    {% for y_value in hourly_report_dict.y_range %}
-                                        <li><span>{{ y_value|currency }}</span></li>
-                                    {% endfor %}
-                                    </ul>
+                                {% if hourly_report_dict.max_revenue %}
+                                    <div class="bar-y-axis">
+                                        <ul class="fill-height">
+                                        {% for y_value in hourly_report_dict.y_range %}
+                                            <li><span>{{ y_value|currency }}</span></li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <dl class="bar-chart">
+                                        {% for item in hourly_report_dict.order_total_hourly %}
+                                            <dd class="bar-layer">
+                                                <em style="right:-20%;">{{ item.end_time|time }}</em>
+                                                <span style="height: {{ item.percentage }}%;" >
+                                                    <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
+                                                </span>
+                                            </dd>
+                                        {% endfor %}
+                                    </dl>
+                                {% else %}
+                                <div class="empty-report">
+                                    Нет заказов за последние 24 часа
                                 </div>
-                                <dl class="bar-chart">
-                                    {% for item in hourly_report_dict.order_total_hourly %}
-                                        <dd class="bar-layer">
-                                            <em style="right:-20%;">{{ item.end_time|time }}</em>
-                                            <span style="height: {{ item.percentage }}%;" >
-                                                <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
-                                            </span>
-                                        </dd>
-                                    {% endfor %}
-                                </dl>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -69,23 +75,29 @@
                         <div class="graph-right">
                             <div class="order_graph">
                                 <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 7 дней</span></h2></div>
-                                <div class="bar-y-axis">
-                                    <ul class="fill-height">
-                                    {% for y_value in week_report_dict.y_range %}
-                                        <li><span>{{ y_value|currency }}</span></li>
-                                    {% endfor %}
-                                    </ul>
-                                </div>
-                                <dl class="bar-chart">
-                                    {% for item in week_report_dict.order_total_days %}
-                                        <dd class="bar-layer" style="width: calc(100% / 7);">
-                                            <em style="right:33%;">{{ item.end_time|date:"d.m" }}</em>
-                                            <span style="height: {{ item.percentage }}%;" >
-                                                <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
-                                            </span>
-                                        </dd>
-                                    {% endfor %}
-                                </dl>
+                                {% if week_report_dict.max_revenue %}
+                                    <div class="bar-y-axis">
+                                        <ul class="fill-height">
+                                        {% for y_value in week_report_dict.y_range %}
+                                            <li><span>{{ y_value|currency }}</span></li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <dl class="bar-chart">
+                                        {% for item in week_report_dict.order_total_days %}
+                                            <dd class="bar-layer" style="width: calc(100% / 7);">
+                                                <em style="right:33%;">{{ item.end_time|date:"d.m" }}</em>
+                                                <span style="height: {{ item.percentage }}%;" >
+                                                    <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
+                                                </span>
+                                            </dd>
+                                        {% endfor %}
+                                    </dl>
+                                {% else %}
+                                    <div class="empty-report">
+                                        Нет заказов за последние 7 дней
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -102,23 +114,29 @@
                         <div class="graph-right">
                             <div class="order_graph">
                                 <div class="bar-caption"><h2>Заказы -<span class="text-primary"> 30 дней</span></h2></div>
-                                <div class="bar-y-axis">
-                                    <ul class="fill-height">
-                                    {% for y_value in month_report_dict.y_range %}
-                                        <li><span>{{ y_value|currency }}</span></li>
-                                    {% endfor %}
-                                    </ul>
+                                {% if month_report_dict.max_revenue %}
+                                    <div class="bar-y-axis">
+                                        <ul class="fill-height">
+                                        {% for y_value in month_report_dict.y_range %}
+                                            <li><span>{{ y_value|currency }}</span></li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <dl class="bar-chart">
+                                        {% for item in month_report_dict.order_total_days %}
+                                            <dd class="bar-layer" style="width: calc(100% / 30);">
+                                                <em {% if not forloop.first and not forloop.last and not forloop.counter|divisibleby:3 %}class="em-mobile-hidden"{% endif %}  style="right:-5%;">{{ item.end_time|date:"d.m" }}</em>
+                                                <span style="height: {{ item.percentage }}%;" >
+                                                    <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
+                                                </span>
+                                            </dd>
+                                        {% endfor %}
+                                    </dl>
+                                {% else %}
+                                <div class="empty-report">
+                                    Нет заказов за последние 30 дней
                                 </div>
-                                <dl class="bar-chart">
-                                    {% for item in month_report_dict.order_total_days %}
-                                        <dd class="bar-layer" style="width: calc(100% / 30);">
-                                            <em {% if not forloop.first and not forloop.last and not forloop.counter|divisibleby:3 %}class="em-mobile-hidden"{% endif %}  style="right:-5%;">{{ item.end_time|date:"d.m" }}</em>
-                                            <span style="height: {{ item.percentage }}%;" >
-                                                <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
-                                            </span>
-                                        </dd>
-                                    {% endfor %}
-                                </dl>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
