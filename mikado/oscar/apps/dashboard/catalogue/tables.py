@@ -12,87 +12,19 @@ AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
 
-
-# ProductClass = get_model("catalogue", "ProductClass")
-# class ProductClassTable(DashboardTable):
-#     name = TemplateColumn(
-#         verbose_name='',
-#         template_name="oscar/dashboard/catalogue/product_row_image.html",
-#         orderable=False,
-#     )
-#     requires_shipping = TemplateColumn(
-#         verbose_name="Имя",
-#         template_name="oscar/dashboard/catalogue/product_row_title.html",
-#         order_by="title",
-#         accessor=A("title"),
-#     )
-#     track_stock = TemplateColumn(
-#         verbose_name="Варианты",
-#         template_name="oscar/dashboard/catalogue/product_row_variants.html",
-#         orderable=False,
-#     )
-#     additionals = TemplateColumn(
-#         verbose_name="Доп. товары",
-#         template_name="oscar/dashboard/catalogue/product_row_additionals.html",
-#         orderable=False,
-#     )
-#     options = TemplateColumn(
-#         verbose_name="Опции",
-#         template_name="oscar/dashboard/catalogue/product_row_options.html",
-#         orderable=False,
-#     )
-#     categories = TemplateColumn(
-#         verbose_name="Категории",
-#         template_name="oscar/dashboard/catalogue/product_row_categories.html",
-#         accessor=A("categories"),
-#         order_by="categories__name",
-#     )
-#     price = TemplateColumn(
-#         verbose_name="Цена",
-#         template_name="oscar/dashboard/catalogue/product_row_price.html",
-#         # accessor="get_low_price",
-#         order_by="title",
-#         orderable=True,
-#     )
-#     is_public = BooleanColumn(verbose_name="Доступен", accessor="is_public", order_by=("is_public"))
-#     actions = TemplateColumn(
-#         verbose_name="",
-#         template_name="oscar/dashboard/catalogue/product_row_actions.html",
-#         orderable=False,
-#     )
-
-#     icon = "fas fa-chart-bar"
-
-#     class Meta(DashboardTable.Meta):
-#         model = ProductClass
-#         fields = ("date_updated", "is_public")
-#         sequence = (
-#             "image",
-#             "title",
-#             "categories",
-#             "additionals",
-#             "options",
-#             "variants",
-#             "price",
-#             "...",
-#             "is_public",
-#             "date_updated",
-#             "actions",
-#         )
-#         order_by = "-date_updated"
-
-
 class ProductTable(DashboardTable):
     image = TemplateColumn(
         verbose_name='',
         template_name="oscar/dashboard/catalogue/product_row_image.html",
         orderable=False,
+        attrs = {'th': {'class': 'image'},}
     )
     title = TemplateColumn(
         verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/product_row_title.html",
         order_by="title",
         accessor=A("title"),
+        attrs = {'th': {'class': 'title'},}
     )
     variants = TemplateColumn(
         verbose_name="Варианты",
@@ -104,6 +36,7 @@ class ProductTable(DashboardTable):
         verbose_name="Доп. товары",
         template_name="oscar/dashboard/catalogue/product_row_additionals.html",
         orderable=False,
+        attrs = {'th': {'class': 'additionals'},}
     )
     options = TemplateColumn(
         verbose_name="Опции",
@@ -122,6 +55,7 @@ class ProductTable(DashboardTable):
         template_name="oscar/dashboard/catalogue/product_row_categories.html",
         accessor=A("categories"),
         order_by="categories__name",
+        attrs = {'th': {'class': 'categories'},}
     )
     price = TemplateColumn(
         verbose_name="Цена",
@@ -142,11 +76,13 @@ class ProductTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/product_row_actions.html",
         orderable=False,
+        attrs = {'th': {'class': 'actions'},}
     )
     statistic = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/product_row_statistic.html",
         orderable=False,
+        attrs = {'th': {'class': 'statistic'},}
     )
 
     icon = "fas fa-chart-bar"
@@ -192,11 +128,13 @@ class CategoryTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/category_row_image.html",
         orderable=False,
+        attrs = {'th': {'class': 'image'},}
     )
-    name = LinkColumn("dashboard:catalogue-category-update", args=[A("pk")])
+    name = LinkColumn("dashboard:catalogue-category-update", args=[A("pk")], attrs = {'th': {'class': 'name'},})
     description = TemplateColumn(
         template_code='{{ record.description|default:""|striptags'
-        '|cut:"&nbsp;"|truncatewords:6 }}'
+        '|cut:"&nbsp;"|truncatewords:6 }}',
+        attrs = {'th': {'class': 'description'},}
     )
     # mark_safe is needed because of
     # https://github.com/bradleyayers/django-tables2/issues/187
@@ -206,12 +144,14 @@ class CategoryTable(DashboardTable):
         verbose_name=mark_safe("Дочерние категории"),
         accessor="get_num_children",
         orderable=False,
+        attrs = {'th': {'class': 'num_children'},}
     )
     num_products = TemplateColumn(
         verbose_name="Товары",
         template_name="oscar/dashboard/catalogue/category_row_products.html",
         accessor="get_num_products",
         order_by="product",
+        attrs = {'th': {'class': 'num_products'},}
     )
     is_public = TemplateColumn(
         verbose_name="Доступен",
@@ -224,12 +164,14 @@ class CategoryTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/category_row_actions.html",
         orderable=False,
+        attrs = {'th': {'class': 'actions'},}
     )
 
     statistic = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/category_row_statistic.html",
         orderable=False,
+        attrs = {'th': {'class': 'statistic'},}
     )
 
     icon = "fas fa-layer-group"
@@ -249,16 +191,19 @@ class AttributeOptionGroupTable(DashboardTable):
         verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/attribute_option_group_row_name.html",
         order_by="name",
+        attrs = {'th': {'class': 'name'},}
     )
     option_summary = TemplateColumn(
         verbose_name="Значения пераметра",
         template_name="oscar/dashboard/catalogue/attribute_option_group_row_option_summary.html",
         orderable=False,
+        attrs = {'th': {'class': 'option_summary'},}
     )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/attribute_option_group_row_actions.html",
         orderable=False,
+        attrs = {'th': {'class': 'actions'},}
     )
 
     icon = "fas fa-paperclip"
@@ -279,11 +224,21 @@ class OptionTable(DashboardTable):
         verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/option_row_name.html",
         order_by="name",
+        attrs = {'th': {'class': 'name'},}
+    )
+    type = Column(
+        verbose_name="Тип опции",
+        attrs = {'th': {'class': 'type'},}
+    )
+    help_text = Column(
+        verbose_name="Описание",
+        attrs = {'th': {'class': 'description'},}
     )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/option_row_actions.html",
         orderable=False,
+        attrs = {'th': {'class': 'actions'},}
     )
 
     required = TemplateColumn(
@@ -312,11 +267,13 @@ class AdditionalTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/additional_row_image.html",
         orderable=False,
+        attrs = {'th': {'class': 'image'},}
     )
     name = TemplateColumn(
         verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/additional_row_name.html",
         order_by="name",
+         attrs = {'th': {'class': 'name'},}
     )
     max_amount = Column(
         verbose_name="Максимум",
@@ -345,6 +302,7 @@ class AdditionalTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/additional_row_actions.html",
         orderable=False,
+         attrs = {'th': {'class': 'actions'},}
     )
     is_public = TemplateColumn(
         verbose_name="Доступен",

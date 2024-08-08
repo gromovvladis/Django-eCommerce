@@ -96,7 +96,7 @@ class AbstractProductClass(models.Model):
     #: require a message to be specified before it could be bought.
     #: Note that you can also set options on a per-product level.
     options = models.ManyToManyField(
-        "catalogue.Option", blank=True, verbose_name="Опиция"
+        "catalogue.Option", blank=True, verbose_name="Опция"
     )
 
     class_additionals = models.ManyToManyField(
@@ -105,7 +105,7 @@ class AbstractProductClass(models.Model):
         blank=True,
         verbose_name="Дополнительные товары класса",
         help_text=(
-            "Доп товары"
+            "Дополнительные товары для всех продуктов этого класса"
         ),
     )
 
@@ -122,6 +122,18 @@ class AbstractProductClass(models.Model):
     @property
     def has_attributes(self):
         return self.attributes.exists()
+
+    @property
+    def products_count(self):
+        return self.products.count()
+
+    @property
+    def get_options(self):
+        return self.options.all()
+    
+    @property
+    def get_additionals(self):
+        return self.class_additionals.all()
 
 
 class AbstractCategory(MP_Node):

@@ -1497,6 +1497,7 @@ pre code {
   -webkit-box-shadow: 0px 5px 10px rgba(0, 0, 0, .08);
   box-shadow: 0px 5px 10px rgba(0, 0, 0, .08);
   border-radius: 0 0 10px 10px;
+  text-align: center;
   /* overflow: hidden; */
   /* display: block; */
 }
@@ -2409,6 +2410,31 @@ fieldset:disabled a.btn {
   box-shadow: 0 0 0 0.1rem rgba(130, 138, 145, 0.3);
 }
 
+.btn-third {
+  color: #fff;
+  background-color: var(--purple);
+}
+.btn-third:hover {
+  color: #fff;
+  background-color: var(--purple);
+}
+.btn-third:focus, .btn-info.focus {
+  color: #fff;
+  background-color: var(--purple);
+  box-shadow: 0 0 0 0.1rem rgba(195, 58, 191, 0.3);
+}
+.btn-third.disabled, .btn-info:disabled {
+  color: #fff;
+  background-color: var(--purple);
+}
+.btn-third:not(:disabled):not(.disabled):active, .btn-info:not(:disabled):not(.disabled).active, .show > .btn-info.dropdown-toggle {
+  color: #fff;
+  background-color: var(--purple);
+}
+.btn-third:not(:disabled):not(.disabled):active:focus, .btn-info:not(:disabled):not(.disabled).active:focus, .show > .btn-info.dropdown-toggle:focus {
+  box-shadow: 0 0 0 0.1rem rgba(195, 58, 191, 0.3);
+}
+
 .btn-success {
   color: #fff;
   background-color: #28a745;
@@ -2918,7 +2944,10 @@ input[type=button].btn-block {
 
 .nav-link[aria-expanded="true"]{
   color: var(--primary);
+  border-radius: 10px 10px 0 0;
+  background-color: #eee !important;
 }
+
 
 @media (max-width: 576px) {
 
@@ -3124,6 +3153,8 @@ input[type=button].btn-block {
 
 .dropdown-list{
   text-align: start;
+  background-color: #f3f3f3;
+  border-radius: 0 0 10px 10px;
 }
 
 .dropdown-menu.show {
@@ -3842,6 +3873,7 @@ input[type=button].btn-block {
   overflow-x: hidden;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  padding: 5px;
 }
 
 .nav::-webkit-scrollbar{
@@ -3859,6 +3891,7 @@ input[type=button].btn-block {
   width: 100%;
   text-align: start;
   font-weight: 500;
+  border-radius: 10px;
 }
 
 .nav-account{
@@ -3877,7 +3910,7 @@ input[type=button].btn-block {
 
 .sort-table{
   display: none;
-  background-color: #e3e3e3;
+  background-color: #f6f6f6;
   border: none;
   border-radius: 5px;
   padding: 5px 10px;
@@ -4048,7 +4081,7 @@ input[type=button].btn-block {
   }
 
   .navbar-primary.open{
-    width: 170px;
+    width: 180px;
   }
 
   .navbar-primary.open .nav-link.tablet-active{
@@ -4369,11 +4402,13 @@ input[type=button].btn-block {
 }
 
 @media (max-width: 768px) {
-  .dropdown-item,
-  .nav-link {
-    border-radius: 5px;
-    margin: 0 10px 10px;
-    width: calc(100% - 20px);
+
+  /* .nav-link:hover{
+    border-radius: 10px;
+  } */
+
+  .dropdown-item:hover:last-child{
+    border-radius: 0 0 10px 10px;
   }
 }
 
@@ -18325,6 +18360,16 @@ h3.app-ico:before {
   border-radius: 10px;
 }
 
+.table-header[aria-expanded="false"] .fa-chevron-up {
+  display: none;
+}
+
+.table-header[aria-expanded="true"] .fa-chevron-down {
+  display: none;
+}
+
+
+
 caption,
 .table-header {
   font-weight: 500;
@@ -18411,7 +18456,7 @@ caption {
   max-width: 100%;
   float: left;
   z-index: 9990;
-  padding: 1rem;
+  padding: .5rem;
   transition: width .15s ease-in-out, left .15s ease-in-out;
   /* transition: width .15s, height .2s; */
 }
@@ -18423,13 +18468,13 @@ caption {
 @media screen and (min-width: 768px) {
 
   .navbar-primary{
-    width: 50px;
+    width: 60px;
     padding: 0;
     top: 40px;
   }
 
   .dashboard-content{
-    margin-left: 50px;
+    margin-left: 60px;
   }
 
 }
@@ -18644,7 +18689,6 @@ caption {
 .order_graph .bar-chart dd em {
   position: absolute;
   bottom: -33px;
-  left: 7px;
   font-style: inherit;
   color: #adb5bd;
   transform: rotate(-45deg);
@@ -18924,23 +18968,20 @@ caption {
   text-align: center;
 }
 
-.table .status,
-.table .required,
-.table .weight,
-.table .delivery,
-.table .stock,
-.table .actions,
-.table .statistic,
-.table .image,
-.table .img,
-.table .cooking_time,
-.table .price,
-.table .old_price,
-.table .max_amount,
-.table .variants {
-  text-align: center;
-} 
-
+@media (min-width: 768px) {
+  .table .name,
+  .table .title,
+  .table .description,
+  .table .type,
+  .table .partner,
+  .table .additionals,
+  .table .class_options,
+  .table .date_updated,
+  .table .date_created,
+  .table .categories{
+    text-align: start;
+  } 
+}
 .table .empty{
   padding: 1rem !important;
 }
@@ -19013,7 +19054,7 @@ caption {
   }
 
 
-  .mobile-table table .title a,
+  .mobile-table tbody .title a,
   .mobile-table .name a{
     color: var(--purple);
     font-size: 1rem;
