@@ -14,7 +14,7 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
     ]
     permissions_map = {
         "delivery-stats": (["is_staff"], ["partner.dashboard_access"]),
-        "delivery-map": (["is_staff"], ["partner.dashboard_access"]),
+        "delivery-now": (["is_staff"], ["partner.dashboard_access"]),
         "delivery-zones": (["is_staff"], ["partner.dashboard_access"]),
         "delivery-couriers-list": (["is_staff"], ["partner.dashboard_access"]),
         "delivery-kitchen": (["is_staff"], ["partner.dashboard_access"]),
@@ -24,7 +24,7 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
         self.delivery_stats_view = get_class("dashboard.delivery.views", "DeliveryStatsView")
-        self.delivery_map_view = get_class("dashboard.delivery.views", "DeliveryMapView")
+        self.delivery_now_view = get_class("dashboard.delivery.views", "DeliveryNowView")
         self.delivery_zona_view = get_class("dashboard.delivery.views", "DeliveryZonaView")
         self.delivery_zones_view = get_class("dashboard.delivery.views", "DeliveryZonesView")
         self.delivery_zones_create_view = get_class("dashboard.delivery.views", "DeliveryZonesCreateView")
@@ -41,7 +41,7 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
     def get_urls(self):
         urls = [
             path("", self.delivery_stats_view.as_view(), name="delivery-stats"),
-            path("map/", self.delivery_map_view.as_view(), name="delivery-map"),
+            path("map/", self.delivery_now_view.as_view(), name="delivery-now"),
             path("zona/", self.delivery_zona_view.as_view(), name="delivery-zona"),
             path("zones/", self.delivery_zones_view.as_view(), name="delivery-zones"),
             path("zones/create/", self.delivery_zones_create_view.as_view(), name="delivery-create-zona"),

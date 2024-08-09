@@ -86,6 +86,7 @@ class ProductTable(DashboardTable):
     )
 
     icon = "fas fa-chart-bar"
+    caption = ngettext_lazy("%s Продукт", "%s Продуктов")
 
     class Meta(DashboardTable.Meta):
         model = Product

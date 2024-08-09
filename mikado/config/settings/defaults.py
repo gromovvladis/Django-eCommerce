@@ -143,10 +143,10 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "label": "Заказы",
         "icon": "fas fa-shopping-cart",
         "children": [
-            # {
-            #     "label": "Активные заказы",
-            #     "url_name": "dashboard:order-active-list",
-            # },
+            {
+                "label": "Активные заказы",
+                "url_name": "dashboard:order-active-list",
+            },
             {
                 "label": "Все заказы",
                 "url_name": "dashboard:order-list",
@@ -156,31 +156,31 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:order-stats",
             },
             {
-                "label": "Точки продажи",
+                "label": "Точки продаж",
                 "url_name": "dashboard:partner-list",
             },
         ],
     },
     {
-        "label": "Клиенты",
+        "label": "Пользователи",
         "icon": "fas fa-users",
         "children": [
             {
                 "label": "Клиенты",
-                "url_name": "dashboard:users-index",
+                "url_name": "dashboard:customers",
             },
-            # {
-            #     "label": "Персонал",
-            #     "url_name": "dashboard:staff-index",
-            # },
-            # {
-            #     "label": "SMS Aero",
-            #     "url_name": "dashboard:sms-aero",
-            # },
-            # {
-            #     "label": "Отправленные СМС",
-            #     "url_name": "dashboard:sended-sms",
-            # },
+            {
+                "label": "Персонал",
+                "url_name": "dashboard:staff",
+            },
+            {
+                "label": "Отзывы к товарам",
+                "url_name": "dashboard:reviews-product-list",
+            },
+            {
+                "label": "Отзывы к заказам",
+                "url_name": "dashboard:reviews-order-list",
+            },
         ],
     },
     {
@@ -211,20 +211,16 @@ OSCAR_DASHBOARD_NAVIGATION = [
             },
             {
                 "label": "Шаблоны Email",
-                "url_name": "dashboard:comms-list",
+                "url_name": "dashboard:email-list",
             },
             {
                 "label": "Шаблоны SMS",
-                "url_name": "dashboard:comms-list",
+                "url_name": "dashboard:sms-list",
             },
             {
-                "label": "Отзывы к товарам",
-                "url_name": "dashboard:reviews-list",
+                "label": "Отправленные СМС",
+                "url_name": "dashboard:sended-sms",
             },
-            # {
-            #     "label": "Отзывы к заказам",
-            #     "url_name": "dashboard:reviews-orders-list",
-            # },
         ],
     },
     {
@@ -246,20 +242,8 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "icon": "fas fa-delivery",
         "children": [
             {
-                "label": "Статистика",
-                "url_name": "dashboard:delivery-stats",
-            },
-            {
-                "label": "Карта",
-                "url_name": "dashboard:delivery-map",
-            },
-            {
-                "label": "Зоны доставки",
-                "url_name": "dashboard:delivery-zones",
-            },
-            {
-                "label": "Курьеры",
-                "url_name": "dashboard:delivery-couriers-list",
+                "label": "Текущие",
+                "url_name": "dashboard:delivery-now",
             },
             {
                 "label": "Заказы на кухне",
@@ -269,6 +253,19 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Заказы в доставке",
                 "url_name": "dashboard:delivery-couriers",
             },
+            {
+                "label": "Статистика",
+                "url_name": "dashboard:delivery-stats",
+            },
+            {
+                "label": "Зоны доставки",
+                "url_name": "dashboard:delivery-zones",
+            },
+            {
+                "label": "Курьеры",
+                "url_name": "dashboard:delivery-couriers-list",
+            },
+
         ],
     },
     {

@@ -98,19 +98,19 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form
         ctx["productclass_form"] = self.productclass_form_class()
+        if self.request.GET:
+            ctx["searching"] = True
         return ctx
-
-    def get_description(self, form):
-        if form.is_valid() and any(form.cleaned_data.values()):
-            return "Результаты поиска"
-        return "Продукты"
-
+    
     def get_table(self, **kwargs):
         if "recently_edited" in self.request.GET:
             kwargs.update(dict(orderable=False))
 
         table = super().get_table(**kwargs)
-        table.caption = self.get_description(self.form)
+
+        if self.form.is_valid() and any(self.form.cleaned_data.values()):
+            table.caption = "Результаты поиска: %s" % self.object_list.count()
+
         return table
 
     def get_table_pagination(self, table):

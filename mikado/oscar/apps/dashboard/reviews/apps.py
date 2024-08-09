@@ -14,13 +14,15 @@ class ReviewsDashboardConfig(OscarDashboardConfig):
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
-        self.list_view = get_class("dashboard.reviews.views", "ReviewListView")
+        self.product_list_view = get_class("dashboard.reviews.views", "ReviewProductListView")
+        self.order_list_view = get_class("dashboard.reviews.views", "ReviewOrderListView")
         self.update_view = get_class("dashboard.reviews.views", "ReviewUpdateView")
         self.delete_view = get_class("dashboard.reviews.views", "ReviewDeleteView")
 
     def get_urls(self):
         urls = [
-            path("", self.list_view.as_view(), name="reviews-list"),
+            path("", self.product_list_view.as_view(), name="reviews-product-list"),
+            path("", self.order_list_view.as_view(), name="reviews-order-list"),
             path("<int:pk>/", self.update_view.as_view(), name="reviews-update"),
             path("<int:pk>/delete/", self.delete_view.as_view(), name="reviews-delete"),
         ]

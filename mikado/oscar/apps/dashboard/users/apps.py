@@ -14,7 +14,8 @@ class UsersDashboardConfig(OscarDashboardConfig):
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
-        self.index_view = get_class("dashboard.users.views", "IndexView")
+        self.customers_view = get_class("dashboard.users.views", "CustomersView")
+        self.staff_view = get_class("dashboard.users.views", "StaffView")
         self.user_detail_view = get_class("dashboard.users.views", "UserDetailView")
         self.password_reset_view = get_class(
             "dashboard.users.views", "PasswordResetView"
@@ -31,7 +32,8 @@ class UsersDashboardConfig(OscarDashboardConfig):
 
     def get_urls(self):
         urls = [
-            path("", self.index_view.as_view(), name="users-index"),
+            path("customers/", self.customers_view.as_view(), name="customers"),
+            path("staff/", self.staff_view.as_view(), name="staff"),
             re_path(
                 r"^(?P<pk>-?\d+)/$", self.user_detail_view.as_view(), name="user-detail"
             ),

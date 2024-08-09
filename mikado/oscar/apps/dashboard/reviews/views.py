@@ -18,7 +18,7 @@ ProductReviewSearchForm, DashboardProductReviewForm = get_classes(
 ProductReview = get_model("reviews", "productreview")
 
 
-class ReviewListView(BulkEditMixin, generic.ListView):
+class ReviewProductListView(BulkEditMixin, generic.ListView):
     model = ProductReview
     template_name = "oscar/dashboard/reviews/review_list.html"
     context_object_name = "review_list"
@@ -161,7 +161,11 @@ class ReviewListView(BulkEditMixin, generic.ListView):
         for review in reviews:
             review.status = new_status
             review.save()
-        return HttpResponseRedirect(reverse("dashboard:reviews-list"))
+        return HttpResponseRedirect(reverse("dashboard:reviews-product-list"))
+
+
+class ReviewOrderListView(BulkEditMixin, generic.ListView):
+    pass
 
 
 class ReviewUpdateView(generic.UpdateView):
@@ -171,7 +175,7 @@ class ReviewUpdateView(generic.UpdateView):
     context_object_name = "review"
 
     def get_success_url(self):
-        return reverse("dashboard:reviews-list")
+        return reverse("dashboard:reviews-product-list")
 
 
 class ReviewDeleteView(generic.DeleteView):
@@ -180,4 +184,4 @@ class ReviewDeleteView(generic.DeleteView):
     context_object_name = "review"
 
     def get_success_url(self):
-        return reverse("dashboard:reviews-list")
+        return reverse("dashboard:reviews-product-list")
