@@ -14,12 +14,16 @@ class CommunicationsDashboardConfig(OscarDashboardConfig):
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
-        self.list_view = get_class("dashboard.communications.views", "ListView")
+        self.email_list_view = get_class("dashboard.communications.views", "EmailListView")
+        self.sms_list_view = get_class("dashboard.communications.views", "SmsListView")
+        self.sended_sms_view = get_class("dashboard.communications.views", "SendedSmsView")
         self.update_view = get_class("dashboard.communications.views", "UpdateView")
 
     def get_urls(self):
         urls = [
-            path("", self.list_view.as_view(), name="comms-list"),
+            path("email/", self.email_list_view.as_view(), name="email-list"),
+            path("sms/", self.sms_list_view.as_view(), name="sms-list"),
+            path("sended-sms/", self.sended_sms_view.as_view(), name="sended-sms"),
             re_path(
                 r"^(?P<slug>[\w-]+)/$", self.update_view.as_view(), name="comms-update"
             ),

@@ -200,7 +200,7 @@ class DeliveryZonesAvailableView(View):
 class DeliveryStatsView(View):
     pass
 
-class DeliveryMapView(View):
+class DeliveryNowView(View):
     pass
 
 class DeliveryCouriersListView(View):

@@ -168,6 +168,7 @@ class IndexView(TemplateView):
 
         prod_slug = self.request.GET.get('product')
         cat_slug = self.request.GET.get('category')
+        users = User.objects.all()
 
         if prod_slug:
             prod = Product.objects.get(slug=prod_slug)
@@ -176,7 +177,8 @@ class IndexView(TemplateView):
                 "orders": Order.objects.filter(lines__product_id=prod.id),
                 "alerts": StockAlert.objects.filter(stockrecord__product_id=prod.id),
                 "baskets": Basket.objects.filter(lines__product_id=prod.id).filter(status=Basket.OPEN),
-                "customers": User.objects.filter(orders__lines__product_id=prod.id).distinct(),
+                "users": users.filter(baskets__lines__product_id=prod.id).distinct(),
+                "customers": users.filter(orders__lines__product_id=prod.id).distinct(),
                 "lines": Line.objects.filter(product_id=prod.id),
                 "products": Product.objects.filter(id=prod.id),
             }
@@ -189,7 +191,8 @@ class IndexView(TemplateView):
                 "orders": Order.objects.filter(lines__product_id__in=ids),
                 "alerts": StockAlert.objects.filter(stockrecord__product_id__in=ids),
                 "baskets": Basket.objects.filter(lines__product_id__in=ids).filter(status=Basket.OPEN),
-                "customers": User.objects.filter(orders__lines__product_id__in=ids).distinct(),
+                "users": users.filter(baskets__lines__product_id__in=ids).distinct(),
+                "customers": users.filter(orders__lines__product_id__in=ids).distinct(),
                 "lines": Line.objects.filter(product_id__in=ids),
                 "products": prod_cat,
             }
@@ -199,7 +202,8 @@ class IndexView(TemplateView):
                 "orders": Order.objects.all(),
                 "alerts": StockAlert.objects.all(),
                 "baskets": Basket.objects.filter(status=Basket.OPEN),
-                "customers": User.objects.filter(orders__isnull=False).distinct(),
+                "users": users,
+                "customers": users.filter(orders__isnull=False).distinct(),
                 "lines": Line.objects.filter(),
                 "products": Product.objects.all(),
             }
@@ -222,6 +226,7 @@ class IndexView(TemplateView):
         orders = data['orders']
         alerts = data['alerts']
         baskets = data['baskets']
+        users = data['users']
         customers = data['customers']
         lines = data['lines']
         products = data['products']
@@ -282,6 +287,9 @@ class IndexView(TemplateView):
             "total_customers_last_day": customers.filter(
                 date_joined__gt=datetime_24hrs_ago,
             ).count(),
+            "total_users_last_day": users.filter(
+                date_joined__gt=datetime_24hrs_ago,
+            ).count(),
             "total_open_baskets_last_day": baskets.filter(
                 date_created__gt=datetime_24hrs_ago
             ).count(),
@@ -302,6 +310,9 @@ class IndexView(TemplateView):
             "total_customers_last_week": customers.filter(
                 date_joined__gt=datetime_week_ago,
             ).count(),
+            "total_users_last_week": users.filter(
+                date_joined__gt=datetime_week_ago,
+            ).count(),
 
             "total_lines_last_7days": total_lines_last_7days,
             "total_orders_last_7days": orders_last_7days.count(),
@@ -316,7 +327,6 @@ class IndexView(TemplateView):
             "total_customers_last_7days": customers.filter(
                 date_joined__gt=datetime_7days_ago,
             ).count(),
-
             "total_open_baskets_last_7days": baskets.filter(
                 date_created__gt=datetime_7days_ago
             ).count(),
@@ -331,6 +341,9 @@ class IndexView(TemplateView):
                 "total__sum"
             ]
             or D("0.00"),
+            "total_users_last_month": users.filter(
+                date_joined__gt=datetime_month_ago,
+            ).count(),
             "total_customers_last_month": customers.filter(
                 date_joined__gt=datetime_month_ago,
             ).count(),
@@ -359,6 +372,9 @@ class IndexView(TemplateView):
             "total_products": products.count(),
             "total_open_stock_alerts": open_alerts.count(),
             "total_closed_stock_alerts": closed_alerts.count(),
+            "total_users": users.count(),
+            "total_customers_2orders": customers.annotate(order_count=Count('orders')).filter(order_count__gte=2).count(),
+            "total_customers_5orders": customers.annotate(order_count=Count('orders')).filter(order_count__gte=5).count(),
             "total_customers": customers.count(),
             "total_open_baskets": baskets.count(),
             "total_orders": orders.count(),

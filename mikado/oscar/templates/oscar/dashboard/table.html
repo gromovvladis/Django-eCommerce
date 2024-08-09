@@ -28,7 +28,7 @@
             </div>
         </div>
     </caption>
-    {% if not table.empty_text %}
+    {% if table.paginated_rows %}
         <thead>
             <tr>
             {% for column in table.columns %}
@@ -61,9 +61,9 @@
         {% endblock table.tbody.row %}
     {% empty %}
         {% if table.empty_text %}
-        {% block table.tbody.empty_text %}
-        <tr><td class="empty" colspan="{{ table.columns|length }}">{{ table.empty_text }}</td></tr>
-        {% endblock table.tbody.empty_text %}
+            {% block table.tbody.empty_text %}
+                <tr><td class="empty" colspan="{{ table.columns|length }}">{{ table.empty_text }}</td></tr>
+            {% endblock table.tbody.empty_text %}
         {% endif %}
     {% endfor %}
     </tbody>

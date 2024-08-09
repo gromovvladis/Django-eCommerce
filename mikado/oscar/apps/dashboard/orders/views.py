@@ -421,6 +421,10 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
                 )
 
 
+class OrderActiveListView(OrderListView):
+    pass
+
+
 class OrderDetailView(EventHandlerMixin, DetailView):
     """
     Dashboard view to display a single order.

@@ -14,6 +14,7 @@ class OrdersDashboardConfig(OscarDashboardConfig):
     ]
     permissions_map = {
         "order-list": (["is_staff"], ["partner.dashboard_access"]),
+        "order-active-list": (["is_staff"], ["partner.dashboard_access"]),
         "order-stats": (["is_staff"], ["partner.dashboard_access"]),
         "order-detail": (["is_staff"], ["partner.dashboard_access"]),
         "order-detail-note": (["is_staff"], ["partner.dashboard_access"]),
@@ -24,6 +25,7 @@ class OrdersDashboardConfig(OscarDashboardConfig):
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
         self.order_list_view = get_class("dashboard.orders.views", "OrderListView")
+        self.order_active_list_view = get_class("dashboard.orders.views", "OrderActiveListView")
         self.order_detail_view = get_class("dashboard.orders.views", "OrderDetailView")
         self.shipping_address_view = get_class(
             "dashboard.orders.views", "ShippingAddressUpdateView"
@@ -34,6 +36,7 @@ class OrdersDashboardConfig(OscarDashboardConfig):
     def get_urls(self):
         urls = [
             path("", self.order_list_view.as_view(), name="order-list"),
+            path("active/", self.order_active_list_view.as_view(), name="order-active-list"),
             path("statistics/", self.order_stats_view.as_view(), name="order-stats"),
             path(
                 "<str:number>/", self.order_detail_view.as_view(), name="order-detail"

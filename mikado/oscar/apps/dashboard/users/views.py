@@ -20,7 +20,7 @@ UserTable = get_class("dashboard.users.tables", "UserTable")
 User = get_user_model()
 
 
-class IndexView(BulkEditMixin, FormMixin, SingleTableView):
+class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
     template_name = "oscar/dashboard/users/index.html"
     model = User
     actions = (
@@ -120,6 +120,10 @@ class IndexView(BulkEditMixin, FormMixin, SingleTableView):
                 user.save()
         messages.info(self.request, "Пользовательский статус был успешно изменен")
         return redirect("dashboard:users-index")
+
+
+class StaffView(BulkEditMixin, FormMixin, SingleTableView):
+    pass
 
 
 class UserDetailView(DetailView):

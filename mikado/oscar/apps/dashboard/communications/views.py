@@ -12,10 +12,18 @@ CommunicationEventTypeForm = get_class(
 Dispatcher = get_class("communication.utils", "Dispatcher")
 
 
-class ListView(generic.ListView):
+class EmailListView(generic.ListView):
     model = CommunicationEventType
     template_name = "oscar/dashboard/comms/list.html"
     context_object_name = "commtypes"
+
+
+class SmsListView(generic.ListView):
+    pass
+
+
+class SendedSmsView(generic.ListView):
+    pass
 
 
 class UpdateView(generic.UpdateView):

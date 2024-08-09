@@ -8,10 +8,10 @@
 
 {% block styles %}
     {% compress css %}   
-        <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
-        <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
-        <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
-        <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
+    <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
+    <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
+    <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
+    <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
     {% endcompress %}
 {% endblock %}
 
@@ -22,10 +22,11 @@
 {% block layout %}
 
     {% block navbar %}
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-accounts">
+        <nav class="navbar navbar-expand-lg navbar-light navbar-accounts">
             <div class="container fill-width">
                 <button class="navbar-toggler navbar-toggler--mobile" type="button" data-id="navbar-toggler">
-                    <span class="navbar-toggler-icon"></span>
+                    <i class="fa-solid fa-bars"></i>
+                    {% comment %} <span class="navbar-toggler-icon"></span> {% endcomment %}
                 </button>
             </div>
         </nav>
@@ -36,7 +37,7 @@
             {% block dashboard_nav %}
                 {% dashboard_navigation user as nav_items %}
 
-                <div class="navbar-expand-lg navbar-dark navbar-primary flex-column flex-shrink-0 bg-light" data-id="navbar-primary">
+                <div class="navbar-expand-lg navbar-light navbar-primary flex-column flex-shrink-0 bg-light" data-id="navbar-primary">
                     <div class="navbar-header py-3 px-1">
                         {% comment %} <a class="navbar-brand" href="{{ homepage_url }}">
                             {% icon file_name='footer/logo' size=20 fill="#838383" %}
@@ -75,11 +76,11 @@
                     {% endfor %}
                     </ul>
 
-                    <div class="dropdown border-top"> 
+                    <div class="dropdown border-top py-3 px-1"> 
                         
                         <button role="button" class="nav-account d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="nav-account" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <div class="rounded-circle">{{ user.get_img }}</div>
-                            <span class="ml-2">{{ user.get_full_name|default:request.user.get_full_name }}</span>
+                            <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.get_full_name }}</span>
                         </button>
 
                         <ul class="dropdown-menu text-small shadow-sm" aria-labelledby="nav-account">
