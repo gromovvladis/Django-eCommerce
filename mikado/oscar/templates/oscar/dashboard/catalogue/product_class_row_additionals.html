@@ -1,0 +1,9 @@
+{% load django_tables2 %}
+
+{% if record.get_additionals %}
+    {% for adt in record.get_additionals %}
+        {{ adt.name }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+{% else %}
+    -
+{% endif %}

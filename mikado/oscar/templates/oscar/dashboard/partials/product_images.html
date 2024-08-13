@@ -1,3 +1,43 @@
+<tr class="sortable-handle {% if not form.instance.id %}sortable-disabled{% endif %}">
+    {{ form.non_field_errors }}
+    {% for field in form %}
+        {% if field.is_hidden %}
+            {{ field }}
+        {% elif "original" in field.id_for_label %}
+            <td>
+                <span class="btn btn-info btn-handle btn-reorder {% if not form.instance.id %}disabled{% endif %}" {% if not form.instance.id %}disabled{% endif %}><i class="fas fa-grip-lines"></i></span>
+            </td>
+            <td>
+                {{ field }}
+                {% for error in field.errors %}
+                    <ul class="error-block">
+                        <li>{{ error }}</li>
+                    </ul>
+                {% endfor %}
+            </td>
+        {% else %}
+            <td class="image-fill">
+                {% include 'oscar/dashboard/partials/form_field.html' with field=field nolabel=True %}
+                {% comment %} {{ field.label_tag }} {% endcomment %}
+                {% comment %} {{ field }} {% endcomment %}
+                {% for error in field.errors %}
+                    <ul class="error-block">
+                        <li>{{ error }}</li>
+                    </ul>
+                {% endfor %}
+            </td>
+        {% endif %}
+    {% endfor %}
+</tr>      
+
+
+
+
+
+
+
+
+{% comment %} 
 {% load i18n %}
 <li class='sortable-handle'>
     {% for field in form %}
@@ -22,4 +62,4 @@
         {% endif %}
     {% endfor %}
     {{ form.non_field_errors }}
-</li>
+</li>  {% endcomment %}

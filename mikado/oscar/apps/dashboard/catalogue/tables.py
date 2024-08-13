@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django_tables2 import A, Column, LinkColumn, TemplateColumn
 
@@ -7,10 +8,87 @@ from oscar.core.loading import get_class, get_model
 
 DashboardTable = get_class("dashboard.tables", "DashboardTable")
 Product = get_model("catalogue", "Product")
+ProductClass = get_model("catalogue", "ProductClass")
 Category = get_model("catalogue", "Category")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
+
+
+class ProductClassTable(DashboardTable):
+
+    name = LinkColumn(
+        "dashboard:catalogue-category-update", 
+        args=[A("pk")], 
+        attrs = {'th': {'class': 'name'},}
+    )
+    class_options = TemplateColumn(
+        verbose_name="Опции",
+        template_name="oscar/dashboard/catalogue/product_class_row_options.html",
+        order_by="options",
+        accessor=A("get_options"),
+        attrs = {'th': {'class': 'class_options'},}
+    )
+    class_additionals = TemplateColumn(
+        verbose_name="Дополнительные товары",
+        template_name="oscar/dashboard/catalogue/product_class_row_additionals.html",
+        order_by="class_additionals",
+        accessor=A("get_additionals"),
+        attrs = {'th': {'class': 'class_additionals'},}
+    )
+    num_products = Column(
+        verbose_name="Продукты",
+        order_by="products",
+        accessor=A("num_products"),
+        attrs = {'th': {'class': 'num_products'},}
+    )
+    requires_shipping = TemplateColumn(
+        verbose_name="Доставка",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by=("requires_shipping"),
+        attrs = {'th': {'class': 'delivery'},}
+    )
+    track_stock = TemplateColumn(
+        verbose_name="Доступен",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by=("track_stock"),
+        attrs = {'th': {'class': 'stock'},}
+    )
+    actions = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/catalogue/product_class_row_actions.html",
+        orderable=False,
+        attrs = {'th': {'class': 'actions'},}
+    )
+
+    icon = "fas fa-list"
+    caption = ngettext_lazy("%s Тип продуков", "%s Типов продуков")
+
+    class Meta(DashboardTable.Meta):
+        model = ProductClass
+        fields = (
+            "name",
+            "class_options",
+            "class_additionals",
+            "num_products",
+            "requires_shipping",
+            "track_stock",
+        )
+        sequence = (
+            "name",
+            "class_options",
+            "class_additionals",
+            "num_products",
+            "requires_shipping",
+            "track_stock",
+            "actions",
+        )
+        order_by = "-name"
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
+        empty_text = "Нет созданых типов продуктов"
+
 
 class ProductTable(DashboardTable):
     image = TemplateColumn(
@@ -85,6 +163,10 @@ class ProductTable(DashboardTable):
         attrs = {'th': {'class': 'statistic'},}
     )
 
+    date_updated = Column(
+        attrs = {'th': {'class': 'date_updated'}}
+    )
+
     icon = "fas fa-chart-bar"
     caption = ngettext_lazy("%s Продукт", "%s Продуктов")
 
@@ -145,7 +227,7 @@ class CategoryTable(DashboardTable):
         args=[A("pk")],
         verbose_name=mark_safe("Дочерние категории"),
         accessor="get_num_children",
-        orderable=False,
+        orderable=True,
         attrs = {'th': {'class': 'num_children'},}
     )
     num_products = TemplateColumn(
@@ -253,6 +335,10 @@ class OptionTable(DashboardTable):
         attrs = {'th': {'class': 'required'},}
     ) 
 
+    order = Column(
+        attrs = {'th': {'class': 'order'}}
+    )
+
     icon = "fas fa-paperclip"
     caption = ngettext_lazy("%s Опция", "%s Опций")
 
@@ -312,7 +398,6 @@ class AdditionalTable(DashboardTable):
     is_public = TemplateColumn(
         verbose_name="Доступен",
         template_name="oscar/dashboard/table/boolean.html",
-        accessor="is_public",
         order_by=("is_public"),
         attrs = {'th': {'class': 'is_public'},})
 
@@ -328,3 +413,85 @@ class AdditionalTable(DashboardTable):
             'class': 'table table-striped table-bordered table-hover',
         }
         empty_text = "Нет созданых дополнительных товаров"
+
+
+class StockAlertTable(DashboardTable):
+
+    name = TemplateColumn( 
+        verbose_name="Продукт",
+        template_name="oscar/dashboard/catalogue/stock_alert_row_name.html",
+        orderable=False,
+        attrs = {'th': {'class': 'name'},}
+    )
+    partner = TemplateColumn(
+        verbose_name="Точка продажи",
+        template_name="oscar/dashboard/catalogue/stock_alert_row_partner.html",
+        orderable=False,
+        attrs = {'th': {'class': 'partner'},}
+    )
+    threshold = Column(
+        verbose_name="Границы запасов",
+        order_by="threshold",
+        attrs = {'th': {'class': 'threshold'},}
+    )
+    is_public = TemplateColumn(
+        verbose_name="Доступен",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by=("is_public"),
+        attrs = {'th': {'class': 'is_public'},}
+    )
+    date_created = Column(
+        verbose_name="Дата",
+        order_by="date_created",
+        attrs = {'th': {'class': 'date_created'},}
+    )
+    status = TemplateColumn(
+        verbose_name="Статус",
+        template_name="oscar/dashboard/catalogue/stock_alert_row_status.html",
+        order_by="status",
+        attrs = {'th': {'class': 'status'},}
+    )
+    actions = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/catalogue/stock_alert_row_actions.html",
+        orderable=False,
+        attrs = {'th': {'class': 'actions'},}
+    )
+
+    icon = "fas fa-cubes-stacked"
+    
+    filter = {
+        "url": reverse_lazy("dashboard:stock-alert-list"),
+        "values": [
+            ("", "Все"), 
+            ("?status=Открыто", "Открытые"), 
+            ("?status=Закрыто", "Закрытые"), 
+        ]
+    }
+    
+    caption = ngettext_lazy("%s Уведомление о наличии", "%s Уведомлений о наличии")
+
+    class Meta(DashboardTable.Meta):
+        model = ProductClass
+        fields = (
+            "name",
+            "partner",
+            "threshold",
+            "is_public",
+            "date_created",
+            "status",
+        )
+        sequence = (
+            "name",
+            "partner",
+            "threshold",
+            "is_public",
+            "date_created",
+            "status",
+            "actions",
+        )
+        order_by = "-name"
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
+        empty_text = "Нет уведомлений о наличии"

@@ -58,9 +58,9 @@ from oscar.views.generic import ObjectLookupView
         "AttributeOptionFormSet",
     ),
 )
-ProductTable, CategoryTable, AttributeOptionGroupTable, OptionTable, AdditionalTable = get_classes(
+ProductTable, ProductClassTable, CategoryTable, AttributeOptionGroupTable, OptionTable, AdditionalTable, StockAlertTable = get_classes(
     "dashboard.catalogue.tables",
-    ("ProductTable", "CategoryTable", "AttributeOptionGroupTable", "OptionTable", "AdditionalTable"),
+    ("ProductTable", "ProductClassTable", "CategoryTable", "AttributeOptionGroupTable", "OptionTable", "AdditionalTable", "StockAlertTable"),
 )
 (PopUpWindowCreateMixin, PopUpWindowUpdateMixin, PopUpWindowDeleteMixin) = get_classes(
     "dashboard.views",
@@ -569,29 +569,38 @@ class ProductDeleteView(PartnerProductFilterMixin, generic.DeleteView):
             return reverse("dashboard:catalogue-product-list")
 
 
-class StockAlertListView(generic.ListView):
+class StockAlertListView(SingleTableView):
     template_name = "oscar/dashboard/catalogue/stockalert_list.html"
-    model = StockAlert
-    context_object_name = "alerts"
+    table_class = StockAlertTable
+    context_table_name = "alerts"
     paginate_by = settings.OSCAR_STOCK_ALERTS_PER_PAGE
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form
-        ctx["description"] = self.description
         return ctx
+    
+    def get_table(self, **kwargs):
+        table = super().get_table(**kwargs)
+
+        if "status" in self.request.GET:
+            self.form = StockAlertSearchForm(self.request.GET)
+            if self.form.is_valid():
+                status = self.form.cleaned_data["status"]
+                table.caption = 'Уведомление со статусом "%s"' % status
+        else:
+            self.form = StockAlertSearchForm()
+
+        return table
 
     def get_queryset(self):
         if "status" in self.request.GET:
             self.form = StockAlertSearchForm(self.request.GET)
             if self.form.is_valid():
                 status = self.form.cleaned_data["status"]
-                self.description = 'Уведомление со статусом "%s"' % status
-                return self.model.objects.filter(status=status)
+                return StockAlert.objects.filter(status=status)
         else:
-            self.description = "Все уведомления"
-            self.form = StockAlertSearchForm()
-        return self.model.objects.all()
+            return StockAlert.objects.all()        
 
 
 class CategoryListView(SingleTableView):
@@ -820,19 +829,15 @@ class ProductClassUpdateView(ProductClassCreateUpdateView):
         product_class = get_object_or_404(ProductClass, pk=self.kwargs["pk"])
         return product_class
 
-
-class ProductClassListView(generic.ListView):
+    
+class ProductClassListView(SingleTableView):
     template_name = "oscar/dashboard/catalogue/product_class_list.html"
-    context_object_name = "classes"
-    model = ProductClass
+    table_class = ProductClassTable
+    context_table_name = "classes"
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["title"] = "Типы продуктов"
-
-        for clsa in ctx["classes"]:
-            dfgd = clsa
-            
         return ctx
 
     def get_queryset(self):

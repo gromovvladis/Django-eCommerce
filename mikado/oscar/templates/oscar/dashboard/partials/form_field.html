@@ -9,10 +9,11 @@
     {% endcomment %}
 
     {% block control_group %}
-        <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %}">
+        <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width mb-4">
 
             {% block label %}
-                {% if not nolabel and field.widget_type != 'checkbox' %}
+                {% comment %} {% if not nolabel and field.widget_type != 'checkbox' %} {% endcomment %}
+                {% if not nolabel %}
                     <label for="{{ field.auto_id }}" class="{% if style|default:"stacked" != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">
                         {{ field.label|safe }}
                     </label>
@@ -24,9 +25,11 @@
                     {% block widget %}
                         {% if field.widget_type == 'checkbox' %}
                             {% render_field field class+="form-check-input" %}
-                            <label for="{{ field.auto_id }}" class="form-check-label mt-2{% if field.field.required %} required{% endif %}">
-                                {{ field.label|safe }}
-                            </label>
+                            {% if not nolabel %}
+                                <label for="{{ field.auto_id }}" class="form-check-label{% if field.field.required %} required{% endif %}">
+                                    {{ field.label|safe }}
+                                </label>
+                            {% endif %}
                         {% elif field.widget_type == 'radioselect' %}
                             {% render_field field class+="form-check-input position-static controls mt-2" %}
                         {% else %}

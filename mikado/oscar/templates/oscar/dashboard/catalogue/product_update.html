@@ -1,20 +1,19 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 
 {% block body_class %}{{ block.super }} create-page catalogue{% endblock %}
 
 {% block title %}
-    {{ title }} | {% trans "Products" %} | {{ block.super }}
+    {{ title }} | Продукты | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+                <a href="{% url 'dashboard:index' %}">Главная</a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:catalogue-product-list' %}">{% trans "Products" %}</a>
+                <a href="{% url 'dashboard:catalogue-product-list' %}">Продукты</a>
             </li>
             {% if parent %}
                 <li class="breadcrumb-item">
@@ -39,10 +38,8 @@
                 <div class="col-md-12">
                     <div class="alert alert-info">
                         {% url 'dashboard:catalogue-product' pk=parent.id as parent_url %}
-                        {% blocktrans with title=parent.title %}
-                            You are currently editing a product variant of
-                            <a href="{{ parent_url }}">{{ title }}</a>.
-                        {% endblocktrans %}
+                        Вы редактируете вариант продукта -
+                        <a href="{{ parent_url }}">{{ parent.title }}</a>.
                     </div>
                 </div>
             </div>
@@ -54,8 +51,9 @@
                 <div class="col-md-3">
                     <div class="tab-nav sticky-top">
                         <div class="table-header">
-                            <h3>{% trans "Sections" %}</h3>
+                            <h3>Редактирование</h3>
                         </div>
+                        {% comment %} <div class="dropdown-divider"></div> {% endcomment %}
                         <ul class="nav flex-column bs-docs-sidenav" id="product_update_tabs">
                             {% comment %}
                                 The navigation below is filtered heavily on the product structure.
@@ -67,46 +65,46 @@
                             {% block tabs %}
                                 <li class="nav-item">
                                     <a class="nav-link active" href="#product_details" data-toggle="tab">
-                                        {% trans 'Product details' %}
+                                        Описание
                                     </a>
                                 </li>
                                 {% if not parent %}
                                     <li class="nav-item">
                                         <a class="nav-link" href="#product_category" data-toggle="tab">
-                                            {% trans 'Categories' %}
+                                            Категории
                                         </a>
                                     </li>
                                 {% endif %}
                                 {% if product_class.has_attributes %}
                                     <li class="nav-item">
                                         <a class="nav-link" href="#product_attributes" data-toggle="tab">
-                                            {% trans 'Attributes' %}
+                                            Атрибуты
                                         </a>
                                     </li>
                                 {% endif %}
                                 <li class="nav-item">
                                   <a class="nav-link" href="#product_images" data-toggle="tab">
-                                      {% trans 'Images' %}
+                                      Изображения
                                   </a>
                                 </li>
                                 {% if not product.is_parent %}
                                     <li class="nav-item">
                                         <a class="nav-link" href="#product_stock" data-toggle="tab">
-                                            {% trans 'Stock and pricing' %}
+                                            Наличие и цена
                                         </a>
                                     </li>
                                 {% endif %}
                                 {% if user.is_staff and not parent %}
                                     <li class="nav-item">
                                         <a class="nav-link" href="#child_products" data-toggle="tab">
-                                            {% trans 'Variants' %}
+                                            Варианты
                                         </a>
                                     </li>
                                 {% endif %}
                                 {% if not parent %}
                                     <li class="nav-item">
                                         <a class="nav-link" href="#product_recommended" data-toggle="tab">
-                                            {% trans 'Upselling' %}
+                                            Рекомендации
                                         </a>
                                     </li>
                                 {% endif %}
@@ -119,7 +117,7 @@
                                 {% endif %}
                                 <li class="nav-item">
                                     <a class="nav-link" href="#seo" data-toggle="tab">
-                                        {% trans 'Search engine optimisation' %}
+                                        SEO
                                     </a>
                                 </li>
                             {% endblock tabs %}
@@ -134,7 +132,7 @@
                         {% block product_details %}
                             <div class="tab-pane active" id="product_details">
                                 <div class="table-header">
-                                    <h3>{% trans "Product details" %}</h3>
+                                    <h3>Описание</h3>
                                 </div>
                                 <div class="card card-body product-details">
                                     {% block product_details_content %}
@@ -157,7 +155,7 @@
                             <div class="tab-pane" id="product_category">
                                 {% block product_categories_content %}
                                     <table class="table table-striped table-bordered">
-                                        <caption>{% trans "Category" %}</caption>
+                                        <caption>Категории</caption>
                                         {{ category_formset.management_form }}
                                         {{ category_formset.non_form_errors }}
                                         {% for category_form in category_formset %}
@@ -177,9 +175,9 @@
                                 {% block product_attributes_content %}
                                     <table class="table table-striped table-bordered">
                                         <caption>
-                                            {% trans "Attributes" %}
-                                            <span class="badge badge-success">
-                                                {% trans "Product Type:" %} {{ product_class }}
+                                            Атрибуты
+                                            <span class="badge badge-success ml-1">
+                                                Тип продукта: {{ product_class }}
                                             </span>
                                         </caption>
                                         {% for field in form %}
@@ -199,8 +197,22 @@
                         {% block product_images %}
                             <div class="tab-pane" id="product_images">
                                 {% block product_images_content %}
-                                    <div class="table-header">
-                                        <h3>{% trans "Upload, change or remove images" %}</h3>
+                                    
+                                                 
+                                    <table class="table table-striped table-bordered">
+                                        <caption>Загрузить, изменить или удалить изображения</caption>
+                                        <tbody class='upload-image'>
+                                            {{ image_formset.management_form }}
+                                            {{ image_formset.non_form_errors }}
+                                            {% for image_form in image_formset %}
+                                                {% include "oscar/dashboard/partials/product_images.html" with form=image_form %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    
+                            
+                                    {% comment %} <div class="table-header">
+                                        <h3>Загрузить, изменить или удалить изображения</h3>
                                     </div>
                                     <div class="card card-body">
                                         {{ image_formset.management_form }}
@@ -211,9 +223,12 @@
                                             {% endfor %}
                                         </ol>
                                         <p class="form-text">
-                                            {% trans 'Drag images to re-order them. Space for additional images will appear when images are added.' %}
+                                            Перетащите изображения, чтобы изменить их порядок. Место для дополнительных изображений появится при добавлении изображений.
                                         </p>
-                                    </div>
+                                    </div>  {% endcomment %}
+                                    
+
+
                                 {% endblock product_images_content %}
                             </div>
                         {% endblock product_images %}
@@ -222,21 +237,21 @@
                             <div class="tab-pane" id="product_stock">
                                 {% block stockrecords_content %}
                                     <table class="table table-striped table-bordered">
-                                        <caption>{% trans "Stock and pricing" %}</caption>
+                                        <caption>Наличие и цена</caption>
                                         {{ stockrecord_formset.management_form }}
                                         {{ stockrecord_formset.non_form_errors }}
                                         <thead>
                                             <tr>
-                                                <th>{% trans "Partner" %}</th>
-                                                <th>{% trans "SKU" %}</th>
+                                                <th>Точка продажи</th>
+                                                <th>SKU</th>
                                                 {% if product_class.track_stock %}
-                                                    <th>{% trans "Num in stock" %}</th>
-                                                    <th>{% trans "Num allocated" %}</th>
-                                                    <th>{% trans "Low stock threshold" %}</th>
+                                                    <th>Количество в наличии</th>
+                                                    <th>Заказано</th>
+                                                    <th>Граница малых запасов</th>
                                                 {% endif %}
-                                                <th>{% trans "Currency" %}</th>
-                                                <th>{% trans "Price" %}</th>
-                                                <th>{% trans "Delete?" %}</th>
+                                                <th>Валюта</th>
+                                                <th>Цена</th>
+                                                <th>Удалить?</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -278,17 +293,17 @@
                                     {% block child_products_content %}
                                         <table class='table table-striped table-bordered'>
                                             <caption>
-                                                {% trans "Variants" %}
-                                                <button class="btn btn-primary float-right" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="{% trans 'Adding...' %}">
-                                                    <i class="fas fa-plus"></i> {% trans "Add variant" %}
+                                                Варианты
+                                                <button class="btn btn-primary float-right" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
+                                                    <i class="fas fa-plus"></i> Добавить вариант
                                                 </button>
                                             </caption>
                                             {% if children %}
                                                 <tr>
-                                                    <th>{% trans "Title" %}</th>
-                                                    <th>{% trans "Attributes" %}</th>
-                                                    <th>{% trans "Stock records" %}</th>
-                                                    <th>{% trans "Is public?" %}</th>
+                                                    <th>Имя</th>
+                                                    <th>Атрибуты</th>
+                                                    <th>Товарные записи</th>
+                                                    <th>Доступен?</th>
                                                     <th>&nbsp;</th>
                                                 </tr>
                                                 {% for child in children %}
@@ -296,13 +311,13 @@
                                                         <td>{{ child.get_title }}</td>
                                                         <td>{{ child.attribute_summary }}</td>
                                                         <td>{{ child.stockrecords.count }}</td>
-                                                        <td>{% if child.is_public %}<span class="true">✔</span>{% else %}<span class="false">✘</span>{% endif %}</td>
+                                                        <td>{% if child.is_public %}<span class="true">✔️</span>{% else %}<span class="false">❌</span>{% endif %}</td>
                                                         <td>
                                                             <a href="{% url 'dashboard:catalogue-product' pk=child.id %}" class="btn btn-primary">
-                                                                {% trans "Edit" %}
+                                                                Редактировать
                                                             </a>
                                                             <a href="{% url 'dashboard:catalogue-product-delete' pk=child.id %}" class="btn btn-danger">
-                                                                {% trans "Delete" %}
+                                                                Удалить
                                                             </a>
                                                         </td>
                                                     </tr>
@@ -311,13 +326,13 @@
                                                 <tr>
                                                     <td colspan="5">
                                                         {% if product.can_be_parent %}
-                                                            {% trans 'This product does not have any variants.' %}
+                                                            У этого товара нет созданых варианий
                                                         {% else %}
-                                                            {% trans "One can't add variants to this product at this point." %}
+                                                                На данный момент нельзя добавлять варианты к этому товару.
                                                             {% if product.pk is None %}
-                                                                {% trans "Please save the product before trying to add variants." %}
+                                                                Пожалуйста, сохраните товар, прежде чем пытаться добавить варианты.
                                                             {% elif product.has_stockrecords %}
-                                                                {% trans 'This is likely because this product still has stock records.' %}
+                                                                Вероятно, это связано с тем, что для этого продукта все еще имеются товарные записи.
                                                             {% endif %}
                                                         {% endif %}
                                                     </td>
@@ -333,7 +348,7 @@
                             <div class="tab-pane" id="product_recommended">
                                 {% block recommended_products_content %}
                                     <table class="table table-striped table-bordered">
-                                        <caption>{% trans "Recommended products" %}</caption>
+                                        <caption>Рекомендации</caption>
                                         {{ recommended_formset.management_form }}
                                         {{ recommended_formset.non_form_errors }}
                                         {% for recommended_form in recommended_formset %}
@@ -351,7 +366,7 @@
                         {% block additional_products %}
                             <div class="tab-pane" id="product_additional">
 
-                                <div class="tab-pane active">
+                                <div class="tab-pane active mb-3">
                                     <div class="table-header">
                                         <h3>Дополнительные товары типа продукта '{{ product_class }}'</h3>
                                     </div>
@@ -384,7 +399,7 @@
                         {% block seo %}
                             <div class="tab-pane" id="seo">
                                 <div class="table-header">
-                                    <h3>{% trans "Search engine optimisation" %}</h3>
+                                    <h3>SEO</h3>
                                 </div>
                                 <div class="card card-body">
                                     {% block seo_content %}
@@ -405,25 +420,26 @@
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
                 <div class="form-group">
-                    <div class="float-right">
-                        <a href="{% url 'dashboard:catalogue-product-list' %}">
-                            {% trans "Cancel" %}
-                        </a>
-                        {% trans "or" %}
+                    <div class="float-right">  
+                        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
+                            <i class="fa-regular fa-circle-xmark"></i> Отменить
+                        </a>             
                         {% if parent %}
-                            <button class="btn btn-secondary" name="action" type="submit" value="create-another-child" data-loading-text="{% trans 'Saving...' %}">
-                                {% trans "Save and add another variant" %}
+                            <button class="btn btn-secondary mr-2" name="action" type="submit" value="create-another-child" data-loading-text="Сохранение...">
+                                Сохраните и добавить еще одну вариацию
                             </button>
                         {% endif %}
-                        <button class="btn btn-secondary" name="action" type="submit" value="continue" data-loading-text="{% trans 'Saving...' %}">
-                            {% trans "Save and continue editing" %}
+                        <button class="btn btn-secondary mr-2" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+
+                            Сохранить и продожить редактирование
                         </button>
-                        <button class="btn btn-primary" name="action" type="submit" value="save" data-loading-text="{% trans 'Saving...' %}">
-                            {% trans "Save" %}
+                        <button class="btn btn-primary" name="action" type="submit" value="save" data-loading-text="Сохранение...">
+                            <i class="fa-regular fa-floppy-disk"></i>
+                            Сохранить
                         </button>
                     </div>
                     {% if product %}
-                        <a class="btn btn-success" href="{{ product.get_absolute_url }}">{% trans "View on site" %}</a>
+                        <a class="btn btn-success" href="{{ product.get_absolute_url }}">Смотреть на сайте</a>
                     {% endif %}
                 </div>
             </div>

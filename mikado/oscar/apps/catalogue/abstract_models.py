@@ -124,7 +124,7 @@ class AbstractProductClass(models.Model):
         return self.attributes.exists()
 
     @property
-    def products_count(self):
+    def num_products(self):
         return self.products.count()
 
     @property
@@ -470,9 +470,9 @@ class AbstractProduct(models.Model):
     )
 
     # Title is mandatory for canonical products but optional for child products
-    title = models.CharField(("Название продукта", "Название"), max_length=255, blank=True
+    title = models.CharField("Название", max_length=255, blank=True
     )
-    variant = models.CharField(("Название варианта", "Вариант"), max_length=255, blank=True
+    variant = models.CharField("Вариант", max_length=255, blank=True
     )
 
     slug = SlugField("Ярлык", max_length=255, unique=True)

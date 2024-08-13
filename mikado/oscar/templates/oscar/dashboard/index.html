@@ -129,7 +129,7 @@
                                     <dl class="bar-chart">
                                         {% for item in month_report_dict.order_total_days %}
                                             <dd class="bar-layer" style="width: calc(100% / 30);">
-                                                <em {% if not forloop.first and not forloop.last and not forloop.counter|divisibleby:3 %}class="em-mobile-hidden"{% endif %}  style="right:18%;">{{ item.end_time|date:"d.m" }}</em>
+                                                <em {% if not forloop.first and not forloop.last and not forloop.counter|divisibleby:3 %}class="em-mobile-hidden"{% endif %}  style="right:15%;">{{ item.end_time|date:"d.m" }}</em>
                                                 <span style="height: {{ item.percentage }}%;" >
                                                     <p{% if item.percentage == 0 %} style="display: none;"{% endif %}>{{ item.total|currency }}</p>
                                                 </span>
@@ -324,7 +324,7 @@
     </div>
 </div>
 
-<div class="page-header">
+<div class="page-header mt-3">
     <h1>Запасы и скидки</h1>
 </div>
 
