@@ -8,9 +8,12 @@ from django.shortcuts import HttpResponse, get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView, View
+from django_tables2 import SingleTableView
 
-from oscar.core.loading import get_classes, get_model
+from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import BulkEditMixin
+
+RangeTable = get_class("dashboard.ranges.tables", "RangeTable")
 
 Range = get_model("offer", "Range")
 RangeProduct = get_model("offer", "RangeProduct")
@@ -21,14 +24,14 @@ RangeForm, RangeProductForm = get_classes(
 )
 
 
-class RangeListView(ListView):
-    model = Range
-    context_object_name = "ranges"
+class RangeListView(SingleTableView):
     template_name = "oscar/dashboard/ranges/range_list.html"
+    table_class = RangeTable
+    context_table_name = "ranges"
     paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
 
     def get_queryset(self):
-        return self.model._default_manager.prefetch_related("included_categories")
+        return Range._default_manager.prefetch_related("included_categories")
 
 
 class RangeCreateView(CreateView):

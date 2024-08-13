@@ -1,0 +1,3 @@
+{% load django_tables2 %}
+
+<a class="btn btn-info" href="{% url 'dashboard:catalogue-product' pk=record.stockrecord.product.id %}">Обновить</a>

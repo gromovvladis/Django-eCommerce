@@ -936,7 +936,9 @@ class AbstractRange(models.Model):
     )
 
     includes_all_products = models.BooleanField(
-        "Включает все продукты?", default=False
+        "Все продукты?", 
+        help_text="Включает все продукты выбраных категорий.",
+        default=False
     )
 
     included_products = models.ManyToManyField(

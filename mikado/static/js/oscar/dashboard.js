@@ -17,7 +17,7 @@ var oscar = (function(o, $) {
         var $parentTab = $input.parents('.tab-pane').first();
         var imageContainer = $input.parents('.sortable-handle').first();
         imageContainer.find('.btn-reorder').removeAttr('disabled').removeClass('disabled');
-        var $extraImg = $input.parents('.upload-image').children('li').last();
+        var $extraImg = $input.parents('.upload-image').children('tr').last();
         var $totalForms = $parentTab.find("input[name$=images-TOTAL_FORMS]");
         var $maxForms = $parentTab.find("input[name$=images-MAX_NUM_FORMS]");
         var numExisting = parseInt($totalForms.val());
@@ -281,15 +281,19 @@ var oscar = (function(o, $) {
             // convert last 'extra' form into a multi-upload
             // (assumes `extra=1` in django formset)
             var $productImages = $('#product_images');
-            var $extraImg = $productImages.find('.upload-image li').last();
+            // var $extraImg = $productImages.find('.upload-image li').last();
+            var $extraImg = $productImages.find('.upload-image tr').last();
             o.dashboard._extraProductImg = $extraImg.clone();
 
             $productImages.find('a:disabled').parents('sortable-handle').sortable('disable');
 
-            $('ol.upload-image').sortable({
-                vertical: false,
+            // $('ol.upload-image').sortable({
+            $('tbody.upload-image').sortable({
+                vertical: true,
+                itemSelector: "tr",
                 group: 'serialization',
                 handle: '.btn-handle',
+                placeholder: 'tr-placeholder',
                 onDrop: function ($item, container, _super) {
                     var $sortFields = $("input[name$=-display_order]");
                     $sortFields.each(function(i){
@@ -394,6 +398,7 @@ var oscar = (function(o, $) {
                 init = function(user_options) {
                     options = $.extend(options, user_options);
                     var group = $(options.wrapper).sortable({
+                        vertical: true,
                         group: 'serialization',
                         containerSelector: 'tbody',
                         itemSelector: 'tr',
@@ -404,7 +409,7 @@ var oscar = (function(o, $) {
                             saveOrder(data);
                             _super($item, container);
                         },
-                        placeholder: '<tr class="placeholder"/>',
+                        placeholder: 'tr-placeholder',
                         serialize: function (parent, children, isContainer) {
                             if (isContainer) {
                                 return children;

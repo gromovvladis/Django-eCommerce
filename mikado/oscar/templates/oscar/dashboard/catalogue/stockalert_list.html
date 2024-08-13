@@ -1,4 +1,5 @@
 {% extends 'oscar/dashboard/layout.html' %}
+{% load render_table from django_tables2 %}
 
 {% block body_class %}{{ block.super }} catalogue{% endblock %}
 
@@ -14,80 +15,17 @@
 {% endblock %}
 
 {% block header %}
-<div class="page-header">
-  <h1>Уведомления о наличии</h1>
-</div>
+    <div class="page-header">
+        <h1>Уведомления о наличии</h1>
+    </div>
 {% endblock header %}
 
 {% block dashboard_content %}
-
-    <div class="table-header">
-        <h2 class="float-left"><i class="fas fa-cubes-stacked"></i> {{ description }}</h2>
-        <div class="float-right">
-            <div class="dropdown">
-                <button class="sort-table dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa-solid fa-arrow-up-short-wide"></i>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right sort-table-list" aria-labelledby="dropdownMenuButton">
-                    <a class="orderable dropdown-item" href="{% url 'dashboard:stock-alert-list' %}">Все</a>
-                    <a class="orderable dropdown-item" href="{% url 'dashboard:stock-alert-list' %}?status=Open">Открытые</a>
-                    <a class="orderable dropdown-item" href="{% url 'dashboard:stock-alert-list' %}?status=Closed">Закрытые</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="mobile-table">
-        <table class="table table-striped table-bordered table-hover">
-            {% if alerts %} 
-                <thead>
-                    <tr>
-                        <th class="name">Продукт</th>
-                        <th class="partner">Точка продажи</th>
-                        <th class="threshold">Граница малых запасов</th>
-                        <th class="is_public">Доступно</th>
-                        <th class="date_created">Дата уведомления</th>
-                        <th class="status">Стутус</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for alert in alerts %}
-                        <tr>
-                            <td class="name">
-                                <div class="d-flex flex-column">
-                                    <a href="{% url 'dashboard:catalogue-product' alert.stockrecord.product.id %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
-                                        {{ alert.stockrecord.product.get_title }}
-                                    </a>
-                                    <span class="text-muted small">UPC: {{ alert.stockrecord.product.upc }}</span>
-                                </div>
-                            </td>
-                            <td class="partner" data-label="Точка продажи">{{ alert.stockrecord.partner.display_name }}</td>
-                            <td class="threshold" data-label="Граница малых запасов">{{ alert.stockrecord.low_stock_threshold }}</td>
-                            <td class="is_public" data-label="Доступно">{{ alert.stockrecord.net_stock_level }}</td>
-                            <td class="date_created" data-label="Дата уведомления">{{ alert.date_created }}</td>
-                            <td class="status">
-                                <span class="badge {% if alert.status == "Закрыто" %}badge-success{% else %}badge-warning{% endif %}">
-                    
-                                {{ alert.status }}
-                                </span>
-                            </td>
-                            <td class="actions">
-                                <a class="btn btn-info" href="{% url 'dashboard:catalogue-product' pk=alert.stockrecord.product.id %}">Обновить</a>
-                            </td>
-                            <td class="toggle-row">
-                                <button class="btn btn-secondary" type="button">
-                                    <i class="fa-solid fa-chevron-up"></i>
-                                    <i class="fa-solid fa-chevron-down"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            {% else %}
-                <tr><td class="empty">Уведомления о наличии не найдены</td></tr>
-            {% endif %}
-        </table>
-        {% include "oscar/dashboard/partials/pagination.html" %}
+        {% if alerts %} 
+            {% render_table alerts %}                 
+        {% else %}
+            <tr><td class="empty">Уведомления о наличии не найдены</td></tr>
+        {% endif %}
     </div>
 {% endblock dashboard_content %}

@@ -1,0 +1,7 @@
+{% load django_tables2 %}
+
+{% if range.includes_all_products %}
+    Все продукты категорий
+{% else %}
+    {{ range.num_products|default:"-" }}
+{% endif %}

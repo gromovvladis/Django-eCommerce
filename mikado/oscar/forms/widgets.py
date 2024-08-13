@@ -18,7 +18,7 @@ class ImageInput(FileInput):
     """
 
     template_name = "oscar/forms/widgets/image_input_widget.html"
-
+    
     def __init__(self, attrs=None):
         if not attrs:
             attrs = {}

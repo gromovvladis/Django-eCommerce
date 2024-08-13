@@ -1,0 +1,8 @@
+{% load django_tables2 %}
+
+<div class="d-flex flex-column">
+    <a href="{% url 'dashboard:catalogue-product' record.stockrecord.product.id %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
+        {{ record.stockrecord.product.get_title }}
+    </a>
+    <span class="text-muted small">UPC: {{ record.stockrecord.product.upc }}</span>
+</div>

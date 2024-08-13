@@ -1,4 +1,5 @@
 {% extends 'oscar/dashboard/layout.html' %}
+{% load render_table from django_tables2 %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
@@ -19,73 +20,9 @@
 
 {% block dashboard_content %}
     {% if classes %}
-    <div class="mobile-table">
-        <table class="table table-striped table-bordered table-hover">
-            <caption><i class="fas fa-list"></i> Типы продуктов</caption>
-            <thead>
-                <tr>
-                    <th class="name">Имя</th>
-                    <th class="class_options">Опции</th>
-                    <th class="additionals">Дополнительные товары</th>
-                    <th class="products">Продукты</th>
-                    <th class="delivery">Доставка</th>
-                    <th class="stock">Отслеживать запасы</th>
-                    <th>&nbsp;</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for class in classes %}
-                    <tr>
-                        <td class="name"><a href="{% url 'dashboard:catalogue-class-update' class.id %}">{{ class.name }}</a></td>
-                        <td class="class_options" data-label="Опции">
-                            {% if class.get_options %}
-                                {% for opt in class.get_options %}
-                                    {{ opt.name }}{% if not forloop.last %}, {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td class="additionals" data-label="Дополнительные товары">
-                            {% if class.get_additionals %}
-                                {% for adt in class.get_additionals %}
-                                    {{ adt.name }}{% if not forloop.last %}, {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td class="products" data-label="Продукты">{{ class.products_count }}</td>
-                        <td class="delivery" data-label="Доставка">{{ class.requires_shipping|yesno:"✔️,❌" }}</td>
-                        <td class="stock" data-label="Отслеживать запасы">{{ class.track_stock|yesno:"✔️,❌" }}</td>
-                        <td class="actions">
-                            <div class="btn-toolbar">
-                                <div class="dropdown">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-                                        <a class="dropdown-item" href="{% url 'dashboard:catalogue-class-update' pk=class.id %}">
-                                            Редактировать
-                                        </a>
-                                        <a class="dropdown-item" href="{% url 'dashboard:catalogue-class-delete' pk=class.id %}">
-                                            Удалить
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="toggle-row">
-                            <button class="btn btn-secondary" type="button">
-                                <i class="fa-solid fa-chevron-up"></i>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <div class="mobile-table">
+            {% render_table classes %}
+        </div>
     {% else %}
         <p>Нет созданных типов продуктов</p>
     {% endif %}
