@@ -156,14 +156,25 @@
                                 {% block product_categories_content %}
                                     <table class="table table-striped table-bordered">
                                         <caption>Категории</caption>
+                                        <thead style="text-align:center;">
+                                            <tr>
+                                                <th>Категория</th>
+                                                <th class="text-danger">Удалить</th>
+                                            </tr>
+                                       </thead>
                                         {{ category_formset.management_form }}
                                         {{ category_formset.non_form_errors }}
                                         {% for category_form in category_formset %}
-                                            <tr>
-                                                <td class="form-inline">
-                                                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=category_form %}
-                                                </td>
-                                            </tr>
+
+                                                <tr style="text-align:center;">
+                                                    {% for field in category_form %}
+                                                        {% comment %} <td class="form-inline"> {% endcomment %}
+                                                        {% include 'oscar/dashboard/partials/form_table_field.html' with field=field nolabel=True %}
+                                                    {% endfor %}
+                                                </tr>
+
+                                                    {% comment %} {% include "oscar/dashboard/partials/form_fields_inline.html" with form=category_form nolabel=True %} {% endcomment %}
+
                                         {% endfor %}
                                     </table>
                                 {% endblock product_categories_content %}
@@ -198,16 +209,34 @@
                             <div class="tab-pane" id="product_images">
                                 {% block product_images_content %}
                                     
+                                    {{ image_formset.management_form }}
+                                    {{ image_formset.non_form_errors }}
                                                  
                                     <table class="table table-striped table-bordered">
                                         <caption>Загрузить, изменить или удалить изображения</caption>
+                                        <thead style="text-align:center;">
+                                             <tr>
+                                                 <th></th>
+                                                 <th>Изображение</th>
+                                                 <th>Описание</th>
+                                                 <th class="text-danger">Удалить</th>
+                                             </tr>
+                                        </thead>
                                         <tbody class='upload-image'>
-                                            {{ image_formset.management_form }}
-                                            {{ image_formset.non_form_errors }}
                                             {% for image_form in image_formset %}
                                                 {% include "oscar/dashboard/partials/product_images.html" with form=image_form %}
                                             {% endfor %}
                                         </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="4">
+                                                <p class="form-text">
+                                                    Перетащите изображения, чтобы изменить их порядок. Место для дополнительных изображений появится при добавлении изображений.
+                                                </p>
+                                                Первое изображение в списке используется, как основное изображение.
+                                                </td>
+                                            </tr>
+                                        </tfoot>
                                     </table>
                                     
                             
@@ -236,53 +265,62 @@
                         {% block stockrecords %}
                             <div class="tab-pane" id="product_stock">
                                 {% block stockrecords_content %}
-                                    <table class="table table-striped table-bordered">
-                                        <caption>Наличие и цена</caption>
-                                        {{ stockrecord_formset.management_form }}
-                                        {{ stockrecord_formset.non_form_errors }}
-                                        <thead>
-                                            <tr>
-                                                <th>Точка продажи</th>
-                                                <th>SKU</th>
-                                                {% if product_class.track_stock %}
-                                                    <th>Количество в наличии</th>
-                                                    <th>Заказано</th>
-                                                    <th>Граница малых запасов</th>
-                                                {% endif %}
-                                                <th>Валюта</th>
-                                                <th>Цена</th>
-                                                <th>Удалить?</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for stockrecord_form in stockrecord_formset %}
-                                                {% if stockrecord_form.non_field_errors %}
+                                    <div class="mobile-table mobile-table-xl">
+                                        <table class="table table-striped table-bordered">
+                                            <caption>Наличие и цена</caption>
+                                            {{ stockrecord_formset.management_form }}
+                                            {{ stockrecord_formset.non_form_errors }}
+                                            <thead>
                                                 <tr>
-                                                    <td colspan="{% if product_class.track_stock %}10{% else %}7{% endif %}">
-                                                        {% for error in stockrecord_form.non_field_errors  %}
-                                                            <span class="error-block errorlist"><i class="fas fa-exclamation"></i> {{ error }}</span>
-                                                        {% endfor %}
-                                                    </td>
-                                                </tr>
-                                                {% endif %}
-                                                <tr>
-                                                    <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner nolabel=True %}</td>
-                                                    <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner_sku nolabel=True %}</td>
+                                                    <th>Точка продажи</th>
+                                                    <th>SKU</th>
                                                     {% if product_class.track_stock %}
-                                                        <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.num_in_stock nolabel=True %}</td>
-                                                        <td>{{ stockrecord_form.instance.num_allocated|default:"-" }}</td>
-                                                        <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.low_stock_threshold nolabel=True %}</td>
+                                                        <th>В наличии</th>
+                                                        <th>Заказано</th>
+                                                        <th>Граница запасов</th>
                                                     {% endif %}
-                                                    <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price_currency nolabel=True %}</td>
-                                                    <td>{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price nolabel=True %}</td>
-                                                    <td>
-                                                        {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.id nolabel=True %}
-                                                        {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.DELETE nolabel=True %}
-                                                    </td>
+                                                    <th>Валюта</th>
+                                                    <th>Цена</th>
+                                                    <th>Удалить?</th>
+                                                    {% comment %} <th class="actions"></th> {% endcomment %}
                                                 </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {% for stockrecord_form in stockrecord_formset %}
+                                                    {% if stockrecord_form.non_field_errors %}
+                                                    <tr>
+                                                        <td colspan="{% if product_class.track_stock %}10{% else %}7{% endif %}">
+                                                            {% for error in stockrecord_form.non_field_errors  %}
+                                                                <span class="error-block errorlist"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                                                            {% endfor %}
+                                                        </td>
+                                                    </tr>
+                                                    {% endif %}
+                                                    <tr>
+                                                        <td class="name">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner nolabel=True %}</td>
+                                                        <td data-label="SKU">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner_sku nolabel=True %}</td>
+                                                        {% if product_class.track_stock %}
+                                                            <td data-label="В наличии">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.num_in_stock nolabel=True %}</td>
+                                                            <td data-label="Заказано">{{ stockrecord_form.instance.num_allocated|default:"-" }}</td>
+                                                            <td data-label="Граница малых запасов">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.low_stock_threshold nolabel=True %}</td>
+                                                        {% endif %}
+                                                        <td data-label="Валюта">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price_currency nolabel=True %}</td>
+                                                        <td data-label="Цена">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price nolabel=True %}</td>
+                                                        <td data-label="Удалить?">
+                                                            {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.id nolabel=True %}
+                                                            {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.DELETE nolabel=True %}
+                                                        </td>
+                                                        <td class="toggle-row">
+                                                            <button class="btn btn-secondary" type="button">
+                                                                <i class="fa-solid fa-chevron-up"></i>
+                                                                <i class="fa-solid fa-chevron-down"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 {% endblock stockrecords_content %}
                             </div>
                         {% endblock stockrecords %}
@@ -329,10 +367,13 @@
                                                             У этого товара нет созданых варианий
                                                         {% else %}
                                                                 На данный момент нельзя добавлять варианты к этому товару.
+                                                                <br><br>
                                                             {% if product.pk is None %}
                                                                 Пожалуйста, сохраните товар, прежде чем пытаться добавить варианты.
                                                             {% elif product.has_stockrecords %}
                                                                 Вероятно, это связано с тем, что для этого продукта все еще имеются товарные записи.
+                                                                <br>
+                                                                Удалите товарные записи для создания вариативного товара.
                                                             {% endif %}
                                                         {% endif %}
                                                     </td>
@@ -352,8 +393,8 @@
                                         {{ recommended_formset.management_form }}
                                         {{ recommended_formset.non_form_errors }}
                                         {% for recommended_form in recommended_formset %}
-                                            <tr>
-                                                <td class="form-inline">
+                                            <tr class="form-inline justify-space-between">
+                                                <td class="d-flex flex-wrap fill-width">
                                                     {% include "oscar/dashboard/partials/form_fields_inline.html" with form=recommended_form %}
                                                 </td>
                                             </tr>
@@ -399,7 +440,7 @@
                         {% block seo %}
                             <div class="tab-pane" id="seo">
                                 <div class="table-header">
-                                    <h3>SEO</h3>
+                                    <h3>Поисковая оптимизация</h3>
                                 </div>
                                 <div class="card card-body">
                                     {% block seo_content %}
@@ -419,30 +460,26 @@
 
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
-                <div class="form-group">
-                    <div class="float-right">  
-                        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
-                            <i class="fa-regular fa-circle-xmark"></i> Отменить
-                        </a>             
-                        {% if parent %}
-                            <button class="btn btn-secondary mr-2" name="action" type="submit" value="create-another-child" data-loading-text="Сохранение...">
-                                Сохраните и добавить еще одну вариацию
-                            </button>
-                        {% endif %}
-                        <button class="btn btn-secondary mr-2" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
-
-                            Сохранить и продожить редактирование
-                        </button>
-                        <button class="btn btn-primary" name="action" type="submit" value="save" data-loading-text="Сохранение...">
-                            <i class="fa-regular fa-floppy-disk"></i>
-                            Сохранить
-                        </button>
-                    </div>
-                    {% if product %}
-                        <a class="btn btn-success" href="{{ product.get_absolute_url }}">Смотреть на сайте</a>
-                    {% endif %}
+                <div class="float-right">  
+                    <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
+                        <i class="fa-regular fa-circle-xmark"></i> 
+                        Отменить
+                    </a>             
+                    <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        Сохранить
+                    </button>
                 </div>
+                {% if product %}
+                    <a class="btn btn-success" href="{{ product.get_absolute_url }}">
+                        <i class="fa-solid fa-share"></i>
+                        <span>
+                            Смотреть на сайте
+                        </span>
+                    </a>
+                {% endif %}
             </div>
         {% endblock fixed_actions_group %}
+
     </form>
 {% endblock dashboard_content %}

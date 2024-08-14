@@ -138,7 +138,7 @@ class ProductCategoryFormSet(BaseProductCategoryFormSet):
 
 
 BaseProductImageFormSet = inlineformset_factory(
-    Product, ProductImage, form=ProductImageForm, extra=2
+    Product, ProductImage, form=ProductImageForm, extra=1
 )
 
 

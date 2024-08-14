@@ -6,8 +6,7 @@
         <img src="{{ thumb.url }}" alt="Изображение товара" loading="lazy"/>
     {% else %}
         <img alt="Изображение товара" loading="lazy"
-            {% comment %} onload="$('#upload_button_{{ image_id }}').hide();" {% endcomment %}
-            onload="$('#upload_button_{{ image_id }}').html('ffrgrgrg');"
+            onload="$('#upload_button_{{ image_id }}').hide();"
             onerror="$('#upload_button_{{ image_id }}').show(); alert('Неизвестный формат изображения')"/>
         <button class="btn btn-secondary" id="upload_button_{{ image_id }}">Загрузить изображение</button>
     {% endif %}

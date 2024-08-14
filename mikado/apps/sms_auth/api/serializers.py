@@ -24,6 +24,5 @@ class DefaultUserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'pk',
-            'first_name',
-            'last_name'
+            'name',
         ]

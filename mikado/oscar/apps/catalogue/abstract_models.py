@@ -1028,7 +1028,7 @@ class AbstractProductRecommendation(models.Model):
         verbose_name="Рекомендуемый продукт",
     )
     ranking = models.PositiveSmallIntegerField(
-        "Рейтинг",
+        "Порядок",
         default=0,
         db_index=True,
         help_text=(

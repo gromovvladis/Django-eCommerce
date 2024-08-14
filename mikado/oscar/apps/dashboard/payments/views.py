@@ -242,7 +242,7 @@ class AddTransactionView(CreateView):
         try:
             source = form.cleaned_data.get('source')
             amount = form.cleaned_data.get('amount')
-            reference = "Добавлено пользователем:" + str(self.request.user.first_name) + "(id=" + str(self.request.user.id) + ")"
+            reference = "Добавлено пользователем:" + str(self.request.user.name) + "(id=" + str(self.request.user.id) + ")"
             status = form.cleaned_data.get('status')
             paid = form.cleaned_data.get('paid')
             code = form.cleaned_data.get('code')

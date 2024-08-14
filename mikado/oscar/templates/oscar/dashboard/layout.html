@@ -7,12 +7,12 @@
 {% load static %}
 
 {% block styles %}
-    {% compress css %}   
+    {% comment %} {% compress css %}    {% endcomment %}
     <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
     <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
-    {% endcompress %}
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}
 
 {% block title %}
@@ -127,7 +127,8 @@
 
 {# Local scripts #}
 {% block scripts %}
-        {% compress js %}
+
+        {% comment %} {% compress js %} {% endcomment %}
             <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/oscar/ui.js" %}"></script>
             {# jQuery plugins #}
@@ -137,6 +138,7 @@
             <script src="{% static "js/inputmask/jquery.inputmask.min.js" %}"></script>
             <script src="{% static "js/select2/select2.min.js" %}"></script>
             {% comment %} <script src="{% static "js/jquery-sortable/jquery-sortable-min.js" %}"></script> {% endcomment %}
+            
             <script src="{% static "js/jquery-draggable/jquery-draggable-min.js" %}"></script>
             <script src="{% static "js/oscar/RelatedObjectLookups.js" %}"></script>
             <script src="{% static "js/oscar/dashboard.js" %}"></script>
@@ -146,9 +148,13 @@
             <script src="{% static "js/dashboard/dashboard-sliders.js" %}"></script>
             <script src="{% static "js/dashboard/navi.js" %}"></script>
             <script src="{% static "js/dashboard/table.js" %}"></script>
-        {% endcompress %}
+        {% comment %} {% endcompress %} {% endcomment %}
+
         <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
+
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+
     {% endblock %}
 
 {% block onbodyload %}
