@@ -132,15 +132,15 @@ class ReviewProductListView(BulkEditMixin, generic.ListView):
             parts = name.split()
             if len(parts) >= 2:
                 queryset = queryset.filter(
-                    user__first_name__istartswith=parts[0],
-                    user__last_name__istartswith=parts[1],
+                    Q(user__name__istartswith=parts[0]) 
+                    | Q(user__name__istartswith=parts[1])
                 ).distinct()
             else:
                 queryset = queryset.filter(
-                    Q(user__first_name__istartswith=parts[0])
-                    | Q(user__last_name__istartswith=parts[-1])
+                    Q(user__name__istartswith=parts[0])
+                    | Q(user__name__istartswith=parts[-1])
                 ).distinct()
-            self.desc_ctx["name_filter"] = " спользователем соответствующим '%s'" % name
+            self.desc_ctx["name_filter"] = " - найден пользователь '%s'" % name
 
         return queryset
 

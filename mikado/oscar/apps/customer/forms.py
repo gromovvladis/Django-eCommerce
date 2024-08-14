@@ -381,7 +381,7 @@ class UserForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = existing_user_fields(["first_name", "email"])
+        fields = existing_user_fields(["name", "email"])
 
 
 ProfileForm = UserForm

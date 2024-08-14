@@ -86,9 +86,9 @@ class User(AbstractUser, PermissionsMixin):
 
     email = models.EmailField("Email", blank=True)
 
-    first_name = models.CharField("Имя", max_length=255, blank=True)
-    last_name = models.CharField("Фамилия", max_length=255, blank=True)
+    name = models.CharField("Имя", max_length=255, blank=True)
 
+    staff = models.CharField("Должность", max_length=127, blank=True)
 
     is_staff = models.BooleanField(
         "Статус сотрудника",
@@ -126,9 +126,9 @@ class User(AbstractUser, PermissionsMixin):
         ordering = ["username", 
                     "email",
                     "password", 
-                    "first_name", 
-                    "last_name", 
+                    "name", 
                     "is_staff", 
+                    "staff", 
                     "is_active",
                     "is_email_verified",
                     "date_joined",
@@ -149,10 +149,9 @@ class User(AbstractUser, PermissionsMixin):
 
     def get_full_name(self):
         """
-        Return the first_name plus the last_name, with a space in between.
+        Return the name.
         """
-        full_name = "%s %s" % (self.first_name, self.last_name)
-        return full_name.strip()
+        return self.name.strip()
 
     def get_img(self):
         """
@@ -165,11 +164,6 @@ class User(AbstractUser, PermissionsMixin):
 
         return 'А'
 
-    def get_short_name(self):
-        """
-        Return the short name for the user.
-        """
-        return self.first_name
     
     def get_name_and_phone(self):
         name = self.get_full_name()

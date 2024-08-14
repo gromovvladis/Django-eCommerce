@@ -89,9 +89,7 @@ class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
             # always true filter
             condition = Q()
             for part in parts:
-                condition &= Q(first_name__icontains=part) | Q(
-                    last_name__icontains=part
-                )
+                condition &= Q(name__icontains=part)
             queryset = queryset.filter(condition).distinct()
             self.desc_ctx["name_filter"] = " с именем соответствующим '%s'" % data["name"]
 

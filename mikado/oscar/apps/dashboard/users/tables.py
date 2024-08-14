@@ -11,7 +11,7 @@ class UserTable(DashboardTable):
         orderable=False,
     )
     email = LinkColumn("dashboard:user-detail", args=[A("id")], accessor="email")
-    name = Column(accessor="get_full_name", order_by=("last_name", "first_name"))
+    name = Column(accessor="get_full_name", order_by=("last_name", "name"))
     active = Column(accessor="is_active")
     staff = Column(accessor="is_staff")
     date_registered = Column(accessor="date_joined")

@@ -17,6 +17,7 @@ var oscar = (function(o, $) {
         var $parentTab = $input.parents('.tab-pane').first();
         var imageContainer = $input.parents('.sortable-handle').first();
         imageContainer.find('.btn-reorder').removeAttr('disabled').removeClass('disabled');
+        imageContainer.removeClass('sortable-disabled');
         var $extraImg = $input.parents('.upload-image').children('tr').last();
         var $totalForms = $parentTab.find("input[name$=images-TOTAL_FORMS]");
         var $maxForms = $parentTab.find("input[name$=images-MAX_NUM_FORMS]");
@@ -281,26 +282,26 @@ var oscar = (function(o, $) {
             // convert last 'extra' form into a multi-upload
             // (assumes `extra=1` in django formset)
             var $productImages = $('#product_images');
-            // var $extraImg = $productImages.find('.upload-image li').last();
             var $extraImg = $productImages.find('.upload-image tr').last();
             o.dashboard._extraProductImg = $extraImg.clone();
+            $productImages.find('span:disabled').parents('.sortable-handle').sortable('disable');
 
-            $productImages.find('a:disabled').parents('sortable-handle').sortable('disable');
-
-            // $('ol.upload-image').sortable({
             $('tbody.upload-image').sortable({
                 vertical: true,
+                // forcePlaceholderSize: true,
+                axis: 'y',
                 itemSelector: "tr",
                 group: 'serialization',
                 handle: '.btn-handle',
                 placeholder: 'tr-placeholder',
+                cancel: '.sortable-disabled',
                 onDrop: function ($item, container, _super) {
                     var $sortFields = $("input[name$=-display_order]");
                     $sortFields.each(function(i){
                         $(this).val(i);
                     });
                     _super($item, container);
-                }
+                },
             });
         },
         offers: {
@@ -377,6 +378,7 @@ var oscar = (function(o, $) {
             }
         },
         reordering: (function() {
+
             var options = {
                     handle: '.btn-handle',
                     submit_url: '#'
@@ -399,11 +401,12 @@ var oscar = (function(o, $) {
                     options = $.extend(options, user_options);
                     var group = $(options.wrapper).sortable({
                         vertical: true,
+                        axis: 'y',
                         group: 'serialization',
                         containerSelector: 'tbody',
                         itemSelector: 'tr',
                         handle: options.handle,
-                        vertical: true,
+                        cancel: '.sortable-disabled',
                         onDrop: function ($item, container, _super) {
                             var data = group.sortable("serialize");
                             saveOrder(data);
@@ -418,7 +421,7 @@ var oscar = (function(o, $) {
                                 var parts = parent.attr('id').split('_');
                                 return {'name': parts[0], 'value': parts[1]};
                             }
-                        }
+                        },
                     });
                 };
 
@@ -456,3 +459,58 @@ var oscar = (function(o, $) {
     return o;
 
 })(oscar || {}, jQuery);
+
+
+
+$(document).ready(function () {
+    let $files_list = $('.input-file-list');
+    let file = $('.photo-input a')[0];
+    if (file){
+        let new_file_input = '<div class="input-file-list-item">' +
+            '<img class="input-file-list-img" src="' + file.href + '">' +
+            '<span class="input-file-list-name">' + file.innerText + '</span>' +
+            '</div>';
+        $files_list.append(new_file_input);
+    }
+});
+
+
+var dt = new DataTransfer();
+
+$('#id_image').on('change', function (){
+    let $files_list = $('.input-file-list');
+    let file = this.files.item(0);
+
+    
+    dt = new DataTransfer();
+    dt.items.add(file);
+
+    let reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = function(){
+        let new_file_input = '<div class="input-file-list-item">' +
+            '<img class="input-file-list-img" src="' + reader.result + '">' +
+            '<span class="input-file-list-name">' + file.name + '</span>' +
+            '<span onclick="removeFilesItem(this); return false;" class="input-file-list-remove"></span>' +
+        '</div>';
+        $files_list.empty();
+        $files_list.append(new_file_input);
+    }
+
+    this.files = dt.files;
+});
+
+
+
+function removeFilesItem(target){
+        let name = $(target).prev().text();
+        let input = $('#id_image');
+        $(target).closest('.input-file-list-item').remove();
+
+        for(let i = 0; i < dt.items.length; i++){
+            if(name === dt.items[i].getAsFile().name){
+                dt.items.remove(i);
+            }
+        }
+    input[0].files = dt.files;
+}

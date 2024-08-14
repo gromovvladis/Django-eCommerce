@@ -179,8 +179,8 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, ListView):
             else:
                 parts = [parts[0], parts[1:]]
 
-            query = Q(user__first_name__istartswith=parts[0])
-            queryset = queryset.filter(query).distinct()
+            # query = Q(user__name__istartswith=parts[0])
+            queryset = queryset.filter(user__name__istartswith=parts[0]).distinct()
 
         if data["product_title"]:
             queryset = queryset.filter(

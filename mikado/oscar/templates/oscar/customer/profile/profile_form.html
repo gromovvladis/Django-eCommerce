@@ -41,18 +41,18 @@
                 {% endfor %}
             {% endblock %}
             
-            <div data-id="input-wrapper" class="v-input d-flex align-center{% if request.user.first_name %} v-input__label-active{% endif %} v-input__padding">
+            <div data-id="input-wrapper" class="v-input d-flex align-center{% if request.user.name %} v-input__label-active{% endif %} v-input__padding">
                 <div class="v-input__wrapper">
                     <div class="v-input__label">Имя</div>
                     <div class="v-input__control d-flex align-center">
                         <label>
-                            {% include 'oscar/partials/render_field.html' with field=form.first_name data_id="profile-input" %}
+                            {% include 'oscar/partials/render_field.html' with field=form.name data_id="profile-input" %}
                         </label>
                     </div>
                 </div>
             </div>
-            {% if form.first_name.errors %}
-                <span class="error-block mt-2 info-message">{{ form.first_name.errors }}</span>
+            {% if form.name.errors %}
+                <span class="error-block mt-2 info-message">{{ form.name.errors }}</span>
             {% endif %}
 
             <div class="v-input d-flex align-center mt-2 v-input__label-active v-input__padding readonly">

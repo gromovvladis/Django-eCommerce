@@ -5,7 +5,8 @@
 {% else %}
 
     {% block control_group %}
-        <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width">
+        <td data-label="{{ data_label }}" class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width {{ class }}">
+
             {% block label %}
                 {% if not nolabel %}
                     <label for="{{ field.auto_id }}" class="{% if style|default:"stacked" != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">
@@ -15,7 +16,7 @@
             {% endblock %}
 
             {% block controls %}
-                <div class="{% if style|default:"stacked" != 'stacked' %}col-sm-8{% endif %}{% if field.widget_type == 'checkbox' or field.widget_type == 'radioselect' %} form-check{% endif %}">
+                <div class="{% if style|default:"stacked" != 'stacked' %}col-sm-8{% endif %}{% if field.widget_type == 'checkbox' or field.widget_type == 'radioselect' %} d-flex justify-content-center align-items-center{% endif %}">
                     {% block widget %}
                         {% if field.widget_type == 'checkbox' %}
                             {% render_field field class+="form-check-input" %}
@@ -24,17 +25,6 @@
                                     {{ field.label|safe }}
                                 </label>
                             {% endif %}
-                        {% elif field.widget_type == 'clearablefile' %}
-                                
-                        <button class="btn btn-secondary mb-2" type="button">
-                            <label for="{{ field.auto_id }}" class="{% if style|default:"stacked" != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">
-                                <i class="fa-solid fa-plus"></i> Добавить {{ field.label|safe|lower }}
-                            </label>
-                        </button>
-                            <div class="photo-input">
-                                {% render_field field class+="form-control" %}
-                                <div class="input-file-list"></div>
-                            </div>
                         {% elif field.widget_type == 'radioselect' %}
                             {% render_field field class+="form-check-input position-static controls mt-2" %}
                         {% else %}
@@ -56,9 +46,8 @@
                             </small>
                         {% endif %}
                     {% endblock %}
-
                 </div>
             {% endblock %}
-        </div>
+        </td>
     {% endblock %}
 {% endif %}

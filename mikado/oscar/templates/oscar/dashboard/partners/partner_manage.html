@@ -37,7 +37,7 @@
                     <tr>
                         <th>{% trans 'Email' %}</th>
                         <th>{% trans 'First name' %}</th>
-                        <th>{% trans 'Last name' %}</th>
+                        {% comment %} <th>{% trans 'Last name' %}</th> {% endcomment %}
                         <th>&nbsp;</th>
                     </tr>
                 </thead>
@@ -45,8 +45,8 @@
                     {% for user in users %}
                         <tr>
                             <td><a href="{% url 'dashboard:partner-user-update' partner_pk=partner.pk user_pk=user.id %}">{{ user.email }}</a></td>
-                            <td>{{ user.first_name|default:"-" }}</td>
-                            <td>{{ user.last_name|default:"-" }}</td>
+                            <td>{{ user.name|default:"-" }}</td>
+                            {% comment %} <td>{{ user.last_name|default:"-" }}</td> {% endcomment %}
                             <td>
                                 <form action="{% url 'dashboard:partner-user-unlink' partner_pk=partner.id user_pk=user.id %}" method="post">
                                     {% csrf_token %}

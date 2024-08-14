@@ -240,7 +240,7 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
     
     def get_initial(self):
         return {
-            "name": self.request.user.first_name,
+            "name": self.request.user.name,
             "email": self.request.user.email,
         }
 

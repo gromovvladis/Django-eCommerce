@@ -62,7 +62,7 @@ class NewUserForm(PhoneUserCreationForm):
 
     class Meta:
         model = User
-        fields = existing_user_fields(["first_name", "last_name", "email"])
+        fields = existing_user_fields(["name", "email"])
 
 
 class ExistingUserForm(forms.ModelForm):
@@ -118,7 +118,7 @@ class ExistingUserForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = existing_user_fields(["first_name", "last_name"]) + [
+        fields = existing_user_fields(["name"]) + [
             "password1",
             "password2",
         ]

@@ -18,7 +18,7 @@ Additional = get_model("catalogue", "Additional")
 class ProductClassTable(DashboardTable):
 
     name = LinkColumn(
-        "dashboard:catalogue-category-update", 
+        "dashboard:catalogue-class-update", 
         args=[A("pk")], 
         attrs = {'th': {'class': 'name'},}
     )
