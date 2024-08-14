@@ -92,6 +92,7 @@
     переходим в директорию с файлом manage.py
     миграции
         python manage.py makemigrations
+        python manage.py migrate
     
     суперпользователь
         python manage.py createsuperuser
