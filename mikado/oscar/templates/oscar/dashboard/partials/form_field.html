@@ -24,17 +24,6 @@
                                     {{ field.label|safe }}
                                 </label>
                             {% endif %}
-                        {% elif field.widget_type == 'clearablefile' %}
-                                
-                        <button class="btn btn-secondary mb-2" type="button">
-                            <label for="{{ field.auto_id }}" class="{% if style|default:"stacked" != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">
-                                <i class="fa-solid fa-plus"></i> Добавить {{ field.label|safe|lower }}
-                            </label>
-                        </button>
-                            <div class="photo-input">
-                                {% render_field field class+="form-control" %}
-                                <div class="input-file-list"></div>
-                            </div>
                         {% elif field.widget_type == 'radioselect' %}
                             {% render_field field class+="form-check-input position-static controls mt-2" %}
                         {% else %}

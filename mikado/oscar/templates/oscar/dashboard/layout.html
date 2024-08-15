@@ -7,12 +7,12 @@
 {% load static %}
 
 {% block styles %}
-    {% compress css %}   
+    {% comment %} {% compress css %}    {% endcomment %}
     <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
     <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
-    {% endcompress %}
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}
 
 {% block title %}
@@ -49,18 +49,18 @@
 
                     <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
                         {% for item in nav_items %}
-                        <li class="nav-item{% if request.path in item.paths %} current-tab{% endif %}">
+                        <li class="nav-item{% if request.path|tab:item.paths %} current-tab{% endif %}">
                             {% if item.has_children %}
                                 <button class="nav-link" data-target="#navbar_{{ forloop.counter }}"
                                     data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" type="button"
-                                    aria-expanded="{% if request.path in item.paths %}true{% else %}false{% endif %}"
+                                    aria-expanded="{% if request.path|tab:item.paths %}true{% else %}false{% endif %}"
                                 >
-                                    {% if item.icon %}<i class="{{ item.icon }} mr-2" style="width: 15px;"></i>{% endif %}
-                                    <span class="item_text arrow-dropdown">{{ item.label }}</span>
+                                    {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
+                                    <span class="item_text arrow-dropdown ml-2">{{ item.label }}</span>
                                 </button>
-                                <div class="dropdown-list collapse {% if request.path in item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
+                                <div class="dropdown-list collapse {% if request.path|tab:item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
                                     {% for subitem in item.children %}
-                                        <a class="dropdown-item nav-dropdown{% if request.path == subitem.url %} active{% endif %}" href="{{ subitem.url }}">
+                                        <a class="dropdown-item nav-dropdown{% if request.path|subtab:subitem.url %} active{% endif %}" href="{{ subitem.url }}">
                                             {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
                                             {{ subitem.label }}
                                         </a>
@@ -68,8 +68,8 @@
                                 </div>
                             {% else %}
                                 <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
-                                    {% if item.icon %}<i class="{{ item.icon }} mr-2" style="width: 15px;"></i>{% endif %}
-                                    <span class="item_text">{{ item.label }}</span>
+                                    {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
+                                    <span class="item_text ml-2">{{ item.label }}</span>
                                 </a>
                             {% endif %}
                         </li>
@@ -80,7 +80,7 @@
                         
                         <button role="button" class="nav-account d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="nav-account" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <div class="rounded-circle">{{ user.get_img }}</div>
-                            <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.get_full_name }}</span>
+                            <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.username }}</span>
                         </button>
 
                         <ul class="dropdown-menu text-small shadow-sm" aria-labelledby="nav-account">
@@ -133,7 +133,7 @@
 
 {# Local scripts #}
 {% block scripts %}
-        {% compress js %}
+        {% comment %} {% compress js %} {% endcomment %}
             <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/oscar/ui.js" %}"></script>
             <script src="{% static "js/mousewheel/jquery.mousewheel.js" %}"></script>
@@ -149,7 +149,7 @@
             <script src="{% static "js/dashboard/dashboard-sliders.js" %}"></script>
             <script src="{% static "js/dashboard/navi.js" %}"></script>
             <script src="{% static "js/dashboard/table.js" %}"></script>
-        {% endcompress %}
+        {% comment %} {% endcompress %} {% endcomment %}
         <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
     {% endblock %}
 

@@ -1,12 +1,12 @@
-{% load i18n static %}
+{% load static %}
 <div class="related-widget-wrapper multiple">
     {{ rendered_widget }}
     {% block links %}
         {% spaceless %}
-        <a class="related-widget-wrapper-link add-related" id="create_id_{{ name }}"
+        <a class="related-widget-wrapper-link add-related ml-2" id="create_id_{{ name }}"
             href="{{ add_related_url }}?{{ url_params }}"
-            title="{% blocktrans %}Add another {{ model }}{% endblocktrans %}">
-            <img src="{% static 'img/ui/icon-addlink.svg' %}" alt="{% trans 'Add' %}" loading="lazy"/>
+            title="Добавить дополнительно - {{ model }}">
+            <i style="color:#28a745;" class="fa-solid fa-plus"></i>
         </a>
         {% endspaceless %}
     {% endblock %}

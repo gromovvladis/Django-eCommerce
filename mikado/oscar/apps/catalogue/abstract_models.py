@@ -207,11 +207,13 @@ class AbstractCategory(MP_Node):
         only display one product image, e.g. in a list of products.
         """
         img = self.image
+        caption = self.name
         if not img:
             mis_img = MissingProductImage()
-            return {"original": mis_img.name, "caption": "", "is_missing": True}
+            return {"original": mis_img, "caption": caption, "is_missing": True}
 
-        return {"original": img.name, "caption": "", "is_missing": False}
+        return {"original": img, "caption": caption, "is_missing": False}
+
 
     @property
     def full_name(self):

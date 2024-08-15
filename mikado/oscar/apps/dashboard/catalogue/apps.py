@@ -111,6 +111,7 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
 
     def get_urls(self):
         urls = [
+            path("products/", self.product_list_view.as_view(), name="catalogue-product-list"),
             path(
                 "products/<int:pk>/",
                 self.product_createupdate_view.as_view(),
@@ -136,7 +137,6 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 self.product_delete_view.as_view(),
                 name="catalogue-product-delete",
             ),
-            path("", self.product_list_view.as_view(), name="catalogue-product-list"),
             path(
                 "stock-alerts/",
                 self.stock_alert_view.as_view(),
@@ -183,7 +183,7 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 name="catalogue-category-delete",
             ),
             path(
-                "product-type/create/",
+                "product-types/create/",
                 self.product_class_create_view.as_view(),
                 name="catalogue-class-create",
             ),
@@ -193,12 +193,12 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 name="catalogue-class-list",
             ),
             path(
-                "product-type/<int:pk>/update/",
+                "product-types/<int:pk>/update/",
                 self.product_class_update_view.as_view(),
                 name="catalogue-class-update",
             ),
             path(
-                "product-type/<int:pk>/delete/",
+                "product-types/<int:pk>/delete/",
                 self.product_class_delete_view.as_view(),
                 name="catalogue-class-delete",
             ),

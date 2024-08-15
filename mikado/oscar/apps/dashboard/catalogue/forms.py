@@ -4,7 +4,7 @@ from treebeard.forms import movenodeform_factory
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import slugify
-from oscar.forms.widgets import DateTimePickerInput, ImageInput
+from oscar.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
 
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
@@ -40,7 +40,10 @@ BaseCategoryForm = movenodeform_factory(
         "meta_description",
     ],
     exclude=["ancestors_are_public"],
-    widgets={"meta_description": forms.Textarea(attrs={"class": "no-widget-init"})},
+    widgets={
+        "meta_description": forms.Textarea(attrs={"class": "no-widget-init"}),
+        "image": ThumbnailInput(),
+        },
 )
 
 
@@ -99,7 +102,6 @@ class ProductSearchForm(forms.Form):
         label="Категория",
         queryset=Category.objects.all(),
         required=False,
-        # empty_label="-----",
     )
     product_class = forms.ModelMultipleChoiceField(
         label="Тип продукта",
@@ -108,7 +110,6 @@ class ProductSearchForm(forms.Form):
     )
     is_public = forms.BooleanField(
         label="Доступен",
-        # initial=True,
         required=False,
         widget=forms.widgets.CheckboxInput(
             attrs={'checked': True}
@@ -437,6 +438,7 @@ class ProductClassAdditionalForm(forms.ModelForm):
 
 
 class ProductClassForm(forms.ModelForm):
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # pylint: disable=no-member
