@@ -21,7 +21,7 @@ class Profile(models.Model):
                               verbose_name='Gender')
     age = models.PositiveIntegerField(verbose_name='Age')
 
-    img = models.ImageField(blank=True, upload_to="profile")
+    image = models.ImageField(blank=True, upload_to="profile")
 
 
 class UserManager(BaseUserManager):

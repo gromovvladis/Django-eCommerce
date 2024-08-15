@@ -88,7 +88,7 @@ def _good_field(form, product, additional):
         required=False,
         widget=forms.widgets.NumberInput(attrs={
             'additional': True,
-            'img': additional.primary_image,
+            'image': additional.primary_image,
             'price': additional.price, 
             'old_price': additional.old_price,
             'weight': additional.weight,

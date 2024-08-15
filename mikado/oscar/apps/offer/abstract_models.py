@@ -95,7 +95,7 @@ class AbstractConditionalOffer(models.Model):
         unique=True,
         help_text="Это отображается в корзине клиента",
     )
-    img = models.ImageField("Изображение", upload_to="Offers", blank=True)
+    image = models.ImageField("Изображение", upload_to="Offers", blank=True)
     slug = fields.AutoSlugField(
         "Ярлык", max_length=128, unique=True, populate_from="name"
     )
@@ -293,12 +293,13 @@ class AbstractConditionalOffer(models.Model):
         Returns the primary image for a product. Usually used when one can
         only display one product image, e.g. in a list of products.
         """
-        img = self.img
+        img = self.image
+        caption = self.name
         if not img:
             mis_img = MissingProductImage()
-            return {"original": mis_img.name, "caption": "", "is_missing": True}
+            return {"original": mis_img, "caption": caption, "is_missing": True}
 
-        return {"original": img.name, "caption": "", "is_missing": False}
+        return {"original": img, "caption": caption, "is_missing": False}
 
     @property
     def is_voucher_offer_type(self):

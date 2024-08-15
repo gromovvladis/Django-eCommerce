@@ -41,7 +41,7 @@ class HomeView(ListView):
         actions = cache.get('actions_all')
 
         if not actions:
-            actions = Action.objects.only('img', 'slug', 'title').filter(is_active=True)
+            actions = Action.objects.only('image', 'slug', 'title').filter(is_active=True)
             cache.set("actions_all", actions, 3600)
 
         return actions
