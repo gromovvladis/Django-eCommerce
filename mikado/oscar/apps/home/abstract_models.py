@@ -83,11 +83,12 @@ class AbstractAction(models.Model):
         only display one product image, e.g. in a list of products.
         """
         img = self.image
+        caption = self.title
         if not img:
             mis_img = MissingProductImage()
-            return {"original": mis_img.name, "caption": "", "is_missing": True}
+            return {"original": mis_img, "caption": caption, "is_missing": True}
 
-        return {"original": img.name, "caption": "", "is_missing": False}
+        return {"original": img, "caption": caption, "is_missing": False}
     
     def get_absolute_url(self):
         return reverse(
@@ -110,7 +111,7 @@ class AbstractAction(models.Model):
 class AbstractPromoCategory(models.Model):
 
     slug = AutoSlugField("Ярлык", max_length=128, unique=True, populate_from="title")
-    img = models.ImageField(blank=True, upload_to="promocats")
+    image = models.ImageField(blank=True, upload_to="promocats")
 
     title = models.CharField("Заголовок", max_length=128, blank=False, null=False)
     description = models.TextField("Описание", blank=True)
@@ -179,7 +180,7 @@ class AbstractPromoCategory(models.Model):
 
     @cached_property
     def has_image(self):
-        if self.img: 
+        if self.image: 
             return True
         return False
     
@@ -189,12 +190,13 @@ class AbstractPromoCategory(models.Model):
         Returns the primary image for a product. Usually used when one can
         only display one product image, e.g. in a list of products.
         """
-        img = self.img
+        img = self.image
+        caption = self.title
         if not img:
             mis_img = MissingProductImage()
-            return {"original": mis_img.name, "caption": "", "is_missing": True}
+            return {"original": mis_img, "caption": caption, "is_missing": True}
 
-        return {"original": img.name, "caption": "", "is_missing": False}
+        return {"original": img, "caption": caption, "is_missing": False}
     
     @cached_property
     def has_products(self):

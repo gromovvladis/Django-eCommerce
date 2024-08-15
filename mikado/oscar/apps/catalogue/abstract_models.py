@@ -1754,7 +1754,7 @@ class AbstractAdditional(models.Model):
         caption = self.name
         if not img:
             mis_img = MissingProductImage()
-            return {"original": mis_img, "caption": caption, "is_missing": True}
+            return {"original": mis_img.name, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}
 

@@ -12,7 +12,7 @@
                         
                         <div class="v-dish-image fill-width pos-relative">
                             <div class="v-image__inner v-image__inner--topping">
-                                {% url_thumbnail field.field.widget.attrs.img "x150" upscale=False as thumb %}
+                                {% url_thumbnail field.field.widget.attrs.image.original "x150" upscale=False as thumb %}
                                 <img src="{{ thumb.url }}" loading="lazy" alt="{{ field.label|safe }}" class="img-thumbnail w-auto mx-auto my-0">
                             </div>
                         </div>

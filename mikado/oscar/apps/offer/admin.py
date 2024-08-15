@@ -34,7 +34,7 @@ class ConditionalOfferAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "name",
-                    "img",
+                    "image",
                     "description",
                     "offer_type",
                     "condition",

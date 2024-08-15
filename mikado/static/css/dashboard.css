@@ -5208,6 +5208,7 @@ a.badge-dark:focus, a.badge-dark.focus {
   /* padding: 0.75rem 1.25rem; */
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
+  background: #fff;
   border: 1px solid transparent;
   border-radius: 0.75rem;
   -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .07);
@@ -18252,10 +18253,10 @@ h3.app-ico:before {
   margin-left: 0;
   list-style: none;
 }
-
+/* 
 .actions .dropdown-item:hover, .dropdown-item:focus{
   border-radius: 5px;
-}
+} */
 
 .fixed-actions {
   /* margin-bottom: 180px; */
