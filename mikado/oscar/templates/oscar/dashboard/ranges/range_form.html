@@ -1,21 +1,20 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 
 {% block body_class %}{{ block.super }} create-page{% endblock %}
 
 {% block title %}
-    {{ title }} | {% trans "Ranges" %} | {{ block.super }}
+    {{ title }} | Ассортимент | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
             <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:range-list' %}">{% trans "Ranges" %}</a>
+                <a href="{% url 'dashboard:range-list' %}">Ассортименты</a>
             </li>
             {% if range %}
-                <li class="breadcrumb-item active" aria-current="page">'{{ range.name }}'</li>
+                <li class="breadcrumb-item active" aria-current="page">{{ range.name }}</li>
             {% else %}
                 <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
             {% endif %}
@@ -24,21 +23,37 @@
 {% endblock %}
 
 {% block navtext %}
-    {% if range %}{{ range.name }}{% else %}{% trans "Create new range" %}{% endif %}
+    {% if range %}{{ range.name }}{% else %}Создать новый ассортимент{% endif %}
 {% endblock %}
 
 {% block dashboard_content %}
-    <form method="post" class="form-stacked card card-body bg-light wysiwyg">
-        {% csrf_token %}
-        {% include "oscar/dashboard/partials/form_fields.html" with form=form %}
+    <div class="form-stacked wysiwyg fixed-actions">
+        <div class="table-header">
+            <h3>Описание</h3>
+        </div>
+        <form method="post" class="card card-body mb-3" id="range-form">
+            {% csrf_token %}
+            {% include "oscar/dashboard/partials/form_fields.html" with form=form %}
+        </form>
         {% block form_actions %}
-            <div class="form-actions">
-                <button class="btn btn-primary" type="submit" data-loading-text="{% trans 'Saving...' %}">{% trans "Save" %}</button> {% trans "or" %}
-                {# This is an input so we distinguish between which button was pressed #}
-                <input class="btn btn-primary" type="submit" name="action" value="{% trans "Save and edit products" %}"/>
-                {% trans "or" %}
-                <a href="{% url 'dashboard:range-list' %}">{% trans "cancel" %}</a>
+            <div class="fixed-actions-group">
+                <div class="float-right">  
+                    <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
+                        <i class="fa-regular fa-circle-xmark"></i> 
+                        Отменить
+                    </a>      
+                    <button class="btn btn-primary" type="submit" form="range-form" data-loading-text="Сохранение...">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        Сохранить
+                    </button>
+                </div>
+                <button class="btn btn-success" type="submit" form="range-form" name="action"/>
+                    <i class="fa-solid fa-pencil"></i>
+                    <span>
+                        Изменить список продуктов
+                    </span>
+                </button>
             </div>
         {% endblock form_actions %}
-    </form>
+    </div>
 {% endblock dashboard_content %}

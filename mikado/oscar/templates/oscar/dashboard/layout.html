@@ -128,7 +128,6 @@
 {% block cdn_scripts %}
     {{ block.super }}
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
 {% endblock %}
 
 {# Local scripts #}
@@ -151,6 +150,7 @@
             <script src="{% static "js/dashboard/table.js" %}"></script>
         {% endcompress %}
         <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     {% endblock %}
 
 {% block onbodyload %}

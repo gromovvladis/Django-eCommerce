@@ -354,7 +354,7 @@ class OptionTable(DashboardTable):
 
 
 class AdditionalTable(DashboardTable):
-    img = TemplateColumn(
+    image = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/additional_row_image.html",
         orderable=False,
@@ -406,8 +406,8 @@ class AdditionalTable(DashboardTable):
 
     class Meta(DashboardTable.Meta):
         model = Additional
-        fields = ("img", "name", "price", "old_price", "weight", "max_amount", "is_public")
-        sequence = ("img", "name", "price", "old_price", "weight", "max_amount", "is_public", "actions")
+        fields = ("image", "name", "price", "old_price", "weight", "max_amount", "is_public")
+        sequence = ("image", "name", "price", "old_price", "weight", "max_amount", "is_public", "actions")
         per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
         attrs = {
             'class': 'table table-striped table-bordered table-hover',

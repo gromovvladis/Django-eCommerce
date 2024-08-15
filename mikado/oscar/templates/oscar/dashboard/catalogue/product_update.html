@@ -276,12 +276,13 @@
                                                     <th>SKU</th>
                                                     {% if product_class.track_stock %}
                                                         <th>В наличии</th>
-                                                        <th>Заказано</th>
                                                         <th>Граница запасов</th>
+                                                        <th>Заказано</th>
                                                     {% endif %}
-                                                    <th>Валюта</th>
+                                                    <th>Цена до скидки</th>
                                                     <th>Цена</th>
-                                                    <th>Удалить?</th>
+                                                    <th>Валюта</th>
+                                                    <th>Удалить</th>
                                                     {% comment %} <th class="actions"></th> {% endcomment %}
                                                 </tr>
                                             </thead>
@@ -301,12 +302,13 @@
                                                         <td data-label="SKU">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner_sku nolabel=True %}</td>
                                                         {% if product_class.track_stock %}
                                                             <td data-label="В наличии">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.num_in_stock nolabel=True %}</td>
-                                                            <td data-label="Заказано">{{ stockrecord_form.instance.num_allocated|default:"-" }}</td>
                                                             <td data-label="Граница малых запасов">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.low_stock_threshold nolabel=True %}</td>
+                                                            <td data-label="Заказано">{{ stockrecord_form.instance.num_allocated|default:"-" }}</td>
                                                         {% endif %}
-                                                        <td data-label="Валюта">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price_currency nolabel=True %}</td>
+                                                        <td data-label="Цена до скидки">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.old_price nolabel=True %}</td>
                                                         <td data-label="Цена">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price nolabel=True %}</td>
-                                                        <td data-label="Удалить?">
+                                                        <td data-label="Валюта">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price_currency nolabel=True %}</td>
+                                                        <td data-label="Удалить">
                                                             {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.id nolabel=True %}
                                                             {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.DELETE nolabel=True %}
                                                         </td>

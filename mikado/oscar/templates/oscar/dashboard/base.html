@@ -42,11 +42,14 @@
         {# Template vars #}
         <script>{% block templatescripts %}{% endblock %}</script>
 
-        {# External JS scripts #}
-        {% block extrascripts %}{% endblock %}
+        {# Внешние скрипты #}
+        {% block externalscripts %}{% endblock %}
 
         {# Local scripts #}
         {% block scripts %}{% endblock %}
+
+        {# External JS scripts #}
+        {% block extrascripts %}{% endblock %}
             
         {# Block for body onload functions #}
         <script>$(function(){ {% block onbodyload %}{% endblock %} })</script>

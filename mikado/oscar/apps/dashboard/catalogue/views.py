@@ -850,7 +850,6 @@ class ProductClassListView(SingleTableView):
 class ProductClassDeleteView(generic.DeleteView):
     template_name = "oscar/dashboard/catalogue/product_class_delete.html"
     model = ProductClass
-    form_class = ProductClassForm
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -860,7 +859,7 @@ class ProductClassDeleteView(generic.DeleteView):
         if product_count > 0:
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
-            messages.error(self.request, "%i товары по-прежнему относятся к этому типу" % product_count)
+            messages.error(self.request, "%i товаров по-прежнему относятся к этому типу" % product_count)
         return ctx
 
     def get_success_url(self):

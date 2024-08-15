@@ -2,7 +2,7 @@
     {{ form.non_field_errors }}
     {% for field in form %}
         {% if "original" in field.id_for_label %}
-            <td class="width:60px">
+            <td>
                 <span class="btn btn-handle btn-reorder {% if not form.instance.id %}disabled{% endif %}" {% if not form.instance.id %}disabled{% endif %}><i class="fas fa-grip-lines"></i></span>
                 {% for field in form %}
                     {% if field.is_hidden %}
