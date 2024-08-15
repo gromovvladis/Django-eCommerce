@@ -6,6 +6,18 @@ from oscar.core.loading import get_class
 get_nodes = get_class("dashboard.menu", "get_nodes")
 register = template.Library()
 
+@register.filter
+def tab(text, paths):
+    for path in paths:
+        if text.startswith(path):
+            return True
+    return False
+
+@register.filter
+def subtab(text, path):
+    if text.startswith(path):
+        return True
+    return False
 
 @register.simple_tag
 def dashboard_navigation(user):

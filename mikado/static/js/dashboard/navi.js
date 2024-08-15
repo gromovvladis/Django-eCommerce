@@ -29,12 +29,14 @@ function closeNav() {
 }
 
 function openNav(event) {
-  if (!$(navbar).hasClass('open')) {
-    var current = $(navbar).find('.current-tab')
-    $(current).find('.dropdown-list').removeClass('collapsing');
-    $(current).find('.dropdown-list').addClass('show');
-    $(current).find('.nav-link').attr('aria-expanded', true);
-    $(navpills).animate({scrollTop: event.offsetTop - 60 }, 10);
+  if (!$(event).is('a')) {
+    if (!$(navbar).hasClass('open')) {
+      var current = $(navbar).find('.current-tab')
+      $(current).find('.dropdown-list').removeClass('collapsing');
+      $(current).find('.dropdown-list').addClass('show');
+      $(current).find('.nav-link').attr('aria-expanded', true);
+      $(navpills).animate({scrollTop: event.offsetTop - 60 }, 10);
+    }
+    $(navbar).addClass('open');
   }
-  $(navbar).addClass('open');
 }

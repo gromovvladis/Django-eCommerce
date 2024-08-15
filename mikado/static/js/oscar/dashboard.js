@@ -441,7 +441,7 @@ var oscar = (function(o, $) {
                 }
             },
         },
-        product_lists: {
+        thumbnails: {
             init: function() {
                 var imageModal = $("#product-image-modal"),
                     thumbnails = $('.sub-image');
@@ -461,16 +461,22 @@ var oscar = (function(o, $) {
 })(oscar || {}, jQuery);
 
 
+let $files_list;
+let $photo_input;
+let $thumbnail_name = $('input[name="name"]').val()
 
 $(document).ready(function () {
-    let $files_list = $('.input-file-list');
-    let file = $('.photo-input a')[0];
+    $photo_input = $('.photo-input');
+    $files_list = $photo_input.find('.input-file-list');
+    let file = $photo_input.find('.current-file')[0];
     if (file){
-        let new_file_input = '<div class="input-file-list-item">' +
-            '<img class="input-file-list-img" src="' + file.href + '">' +
+        let new_file_input = '<a data-original="' + file.href + '" href="#" class="input-file-list-item sub-image">' +
+            '<img alt="' + $thumbnail_name + '" class="input-file-list-img" src="' + file.href + '">' +
             '<span class="input-file-list-name">' + file.innerText + '</span>' +
-            '</div>';
+            '<span onclick="deleteFile(); return false;" class="input-file-list-remove"></span>' +
+            '</a>';
         $files_list.append(new_file_input);
+        oscar.dashboard.thumbnails.init();
     }
 });
 
@@ -478,9 +484,8 @@ $(document).ready(function () {
 var dt = new DataTransfer();
 
 $('#id_image').on('change', function (){
-    let $files_list = $('.input-file-list');
-    let file = this.files.item(0);
 
+    let file = this.files.item(0);
     
     dt = new DataTransfer();
     dt.items.add(file);
@@ -488,18 +493,24 @@ $('#id_image').on('change', function (){
     let reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = function(){
-        let new_file_input = '<div class="input-file-list-item">' +
-            '<img class="input-file-list-img" src="' + reader.result + '">' +
+        let new_file_input = '<a data-original="' + reader.result + '" href="#" class="input-file-list-item sub-image">' +
+            '<img alt="' + $thumbnail_name + '" class="input-file-list-img" src="' + reader.result + '">' +
             '<span class="input-file-list-name">' + file.name + '</span>' +
             '<span onclick="removeFilesItem(this); return false;" class="input-file-list-remove"></span>' +
-        '</div>';
+            '</a>';
         $files_list.empty();
         $files_list.append(new_file_input);
+        oscar.dashboard.thumbnails.init();
     }
-
+    
     this.files = dt.files;
 });
 
+
+function deleteFile(target){
+    $($photo_input).find('input[type="checkbox"]').prop('checked', true);
+    $files_list.empty();
+}
 
 
 function removeFilesItem(target){
