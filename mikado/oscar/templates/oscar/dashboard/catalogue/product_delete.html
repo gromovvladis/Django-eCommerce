@@ -1,7 +1,5 @@
 {% extends 'oscar/dashboard/layout.html' %}
 
-{% load i18n %}
-
 {% block title %}
     {{ title }} | {{ block.super }}
 {% endblock %}
@@ -11,8 +9,8 @@
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-product-list' %}">{% trans "Products" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-product-list' %}">Продукты</a></li>
             <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-product' pk=product.pk %}">{{ product.get_title }}</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
         </ol>
@@ -27,22 +25,18 @@
     </div>
     <form method="post" class="card card-body bg-light">
         {% csrf_token %}
-
+        
         <p>
             {% if product.is_child %}
-                {% blocktrans with title=product.get_title %}
-                    Delete product variant <strong>{{ title }}</strong> - are you sure?
-                {% endblocktrans %}
+                Удалить вариант продукта - <strong>{{ product.get_title }}</strong> - вы уверены?
             {% else %}
-                {% blocktrans with title=product.get_title %}
-                    Delete product <strong>{{ title }}</strong> - are you sure?
-                {% endblocktrans %}
+                Удалить продукт <strong>{{ product.get_title }}</strong> - вы уверены?
             {% endif %}
         </p>
 
         {% if product.is_parent %}
             <p>
-                {% trans "This will also delete the following child products:" %}
+                При этом также будут удалены следующие дочерние продукты:
                 <ul>
                     {% for child in product.children.all %}
                         <li><strong>{{ child.get_title }}</strong></li>
@@ -51,10 +45,18 @@
             </p>
         {% endif %}
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-danger" data-loading-text="{% trans 'Deleting...' %}">{% trans "Delete" %}</button>
-            {% trans "or" %}
-            <a href="{% url 'dashboard:catalogue-product-list' %}">{% trans "cancel" %}</a>
+        <div class="form-actions fill-width mt-3">
+            <div class="float-right">
+                <a class="btn btn-secondary" href="{% url 'dashboard:catalogue-product-list' %}">
+                    <i class="fa-solid fa-ban"></i>
+                    Отмена
+                </a>
+                <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                    <i class="fa-solid fa-trash"></i>
+                    Удалить
+                </button>
+            </div>
         </div>
+
     </form>
 {% endblock %}

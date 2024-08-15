@@ -1,14 +1,13 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 
 {% block body_class %}{{ block.super }} create-page{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-class-list' %}">{% trans "Product type" %}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{% trans "Delete product type?" %}</li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-class-list' %}">Тип продукта</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Удалить этот тип продукта</li>
         </ol>
     </nav>
 {% endblock %}
@@ -19,20 +18,30 @@
 
 {% block dashboard_content %}
     {% if disallow %}
-        <p>{% trans "Please make sure all products are assigned to another type before deletion." %}</p>
+        <p>Перед удалением убедитесь, что всем продуктам присвоен другой тип.</p>
     {% else %}
         <div class="table-header">
-            <h2>{% trans "Delete product type" %}</h2>
+            <h2>Удалить тип продукта</h2>
         </div>
-        <form method="post" class="card card-body bg-light">
+        <form method="post" class="card card-body">
             {% csrf_token %}
-            {{ form }}
+            {% comment %} <div class="d-none"> {% endcomment %}
+                {{ form }}
+            {% comment %} </div> {% endcomment %}
             <p>
-                {% blocktrans with name=object.name %}Delete product type <strong>{{ name }}</strong> - are you sure?{% endblocktrans %}
+                Удалить тип продукта <strong>{{ object.name }}</strong> - вы уверены?
             </p>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-danger" data-loading-text="{% trans 'Deleting...' %}">{% trans "Delete" %}</button>
-            {% trans "or" %} <a href="{% url 'dashboard:catalogue-class-list' %}">{% trans "cancel" %}</a>
+            <div class="form-actions fill-width">
+                <div class="float-right">
+                    <a class="btn btn-secondary" href="{% url 'dashboard:catalogue-class-list' %}">
+                        <i class="fa-solid fa-ban"></i>
+                        Отмена
+                    </a>
+                    <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                        <i class="fa-solid fa-trash"></i>
+                        Удалить
+                    </button>
+                </div>
             </div>
         </form>
     {% endif %}

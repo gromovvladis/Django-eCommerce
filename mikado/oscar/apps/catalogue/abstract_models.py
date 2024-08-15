@@ -1734,7 +1734,7 @@ class AbstractAdditional(models.Model):
         help_text="Максимальное количество доп. товара, которое может быть добавлено к основному товару",
     )
 
-    img = models.ImageField(
+    image = models.ImageField(
         "Изображение", upload_to="additionals", blank=True, null=True, max_length=255
     )
 
@@ -1743,17 +1743,20 @@ class AbstractAdditional(models.Model):
 
     objects = AdditionalQuerySet.as_manager()
 
+
     @cached_property
     def primary_image(self):
         """
         Returns the primary image for a product. Usually used when one can
         only display one product image, e.g. in a list of products.
         """
-        img = self.img
+        img = self.image
+        caption = self.name
         if not img:
-            return MissingProductImage()
+            mis_img = MissingProductImage()
+            return {"original": mis_img, "caption": caption, "is_missing": True}
 
-        return img
+        return {"original": img, "caption": caption, "is_missing": False}
 
     class Meta:
         abstract = True

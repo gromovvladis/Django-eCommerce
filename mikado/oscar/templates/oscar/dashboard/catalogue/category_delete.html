@@ -1,39 +1,46 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 
 {% block body_class %}{{ block.super }} create-page{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
             <li class="breadcrumb-item">
                 <a href="{% if parent %}{% url 'dashboard:catalogue-category-detail-list' pk=parent.pk %}{% else %}{% url 'dashboard:catalogue-category-list' %}{% endif %}">
-                    {% trans "Categories" %}
+                    Категории
                 </a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">{% trans "Delete category?" %}</li>
+            <li class="breadcrumb-item active" aria-current="page">Удалить категорию</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block navtext %}
-    {% trans "Delete category?" %}
+    Удалить категорию?
 {% endblock %}
 
 {% block dashboard_content %}
     <div class="table-header">
-        <h2>{% trans "Delete category" %}</h2>
+        <h2>Удаление</h2>
     </div>
     <form method="post" class="card card-body bg-light">
         {% csrf_token %}
         {{ form }}
-        {% blocktrans with name=object.name %}
-            <p>Delete category <strong>{{ name }}</strong> - are you sure?</p>
-        {% endblocktrans %}
-        <div class="form-actions">
-            <button type="submit" class="btn btn-danger" data-loading-text="{% trans 'Deleting...' %}">{% trans "Delete" %}</button>
-        {% trans "or" %} <a href="{% if parent %}{% url 'dashboard:catalogue-category-detail-list' pk=parent.pk %}{% else %}{% url 'dashboard:catalogue-category-list' %}{% endif %}">{% trans "cancel" %}</a>
-    </div>
-</form>
+
+        <p>Удалить категорию <strong>{{ object.name }}</strong> - вы уверены?</p>
+
+        <div class="form-actions fill-width mt-3">
+            <div class="float-right">
+                <a class="btn btn-secondary" href="{% if parent %}{% url 'dashboard:catalogue-category-detail-list' pk=parent.pk %}{% else %}{% url 'dashboard:catalogue-category-list' %}{% endif %}">
+                    <i class="fa-solid fa-ban"></i>
+                    Отмена
+                </a>
+                <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                    <i class="fa-solid fa-trash"></i>
+                    Удалить
+                </button>
+            </div>
+        </div>
+    </form>
 {% endblock %}

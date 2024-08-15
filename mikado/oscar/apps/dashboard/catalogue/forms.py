@@ -149,8 +149,9 @@ class StockRecordForm(forms.ModelForm):
         fields = [
             "partner",
             "partner_sku",
-            "price_currency",
+            "old_price",
             "price",
+            "price_currency",
             "num_in_stock",
             "low_stock_threshold",
         ]
@@ -466,7 +467,7 @@ class ProductAttributesForm(forms.ModelForm):
         remote_field = self._meta.model._meta.get_field("option_group").remote_field
         self.fields["option_group"].widget = RelatedFieldWidgetWrapper(
             self.fields["option_group"].widget, remote_field
-        )
+        ) 
 
     def clean_code(self):
         code = self.cleaned_data.get("code")
@@ -508,7 +509,11 @@ class OptionForm(forms.ModelForm):
         model = Option
         fields = ["name", "type", "required", "order", "help_text", "option_group"]
 
+
 class AdditionalForm(forms.ModelForm):
     class Meta:
         model = Additional
-        fields = ["name", "upc", "order", "description", "price_currency", "price", "old_price", "weight", "max_amount", "img"]
+        fields = ["name", "upc", "order", "description", "price_currency", "price", "old_price", "weight", "max_amount", "image"]
+        widgets = {
+            "image": ThumbnailInput(),
+        }

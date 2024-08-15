@@ -49,23 +49,6 @@ class ThumbnailInput(ClearableFileInput):
     initial_text = "На данный момент"
     input_text = "Изменить"
     template_name = "oscar/forms/widgets/thumbnail_input_widget.html"
-    
-    # def __init__(self, attrs=None):
-    #     if not attrs:
-    #         attrs = {}
-    #     attrs["accept"] = "image/*"
-    #     super().__init__(attrs=attrs)
-
-    # def get_context(self, name, value, attrs):
-    #     ctx = super().get_context(name, value, attrs)
-
-    #     ctx["image_url"] = ""
-    #     if value and not isinstance(value, InMemoryUploadedFile):
-    #         # can't display images that aren't stored - pass empty string to context
-    #         ctx["image_url"] = value
-
-    #     ctx["image_id"] = "%s-image" % ctx["widget"]["attrs"]["id"]
-    #     return ctx
 
 
 class WYSIWYGTextArea(forms.Textarea):

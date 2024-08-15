@@ -10,7 +10,7 @@ from oscar.core.utils import slugify
 class AbstractAction(models.Model):
 
     slug = AutoSlugField("Ярлык", max_length=128, unique=True, populate_from="title")
-    img = models.ImageField(blank=False, upload_to="actions", null=False)
+    image = models.ImageField(blank=False, upload_to="actions", null=False)
 
     title = models.CharField("Заголовок", max_length=128, blank=False, null=False)
     description = models.TextField("Описание", blank=True)
@@ -72,7 +72,7 @@ class AbstractAction(models.Model):
 
     @cached_property
     def has_image(self):
-        if self.img: 
+        if self.image: 
             return True
         return False
     
@@ -82,7 +82,7 @@ class AbstractAction(models.Model):
         Returns the primary image for a product. Usually used when one can
         only display one product image, e.g. in a list of products.
         """
-        img = self.img
+        img = self.image
         if not img:
             mis_img = MissingProductImage()
             return {"original": mis_img.name, "caption": "", "is_missing": True}
@@ -103,7 +103,6 @@ class AbstractAction(models.Model):
         """
         Return a queryset of products in this action
         """
-        
         return self.products_related.select_related("parent", "product_class").prefetch_related("stockrecords", "images", "parent__product_class", "categories").all()
     
 
