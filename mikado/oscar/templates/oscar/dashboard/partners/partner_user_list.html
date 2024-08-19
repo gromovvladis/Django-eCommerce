@@ -15,7 +15,8 @@
 {% endblock %}
 
 {% block header %}
-    <div class="page-header">
+    <div class="page-header d-flex justify-content-between">
+        <h1>{% trans "Manage users" %}</h1>
         <div class="btn-group float-right">
             <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">
                 <i class="fas fa-plus"></i>
@@ -26,7 +27,6 @@
                 <li><a href="{% url 'dashboard:partner-user-select' partner_pk=partner.pk %}" >{% trans "Link an existing user" %}</a></li>
             </ul>
         </div>
-        <h1>{% trans "Manage users" %}</h1>
     </div>
 {% endblock header %}
 

@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Exists, OuterRef
 from django.db.models.constants import LOOKUP_SEP
 from treebeard.mp_tree import MP_NodeQuerySet
+from django.db.models import Count
 
 from oscar.core.loading import get_model
 
@@ -148,7 +149,7 @@ class CategoryQuerySet(MP_NodeQuerySet):
         Excludes non-public categories
         """
         return self.filter(is_public=True, ancestors_are_public=True)
-
+    
 
 class AdditionalQuerySet(MP_NodeQuerySet):
     def browsable(self):

@@ -2,7 +2,7 @@
 
 {% if record.primary_image.original %}
     {% with image=record.primary_image.original %}
-        {% oscar_thumbnail image "50x50" upscale=False as thumb %}
+        {% oscar_thumbnail image "80x80" upscale=False as thumb %}
         <a href="#" data-original="{{ image.url }}" class="sub-image">
             <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ record.name }}{% endif %}" loading="lazy">
         </a>

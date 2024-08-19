@@ -18,13 +18,13 @@
 {% endblock %}
 
 {% block header %}
-<div class="page-header">
+<div class="page-header d-flex justify-content-between">
+    <h1>{% trans "Voucher set" %} '{{ voucher_set.name }}'</h1>
     <div class="float-right">
         <a href="{% url 'dashboard:voucher-set-download' pk=voucher_set.pk %}" class="btn btn-primary">
             <i class="fas fa-download"></i> {% trans "Download CSV" %}
         </a>
     </div>
-    <h1>{% trans "Voucher set" %} '{{ voucher_set.name }}'</h1>
 </div>
 {% endblock header %}
 

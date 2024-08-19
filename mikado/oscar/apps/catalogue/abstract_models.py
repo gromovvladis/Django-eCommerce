@@ -362,26 +362,6 @@ class AbstractCategory(MP_Node):
     def has_children(self):
         return self.get_num_children() > 0
 
-    def get_num_children(self):
-        return self.get_children().count()
-    
-    def get_num_products(self):
-        cats = self
-        cats_list = []
-
-        if self.has_children():
-            cats = self.get_ancestors_and_self()
-            for cat in cats:
-                cats_list.append(cat.id)
-        else: 
-            cats_list.append(cats.id)
-  
-        Product = get_model('catalogue', 'Product')
-        prod_nums = Product.objects.filter(categories__in=cats_list).count()
-
-        return prod_nums
-
-
 
 class AbstractProductCategory(models.Model):
     """

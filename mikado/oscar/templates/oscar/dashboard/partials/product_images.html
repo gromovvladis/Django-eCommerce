@@ -2,7 +2,7 @@
     {{ form.non_field_errors }}
     {% for field in form %}
         {% if "original" in field.id_for_label %}
-            <td>
+            <td class="handle">
                 <span class="btn btn-handle btn-reorder {% if not form.instance.id %}disabled{% endif %}" {% if not form.instance.id %}disabled{% endif %}><i class="fas fa-grip-lines"></i></span>
                 {% for field in form %}
                     {% if field.is_hidden %}
@@ -10,7 +10,7 @@
                     {% endif %}
                 {% endfor %}
             </td>
-            <td>
+            <td class="image">
                 {{ field }}
                 {% for error in field.errors %}
                     <ul class="error-block">
@@ -19,7 +19,7 @@
                 {% endfor %}
             </td>
         {% elif not field.is_hidden %}
-            {% include 'oscar/dashboard/partials/form_table_field.html' with field=field nolabel=True %}
+            {% include 'oscar/dashboard/partials/form_table_field.html' with field=field nolabel=True data_label=field.label %}
             {% for error in field.errors %}
                 <ul class="error-block">
                     <li>{{ error }}</li>
@@ -27,4 +27,10 @@
             {% endfor %}
         {% endif %}
     {% endfor %}
+    <td class="toggle-row">
+        <button class="btn btn-secondary" type="button">
+            <i class="fa-solid fa-chevron-up"></i>
+            <i class="fa-solid fa-chevron-down"></i>
+        </button>
+    </td>
 </tr>

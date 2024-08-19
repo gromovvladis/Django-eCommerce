@@ -3,17 +3,30 @@
 {% if not record.get_prices %}
     -
 {% else %}
-    {% if record.get_prices|length > 1 %}
-        {% for price in record.get_prices %}
-            {% if forloop.first %}
-                от {{ price|currency }}
-                <br>
-            {% else %}
-                до {{ price|currency }}
-            {% endif %}
-        {% endfor %}
+    {% if record.old_price %}
+        {% if record.min_price != record.max_price %}
+            <span class="text-danger">
+                от {{ record.min_price|currency }}
+            </span>
+            <br>
+            <span class="text-muted text-line-through">
+                до {{ record.old_price|currency }}
+            </span>
+        {% else %}
+        <span class="text-danger">
+            {{ record.min_price|currency }}
+        </span>
+        <span class="text-muted text-line-through">
+            {{ record.old_price|currency }}
+        </span>
+        {% endif %}
     {% else %}
-        {{ record.get_prices.pop|currency }}
+        {% if record.min_price != record.max_price %}
+                от {{ record.min_price|currency }}
+                <br>
+                до {{ record.max_price|currency }}
+        {% else %}
+            {{ record.min_price|currency }}
+        {% endif %}
     {% endif %}
-    
 {% endif %}

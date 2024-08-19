@@ -81,8 +81,11 @@ class ProductClassSelectForm(forms.Form):
 
     product_class = forms.ModelChoiceField(
         label="Создать продукт",
-        empty_label="-- Выберите тип продукта --",
+        empty_label="Выберите тип продукта",
         queryset=ProductClass.objects.all(),
+        widget=forms.Select(attrs={
+            'class': 'select-field',
+        })
     )
 
     def __init__(self, *args, **kwargs):

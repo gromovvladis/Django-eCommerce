@@ -7,12 +7,12 @@
 {% load static %}
 
 {% block styles %}
-    {% compress css %}   
+    {% comment %} {% compress css %}    {% endcomment %}
     <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
     <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
-    {% endcompress %}
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}
 
 {% block title %}
@@ -110,7 +110,7 @@
                 <div class="content">
                     {% include 'oscar/dashboard/partials/alert_messages.html' %}
                     {% block header %}
-                    <div class="page-header">
+                    <div class="page-header d-flex justify-content-between">
                         <h1>{% block navtext %}{% endblock %}</h1>
                     </div>
                     {% endblock %}
@@ -132,7 +132,7 @@
 
 {# Local scripts #}
 {% block scripts %}
-        {% compress js %}
+        {% comment %} {% compress js %} {% endcomment %}
             <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/oscar/ui.js" %}"></script>
             <script src="{% static "js/mousewheel/jquery.mousewheel.js" %}"></script>
@@ -148,7 +148,7 @@
             <script src="{% static "js/dashboard/dashboard-sliders.js" %}"></script>
             <script src="{% static "js/dashboard/navi.js" %}"></script>
             <script src="{% static "js/dashboard/table.js" %}"></script>
-        {% endcompress %}
+        {% comment %} {% endcompress %} {% endcomment %}
         <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     {% endblock %}

@@ -1939,6 +1939,7 @@ pre code {
   display: block;
   width: 100%;
   min-height: 2.5rem;
+  /* min-width: 250px; */
   /* height: calc(2rem + 1rem); */
   padding: 0 .5rem;
   font-size: .8rem;
@@ -1967,6 +1968,7 @@ pre code {
 
 .form-control[type="checkbox"]{
   width: 1rem;
+  min-width: auto;
   height: 1rem;
   /* margin: 1rem 0 .25rem; */
   margin: 0 0 .25rem;
@@ -3227,11 +3229,21 @@ input[type=button].btn-block {
   bottom: auto;
 }
 
+.dropdown-thin-divider,
 .dropdown-divider {
   height: 0;
   margin: 0.5rem 0;
   overflow: hidden;
   border-top: 1px solid #e9ecef;
+}
+
+.dropdown-thin-divider{
+  margin: 0;
+}
+
+.dropdown-thin-divider:last-child{
+  /* margin-bottom: 0; */
+  border-top: none;
 }
 
 .dropdown-item {
@@ -4042,13 +4054,18 @@ input[type=button].btn-block {
 
 .table-list .orderable{
   padding: .5rem;
-  border-bottom: 1px solid #eee;
+  /* border-bottom: 1px solid #eee; */
   color: var(--primary);
   display: inline-block;
   text-align: end;
   font-weight: 400;
   border-radius: 5px;
   /* width: min-content; */
+}
+
+.table-list .asc,
+.table-list .desc{
+  color: var(--danger);
 }
 
 .table-list .orderable:last-child{
@@ -9713,6 +9730,10 @@ a.text-dark:hover, a.text-dark:focus {
 
 .text-decoration-none {
   text-decoration: none !important;
+}
+
+.text-line-through {
+  text-decoration: line-through !important;
 }
 
 .text-break {
@@ -18148,6 +18169,17 @@ h3.app-ico:before {
   margin: 2rem 0;
 }
 
+@media (max-width: 1200px) {
+  
+  .breadcrumb,
+  .page-header{
+    margin: 1.5rem 0;
+  }
+  .page-header h1 {
+    font-size: 1.2rem;
+  }
+}
+
 .content-block {
   /* border: 1px solid #ced4da; */
   background: #fff;
@@ -18421,6 +18453,7 @@ h3.app-ico:before {
 }
 
 .upload-image .image-input {
+  display: inline-block;
   background: #fff;
   position: relative;
   width: 150px;
@@ -18428,7 +18461,7 @@ h3.app-ico:before {
   border-radius: 10px;
   overflow: hidden;
   z-index: 200;
-  margin: 0 auto;
+  /* margin: 0 auto; */
   transition: all .1s ease-in-out;
 }
 .upload-image img {
@@ -18588,9 +18621,11 @@ h3.app-ico:before {
   display: inline-block;
 }
 
-.form-inline select {
-  min-width: 200px;
+.form-inline select,
+.form-inline input {
+  min-width: 250px;
 }
+
 .form-inline .select2-container.form-control {
   display: inline-block;
 }
@@ -18633,12 +18668,12 @@ h3.app-ico:before {
   color: #dc3545;
 }
 
-.form-inline input[type=number],
+/* .form-inline input[type=number],
 .form-inline input[type=email],
 .form-inline input[type=url],
 .form-inline input[type=text] {
   min-width: 250px;
-} 
+}  */
 
 .fill-width {
   width: 100%;
@@ -18664,19 +18699,17 @@ h3.app-ico:before {
 .asc .filter:before {
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
-  /* content: "⇩"; */
   content: "\f063";
 }
 
 .asc a,
 .desc a {
-  color: #bd2130;
+  color: var(--danger);
 }
 
 .desc .filter:before {
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
-  /* content: "⇧"; */
   content: "\f062";
 }
 
@@ -19524,6 +19557,10 @@ input[type="number"]:focus {
     padding: 1rem !important;
   }
 
+  .mobile-table-xl input{
+    text-align: end;
+  }
+
 
   .mobile-table-xl table .mobile-open .name{
     margin-bottom: 15px;
@@ -19533,7 +19570,7 @@ input[type="number"]:focus {
     padding: 1rem 1rem 0 !important;
   }
 
-  .mobile-table-xl table tr:not(.mobile-open) td:not(.image):not(.title):not(.name):not(.status):not(.actions):not(.statistic):not(.empty):not(.empty):not(.toggle-row){
+  .mobile-table-xl table tr:not(.mobile-open) td:not(.image):not(.title):not(.name):not(.status):not(.actions):not(.statistic):not(.handle):not(.empty):not(.empty):not(.toggle-row){
     display: none;
   }
 
@@ -19656,6 +19693,7 @@ input[type="number"]:focus {
     left: 50px;
   }
 
+  .mobile-table table tr:not(.mobile-open) .handle,
   .mobile-table table tr:not(.mobile-open) .statistic{
     display: block;
     position: absolute;
@@ -19682,7 +19720,7 @@ input[type="number"]:focus {
   }
 
   .statistic-desctop,
-  .mobile-table table tr:not(.mobile-open) td:not(.image):not(.title):not(.name):not(.status):not(.actions):not(.statistic):not(.empty):not(.toggle-row){
+  .mobile-table table tr:not(.mobile-open) td:not(.image):not(.title):not(.name):not(.status):not(.actions):not(.statistic):not(.handle):not(.empty):not(.toggle-row){
     display: none;
   }
 
@@ -19694,11 +19732,11 @@ input[type="number"]:focus {
 
 .select2-dropdown{
   border: none;
-  border-radius: 10px;
+  border-radius: 10px !important;
   padding: 10px;
   -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .07);
   box-shadow: 0 0 10px rgba(0, 0, 0, .07);
-  /* margin: 1rem 0 -1rem; */
+  /* margin: 1rem 0; */
 }
 
 .select2-search--dropdown .select2-search__field{

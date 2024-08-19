@@ -212,6 +212,7 @@
                                     {{ image_formset.management_form }}
                                     {{ image_formset.non_form_errors }}
                                                  
+                                    <div class="mobile-table">
                                     <table class="table table-striped table-bordered">
                                         <caption>Загрузить, изменить или удалить изображения</caption>
                                         <thead style="text-align:center;">
@@ -238,6 +239,7 @@
                                             </tr>
                                         </tfoot>
                                     </table>
+                                    </div>
                                     
                             
                                     {% comment %} <div class="table-header">
@@ -334,7 +336,7 @@
                                         <table class='table table-striped table-bordered'>
                                             <caption>
                                                 Варианты
-                                                <button class="btn btn-primary float-right" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
+                                                <button class="btn btn-primary ml-3" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
                                                     <i class="fas fa-plus"></i> Добавить вариант
                                                 </button>
                                             </caption>

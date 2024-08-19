@@ -19,7 +19,8 @@
 {% endblock %}
 
 {% block header %}
-    <div class="page-header">
+    <div class="page-header d-flex justify-content-between">
+        <h1>{{ offer.name }}</h1>
         <form id="status_form" class="float-right" method="post">
             {% csrf_token %}
             {% if offer.is_suspended %}
@@ -31,7 +32,6 @@
             <a class="btn btn-danger" href="{% url 'dashboard:offer-delete' pk=offer.pk %}">{% trans "Delete offer" %}</a>
             {% endif %}
         </form>
-        <h1>{{ offer.name }}</h1>
     </div>
 {% endblock header %}
 
