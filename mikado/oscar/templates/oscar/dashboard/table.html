@@ -24,7 +24,11 @@
                             <h6 class="dropdown-header">Фильтр</h6>
                             <div class="dropdown-divider"></div>
                             {% for fltr in table.filter.values %}
-                                <a class="orderable dropdown-item" href="{{ table.filter.url }}{{ fltr.0 }}">{{ fltr.1 }}</a>
+                                <a class="orderable dropdown-item" href="{{ table.filter.url }}{{ fltr.0 }}">
+                                    <span class="orderable py-1">
+                                        {{ fltr.1 }}
+                                    </span>
+                                </a>
                             {% endfor %}
                         </div>
                     </div>
@@ -42,10 +46,12 @@
                             <div class="dropdown-divider"></div>
                             {% for column in table.columns %}
                                 {% if column.orderable %}
-                                    <span class="orderable dropdown-item">
-                                        <a href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">{{ column.header }}</a>
-                                        <span></span>
-                                    </span>
+                                    <a class="orderable dropdown-item px-0 py-1" href="{% querystring table.prefixed_order_by_field=column.order_by_alias.next %}">
+                                        <span {{ column.attrs.th.as_html }}>
+                                            {{ column.header }}
+                                            <span class="filter"></span>
+                                        </span>
+                                    </a>
                                 {% endif %}
                             {% endfor %}
                         </div>

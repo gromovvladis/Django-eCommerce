@@ -1,7 +1,7 @@
 {% load django_tables2 %}
 
-{% if range.includes_all_products %}
-    Все продукты категорий
+{% if record.includes_all_products %}
+    Все продукты из категорий ({{ record.num_products }} шт.)
 {% else %}
-    {{ range.num_products|default:"-" }}
+    {{ record.num_products|default:"-" }}
 {% endif %}

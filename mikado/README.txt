@@ -206,6 +206,8 @@
     ssh vladis@5.35.89.111
     source venv/bin/activate
     cd mikado
+    python manage.py makemigrations
+    python manage.py migrate
     git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py collectstatic
     python manage.py compress

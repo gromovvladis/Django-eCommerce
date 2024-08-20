@@ -3,7 +3,7 @@ from io import TextIOWrapper
 from django.conf import settings
 from django.contrib import messages
 from django.core import exceptions
-from django.db.models import Count
+from django.db.models import Count, Sum, F, IntegerField, ExpressionWrapper
 from django.shortcuts import HttpResponse, get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -12,6 +12,8 @@ from django_tables2 import SingleTableView
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import BulkEditMixin
+
+from django.utils.translation import ngettext
 
 RangeTable = get_class("dashboard.ranges.tables", "RangeTable")
 
@@ -31,7 +33,10 @@ class RangeListView(SingleTableView):
     paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
 
     def get_queryset(self):
-        return Range._default_manager.prefetch_related("included_categories")
+        return Range._default_manager.prefetch_related("included_categories", "included_products").annotate(
+            benefits=Count("benefit"),
+            included_categories_count=Count("included_categories"),
+        )
 
 
 class RangeCreateView(CreateView):
@@ -164,7 +169,7 @@ class RangeProductListView(BulkEditMixin, ListView):
         num_products = len(products)
         messages.success(
             request,
-            (
+            ngettext(
                 "Удален %d продукт из ассортимента",
                 "Удалено %d продуктов из ассортимента",
                 num_products,
@@ -218,9 +223,9 @@ class RangeProductListView(BulkEditMixin, ListView):
         num_products = len(products)
         messages.success(
             request,
-            (
-                "Удален %d товар из исключенного списка",
-                "Удалено %d товаров из исключенного списка",
+            ngettext(
+                "Добавлен %d товар из исключенного списка",
+                "Добавлен %d товаров из исключенного списка",
                 num_products,
             )
             % num_products,

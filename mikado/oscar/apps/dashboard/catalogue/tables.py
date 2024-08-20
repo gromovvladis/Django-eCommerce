@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
-from django_tables2 import A, Column, LinkColumn, TemplateColumn
+from django_tables2 import A, Column, LinkColumn, TemplateColumn, ManyToManyColumn
+from django.db.models import Count
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
@@ -29,17 +30,16 @@ class ProductClassTable(DashboardTable):
         accessor=A("get_options"),
         attrs = {'th': {'class': 'class_options'},}
     )
-    class_additionals = TemplateColumn(
-        verbose_name="Дополнительные товары",
-        template_name="oscar/dashboard/catalogue/product_class_row_additionals.html",
-        order_by="class_additionals",
-        accessor=A("get_additionals"),
+    class_additionals = ManyToManyColumn(
+        verbose_name="Доп. товары",
+        orderable=True,
+        order_by="num_additionals",
         attrs = {'th': {'class': 'class_additionals'},}
     )
     num_products = Column(
         verbose_name="Продукты",
-        order_by="products",
-        accessor=A("num_products"),
+        orderable=True,
+        order_by="num_products",
         attrs = {'th': {'class': 'num_products'},}
     )
     requires_shipping = TemplateColumn(
@@ -83,7 +83,6 @@ class ProductClassTable(DashboardTable):
             "track_stock",
             "actions",
         )
-        order_by = "-name"
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
@@ -107,13 +106,14 @@ class ProductTable(DashboardTable):
     variants = TemplateColumn(
         verbose_name="Варианты",
         template_name="oscar/dashboard/catalogue/product_row_variants.html",
-        orderable=False,
+        orderable=True,
         attrs = {'th': {'class': 'variants'},}
     )
     additionals = TemplateColumn(
         verbose_name="Доп. товары",
         template_name="oscar/dashboard/catalogue/product_row_additionals.html",
-        orderable=False,
+        orderable=True,
+        order_by="productadditional",
         attrs = {'th': {'class': 'additionals'},}
     )
     options = TemplateColumn(
@@ -138,7 +138,7 @@ class ProductTable(DashboardTable):
     price = TemplateColumn(
         verbose_name="Цена",
         template_name="oscar/dashboard/catalogue/product_row_price.html",
-        order_by="title",
+        order_by="min_price",
         orderable=True,
         attrs = {'th': {'class': 'price'},}
     )
@@ -194,18 +194,6 @@ class ProductTable(DashboardTable):
         }
         empty_text = "Нет созданых продуктов"
 
-    def order_price(self, queryset, is_descending):
-        queryset = sorted(
-            queryset,
-            key=lambda product: product.get_low_price(),
-            reverse=is_descending
-        )
-
-        self.data.data = queryset
-        self.data._length = len(queryset)
-
-        return queryset, True
-
 
 class CategoryTable(DashboardTable):
     image = TemplateColumn(
@@ -214,7 +202,12 @@ class CategoryTable(DashboardTable):
         orderable=False,
         attrs = {'th': {'class': 'image'},}
     )
-    name = LinkColumn("dashboard:catalogue-category-update", args=[A("pk")], attrs = {'th': {'class': 'name'},})
+    name = LinkColumn(
+        "dashboard:catalogue-category-update", 
+        args=[A("pk")], 
+        orderable=True, 
+        attrs = {'th': {'class': 'name'},}
+    )
     description = TemplateColumn(
         template_code='{{ record.description|default:"-"|striptags'
         '|cut:"&nbsp;"|truncatewords:6 }}',
@@ -226,21 +219,20 @@ class CategoryTable(DashboardTable):
         "dashboard:catalogue-category-detail-list",
         args=[A("pk")],
         verbose_name=mark_safe("Дочерние категории"),
-        accessor="get_num_children",
+        accessor=A("numchild"),
         orderable=True,
         attrs = {'th': {'class': 'num_children'},}
     )
     num_products = TemplateColumn(
         verbose_name="Товары",
         template_name="oscar/dashboard/catalogue/category_row_products.html",
-        accessor="get_num_products",
-        order_by="product",
+        accessor=A("num_products"),
+        orderable=True,
         attrs = {'th': {'class': 'num_products'},}
     )
     is_public = TemplateColumn(
         verbose_name="Доступен",
         template_name="oscar/dashboard/table/boolean.html",
-        accessor="is_public",
         order_by=("is_public"),
         attrs = {'th': {'class': 'is_public'},}
     )
@@ -264,12 +256,23 @@ class CategoryTable(DashboardTable):
     class Meta(DashboardTable.Meta):
         model = Category
         fields = ("image", "name", "description", "is_public")
-        sequence = ("image", "name", "description", "...", "is_public", "actions", "statistic")
+        sequence = ("image", "name", "description", "num_children", "num_products",  "...", "is_public", "actions", "statistic")
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
         empty_text = "Нет созданых категорий"
 
+    # def order_num_products(self, queryset, is_descending):
+    #     queryset = sorted(
+    #         queryset,
+    #         key=lambda category: category.get_num_products(),
+    #         reverse=is_descending
+    #     )
+
+    #     self.data.data = queryset
+    #     self.data._length = len(queryset)
+
+    #     return queryset, True
 
 class AttributeOptionGroupTable(DashboardTable):
     name = TemplateColumn(
@@ -420,13 +423,13 @@ class StockAlertTable(DashboardTable):
     name = TemplateColumn( 
         verbose_name="Продукт",
         template_name="oscar/dashboard/catalogue/stock_alert_row_name.html",
-        orderable=False,
+        orderable=True,
         attrs = {'th': {'class': 'name'},}
     )
     partner = TemplateColumn(
         verbose_name="Точка продажи",
         template_name="oscar/dashboard/catalogue/stock_alert_row_partner.html",
-        orderable=False,
+        orderable=True,
         attrs = {'th': {'class': 'partner'},}
     )
     threshold = Column(

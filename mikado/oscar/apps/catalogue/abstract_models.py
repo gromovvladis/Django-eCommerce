@@ -124,10 +124,6 @@ class AbstractProductClass(models.Model):
         return self.attributes.exists()
 
     @property
-    def num_products(self):
-        return self.products.count()
-
-    @property
     def get_options(self):
         return self.options.all()
     
@@ -362,26 +358,6 @@ class AbstractCategory(MP_Node):
     def has_children(self):
         return self.get_num_children() > 0
 
-    def get_num_children(self):
-        return self.get_children().count()
-    
-    def get_num_products(self):
-        cats = self
-        cats_list = []
-
-        if self.has_children():
-            cats = self.get_ancestors_and_self()
-            for cat in cats:
-                cats_list.append(cat.id)
-        else: 
-            cats_list.append(cats.id)
-  
-        Product = get_model('catalogue', 'Product')
-        prod_nums = Product.objects.filter(categories__in=cats_list).count()
-
-        return prod_nums
-
-
 
 class AbstractProductCategory(models.Model):
     """
@@ -524,7 +500,7 @@ class AbstractProduct(models.Model):
         blank=True,
         verbose_name="Дополнительные товары продукта",
         help_text=(
-            "Доп товары"
+            "Дополнительные товары для данного продукта"
         ),
     )
 

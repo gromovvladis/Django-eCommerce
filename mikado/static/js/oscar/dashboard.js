@@ -154,7 +154,7 @@ var oscar = (function(o, $) {
             // Adds type/search for select fields
             var $selects = $(el).find('select').not('.no-widget-init select').not('.no-widget-init');
             $selects.filter('.form-stacked select').css('width', '100%');
-            $selects.filter('.form-inline select').css('width', '300px');
+            // $selects.filter('.form-inline select').css('width', '250px');
             $selects.not('.related-widget-wrapper select').select2({width: 'resolve'});
             $selects.filter('.related-widget-wrapper.single select').select2({
                 // Keep updated labels after editing related obj
@@ -167,7 +167,7 @@ var oscar = (function(o, $) {
                 width: 'resolve'
             });
             $selects.filter('.related-widget-wrapper.multiple select').select2({
-                width: '95%'
+                // width: '95%'
             });
             $(el).find('select.select2').each(function(i, e) {
                 var opts = {};

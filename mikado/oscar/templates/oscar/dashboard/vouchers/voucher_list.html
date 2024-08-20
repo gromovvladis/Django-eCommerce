@@ -21,9 +21,9 @@
 {% endblock %}
 
 {% block header %}
-    <div class="page-header">
-        <a href="{% url 'dashboard:voucher-create' %}" class="btn btn-primary float-right"><i class="fas fa-plus"></i> {% trans "Create new voucher" %}</a>
+    <div class="page-header d-flex justify-content-between">
         <h1>{% trans "Vouchers" %}</h1>
+        <a href="{% url 'dashboard:voucher-create' %}" class="btn btn-primary ml-3"><i class="fas fa-plus"></i> {% trans "Create new voucher" %}</a>
     </div>
 {% endblock header %}
 

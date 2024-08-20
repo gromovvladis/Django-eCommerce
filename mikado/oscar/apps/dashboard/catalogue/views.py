@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views import generic
 from django_tables2 import SingleTableMixin, SingleTableView
+from django.db.models import Count, Max, Min, Case, When, DecimalField
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import ObjectLookupView
@@ -120,9 +121,29 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         """
         Build the queryset for this list
         """
-        queryset = Product.objects.browsable_dashboard().base_queryset()
+        queryset = Product.objects.browsable_dashboard().base_queryset().select_related()
         queryset = self.filter_queryset(queryset)
         queryset = self.apply_search(queryset)
+
+        queryset = queryset.annotate(
+            min_price=Case(
+                When(structure="parent", then=Min("children__stockrecords__price")),
+                default=Min('stockrecords__price'),
+                output_field=DecimalField()
+            ),
+            max_price=Case(
+                When(structure="parent", then=Max("children__stockrecords__price")),
+                default=Max('stockrecords__price'),
+                output_field=DecimalField()
+            ),
+            old_price=Case(
+                When(structure="parent", then=Max("children__stockrecords__old_price")),
+                default=Max('stockrecords__old_price'),
+                output_field=DecimalField()
+            ),
+            variants=Count("children"),
+        )
+
         return queryset
 
     def apply_search(self, queryset):
@@ -609,7 +630,7 @@ class CategoryListView(SingleTableView):
     context_table_name = "categories"
 
     def get_queryset(self):
-        return Category.get_root_nodes()
+        return Category.get_root_nodes().annotate(num_products=Count('product'))
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -844,7 +865,13 @@ class ProductClassListView(SingleTableView):
         """
         Build the queryset for this list
         """
-        return ProductClass.objects.prefetch_related("options", "class_additionals").all()
+        queryset = ProductClass.objects.prefetch_related("options", "class_additionals").all()
+        queryset = queryset.annotate(
+            num_products=Count("products"),
+            num_additionals=Count('class_additionals'),
+        )
+
+        return queryset
 
 
 class ProductClassDeleteView(generic.DeleteView):
