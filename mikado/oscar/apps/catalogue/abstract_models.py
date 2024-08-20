@@ -124,10 +124,6 @@ class AbstractProductClass(models.Model):
         return self.attributes.exists()
 
     @property
-    def num_products(self):
-        return self.products.count()
-
-    @property
     def get_options(self):
         return self.options.all()
     
@@ -504,7 +500,7 @@ class AbstractProduct(models.Model):
         blank=True,
         verbose_name="Дополнительные товары продукта",
         help_text=(
-            "Доп товары"
+            "Дополнительные товары для данного продукта"
         ),
     )
 

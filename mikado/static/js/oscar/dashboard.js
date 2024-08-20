@@ -167,7 +167,7 @@ var oscar = (function(o, $) {
                 width: 'resolve'
             });
             $selects.filter('.related-widget-wrapper.multiple select').select2({
-                width: '95%'
+                // width: '95%'
             });
             $(el).find('select.select2').each(function(i, e) {
                 var opts = {};

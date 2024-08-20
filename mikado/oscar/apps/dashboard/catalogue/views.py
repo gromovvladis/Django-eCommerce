@@ -8,8 +8,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views import generic
 from django_tables2 import SingleTableMixin, SingleTableView
-from django.db.models import Count, Max, Min, OuterRef, Subquery, Case, When, F, DecimalField
-from decimal import Decimal as D
+from django.db.models import Count, Max, Min, Case, When, DecimalField
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import ObjectLookupView
@@ -142,6 +141,7 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
                 default=Max('stockrecords__old_price'),
                 output_field=DecimalField()
             ),
+            variants=Count("children"),
         )
 
         return queryset
@@ -865,7 +865,13 @@ class ProductClassListView(SingleTableView):
         """
         Build the queryset for this list
         """
-        return ProductClass.objects.prefetch_related("options", "class_additionals").all()
+        queryset = ProductClass.objects.prefetch_related("options", "class_additionals").all()
+        queryset = queryset.annotate(
+            num_products=Count("products"),
+            num_additionals=Count('class_additionals'),
+        )
+
+        return queryset
 
 
 class ProductClassDeleteView(generic.DeleteView):

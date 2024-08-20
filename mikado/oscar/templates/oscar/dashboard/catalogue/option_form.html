@@ -1,11 +1,10 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 
 {% block title %}
     {{ title }} | {{ block.super }}
 {% endblock %}
 
-{% block body_class %}{{ block.super }} create-page{% endblock %}
+{% block body_class %}{{ block.super }} popup-page{% endblock %}
 
 {% block navbar %}
 {% if not is_popup %}
@@ -23,9 +22,9 @@
 {% if not is_popup %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
             <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:catalogue-option-list' %}">{% trans "Options" %}</a>
+                <a href="{% url 'dashboard:catalogue-option-list' %}">Опции</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
         </ol>
@@ -47,7 +46,7 @@
                     {% block option_details %}
                         <div class="tab-pane active" id="option_details">
                             <div class="table-header">
-                                <h3>{% trans "Option details" %}</h3>
+                                <h3>Описание опции</h3>
                             </div>
                             <div class="card card-body bg-light option-details">
 
@@ -77,22 +76,21 @@
                 </div>
             </div>
         </div>
-
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
-                <div class="form-actions">
-                    <div class="float-right">
-                        <a href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
-                            {% trans "Cancel" %}
-                        </a>
-                        {% trans "or" %}
-                        <button class="btn btn-primary" type="submit">
-                            {% trans "Save" %}
-                        </button>
-                    </div>
+                <div class="d-flex justify-content-end">  
+                    <a class="btn btn-danger mr-2"  href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
+                        <i class="fa-regular fa-circle-xmark"></i> 
+                        Отменить
+                    </a>             
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Сохранить
+                    </button>
                 </div>
             </div>
         {% endblock fixed_actions_group %}
+        
     </form>
 
 {% endblock dashboard_content %}

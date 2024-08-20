@@ -1,5 +1,5 @@
 
-from django_tables2 import A, Column, LinkColumn, TemplateColumn
+from django_tables2 import A, Column, ManyToManyColumn, TemplateColumn
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
@@ -16,14 +16,21 @@ class RangeTable(DashboardTable):
         attrs = {'th': {'class': 'name'},}
     )
     description = TemplateColumn(
+        verbose_name="Описание",
         template_code='{{ record.description|default:"-"|striptags'
         '|cut:"&nbsp;"|truncatewords:6 }}',
         attrs = {'th': {'class': 'description'},}
     )
-    products = TemplateColumn(
+    num_products = TemplateColumn(
         verbose_name="Товары",
         template_name="oscar/dashboard/ranges/range_list_row_products.html",
-        order_by="product",
+        orderable=True,
+        attrs = {'th': {'class': 'num_products'},}
+    )
+    included_categories = ManyToManyColumn(
+        verbose_name="Категории",
+        orderable=True,
+        order_by="included_categories_count",
         attrs = {'th': {'class': 'num_products'},}
     )
     is_public = TemplateColumn(
@@ -31,6 +38,12 @@ class RangeTable(DashboardTable):
         template_name="oscar/dashboard/table/boolean.html",
         order_by=("is_public"),
         attrs = {'th': {'class': 'is_public'},}
+    )
+    benefits = TemplateColumn(
+        verbose_name="Активные предложения",
+        template_name="oscar/dashboard/table/boolean.html",
+        orderable=True,
+        attrs = {'th': {'class': 'benefits'},}
     )
     date_created = Column(
         verbose_name="Дата",
@@ -49,10 +62,22 @@ class RangeTable(DashboardTable):
 
     class Meta(DashboardTable.Meta):
         model = Range
-        fields = ("name", "description", "products", "is_public", "date_created")
-        sequence = ("name", "description", "products", "date_created", "...", "actions")
+        fields = ("name", "description", "num_products", "included_categories", "benefits", "is_public", "date_created")
+        sequence = ("name", "description", "num_products", "included_categories", "benefits", "is_public", "date_created", "...", "actions")
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
         empty_text = "Нет созданых ассортиментов"
+
+    def order_num_products(self, queryset, is_descending):
+        queryset = sorted(
+            queryset,
+            key=lambda range: range.num_products(),
+            reverse=is_descending
+        )
+
+        self.data.data = queryset
+        self.data._length = len(queryset)
+
+        return queryset, True
 
