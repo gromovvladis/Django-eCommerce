@@ -2,6 +2,7 @@ import re
 from django import template
 from datetime import datetime
 from oscar.core.loading import get_class
+from urllib.parse import urlencode
 
 get_nodes = get_class("dashboard.menu", "get_nodes")
 register = template.Library()
@@ -45,3 +46,22 @@ def payment_date(iso_date):
                                 .replace('December', 'декабря')
 
     return formatted_date
+
+@register.simple_tag
+def filter_table(request, filtres):
+    res = []
+    for fltr in filtres["values"]:
+        params = request.GET.copy()
+        params.pop('status', None)
+        params = urlencode(params)
+
+        url = f'{filtres["url"]}'
+        if params or fltr[0]:
+            url += '?' + '&'.join(filter(None, [params, fltr[0]]))
+
+        res.append({
+            "url": url,
+            "name": fltr[1]
+        })
+        
+    return res

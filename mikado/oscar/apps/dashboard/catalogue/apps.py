@@ -73,6 +73,9 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
         self.stock_alert_view = get_class(
             "dashboard.catalogue.views", "StockAlertListView"
         )
+        self.stock_alert_update_view = get_class(
+            "dashboard.catalogue.views", "StockAlertUpdateView"
+        )
 
         self.attribute_option_group_create_view = get_class(
             "dashboard.catalogue.views", "AttributeOptionGroupCreateView"
@@ -141,6 +144,11 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 "stock-alerts/",
                 self.stock_alert_view.as_view(),
                 name="stock-alert-list",
+            ),
+            path(
+                "stock-alerts/update/<int:pk>/",
+                self.stock_alert_update_view.as_view(),
+                name="stock-alert-update-list",
             ),
             path(
                 "product-lookup/",

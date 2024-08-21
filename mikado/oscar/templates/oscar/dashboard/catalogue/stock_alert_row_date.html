@@ -1,0 +1,7 @@
+{% load django_tables2 %}
+
+Открытие: {{ record.date_created }}
+{% if record.date_closed %}
+<br>
+Закрытие: {{ record.date_closed }}
+{% endif %}

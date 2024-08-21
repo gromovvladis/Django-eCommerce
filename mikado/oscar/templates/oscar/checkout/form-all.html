@@ -52,7 +52,7 @@
                                         <div class="fill-width fill-height"></div>
                                     </div>
                                     {% for method in methods %}
-                                        <button class="v-tabs-button__button{% if method.default_selected %} active{% endif %}" data-id="delivery-method-button" name="method_code" value="{{ method.code }}">{{ method.name }}</button>
+                                        <button class="v-tabs-button__button" data-id="delivery-method-button" name="method_code" value="{{ method.code }}">{{ method.name }}</button>
                                     {% endfor %}
                                 </div>
                             </div>

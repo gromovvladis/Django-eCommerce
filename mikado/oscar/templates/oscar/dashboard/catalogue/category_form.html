@@ -97,26 +97,24 @@
         </div>
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
-                <div class="form-group">
-                    <div class="float-right">
-                        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-category-list' %}">
-                            <i class="fa-regular fa-circle-xmark"></i> 
-                            Отменить
-                        </a>
-                        <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
-                            <i class="fa-regular fa-floppy-disk"></i>
-                            Сохранить
-                        </button>
-                    </div>
-                    {% if category %}
-                        <a class="btn btn-success" href="{{ category.get_absolute_url }}">
-                            <i class="fa-solid fa-share"></i>
-                            <span>
-                                Смотреть на сайте
-                            </span>
-                        </a>
-                    {% endif %}
+                <div class="d-flex justify-content-end">
+                    <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-category-list' %}">
+                        <i class="fa-regular fa-circle-xmark"></i> 
+                        Отменить
+                    </a>
+                    <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        Сохранить
+                    </button>
                 </div>
+                {% if category %}
+                    <a class="btn btn-success" href="{{ category.get_absolute_url }}">
+                        <i class="fa-solid fa-share"></i>
+                        <span>
+                            Смотреть на сайте
+                        </span>
+                    </a>
+                {% endif %}
             </div>
         {% endblock fixed_actions_group %}
     </form>

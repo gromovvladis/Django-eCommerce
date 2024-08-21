@@ -1,4 +1,4 @@
-from oscar.apps.delivery.abstract_models import AbstractDeliveryZona,  AbstractCourier, AbstractCourierShift, AbstractKitchen, AbstractDeliveryOrder, AbstractTrip, AbstractRoute, AbstractDeliverySession
+from oscar.apps.delivery.abstract_models import AbstractDeliveryZona,  AbstractCourier, AbstractCourierShift, AbstractDeliveryOrder, AbstractTrip, AbstractRoute, AbstractDeliverySession
 from oscar.core.loading import is_model_registered
 
 __all__ = []
@@ -26,14 +26,6 @@ if not is_model_registered("delivery", "CourierShift"):
         pass
 
     __all__.append("CourierShift")
-
-    
-if not is_model_registered("delivery", "Kitchen"):
-
-    class Kitchen(AbstractKitchen):
-        pass
-
-    __all__.append("Kitchen")
 
     
 if not is_model_registered("delivery", "DeliveryOrder"):

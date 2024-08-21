@@ -2,7 +2,11 @@
 
 <div class="d-flex flex-column">
     <a href="{% url 'dashboard:catalogue-product' record.stockrecord.product.id %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
-        {{ record.stockrecord.product.get_title }}
+        {{ record.name }}
     </a>
+    {% if record.stockrecord.product.is_child and record.stockrecord.product.variant %}
+        <span class="small">{{ record.stockrecord.product.variant }}</span>
+        <br>
+    {% endif %}
     <span class="text-muted small">UPC: {{ record.stockrecord.product.upc }}</span>
 </div>

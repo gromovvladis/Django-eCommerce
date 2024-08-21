@@ -11,17 +11,31 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("sms_auth", "0001_initial"),
+        ("basket", "0003_initial"),
+        ("voucher", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="phonecode",
+            model_name="basket",
             name="owner",
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
+                related_name="baskets",
                 to=settings.AUTH_USER_MODEL,
+                verbose_name="Владелец",
             ),
+        ),
+        migrations.AddField(
+            model_name="basket",
+            name="vouchers",
+            field=models.ManyToManyField(
+                blank=True, to="voucher.voucher", verbose_name="Промокод"
+            ),
+        ),
+        migrations.AlterUniqueTogether(
+            name="line",
+            unique_together={("basket", "line_reference")},
         ),
     ]

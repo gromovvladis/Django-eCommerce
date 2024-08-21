@@ -10,18 +10,24 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ("reviews", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("sms_auth", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="phonecode",
-            name="owner",
+            model_name="productreview",
+            name="user",
             field=models.ForeignKey(
+                blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
+                related_name="reviews",
                 to=settings.AUTH_USER_MODEL,
             ),
+        ),
+        migrations.AlterUniqueTogether(
+            name="productreview",
+            unique_together={("product", "user")},
         ),
     ]

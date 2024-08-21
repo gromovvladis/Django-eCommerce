@@ -98,6 +98,8 @@ class AbstractOrder(models.Model):
 
     has_review = models.BooleanField(db_index=True, default=False)
 
+    is_open = models.BooleanField("Заказ просмотрен", default=False)
+
     #: Order status pipeline.  This should be a dict where each (key, value) #:
     #: corresponds to a status and a list of possible statuses that can follow
     #: that one.

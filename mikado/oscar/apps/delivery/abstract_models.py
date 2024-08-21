@@ -1,13 +1,16 @@
+from django.conf import settings
+
+import json
 from datetime import timedelta
 from django.utils import timezone
-import json
-from django.conf import settings
 from django.db import models
 
 from oscar.core.compat import get_user_model
 User = get_user_model()
 
 _dir = settings.STATIC_PRIVATE_ROOT
+
+# -------- Зона доставки ---------------
 
 class AbstractDeliveryZona(models.Model):
     """
@@ -79,7 +82,7 @@ class AbstractDeliveryZona(models.Model):
         file = open(_dir + '/js/delivery/geojson/delivery_zones.geojson', 'w')
         json.dump(_json, file)
 
-
+# -------- Курьер и его смены ---------------
 
 class AbstractCourier(models.Model):
 
@@ -89,8 +92,7 @@ class AbstractCourier(models.Model):
     ]
         
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    passport_info = models.CharField(max_length=255)
-    vehicle_info = models.CharField(max_length=255)
+    profile = models.OneToOneField("user.Profile", on_delete=models.CASCADE)
     type = models.CharField(max_length=50, choices=STATUS_CHOICES, default='driving')
 
     def __str__(self):
@@ -98,12 +100,12 @@ class AbstractCourier(models.Model):
 
 
     class Meta:
+        abstract = True
         verbose_name = "Курьер"
         verbose_name_plural = "Курьеры"
-        ordering = ['user', 'passport_info', 'vehicle_info']
+        ordering = ['user', 'profile']
         unique_together = ('user', 'type')
         get_latest_by = 'user_username'
-
 
 
 class AbstractCourierShift(models.Model):
@@ -120,52 +122,35 @@ class AbstractCourierShift(models.Model):
         return f"Shift for {self.courier.user.get_full_name()}"
 
     class Meta:
+        abstract = True
         verbose_name = "Смена курьера"
         verbose_name_plural = "Смены курьера"
         ordering = ['-start_time']
         unique_together = ('courier','start_time')
         get_latest_by = 'end_time'
 
-
-
-class AbstractKitchen(models.Model):
-
-    partner = models.ForeignKey('partner.Partner', on_delete=models.CASCADE)
-    orders = models.ManyToManyField('delivery.DeliveryOrder', related_name='kitchen_orders')
-
-    def schedule_orders(self):
-        # Логика планирования заказов на кухне
-        pass
-
-    def __str__(self):
-        return self.name    
-    
-    class Meta:
-        verbose_name = "Кухня"
-        verbose_name_plural = "Кухни"
-        ordering = ['partner']
-
-
-
+# -------- Заказы ---------------
 
 class AbstractDeliveryOrder(models.Model):
 
     order = models.ForeignKey('order.Order', on_delete=models.CASCADE, null=False, blank=False)
     pickup_time = models.DateTimeField()
     delivery_time = models.DateTimeField()
-    kitchen = models.ForeignKey('delivery.Kitchen', on_delete=models.CASCADE, null=True, blank=True)
+    partner = models.ForeignKey('partner.Partner', on_delete=models.CASCADE, null=True, blank=True)
     courier = models.ForeignKey('delivery.Courier', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"Order {self.order_id}"
     
     class Meta:
+        abstract = True
         verbose_name = "Заказ доставки"
         verbose_name_plural = "Заказы доставки"
         ordering = ['-delivery_time']
         index_together = ['pickup_time', 'delivery_time']
-        
+    
 
+# -------- Поездки и манрщруты ---------------
 
 class AbstractTrip(models.Model):
 
@@ -186,12 +171,11 @@ class AbstractTrip(models.Model):
         return f"Trip from {self.start_point}"
     
     class Meta:
+        abstract = True
         verbose_name = "Маршрут"
         verbose_name_plural = "Маршруты"
         ordering = ['start_time']
         index_together = ['start_time', 'end_time']
-
-
 
 
 class AbstractRoute(models.Model):
@@ -205,17 +189,21 @@ class AbstractRoute(models.Model):
         return f"Route for {self.courier.user.get_full_name()} on {self.start_time}"
 
     class Meta:
+        abstract = True
         verbose_name = "Маршрут курьера"
         verbose_name_plural = "Маршруты курьеров"
         ordering = ['start_time']
         index_together = ['start_time', 'end_time']
 
-
+# -------- Сессия доставки ---------------
 
 class AbstractDeliverySession(models.Model):
-    date = models.DateField(default=timezone.now)
+    
     orders = models.ManyToManyField('delivery.DeliveryOrder')
     couriers = models.ManyToManyField('delivery.Courier')
+    partners = models.ManyToManyField('partner.Partner')
+    
+    date = models.DateField(default=timezone.now)
     open_time = models.DateTimeField(auto_now_add=True)
     close_time = models.DateTimeField()
 
@@ -223,6 +211,7 @@ class AbstractDeliverySession(models.Model):
         return f"Торговая сессия - дата: {self.date}"
     
     class Meta:
+        abstract = True
         verbose_name = "Торговая сессия"
         verbose_name_plural = "Торговые сессии"
         ordering = ['-date']

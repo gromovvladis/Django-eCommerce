@@ -19,6 +19,7 @@ class Node(object):
     def __init__(
         self,
         label,
+        notif=None,
         url_name=None,
         url_args=None,
         url_kwargs=None,
@@ -26,6 +27,7 @@ class Node(object):
         icon=None,
     ):
         self.label = label
+        self.notif = notif
         self.icon = icon
         self.url_name = url_name
         self.url_args = url_args
@@ -63,6 +65,7 @@ class Node(object):
             url_kwargs=self.url_kwargs,
             access_fn=self.access_fn,
             icon=self.icon,
+            notif=self.notif,
         )
         for child in self.children:
             if child.is_visible(user):

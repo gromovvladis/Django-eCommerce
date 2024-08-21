@@ -51,7 +51,7 @@ class HomeView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["summary"] = "Главная"
+        ctx["summary"] = "Доставка суши и роллов | Микадо Красноярск "
         
         agent = parse(self.request.META['HTTP_USER_AGENT'])
         ctx["is_mobile"] = agent.is_mobile

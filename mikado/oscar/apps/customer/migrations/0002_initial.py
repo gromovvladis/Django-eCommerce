@@ -9,18 +9,19 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("basket", "0002_initial"),
-        ("partner", "0001_initial"),
+        ("order", "0001_initial"),
+        ("customer", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="line",
-            name="stockrecord",
+            model_name="orderreview",
+            name="order",
             field=models.ForeignKey(
+                null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name="basket_lines",
-                to="partner.stockrecord",
+                related_name="reviews",
+                to="order.order",
             ),
         ),
     ]

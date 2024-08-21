@@ -14,6 +14,8 @@ Category = get_model("catalogue", "Category")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
+StockAlert = get_model("partner", "StockAlert")
+
 
 
 class ProductClassTable(DashboardTable):
@@ -262,17 +264,6 @@ class CategoryTable(DashboardTable):
         }
         empty_text = "Нет созданых категорий"
 
-    # def order_num_products(self, queryset, is_descending):
-    #     queryset = sorted(
-    #         queryset,
-    #         key=lambda category: category.get_num_products(),
-    #         reverse=is_descending
-    #     )
-
-    #     self.data.data = queryset
-    #     self.data._length = len(queryset)
-
-    #     return queryset, True
 
 class AttributeOptionGroupTable(DashboardTable):
     name = TemplateColumn(
@@ -367,7 +358,7 @@ class AdditionalTable(DashboardTable):
         verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/additional_row_name.html",
         order_by="name",
-         attrs = {'th': {'class': 'name'},}
+        attrs = {'th': {'class': 'name'},}
     )
     max_amount = Column(
         verbose_name="Максимум",
@@ -396,7 +387,7 @@ class AdditionalTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/additional_row_actions.html",
         orderable=False,
-         attrs = {'th': {'class': 'actions'},}
+        attrs = {'th': {'class': 'actions'},}
     )
     is_public = TemplateColumn(
         verbose_name="Доступен",
@@ -424,34 +415,40 @@ class StockAlertTable(DashboardTable):
         verbose_name="Продукт",
         template_name="oscar/dashboard/catalogue/stock_alert_row_name.html",
         orderable=True,
+        order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
-    partner = TemplateColumn(
+    partner = Column(
         verbose_name="Точка продажи",
-        template_name="oscar/dashboard/catalogue/stock_alert_row_partner.html",
         orderable=True,
         attrs = {'th': {'class': 'partner'},}
     )
     threshold = Column(
-        verbose_name="Границы запасов",
-        order_by="threshold",
+        verbose_name="Граница запасов",
+        orderable=True,
         attrs = {'th': {'class': 'threshold'},}
+    )
+    num_in_stock = Column(
+        verbose_name="В наличии",
+        orderable=True,
+        attrs = {'th': {'class': 'num_in_stock'},}
     )
     is_public = TemplateColumn(
         verbose_name="Доступен",
         template_name="oscar/dashboard/table/boolean.html",
-        order_by=("is_public"),
+        accessor=A("num_in_stock"),
         attrs = {'th': {'class': 'is_public'},}
     )
-    date_created = Column(
+    date_created = TemplateColumn(
         verbose_name="Дата",
+        template_name="oscar/dashboard/catalogue/stock_alert_row_date.html",
         order_by="date_created",
         attrs = {'th': {'class': 'date_created'},}
     )
     status = TemplateColumn(
         verbose_name="Статус",
         template_name="oscar/dashboard/catalogue/stock_alert_row_status.html",
-        order_by="status",
+        orderable=True,
         attrs = {'th': {'class': 'status'},}
     )
     actions = TemplateColumn(
@@ -462,24 +459,24 @@ class StockAlertTable(DashboardTable):
     )
 
     icon = "fas fa-cubes-stacked"
-    
     filter = {
         "url": reverse_lazy("dashboard:stock-alert-list"),
         "values": [
             ("", "Все"), 
-            ("?status=Открыто", "Открытые"), 
-            ("?status=Закрыто", "Закрытые"), 
+            ("status=Открыто", "Открытые"), 
+            ("status=Закрыто", "Закрытые"), 
         ]
     }
     
     caption = ngettext_lazy("%s Уведомление о наличии", "%s Уведомлений о наличии")
 
     class Meta(DashboardTable.Meta):
-        model = ProductClass
+        model = StockAlert
         fields = (
             "name",
             "partner",
             "threshold",
+            "num_in_stock",
             "is_public",
             "date_created",
             "status",
@@ -488,12 +485,13 @@ class StockAlertTable(DashboardTable):
             "name",
             "partner",
             "threshold",
+            "num_in_stock",
             "is_public",
             "date_created",
             "status",
+            "...",
             "actions",
         )
-        order_by = "-name"
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }

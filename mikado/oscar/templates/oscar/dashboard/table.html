@@ -1,5 +1,6 @@
 {% extends 'django_tables2/table.html' %}
 {% load django_tables2 %}
+{% load dashboard_tags %}
 
 {% block table.thead %}
     <caption align="center">
@@ -16,17 +17,18 @@
         <div class="float-right d-flex">
             {% if table.filter %}
                 <div class="btn-group">
-                    <button role="button" class="filter-table text-decoration-none dropdown-toggle{% if table.orderable %} mr-2{% endif %}" id="filter-table" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button role="button" class="filter-table text-decoration-none dropdown-toggle" id="filter-table" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fa-solid fa-filter"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right text-small shadow-sm" aria-labelledby="filter-table">
                         <div class="table-list d-flex flex-column">
                             <h6 class="dropdown-header">Фильтр</h6>
                             <div class="dropdown-divider"></div>
-                            {% for fltr in table.filter.values %}
-                                <a class="orderable dropdown-item" href="{{ table.filter.url }}{{ fltr.0 }}">
+                            {% filter_table request table.filter as filters %}
+                            {% for fltr in filters %}
+                                <a class="orderable dropdown-item" href="{{ fltr.url }}">
                                     <span class="orderable py-1">
-                                        {{ fltr.1 }}
+                                        {{ fltr.name }}
                                     </span>
                                 </a>
                             {% endfor %}
