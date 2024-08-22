@@ -1,6 +1,6 @@
 import re
 from django import template
-from datetime import datetime
+from datetime import datetime, timedelta
 from oscar.core.loading import get_class
 from urllib.parse import urlencode
 
@@ -19,6 +19,25 @@ def subtab(text, path):
     if text.startswith(path):
         return True
     return False
+
+@register.filter
+def in_future(value):
+    if isinstance(value, timedelta):
+        return value > timedelta(0)
+    return False
+
+@register.filter
+def hours(value):
+    if isinstance(value, timedelta):
+        return int(value.total_seconds() // 3600 % 24)
+    return 0
+
+@register.filter
+def minutes(value):
+    if isinstance(value, timedelta):
+        minutes = int(value.total_seconds() // 60 % 60) 
+        return minutes if minutes < 61 else 0
+    return 0
 
 @register.simple_tag
 def dashboard_navigation(user):

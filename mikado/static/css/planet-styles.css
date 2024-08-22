@@ -9086,6 +9086,10 @@ html.drawer .v-app__side {
     height: 30px
 }
 
+.button-order{
+    transition: border-color .7s linear;
+}
+
 .button-order.sending {
 
     width: 44px;

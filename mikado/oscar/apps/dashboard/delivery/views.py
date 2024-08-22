@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.views.generic import UpdateView, DeleteView, CreateView, View
 
 from django_tables2 import SingleTableView

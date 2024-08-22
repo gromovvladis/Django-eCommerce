@@ -530,7 +530,13 @@ class AbstractProduct(models.Model):
         help_text="Определяет порядок отображения в списке.",
     )
     
-    cooking_time = models.IntegerField("Время приготовления", null=False, blank=False, default=20)
+    cooking_time = models.IntegerField(
+        "Время приготовления", 
+        null=False, 
+        blank=False, 
+        default=20,
+        help_text="Приблизительное время, которое уйдет у повара на приготовление и сборку заказа на кухне. Указывается в минутах.",
+    )
 
     date_created = models.DateTimeField(
         "Дата создания", auto_now_add=True, db_index=True

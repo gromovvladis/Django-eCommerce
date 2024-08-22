@@ -27,8 +27,8 @@ class AbstractDeliveryZona(models.Model):
         help_text="Координаты в формате: [[55.730719,37.583146],[55.719093,37.677903]]"
         " Получить можно на сайте: http://mapinit.ru/coords/"
     )
-    isAvailable = models.BooleanField("Доставка доступна", max_length=255)
-    isHide = models.BooleanField("Убрать с карты", max_length=255)
+    isAvailable = models.BooleanField("Доставка доступна", max_length=255, default=True)
+    isHide = models.BooleanField("Убрать с карты", max_length=255, default=False)
 
     def __str__(self):
         return "Зона №%s - %s" % (self.number, self.description)

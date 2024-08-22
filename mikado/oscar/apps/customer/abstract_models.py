@@ -36,7 +36,7 @@ class AbstractOrderReview(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True)
 
-    is_open = models.BooleanField("Отзыв просмотрен", default=False)
+    is_open = models.BooleanField("Отзыв просмотрен", default=False, db_index=True)
 
     class Meta:
         abstract = True

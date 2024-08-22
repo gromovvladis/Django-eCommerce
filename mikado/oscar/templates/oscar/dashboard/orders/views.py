@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django_tables2 import SingleTableView
-from django.db.models import Count, Q, Sum, fields, F, Max
+from django.db.models import Count, Q, Sum, fields, F
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -18,7 +18,6 @@ from oscar.core.compat import UnicodeCSVWriter
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import datetime_combine, format_datetime
 from oscar.views import sort_queryset
-from django.utils.timezone import now
 
 import logging
 logger = logging.getLogger("oscar.dashboard")
@@ -164,15 +163,9 @@ class OrderListView(EventHandlerMixin, SingleTableView):
         queryset = sort_queryset(
             self.base_queryset, self.request, ["number", "total"]
         ).annotate(
-            num_products=Sum("basket__lines__quantity"),
-            source=Max("sources__reference"),
-            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
-            paid=F("sources__paid"),
+            num_products=Count("basket__lines__quantity"),
+            payment=F("sources"),
         )
-
-        for obj in queryset:
-            if not obj.date_finish:
-                obj.before_order = obj.order_time - now()
 
         self.form = self.form_class(self.request.GET)
         if not self.form.is_valid():

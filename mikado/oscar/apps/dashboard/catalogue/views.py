@@ -359,7 +359,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
     def get_page_title(self):
         if self.creating:
             if self.parent is None:
-                return ("Создать новый %(product_class)s продукт") % {
+                return ("Создать новый продукт типа '%(product_class)s'") % {
                     "product_class": self.product_class.name
                 }
             else:
@@ -439,7 +439,6 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         else:
             # a just created product was already saved in process_all_forms()
             self.object = form.save()
-            self.update_alerts()
 
         # Save formsets
         for formset in formsets.values():
@@ -452,20 +451,20 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-    def update_alerts(self):
-        # Извлекаем все StockRecord, где num_in_stock больше low_stock_threshold
-        stock_records = StockRecord.objects.filter(product=self.object, num_in_stock__gt=F('low_stock_threshold'))
+    # def update_alerts(self):
+    #     # Извлекаем все StockRecord, где num_in_stock больше low_stock_threshold
+    #     stock_records = StockRecord.objects.filter(product=self.object, num_in_stock__gt=F('low_stock_threshold'))
 
-        # Проходим по найденным StockRecord и обновляем соответствующие StockAlert
-        for stock_record in stock_records:
-            # Находим все связанные с этим StockRecord уведомления
-            stock_alerts = StockAlert.objects.filter(stockrecord=stock_record, status=StockAlert.OPEN)
+    #     # Проходим по найденным StockRecord и обновляем соответствующие StockAlert
+    #     for stock_record in stock_records:
+    #         # Находим все связанные с этим StockRecord уведомления
+    #         stock_alerts = StockAlert.objects.filter(stockrecord=stock_record, status=StockAlert.OPEN)
             
-            # Обновляем статус каждого найденного уведомления
-            for alert in stock_alerts:
-                alert.status = StockAlert.CLOSED
-                alert.date_closed = now()
-                alert.save()
+    #         # Обновляем статус каждого найденного уведомления
+    #         for alert in stock_alerts:
+    #             alert.status = StockAlert.CLOSED
+    #             alert.date_closed = now()
+    #             alert.save()
 
     def handle_adding_child(self, parent):
         """
@@ -643,6 +642,7 @@ class StockAlertListView(SingleTableView):
                 partner=F("stockrecord__partner__name"),
                 threshold=F("stockrecord__low_stock_threshold"),
                 num_in_stock=F("stockrecord__num_in_stock"),
+                num_allocated=F("stockrecord__num_allocated"),
             )       
         else:
             return StockAlert.objects.all().select_related("stockrecord").annotate(
@@ -650,14 +650,15 @@ class StockAlertListView(SingleTableView):
                 partner=F("stockrecord__partner__name"),
                 threshold=F("stockrecord__low_stock_threshold"),
                 num_in_stock=F("stockrecord__num_in_stock"),
+                num_allocated=F("stockrecord__num_allocated"),
             )
 
 
 class StockAlertUpdateView(View):
     def get(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         # Извлекаем все StockRecord, где num_in_stock больше low_stock_threshold
-        product_id = kwargs['pk']
-        stock_records = StockRecord.objects.filter(product_id=product_id, num_in_stock__gt=F('low_stock_threshold'))
+        stockrecord_id = kwargs['pk']
+        stock_records = StockRecord.objects.filter(id=stockrecord_id, num_in_stock__gt=F('low_stock_threshold') + F('num_allocated'))
 
         # Проходим по найденным StockRecord и обновляем соответствующие StockAlert
         for stock_record in stock_records:
@@ -923,7 +924,7 @@ class ProductClassListView(SingleTableView):
         """
         queryset = ProductClass.objects.prefetch_related("options", "class_additionals").all()
         queryset = queryset.annotate(
-            num_products=Count("products"),
+            num_products=Count("products", distinct=True),
             num_additionals=Count('class_additionals'),
         )
 
@@ -1239,7 +1240,7 @@ class AdditionalCreateView(PopUpWindowCreateMixin, AdditionalCreateUpdateView):
         return "Добавить новый доп. товар"
 
     def get_success_url(self):
-        self.add_success_message("Опция успешно создана")
+        self.add_success_message("Дополнительный товар успешно создан")
         return reverse("dashboard:catalogue-additional-list")
 
 

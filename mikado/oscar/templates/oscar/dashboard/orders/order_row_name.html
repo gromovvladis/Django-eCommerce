@@ -1,0 +1,10 @@
+{% load django_tables2 %}
+<a href="{% url 'dashboard:order-detail' number=record.number %}" class="d-flex flex-column">
+    <span>
+        {% for line in record.basket.all_lines %}
+            {{ line.product }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </span>
+    <span class="text-dark small">Товаров:{{ record.num_products }}</span>
+    <span class="text-muted small">№{{ record.number }}</span>
+</a>

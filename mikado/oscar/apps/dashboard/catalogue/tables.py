@@ -165,7 +165,8 @@ class ProductTable(DashboardTable):
         attrs = {'th': {'class': 'statistic'},}
     )
 
-    date_updated = Column(
+    date_updated = TemplateColumn(
+        template_code='{{ record.date_updated|date:"d.m.y H:i" }}',
         attrs = {'th': {'class': 'date_updated'}}
     )
 
@@ -433,6 +434,11 @@ class StockAlertTable(DashboardTable):
         orderable=True,
         attrs = {'th': {'class': 'num_in_stock'},}
     )
+    num_allocated = Column(
+        verbose_name="Заказано",
+        orderable=True,
+        attrs = {'th': {'class': 'num_allocated'},}
+    )
     is_public = TemplateColumn(
         verbose_name="Доступен",
         template_name="oscar/dashboard/table/boolean.html",
@@ -477,6 +483,7 @@ class StockAlertTable(DashboardTable):
             "partner",
             "threshold",
             "num_in_stock",
+            "num_allocated",
             "is_public",
             "date_created",
             "status",
@@ -486,6 +493,7 @@ class StockAlertTable(DashboardTable):
             "partner",
             "threshold",
             "num_in_stock",
+            "num_allocated",
             "is_public",
             "date_created",
             "status",

@@ -1,0 +1,17 @@
+{% load django_tables2 %}
+{% load currency_filters %}
+
+<span class="{% if record.paid %}text-success{% else %}{% endif %}">
+    {% if record.source == 'SBP' %}
+        Yoomoney
+    {% elif record.source == 'CARD' %}
+        Карта
+    {% elif record.source == 'COURIER-CARD' %}
+        Картой
+    {% else %}
+        Наличными
+    {% endif %}
+    {% if record.amount_paid %}
+        {{ record.amount_paid|currency:record.currency }}
+    {% endif %}
+</span>

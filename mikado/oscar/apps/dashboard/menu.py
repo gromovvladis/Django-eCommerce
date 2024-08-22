@@ -36,8 +36,11 @@ def create_menu(menu_items, parent=None):
     """
     nodes = []
     models = {
+        "stock_alert": StockAlert.objects.filter(status=StockAlert.OPEN),
         "orders": Order.objects.filter(date_finish__isnull=True),
-        "delivery": DeliveryOrder.objects.filter(pickup_time__gt=timezone.now())
+        "delivery": DeliveryOrder.objects.filter(pickup_time__gt=timezone.now()),
+        "product_review": ProductReview.objects.filter(is_open=False),
+        "order_review": OrderReview.objects.filter(is_open=False),
     }
     default_fn = import_string(settings.OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION)
     for menu_dict in menu_items:
@@ -59,7 +62,7 @@ def create_menu(menu_items, parent=None):
             node = Node(
                 label=label,
                 icon=menu_dict.get("icon", None),
-                notif=get_notif(menu_dict.get("notification", None), models),
+                notif=get_notif(menu_dict, models),
                 url_name=menu_dict.get("url_name", None),
                 url_kwargs=menu_dict.get("url_kwargs", None),
                 url_args=menu_dict.get("url_args", None),
@@ -75,64 +78,68 @@ def create_menu(menu_items, parent=None):
 
 def get_parent_notif(children, models):
     total_notif = 0
+    pass_notif = ["all_orders"]
     for child in children:
         if "children" in child and child["children"]:
             # Если у дочернего элемента есть свои дочерние, суммируем их notif рекурсивно
-            total_notif += get_parent_notif(child["children"])
+            total_notif += get_parent_notif(child["children"], models)
         else:
             # Если это листовой элемент, добавляем его notif
-            notif = get_notif(child.get("notification", None), models, child.get("notif_count", None))
-            child["notif_count"] = notif
-            total_notif += notif
+            if child.get("notification") in pass_notif:
+                continue
+            total_notif += get_notif(child, models)
+
     return total_notif
 
 
-def get_notif(notif, models, count=None):
-
-    orders = models['orders']
-    delivery = models['delivery']
-
-    if count:
-        return count
-    if notif:
+def get_notif(child, models):
+    if child.get("notification"):
         function_map = {
             'stock_alerts': stock_alerts,
-            'active_orders': active_orders(orders),
-            'all_orders': all_orders(orders),
+            'active_orders': active_orders,
+            'all_orders': all_orders,
             'feedback_product': feedback_product,
             'feedback_order': feedback_order,
-            'delivery_now': delivery_now(delivery),
-            'delivery_kitchen': delivery_kitchen(delivery),
-            'delivery_couriers': delivery_couriers(delivery),
+            'delivery_now': delivery_now,
+            'delivery_kitchen': delivery_kitchen,
+            'delivery_couriers': delivery_couriers,
         }
-        function_to_call = function_map.get(notif)
+        function_to_call = function_map.get(child["notification"])
         if function_to_call:
-            return function_to_call()
-        else:
-            return 0
+            return function_to_call(models)
+        
     return 0
 
-def stock_alerts():
-    return StockAlert.objects.filter(status=StockAlert.OPEN).count()
 
-def active_orders(orders):
+def stock_alerts(models):
+    stock_alert = models['stock_alert']
+    return stock_alert.count()
+
+def active_orders(models):
+    orders = models['orders']
     active_statuses = ['Ожидает оплаты', 'Оплачен', 'Обрабатывается', 'Готовится', 'Готов', 'Доставляется']
-    return orders.filter(is_open=False, status__in=active_statuses).count()
+    return orders.filter(status__in=active_statuses).count()
 
-def all_orders(orders):
+def all_orders(models):
+    orders = models['orders']
     return orders.filter(is_open=False).count()
 
-def feedback_product():
-    return ProductReview.objects.filter(is_open=False).count()
+def feedback_product(models):
+    product_review = models['product_review']
+    return product_review.count()
 
-def feedback_order():
-    return OrderReview.objects.filter(is_open=False).count()
+def feedback_order(models):
+    order_review = models['order_review']
+    return order_review.count()
 
-def delivery_now(delivery):
-    return delivery.all().count()
+def delivery_now(models):
+    delivery = models['delivery']
+    return delivery.count()
 
-def delivery_kitchen(delivery):
-    return delivery.all().count()
+def delivery_kitchen(models):
+    delivery = models['delivery']
+    return delivery.count()
 
-def delivery_couriers(delivery):
-    return delivery.all().count()
+def delivery_couriers(models):
+    delivery = models['delivery']
+    return delivery.count()

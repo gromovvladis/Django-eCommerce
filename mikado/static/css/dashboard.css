@@ -430,9 +430,9 @@ hr {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-small,
+/* small, */
 .small {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 400;
 }
 
@@ -610,6 +610,10 @@ pre code {
   flex-wrap: wrap;
   margin-right: -.5rem;
   margin-left: -.5rem;
+}
+
+.modal .row{
+  margin: 0;
 }
 
 .no-gutters {
@@ -2994,7 +2998,9 @@ input[type=button].btn-block {
 }
 
 .fade {
-  transition: opacity 0.15s linear;
+  transition: opacity 0.15s ease-in-out;
+  /* transition: all 0.15s ease-in-out; */
+  backdrop-filter: blur(1px);
 }
 @media (prefers-reduced-motion: reduce) {
   .fade {
@@ -3301,7 +3307,7 @@ input[type=button].btn-block {
   color: white;
   text-align: center;
   line-height: 1.25rem;
-  font-weight: bold;
+  /* font-weight: bold; */
   font-size: .8rem;
 }
 
@@ -4210,6 +4216,10 @@ input[type=button].btn-block {
   border-radius: 10px;
 }
 
+.nav-item.current-tab .nav-link{
+  color: var(--primary);
+}
+
 .nav-link:hover {
   background-color: #eee;
 }
@@ -4277,6 +4287,12 @@ input[type=button].btn-block {
   .nav-account span{
     display: none;
   }
+
+  .table th,
+  .table td {
+    padding: 0.5rem;
+  }
+
 }
 
 @media screen and (min-width: 768px) and (max-width: 1199.9px) {
@@ -4291,9 +4307,9 @@ input[type=button].btn-block {
 
   .navbar-primary:not(.open) .dropdown-item-badge {
     position: absolute;
-    width: 25px;
-    height: 25px;
-    line-height: 25px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
     top: 50%;
     left: 50%;
     transform: translate3d(-50%, -50%, 0);
@@ -5239,6 +5255,10 @@ a.badge:hover, a.badge:focus {
   display: none;
 }
 
+.badge-96{
+  width: 96px;
+}
+
 .btn .badge {
   position: relative;
   top: -1px;
@@ -5957,8 +5977,10 @@ a.close.disabled {
 
 .modal {
   position: fixed;
-  top: 40px;
-  bottom: 20px;
+  /* top: 20px; */
+  /* bottom: 20px; */
+  top: 0;
+  bottom: 0;
   left: 0;
   z-index: 10001;
   display: none;
@@ -5975,7 +5997,7 @@ a.close.disabled {
   pointer-events: none;
 }
 .modal.fade .modal-dialog {
-  transition: transform 0.15s ease-out;
+  transition: transform 0.1s ease-out;
   transform: translate(0, -50px);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -6052,6 +6074,7 @@ a.close.disabled {
   width: 100vw;
   height: 100vh;
   background-color: #000;
+  backdrop-filter: blur(15px);
 }
 .modal-backdrop.fade {
   opacity: 0;
@@ -6084,10 +6107,11 @@ a.close.disabled {
 .modal-body {
   position: relative;
   flex: 1 1 auto;
-  padding: 1rem;
+  padding: .5rem;
+  /* padding: 1rem; */
   border-radius: 0 0 10px 10px;
   /* background: #eaeaea; */
-  background: linear-gradient(0deg, #e4e4e4, white);
+  /* background: linear-gradient(0deg, #e4e4e4, white); */
 }
 
 .modal-footer {
