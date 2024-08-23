@@ -7,12 +7,12 @@
 {% load static %}
 
 {% block styles %}
-    {% comment %} {% compress css %}    {% endcomment %}
+    {% compress css %}   
     <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
     <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
-    {% comment %} {% endcompress %} {% endcomment %}
+    {% endcompress %}
 {% endblock %}
 
 {% block title %}Панель управления {{ block.super }}{% endblock %}
@@ -139,7 +139,7 @@
 
 {# Local scripts #}
 {% block scripts %}
-        {% comment %} {% compress js %} {% endcomment %}
+        {% compress js %}
             <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/oscar/ui.js" %}"></script>
             <script src="{% static "js/mousewheel/jquery.mousewheel.js" %}"></script>
@@ -157,7 +157,7 @@
             <script src="{% static "js/dashboard/table.js" %}"></script>
             <script src="{% static "js/dashboard/photo.js" %}"></script>
             <script src="{% static "js/dashboard/meta.js" %}"></script>
-        {% comment %} {% endcompress %} {% endcomment %}
+        {% endcompress %}
         <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     {% endblock %}
