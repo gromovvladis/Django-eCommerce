@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django_tables2 import SingleTableView
-from django.db.models import Count, Q, Sum, fields, F, Max
+from django.db.models import Count, Sum, fields, F, Max, ExpressionWrapper, DurationField, When, Value, Case
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -20,7 +20,12 @@ from oscar.core.utils import datetime_combine, format_datetime
 from oscar.views import sort_queryset
 from django.utils.timezone import now
 
+import csv
+import io
+
 import logging
+
+from oscar.views.generic import BulkEditMixin
 logger = logging.getLogger("oscar.dashboard")
 
 Partner = get_model("partner", "Partner")
@@ -110,25 +115,30 @@ class OrderStatsView(FormView):
         return stats
 
 
-class OrderListView(EventHandlerMixin, SingleTableView):
+class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
     """
     Dashboard view for a list of orders.
     Supports the permission-based dashboard.
     """
-
+    model = Order
     template_name = "oscar/dashboard/orders/order_list.html"
     form_class = OrderSearchForm
     table_class = OrderTable
-    context_table_name = "orders_table"
+    context_table_name = "orders"
     actions = ("download_selected_orders", "change_order_statuses")
 
     CSV_COLUMNS = {
         "number": "Номер заказа",
-        "value": "Стоимость заказа",
-        "date": "Дата покупки",
-        "num_items": "Количество товаров",
+        "total": "Стоимость заказа",
+        "shipping_charge": "Стоимость доставки",
+        "shipping_method": "Метод доставки",
         "status": "Последний статус",
-        "customer": "Email клиента",
+        "date_placed": "Дата создания заказа",
+        "date_finish": "Дата завершения заказа",
+        "order_time": "Дата заказа",
+        "num_items": "Количество товаров",
+        "items": "Товары",
+        "customer": "Клиент",
         "shipping_address_name": "Адрес доставки",
     }
 
@@ -139,7 +149,7 @@ class OrderListView(EventHandlerMixin, SingleTableView):
     def dispatch(self, request, *args, **kwargs):
         # base_queryset is equal to all orders the user is allowed to access
         self.base_queryset = queryset_orders_for_user(request.user).order_by(
-            "-date_placed"
+            "-order_time"
         )
         return super().dispatch(request, *args, **kwargs)
 
@@ -168,11 +178,12 @@ class OrderListView(EventHandlerMixin, SingleTableView):
             source=Max("sources__reference"),
             amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             paid=F("sources__paid"),
+            before_order=Case(
+                When(date_finish__isnull=True, then=ExpressionWrapper(F('order_time') - now(), output_field=DurationField())),
+                default=Value(None),
+                output_field=DurationField()
+            )
         )
-
-        for obj in queryset:
-            if not obj.date_finish:
-                obj.before_order = obj.order_time - now()
 
         self.form = self.form_class(self.request.GET)
         if not self.form.is_valid():
@@ -236,6 +247,14 @@ class OrderListView(EventHandlerMixin, SingleTableView):
             queryset = queryset.filter(status=data["status"])
 
         return queryset
+
+    def get_table(self, **kwargs):
+        table = super().get_table(**kwargs)
+
+        if self.form.is_valid() and any(self.form.cleaned_data.values()):
+            table.caption = "Результаты поиска: %s" % self.object_list.count()
+
+        return table
 
     def get_search_filter_descriptions(self):
         """Describe the filters used in the search.
@@ -376,29 +395,44 @@ class OrderListView(EventHandlerMixin, SingleTableView):
         return "orders.csv"
 
     def get_row_values(self, order):
+        formatted_items = [
+            f"{item.title}({item.quantity})"
+            for item in order.basket.lines.all()
+        ]
         row = {
             "number": order.number,
-            "customer": order.user,
-            "num_items": order.num_items,
-            "date": format_datetime(order.date_placed, "DATETIME_FORMAT"),
-            "value": order.total,
+            "total": order.total,
+            "shipping_charge": order.shipping,
+            "shipping_method": order.shipping_method,
             "status": order.status,
+            "date_placed": format_datetime(order.date_placed, "DATETIME_FORMAT"),
+            "date_finish": format_datetime(order.date_finish, "DATETIME_FORMAT") if order.date_finish else "",
+            "order_time": format_datetime(order.order_time, "DATETIME_FORMAT"),
+            "num_items": order.num_items,
+            "items": " ".join(formatted_items),
+            "customer": order.user.username,
+            "shipping_address_name": order.shipping_address.line1 if order.shipping_address else "",
         }
-        if order.shipping_address:
-            row["shipping_address_name"] = order.shipping_address.line1
         return row
 
     def download_selected_orders(self, request, orders):
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = (
-            "attachment; filename=%s" % self.get_download_filename(request)
-        )
-        writer = UnicodeCSVWriter(open_file=response)
+        # Используем StringIO для работы с текстовыми данными в памяти
+        output = io.StringIO()
+        writer = csv.writer(output, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-        writer.writerow(self.CSV_COLUMNS.values())
+        # Записываем заголовки столбцов в CSV файл
+        writer.writerow([header for header in self.CSV_COLUMNS.values()])
+
+        # Записываем данные в CSV файл
         for order in orders:
             row_values = self.get_row_values(order)
             writer.writerow([row_values.get(column, "") for column in self.CSV_COLUMNS])
+
+        # Преобразуем содержимое StringIO в байты с кодировкой utf-8
+        response = HttpResponse(output.getvalue().encode('utf-8-sig'), content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = f'attachment; filename={self.get_download_filename(request)}'
+        output.close()
+
         return response
 
     def change_order_statuses(self, request, orders):
@@ -429,8 +463,8 @@ class OrderListView(EventHandlerMixin, SingleTableView):
                 )
             else:
                 msg = (
-                    "Статус заказа изменился с '%(old_status)s' на '%(new_status)s'"
-                ) % {"old_status": old_status, "new_status": new_status}
+                    "Статус заказа №%(number)s изменился с '%(old_status)s' на '%(new_status)s'"
+                ) % {"old_status": old_status, "new_status": new_status, "number": order.number}
                 messages.info(request, msg)
                 order.notes.create(
                     user=request.user, message=msg, note_type=OrderNote.SYSTEM

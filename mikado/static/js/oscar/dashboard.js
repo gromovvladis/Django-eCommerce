@@ -366,9 +366,12 @@ var oscar = (function(o, $) {
             initTable: function() {
                 var table = $('form table'),
                     input = $('<input type="checkbox" />').css({
-                        'margin-right': '5px',
                         'vertical-align': 'top'
                     });
+                    // input = $('<input type="checkbox" />').css({
+                    //     'margin-right': '5px',
+                    //     'vertical-align': 'top'
+                    // });
                 $('th:first', table).prepend(input);
                 $(input).change(function(){
                     $('tr', table).each(function() {

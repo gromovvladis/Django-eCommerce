@@ -1,5 +1,5 @@
 {% load django_tables2 %}
 
-<span class="badge badge-96 {% if record.status == "Завершен" %}badge-success{% elif record.status == "Отменен" %}badge-danger{% else %}badge-warning{% endif %}">
+<span class="badge badge-96 {% if record.status == "Завершен" %}badge-success{% elif record.status == "Отменен" %}badge-danger{% elif record.status == "Готовится" %}badge-info{% else %}badge-warning{% endif %}">
     {{ record.status }}
 </span>

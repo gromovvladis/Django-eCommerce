@@ -26,13 +26,13 @@
 
 {% block dashboard_content %}
     <div class="table-wrapper mb-4">
-        <div class="table-header d-flex justify-space-between" data-target="#card-body" 
-        data-toggle="collapse" aria-controls="card-body" aria-expanded="false">
+        <div class="table-header d-flex justify-space-between" data-target="#search-body" 
+        data-toggle="collapse" aria-controls="search-body" aria-expanded="false">
             <h3><i class="fas fa-search"></i> Поиск</h3>
             <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
             <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
         </div>
-        <div class="card card-body bg-light dropdown-list collapse" id="card-body">
+        <div class="card card-body bg-light dropdown-list collapse" id="search-body">
             <form method="get" class="form-inline" id="search_form">
                 {% for field in form %}
                     {% if "order" in field.id_for_label %}
@@ -70,120 +70,57 @@
         </div>
     </div>
 
-    <div class="mobile-table">
-        {% if orders_table %} 
-            {% render_table orders_table %}                 
-        {% else %}
-            <tr><td class="empty">Заказы не найдены</td></tr>
-        {% endif %}
-    </div>
-    
-
-    {% comment %} {% if orders %}
-        <form method="post" class="order_table" id="orders_form">
+    <form method="post" id="orders_form" class="mobile-table order_table">
+        {% if orders %} 
+            {% render_table orders %}  
             {% csrf_token %}
-
-            {% block order_list %}
-            <table class="table table-striped table-bordered table-hover">
-                <caption>
-                    <h3 class="float-left"><i class="fas fa-shopping-cart"></i>
-                        {% if search_filters %}
-                            Результаты поиска
-                        {% else %}
-                            Все заказы
-                        {% endif %}
-                    </h3>
-                    <div class="float-right">
-                        <div class="form-inline">
-                            <label>Скачать в формате CSV</label>
-                            <button type="submit" class="btn btn-primary" name="action" value="download_selected_orders" data-loading-text="Скачивание...">Скачать</button>
-                        </div>
-                    </div>
-                </caption>
-
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Заказ</th>
-                        <th>Позиции</th>
-                        <th>Статус</th>
-                        <th>Клиент</th>
-                        <th>Доставка</th>
-                        <th>Оплата</th>
-                        <th>Сумма</th>
-                        <th>Время заказа</th>
-                        <th>Дата</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for order in orders %}
-                    <tr>
-                        <td><input type="checkbox" name="selected_order" class="selected_order" value="{{ order.id }}"/></td>
-                        <td>
-                            <a href="{% url 'dashboard:order-detail' number=order.number %}">{{ order.number }}</a>
-                        </td>
-                        <td>{{ order.total|currency:order.currency }}</td>
-                        <td>{{ order.num_items }}</td>
-                        <td>{{ order.status|default:"-" }}</td>
-                        <td>
-                            {% if order.guest_email %}
-                                {{ order.guest_email }}
-                            {% elif order.user %}
-                                <a href="{% url 'dashboard:user-detail' pk=order.user.id %}">{{ order.user.get_full_name|default:order.user.email }}</a>
-                            {% else %}
-                                &lt;Удалить&gt;
-                            {% endif %}
-                        </td>
-                        <td>{{ order.shipping_address|default:"-" }}</td>
-                        <td>{{ order.date_placed }}</td>
-                        <td>
-                            <a class="btn btn-secondary" href="{% url 'dashboard:order-detail' number=order.number %}">Посмотреть</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            {% endblock order_list %}
-            {% block order_actions %}
-                <div class="card card-body bg-light">
-                    <h3><i class="fas fa-exclamation-circle"></i> Изменить статус заказа:</h3>
+            <div class="table-wrapper mb-4">
+                <div class="table-header d-flex justify-space-between" data-target="#status-body" 
+                data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
+                    <h3><i class="fa-solid fa-list-check"></i>Изменить статус заказа и скачать заказы CSV</h3>
+                    <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+                    <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+                </div>
+                <div class="card card-body dropdown-list collapse" id="status-body">
+                    
+                    <h2 class="mb-3">Изменить статус заказа</h2>
                     {% if order_statuses %}
-                        <div class="form-group">
-                            <div class="controls">
-                                <select name="new_status">
+                        <div class="form-inline fill-width justify-space-between">
+                            <div class="form-group form-flex-inline my-2">
+                                <label for="new_status_id">Новый статус</label>
+                                <select id="new_status_id" name="new_status">
                                     <option value=""> -- Новый статус -- </option>
                                     {% for status in order_statuses %}
                                         <option>{{ status }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                        </div>
-                        <div class="flex-nowrap">
-                            <button type="submit" name="action" value="change_order_statuses" class="btn btn-primary" data-loading-text="Смена статуса...">
-                                Изменить статус заказа
-                            </button>
+                            <div class="btn-form d-flex">
+                                <button type="submit" name="action" value="change_order_statuses" class="btn btn-primary" data-loading-text="Смена статуса...">
+                                    Изменить статус заказа
+                                </button>
+                            </div>
                         </div>
                     {% else %}
                         Статус этого заказа нельзя изменить.
                     {% endif %}
+                    <div class="form-inline fill-width justify-space-between">
+                        <h2 class="mt-4">Cкачать выбранные заказы CSV</h2>
+                        <div class="btn-form d-flex">
+                            <button class="btn btn-success flex-fill"  name="action" value="download_selected_orders" type="submit" data-loading-text="Скачивание...">
+                                <i class="fa-solid fa-down-long"></i>
+                                <span class="ml-2">
+                                    Скачать
+                                </span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            {% endblock %}
-
-            {% include "oscar/dashboard/partials/pagination.html" %}
-        </form>
-    {% else %}
-        <table class="table table-striped table-bordered">
-            <caption><i class="fas fa-shopping-cart"></i>
-                {% if search_filters %}
-                    Результаты поиска
-                {% else %}
-                    Все заказы
-                {% endif %}
-            </caption>
-            <tr><td>Заказы не найдены</td></tr>
-        </table>
-    {% endif %} {% endcomment %}
+            </div>
+        {% else %}
+            <p class="empty">Заказы не найдены</p>
+        {% endif %}
+    </form>
 
 {% endblock dashboard_content %}
 

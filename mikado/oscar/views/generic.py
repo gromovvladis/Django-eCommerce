@@ -115,7 +115,7 @@ class BulkEditMixin:
         if not ids:
             messages.error(
                 self.request,
-                _("You need to select some %ss") % self.get_checkbox_object_name(),
+                ("Вам нужно выбрать несколько %ss") % self.get_checkbox_object_name(),
             )
             return redirect(self.get_error_url(request))
 

@@ -1,8 +1,5 @@
-from django.conf import settings
-from django.urls import reverse, reverse_lazy
-from django.utils.safestring import mark_safe
-from django_tables2 import A, Column, LinkColumn, TemplateColumn, ManyToManyColumn
-from django.db.models import Count
+from django.urls import reverse_lazy
+from django_tables2 import TemplateColumn
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
@@ -50,7 +47,7 @@ class OrderTable(DashboardTable):
     payment = TemplateColumn(
         verbose_name="Оплата ",
         template_name="oscar/dashboard/orders/order_row_payment.html",
-        order_by="payment",
+        order_by="source",
         attrs = {'th': {'class': 'payment'},}
     )
     total = TemplateColumn(
@@ -62,12 +59,34 @@ class OrderTable(DashboardTable):
     order_time = TemplateColumn(
         verbose_name="Время",
         template_name="oscar/dashboard/orders/order_row_time.html",
-        orderable=True,
+        order_by="order_time",
         attrs = {'th': {'class': 'order_time'},}
+    )
+    before_order = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/orders/order_row_before_order.html",
+        orderable=False,
+        attrs = {
+            'th': {'class': 'before_order'},
+            'td': {'class': lambda record: 'before_order' if record.before_order else 'd-none'},
+        },
     )
 
     icon = "fas fa-shopping-cart"
     caption = ngettext_lazy("%s Заказ", "%s Заказов")
+    filter = {
+        "url": reverse_lazy("dashboard:order-list"),
+        "values": [
+            ("", "Все"), 
+            ("status=Ожидает+оплаты", "Ожидает оплаты"), 
+            ("status=Обрабатывается", "Обрабатывается"), 
+            ("status=Готовится", "Готовится"), 
+            ("status=Готов", "Готов"), 
+            ("status=Доставляется", "Доставляется"), 
+            ("status=Отменен", "Отменен"), 
+            ("status=Завершен", "Завершен"), 
+        ]
+    }
 
     class Meta(DashboardTable.Meta):
         model = Order
@@ -77,6 +96,7 @@ class OrderTable(DashboardTable):
             "user",
             "total",
             "order_time",
+            "before_order",
         )
         sequence = (
             "checkbox",
@@ -95,5 +115,9 @@ class OrderTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
+        row_attrs = {
+            'class': lambda record: 'new-record' if not record.is_open else ''
+        }
+        order_by = "date_placed"
         empty_text = "Нет созданых заказов"
 
