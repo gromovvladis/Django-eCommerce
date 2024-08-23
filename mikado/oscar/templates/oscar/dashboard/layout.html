@@ -15,9 +15,7 @@
     {% endcompress %}
 {% endblock %}
 
-{% block title %}
-    Панель управления | {{ block.super }}
-{% endblock %}
+{% block title %}Панель управления {{ block.super }}{% endblock %}
 
 {% block layout %}
 
@@ -51,25 +49,34 @@
                         {% for item in nav_items %}
                         <li class="nav-item{% if request.path|tab:item.paths %} current-tab{% endif %}">
                             {% if item.has_children %}
-                                <button class="nav-link" data-target="#navbar_{{ forloop.counter }}"
+                                <button class="nav-link position-relative" data-target="#navbar_{{ forloop.counter }}"
                                     data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" type="button"
                                     aria-expanded="{% if request.path|tab:item.paths %}true{% else %}false{% endif %}"
                                 >
-                                    {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
-                                    <span class="item_text arrow-dropdown ml-2">{{ item.label }}</span>
+                                    <span>
+                                        {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
+                                        <span class="item_text arrow-dropdown ml-2">{{ item.label }}</span>
+                                    </span>
+                                    <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>
                                 </button>
                                 <div class="dropdown-list collapse {% if request.path|tab:item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
                                     {% for subitem in item.children %}
-                                        <a class="dropdown-item nav-dropdown{% if request.path|subtab:subitem.url %} active{% endif %}" href="{{ subitem.url }}">
+                                        <a class="dropdown-item dropdown-item--nav nav-dropdown{% if request.path|subtab:subitem.url %} active{% endif %}" href="{{ subitem.url }}">
                                             {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
-                                            {{ subitem.label }}
+                                            <span>
+                                                {{ subitem.label }}
+                                            </span>
+                                            <div class="dropdown-item-badge ml-1">{% if subitem.notif %}{{ subitem.notif }}{% endif %}</div>
                                         </a>
                                     {% endfor %}
                                 </div>
                             {% else %}
                                 <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
-                                    {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
-                                    <span class="item_text ml-2">{{ item.label }}</span>
+                                    <span>
+                                        {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
+                                        <span class="item_text ml-2">{{ item.label }}</span>
+                                    </span>
+                                    <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>
                                 </a>
                             {% endif %}
                         </li>
@@ -148,6 +155,8 @@
             <script src="{% static "js/dashboard/dashboard-sliders.js" %}"></script>
             <script src="{% static "js/dashboard/navi.js" %}"></script>
             <script src="{% static "js/dashboard/table.js" %}"></script>
+            <script src="{% static "js/dashboard/photo.js" %}"></script>
+            <script src="{% static "js/dashboard/meta.js" %}"></script>
         {% endcompress %}
         <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>

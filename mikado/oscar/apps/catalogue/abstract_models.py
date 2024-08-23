@@ -426,8 +426,8 @@ class AbstractProduct(models.Model):
         unique=True,
         help_text=(
             "Универсальный код продукта (UPC) является идентификатором для "
-            "продукта, который не является специфичным для конкретного"
-            "Поставщик. Например, ISBN книги"
+            "продукта, который не является специфичным для конкретного товара. "
+            "Например, ISBN книги"
         ),
     )
 
@@ -448,9 +448,13 @@ class AbstractProduct(models.Model):
     )
 
     # Title is mandatory for canonical products but optional for child products
-    title = models.CharField("Название", max_length=255, blank=True
-    )
-    variant = models.CharField("Вариант", max_length=255, blank=True
+    title = models.CharField("Название", max_length=255, blank=True)
+
+    variant = models.CharField(
+        "Вариант", 
+        max_length=255, 
+        blank=True,
+        help_text="Отображается в поле выбора вариации родительского товара. К примеру, для пиццы: 25см, 30см",
     )
 
     slug = SlugField("Ярлык", max_length=255, unique=True)
@@ -518,9 +522,21 @@ class AbstractProduct(models.Model):
     # Product has no ratings if rating is None
     rating = models.FloatField("Рейтинг", null=True, editable=False)
 
-    order = models.IntegerField("Порядок", null=False, blank=False, default=0)
+    order = models.IntegerField(
+        "Порядок",
+        null=False, 
+        blank=False, 
+        default=0,
+        help_text="Определяет порядок отображения в списке.",
+    )
     
-    cooking_time = models.IntegerField("Время приготовления", null=False, blank=False, default=20)
+    cooking_time = models.IntegerField(
+        "Время приготовления", 
+        null=False, 
+        blank=False, 
+        default=20,
+        help_text="Приблизительное время, которое уйдет у повара на приготовление и сборку заказа на кухне. Указывается в минутах.",
+    )
 
     date_created = models.DateTimeField(
         "Дата создания", auto_now_add=True, db_index=True

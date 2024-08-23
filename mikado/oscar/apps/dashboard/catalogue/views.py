@@ -1,14 +1,16 @@
 # pylint: disable=attribute-defined-outside-init
+from typing import Any
 from django.conf import settings
 from django.contrib import messages
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.views import generic
+from django.views import View, generic
 from django_tables2 import SingleTableMixin, SingleTableView
-from django.db.models import Count, Max, Min, Case, When, DecimalField
+from django.db.models import Count, Max, Min, Case, When, DecimalField, F
+from django.utils.timezone import now
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import ObjectLookupView
@@ -357,7 +359,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
     def get_page_title(self):
         if self.creating:
             if self.parent is None:
-                return ("Создать новый %(product_class)s продукт") % {
+                return ("Создать новый продукт типа '%(product_class)s'") % {
                     "product_class": self.product_class.name
                 }
             else:
@@ -368,7 +370,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             if self.object.title or not self.parent:
                 return self.object.title
             else:
-                return ("Editing variant of %(parent_product)s") % {
+                return ("Редактирование вариации товара - %(parent_product)s") % {
                     "parent_product": self.parent.title
                 }
 
@@ -447,6 +449,22 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             image.save()
 
         return HttpResponseRedirect(self.get_success_url())
+
+
+    # def update_alerts(self):
+    #     # Извлекаем все StockRecord, где num_in_stock больше low_stock_threshold
+    #     stock_records = StockRecord.objects.filter(product=self.object, num_in_stock__gt=F('low_stock_threshold'))
+
+    #     # Проходим по найденным StockRecord и обновляем соответствующие StockAlert
+    #     for stock_record in stock_records:
+    #         # Находим все связанные с этим StockRecord уведомления
+    #         stock_alerts = StockAlert.objects.filter(stockrecord=stock_record, status=StockAlert.OPEN)
+            
+    #         # Обновляем статус каждого найденного уведомления
+    #         for alert in stock_alerts:
+    #             alert.status = StockAlert.CLOSED
+    #             alert.date_closed = now()
+    #             alert.save()
 
     def handle_adding_child(self, parent):
         """
@@ -619,9 +637,48 @@ class StockAlertListView(SingleTableView):
             self.form = StockAlertSearchForm(self.request.GET)
             if self.form.is_valid():
                 status = self.form.cleaned_data["status"]
-                return StockAlert.objects.filter(status=status)
+                return StockAlert.objects.filter(status=status).select_related("stockrecord").annotate(
+                name=F("stockrecord__product__title"),
+                partner=F("stockrecord__partner__name"),
+                threshold=F("stockrecord__low_stock_threshold"),
+                num_in_stock=F("stockrecord__num_in_stock"),
+                num_allocated=F("stockrecord__num_allocated"),
+            )       
         else:
-            return StockAlert.objects.all()        
+            return StockAlert.objects.all().select_related("stockrecord").annotate(
+                name=F("stockrecord__product__title"),
+                partner=F("stockrecord__partner__name"),
+                threshold=F("stockrecord__low_stock_threshold"),
+                num_in_stock=F("stockrecord__num_in_stock"),
+                num_allocated=F("stockrecord__num_allocated"),
+            )
+
+
+class StockAlertUpdateView(View):
+    def get(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
+        # Извлекаем все StockRecord, где num_in_stock больше low_stock_threshold
+        stockrecord_id = kwargs['pk']
+        stock_records = StockRecord.objects.filter(id=stockrecord_id, num_in_stock__gt=F('low_stock_threshold') + F('num_allocated'))
+
+        # Проходим по найденным StockRecord и обновляем соответствующие StockAlert
+        for stock_record in stock_records:
+            # Находим все связанные с этим StockRecord уведомления
+            stock_alerts = StockAlert.objects.filter(stockrecord=stock_record, status=StockAlert.OPEN)
+            
+            # Обновляем статус каждого найденного уведомления
+            for alert in stock_alerts:
+                alert.status = StockAlert.CLOSED
+                alert.date_closed = now()
+                alert.save()
+
+        return redirect('dashboard:stock-alert-list')
+
+
+    def form_valid(self, form):
+        # Дополнительная логика перед сохранением
+        if form.cleaned_data['status'] == StockAlert.CLOSED and not form.cleaned_data['date_closed']:
+            form.instance.date_closed = now()  # Устанавливаем дату закрытия, если статус закрыт и дата не установлена
+        return super().form_valid(form)
 
 
 class CategoryListView(SingleTableView):
@@ -867,7 +924,7 @@ class ProductClassListView(SingleTableView):
         """
         queryset = ProductClass.objects.prefetch_related("options", "class_additionals").all()
         queryset = queryset.annotate(
-            num_products=Count("products"),
+            num_products=Count("products", distinct=True),
             num_additionals=Count('class_additionals'),
         )
 
@@ -972,7 +1029,7 @@ class AttributeOptionGroupCreateView(
         return None
 
     def get_title(self):
-        return "Добавить новую группу параметров атрибута"
+        return "Создать группу параметров атрибута"
 
     def get_success_url(self):
         self.add_success_message("Группа параметров атрибута успешно создана")
@@ -1183,7 +1240,7 @@ class AdditionalCreateView(PopUpWindowCreateMixin, AdditionalCreateUpdateView):
         return "Добавить новый доп. товар"
 
     def get_success_url(self):
-        self.add_success_message("Опция успешно создана")
+        self.add_success_message("Дополнительный товар успешно создан")
         return reverse("dashboard:catalogue-additional-list")
 
 

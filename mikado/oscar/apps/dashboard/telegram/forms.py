@@ -223,7 +223,7 @@ class NewTransactionForm(forms.ModelForm):
 
         self.order = order
 
-        txn_type_choices = (('Refund', 'Оплата'), ('Refund', 'Возврат'))
+        txn_type_choices = (('Payment', 'Оплата'), ('Refund', 'Возврат'))
         status_choices = (('succeeded', 'Успешно'), ('canceled', 'Отклонен'), ('pending', 'Обработка'))
         queryset = Source.objects.filter(order_id=order.id)
 

@@ -40,3 +40,8 @@ function openNav(event) {
     $(navbar).addClass('open');
   }
 }
+
+// смена ползунка
+$(".tabs-button__button").on('click', function(){
+  $(this).siblings(".tabs-button__active-block").offset({'left':$(this).offset().left});
+})

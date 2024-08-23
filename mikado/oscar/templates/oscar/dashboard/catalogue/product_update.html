@@ -34,14 +34,10 @@
         {% csrf_token %}
 
         {% if parent %}
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="alert alert-info">
-                        {% url 'dashboard:catalogue-product' pk=parent.id as parent_url %}
-                        Вы редактируете вариант продукта -
-                        <a href="{{ parent_url }}">{{ parent.title }}</a>.
-                    </div>
-                </div>
+            <div class="alert alert-info">
+                {% url 'dashboard:catalogue-product' pk=parent.id as parent_url %}
+                Вы редактируете вариант продукта -
+                <a href="{{ parent_url }}">{{ parent.title }}</a>.
             </div>
         {% endif %}
 
@@ -338,7 +334,8 @@
                                                 <div class="d-flex justify-space-between">
                                                     Варианты
                                                     <button class="btn btn-primary ml-3" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
-                                                        <i class="fas fa-plus"></i> Добавить вариант
+                                                        <i class="fas fa-plus"></i> 
+                                                        <span class="caption-button"> Добавить вариант</span>
                                                     </button>
                                                 </div>
                                             </caption>
@@ -466,24 +463,28 @@
 
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
-                <div class="float-right">  
-                    <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
-                        <i class="fa-regular fa-circle-xmark"></i> 
-                        Отменить
-                    </a>             
-                    <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
-                        <i class="fa-regular fa-floppy-disk"></i>
-                        Сохранить
-                    </button>
+                <div class="d-flex justify-content-between">
+                    <div>
+                        {% if product %}
+                            <a class="btn btn-success" href="{{ product.get_absolute_url }}">
+                                <i class="fa-solid fa-share"></i>
+                                <span>
+                                    Смотреть на сайте
+                                </span>
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
+                            <i class="fa-regular fa-circle-xmark"></i> 
+                            Отменить
+                        </a>             
+                        <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+                            <i class="fa-regular fa-floppy-disk"></i>
+                            Сохранить
+                        </button>
+                    </div>
                 </div>
-                {% if product %}
-                    <a class="btn btn-success" href="{{ product.get_absolute_url }}">
-                        <i class="fa-solid fa-share"></i>
-                        <span>
-                            Смотреть на сайте
-                        </span>
-                    </a>
-                {% endif %}
             </div>
         {% endblock fixed_actions_group %}
 

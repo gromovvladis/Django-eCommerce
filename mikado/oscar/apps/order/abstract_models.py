@@ -1,5 +1,4 @@
 # pylint: disable=F0002
-from functools import cached_property
 import logging
 from decimal import Decimal as D
 
@@ -8,11 +7,9 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signing import BadSignature, Signer
 from django.db import models
 from django.db.models import Sum
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 from django.utils.timezone import now
-from oscar.apps.customer.models import OrderReview
 from oscar.apps.order.signals import order_line_status_changed, order_status_changed
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_model
@@ -79,10 +76,11 @@ class AbstractOrder(models.Model):
         verbose_name="Адрес доставки",
         on_delete=models.SET_NULL,
     )
+
     shipping_method = models.CharField("Способ доставки", max_length=128, blank=True)
 
     # Identifies shipping code
-    shipping_code = models.CharField(blank=True, max_length=128, default="")
+    # shipping_code = models.CharField(blank=True, max_length=128, default="")
 
     # Use this field to indicate that an order is on hold / awaiting payment
     status = models.CharField("Статус", max_length=100, blank=True)
@@ -97,6 +95,8 @@ class AbstractOrder(models.Model):
     date_finish = models.DateTimeField(db_index=True, blank=True, null=True)
 
     has_review = models.BooleanField(db_index=True, default=False)
+
+    is_open = models.BooleanField("Заказ просмотрен", default=False, db_index=True)
 
     #: Order status pipeline.  This should be a dict where each (key, value) #:
     #: corresponds to a status and a list of possible statuses that can follow
@@ -153,6 +153,10 @@ class AbstractOrder(models.Model):
                 if new_line_status in line.available_statuses():
                     line.status = new_line_status
                     line.save()
+        
+        if new_status in ["Отменен", "Завершен"]:
+            self.date_finish = now()
+        
         self.save()
 
         # Send signal for handling status changed
@@ -171,6 +175,9 @@ class AbstractOrder(models.Model):
         # Not setting the status on the order as that should be handled before
         self.status_changes.create(old_status=old_status, new_status=new_status)
         
+    def open(self):
+        self.is_open = True
+        self.save()
 
     @property
     def basket_total_before_discounts(self):

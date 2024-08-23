@@ -259,6 +259,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
             "short_description",
             "description",
             "order",
+            "cooking_time",
             "is_public",
             "is_discountable",
             "structure",

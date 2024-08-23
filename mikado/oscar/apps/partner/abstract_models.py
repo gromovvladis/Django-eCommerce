@@ -325,8 +325,9 @@ class AbstractStockAlert(models.Model):
         related_name="alerts",
         verbose_name="Товарная запись",
     )
-    threshold = models.PositiveIntegerField("Порог")
+
     OPEN, CLOSED = "Открыто", "Закрыто"
+
     status_choices = (
         (OPEN, "Открыто"),
         (CLOSED, "Закрыто"),

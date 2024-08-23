@@ -1,0 +1,4 @@
+{% load django_tables2 %}
+{% load currency_filters %}
+
+{{ record.total|currency:record.currency }}

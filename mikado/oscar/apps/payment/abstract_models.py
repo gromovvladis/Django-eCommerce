@@ -190,7 +190,7 @@ class AbstractSource(models.Model):
 
     # PAYMENTS
     
-    def allocate(self, amount, reference="", status="", paid="", code="", refundable="", receipt=False):
+    def allocate(self, amount, reference="", status="", paid="", code="", refundable=True, receipt=False):
         """
         Convenience method for ring-fencing money against this source
         """
@@ -200,19 +200,20 @@ class AbstractSource(models.Model):
 
     allocate.alters_data = True
 
-    def debit(self, amount=None, reference="", status="", paid="", code="", refundable="", receipt=False):
+    def debit(self, amount=None, reference="", status="", paid="", code="", refundable=True, receipt=False):
         """
         Convenience method for recording debits against this source
         """
         if amount is None:
             amount = self.balance
+            
         self.amount_debited += amount
         self.save()
         self._create_transaction(AbstractTransaction.PAYMENT, amount, reference, status, paid, code, refundable, receipt)
 
     debit.alters_data = True
 
-    def new_payment(self, amount=None, reference="", status="", paid="", code="", refundable="", receipt=False):
+    def new_payment(self, amount=None, reference="", status="", paid="", code="", refundable=True, receipt=False):
         """
         Добавление новой транзакции оплаты
         """ 
@@ -233,7 +234,7 @@ class AbstractSource(models.Model):
     new_payment.alters_data = True
 
     #REFUND
-    def refund(self, amount, reference="", status="", paid="", code="", refundable="", receipt=False):
+    def refund(self, amount, reference="", status="", paid="", code="", refundable=False, receipt=False):
         """
         Convenience method for recording refunds against this source
         """

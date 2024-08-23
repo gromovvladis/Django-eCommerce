@@ -1,5 +1,9 @@
 {% load django_tables2 %}
 <div class="d-flex flex-column">
     <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ value }}</a>
+    {% if record.is_child and record.variant %}
+        <span class="small">{{ record.variant }}</span>
+        <br>
+    {% endif %}
     <span class="text-muted small">UPC: {{ record.upc }}</span>
 </div>

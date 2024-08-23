@@ -4,7 +4,7 @@
     {{ title }} | {{ block.super }}
 {% endblock %}
 
-{% block body_class %}{{ block.super }} popup-page{% endblock %}
+{% block body_class %}{{ block.super }} {% if is_popup %}popup-page{% endif %}{% endblock %}
 
 {% block navbar %}
 {% if not is_popup %}
@@ -83,7 +83,7 @@
                         <i class="fa-regular fa-circle-xmark"></i> 
                         Отменить
                     </a>             
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" data-loading-text="Сохранение...">
                         <i class="fa-solid fa-floppy-disk"></i>
                         Сохранить
                     </button>

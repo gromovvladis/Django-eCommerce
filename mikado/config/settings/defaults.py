@@ -2,7 +2,7 @@ from django.urls import reverse_lazy
 from yookassa import Configuration
 
 
-OSCAR_SHOP_NAME = "Микадо Красноярск"
+# OSCAR_SHOP_NAME = "Микадо Красноярск"
 OSCAR_HOMEPAGE = reverse_lazy("home:index")
 
 # Dynamic class loading
@@ -136,6 +136,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {
                 "label": "Уведомления о наличии",
                 "url_name": "dashboard:stock-alert-list",
+                "notification": "stock_alerts",
             },
         ],
     },
@@ -146,10 +147,12 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {
                 "label": "Активные заказы",
                 "url_name": "dashboard:order-active-list",
+                "notification": "active_orders",
             },
             {
                 "label": "Все заказы",
                 "url_name": "dashboard:order-list",
+                "notification": "all_orders",
             },
             {
                 "label": "Статистика",
@@ -162,7 +165,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
-        "label": "Пользователи",
+        "label": "Клиенты",
         "icon": "fas fa-users",
         "children": [
             {
@@ -176,10 +179,12 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {
                 "label": "Отзывы к товарам",
                 "url_name": "dashboard:reviews-product-list",
+                "notification": "feedback_product",
             },
             {
                 "label": "Отзывы к заказам",
                 "url_name": "dashboard:reviews-order-list",
+                "notification": "feedback_order",
             },
         ],
     },
@@ -244,14 +249,17 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {
                 "label": "Текущие",
                 "url_name": "dashboard:delivery-now",
+                "notification": "delivery_now",
             },
             {
                 "label": "Заказы на кухне",
                 "url_name": "dashboard:delivery-kitchen",
+                "notification": "delivery_kitchen",
             },
             {
                 "label": "Заказы в доставке",
                 "url_name": "dashboard:delivery-couriers",
+                "notification": "delivery_couriers",
             },
             {
                 "label": "Статистика",
@@ -375,14 +383,13 @@ SMS_AUTH_SETTINGS = {
 # sophisticated things.
 OSCAR_INITIAL_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = 'Ожидает оплаты'
-OSCAR_PAID_ONLINE_PAYMENT_ORDER_STATUS = 'Оплачен'
+OSCAR_PAID_ONLINE_PAYMENT_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_LINE_STATUS = 'Новый заказ'
 
 # This dict defines the new order statuses than an order can move to
 OSCAR_ORDER_STATUS_PIPELINE = {
-    'Ожидает оплаты': ('Оплачен', 'Отменен'), 
-    'Оплачен': ('Готовится', 'Отменен'),
-    'Обрабатывается': ('Оплачен', 'Готовится', 'Отменен'),
+    'Ожидает оплаты': ('Обрабатывается', 'Отменен'), \
+    'Обрабатывается': ('Готовится', 'Отменен'),
     'Готовится': ('Готов', 'Отменен'),
     'Готов': ('Доставляется', 'Завершен', 'Отменен'),
     'Доставляется': ('Завершен', 'Отменен'),

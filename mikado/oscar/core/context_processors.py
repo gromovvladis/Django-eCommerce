@@ -5,7 +5,7 @@ def metadata(request):
     Add some generally useful metadata to the template context
     """
     return {
-        "shop_name": settings.OSCAR_SHOP_NAME,
+        # "shop_name": settings.OSCAR_SHOP_NAME,
         "homepage_url": settings.OSCAR_HOMEPAGE,
         # Fallback to old settings name for backwards compatibility
         "google_analytics_id": (

@@ -32,6 +32,17 @@
 
 <div class="tabbable dashboard fixed-actions">
 
+  <div class="tabs-button-wrapper mb-3">
+    <div class="nav tabs-button d-flex fill">
+      {% block nav_tabs %}
+        <div class="tabs-button__active-block" style="width: 50%; left: 0px;"><div class="fill-width fill-height"></div></div>
+        <button role="button" class="tabs-button__button {% if not upload_type == "excluded" %}active{% endif %}" href="#included" data-toggle="tab">Добавленные продукты</button>
+        <button role="button" class="tabs-button__button {% if upload_type == "excluded" %}active{% endif %}" href="#excluded" data-toggle="tab">Исключенные продукты</button>
+      {% endblock nav_tabs %}
+    </div>
+  </div>
+
+{% comment %} 
   <ul class="nav nav-tabs flex-wrap p-0 mb-2" role="tablist">
     {% block nav_tabs %}
       <li class="nav-item mb-2 mr-3">
@@ -45,7 +56,7 @@
         </button>
       </li>
       {% endblock nav_tabs %}
-  </ul>
+  </ul> {% endcomment %}
 
   <div class="tab-content">
     <div class="tab-pane fade {% if not upload_type == "excluded" %}show active{% endif %}" id="included" role="tabpanel">
@@ -53,7 +64,7 @@
         В этом ассортименте представлены все продукты. Чтобы добавить продукты вручную, снимите флажок «Включает все продукты» на странице редактирования диапазона.
       {% else %}
         {% if products %}
-          <form method="post" class="fill-width mb-4">
+          <form method="post" class="fill-width mb-3">
             {% csrf_token %}
             <div class="mobile-table">
               <table class="table table-striped table-bordered table-hover">
@@ -98,6 +109,10 @@
                       </td>
                       <td class="name">
                         <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_title }}</a>
+                        {% if product.is_child and product.variant %}
+                            <br>
+                            <span class="small">{{ product.variant }}</span>
+                        {% endif %}
                         <br>
                         <span class="text-muted small">UPC: {{ product.upc|default:"-" }}</span>
                       </td>
@@ -125,7 +140,7 @@
             {% include "oscar/dashboard/partials/pagination.html" %}
           </form>
         {% else %}
-          <table class="table table-striped table-bordered table-hover mb-4">
+          <table class="table table-striped table-bordered table-hover mb-3">
             <caption>
               Продукты в ассортименте
             </caption>
@@ -185,69 +200,8 @@
     <div class="tab-pane fade {% if upload_type == "excluded" %}show active{% endif %}" id="excluded" role="tabpanel">
 
         {% if range.excluded_products.count %}
-          <form method="post" class="fill-width mb-4">
+          <form method="post" class="fill-width mb-3">
             {% csrf_token %}
-
-            {% comment %} <table class="table table-striped table-bordered table-hover">
-            <caption>
-                <h3 class="float-left">Исключеные товары из ассортимента</h3>
-                <div class="float-right">
-                  <input type="hidden" name="action" value="remove_excluded_products" />
-                  <button type="submit" class="btn btn-secondary" data-loading-text="Удаление...">
-                    <i class="fa-solid fa-trash"></i>
-                    <span class="caption-button">
-                      &nbsp; Удалить выбранные
-                    </span>
-                  </button>
-                </div>
-              </caption>
-              <thead>
-                <tr>
-                  <th></th>
-                  <th></th>
-                  <th>Имя</th>
-                  <th>Возможна скидка?</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody class="product_list">
-                {% for product in range.excluded_products.all %}
-                  <tr id="product_{{ product.pk }}">
-                    <td>
-                      <input type="checkbox" name="selected_product" value="{{ product.id }}" />
-                    </td>
-                    <td>
-                      {% if product.primary_image.original %}
-                        {% with image=product.primary_image.original %}
-                          {% oscar_thumbnail image "80x80" upscale=False as thumb %}
-                          <a href="#" data-original="{{ image.url }}" class="sub-image">
-                              <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ record.name }}{% endif %}" loading="lazy">
-                          </a>
-                        {% endwith %}
-                      {% else %}
-                          —
-                      {% endif %}
-                    </td>
-                    <td>
-                      <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_title }}</a>
-                      <br>
-                      <span class="text-muted small">UPC: {{ product.upc|default:"-" }}</span>
-                    </td>
-                    <td class="text-center">{% if product.is_discountable %}✔️{% else %}❌{% endif %}</td>
-                    <td>
-                      <a class="btn btn-danger" href="#" data-behaviours="remove">Удалить</a>
-                    </td>
-                    <td class="toggle-row">
-                      <button class="btn btn-secondary" type="button">
-                          <i class="fa-solid fa-chevron-up"></i>
-                          <i class="fa-solid fa-chevron-down"></i>
-                      </button>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table> {% endcomment %}
-
             <div class="mobile-table">
               <table class="table table-striped table-bordered table-hover">
                 <caption>
@@ -291,6 +245,10 @@
                       </td>
                       <td class="name">
                         <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_title }}</a>
+                        {% if product.is_child and product.variant %}
+                            <br>
+                            <span class="small">{{ product.variant }}</span>
+                        {% endif %}
                         <br>
                         <span class="text-muted small">UPC: {{ product.upc|default:"-" }}</span>
                       </td>
@@ -393,13 +351,6 @@
   {% endblock fixed_actions_group %}
 
 </div>
-
-
-
-{% comment %} <div class="form-actions">
-  <a href="{% url 'dashboard:range-update' pk=range.id %}" class="btn btn-primary">Со</a> {% trans "or" %}
-  <a href="{% url 'dashboard:range-list' %}" class="">Отмена</a>
-</div> {% endcomment %}
 
 {% endblock dashboard_content %}
 

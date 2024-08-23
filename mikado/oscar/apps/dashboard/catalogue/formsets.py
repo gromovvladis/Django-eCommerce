@@ -119,7 +119,7 @@ class ProductCategoryFormSet(BaseProductCategoryFormSet):
     def clean(self):
         if not self.instance.is_child and self.get_num_categories() == 0:
             raise forms.ValidationError(
-                "Отдельные и родительские продукты должны иметь хотя бы одну категорию."
+                "Продукты должны иметь хотя бы одну категорию."
             )
         if self.instance.is_child and self.get_num_categories() > 0:
             raise forms.ValidationError("Дочерний товар не должен иметь категорий")
