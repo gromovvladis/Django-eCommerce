@@ -12,7 +12,7 @@ PhoneUserCreationForm = get_class("customer.forms", "PhoneUserCreationForm")
 
 class PartnerSearchForm(forms.Form):
     name = forms.CharField(
-        required=False, label=("Название точки продажи", "Название")
+        required=False, label="Название"
     )
 
 
@@ -131,7 +131,7 @@ class UserEmailForm(forms.Form):
 
 class PartnerAddressForm(forms.ModelForm):
     name = forms.CharField(
-        required=False, max_length=128, label=("Название точки продажи", "Название")
+        required=False, max_length=128, label="Название"
     )
 
     class Meta:

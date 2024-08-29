@@ -1,4 +1,4 @@
-<div class="form-inline">
+<div class="form-inline fill-width">
     <div class="input-group datetime-input {{ input_type }}" {% for name, value in div_attrs.items %}{{ name }}="{{ value|stringformat:'s' }}"{% endfor %}>
         {% include "django/forms/widgets/input.html" %}
         <div class="input-group-append datetime-btn">

@@ -152,6 +152,29 @@ class DateTimeWidgetMixin(object):
         return attrs
 
 
+class DateRangeInput(forms.TextInput):
+    template_name = "oscar/forms/widgets/daterange_picker.html"
+
+    format_key = "TEXT_INPUT_FORMATS"
+
+    def __init__(self, format=None, *args, **kwargs):
+        self.format = format
+        super().__init__(*args, **kwargs)
+
+    def get_format(self):
+        return self.format or formats.get_format(self.format_key)[0]
+    
+    def build_attrs(self, base_attrs, extra_attrs=None):
+        attrs = super().build_attrs(base_attrs, extra_attrs)
+        attrs["data-inputmask"] = "'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy - dd.mm.yyyy'"
+        return attrs
+
+    def get_context(self, name, value, attrs):
+        ctx = super().get_context(name, value, attrs)
+        ctx["input_type"] = "daterange"
+        ctx["icon_classes"] = "far fa-calendar-minus"
+        return ctx
+
 class TimePickerInput(DateTimeWidgetMixin, forms.TimeInput):
     """
     A widget that passes the date format to the JS date picker in a data
@@ -166,6 +189,7 @@ class TimePickerInput(DateTimeWidgetMixin, forms.TimeInput):
             "data-oscarWidget": "time",
             "data-timeFormat": datetime_format_to_js_time_format(self.get_format()),
         }
+        ctx["input_type"] = "time"
         ctx["icon_classes"] = "far fa-clock"
         return ctx
 
@@ -184,6 +208,7 @@ class DatePickerInput(DateTimeWidgetMixin, forms.DateInput):
             "data-oscarWidget": "date",
             "data-dateFormat": datetime_format_to_js_date_format(self.get_format()),
         }
+        ctx["input_type"] = "date"
         ctx["icon_classes"] = "far fa-calendar-alt"
         return ctx
 
@@ -218,6 +243,7 @@ class DateTimePickerInput(DateTimeWidgetMixin, forms.DateTimeInput):
                 self.get_format()
             ),
         }
+        ctx["input_type"] = "datetime"
         ctx["icon_classes"] = "far fa-calendar-alt"
         return ctx
 

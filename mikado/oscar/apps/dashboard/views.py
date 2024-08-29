@@ -12,6 +12,7 @@ from django.urls import reverse_lazy
 from django.utils.timezone import now
 from django.views.generic import TemplateView
 
+from oscar.apps.dashboard.orders.views import queryset_orders_for_user
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
 
@@ -109,7 +110,6 @@ class IndexView(TemplateView):
         }
         return ctx
 
-
     def get_days_report(self, orders, days=7, segments=10):
         """
         Get report of order revenue split up in days chunks. A report is
@@ -163,7 +163,6 @@ class IndexView(TemplateView):
         }
         return ctx
 
-
     def get_data(self):
 
         prod_slug = self.request.GET.get('product')
@@ -174,7 +173,8 @@ class IndexView(TemplateView):
             prod = Product.objects.get(slug=prod_slug)
             data = {
                 "title": "Статистика для продукта '%s'" % prod.get_title(),
-                "orders": Order.objects.filter(lines__product_id=prod.id),
+                "orders": queryset_orders_for_user(self.request.user),
+                # "orders": Order.objects.filter(lines__product_id=prod.id),
                 "alerts": StockAlert.objects.filter(stockrecord__product_id=prod.id),
                 "baskets": Basket.objects.filter(lines__product_id=prod.id).filter(status=Basket.OPEN),
                 "users": users.filter(baskets__lines__product_id=prod.id).distinct(),
@@ -188,7 +188,8 @@ class IndexView(TemplateView):
             ids = [prod.id for prod in prod_cat]
             data = {
                 "title": "Статистика для категории '%s'" % cat.name,
-                "orders": Order.objects.filter(lines__product_id__in=ids),
+                # "orders": Order.objects.filter(lines__product_id__in=ids),
+                "orders": queryset_orders_for_user(self.request.user),
                 "alerts": StockAlert.objects.filter(stockrecord__product_id__in=ids),
                 "baskets": Basket.objects.filter(lines__product_id__in=ids).filter(status=Basket.OPEN),
                 "users": users.filter(baskets__lines__product_id__in=ids).distinct(),
@@ -199,7 +200,8 @@ class IndexView(TemplateView):
         else:
             data = {
                 "title": "Статистика",
-                "orders": Order.objects.all(),
+                # "orders": Order.objects.all(),
+                "orders": queryset_orders_for_user(self.request.user),
                 "alerts": StockAlert.objects.all(),
                 "baskets": Basket.objects.filter(status=Basket.OPEN),
                 "users": users,
@@ -209,7 +211,6 @@ class IndexView(TemplateView):
             }
 
         return data
-
 
     def get_stats(self):
         current_time = now()

@@ -1,5 +1,11 @@
 # pylint: disable=attribute-defined-outside-init
+
+import csv
+import io
 import datetime
+import logging
+
+from decimal import ROUND_UP
 from decimal import Decimal as D
 from decimal import InvalidOperation
 
@@ -11,21 +17,19 @@ from django.db.models import Count, Sum, fields, F, Max, ExpressionWrapper, Dura
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.views.generic import DetailView, FormView, ListView, UpdateView
+from django.views.generic import DetailView, FormView, UpdateView
+from django.utils.timezone import now
+
+from oscar.core.compat import get_user_model
+from oscar.views.generic import BulkEditMixin
 from oscar.apps.order import exceptions as order_exceptions
 from oscar.apps.payment.exceptions import PaymentError
-from oscar.core.compat import UnicodeCSVWriter
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import datetime_combine, format_datetime
 from oscar.views import sort_queryset
-from django.utils.timezone import now
+from dateutil.relativedelta import relativedelta
 
-import csv
-import io
 
-import logging
-
-from oscar.views.generic import BulkEditMixin
 logger = logging.getLogger("oscar.dashboard")
 
 Partner = get_model("partner", "Partner")
@@ -45,6 +49,19 @@ ShippingAddressForm = get_class("dashboard.orders.forms", "ShippingAddressForm")
 OrderStatusForm = get_class("dashboard.orders.forms", "OrderStatusForm")
 
 OrderTable = get_class("dashboard.orders.tables", "OrderTable")
+ProductSearchForm = get_class("dashboard.catalogue.forms", "ProductSearchForm")
+
+
+
+Voucher = get_model("voucher", "Voucher")
+Basket = get_model("basket", "Basket")
+StockAlert = get_model("partner", "StockAlert")
+Product = get_model("catalogue", "Product")
+Category = get_model("catalogue", "Category")
+Order = get_model("order", "Order")
+Line = get_model("order", "Line")
+User = get_user_model()
+
 
 def queryset_orders_for_user(user):
     """
@@ -56,7 +73,8 @@ def queryset_orders_for_user(user):
     queryset = Order._default_manager.select_related(
         "shipping_address",
         "user",
-    ).prefetch_related("lines", "status_changes")
+    ).prefetch_related("lines", "status_changes", "sources", "payment_events", "shipping_events")
+    # ).prefetch_related("lines", "status_changes", "sources", "payment_events", "shipping_events", "reviews")
     if user.is_staff:
         return queryset
     else:
@@ -79,7 +97,7 @@ class OrderStatsView(FormView):
 
     template_name = "oscar/dashboard/orders/statistics.html"
     form_class = OrderStatsForm
-
+        
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
@@ -94,25 +112,241 @@ class OrderStatsView(FormView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+
+        ctx["form"] = kwargs.get("form", self.form_class)
         filters = kwargs.get("filters", {})
+
         ctx.update(self.get_stats(filters))
         ctx["title"] = kwargs["form"].get_filter_description()
+        ctx["search_filters"] = kwargs["form"].get_search_filters()
+        ctx["active_tab"] = "day"
+
         return ctx
 
-    def get_stats(self, filters):
+
+
+
+    def get_report(self, orders, start, end, range_type, segments=10):
+        """
+        Get report of order revenue split up in days, weeks, months, or years chunks.
+        A report is generated for the specified range type ('day', 'week', 'month', 'year').
+        The report provides ``max_revenue`` of the order revenue sum,
+        ``y-range`` as the labelling for the y-axis in a template and
+        ``order_total_days``, a list of properties for the chunks.
+        *segments* defines the number of labelling segments used for the y-axis.
+        """
+        start_time = start
+
+        # Определяем range_time в зависимости от типа диапазона
+        if range_type == 'day':
+            range_time = (end - start).days
+            delta = datetime.timedelta(days=1)
+        elif range_type == 'week':
+            range_time = (end - start).days // 7
+            delta = datetime.timedelta(weeks=1)
+        elif range_type == 'month':
+            delta = relativedelta(months=1)
+            range_time = relativedelta(end, start).years * 12 + relativedelta(end, start).months
+        elif range_type == 'year':
+            delta = relativedelta(years=1)
+            range_time = relativedelta(end, start).years
+        else:
+            raise ValueError("Invalid range_type. Must be 'day', 'week', 'month', or 'year'.")
+
+        order_totals = []
+        for _ in range(range_time):
+            end_time = start_time + delta
+            report_orders = orders.filter(date_placed__gte=start_time, date_placed__lt=end_time)
+            total = report_orders.aggregate(Sum("total"))["total__sum"] or D("0.0")
+            order_totals.append({"end_time": end_time, "total": total})
+            start_time = end_time
+
+        # Вычисляем максимальное значение и масштабируем его
+        max_value = max([x["total"] for x in order_totals], default=D("0.0"))
+        divisor = 1
+        while divisor < max_value / 50:
+            divisor *= 10
+        max_value = (max_value / divisor).quantize(D("1"), rounding=ROUND_UP)
+        max_value *= divisor
+
+        # Вычисляем процентные значения и y_range
+        if max_value:
+            segment_size = max_value / D("100.0")
+            for item in order_totals:
+                item["percentage"] = int(item["total"] / segment_size)
+
+            y_range = []
+            y_axis_steps = max_value / D(str(segments))
+            for idx in reversed(range(segments + 1)):
+                y_range.append(idx * y_axis_steps)
+        else:
+            y_range = []
+            for item in order_totals:
+                item["percentage"] = 0
+
+        ctx = {
+            "order_totals": order_totals,
+            "max_revenue": max_value,
+            "y_range": y_range,
+        }
+        
+        return ctx
+
+    def get_data(self, filters):
+        
         orders = queryset_orders_for_user(self.request.user).filter(**filters)
+        
+        if filters.get('date_placed__range') is not None:
+            start_date, end_date = filters['date_placed__range']
+            users = User.objects.filter(date_joined__range=[start_date, end_date])
+            alerts = StockAlert.objects.filter(date_created__range=[start_date, end_date])
+            baskets = Basket.objects.filter(status=Basket.OPEN, date_created__range=[start_date, end_date])
+            products = Product.objects.filter(date_created__range=[start_date, end_date])
+            lines = Line.objects.filter(order__in=orders)
+        elif filters.get('date_placed__gte') is not None:
+            start_date = filters['date_placed__gte']
+            users = User.objects.filter(date_joined__gte=start_date)
+            alerts = StockAlert.objects.filter(date_created__gte=start_date)
+            baskets = Basket.objects.filter(status=Basket.OPEN, date_created__gte=start_date)
+            products = Product.objects.filter(date_created__gte=start_date)
+            lines = Line.objects.filter(order__in=orders)
+        elif filters.get('date_placed__lte') is not None:
+            end_date = filters['date_placed__lte']
+            users = User.objects.filter(date_joined__lte=end_date)
+            alerts = StockAlert.objects.filter(date_created__lte=end_date)
+            baskets = Basket.objects.filter(status=Basket.OPEN, date_created__lte=end_date)
+            products = Product.objects.filter(date_created__lte=end_date)
+            lines = Line.objects.filter(order__in=orders)
+
+        data = {
+            "orders": orders,
+            "alerts": alerts,
+            "baskets": baskets,
+            "users": users,
+            "customers": users.filter(orders__isnull=False).distinct(),
+            "lines": lines,
+            "products": products,
+        }
+
+        return data
+
+    def get_stats(self, filters):
+
+        start_date = None
+        end_date = now()
+
+        if filters.get('date_placed__range') is not None:
+            start_date, end_date = filters['date_placed__range']
+            start_date_days = start_date_weeks = start_date_months = start_date_years = start_date
+        elif filters.get('date_placed__gte') is not None:
+            start_date = start_date_days = start_date_weeks = start_date_months = start_date_years = filters['date_placed__gte']
+        elif filters.get('date_placed__lte') is not None:
+            end_date = filters['date_placed__lte']
+
+        if start_date is None:
+            start_date_days = end_date - datetime.timedelta(days=60)
+            start_date_weeks = end_date - datetime.timedelta(weeks=20)
+            start_date_months = end_date - datetime.timedelta(months=12)
+            start_date_years = end_date - datetime.timedelta(years=3)
+
+        data = self.get_data(filters)
+
+        orders = data['orders']
+        alerts = data['alerts']
+        baskets = data['baskets']
+        users = data['users']
+        customers = data['customers']
+        lines = data['lines']
+        products = data['products']
+
+        user = self.request.user
+        if not user.is_staff:
+            partners_ids = tuple(user.partners.values_list("id", flat=True))
+            orders = orders.filter(lines__partner_id__in=partners_ids).distinct()
+            alerts = alerts.filter(stockrecord__partner_id__in=partners_ids)
+            baskets = baskets.filter(
+                lines__stockrecord__partner_id__in=partners_ids
+            ).distinct()
+            customers = customers.filter(
+                orders__lines__partner_id__in=partners_ids
+            ).distinct()
+            lines = lines.filter(partner_id__in=partners_ids)
+            products = products.filter(stockrecords__partner_id__in=partners_ids)
+
+
+        orders_days = orders.filter(date_placed__range=(start_date_days, end_date))
+        orders_weeks = orders.filter(date_placed__range=(start_date_weeks, end_date))
+        orders_months = orders.filter(date_placed__range=(start_date_months, end_date))
+        orders_years = orders.filter(date_placed__range=(start_date_years, end_date))
+
         stats = {
-            "total_orders": orders.count(),
-            "total_lines": Line.objects.filter(order__in=orders).count(),
-            "total_revenue": orders.aggregate(Sum("total"))[
-                "total__sum"
-            ]
-            or D("0.00"),
+
+            "start_date_days": start_date_days,
+            "start_date_weeks": start_date_weeks,
+            "start_date_months": start_date_months,
+            "start_date_years": start_date_years,
+            "end_time": end_date,
+
+            "days_report_dict": self.get_report(orders, start_date_days, end_date, "day"),
+            "weeks_report_dict": self.get_report(orders, start_date_weeks, end_date, "week"),
+            "months_report_dict": self.get_report(orders, start_date_months, end_date, "month"),
+            "years_report_dict": self.get_report(orders, start_date_years, end_date, "year"),
+
+            "orders_days": orders_days,
+            "alerts_days": alerts.filter(date_created__range=(start_date_days, end_date)),
+            "baskets_days": baskets.filter(date_created__range=(start_date_days, end_date)),
+            "users_days": users.filter(date_joined__range=(start_date_days, end_date)),
+            "customers_days": customers.filter(date_joined__range=(start_date_days, end_date)),
+            "lines_days": lines.filter(order__in=orders_days),
+            "products_days": products.filter(date_created__range=(start_date_days, end_date)),
+
+            "orders_weeks": orders_weeks,
+            "alerts_weeks": alerts.filter(date_created__range=(start_date_weeks, end_date)),
+            "baskets_weeks": baskets.filter(date_created__range=(start_date_weeks, end_date)),
+            "users_weeks": users.filter(date_joined__range=(start_date_weeks, end_date)),
+            "customers_weeks": customers.filter(date_joined__range=(start_date_weeks, end_date)),
+            "lines_weeks": lines.filter(order__in=orders_weeks),
+            "products_weeks": products.filter(date_created__range=(start_date_weeks, end_date)),
+
+            "orders_months": orders_months,
+            "alerts_months": alerts.filter(date_created__range=(start_date_months, end_date)),
+            "baskets_months": baskets.filter(date_created__range=(start_date_months, end_date)),
+            "users_months": users.filter(date_joined__range=(start_date_months, end_date)),
+            "customers_months": customers.filter(date_joined__range=(start_date_months, end_date)),
+            "lines_months": lines.filter(order__in=orders_months),
+            "products_months": products.filter(date_created__range=(start_date_months, end_date)),
+
+            "orders_years": orders_years,
+            "alerts_years": alerts.filter(date_created__range=(start_date_years, end_date)),
+            "baskets_years": baskets.filter(date_created__range=(start_date_years, end_date)),
+            "users_years": users.filter(date_joined__range=(start_date_years, end_date)),
+            "customers_years": customers.filter(date_joined__range=(start_date_years, end_date)),
+            "lines_years": lines.filter(order__in=orders_years),
+            "products_years": products.filter(date_created__range=(start_date_years, end_date)),
+
             "order_status_breakdown": orders.order_by("status")
             .values("status")
             .annotate(freq=Count("id")),
+
         }
+
         return stats
+
+
+    # def get_stats(self, filters):
+    #     orders = queryset_orders_for_user(self.request.user).filter(**filters)
+    #     stats = {
+    #         "total_orders": orders.count(),
+    #         "total_lines": Line.objects.filter(order__in=orders).count(),
+    #         "total_revenue": orders.aggregate(Sum("total"))[
+    #             "total__sum"
+    #         ]
+    #         or D("0.00"),
+    #         "order_status_breakdown": orders.order_by("status")
+    #         .values("status")
+    #         .annotate(freq=Count("id")),
+    #     }
+    #     return stats
 
 
 class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
@@ -173,16 +407,6 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         """
         queryset = sort_queryset(
             self.base_queryset, self.request, ["number", "total"]
-        ).annotate(
-            num_products=Sum("basket__lines__quantity"),
-            source=Max("sources__reference"),
-            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
-            paid=F("sources__paid"),
-            before_order=Case(
-                When(date_finish__isnull=True, then=ExpressionWrapper(F('order_time') - now(), output_field=DurationField())),
-                default=Value(None),
-                output_field=DurationField()
-            )
         )
 
         self.form = self.form_class(self.request.GET)
@@ -196,18 +420,19 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
                 number__istartswith=data["order_number"]
             )
 
-        if data["name"]:
+        if data["username"]:
             # If the value is two words, then assume they are first name and
             # last name
-            parts = data["name"].split()
+            # parts = data["username"].split()
 
-            if len(parts) == 1:
-                parts = [data["name"], data["name"]]
-            else:
-                parts = [parts[0], parts[1:]]
+            # if len(parts) == 1:
+            #     parts = [data["name"], data["name"]]
+            # else:
+            #     parts = [parts[0], parts[1:]]
 
             # query = Q(user__name__istartswith=parts[0])
-            queryset = queryset.filter(user__name__istartswith=parts[0]).distinct()
+            # queryset = queryset.filter(user__username__istartswith=parts[0]).distinct()
+            queryset = queryset.filter(user__username__istartswith=data["username"]).distinct()
 
         if data["product_title"]:
             queryset = queryset.filter(
@@ -246,16 +471,27 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         if data["status"]:
             queryset = queryset.filter(status=data["status"])
 
-        return queryset
+        return queryset.annotate(
+            num_products=Sum("basket__lines__quantity"),
+            source=Max("sources__reference"),
+            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
+            paid=F("sources__paid"),
+            before_order=Case(
+                When(date_finish__isnull=True, then=ExpressionWrapper(F('order_time') - now(), output_field=DurationField())),
+                default=Value(None),
+                output_field=DurationField()
+            )
+        )
 
     def get_table(self, **kwargs):
         table = super().get_table(**kwargs)
+        filtered_data = {key: value for key, value in self.form.cleaned_data.items() if key != 'response_format'}
 
-        if self.form.is_valid() and any(self.form.cleaned_data.values()):
+        if self.form.is_valid() and any(filtered_data.values()):
             table.caption = "Результаты поиска: %s" % self.object_list.count()
 
         return table
-
+    
     def get_search_filter_descriptions(self):
         """Describe the filters used in the search.
 
@@ -277,99 +513,99 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
             return descriptions
 
         if data.get("order_number"):
-            descriptions.append(
+            descriptions.append((
                 ('Номер заказа начинается с "{order_number}"').format(
                     order_number=data["order_number"]
-                )
-            )
+                ), (("order_number", data["order_number"]),)
+            ))
 
-        if data.get("name"):
-            descriptions.append(
-                ('Имя клиента совпадает "{customer_name}"').format(
-                    customer_name=data["name"]
-                )
-            )
+        if data.get("username"):
+            descriptions.append((
+                ('Номер клиента совпадает с "{customer_name}"').format(
+                    customer_name=data["username"]
+                ), (("username", data["username"]),)
+            ))
 
         if data.get("product_title"):
-            descriptions.append(
+            descriptions.append((
                 ('Название продукта соответствует "{product_name}"').format(
                     product_name=data["product_title"]
-                )
-            )
+                ), (("product_title", data["product_title"]),)
+            ))
 
         if data.get("upc"):
-            descriptions.append(
+            descriptions.append((
                 # Translators: "UPC" means "universal product code" and it is
                 # used to uniquely identify a product in an online store.
                 # "Item" in this context means an item in an order placed
                 # in an online store.
-                ('Включает предмет с UPC "{upc}"').format(upc=data["upc"])
-            )
+                ('Включает предмет с UPC "{upc}"').format(upc=data["upc"]), (("upc", data["upc"]),)
+            ))
 
         if data.get("partner_sku"):
-            descriptions.append(
+            descriptions.append((
                 # Translators: "SKU" means "stock keeping unit" and is used to
                 # identify products that can be shipped from an online store.
                 # A "partner" is a company that ships items to users who
                 # buy things in an online store.
                 ('Включает товар с артикулом партнера. "{partner_sku}"').format(
                     partner_sku=data["partner_sku"]
-                )
-            )
+                ), (("partner_sku", data["partner_sku"]),)
+            ))
 
         if data.get("date_from") and data.get("date_to"):
-            descriptions.append(
+            descriptions.append((
                 # Translators: This string refers to orders in an online
                 # store that were made within a particular date range.
                 ("Размещено между {start_date} и {end_date}").format(
                     start_date=data["date_from"], end_date=data["date_to"]
-                )
-            )
+                ), (("date_from", data["date_from"]), ("date_to", data["date_to"]))
+            ))
 
         elif data.get("date_from"):
-            descriptions.append(
+            descriptions.append((
                 # Translators: This string refers to orders in an online store
                 # that were made after a particular date.
-                ("Размещено после {start_date}").format(start_date=data["date_from"])
-            )
+                ("Размещено после {start_date}").format(start_date=data["date_from"]), (("date_from", data["date_from"]),)
+            ))
 
         elif data.get("date_to"):
             end_date = data["date_to"] + datetime.timedelta(days=1)
-            descriptions.append(
+            descriptions.append((
                 # Translators: This string refers to orders in an online store
                 # that were made before a particular date.
-                ("Размещено до {end_date}").format(end_date=end_date)
-            )
+                ("Размещено до {end_date}").format(end_date=end_date), (("date_to", data["date_to"]),)
+            ))
 
         if data.get("voucher"):
-            descriptions.append(
+            descriptions.append((
                 # Translators: A "voucher" is a coupon that can be applied to
                 # an order in an online store in order to receive a discount.
                 # The voucher "code" is a string that users can enter to
                 # receive the discount.
                 ('Использованный промокод "{voucher_code}"').format(
                     voucher_code=data["voucher"]
-                )
-            )
+                ), (("voucher", data["voucher"]),)
+            ))
 
         if data.get("payment_method"):
             payment_type = SourceType.objects.get(code=data["payment_method"])
-            descriptions.append(
+            descriptions.append((
                 # Translators: A payment method is a way of paying for an
                 # item in an online store.  For example, a user can pay
                 # with a credit card or PayPal.
                 ("Оплачено с помощью {payment_method}").format(
                     payment_method=payment_type.name
-                )
-            )
+                ), (("payment_method", data["payment_method"]),)
+            ))
 
         if data.get("status"):
-            descriptions.append(
+            descriptions.append((
                 # Translators: This string refers to an order in an
                 # online store.  Some examples of order status are
                 # "purchased", "cancelled", or "refunded".
-                ("Статус заказа {order_status}").format(order_status=data["status"])
-            )
+                ("Статус заказа {order_status}").format(order_status=data["status"]), (("status", data["status"]),)
+            ))
 
         return descriptions
 
@@ -472,7 +708,88 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
 
 class OrderActiveListView(OrderListView):
-    pass
+    def get_queryset(self):
+        """
+        Build the queryset for this list.
+        """
+        active_statuses = ["Обрабатывается", "Готовится", "Готов", "Доставляется"]
+        queryset = sort_queryset(
+            self.base_queryset, self.request, ["number", "total"]
+        ).filter(status__in=active_statuses)
+
+        self.form = self.form_class(self.request.GET)
+        if not self.form.is_valid():
+            return queryset
+
+        data = self.form.cleaned_data
+
+        if data["order_number"]:
+            queryset = self.base_queryset.filter(
+                number__istartswith=data["order_number"]
+            )
+
+        if data["username"]:
+            # If the value is two words, then assume they are first name and
+            # last name
+            # parts = data["username"].split()
+
+            # if len(parts) == 1:
+            #     parts = [data["name"], data["name"]]
+            # else:
+            #     parts = [parts[0], parts[1:]]
+
+            # query = Q(user__name__istartswith=parts[0])
+            # queryset = queryset.filter(user__username__istartswith=parts[0]).distinct()
+            queryset = queryset.filter(user__username__istartswith=data["username"]).distinct()
+
+        if data["product_title"]:
+            queryset = queryset.filter(
+                lines__title__istartswith=data["product_title"]
+            ).distinct()
+
+        if data["upc"]:
+            queryset = queryset.filter(lines__upc=data["upc"])
+
+        if data["partner_sku"]:
+            queryset = queryset.filter(lines__partner_sku=data["partner_sku"])
+
+        if data["date_from"] and data["date_to"]:
+            date_to = datetime_combine(data["date_to"], datetime.time.max)
+            date_from = datetime_combine(data["date_from"], datetime.time.min)
+            queryset = queryset.filter(
+                date_placed__gte=date_from, date_placed__lt=date_to
+            )
+        elif data["date_from"]:
+            date_from = datetime_combine(data["date_from"], datetime.time.min)
+            queryset = queryset.filter(date_placed__gte=date_from)
+        elif data["date_to"]:
+            date_to = datetime_combine(data["date_to"], datetime.time.max)
+            queryset = queryset.filter(date_placed__lt=date_to)
+
+        if data["voucher"]:
+            queryset = queryset.filter(
+                discounts__voucher_code=data["voucher"]
+            ).distinct()
+
+        if data["payment_method"]:
+            queryset = queryset.filter(
+                sources__source_type__code=data["payment_method"]
+            ).distinct()
+
+        if data["status"]:
+            queryset = queryset.filter(status=data["status"])
+
+        return queryset.annotate(
+            num_products=Sum("basket__lines__quantity"),
+            source=Max("sources__reference"),
+            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
+            paid=F("sources__paid"),
+            before_order=Case(
+                When(date_finish__isnull=True, then=ExpressionWrapper(F('order_time') - now(), output_field=DurationField())),
+                default=Value(None),
+                output_field=DurationField()
+            )
+        )
 
 
 class OrderDetailView(EventHandlerMixin, DetailView):
@@ -485,7 +802,6 @@ class OrderDetailView(EventHandlerMixin, DetailView):
     model = Order
     context_object_name = "order"
     template_name = "oscar/dashboard/orders/order_detail.html"
-    
 
     # These strings are method names that are allowed to be called from a
     # submitted form.
@@ -504,6 +820,10 @@ class OrderDetailView(EventHandlerMixin, DetailView):
     def get_object(self, queryset=None):
         order = get_order_for_user_or_404(self.request.user, self.kwargs["number"])
         order.open()
+        if not order.date_finish:  # Проверяем, что дата завершения ещё не установлена
+            order.before_order = order.order_time - now()
+        else:
+            order.before_order = None
         return order
 
     def get_order_lines(self):
@@ -526,7 +846,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         if "line_action" in request.POST:
             return self.handle_line_action(request, order, request.POST["line_action"])
 
-        return self.reload_page(error="Действительные действия не отправлены")
+        return self.reload_page(error="Корректные действия не отправлены")
 
     def handle_order_action(self, request, order, action):
         if action not in self.order_actions:
@@ -590,6 +910,22 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         ctx["line_statuses"] = Line.all_statuses()
         ctx["shipping_event_types"] = ShippingEventType.objects.all()
         ctx["payment_event_types"] = PaymentEventType.objects.all()
+        
+        user_orders = Order.objects.filter(user=ctx['order'].user)
+        order_amount = 0
+        for order in user_orders:
+            order_amount += order.total
+
+        ctx["user_info"] = {
+            "order_count": user_orders.count(),
+            "order_amount": order_amount,
+        }
+
+        paid = 0
+        for src in ctx['order'].sources.all():
+            paid += src.amount_debited - src.amount_refunded
+
+        ctx["order_paid"] = paid
 
         transactions = self.get_payment_transactions()
         ctx["payment_transactions"] = transactions
@@ -609,6 +945,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         for trans in transactions:
             setattr(trans, 'source_refundable', trans.source.refundable)
         return transactions
+    
     def get_order_note_form(self):
         kwargs = {"order": self.object, "user": self.request.user, "data": None}
         if self.request.method == "POST":

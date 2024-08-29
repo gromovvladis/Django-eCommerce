@@ -45,7 +45,7 @@
             <tr>
                 <td>{{ payment.id }}</td>
                 <td>
-                    <div class="d-flex">
+                    <div class="d-flex align-items-center">
                         <span class="spinner-border-sm {% if payment.paid and payment.refundable %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
                         <a href="{% url 'dashboard:order-detail' number=number %}">{{ payment.description }}</a>
                     </div>

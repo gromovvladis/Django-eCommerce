@@ -18,12 +18,16 @@
 {% endblock %}
 
 {% block navtext %}
-    {{ range.name }}
+    Удалить ассортимент '{{ range.name }}'?
 {% endblock %}
 
 {% block dashboard_content %}
+    <div class="table-header">
+        <h2>Удалить ассортимент</h2>
+    </div>
     <form method="post" class="card card-body bg-light">
         <p>Вы уверены, что хотите удалить этот ассортимент?</p>
+        <span>Это действие нельзя отменить!</span>
         {% csrf_token %}
         <div class="form-actions fill-width mt-3">
             <div class="float-right">

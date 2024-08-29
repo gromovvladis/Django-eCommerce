@@ -3,7 +3,6 @@
 {% if field.is_hidden %}
     {{ field }}
 {% else %}
-
     {% block control_group %}
         <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width">
             {% block label %}

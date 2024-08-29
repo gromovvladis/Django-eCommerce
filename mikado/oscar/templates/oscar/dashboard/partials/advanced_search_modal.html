@@ -7,7 +7,25 @@
             </div>
             <form method="get" class="form-stacked">
                 <div class="modal-body mt-1">
-                    {% include "oscar/dashboard/partials/form_fields.html" with form=form style=style %}
+                    {% if form.is_bound and not form.is_valid %}
+                        <div class="alert alert-danger">
+                            <strong>Упс! Мы нашли несколько ошибок</strong> - пожалуйста, проверьте сообщения об ошибках ниже и попробуйте еще раз
+                        </div>
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                            <div class="alert alert-danger form-group">
+                                <span class="help-inline"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% for field in form %}
+                        {% if field.name != "date_range" %}
+                            {% include 'oscar/dashboard/partials/form_field.html' with field=field style=style %}
+                        {% endif %}
+                    {% endfor %}
                 </div>
                 <div class="modal-footer">
                     <a href="#" class="btn btn-secondary" data-dismiss="modal">Закрыть</a>

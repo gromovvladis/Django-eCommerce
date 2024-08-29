@@ -42,6 +42,22 @@ function openNav(event) {
 }
 
 // смена ползунка
+// $(".tabs-button__button").on('click', function(){
+//   $(this).siblings(".tabs-button__active-block").offset({'left':$(this).offset().left});
+// })
+
 $(".tabs-button__button").on('click', function(){
-  $(this).siblings(".tabs-button__active-block").offset({'left':$(this).offset().left});
+  // Задержка, чтобы дождаться применения новой ширины
+  setTimeout(() => {
+    // Получаем новое смещение после изменения ширины
+    var newOffset = $(this).offset().left;
+
+    // Устанавливаем новое смещение для активного блока
+    $(this).siblings(".tabs-button__active-block").offset({'left': newOffset});
+  }, 0);
+});
+
+$(window).resize(function() {
+  var active_label = $(".tabs-button__button").filter('.active');
+  $(".tabs-button__active-block").offset({'left':$(active_label).offset().left});
 })

@@ -70,9 +70,9 @@ function authModalLoaded(){
             $(btn_sms).addClass('v-auth-modal__repeat-text')
             password_groug.removeClass('d-none');
             password_groug.addClass('v-input v-input__label-active');
+            password_groug.find('input').focus();
             btn_auth.removeClass('d-none');
             btn_auth.addClass('v-button v-button--main');
-            // phoneInput.setAttribute("readonly", "readonly");
             phoneInput.readOnly = true;
             var _Seconds = 30;
             int_id = setInterval(function() {

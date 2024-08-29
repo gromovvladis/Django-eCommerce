@@ -18,11 +18,11 @@ AbstractAddressForm = get_class("address.forms", "AbstractAddressForm")
 class OrderStatsForm(forms.Form):
     date_from = forms.DateField(
         required=False,
-        label=("Дата начала", "От"),
+        label="Дата начала",
         widget=DatePickerInput,
     )
     date_to = forms.DateField(
-        required=False, label=("Дата окончания", "До"), widget=DatePickerInput
+        required=False, label="Дата окончания", widget=DatePickerInput
     )
 
     _filters = _description = None
@@ -258,9 +258,9 @@ class NewTransactionForm(forms.ModelForm):
         label="Сумма", min_value=0, required=False, help_text='Сумма транзакции'
     )
 
-    code = forms.CharField(max_length=128, label="Код", required=False, help_text='Код для интернет транзакций')
+    code = forms.CharField(max_length=128, label="Код транзакции", required=False, help_text='Код для интернет транзакций. Формат "0e000b000-000f-0000-a000-00000000ac00"')
     paid = forms.BooleanField(initial=True, label="Оплачено", required=False, help_text='Заказ оплачен?')
-    refundable = forms.BooleanField(initial=True, label="Возврат осуществлен", required=False, help_text='Оплату возможно вернуть?')
+    refundable = forms.BooleanField(initial=True, label="Возврат возможен?", required=False, help_text='Оплату возможно вернуть?')
 
     class Meta:
         model = Transaction

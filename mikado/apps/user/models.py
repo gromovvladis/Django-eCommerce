@@ -1,4 +1,4 @@
-from django.contrib.auth.models import BaseUserManager, AbstractUser
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 from django.utils import timezone
@@ -69,7 +69,7 @@ class UserManager(BaseUserManager):
         return u
 
 
-class User(AbstractUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin):
     """
     An abstract base user suitable for use in Oscar projects.
 
@@ -172,7 +172,6 @@ class User(AbstractUser, PermissionsMixin):
         
         return "%s" % self.username
         
-
     def email_user(self, subject, message, from_email=None, **kwargs):
         """
         Send an email to this user.

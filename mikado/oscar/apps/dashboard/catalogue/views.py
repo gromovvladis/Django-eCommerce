@@ -1277,9 +1277,9 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products_count:
-                messages.error(self.request, "%i продукт(ы) по-прежнему содержит этот доп продукт. Список продуктов с этим доп. продуктом: %s. Удалите доп.продукт у основного продукта(ов), прежде чем удалять доп. продукт" % (products_count, list(products.values_list('title', flat=True))))
+                messages.error(self.request, "%i продукт(а/ы) по-прежнему содержит этот доп продукт. Список продуктов с этим доп. продуктом: %s. Удалите доп.продукт у основного продукта(ов), прежде чем удалять доп. продукт" % (products_count, list(products.values_list('title', flat=True))))
             if product_classes_count:
-                messages.error(self.request, "%i класс(ы) по-прежнему содержит этот доп продукт. Список класснов с этим доп. продуктом: %s. Удалите доп.продукт у класса(ов), прежде чем удалять доп. продукт" % (product_classes_count, list(product_classes.values_list('title', flat=True))))
+                messages.error(self.request, "%i класс(а/ы) по-прежнему содержит этот доп продукт. Список класснов с этим доп. продуктом: %s. Удалите доп.продукт у класса(ов), прежде чем удалять доп. продукт" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
 
         return ctx
 
