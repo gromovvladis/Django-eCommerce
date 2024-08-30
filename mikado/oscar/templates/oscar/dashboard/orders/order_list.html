@@ -33,10 +33,9 @@
             <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
             <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
         </div>
-        <div class="card card-body bg-light collapse" id="search-body">
+        <div class="card card-body bg-light {% if form.is_valid %}collapse{% endif %}" id="search-body">
 
             <form method="get" class="form-inline fill-width d-flex justify-content-between" id="search_form">
-
                 {% for field in form %}
                     {% if "order" in field.id_for_label %}
                         {% if field.is_hidden %}
@@ -74,7 +73,6 @@
                     {% endif %}
                 </div>
             </form>
-
 
             {% include "oscar/dashboard/partials/advanced_search_modal.html" with form=form style='horizontal' %}
 

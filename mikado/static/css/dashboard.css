@@ -6938,7 +6938,7 @@ button.bg-dark:focus {
 }
 
 .rounded {
-  border-radius: 0.25rem !important;
+  border-radius: 10px !important;
 }
 
 .rounded-top {
@@ -19425,6 +19425,32 @@ caption {
   /* width: 98%; */
   /* height: 300px; */
 }
+
+
+
+
+.canvas-graph{
+  width: 100% !important;
+  height: 400px !important;
+}
+
+.canvas-graph--doughnut{
+  width: auto !important;
+  height: 400px !important;
+}
+
+
+.chart-container {
+  width: 100%; /* Ширина контейнера */
+  scrollbar-width: none;
+}
+
+.chart-container::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+}
+
+
 .order_graph .bar-chart dd {
   position: relative;
   float: left;
@@ -19432,6 +19458,10 @@ caption {
   height: calc(100% - 3rem);
   /* margin-top: 35px; */
   border-right: 1px solid #f2f2f2;
+}
+
+.order_graph .bar-chart--scroll dd{
+  min-width: 40px;
 }
 
 .order_graph .bar-chart dd:first-child {
