@@ -258,3 +258,10 @@ class AbstractPartnerAddress(AbstractAddress):
         app_label = "partner"
         verbose_name = "Адрес точки продажи"
         verbose_name_plural = "Адреса точек продаж"
+
+    def save(self, *args, **kwargs):
+        if self.line1:
+            super().save(*args, **kwargs)
+        else:
+            if self.pk:
+                self.delete()

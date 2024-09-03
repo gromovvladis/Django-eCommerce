@@ -2,6 +2,7 @@
 {% load render_table from django_tables2 %}
 {% load sorting_tags %}
 {% load widget_tweaks %}
+{% load dashboard_tags %}
 
 {% block body_class %}{{ block.super }} orders{% endblock %}
 
@@ -32,14 +33,15 @@
             <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
             <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
         </div>
-        <div class="card card-body bg-light dropdown-list collapse" id="search-body">
-            <form method="get" class="form-inline" id="search_form">
+        <div class="card card-body bg-light {% if form.is_valid %}collapse{% endif %}" id="search-body">
+
+            <form method="get" class="form-inline fill-width d-flex justify-content-between" id="search_form">
                 {% for field in form %}
                     {% if "order" in field.id_for_label %}
                         {% if field.is_hidden %}
                             {% render_field field class+='form-control' %}
                         {% else %}
-                            <div class="form-group mr-2">
+                            <div class="form-group form-flex-inline my-0">
                                 {{ field.label_tag }}
                                 {% render_field field class+='form-control' %}
                                 {% for error in field.errors %}
@@ -51,21 +53,40 @@
                         {% endif %}
                     {% endif %}
                 {% endfor %}
-                <input type="submit" value="Поиск" class="btn btn-primary mr-2" />
-                <a data-toggle="modal" data-target="#SearchModal" href="#">Расширенный поиск</a>
+                <div class="btn-form d-flex">
+                    <button class="btn btn-primary flex-fill" type="submit" data-loading-text="Поиск...">
+                        <i class="fas fa-search"></i>
+                        <span class="ml-2">
+                            Поиск
+                        </span>
+                    </button>
+                    <a data-toggle="modal" class="btn btn-third ml-2" data-target="#SearchModal" href="#">
+                        <i class="fa-solid fa-bars"></i>
+                    </a>
+                    {% if request.GET %}
+                        <a href="{% url 'dashboard:order-list' %}" class="btn btn-danger ml-2">
+                            <i class="fa-solid fa-trash"></i>
+                            <span class="caption-button">
+                                Сбросить
+                            </span>
+                        </a>
+                    {% endif %}
+                </div>
             </form>
 
-            {# Search modal, if there are form errors the form is automatically openend #}
             {% include "oscar/dashboard/partials/advanced_search_modal.html" with form=form style='horizontal' %}
 
             {% if search_filters %}
-            <div class="search-filter-list">
-                <label>Фильтры:</label>
-                {% for filter in search_filters %}
-                    <span class="badge badge-success">{{ filter }}</span>
-                {% endfor %}
-            </div>
-
+                <div class="search-filter-list mt-4">
+                    <label class="mr-2">Фильтры:</label>
+                    {% for filter, param in search_filters %}
+                        <span class="badge badge-filter mb-2 mr-1">{{ filter }}
+                            <a class="delete-filter text-danger ml-1" href="{% delete_filter request param %}">
+                                <i class="fa-solid fa-xmark"></i>
+                            </a>    
+                        </span>
+                    {% endfor %}
+                </div>
             {% endif %}
         </div>
     </div>

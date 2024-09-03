@@ -67,7 +67,7 @@ class OrderStatsForm(forms.Form):
 
 class OrderSearchForm(forms.Form):
     order_number = forms.CharField(required=False, label="Номер заказа")
-    name = forms.CharField(required=False, label="Имя Клиента")
+    username = forms.CharField(required=False, label="Телефон клиента")
     product_title = forms.CharField(required=False, label="Наименование товара")
     upc = forms.CharField(required=False, label="Товарный код продукта UPC")
     partner_sku = forms.CharField(required=False, label="Артикул в точке продажи")
@@ -171,7 +171,6 @@ class OrderStatusForm(forms.Form):
 
 class NewSourceForm(forms.ModelForm):
 
-
     def __init__(self, order, *args, **kwargs):
         
         super().__init__(*args, **kwargs)
@@ -183,27 +182,28 @@ class NewSourceForm(forms.ModelForm):
         for chs in payment_chouces:
             source_type_list.append(chs[1])
 
-        queryset = SourceType.objects.filter(name__in=source_type_list)
+        # queryset = source_type_list
+        # queryset = SourceType.objects.filter(name__in=source_type_list)
 
-        self.fields["source_type"].queryset = queryset
-        self.fields["source_type"].initial = queryset.first()
+        self.fields["source_type"].queryset = source_type_list
+        self.fields["source_type"].initial = source_type_list.get(0)
         self.fields["amount_allocated"].widget.attrs.update({'max': order.total})
         self.fields["amount_allocated"].initial = order.total
 
 
-    source_type = forms.ModelChoiceField(
-        queryset=Source.objects.none(),
+    source_type = forms.ChoiceField(
+        choices=[],
+        # queryset=Source.objects.none(),
         label='Способ оплаты',
         required=True,
         help_text='Выберите для какого способа оплаты создате транзакцию',
     )
 
     amount_allocated = forms.DecimalField(
-        label="Сумма", min_value=0, required=False, help_text='Сумма к оплате'
+        label="Сумма", min_value=0, required=True, help_text='Сумма к оплате'
     )
     payment_id = forms.CharField(max_length=128, label="Код платежа", required=False, help_text='Код оплаты (для интернет транзакций)')
     refund_id = forms.CharField(max_length=128, label="Код возврата", required=False, help_text='Код возврата (для интернет транзакций)')
-
 
     class Meta:
         model = Source
@@ -258,9 +258,9 @@ class NewTransactionForm(forms.ModelForm):
         label="Сумма", min_value=0, required=False, help_text='Сумма транзакции'
     )
 
-    code = forms.CharField(max_length=128, label="Код", required=False, help_text='Код для интернет транзакций')
+    code = forms.CharField(max_length=128, label="Код транзакции", required=False, help_text='Код для интернет транзакций. Формат "0e000b000-000f-0000-a000-00000000ac00"')
     paid = forms.BooleanField(initial=True, label="Оплачено", required=False, help_text='Заказ оплачен?')
-    refundable = forms.BooleanField(initial=True, label="Возврат осуществлен", required=False, help_text='Оплату возможно вернуть?')
+    refundable = forms.BooleanField(initial=True, label="Возврат возможен?", required=False, help_text='Оплату возможно вернуть?')
 
     class Meta:
         model = Transaction

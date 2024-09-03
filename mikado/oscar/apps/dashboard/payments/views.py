@@ -6,15 +6,13 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.generic import DetailView, UpdateView, DeleteView, CreateView
 from django_tables2 import SingleTableView
-import requests
+from django.views.generic.edit import FormView
 
-from oscar.apps.dashboard.orders.forms import NewSourceForm, NewTransactionForm
 from oscar.apps.payment.exceptions import DebitedAmountIsNotEqualsRefunded
 from oscar.apps.payment.methods import PaymentManager
-from oscar.apps.payment.models import Source
 from oscar.core.compat import get_user_model
-from oscar.core.loading import get_classes, get_model
-from yookassa import Payment, Refund, Receipt
+from oscar.core.loading import get_class, get_classes, get_model
+from yookassa import Payment, Refund
 
 import logging
 logger = logging.getLogger("oscar.dashboard")
@@ -22,7 +20,11 @@ logger = logging.getLogger("oscar.dashboard")
 User = get_user_model()
 Transaction = get_model("payment", "Transaction")
 Order = get_model("order", "Order")
+Source = get_model("payment", "Source")
+SourceType = get_model("payment", "SourceType")
 PaymentListTable, RefundListTable = get_classes("dashboard.payments.tables", ["PaymentListTable", "RefundListTable"])
+NewSourceForm = get_class("dashboard.orders.forms", "NewSourceForm")
+NewTransactionForm = get_class("dashboard.orders.forms", "NewTransactionForm")
 
 
 class TransactionsListView(SingleTableView):
@@ -107,12 +109,10 @@ class RefundDetailView(DetailView):
         return render(request, self.template_name, {'refund': refund_data, 'title': 'Информация о возврате'})
 
 
-
 class UpdateSourceView(UpdateView):
     """
     Обновить информацию о транзациях для конкретного СОРСА
     """
-
     model = Source
 
     def get(self, request, *args, **kwargs):
@@ -120,7 +120,6 @@ class UpdateSourceView(UpdateView):
         Fetch the latest status from docdata.
         """
         self.object = self.get_object()
-
 
         # Perform update.
         try:
@@ -167,18 +166,13 @@ class DeleteSourceView(DeleteView):
         return HttpResponseRedirect(reverse('dashboard:order-detail', args=(order_number,)))
 
 
-class AddSourceView(CreateView):
+class AddSourceView(FormView):
     
     template_name = "oscar/dashboard/orders/add_source.html"
-    model = Source
-    order_model = Order
     form_class = NewSourceForm
 
     def dispatch(self, request, *args, **kwargs):
-        # pylint: disable=attribute-defined-outside-init
-        self.order = get_object_or_404(
-            self.order_model, number=kwargs["number"]
-        )
+        self.order = get_object_or_404(Order, number=kwargs["number"])
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -190,24 +184,41 @@ class AddSourceView(CreateView):
         kwargs = super().get_form_kwargs()
         kwargs["order"] = self.order
         return kwargs
-
+    
     def form_valid(self, form):
-
         try:
-            form_edited = form.save(commit=False)
-            form_edited.amount_debited = D(0)
-            form_edited.amount_refunded = D(0)
-            form_edited.refundable = False
-            form_edited.paid = False
-            form_edited.order = form.order
-            form_edited.currency = form.order.currency
-            form_edited.reference = form.instance.source_type.code
-            form_edited.save()
+            source_code = form.cleaned_data['source_type']
+        
+            for val, label in settings.WEBSHOP_PAYMENT_CHOICES:
+                if val == source_code:
+                    source_name = label
+                    break
+
+            source_type, is_created = SourceType.objects.get_or_create(
+                code=source_code, 
+                name=source_name
+            )
+
+            new_source = Source(
+                amount_allocated=form.cleaned_data['amount_allocated'],
+                amount_debited=D(0),
+                amount_refunded=D(0),
+                refundable=False,
+                paid=False,
+                order=self.order,
+                currency=self.order.currency,
+                reference=form.cleaned_data['source_type'],
+                source_type=source_type,
+            )
+            if is_created:
+                source_type.save()
+            new_source.save()
             messages.success(self.request, "Способ оплаты был успешно добавлен!")
         except Exception as e:
-            messages.error(self.request, "Ошибка при добавлении способа оплаты!")
+            messages.error(self.request, f"Ошибка при добавлении способа оплаты: {e}")
     
         return HttpResponseRedirect(self.get_success_url())
+
 
     def get_success_url(self):
         return reverse('dashboard:order-detail', args=(self.order.number,))
@@ -242,7 +253,7 @@ class AddTransactionView(CreateView):
         try:
             source = form.cleaned_data.get('source')
             amount = form.cleaned_data.get('amount')
-            reference = "Добавлено пользователем:" + str(self.request.user.name) + "(id=" + str(self.request.user.id) + ")"
+            reference = "Добавлено пользователем " + str(self.request.user.username)
             status = form.cleaned_data.get('status')
             paid = form.cleaned_data.get('paid')
             code = form.cleaned_data.get('code')

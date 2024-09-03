@@ -1,35 +1,37 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 
 {% block title %}
-    {% trans "Добавить способ оплаты" %} | {% trans "Order" %} {{ order.number }} | {{ block.super }}
+    Добавить способ оплаты | Заказ №{{ order.number }} | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">{% trans "Orders" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">Заказы</a></li>
             <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:order-detail' number=order.number %}">#{{ order.number }}</a>
+                <a href="{% url 'dashboard:order-detail' number=order.number %}">№{{ order.number }}</a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">{% trans "Edit shipping address" %}</li>
+            <li class="breadcrumb-item active" aria-current="page">Добавить способ оплаты</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block navtext %}
-    {% blocktrans %}Добавить способ оплаты для заказа №{{ order.number }}{% endblocktrans %}
+    Добавить способ оплаты для заказа №{{ order.number }}
 {% endblock  %}
 
 {% block content %}
 
-    <form method="post" class="card card-body">
+    <div class="table-header d-flex justify-space-between" data-target="#card-body" data-toggle="collapse" aria-controls="card-body" aria-expanded="true">
+        <h3><i class="fa-solid fa-plus"></i> Новый способ оплаты</h3>
+    </div>
+    <form method="post" class="card card-body mb-3">
         {% csrf_token %}
         {% include "oscar/dashboard/partials/form_fields.html" with form=form style='horizontal' %}
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Updating...' %}">{% trans "Добавить транзакцию" %}</button>
-            {% trans "or" %} <a href="{% url 'dashboard:order-detail' number=order.number %}">{% trans "cancel" %}</a>
+        <div class="form-actions d-flex justify-content-end fill-width">
+            <a class="btn btn-danger ml-2" href="{% url 'dashboard:order-detail' number=order.number %}">Назад</a>
+            <button type="submit" class="btn btn-primary" data-loading-text="Добавление...">Добавить</button>
         </div>
     </form>
 

@@ -22,7 +22,7 @@ class AbstractPartner(models.Model):
         "Код", max_length=128, unique=True, db_index=True, populate_from="name"
     )
     name = models.CharField(
-        ("Название точки продажи", "Название"),
+        "Название",
         max_length=128,
         blank=True,
         db_index=True,
@@ -53,7 +53,9 @@ class AbstractPartner(models.Model):
         if len(addresses) == 0:  # intentionally using len() to save queries
             return None
         elif len(addresses) == 1:
-            return addresses[0]
+            if addresses[0].line1:
+                return addresses[0]
+            return None
         else:
             raise NotImplementedError(
                 "Oscar's default implementation of primary_address only "

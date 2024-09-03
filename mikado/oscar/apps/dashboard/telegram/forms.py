@@ -67,7 +67,7 @@ class OrderStatsForm(forms.Form):
 
 class OrderSearchForm(forms.Form):
     order_number = forms.CharField(required=False, label="Номер заказа")
-    name = forms.CharField(required=False, label="Имя Клиента")
+    username = forms.CharField(required=False, label="Телефон клиента")
     product_title = forms.CharField(required=False, label="Наименование товара")
     upc = forms.CharField(required=False, label="Товарный код продукта UPC")
     partner_sku = forms.CharField(required=False, label="Артикул в точке продажи")
@@ -258,9 +258,9 @@ class NewTransactionForm(forms.ModelForm):
         label="Сумма", min_value=0, required=False, help_text='Сумма транзакции'
     )
 
-    code = forms.CharField(max_length=128, label="Код", required=False, help_text='Код для интернет транзакций')
+    code = forms.CharField(max_length=128, label="Код транзакции", required=False, help_text='Код для интернет транзакций. Формат "0e000b000-000f-0000-a000-00000000ac00"')
     paid = forms.BooleanField(initial=True, label="Оплачено", required=False, help_text='Заказ оплачен?')
-    refundable = forms.BooleanField(initial=True, label="Возврат осуществлен", required=False, help_text='Оплату возможно вернуть?')
+    refundable = forms.BooleanField(initial=True, label="Возврат возможен?", required=False, help_text='Оплату возможно вернуть?')
 
     class Meta:
         model = Transaction

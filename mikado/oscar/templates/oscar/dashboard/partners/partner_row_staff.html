@@ -1,0 +1,14 @@
+{% load django_tables2 %}
+
+{% with usrs=record.users.all %}
+    {% if usrs %}
+        {% for usr in usrs %}
+            {{ usr.get_name_and_phone }}
+            {% if not forloop.last %},{% endif %}
+            <br>
+        {% endfor %}
+    {% else %}
+        -
+    {% endif %}
+{% endwith %}
+

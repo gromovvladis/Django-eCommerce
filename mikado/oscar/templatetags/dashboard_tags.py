@@ -3,6 +3,7 @@ from django import template
 from datetime import datetime, timedelta
 from oscar.core.loading import get_class
 from urllib.parse import urlencode
+from django.utils.timezone import now
 
 get_nodes = get_class("dashboard.menu", "get_nodes")
 register = template.Library()
@@ -66,6 +67,24 @@ def payment_date(iso_date):
 
     return formatted_date
 
+@register.filter
+def from_now(value):
+    delta = now() - value
+
+    days = delta.days
+    if days:
+        return f"{days} дн."
+    
+    hours = int(delta.total_seconds() // 3600 % 24)
+    if hours:
+        return f"{hours} ч."
+
+    minutes = int(delta.total_seconds() // 60 % 60) 
+    if hours:
+        return f"{minutes} мин."
+
+
+
 @register.simple_tag
 def filter_table(request, filtres):
     res = []
@@ -84,3 +103,14 @@ def filter_table(request, filtres):
         })
         
     return res
+
+@register.simple_tag
+def delete_filter(request, params):
+    query_params = request.GET.copy()
+
+    for param in params:
+        param_name, param_value = param
+        if query_params.getlist(param_name) and str(param_value):
+            del query_params[param_name]
+
+    return f"{request.path}?{query_params.urlencode()}"

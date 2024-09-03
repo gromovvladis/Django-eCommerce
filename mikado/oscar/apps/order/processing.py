@@ -65,8 +65,8 @@ class EventHandler(object):
         viewed as a shipping event affecting all lines.
         """
         order.set_status(new_status)
-        if note_msg:
-            self.create_note(order, note_msg)
+        # if note_msg:
+        #     self.create_note(order, note_msg)
 
     # Validation methods
     # ------------------

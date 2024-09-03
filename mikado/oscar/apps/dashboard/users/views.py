@@ -1,23 +1,25 @@
 # pylint: disable=attribute-defined-outside-init
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.models import Group
 from django.db.models import Q
 from django.shortcuts import redirect
-from django.urls import reverse
-from django.views.generic import DeleteView, DetailView, FormView, ListView, UpdateView
+from django.urls import reverse, reverse_lazy
+from django.views.generic import DetailView, FormView, ListView, CreateView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin
 from django_tables2 import SingleTableView
 
 from oscar.core.compat import get_user_model
-from oscar.core.loading import get_class, get_classes, get_model
+from oscar.core.loading import get_class
 from oscar.views.generic import BulkEditMixin
 
+GroupForm = get_class("dashboard.users.forms","GroupForm")
 UserSearchForm = get_class("dashboard.users.forms","UserSearchForm")
 PasswordResetForm = get_class("customer.forms", "PasswordResetForm")
 UserTable = get_class("dashboard.users.tables", "UserTable")
-# ProductAlert = get_model("customer", "ProductAlert")
 User = get_user_model()
+
 
 
 class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
@@ -117,7 +119,7 @@ class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
                 user.is_active = value
                 user.save()
         messages.info(self.request, "Пользовательский статус был успешно изменен")
-        return redirect("dashboard:users-index")
+        return redirect("dashboard:customers")
 
 
 class StaffView(BulkEditMixin, FormMixin, SingleTableView):
@@ -158,6 +160,30 @@ class PasswordResetView(SingleObjectMixin, FormView):
     def get_success_url(self):
         messages.success(self.request, "Письмо для сброса пароля отправлено.")
         return reverse("dashboard:user-detail", kwargs={"pk": self.object.id})
+
+
+
+class StaffGroupCreateView(CreateView):
+    model = Group
+    form_class = GroupForm
+    template_name = "oscar/dashboard/users/group_create.html"
+    success_url = reverse_lazy('dashboard:groups')
+    permission_required = 'auth.add_group'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Группа успешно создана!')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Ошибка при создании группы. Проверьте введенные данные.')
+        return super().form_invalid(form)
+
+
+class StaffGroupListView(ListView):
+    model = Group
+    template_name = "oscar/dashboard/users/group_list.html"
+    context_object_name = 'groups'  # Имя контекста для использования в шаблоне
+
 
 
 # class ProductAlertListView(ListView):

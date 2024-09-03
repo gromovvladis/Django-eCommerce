@@ -16135,10 +16135,15 @@ ymaps[class*="search__suggest-item_selected"] {
     font-style: normal;
     min-height: 44px;
     padding: 0;
-    color: #000;
+    color: #111;
     position: relative;
     z-index: 1
 }
+
+/* .v-tabs-button__button.active{
+    color: #111;
+    color: #3c3c3c;
+} */
 
 .v-tabs-button__button:disabled {
     opacity: .3

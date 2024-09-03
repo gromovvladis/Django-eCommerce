@@ -1,16 +1,16 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
+{% load static %}
 
 {% block body_class %}{{ block.super }} create-page partners{% endblock %}
 {% block title %}
-    {{ partner.name }} | {% trans "Partners" %} | {{ block.super }}
+    {{ partner.name }} | Точка продажи | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:partner-list' %}">{% trans "Partners" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:partner-list' %}">Точка продажи</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{ partner.name }}</li>
         </ol>
     </nav>
@@ -20,49 +20,108 @@
 
 {% block dashboard_content %}
 
-    <div class="row">
+    <div class="row mb-4">
         <div class="col-md-12">
             <div class="table-header">
-                <h2>{{ title }}</h2>
+                <h2 class="d-flex"><i class="fa-solid fa-house-medical"></i></i> Точка продажи на карте</h2>
+            </div>
+            <div class="delivery__map">
+                <div class="v-map__wrapper">
+                    <div id="map" class="v-map"></div>
+                </div>
             </div>
             {% include "oscar/dashboard/partials/form.html" with form=form class="card card-body" %}
         </div>
     </div>
-    <div class="row">
+
+    <div class="row mb-4">
         <div class="col-md-12">
-        <h2>{% trans "Users" %}</h2>
-        {% if users %}
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>{% trans 'Email' %}</th>
-                        <th>{% trans 'First name' %}</th>
-                        {% comment %} <th>{% trans 'Last name' %}</th> {% endcomment %}
-                        <th>&nbsp;</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
+            <div class="table-header">
+                <div class="d-flex justify-content-between">
+                    <h2 class="d-flex"><i class="fa-solid fa-user-group"></i> Песонал</h2>
+                    <div class="form-group form-actions fill-width">
+                        <div class="d-flex justify-content-end">
+                            <a class="btn btn-primary mr-2" href="{% url 'dashboard:partner-user-select' partner_pk=partner.pk %}">
+                                <i class="fa-solid fa-link"></i>
+                                <span class="caption-button">
+                                    Добавить персонал
+                                </span>
+                            </a>
+                            <a class="btn btn-info" href="{% url 'dashboard:partner-user-create' partner_pk=partner.pk %}">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <span class="caption-button">
+                                    Создать пользователя
+                                </span>
+                            </a>             
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-striped table-bordered m-0">
+                {% if users %}
+                    <thead>
                         <tr>
-                            <td><a href="{% url 'dashboard:partner-user-update' partner_pk=partner.pk user_pk=user.id %}">{{ user.email }}</a></td>
-                            <td>{{ user.name|default:"-" }}</td>
-                            {% comment %} <td>{{ user.last_name|default:"-" }}</td> {% endcomment %}
-                            <td>
-                                <form action="{% url 'dashboard:partner-user-unlink' partner_pk=partner.id user_pk=user.id %}" method="post">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger" data-loading-text="{% trans 'Unlinking...' %}">{% trans 'Unlink user' %}</button>
-                                </form>
-                            </td>
+                            <th>ФИО</th>
+                            <th>Должность</th>
+                            <th>Телефон</th>
+                            <th></th>
+                            {% comment %} <th>Удалить</th> {% endcomment %}
                         </tr>
-                    {% endfor %}
-                </tbody>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>
+                                    <a class="d-flex align-items-center" href="{% url 'dashboard:partner-user-update' partner_pk=partner.pk user_pk=user.id %}">
+                                        <span class="spinner-border-sm {% if user.gender == "М" %}badge-primary{% else %}badge-pink{% endif %}  rounded-circle mr-2">&nbsp;</span>
+                                        {{ user.name|default:"---" }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {{ user.staff }}
+                                </td>
+                                <td>{{ user.username }}</td>
+                                <td class="d-flex justify-content-end">
+                                    <form class="btn-toolbar" action="{% url 'dashboard:partner-user-unlink' partner_pk=partner.id user_pk=user.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                                            <i class="fa-solid fa-trash"></i>
+                                            <span class="caption-button">
+                                                Удалить
+                                            </span>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                {% else %}
+                    <tbody>
+                        <tr><td class="empty" colspan="8">Нет добавленного персонала</td></tr>
+                    </tbody>
+                {% endif %}
             </table>
-        {% else %}
-            <p>{% trans "No users linked." %}</p>
-        {% endif %}
-        <div class="form-group">
-            <a class="btn btn-info" href="{% url 'dashboard:partner-user-create' partner_pk=partner.pk %}" >{% trans "Link a new user" %}</a>
-            <a class="btn btn-info" href="{% url 'dashboard:partner-user-select' partner_pk=partner.pk %}" >{% trans "Link an existing user" %}</a>
         </div>
     </div>
 {% endblock dashboard_content %}
+
+
+{% block externalscripts %}
+    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&lang=ru_RU"></script>
+{% endblock %}
+
+
+{% block templatescripts %}
+    var csrf_token = "{{ csrf_token }}";
+    var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
+{% endblock %}
+
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/dashboard/partner/partner-address.js" %}"></script>
+{% endblock %}
+
+{% block onbodyload %}
+    createMap("{{ line1 }}");
+{% endblock %}

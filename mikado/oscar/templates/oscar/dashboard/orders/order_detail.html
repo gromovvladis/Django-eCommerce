@@ -1,120 +1,235 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 {% load currency_filters %}
+{% load dashboard_tags %}
 
 {% block body_class %}{{ block.super }} orders{% endblock %}
 
 {% block title %}
-    {% blocktrans with number=order.number %}Order {{ number }}{% endblocktrans %} | {{ block.super }}
+    Заказ {{ order.number }} | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">{% trans "Orders" %}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">#{{ order.number }}</li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">Заказы</a></li>
+            <li class="breadcrumb-item active" aria-current="page">№{{ order.number }}</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block navtext %}
-    {% blocktrans with number=order.number %}Order #{{ number }}{% endblocktrans %}
+    Заказ №{{ order.number }}
 {% endblock  %}
 
 {% block dashboard_content %}
+    
     {% block customer_information %}
-    <table class="table table-bordered table-hover">
-        <caption><i class="fas fa-user"></i> {% trans "Customer Information" %}</caption>
-        {% if order.guest_email %}
-            <tr>
-                <th>{% trans "Name" %}</th>
-                <th>{% trans "Email address" %}</th>
-            </tr>
-            <tr>
-                <td>
-                    {% trans "Customer checked out as a guest." %}
-                </td>
-                <td>{{ order.email }}</td>
-            </tr>
-        {% elif order.user %}
-            <tr>
-                <th>{% trans "Name" %}</th>
-                <th>{% trans "Email address" %}</th>
-            </tr>
-            <tr>
-                <td>{{ order.user.get_full_name|default:"-" }}</td>
-                <td>{{ order.user.email|default:"-" }}</td>
-            </tr>
-        {% else %}
-            <tr><td>{% trans "Customer has deleted their account." %}</td></tr>
-        {% endif %}
-    </table>
+        <table class="table table-bordered table-hover">
+            <caption class="table-caption" data-target="#client-body" data-toggle="collapse" aria-controls="client-body" aria-expanded="false">
+                <div class="d-flex justify-space-between" >
+                    <h3>
+                        <i class="fas fa-user"></i> Клиент
+                        <span class="badge badge-info ml-2">
+                            {{ order.user.date_joined|from_now }} / {{ user_info.order_count|default:"-" }} зак.
+                        </span>
+                    </h3>
+                    <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+                    <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+                </div>
+            </caption>
+            <tbody class="collapse" id="client-body">
+                {% if order.user %}
+                    <tr>
+                        <th>Имя</th>
+                        <td>{{ order.user.get_full_name|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Номер телефона</th>
+                        <td class="d-flex justify-content-between align-items-center">
+                            {{ order.user.username|default:"-" }}
+                            <a class="badge badge-success ml-1" style="padding: .4rem .6rem;" href="tel:{{ order.user.username }}">
+                                <i class="fa-solid fa-phone"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Дата регистрации</th>
+                        <td>{{ order.user.date_joined|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Количество заказов</th>
+                        <td>{{ user_info.order_count|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Сумма заказов</th>
+                        <td>{{ user_info.order_amount|default:"-"|currency }}</td>
+                    </tr>
+                    {% comment %} <tr>
+                        <th>Имя</th>
+                        <th>Номер телефона</th>
+                        <th>Дата регистрации</th>
+                        <th>Количество заказов</th>
+                    </tr>
+                    <tr>
+                        <td>{{ order.user.get_full_name|default:"-" }}</td>
+                        <td>{{ order.user.username|default:"-" }}</td>
+                        <td>{{ order.user.date_joined|default:"-" }}</td>
+                        <td>{{ user_info|default:"1" }}</td>
+                    </tr> {% endcomment %}
+                {% else %}
+                    <tr><td>Аккаунт пользователя удален</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
     {% endblock customer_information %}
 
     {% block order_information %}
-    <table class="table table-striped table-bordered table-hover">
-        <caption><i class="fas fa-shopping-cart"></i> {% trans "Order information" %}</caption>
-        <tr>
-            <th>{% trans "Order Total" %}</th>
-            <th>{% trans "Date of purchase" %}</th>
-            <th>{% trans "Time of purchase" %}</th>
-            <th>{% trans "Status" %}</th>
-        </tr>
-        <tr>
-            <td>{{ order.total|currency:order.currency }}</td>
-            <td>{{ order.date_placed|date }}</td>
-            <td>{{ order.date_placed|time }}</td>
-            <td>{{ order.status|default:"N/A" }}</td>
-        </tr>
-    </table>
+        <table class="table table-striped table-bordered table-hover">
+            <caption class="table-caption" data-target="#orderinfo-body" data-toggle="collapse" aria-controls="orderinfo-body" aria-expanded="false">
+                <div class="d-flex justify-space-between" >
+                    <h3>
+                        <i class="fa-solid fa-circle-info"></i> Информация о заказе
+                        {% if order.before_order %}
+                            <span class="ml-2 badge {% if order.before_order|in_future %}badge-success{% else %}badge-danger{% endif %}">
+                                {% if order.before_order.days %}
+                                    {{ order.before_order.days }} дн.
+                                {% endif %}
+                                {% with hours=order.before_order|hours %}
+                                    {% if hours %}
+                                        {{ hours }} ч.
+                                    {% else %}
+                                        {{ order.before_order|minutes }} мин.
+                                    {% endif %}
+                                {% endwith %}
+                            </span>
+                        {% endif %}
+                    </h3>
+                    <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+                    <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+                </div>
+            </caption>
+            <tbody class="collapse" id="orderinfo-body">
+                <tr>
+                    <th>Сумма заказа</th>
+                    <td>{{ order.total|currency:order.currency }}</td>
+                </tr>
+                <tr>
+                    <th>Время заказа</th>
+                    <td>{{ order.order_time }}</td>
+                </tr>
+                <tr>
+                    <th>Дата</th>
+                    <td>
+                        Создан: {{ order.date_placed|date }} {{ order.date_placed|time }}
+                        {% if order.date_finish %}
+                            <br>
+                            Завершен:  {{ order.date_finish|date }} {{ order.date_finish|time }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Статус</th>
+                    <td>
+                        <span class="badge badge-96 {% if order.status == "Завершен" %}badge-success{% elif order.status == "Отменен" %}badge-danger{% elif order.status == "Готовится" %}badge-info{% else %}badge-warning{% endif %}">
+                            {{ order.status|default:"N/A" }}
+                        </span>
+                    </td>
+                </tr>
+
+            {% comment %} 
+                <tr>
+                    <th>Сумма заказа</th>
+                    <th>Время заказа</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                </tr>
+                <tr>
+                    <td>{{ order.total|currency:order.currency }}</td>
+                    <td>
+                        {{ order.order_time }}
+                    </td>
+                    <td>
+                        Создан: {{ order.date_placed|date }} {{ order.date_placed|time }}
+                        {% if order.date_finish %}
+                            <br>
+                            Завершен:  {{ order.date_finish|date }} {{ order.date_finish|time }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-96 {% if order.status == "Завершен" %}badge-success{% elif order.status == "Отменен" %}badge-danger{% elif order.status == "Готовится" %}badge-info{% else %}badge-warning{% endif %}">
+                            {{ order.status|default:"N/A" }}
+                        </span>
+                    </td>
+                </tr> 
+            {% endcomment %}
+            </tbody>
+        </table>
     {% endblock order_information %}
 
     {% block additional_order_information %}
     {% endblock additional_order_information %}
 
-    <div class="sub-header">
-        <h2>{% trans "Order Details" %}</h2>
-    </div>
+
+    {% comment %} <div class="page-header d-flex justify-content-between">
+        <h1>Детали заказа</h1>
+    </div> {% endcomment %}
+
 
     <div class="tabbable dashboard">
 
-        <ul class="nav nav-tabs mb-0" role="tablist">
+        <ul class="nav nav-tabs mb-3 mb-lg-4 p-0" role="tablist">
             {% block nav_tabs %}
-                <li class="nav-item">
-                    <a class="nav-link {% if active_tab == 'lines' %}active{% endif %}" href="#lines" data-toggle="tab">
-                        {% trans "Order contents" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if active_tab == 'shipping' %}active{% endif %}" href="#shipping" data-toggle="tab">
-                        {% trans "Shipping" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if active_tab == 'payment' %}active{% endif %}" href="#payment" data-toggle="tab">
-                        {% trans "Payment" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if active_tab == 'discounts' %}active{% endif %}" href="#discounts" data-toggle="tab">
-                        {% trans "Discounts" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if active_tab == 'notes' %}active{% endif %}" href="#notes" data-toggle="tab">
-                        {% trans "Notes" %}
-                    </a>
-                </li>
+                <div class="tabs-button-wrapper">
+                    <div class="nav tabs-button d-flex fill">
+                        <div class="tabs-button__active-block" style="width: 135px; left: 0px;"><div class="fill-width fill-height"></div></div>
+                        <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'lines' %}active{% endif %}" href="#lines" data-toggle="tab">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>
+                                Заказ
+                            </span>
+                        </button>
+                        <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'shipping' %}active{% endif %}" href="#shipping" data-toggle="tab">
+                            <i class="fa-solid fa-truck-fast"></i>
+                            <span>
+                                Доставка
+                            </span>
+                        </button>
+                        <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'payment' %}active{% endif %}" href="#payment" data-toggle="tab">
+                            <i class="fa-regular fa-credit-card"></i>
+                            <span>
+                                Оплата
+                            </span>
+                        </button>
+                        <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'discounts' %}active{% endif %}" href="#discounts" data-toggle="tab">
+                            <i class="fa-solid fa-percent"></i>
+                            <span>
+                                Скидки
+                            </span>
+                        </button>
+                        <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'notes' %}active{% endif %}" href="#notes" data-toggle="tab">
+                            <i class="fa-regular fa-note-sticky"></i>
+                            <span>
+                                Заметки
+                            </span>
+                        </button>
+                    </div>
+                </div>
             {% endblock nav_tabs %}
         </ul>
 
         <div class="tab-content">
             <div class="tab-pane fade {% if active_tab == 'lines' %}show active{% endif %}" id="lines" role="tabpanel">
-                <div class="table-header">
-                    <h3>{% trans "Items ordered" %}</h3>
+                <div class="table-header d-flex justify-space-between">
+                    <h3>
+                        <i class="fas fa-shopping-cart"></i>
+                        Заказ
+                    </h3>
+                    <span class="badge {% if order.status == "Завершен" %}badge-success{% elif order.status == "Отменен" %}badge-danger{% elif order.status == "Готовится" %}badge-info{% else %}badge-warning{% endif %}">
+                        {{ order.status|default:"N/A" }}
+                    </span>
                 </div>
-                <form id="order_lines_form" method="post" class="form-inline">
+                <form id="order_lines_form" method="post" class="form-inline1">
                     {% csrf_token %}
                     {% block order_lines %}
                         <table class="table table-striped table-bordered table-hover">
@@ -122,15 +237,15 @@
                                 <tr>
                                     <th></th>
                                     <th></th>
-                                    <th>{% trans "Line ID" %}</th>
-                                    <th>{% trans "Quantity" %}</th>
-                                    <th>{% trans "Product" %}</th>
-                                    <th>{% trans "UPC" %}</th>
-                                    <th>{% trans "Status" %}</th>
-                                    <th>{% trans "Supplier" %}</th>
-                                    <th>{% trans "Supplier SKU" %}</th>
-                                    <th>{% trans "Price" %}</th>
-                                    <th>{% trans "Actions" %}</th>
+                                    <th>Количество</th>
+                                    <th>Продукт</th>
+                                    <th>UPC</th>
+                                    <th>Статус</th>
+                                    <th>Точка продажи</th>
+                                    <th>SKU</th>
+                                    <th>Цена</th>
+                                    {% comment %} <th>{% trans "Actions" %}</th> {% endcomment %}
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -142,7 +257,6 @@
                                         <td>
                                             <input type="text" name="selected_line_qty_{{ line.id }}" value="{{ line.quantity }}" size="2" style="width:40px" />
                                         </td>
-                                        <td><a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}">#{{ line.id }}</a></td>
                                         <td>{{ line.quantity }}</td>
                                         <td>
                                             {% if line.product %}
@@ -163,49 +277,49 @@
                                         <td>{{ line.partner_sku }}</td>
                                         <td class="text-right">{{ line.line_price_before_discounts|currency:order.currency }}</td>
                                         <td>
-                                            <a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}" class="btn btn-secondary">{% trans "View" %}</a>
+                                            <a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}" class="btn btn-secondary">Просмотр</a>
                                         </td>
                                     </tr>
                                 {% endfor %}
 
                                 <tr>
                                     <td colspan="8"></td>
-                                    <th>{% trans "Discount" %}</th>
+                                    <th>Скидки</th>
                                     <td class="text-right">{{ order.total_discount|currency:order.currency }}</td>
-                                    <td></td>
+                                    {% comment %} <td></td> {% endcomment %}
                                 </tr>
                                 {% with discounts=order.basket_discounts %}
                                     {% if discounts %}
                                         <tr>
                                             <td colspan="8"></td>
-                                            <th>{% trans "Basket total (excl. discounts)" %}</th>
+                                            <th>Сумма заказа без скидки</th>
                                             <td class="text-right">{{ order.basket_total_before_discounts|currency:order.currency }}</td>
-                                            <td></td>
+                                            {% comment %} <td></td> {% endcomment %}
                                         </tr>
                                         {% for discount in discounts %}
                                             <tr>
                                                 <td colspan="8"></td>
                                                 <td>
-                                                    <span class="badge badge-success">{% trans "Discount" %}</span>
+                                                    <span class="badge badge-success">Скидки</span>
                                                     {{ discount.offer_name }}
                                                 </td>
                                                 <td class="text-right"></td>
                                                 <td class="text-right">- {{ discount.amount|currency:order.currency }}</td>
-                                                <td></td>
+                                                {% comment %} <td></td> {% endcomment %}
                                             </tr>
                                         {% endfor %}
                                         <tr>
                                             <td colspan="8"></td>
-                                            <th>{% trans "Basket total (inc. discounts)" %}</th>
+                                            <th>Сумма заказа со скидкой</th>
                                             <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
-                                            <td></td>
+                                            {% comment %} <td></td> {% endcomment %}
                                         </tr>
                                     {% else %}
                                         <tr>
                                             <td colspan="8"></td>
-                                            <th>{% trans "Basket total" %}</th>
+                                            <th>Продукты</th>
                                             <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
-                                            <td></td>
+                                            {% comment %} <td></td> {% endcomment %}
                                         </tr>
                                     {% endif %}
                                 {% endwith %}
@@ -213,55 +327,55 @@
                                 {% if order.has_shipping_discounts %}
                                     <tr>
                                         <td colspan="8"></td>
-                                        <td>{% trans "Shipping total (excl. discounts)" %}</td>
+                                        <td>Доставка без скидки</td>
                                         <td class="text-right">{{ order.shipping_before_discounts|currency:order.currency }}</td>
-                                        <td></td>
+                                        {% comment %} <td></td> {% endcomment %}
                                     </tr>
                                     {% for discount in order.shipping_discounts %}
                                         <tr>
                                             <td colspan="8"></td>
                                             <td>
-                                                <span class="badge badge-success">{% trans "Discount" %}</span>
+                                                <span class="badge badge-success">Скидка на доставку</span>
                                                 {{ discount.offer_name }}
                                             </td>
                                             <td></td>
                                             <td class="text-right">- {{ discount.amount|currency:order.currency }}</td>
-                                            <td></td>
+                                            {% comment %} <td></td> {% endcomment %}
                                         </tr>
                                     {% endfor %}
                                     <tr>
                                         <td colspan="8"></td>
-                                        <th>{% trans "Shipping total" %}</th>
+                                        <th>Доставка</th>
                                         <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
-                                        <td></td>
+                                        {% comment %} <td></td> {% endcomment %}
                                     </tr>
                                 {% else %}
                                     <tr>
                                         <td colspan="8"></td>
-                                        <th>{% trans "Shipping total" %}</th>
+                                        <th>Доставка</th>
                                         <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
-                                        <td></td>
+                                        {% comment %} <td></td> {% endcomment %}
                                     </tr>
                                 {% endif %}
 
                                 {% with surcharges=order.surcharges.all %}
-                                {% if surcharges %}
-                                    {% for charge in surcharges %}
-                                        <tr>
-                                            <td colspan="8"></td>
-                                            <th>{% blocktrans with name=charge.name %}Surcharge {{ name }}{% endblocktrans %}</th>
-                                            <th class="text-right">{{ charge.money|currency:order.currency }}</th>
-                                            <td></td>
-                                        </tr>
-                                    {% endfor %}
-                                {% endif %}
+                                    {% if surcharges %}
+                                        {% for charge in surcharges %}
+                                            <tr>
+                                                <td colspan="8"></td>
+                                                <th>Доплата {{ charge.name }}</th>
+                                                <th class="text-right">{{ charge.money|currency:order.currency }}</th>
+                                                {% comment %} <td></td> {% endcomment %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
                                 {% endwith %}
 
                                 <tr>
                                     <td colspan="8"></td>
-                                    <th>{% trans "Order total" %}</th>
+                                    <th>Итого</th>
                                     <th class="text-right">{{ order.total|currency:order.currency }}</th>
-                                    <td></td>
+                                    {% comment %} <td></td> {% endcomment %}
                                 </tr>
                             </tbody>
                         </table>
@@ -274,18 +388,18 @@
                     {% endcomment %}
                     {% block line_actions %}
                         <div class="card card-body bg-light">
-                            <h3>{% trans "With selected lines" %}:</h3>
+                            <h3>С выбранными позициями:</h3>
                             <div class="form-inline mb-sm-2">
                                 <div class="form-group">
                                     <div class="form-check">
                                         <input id="line_status_check" class="form-check-input" type="radio" name="line_action" value="change_line_statuses" />
-                                        <label for="line_status_check" class="form-check-label">{% trans "Change line status to" %}</label>
+                                        <label for="line_status_check" class="form-check-label">Изменить статус позиций</label>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="sr-only" for="new_status_select">{% trans "choose new status" %}</label>
+                                    <label class="sr-only" for="new_status_select">Выбрать новый статус</label>
                                     <select id="new_status_select" name="new_status">
-                                        <option value=""> -- {% trans "choose new status" %} -- </option>
+                                        <option value=""> -- Выберите новый статус -- </option>
                                         {% for status in line_statuses %}
                                         <option>{{ status }}</option>
                                         {% endfor %}
@@ -296,20 +410,20 @@
                                 <div class="form-group">
                                     <div class="form-check">
                                         <input id="shipping_event_check" class="form-check-input" type="radio" name="line_action" value="create_shipping_event" />
-                                        <label for="shipping_event_check" class="form-check-label">{% trans "Create shipping event" %}</label>
+                                        <label for="shipping_event_check" class="form-check-label">Создать событие доставки</label>
                                     </div>
                                 </div>
                                 <div class="form-group mr-1">
-                                    <label class="sr-only" for="shipping_event_type_select">{% trans "choose event type" %}</label>
+                                    <label class="sr-only" for="shipping_event_type_select">Выбрать тип события</label>
                                     <select id="shipping_event_type_select" name="shipping_event_type">
-                                        <option value=""> -- {% trans "choose event type" %} -- </option>
+                                        <option value=""> -- Выберете тип события -- </option>
                                         {% for event_type in shipping_event_types %}
                                         <option value="{{ event_type.code }}">{{ event_type.name }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="reference_input">{% trans "with reference" %}</label>
+                                    <label for="reference_input">со ссылкой</label>
                                     <input id="reference_input" type="text" name="reference" value="" />
                                 </div>
                             </div>
@@ -317,60 +431,66 @@
                                 <div class="form-group">
                                     <div class="form-check">
                                         <input id="payment_event_check" class="form-check-input" type="radio" name="line_action" value="create_payment_event" />
-                                        <label for="payment_event_check" class="form-check-label">{% trans "Create payment event" %}</label>
+                                        <label for="payment_event_check" class="form-check-label">Создать платежное событие</label>
                                     </div>
                                 </div>
                                 <div class="form-group mr-1">
-                                    <label class="sr-only" for="payment_event_type_select">{% trans "choose event type" %}</label>
+                                    <label class="sr-only" for="payment_event_type_select">Выберете тип события</label>
                                     <select id="payment_event_type_select" name="payment_event_type">
-                                        <option value=""> -- {% trans "choose event type" %} -- </option>
+                                        <option value=""> -- Выберете тип события -- </option>
                                         {% for event_type in payment_event_types %}
                                         <option value="{{ event_type.code }}">{{ event_type.name }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="amount_input">{% trans "with amount" %}</label>
+                                    <label for="amount_input">с суммой</label>
                                     <input id="amount_input" type="text" name="amount" value="" />
                                 </div>
                             </div>
                             <div class="flex-nowrap">
-                                <button type="submit" class="btn btn-primary">{% trans "Go!" %}</button>
+                                <button type="submit" class="btn btn-primary">Подтвердить</button>
                             </div>
                         </div>
                     {% endblock line_actions %}
                 </form>
 
-                <form method="post" id="order_status_form">
+                <form method="post" id="order_status_form" class="mb-3">
                     {% csrf_token %}
                     {% block order_actions %}
                         <div class="card card-body bg-light">
-                            <h3><i class="fas fa-exclamation-triangle"></i> {% trans "Change order status" %}:</h3>
+                            <h3><i class="fas fa-exclamation-triangle"></i> Изменить статус заказа:</h3>
                             {% if order_status_form.has_choices %}
                                 {% include "oscar/dashboard/partials/form_fields.html" with form=order_status_form %}
                                 <input type="hidden" value="change_order_status" name="order_action" />
                                 <div class="flex-nowrap">
-                                    <button type="submit" class="btn btn-primary">{% trans "Change status" %}</button>
+                                    <button type="submit" class="btn btn-primary">Выберете статус</button>
                                 </div>
                             {% else %}
-                                {% trans "This order can't have its status changed." %}
+                                Статус этого заказа нельзя изменить.
                             {% endif %}
                         </div>
                     {% endblock %}
                 </form>
 
                 {% block order_status_changes %}
-                    <div class="table-header">
-                        <h3>{% trans "Status Changes" %}</h3>
+                    <div class="table-header" data-target="#status-body" data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
+                        <div class="d-flex justify-space-between" >
+                            <h3>
+                                <i class="fa-solid fa-rotate"></i> Изменения статуса заказа
+                            </h3>
+                            <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+                            <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+                        </div>
                     </div>
                     {% with status_changes=order.status_changes.all %}
-                        <table class="table table-striped table-bordered table-hover">
+                        <table class="table table-striped table-bordered table-hover collapse" id="status-body">
                             {% if status_changes %}
                                 <thead>
                                     <tr>
-                                        <th>{% trans "From" %}</th>
-                                        <th>{% trans "To" %}</th>
-                                        <th>{% trans "Date" %}</th>
+                                        <th>Старый статус</th>
+                                        <th>Новый статус</th>
+                                        <th>Дата</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -385,7 +505,7 @@
                             {% else %}
                                 <tbody>
                                     <tr>
-                                        <td>{% trans "No status changes." %}</td>
+                                        <td class="empty">Нет изменений статуса</td>
                                     </tr>
                                 </tbody>
                             {% endif %}
@@ -393,138 +513,130 @@
                     {% endwith %}
                 {% endblock %}
 
-                {% block shipping_events %}
-                    <div class="table-header">
-                        <h3>{% trans "Shipping Events" %}</h3>
-                    </div>
-                    {% with events=order.shipping_events.all %}
-                        <table class="table table-striped table-bordered table-hover">
-                            {% if events %}
-                                <thead>
-                                    <tr>
-                                        <th>{% trans "Date" %}</th>
-                                        <th>{% trans "Event" %}</th>
-                                        <th>{% trans "Lines" %}</th>
-                                        <th>{% trans "Reference" %}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for event in events %}
-                                        {% with line_qtys=event.line_quantities.all %}
-                                            <tr>
-                                                <td>{{ event.date_created }}</td>
-                                                <td>{{ event.event_type.name }}</td>
-                                                <td>
-                                                    {% for line_qty in event.line_quantities.all %}
-                                                        <a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line_qty.line.id %}">
-                                                            {% blocktrans with title=line_qty.line.title event_qty=line_qty.quantity total_qty=line_qty.line.quantity %}
-                                                                {{ title }} (quantity {{ event_qty }}/{{ total_qty }})
-                                                            {% endblocktrans %}
-                                                        </a>
-                                                    {% endfor %}
-                                                </td>
-                                                <td>{{ event.notes|default:"-" }}</td>
-                                            </tr>
-                                        {% endwith %}
-                                    {% endfor %}
-                                </tbody>
-                            {% else %}
-                                <tbody>
-                                    <tr>
-                                        <td>{% trans "No shipping events." %}</td>
-                                    </tr>
-                                </tbody>
-                            {% endif %}
-                        </table>
-                    {% endwith %}
-                {% endblock %}
-
-                {% block payment_events %}
-                    <div class="table-header">
-                        <h3 >{% trans "Payment Events" %}</h3>
-                    </div>
-                    {% with events=order.payment_events.all %}
-                        <table class="table table-striped table-bordered table-hover">
-                            {% if events %}
-                                <thead>
-                                    <tr>
-                                        <th>{% trans "Date" %}</th>
-                                        <th>{% trans "Event" %}</th>
-                                        <th>{% trans "Amount" %}</th>
-                                        <th>{% trans "Lines" %}</th>
-                                        <th>{% trans "Reference" %}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for event in events %}
-                                        {% with line_qtys=event.line_quantities.all %}
-                                            <tr>
-                                                <td >{{ event.date_created }}</td>
-                                                <td >{{ event.event_type.name }}</td>
-                                                <td >{{ event.amount|currency:order.currency }}</td>
-                                                <td>
-                                                    {% for line_qty in event.line_quantities.all %}
-                                                        {% trans "Product:" %} {{ line_qty.line.title }} - {% trans "quantity" %} {{ line_qty.quantity }}</br>
-                                                    {% endfor %}
-                                                </td>
-                                                <td >{{ event.reference|default:"-" }}</td>
-                                            </tr>
-                                        {% endwith %}
-                                    {% endfor %}
-                                </tbody>
-                            {% else %}
-                                <tbody>
-                                    <tr><td>{% trans "No payment events." %}</td></tr>
-                                </tbody>
-                            {% endif %}
-                        </table>
-                    {% endwith %}
-                {% endblock %}
             </div>
 
             <div class="tab-pane fade {% if active_tab == 'shipping' %}show active{% endif %}" id="shipping" role="tabpanel">
                 {% block tab_shipping %}
                     <div class="table-header">
-                        <h3>{% trans "Shipping" %}</h3>
+                        <h3>
+                            <i class="fa-solid fa-truck-fast"></i>
+                            Доставка
+                        </h3>
                     </div>
                     <table class="table table-striped table-bordered table-hover">
                         <tbody>
                             <tr>
-                                <th>{% trans "Method name" %}</th>
+                                <th>Метод доставки</th>
                                 <td>{{ order.shipping_method }}</td>
                             </tr>
-                            <tr>
-                                <th>{% trans "Method code" %}</th>
-                                <td>{{ order.shipping_code|upper }}</td>
-                            </tr>
-                            <tr>
-                                <th>{% trans "Charge" %}</th>
-                                <td>{{ order.shipping|currency:order.currency }}</td>
-                            </tr>
-                            <tr>
-                                <th>{% trans "Address" %}</th>
-                                <td>
-                                    {% for field in order.shipping_address.active_address_fields %}
-                                        {{ field }}<br/>
-                                    {% endfor %}
-                                    {% if order.shipping_address %}
-                                        <a class="btn btn-secondary" href="{% url 'dashboard:order-shipping-address' order.number %}">
-                                            {% trans "Update" %}
-                                        </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>{% trans "Phone" %}</th>
-                                <td>{{ order.shipping_address.phone_number|default:"-" }}</td>
-                            </tr>
-                            <tr>
-                                <th>{% trans "Instructions" %}</th>
-                                <td>{{ order.shipping_address.notes|default:"-"|linebreaks }}</td>
-                            </tr>
+
+                            {% if order.shipping_method == "Доставка" %}
+                                <tr>
+                                    <th>Стоимость доставки</th>
+                                    <td>{{ order.shipping|currency:order.currency }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="d-flex flex-column">
+                                        Адрес
+                                        <div class="d-flex mt-2">
+                                            {% if order.shipping_address %}
+                                                <a class="btn btn-third" href="{% url 'dashboard:order-shipping-address' order.number %}">
+                                                    <i class="fa-solid fa-pencil"></i>
+                                                    <span class="caption-button">
+                                                        Изменить
+                                                    </span>
+                                                </a>
+                                                <button class="btn btn-warning ml-1" onclick="openMap('{{ order.shipping_address.line1 }}')">
+                                                    <i class="fa-solid fa-location-dot"></i>
+                                                    <span class="caption-button">
+                                                        На карте
+                                                    </span>
+                                                </button>
+                                                <button class="btn btn-warning ml-1" onclick="createRote('{{ order.shipping_address.line1 }}')">
+                                                    <i class="fa-solid fa-location-arrow"></i>
+                                                    <span class="caption-button">
+                                                        Маршрут
+                                                    </span>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </th>
+                                    <td>
+                                        {% for field in order.shipping_address.active_address_fields_and_labels %}
+                                            {{ field.label }}: {{ field.value }}
+                                            <br>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Телефон</th>
+                                    <td>{{ order.user.username|default:"-" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Инструкции курьеру</th>
+                                    <td>{{ order.shipping_address.notes|default:"-"|linebreaks }}</td>
+                                </tr>
+                            {% endif %}
                         </tbody>
                     </table>
+
+
+                    {% block shipping_events %}
+                        {% with events=order.shipping_events.all %}
+                        <div class="table-header" data-target="#delivery-body" data-toggle="collapse" aria-controls="delivery-body" aria-expanded="false">
+                            <div class="d-flex justify-space-between" >
+                                <h3>
+                                    <i class="fa-solid fa-truck-ramp-box"></i> События доставки
+                                    {% if events.count %}
+                                        <span class="dropdown-item-badge ml-1">{{ events.count }}</span>
+                                    {% endif %}
+                                </h3>
+                                <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+                                <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+                            </div>
+                        </div>
+                            <table class="table table-striped table-bordered table-hover collapse" id="delivery-body">
+                                {% if events %}
+                                    <thead>
+                                        <tr>
+                                            <th>Дата</th>
+                                            <th>Событие</th>
+                                            <th>Позиции</th>
+                                            <th>Ссылка</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for event in events %}
+                                            {% with line_qtys=event.line_quantities.all %}
+                                                <tr>
+                                                    <td>{{ event.date_created }}</td>
+                                                    <td>{{ event.event_type.name }}</td>
+                                                    <td>
+                                                        {% for line_qty in event.line_quantities.all %}
+                                                            <a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line_qty.line.id %}">
+                                                                {{ line_qty.line.title }} (quantity {{ line_qty.quantity }}/{{ line_qty.line.quantity }})
+                                                            </a>
+                                                        {% endfor %}
+                                                    </td>
+                                                    <td>{{ event.notes|default:"-" }}</td>
+                                                </tr>
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </tbody>
+                                {% else %}
+                                    <tbody>
+                                        <tr>
+                                            <td class="empty">Нет событий доставки.</td>
+                                        </tr>
+                                    </tbody>
+                                {% endif %}
+                            </table>
+                        {% endwith %}
+                    {% endblock %}
+                    
                 {% endblock %}
+
+                
             </div>
 
             <div class="tab-pane fade {% if active_tab == 'payment' %}show active{% endif %}" id="payment" role="tabpanel">
@@ -532,111 +644,258 @@
 
                     {% with sources=order.sources.all %}
                         <div class="table-header">
-                            <h3 >{% trans "Payment sources" %}</h3>
+                            <h3 class="float-left">
+                                <i class="fa-solid fa-credit-card"></i>
+                                Источники оплаты
+                            </h3>
+                            <a class="btn btn-secondary float-right caption-fill-width" href="{% url 'dashboard:add-source' number=order.number %}">
+                                <i class="fas fa-plus"></i>
+                                <span class="caption-button">
+                                    Добавить способ оплаты
+                                </span>
+                            </a>
                         </div>
                         {% if sources %}
-                            <table class="table table-striped table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>{% trans "Source" %}</th>
-                                        <th>{% trans "Allocation" %}</th>
-                                        <th>{% trans "Amount debited" %}</th>
-                                        <th>{% trans "Amount refunded" %}</th>
-                                        <th>{% trans "Reference" %}</th>
-                                        <th>{% trans "Update info" %}</th>
-                                        <th>{% trans "Cancel source" %}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for source in sources %}
+                            <div class="mobile-table">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
                                         <tr>
-                                            <td>{{ source.source_type }}</td>
-                                            <td>{{ source.amount_allocated|currency:order.currency }}</td>
-                                            <td>{{ source.amount_debited|currency:order.currency }}</td>
-                                            <td>{{ source.amount_refunded|currency:order.currency }}</td>
-                                            <td>{{ source.reference|default:"-" }}</td>
-                                            <td>
-                                                {% if source.reference == 'SBP' or source.reference == 'CARD and source.payment_code or source.refund_code' %}
-                                                    <a href="{% url 'dashboard:update-source' number=order.number pk=source.id %}">Обновить информацию</a>
+                                            <th class="name">Источник</th>
+                                            <th>К оплате</th>
+                                            <th>Оплачено</th>
+                                            <th>Возвращено</th>
+                                            <th class="actions">Обновить</th>
+                                            <th>Удалить</th>
+                                            <th class="toggle-row"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for source in sources %}
+                                            <tr>
+                                                <td class="name d-flex align-items-center">
+                                                    <span class="spinner-border-sm {% if source.paid %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
+                                                    {{ source.source_type }} ({{ source.reference|default:"-" }})
+                                                </td>
+                                                <td data-label="К оплате">{{ source.amount_allocated|currency:order.currency }}</td>
+                                                <td data-label="Оплачено">{{ source.amount_debited|currency:order.currency }}</td>
+                                                <td data-label="Возвращено">{{ source.amount_refunded|currency:order.currency }}</td>
+                                                <td class="actions">
+                                                    {% if source.payment_id or source.refund_id %}
+                                                        <a class="btn btn-info" href="{% url 'dashboard:update-source' number=order.number pk=source.id %}">
+                                                            <i class="fa-solid fa-arrows-rotate"></i>
+                                                            <span class="caption-button">
+                                                                Обновить
+                                                            </span>
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="caption-button">
+                                                            -
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td data-label="Удалить">
+                                                    {% if not source.id in payment_transactions_source_id %}
+                                                        <a class="btn btn-danger" href="{% url 'dashboard:delete-source' number=order.number pk=source.id %}">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                            <span class="caption-button">
+                                                                Удалить
+                                                            </span>
+                                                        </a>
+                                                    {% else %}
+                                                        Удаление недоступно. 
+                                                        Имеются транзакции
+                                                    {% endif %}
+                                                </td>
+                                                <td class="toggle-row">
+                                                    <button class="btn btn-secondary" type="button">
+                                                        <i class="fa-solid fa-chevron-up"></i>
+                                                        <i class="fa-solid fa-chevron-down"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="">
+                                        <tr>
+                                            <td class="table-footer" colspan="8">
+                                                {% if order_paid == order.total %}
+                                                    <span style="text-success"><strong>Заказ оплачен</strong></span>
+                                                {% elif order_paid == 0 %}
+                                                    <span style="text-danger"><strong>Заказ не оплачен</strong></span>
                                                 {% else %}
-                                                    ---
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if not source.id in payment_transactions_source_id %}
-                                                    <a href="{% url 'dashboard:delete-source' number=order.number pk=source.id %}">Удалить исочник оплаты</a>
-                                                {% else %}
-                                                    Удаление недоступно. 
-                                                    Имеются транзакции
+                                                    <span style="text-warning"><strong>Оплачено: {{ order_paid|currency:order.currency }}</strong></span>
                                                 {% endif %}
                                             </td>
                                         </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                    </tfoot>
+                                </table>
+                            </div>
                         {% else %}
                             <table class="table table-striped table-bordered table-hover">
-                                <tr><td>{% trans "No payment sources found for this order." %}</td></tr>
+                                <tr><td>Источники оплаты для этого заказа не найдены.</td></tr>
                             </table>
                         {% endif %}
-                        <div>
-                            <a href="{% url 'dashboard:add-source' number=order.number %}">+ Добавить способ оплаты</a>
-                        </div>
                     {% endwith %}
 
-
-
                     {% block payment_transactions %}
+                        <div class="table-header">
+                            <h3 class="float-left">
+                                <i class="fa-solid fa-money-bill-transfer"></i>
+                                Транзакции
+                            </h3>
+                            <a class="btn btn-secondary float-right caption-fill-width" href="{% url 'dashboard:add-transaction' number=order.number %}">
+                                <i class="fas fa-plus"></i>
+                                <span class="caption-button">
+                                    Добавить транзакцию
+                                </span>
+                            </a>
+                        </div>
                         {% if payment_transactions %}
-                            <div class="table-header">
-                                <h3>{% trans "Transactions" %}</h3>
-                            </div>
-                            <table class="table table-striped table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>{% trans "Source" %}</th>
-                                        <th>{% trans "Amount" %}</th>
-                                        <th>{% trans "Reference" %}</th>
-                                        <th>{% trans "Status" %}</th>
-                                        <th>{% trans "Date" %}</th>
-                                        <th>Тип транзакции</th>
-                                        <th>Оплачено</th>
-                                        <th>Чек</th>
-                                        <th>Сделать возврат</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for txn in payment_transactions %}
+                            <div class="mobile-table">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
                                         <tr>
-                                            <td>{{ txn.source.source_type }}</td>
-                                            <td>{{ txn.amount|currency:order.currency }}</td>
-                                            <td>{{ txn.reference|default:"-" }}</td>
-                                            <td>{{ txn.status|default:"-" }}</td>
-                                            <td>{{ txn.date_created }}</td>
-                                            <td>{{ txn.txn_type }}</td>
-                                            <td>{{ txn.paid }}</td>
-                                            <td>{{ txn.receipt }}</td>
-                                            <td>
-
-                                                {% if txn.txn_type == "Payment" and txn.source_refundable and txn.refundable %}
-                                                    <a href="{% url 'dashboard:refund-transaction' pk=txn.id %}">Вернуть деньги</a>
-                                                {% elif txn.txn_type == "Payment" and not txn.source_refundable and txn.refundable %}
-                                                    Деньги вовращены
-                                                {% elif txn.txn_type == "Refund" %}
-                                                    -
-                                                {% else %}
-                                                    Возврат недоступен    
-                                                {% endif %}
-                                            </td>
+                                            <th class="name">Источник</th>
+                                            <th class="status">Статус</th>
+                                            <th>Тип транзакции</th>
+                                            <th>Сумма</th>
+                                            <th class="text-table-center">Оплачено</th>
+                                            <th class="text-table-center">Чек</th>
+                                            <th>Дата</th>
+                                            <th>Сделать возврат</th>
                                         </tr>
-                                    {% endfor %}
-                                </tbody>
+                                    </thead>
+                                    <tbody>
+                                        {% for txn in payment_transactions %}
+                                            <tr>
+                                                <td class="title">{{ txn.source.source_type }} ({{ txn.reference|default:"-" }})</td>
+                                                <td class="status">
+                                                    <span class="badge badge-96 {% if txn.status == "succeeded" %}badge-success{% elif txn.status == "canceled" %}badge-danger{% else %}badge-warning{% endif %}">
+                                                        {% if txn.status == "succeeded" %}
+                                                            Успешно
+                                                        {% elif txn.status == "canceled" %}
+                                                            Отменен
+                                                        {% else %}
+                                                            Обрабатывется
+                                                        {% endif %}
+                                                    </span>
+                                                </td>
+                                                <td data-label="Тип транзакции">
+                                                    {% if txn.txn_type == "Payment" %}
+                                                        <span class="text-success">
+                                                            Оплата
+                                                        </span> 
+                                                    {% else %}
+                                                        <span class="text-danger">
+                                                            Возврат
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td data-label="Сумма" class="status">{{ txn.amount|currency:order.currency }}</td>
+                                                <td class="is_public" data-label="Оплачено">{{ txn.paid|yesno:"✔️,❌" }}</td>
+                                                <td class="is_public" data-label="Чек">{{ txn.receipt|yesno:"✔️,❌" }}</td>
+                                                <td data-label="Дата">{{ txn.date_created }}</td>
+                                                <td data-label="Сумма">
+                                                    {% if txn.txn_type == "Payment" and txn.source_refundable and txn.refundable %}
+                                                        <a href="{% url 'dashboard:refund-transaction' pk=txn.id %}">Вернуть деньги</a>
+                                                    {% elif txn.txn_type == "Payment" and not txn.source_refundable and txn.refundable %}
+                                                        Деньги вовращены
+                                                    {% elif txn.txn_type == "Refund" %}
+                                                        -
+                                                    {% else %}
+                                                        Возврат недоступен    
+                                                    {% endif %}
+                                                </td>
+                                                <td class="toggle-row">
+                                                    <button class="btn btn-secondary" type="button">
+                                                        <i class="fa-solid fa-chevron-up"></i>
+                                                        <i class="fa-solid fa-chevron-down"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <table class="table table-striped table-bordered table-hover">
+                                <tr><td>Транзакции для этого заказа не найдены.</td></tr>
                             </table>
                         {% endif %}
                     {% endblock %}
-                    <div>
-                        <a href="{% url 'dashboard:add-transaction' number=order.number %}">+ Добавить транзакцию</a>
-                    </div>
+
+                    
+                    {% block payment_events %}
+                        {% with events=order.payment_events.all %}
+                            <div class="table-header" data-target="#payment-body" data-toggle="collapse" aria-controls="payment-body" aria-expanded="false">
+                                <div class="d-flex justify-space-between" >
+                                    <h3>
+                                        <i class="fa-solid fa-cash-register"></i> Платежные события
+                                        {% if events.count %}
+                                            <span class="dropdown-item-badge ml-1">{{ events.count }}</span>
+                                        {% endif %}
+                                    </h3>
+                                    <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+                                    <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+                                </div>
+                            </div>
+                            <div class="mobile-table">
+                                <table class="table table-striped table-bordered table-hover collapse" id="payment-body">
+                                    {% if events %}
+                                        <thead>
+                                            <tr>
+                                                <th>Событие</th>
+                                                <th>Сумма</th>
+                                                <th>Позиции</th>
+                                                <th>Дата</th>
+                                                <th>Код транзакции</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for event in events %}
+                                                {% with line_qtys=event.line_quantities.all %}
+                                                    <tr>
+                                                        <td class="name">
+                                                            {% if event.event_type.name == "Оплата не удалась" %}
+                                                                <span class="text-danger">
+                                                            {% elif event.event_type.name == "Успешная оплата" %}
+                                                                <span class="text-success">
+                                                            {% else %}
+                                                                <span>
+                                                            {% endif %}
+                                                            {{ event.event_type.name }}
+                                                            </span>
+                                                        </td>
+                                                        <td data-label="Сумма">{{ event.amount|currency:order.currency }}</td>
+                                                        <td data-label="Позиции">
+                                                            {% for line_qty in event.line_quantities.all %}
+                                                                {{ line_qty.line.title }} ({{ line_qty.quantity }} шт.)
+                                                                </br>
+                                                            {% endfor %}
+                                                        </td>
+                                                        <td data-label="Дата">{{ event.date_created }}</td>
+                                                        <td data-label="Код транзакции">{{ event.reference|default:"-" }}</td>
+                                                        <td class="toggle-row">
+                                                            <button class="btn btn-secondary" type="button">
+                                                                <i class="fa-solid fa-chevron-up"></i>
+                                                                <i class="fa-solid fa-chevron-down"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% endwith %}
+                                            {% endfor %}
+                                        </tbody>
+                                    {% else %}
+                                        <tbody>
+                                            <tr><td class="empty">Нет платежных событий.</td></tr>
+                                        </tbody>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        {% endwith %}
+                    {% endblock %}
+
+
                 {% endblock %}
             </div>
 
@@ -645,18 +904,21 @@
 
                     {% with discounts=order.discounts.all %}
                         <div class="table-header">
-                            <h3>{% trans "Discounts" %}</h3>
+                            <h3>
+                                <i class="fa-solid fa-percent"></i>
+                                Скидки
+                            </h3>
                         </div>
                         {% if discounts %}
                             <table class="table table-striped table-bordered table-hover">
                                 <thead>
                                     <tr>
-                                        <th>{% trans "Type" %}</th>
-                                        <th>{% trans "Voucher" %}</th>
-                                        <th>{% trans "Offer name" %}</th>
-                                        <th>{% trans "Frequency" %}</th>
-                                        <th>{% trans "Message" %}</th>
-                                        <th>{% trans "Amount" %}</th>
+                                        <th>Тип</th>
+                                        <th>Промокод</th>
+                                        <th>Скидка</th>
+                                        <th>Frequency</th>
+                                        <th>Сообщение</th>
+                                        <th>Сумма</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -682,7 +944,7 @@
                             </table>
                         {% else %}
                             <table class="table table-striped table-bordered table-hover">
-                                <tr><td>{% trans "No discounts were applied to this order." %}</td></tr>
+                                <tr><td>К этому заказу скидки не применялись.</td></tr>
                             </table>
                         {% endif %}
                     {% endwith %}
@@ -693,54 +955,95 @@
             <div class="tab-pane fade {% if active_tab == 'notes' %}show active{% endif %}" id="notes" role="tabpanel">
                 {% block tab_notes %}
                     <div class="table-header">
-                        <h3>{% trans "Notes" %}</h3>
+                        <h3>
+                            <i class="fa-solid fa-note-sticky"></i>
+                            Заметки
+                        </h3>
                     </div>
                     {% with notes=order.notes.all %}
+                    <div class="mobile-table">
                         <table class="table table-striped table-bordered table-hover">
                             {% if notes %}
-                                <tr>
-                                    <th>{% trans "Date" %}</th>
-                                    <th>{% trans "User" %}</th>
-                                    <th>{% trans "Type" %}</th>
-                                    <th>{% trans "Message" %}</th>
-                                    <th>{% trans "Admin" %}</th>
-                                </tr>
-                                {% for note in notes %}
+                                <thead>
                                     <tr>
-                                        <td>{{ note.date_created }}</td>
-                                        <td>{{ note.user|default:"-" }}</td>
-                                        <td>{{ note.note_type|default:"-" }}</td>
-                                        <td>{{ note.message|linebreaks }}</td>
-                                        <td>
-                                            {% if note.is_editable %}
-                                                <a href="{% url 'dashboard:order-detail-note' number=order.number note_id=note.id %}#notes" class="btn btn-info">{% trans "Edit" %}</a>
-                                                <form method="post" class="float-left m-0">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="order_action" value="delete_note" />
-                                                    <input type="hidden" name="note_id" value="{{ note.id }}" />
-                                                    <input type="submit" value="{% trans "Delete" %}" class="btn btn-danger" />
-                                                </form>
-                                            {% endif %}
-                                        </td>
+                                        <th>Сообщение</th>
+                                        <th>Тип</th>
+                                        <th>Пользователь</th>
+                                        <th>Дата</th>
+                                        {% if note.is_editable %}
+                                            <th>Действия</th>
+                                        {% endif %}
                                     </tr>
+                                </thead>
+                                {% for note in notes %}
+                                    <tbody>
+                                        <tr>
+                                            <td class="title">{{ note.message|linebreaks }}</td>
+                                            <td data-label="Тип">{{ note.note_type|default:"-" }}</td>
+                                            <td data-label="Пользователь">{{ note.user|default:"-" }}</td>
+                                            <td data-label="Дата">{{ note.date_created }}</td>
+                                            {% if note.is_editable %}
+                                                <td class="actions">
+                                                    <div class="d-flex justify-content-center">
+                                                        <a href="{% url 'dashboard:order-detail-note' number=order.number note_id=note.id %}#notes" class="btn btn-info mr-2">
+                                                            <i class="fa-solid fa-pencil"></i>
+                                                            <span class="caption-button">
+                                                                Изменить
+                                                            </span>
+                                                        </a>
+                                                        <form method="post" class="float-left m-0">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="order_action" value="delete_note" />
+                                                            <input type="hidden" name="note_id" value="{{ note.id }}" />
+                                                            <button type="submit"class="btn btn-danger">
+                                                                <i class="fa-solid fa-trash"></i>
+                                                                <span class="caption-button">
+                                                                    Удалить
+                                                                </span>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                            <td class="toggle-row">
+                                                <button class="btn btn-secondary" type="button">
+                                                    <i class="fa-solid fa-chevron-up"></i>
+                                                    <i class="fa-solid fa-chevron-down"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <tbody>
                                 {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td>{% trans "No notes available." %}</td>
+                                    <td class="empty">Нет доступных заметок.</td>
                                 </tr>
                             {% endif %}
                         </table>
+                    </div>
                     {% endwith %}
 
-                    <form id="order_note_form" action=".?note={{ note_id }}" method="post" class="form-stacked">
-                        {% csrf_token %}
-                        <input type="hidden" value="save_note" name="order_action" />
-                        {% include "oscar/dashboard/partials/form_fields.html" with form=note_form %}
-                        <div class="form-actions">
-                            <input type="submit" value="{% trans "Save note" %}" class="btn btn-primary" />
-                            {% trans "Notes are only editable for 5 minutes after being saved." %}
-                        </div>
-                    </form>
+                    <div class="table-header">
+                        <h3>
+                            <i class="fas fa-plus"></i>
+                            Создать заметку
+                        </h3>
+                    </div>
+                    <div class="card card-body bg-light">
+                        <form id="order_note_form" action=".?note={{ note_id }}" method="post" class="form-stacked fill-width">
+                            {% csrf_token %}
+                            <input type="hidden" value="save_note" name="order_action" />
+                            {% include "oscar/dashboard/partials/form_fields.html" with form=note_form %}
+                            <p class="mt-2 text-muted">
+                                Заметки можно редактировать только в течение 5 минут после сохранения.
+                            </p>
+                            <div class="form-actions mt-2 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    Сохранить заметку
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 {% endblock %}
             </div>
 

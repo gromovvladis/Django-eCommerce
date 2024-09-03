@@ -155,7 +155,8 @@ var oscar = (function(o, $) {
             var $selects = $(el).find('select').not('.no-widget-init select').not('.no-widget-init');
             $selects.filter('.form-stacked select').css('width', '100%');
             // $selects.filter('.form-inline select').css('width', '250px');
-            $selects.not('.related-widget-wrapper select').select2({width: 'resolve'});
+            // $selects.not('.related-widget-wrapper select').select2({width: 'resolve'});
+            $selects.not('.related-widget-wrapper select').select2();
             $selects.filter('.related-widget-wrapper.single select').select2({
                 // Keep updated labels after editing related obj
                 templateResult: function (data) {
@@ -164,7 +165,7 @@ var oscar = (function(o, $) {
                 templateSelection: function (data) {
                     return $(data.element).text();
                 },
-                width: 'resolve'
+                // width: 'resolve'
             });
             $selects.filter('.related-widget-wrapper.multiple select').select2({
                 // width: '95%'
