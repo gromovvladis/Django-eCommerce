@@ -149,6 +149,7 @@ class DateTimeWidgetMixin(object):
         attrs["data-inputmask"] = "'alias': 'datetime', 'inputFormat': '{mask}'".format(
             mask=datetime_format_to_js_input_mask(self.get_format())
         )
+        attrs["autocomplete"] = "off"
         return attrs
 
 
@@ -167,6 +168,7 @@ class DateRangeInput(forms.TextInput):
     def build_attrs(self, base_attrs, extra_attrs=None):
         attrs = super().build_attrs(base_attrs, extra_attrs)
         attrs["data-inputmask"] = "'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy - dd.mm.yyyy'"
+        attrs["autocomplete"] = "off"
         return attrs
 
     def get_context(self, name, value, attrs):

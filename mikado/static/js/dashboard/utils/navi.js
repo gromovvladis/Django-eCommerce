@@ -59,5 +59,7 @@ $(".tabs-button__button").on('click', function(){
 
 $(window).resize(function() {
   var active_label = $(".tabs-button__button").filter('.active');
-  $(".tabs-button__active-block").offset({'left':$(active_label).offset().left});
+  if ($(active_label).length > 0) {
+    $(".tabs-button__active-block").offset({'left':$(active_label).offset().left});
+  }
 })

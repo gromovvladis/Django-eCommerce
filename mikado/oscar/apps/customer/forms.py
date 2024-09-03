@@ -1,43 +1,57 @@
-import re
 import datetime
-import string
+import phonenumbers
 
 from django import forms
 from django.conf import settings
 from django.contrib.auth import forms as auth_forms
 from django.contrib.sites.shortcuts import get_current_site
+from django.core import validators
 from django.core.exceptions import ValidationError
-from django.utils.crypto import get_random_string
 from django.utils.http import url_has_allowed_host_and_scheme
-from phonenumber_field.modelfields import PhoneNumberField
-
 from django.utils.module_loading import import_string
+
+from phonenumber_field.modelfields import PhoneNumberField
+from phonenumber_field.phonenumber import PhoneNumber
 
 from oscar.apps.customer.utils import get_password_reset_url, normalise_email
 from oscar.core.compat import existing_user_fields, get_user_model
-from oscar.core.loading import get_class, get_model, get_profile_class
+from oscar.core.loading import get_class, get_model
 from oscar.core.utils import datetime_combine
-from oscar.forms import widgets
-from django.core import validators
-
-import phonenumbers
-from phonenumber_field.phonenumber import PhoneNumber
-
-from django.contrib import messages
 
 CustomerDispatcher = get_class("customer.utils", "CustomerDispatcher")
 User = get_user_model()
 
 
-def generate_username():
-    letters = string.ascii_letters
-    allowed_chars = letters + string.digits + "_"
-    uname = get_random_string(length=10, allowed_chars=allowed_chars)
-    try:
-        User.objects.get(username=uname)
-        return generate_username()
-    except User.DoesNotExist:
-        return uname
+class UserForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        """
+        Make sure that the email address is always unique as it is
+        used instead of the username. This is necessary because the
+        uniqueness of email addresses is *not* enforced on the model
+        level in ``django.contrib.auth.models.User``.
+        """
+
+        email = normalise_email(self.cleaned_data["email"])
+        if email:
+            if (
+                User._default_manager.filter(email__iexact=email)
+                .exclude(id=self.user.id)
+                .exists()
+            ):
+                raise ValidationError("Пользователь с таким адресом электронной почты уже существует")
+        # Save the email unaltered
+        return email
+
+    class Meta:
+        model = User
+        fields = existing_user_fields(["name", "email"])
+
+
+ProfileForm = UserForm
 
 
 class PhoneAuthenticationForm(forms.Form):
@@ -55,8 +69,7 @@ class PhoneAuthenticationForm(forms.Form):
         widget=forms.TextInput(attrs={
             'placeholder': '+7 (900) 000 0000',
             'inputmode': 'tel',
-            })
-        # validators=[validators.RegexValidator(regex = r"^\+?1?\d{8,15}$")]
+        })
     )
 
     password = forms.CharField(
@@ -70,14 +83,12 @@ class PhoneAuthenticationForm(forms.Form):
         validators=[validators.RegexValidator(r'^\d{1,10}$')]
     )
 
-
     redirect_url = forms.CharField(widget=forms.HiddenInput, required=False)
     
     error_messages = {
         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
         "inactive": "Этот аккаунт не активен.",
     }
-
 
     def __init__(self, host, *args, **kwargs):
         self.host = host
@@ -165,64 +176,22 @@ class PhoneAuthenticationForm(forms.Form):
         return cleaned_data
 
 
-class PhoneSmsForm(forms.Form):
-
-    username = forms.CharField(
-        label="Телефон",
-        required=True,
-        max_length=12,
-        validators=[validators.RegexValidator(regex = r"^\+?1?\d{8,15}$")]
-    )
-
-    error_messages = {
-        "invalid_login": "Пожалуйста, введите корректный номер телефона.",
-        "inactive": "Этот аккаунт не активен.",
-    }
-
-
-    def __init__(self, host, *args, **kwargs):
-        self.host = host
-        self.request = kwargs.pop('request')
-        self.user_cache = None
-        super().__init__(*args, **kwargs)
-
-
-    def get_phone(self):
-        phone_number = self.cleaned_data.get("username")
-        return phone_number
-
-
-    def get_invalid_login_error(self):
-        messages.error(self.request, 'Invalid code')
-
-
-    def clean_redirect_url(self):
-        url = self.cleaned_data["redirect_url"].strip()
-        if url and url_has_allowed_host_and_scheme(url, self.host):
-            return url
-
-
 class PhoneUserCreationForm(forms.Form):
-    
     
     phone = PhoneNumberField(
         "Номер телефона",
         blank=True,
         help_text="На случай, если нам понадобится позвонить вам по поводу вашего заказа",
     )
-
-    
     sms_code = forms.CharField(
         widget=forms.widgets.TextInput,
         required=True,
         max_length=4,
     )
-
     error_messages = {
         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
         "inactive": "Этот аккаунт не активен.",
     }
-
     redirect_url = forms.CharField(widget=forms.HiddenInput, required=False)
 
     class Meta:
@@ -246,13 +215,34 @@ class PhoneUserCreationForm(forms.Form):
         return settings.LOGIN_REDIRECT_URL
 
     def save(self, commit=True):
-        user = super().save(commit=False)
-
-        if "username" in [f.name for f in User._meta.fields]:
-            user.username = generate_username()
-        if commit:
-            user.save()
+        user = super().save(commit=commit)
         return user
+    
+
+class PasswordResetForm(auth_forms.PasswordResetForm):
+    """
+    This form takes the same structure as its parent from :py:mod:`django.contrib.auth`
+    """
+
+    def save(self, *args, domain_override=None, request=None, **kwargs):
+        """
+        Generates a one-use only link for resetting password and sends to the
+        user.
+        """
+        site = get_current_site(request)
+        if domain_override is not None:
+            site.domain = site.name = domain_override
+        for user in self.get_users(self.cleaned_data["email"]):
+            self.send_password_reset_email(site, user, request)
+
+    def send_password_reset_email(self, site, user, request=None):
+        extra_context = {
+            "user": user,
+            "site": site,
+            "reset_url": get_password_reset_url(user),
+            "request": request,
+        }
+        CustomerDispatcher().send_password_reset_email_for_user(user, extra_context)
 
 
 class OrderSearchForm(forms.Form):
@@ -354,66 +344,63 @@ class OrderSearchForm(forms.Form):
         return kwargs
 
 
-class UserForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
-        super().__init__(*args, **kwargs)
-
-    def clean_email(self):
-        """
-        Make sure that the email address is always unique as it is
-        used instead of the username. This is necessary because the
-        uniqueness of email addresses is *not* enforced on the model
-        level in ``django.contrib.auth.models.User``.
-        """
-
-        email = normalise_email(self.cleaned_data["email"])
-        if email:
-            if (
-                User._default_manager.filter(email__iexact=email)
-                .exclude(id=self.user.id)
-                .exists()
-            ):
-                raise ValidationError("Пользователь с таким адресом электронной почты уже существует")
-        # Save the email unaltered
-        return email
-
-    class Meta:
-        model = User
-        fields = existing_user_fields(["name", "email"])
 
 
-ProfileForm = UserForm
 
 
-class PasswordResetForm(auth_forms.PasswordResetForm):
-    """
-    This form takes the same structure as its parent from :py:mod:`django.contrib.auth`
-    """
-
-    def save(self, *args, domain_override=None, request=None, **kwargs):
-        """
-        Generates a one-use only link for resetting password and sends to the
-        user.
-        """
-        site = get_current_site(request)
-        if domain_override is not None:
-            site.domain = site.name = domain_override
-        for user in self.get_users(self.cleaned_data["email"]):
-            self.send_password_reset_email(site, user, request)
-
-    def send_password_reset_email(self, site, user, request=None):
-        extra_context = {
-            "user": user,
-            "site": site,
-            "reset_url": get_password_reset_url(user),
-            "request": request,
-        }
-        CustomerDispatcher().send_password_reset_email_for_user(user, extra_context)
 
 
-# ProductAlert = get_model("customer", "ProductAlert")
+
+
+
+# def generate_username():
+#     letters = string.ascii_letters
+#     allowed_chars = letters + string.digits + "_"
+#     uname = get_random_string(length=10, allowed_chars=allowed_chars)
+#     try:
+#         User.objects.get(username=uname)
+#         return generate_username()
+#     except User.DoesNotExist:
+#         return uname
+
+
+# class PhoneSmsForm(forms.Form):
+
+#     username = forms.CharField(
+#         label="Телефон",
+#         required=True,
+#         max_length=12,
+#         validators=[validators.RegexValidator(regex = r"^\+?1?\d{8,15}$")]
+#     )
+
+#     error_messages = {
+#         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
+#         "inactive": "Этот аккаунт не активен.",
+#     }
+
+
+#     def __init__(self, host, *args, **kwargs):
+#         self.host = host
+#         self.request = kwargs.pop('request')
+#         self.user_cache = None
+#         super().__init__(*args, **kwargs)
+
+
+#     def get_phone(self):
+#         phone_number = self.cleaned_data.get("username")
+#         return phone_number
+
+
+#     def get_invalid_login_error(self):
+#         messages.error(self.request, 'Invalid code')
+
+
+#     def clean_redirect_url(self):
+#         url = self.cleaned_data["redirect_url"].strip()
+#         if url and url_has_allowed_host_and_scheme(url, self.host):
+#             return url
+
+
 
 
 # class ConfirmPasswordForm(forms.Form):

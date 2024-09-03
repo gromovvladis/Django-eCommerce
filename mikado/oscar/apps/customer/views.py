@@ -29,9 +29,9 @@ PageTitleMixin, RegisterUserMixin = get_classes(
     "customer.mixins", ["PageTitleMixin", "RegisterUserMixin"]
 )
 CustomerDispatcher = get_class("customer.utils", "CustomerDispatcher")
-PhoneAuthenticationForm, PhoneSmsForm, PhoneUserCreationForm, OrderSearchForm = get_classes(
+PhoneAuthenticationForm, PhoneUserCreationForm, OrderSearchForm = get_classes(
     "customer.forms",
-    ["PhoneAuthenticationForm", "PhoneSmsForm", "PhoneUserCreationForm", "OrderSearchForm"],
+    ["PhoneAuthenticationForm", "PhoneUserCreationForm", "OrderSearchForm"],
 )
 ProfileForm = get_class("customer.forms", "ProfileForm")
 UserAddressForm = get_class("address.forms", "UserAddressForm")
@@ -421,6 +421,7 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
             self.response = redirect("basket:summary")
         else:
             self.response = redirect("customer:order-list")
+
 
 class OrderLineView(PostActionMixin, generic.DetailView):
     """Customer order line"""

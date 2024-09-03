@@ -1,11 +1,12 @@
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 from django.utils import timezone
 from django.core.mail import send_mail
-from oscar.core import compat
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from phonenumber_field.modelfields import PhoneNumberField
+from oscar.core import compat
+from django.contrib.auth.models import Group
 
 class Profile(models.Model):
     """
@@ -13,15 +14,27 @@ class Profile(models.Model):
     """
     user = models.OneToOneField(compat.AUTH_USER_MODEL, related_name="profile",
                                 on_delete=models.CASCADE)
-    MALE, FEMALE = 'М', 'Ж'
-    choices = (
-        (MALE, 'Мужчина'),
-        (FEMALE, 'Женщина'))
-    gender = models.CharField(max_length=1, choices=choices,
-                              verbose_name='Gender')
-    age = models.PositiveIntegerField(verbose_name='Age')
 
-    image = models.ImageField(blank=True, upload_to="profile")
+    last_name = models.CharField("Фамилия", blank=False, null=False, max_length=255)
+    first_name = models.CharField("Имя", blank=False, null=False, max_length=255)
+    middle_name = models.CharField("Отчество", blank=True, null=True, max_length=255)
+
+    job = models.CharField("Должность", max_length=127, null=False)
+
+    MALE, FEMALE = 'М', 'Ж'
+    gender_choices = (
+        (MALE, 'Мужчина'), 
+        (FEMALE, 'Женщина'))
+    gender = models.CharField(max_length=1, choices=gender_choices,
+                              verbose_name='Пол', null=False)
+    age = models.PositiveIntegerField(verbose_name='Возраст', null=True, blank=True)
+
+    image = models.ImageField(blank=True, null=True, verbose_name='Фото', upload_to="profile")
+
+    @staticmethod
+    def get_job_choices():
+        groups = Group.objects.all()
+        return [(group.id, group.name) for group in groups]
 
 
 class UserManager(BaseUserManager):
@@ -33,7 +46,7 @@ class UserManager(BaseUserManager):
         """
         now = timezone.now()
         if not username:
-            raise ValueError("The given phone must be set")
+            raise ValueError("Телефон некорректный или пустой.")
         if email:
             email = UserManager.normalize_email(email)
         
@@ -81,17 +94,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=12,
         unique=True,
         blank=False,
-        help_text="Формат телефона: '+79950750075",
+        help_text="Формат телефона: '+7 (900) 000-0000",
     )
 
     email = models.EmailField("Email", blank=True)
 
     name = models.CharField("Имя", max_length=255, blank=True)
 
-    staff = models.CharField("Должность", max_length=127, blank=True)
-
     is_staff = models.BooleanField(
-        "Статус сотрудника",
+        "Это сотрудник?",
         default=False,
         help_text="Повар, Курьер, Менеджер и т.д.",
     )
@@ -114,10 +125,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
-    
-    # jwt_token_key = models.CharField(
-    #     max_length=12, default=partial(get_random_string, length=12)
-    # )
 
     class Meta:
         db_table = "auth_user"
@@ -128,7 +135,6 @@ class User(AbstractBaseUser, PermissionsMixin):
                     "password", 
                     "name", 
                     "is_staff", 
-                    "staff", 
                     "is_active",
                     "is_email_verified",
                     "date_joined",

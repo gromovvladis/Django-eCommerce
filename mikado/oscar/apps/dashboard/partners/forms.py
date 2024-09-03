@@ -29,42 +29,6 @@ class PartnerCreateForm(forms.ModelForm):
         fields = ("name",)
 
 
-ROLE_CHOICES = (
-    ("staff", "Полный доступ к панели управления"),
-    ("limited", "Ограниченный доступ к панели управления"),
-)
-
-
-class NewUserForm(PhoneUserCreationForm):
-    role = forms.ChoiceField(
-        choices=ROLE_CHOICES,
-        widget=forms.RadioSelect,
-        label="Роль пользователя",
-        initial="limited",
-    )
-
-    def __init__(self, partner, *args, **kwargs):
-        self.partner = partner
-        super().__init__(host=None, *args, **kwargs)
-
-    def save(self):
-        role = self.cleaned_data.get("role", "limited")
-        user = super().save(commit=False)
-        user.is_staff = role == "staff"
-        user.save()
-        self.partner.users.add(user)
-        if role == "limited":
-            dashboard_access_perm = Permission.objects.get(
-                codename="dashboard_access", content_type__app_label="partner"
-            )
-            user.user_permissions.add(dashboard_access_perm)
-        return user
-
-    class Meta:
-        model = User
-        fields = existing_user_fields(["name", "email"])
-
-
 class ExistingUserForm(forms.ModelForm):
     """
     Slightly different form that makes
@@ -72,7 +36,10 @@ class ExistingUserForm(forms.ModelForm):
     * doesn't regenerate username
     * doesn't allow changing email till #668 is resolved
     """
-
+    ROLE_CHOICES = (
+        ("staff", "Полный доступ к панели управления"),
+        ("limited", "Ограниченный доступ к панели управления"),
+    )
     role = forms.ChoiceField(
         choices=ROLE_CHOICES, widget=forms.RadioSelect, label="Роль пользователя"
     )
@@ -124,9 +91,9 @@ class ExistingUserForm(forms.ModelForm):
         ]
 
 
-class UserEmailForm(forms.Form):
-    # We use a CharField so that a partial email address can be entered
-    email = forms.CharField(label="Email", max_length=100)
+class UserPhoneForm(forms.Form):
+    # We use a CharField so that a partial phone can be entered
+    username = forms.CharField(label="Номер телефона сотрудника", max_length=20)
 
 
 class PartnerAddressForm(forms.ModelForm):
@@ -141,4 +108,15 @@ class PartnerAddressForm(forms.ModelForm):
             "coords_long",
             "coords_lat",
         )
+        widgets = {
+            'line1': forms.TextInput(attrs={
+                'readonly': "true"
+            }),
+            'coords_long': forms.TextInput(attrs={
+                'readonly': "true"
+            }),
+            'coords_lat': forms.TextInput(attrs={
+                'readonly': "true"
+            }),
+        }
         model = PartnerAddress

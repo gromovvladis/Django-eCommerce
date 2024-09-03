@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Инициализация Air Datepicker для текущего input
       var datepicker = new AirDatepicker(input, {
 
-            autoClose: false,
+            autoClose: true,
             range: true,
         
             dateFormat: 'dd.MM.yyyy',
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Инициализация Air Datepicker для текущего input
       var datepicker = new AirDatepicker(input, {
-          autoClose: false,
+          autoClose: true,
           isMobile: true,
           timepicker: true,
 

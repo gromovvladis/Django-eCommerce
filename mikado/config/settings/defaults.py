@@ -165,12 +165,16 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
-        "label": "Клиенты",
+        "label": "Пользователи",
         "icon": "fas fa-users",
         "children": [
             {
                 "label": "Клиенты",
                 "url_name": "dashboard:customers",
+            },
+            {
+                "label": "Группы персонала",
+                "url_name": "dashboard:groups",
             },
             {
                 "label": "Персонал",

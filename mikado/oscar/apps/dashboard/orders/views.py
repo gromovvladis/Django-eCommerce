@@ -123,77 +123,6 @@ class OrderStatsView(FormView):
 
         return ctx
 
-
-
-
-    # def get_report(self, orders, start, end, range_type, segments=10):
-    #     """
-    #     Get report of order revenue split up in days, weeks, months, or years chunks.
-    #     A report is generated for the specified range type ('day', 'week', 'month', 'year').
-    #     The report provides ``max_revenue`` of the order revenue sum,
-    #     ``y-range`` as the labelling for the y-axis in a template and
-    #     ``order_total_days``, a list of properties for the chunks.
-    #     *segments* defines the number of labelling segments used for the y-axis.
-    #     """
-    #     start_time = start
-
-    #     # Определяем range_time в зависимости от типа диапазона
-    #     if range_type == 'days':
-    #         range_time = (end - start).days
-    #         delta = datetime.timedelta(days=1)
-    #     elif range_type == 'weeks':
-    #         range_time = (end - start).days // 7
-    #         delta = datetime.timedelta(weeks=1)
-    #     elif range_type == 'months':
-    #         delta = relativedelta(months=1)
-    #         range_time = relativedelta(end, start).years * 12 + relativedelta(end, start).months
-    #     elif range_type == 'years':
-    #         delta = relativedelta(years=1)
-    #         range_time = relativedelta(end, start).years
-    #     else:
-    #         raise ValueError("Invalid range_type. Must be 'days', 'weeks', 'months', or 'years'.")
-
-    #     order_totals = []
-    #     for _ in range(range_time):
-    #         end_time = start_time + delta
-    #         report_orders = orders.filter(date_placed__gte=start_time, date_placed__lt=end_time)
-    #         total = report_orders.aggregate(Sum("total"))["total__sum"] or D("0.0")
-    #         order_totals.append({"end_time": end_time, "total": total})
-    #         start_time = end_time
-
-    #     # Вычисляем максимальное значение и масштабируем его
-    #     max_value = max([x["total"] for x in order_totals], default=D("0.0"))
-    #     divisor = 1
-    #     while divisor < max_value / 50:
-    #         divisor *= 10
-    #     max_value = (max_value / divisor).quantize(D("1"), rounding=ROUND_UP)
-    #     max_value *= divisor
-
-    #     # Вычисляем процентные значения и y_range
-    #     if max_value:
-    #         segment_size = max_value / D("100.0")
-    #         for item in order_totals:
-    #             item["percentage"] = int(item["total"] / segment_size)
-
-    #         y_range = []
-    #         y_axis_steps = max_value / D(str(segments))
-    #         for idx in reversed(range(segments + 1)):
-    #             y_range.append(idx * y_axis_steps)
-    #     else:
-    #         y_range = []
-    #         for item in order_totals:
-    #             item["percentage"] = 0
-
-    #     ctx = {
-    #         "order_totals": order_totals,
-    #         "max_revenue": max_value,
-    #         "y_range": y_range,
-    #     }
-        
-    #     return ctx
-
-
-
     def get_report(self, orders, start, end, range_type, segments=10):
         """
         Get report of order revenue split up in days, weeks, months, or years chunks.
@@ -204,37 +133,50 @@ class OrderStatsView(FormView):
         *segments* defines the number of labelling segments used for the y-axis.
         """
         start_time = start
+        diff = relativedelta(end, start)
 
-        # Определяем range_time в зависимости от типа диапазона
         if range_type == 'days':
             range_time = (end - start).days
-            delta = datetime.timedelta(days=1)
         elif range_type == 'weeks':
             range_time = (end - start).days // 7
-            delta = datetime.timedelta(weeks=1)
         elif range_type == 'months':
-            delta = relativedelta(months=1)
-            range_time = relativedelta(end, start).years * 12 + relativedelta(end, start).months
+            start_time = start_time.replace(day=1)
+            range_time = diff.years * 12 + diff.months + (1 if diff.days > 0 else 0)
         elif range_type == 'years':
-            delta = relativedelta(years=1)
-            range_time = relativedelta(end, start).years
+            start_time = start_time.replace(month=1, day=1)
+            range_time = diff.years + (1 if diff.months > 0 or diff.days > 0 else 0)
         else:
             raise ValueError("Invalid range_type. Must be 'days', 'weeks', 'months', or 'years'.")
 
-        # order_data = {"labels": [], "datasets": []}
         order_data = {}
         order_labels = []
         order_total = []
         order_count = []
 
         for _ in range(range_time):
-            end_time = start_time + delta
+            if range_type == 'days':
+                end_time = start_time + relativedelta(days=1)
+            elif range_type == 'weeks':
+                end_time = start_time + relativedelta(days=7)
+            elif range_type == 'months':
+                end_time = start_time + relativedelta(months=1)
+            elif range_type == 'years':
+                end_time = start_time + relativedelta(years=1) 
+
             report_orders = orders.filter(date_placed__gte=start_time, date_placed__lt=end_time)
             total = report_orders.aggregate(Sum("total"))["total__sum"] or D("0.0")
             count = report_orders.count()
             order_count.append(count) 
             order_total.append(int(total))
-            order_labels.append(end_time.strftime('%d.%m'))
+            if range_type == 'days':
+                order_labels.append(end_time.strftime('%d.%m'))
+            elif range_type == 'weeks':
+                order_labels.append(start_time.strftime('%d.%m') + "-" + end_time.strftime('%d.%m'))
+            elif range_type == 'months':
+                order_labels.append(start_time.strftime('%m.%Y'))
+            else:
+                order_labels.append(start_time.strftime('%Y'))
+
             start_time = end_time
 
         order_data["labels"] = order_labels
@@ -258,7 +200,6 @@ class OrderStatsView(FormView):
         ]
         
         return order_data, sum(order_count) > 0
-
 
     def get_data(self, filters):
         
@@ -361,6 +302,10 @@ class OrderStatsView(FormView):
             "start_date_years": start_dates["years"],
             "start_date": start_date,
             "end_time": end_date,
+            "report_datas": [],
+            "top_products_titles": [],
+            "top_products_quantities": [],
+            "top_products_sums": [],
         }
 
         # Добавление отчетов и статистики
@@ -387,18 +332,17 @@ class OrderStatsView(FormView):
             stats[f"lines_{period}"] = lines_period.count()
             stats[f"products_{period}"] = products.filter(date_created__range=(start_date, end_date)).count()
             
-            # stats[f"report_dict_{period}"] = self.get_report(orders, start, end_date, period)            
-            # stats[f"report_labels_{period}"] = report['labels']
-
-            stats[f"report_data_{period}"],  stats[f"report_exist_{period}"] = self.get_report(orders, start, end_date, period)
+            report,  stats[f"report_exist_{period}"] = self.get_report(orders, start, end_date, period)
+            stats["report_datas"].append(report)
 
             stats[f"top_products_{period}"] = top_products
-            stats[f"top_products_titles_{period}"] = [product['title'] for product in top_products]
-            stats[f"top_products_quantity_{period}"] = [product['total_quantity'] for product in top_products]
-            stats[f"top_products_sum_{period}"] = [int(product['total_sum']) for product in top_products]
+            stats["top_products_titles"].append([product['title'] for product in top_products])
+            stats["top_products_quantities"].append([product['total_quantity'] for product in top_products])
+            stats["top_products_sums"].append([int(product['total_sum']) for product in top_products])
+            
+            # Разбивка заказов по статусам
+            stats[f"order_status_breakdown_{period}"] = orders.filter(date_placed__range=(start_date, end_date)).order_by("status").values("status").annotate(freq=Count("id"))
 
-        # Разбивка заказов по статусам
-        stats["order_status_breakdown"] = orders.order_by("status").values("status").annotate(freq=Count("id"))
 
         return stats
 
@@ -519,21 +463,6 @@ class OrderStatsView(FormView):
 
         return stats
 
-
-    # def get_stats(self, filters):
-    #     orders = queryset_orders_for_user(self.request.user).filter(**filters)
-    #     stats = {
-    #         "total_orders": orders.count(),
-    #         "total_lines": Line.objects.filter(order__in=orders).count(),
-    #         "total_revenue": orders.aggregate(Sum("total"))[
-    #             "total__sum"
-    #         ]
-    #         or D("0.00"),
-    #         "order_status_breakdown": orders.order_by("status")
-    #         .values("status")
-    #         .annotate(freq=Count("id")),
-    #     }
-    #     return stats
 
 
 class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):

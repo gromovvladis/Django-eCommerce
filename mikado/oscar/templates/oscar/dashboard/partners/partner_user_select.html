@@ -1,23 +1,22 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 
 {% block title %}
-    {% trans "Link an existing user" %} | {{ partner.name }} | {% trans "Partners" %} | {{ block.super }}
+    Добавить персонал | {{ partner.name }} | Точки продажи | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:partner-list' %}">{% trans "Partners" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:partner-list' %}">Точки продажи</a></li>
             <li class="breadcrumb-item"><a href="{% url 'dashboard:partner-manage' pk=partner.id %}">{{ partner.name }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{% trans "Link an existing user" %}</li>
+            <li class="breadcrumb-item active" aria-current="page">Добавить персонал</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block navtext %}
-    {% trans "Link an existing user" %}
+    Добавить персонал
 {% endblock %}
 
 {% block dashboard_content %}
@@ -25,11 +24,13 @@
         <div class="card card-body">
             <form method="get" class="form-inline">
                 {% include 'oscar/dashboard/partials/form_fields_inline.html' with form=form %}
-                <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Searching...' %}">{% trans "Search" %}</button>
+                <button type="submit" class="btn btn-primary flex-fill" data-loading-text="Поиск..."><i class="fas fa-search"></i><span class="ml-2">Поиск</span></button>
                 {% if form.is_bound %}
-                    <a class="btn btn-secondary" href="{% url 'dashboard:partner-user-select' partner_pk=partner.id %}" >{% trans "Reset" %}</a>
+                    <a class="btn btn-danger ml-2" href="{% url 'dashboard:partner-user-select' partner_pk=partner.id %}">
+                        <i class="fa-regular fa-circle-xmark"></i>
+                    </a>
                 {% endif %}
-                <div style="margin-top:5px">{% trans "A partial email address can be entered (eg '@example.com') to match multiple addresses." %}</div>
+                <div style="margin-top:5px">Можно ввести частичный адрес электронной почты (например, «@example.com»), чтобы он соответствовал нескольким адресам.</div>
             </form>
         </div>
     {% endblock %}
@@ -41,8 +42,8 @@
                     {% block users_header %}
                         <thead>
                             <tr>
-                                <th>{% trans 'Email' %}</th>
-                                <th>{% trans 'First name' %}</th>
+                                <th>email</th>
+                                <th>name</th>
                                 {% comment %} <th>{% trans 'Last name' %}</th> {% endcomment %}
                                 <th>&nbsp;</th>
                             </tr>
@@ -57,13 +58,11 @@
                                     {% comment %} <td>{{ user.last_name|default:"-" }}</td> {% endcomment %}
                                     <td>
                                         {% if user in partner_users %}
-                                            {% blocktrans with name=partner.name %}
-                                                User is already linked to {{ name }}.
-                                            {% endblocktrans %}
+                                            User is already linked to {{ partner.name }}.
                                         {% else %}
                                             <form action="{% url 'dashboard:partner-user-link' partner_pk=partner.id user_pk=user.id %}" method="post">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Linking...' %}">{% trans 'Link user' %}</button>
+                                                <button type="submit" class="btn btn-primary" data-loading-text="Добавление...">Добавить</button>
                                             </form>
                                         {% endif %}
                                     </td>
@@ -75,7 +74,7 @@
             {% endwith %}
             {% include "oscar/dashboard/partials/pagination.html" %}
         {% else %}
-            {% trans "No users found." %}
+            Пользователи не найдены.
         {% endif %}
     {% endif %}
 {% endblock dashboard_content %}

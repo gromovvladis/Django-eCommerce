@@ -7,13 +7,12 @@
 {% load static %}
 
 {% block styles %}
-    {% comment %} {% compress css %}    {% endcomment %}
+    {% compress css %}   
     <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
     <link rel="stylesheet" href="{% static "css/air-datepicker.css" %}"/>
-    {% comment %} <link rel="stylesheet" href="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.css" %}" /> {% endcomment %}
     <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
-    {% comment %} {% endcompress %} {% endcomment %}
+    {% endcompress %}
 {% endblock %}
 
 {% block title %}Панель управления {{ block.super }}{% endblock %}
@@ -141,12 +140,10 @@
 
 {# Local scripts #}
 {% block scripts %}
-        {% comment %} {% compress js %} {% endcomment %}
+        {% compress js %}
             <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/oscar/ui.js" %}"></script>
             <script src="{% static "js/mousewheel/jquery.mousewheel.js" %}"></script>
-            {% comment %} <script src="{% static "js/bootstrap4-datetimepicker/moment-with-locales.min.js" %}"></script> {% endcomment %}
-            {% comment %} <script src="{% static "js/bootstrap4-datetimepicker/tempusdominus-bootstrap-4.min.js" %}"></script> {% endcomment %}
             <script src="{% static "js/inputmask/jquery.inputmask.min.js" %}"></script>
             <script src="{% static "js/select2/select2.min.js" %}"></script>
             <script src="{% static "js/jquery-draggable/jquery-draggable-min.js" %}"></script>
@@ -154,16 +151,17 @@
             <script src="{% static "js/oscar/dashboard.js" %}"></script>
             <script src="{% static "js/slider/slider.js" %}"></script>
             <script src="{% static "js/tinymce/jquery.tinymce.min.js" %}"></script>
-            <script src="{% static "js/dashboard/dashboard-sliders.js" %}"></script>
-            <script src="{% static "js/dashboard/navi.js" %}"></script>
-            <script src="{% static "js/dashboard/table.js" %}"></script>
-            <script src="{% static "js/dashboard/photo.js" %}"></script>
-            <script src="{% static "js/dashboard/meta.js" %}"></script>
-            <script src="{% static "js/dashboard/datepicker.js" %}"></script>
             <script src="{% static "js/datetimepicker/air-datepicker.js" %}"></script>
-            <script src="{% static "js/dashboard/phone-mask.js" %}"></script>
-            <script src="{% static "js/dashboard/map.js" %}"></script>
-        {% comment %} {% endcompress %} {% endcomment %}
+
+            <script src="{% static "js/dashboard/index/dashboard-sliders.js" %}"></script>
+            <script src="{% static "js/dashboard/utils/navi.js" %}"></script>
+            <script src="{% static "js/dashboard/utils/table.js" %}"></script>
+            <script src="{% static "js/dashboard/utils/photo.js" %}"></script>
+            <script src="{% static "js/dashboard/utils/meta.js" %}"></script>
+            <script src="{% static "js/dashboard/utils/datepicker.js" %}"></script>
+            <script src="{% static "js/dashboard/utils/phone-mask.js" %}"></script>
+            <script src="{% static "js/dashboard/utils/map.js" %}"></script>
+        {% endcompress %}
         <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
 {% endblock %}

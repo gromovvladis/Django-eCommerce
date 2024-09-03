@@ -1,14 +1,16 @@
 # pylint: disable=attribute-defined-outside-init
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import Permission
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.views import generic
+from django_tables2 import SingleTableView
 
 from oscar.apps.customer.utils import normalise_email
 from oscar.core.compat import get_user_model
-from oscar.core.loading import get_classes, get_model
+from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views import sort_queryset
 
 User = get_user_model()
@@ -17,8 +19,7 @@ Partner = get_model("partner", "Partner")
     PartnerSearchForm,
     PartnerCreateForm,
     PartnerAddressForm,
-    NewUserForm,
-    UserEmailForm,
+    UserPhoneForm,
     ExistingUserForm,
 ) = get_classes(
     "dashboard.partners.forms",
@@ -26,22 +27,41 @@ Partner = get_model("partner", "Partner")
         "PartnerSearchForm",
         "PartnerCreateForm",
         "PartnerAddressForm",
-        "NewUserForm",
-        "UserEmailForm",
+        "UserPhoneForm",
         "ExistingUserForm",
     ],
 )
+PartnerListTable = get_class("dashboard.partners.tables", "PartnerListTable")
+StaffCreationForm = get_class("dashboard.users.forms", "StaffCreationForm")
 
-
-class PartnerListView(generic.ListView):
-    model = Partner
-    context_object_name = "partners"
+class PartnerListView(SingleTableView):
+    context_table_name = "partners"
     template_name = "oscar/dashboard/partners/partner_list.html"
     form_class = PartnerSearchForm
+    table_class = PartnerListTable
+
+    def get_table(self, **kwargs):
+        table = super().get_table(**kwargs)
+
+        if self.form.is_valid() and any(self.form.cleaned_data.values()):
+            table.caption = "Результаты поиска: %s" % self.object_list.count()
+
+        return table
+    
+    def get_table_pagination(self, table):
+        return dict(per_page=settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["queryset_description"] = self.description
+        ctx["form"] = self.form
+        ctx["is_filtered"] = self.is_filtered
+        return ctx  
 
     def get_queryset(self):
-        qs = self.model._default_manager.all()
-        qs = sort_queryset(qs, self.request, ["name"])
+        qs = Partner._default_manager.prefetch_related("addresses", "users").all()
+        # qs = self.filter_queryset(qs)
+        # qs = sort_queryset(qs, self.request, ["name"])
 
         self.description = "Все точки продажи"
 
@@ -52,21 +72,49 @@ class PartnerListView(generic.ListView):
         if not self.form.is_valid():
             return qs
 
-        data = self.form.cleaned_data
+        qs = self.apply_search(qs)
 
-        if data["name"]:
-            qs = qs.filter(name__icontains=data["name"])
-            self.description = "Точки продаж соответствующие '%s'" % data["name"]
-            self.is_filtered = True
+        # queryset = queryset.annotate(
+        #     min_price=Case(
+        #         When(structure="parent", then=Min("children__stockrecords__price")),
+        #         default=Min('stockrecords__price'),
+        #         output_field=DecimalField()
+        #     ),
+        #     max_price=Case(
+        #         When(structure="parent", then=Max("children__stockrecords__price")),
+        #         default=Max('stockrecords__price'),
+        #         output_field=DecimalField()
+        #     ),
+        #     old_price=Case(
+        #         When(structure="parent", then=Max("children__stockrecords__old_price")),
+        #         default=Max('stockrecords__old_price'),
+        #         output_field=DecimalField()
+        #     ),
+        #     variants=Count("children"),
+        # )
 
         return qs
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["queryset_description"] = self.description
-        ctx["form"] = self.form
-        ctx["is_filtered"] = self.is_filtered
-        return ctx
+    def apply_search(self, queryset):
+        """
+        Search through the filtered queryset.
+
+        We must make sure that we don't return search results that the user is not allowed
+        to see (see filter_queryset).
+        """
+        self.form = self.form_class(self.request.GET)
+
+        if not self.form.is_valid():
+            return queryset
+
+        data = self.form.cleaned_data
+
+        name = data.get("name")
+        if name:
+            queryset = queryset.filter(name__icontains=data["name"])
+            self.is_filtered = True
+
+        return queryset.distinct()
 
 
 class PartnerCreateView(generic.CreateView):
@@ -112,12 +160,14 @@ class PartnerManageView(generic.UpdateView):
         ctx["partner"] = self.partner
         ctx["title"] = self.partner.name
         ctx["users"] = self.partner.users.all()
+        if self.object.line1:
+            ctx['line1'] = self.object.line1
         return ctx
 
     def form_valid(self, form):
         messages.success(
             self.request,
-            "точка продажи '%s' успешно обновлена." % self.partner.name,
+            "Точка продажи '%s' успешно обновлена." % self.partner.name,
         )
         self.partner.name = form.cleaned_data["name"]
         self.partner.save()
@@ -130,7 +180,7 @@ class PartnerDeleteView(generic.DeleteView):
 
     def get_success_url(self):
         messages.success(
-            self.request, "ТОчка продажи '%s' успешно удалена." % self.object.name
+            self.request, "Точка продажи '%s' успешно удалена." % self.object.name
         )
         return reverse("dashboard:partner-list")
 
@@ -143,7 +193,7 @@ class PartnerDeleteView(generic.DeleteView):
 class PartnerUserCreateView(generic.CreateView):
     model = User
     template_name = "oscar/dashboard/partners/partner_user_form.html"
-    form_class = NewUserForm
+    form_class = StaffCreationForm
 
     def dispatch(self, request, *args, **kwargs):
         self.partner = get_object_or_404(Partner, pk=kwargs.get("partner_pk", None))
@@ -161,14 +211,14 @@ class PartnerUserCreateView(generic.CreateView):
         return kwargs
 
     def get_success_url(self):
-        name = self.object.get_full_name() or self.object.email
+        name = self.object.get_full_name() or self.object.username
         messages.success(self.request, "Пользователь '%s' успешно создан." % name)
         return reverse("dashboard:partner-list")
 
 
 class PartnerUserSelectView(generic.ListView):
     template_name = "oscar/dashboard/partners/partner_user_select.html"
-    form_class = UserEmailForm
+    form_class = UserPhoneForm
     context_object_name = "users"
 
     def dispatch(self, request, *args, **kwargs):

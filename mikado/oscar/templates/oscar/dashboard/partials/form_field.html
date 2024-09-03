@@ -6,13 +6,22 @@
     {% block control_group %}
         <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width">
             {% block label %}
-                {% if not nolabel %}
+                {% if field.name == "line1" %}
+                
+                <div class="d-flex align-items-center justify-content-between">
+                    <label for="{{ field.auto_id }}" class="{% if style|default:"stacked" != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">
+                        {{ field.label|safe }}
+                    </label>
+                    <button type="button" id="clean_address" class="v-delivery--clear text-danger col-form-label">
+                        <i class="fa-solid fa-trash"></i> Очистить
+                    </button>
+                </div>
+                {% elif not nolabel %}
                     <label for="{{ field.auto_id }}" class="{% if style|default:"stacked" != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">
                         {{ field.label|safe }}
                     </label>
                 {% endif %}
             {% endblock %}
-
             {% block controls %}
                 <div class="{% if style|default:"stacked" != 'stacked' %}col-sm-8{% endif %}{% if field.widget_type == 'checkbox' or field.widget_type == 'radioselect' %} form-check{% endif %}">
                     {% block widget %}

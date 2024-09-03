@@ -1,8 +1,7 @@
 from django.conf import settings
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django_tables2 import A, Column, LinkColumn, TemplateColumn, ManyToManyColumn
-from django.db.models import Count
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
@@ -15,7 +14,6 @@ AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
 StockAlert = get_model("partner", "StockAlert")
-
 
 
 class ProductClassTable(DashboardTable):
