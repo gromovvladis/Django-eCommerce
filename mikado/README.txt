@@ -42,13 +42,13 @@
 
     Команды от имени "postgres=#": (точка с запятой в конце обязательны)
         CREATE DATABASE mikado; / создаем бд
-        CREATE USER user_db WITH PASSWORD 'PASSWORD'; / создаем пользователя с именем и паролем
+        CREATE USER user_db WITH PASSWORD 'mikadosushi25'; / создаем пользователя с именем и паролем
         ALTER ROLE user_db SET client_encoding TO 'utf8'; / кодировка
         ALTER ROLE user_db SET default_transaction_isolation TO 'read committed'; / хз
         ALTER ROLE user_db SET timezone TO 'UTC'; / время в офрмате utc
         GRANT ALL PRIVILEGES ON DATABASE mikado TO user_db; / все привелении для бд mikado пользователю user_db
         ALTER DATABASE mikado OWNER TO user_db; / передаем владение бд пользователю 
-        \q / выйти из пользователя "postgres=#"
+        \q     / выйти из пользователя "postgres=#"
 
 
 4. Проверяем версию Python и создаем venv
@@ -206,9 +206,9 @@
     ssh vladis@5.35.89.111
     source venv/bin/activate
     cd mikado
+    git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
-    git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py collectstatic
     python manage.py compress
     sudo supervisorctl restart all
