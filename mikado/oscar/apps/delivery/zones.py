@@ -33,7 +33,7 @@ class ZonesUtils:
                 crd = crd.split(",")
                 coords.append((D(crd[0]), D(crd[1])))
 
-            polygon_zones[zona.number] = Polygon(coords)
+            polygon_zones[zona.id] = Polygon(coords)
 
         return polygon_zones
 

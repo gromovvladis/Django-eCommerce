@@ -172,9 +172,6 @@ class DeliveryNowView(View):
         return 50
 
 
-
-
-
 class DeliveryLaterView(APIView):
     """
     Время доставки к определенному времени

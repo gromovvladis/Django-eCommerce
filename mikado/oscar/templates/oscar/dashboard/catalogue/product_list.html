@@ -34,7 +34,7 @@
                 <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
             </div>
             <div class="card card-body dropdown-list collapse" id="card-body">
-                <h2 class="mb-3">Создание</h2>
+                <h2 class="mb-4">Создание</h2>
                 <form action="{% url 'dashboard:catalogue-product-create' %}" method="get" class="form-inline fill-width justify-space-between">
                     {% include "oscar/dashboard/partials/form_fields_inline.html" with form=productclass_form %}
                     <div class="btn-form d-flex">
@@ -46,7 +46,7 @@
                         </button>
                     </div>
                 </form>
-                <h2 class="my-3">Поиск</h2>
+                <h2 class="my-4">Поиск</h2>
                 <form method="get" class="form-inline fill-width justify-space-between">
                     <div class="d-flex form-row">
                         {% for name, value in request.GET.items %}

@@ -8,6 +8,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from oscar.core import compat
 from django.contrib.auth.models import Group
 
+
 class Profile(models.Model):
     """
     Dummy profile model used for testing

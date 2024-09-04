@@ -165,6 +165,58 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
+        "label": "Доставка",
+        "icon": "fas fa-delivery",
+        "children": [
+            {
+                "label": "Текущие",
+                "url_name": "dashboard:delivery-active",
+                "notification": "delivery_active",
+            },
+            {
+                "label": "Все доставки",
+                "url_name": "dashboard:delivery-list",
+            },
+            {
+                "label": "Заказы на кухне",
+                "url_name": "dashboard:delivery-partners",
+                "notification": "delivery_partner",
+            },
+            {
+                "label": "Заказы в доставке",
+                "url_name": "dashboard:delivery-couriers",
+                "notification": "delivery_couriers",
+            },
+            {
+                "label": "Статистика",
+                "url_name": "dashboard:delivery-stats",
+            },
+            {
+                "label": "Зоны доставки",
+                "url_name": "dashboard:delivery-zones",
+            },
+            {
+                "label": "Курьеры",
+                "url_name": "dashboard:delivery-couriers-list",
+            },
+
+        ],
+    },
+    {
+        "label": "Оплата",
+        "icon": "fas fa-credit-card",
+        "children": [
+            {
+                "label": "Список платежей",
+                "url_name": "dashboard:payments-list",
+            },
+            {
+                "label": "Список возвратов",
+                "url_name": "dashboard:refunds-list",
+            },
+        ]
+    },
+    {
         "label": "Пользователи",
         "icon": "fas fa-users",
         "children": [
@@ -211,76 +263,6 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
-        "label": "Контент",
-        "icon": "fas fa-newspaper",
-        "children": [
-            {
-                "label": "Страницы",
-                "url_name": "dashboard:page-list",
-            },
-            {
-                "label": "Шаблоны Email",
-                "url_name": "dashboard:email-list",
-            },
-            {
-                "label": "Шаблоны SMS",
-                "url_name": "dashboard:sms-list",
-            },
-            {
-                "label": "Отправленные СМС",
-                "url_name": "dashboard:sended-sms",
-            },
-        ],
-    },
-    {
-        "label": "Оплата",
-        "icon": "fas fa-credit-card",
-        "children": [
-            {
-                "label": "Список платежей",
-                "url_name": "dashboard:payments-list",
-            },
-            {
-                "label": "Список возвратов",
-                "url_name": "dashboard:refunds-list",
-            },
-        ]
-    },
-    {
-        "label": "Доставка",
-        "icon": "fas fa-delivery",
-        "children": [
-            {
-                "label": "Текущие",
-                "url_name": "dashboard:delivery-now",
-                "notification": "delivery_now",
-            },
-            {
-                "label": "Заказы на кухне",
-                "url_name": "dashboard:delivery-kitchen",
-                "notification": "delivery_kitchen",
-            },
-            {
-                "label": "Заказы в доставке",
-                "url_name": "dashboard:delivery-couriers",
-                "notification": "delivery_couriers",
-            },
-            {
-                "label": "Статистика",
-                "url_name": "dashboard:delivery-stats",
-            },
-            {
-                "label": "Зоны доставки",
-                "url_name": "dashboard:delivery-zones",
-            },
-            {
-                "label": "Курьеры",
-                "url_name": "dashboard:delivery-couriers-list",
-            },
-
-        ],
-    },
-    {
         "label": "Tillypad",
         "icon": "fas fa-tillypad",
         "children": [
@@ -321,6 +303,28 @@ OSCAR_DASHBOARD_NAVIGATION = [
             {
                 "label": "Курьеры",
                 "url_name": "dashboard:telegram-couriers",
+            },
+        ],
+    },
+    {
+        "label": "Контент",
+        "icon": "fas fa-newspaper",
+        "children": [
+            {
+                "label": "Страницы",
+                "url_name": "dashboard:page-list",
+            },
+            {
+                "label": "Шаблоны Email",
+                "url_name": "dashboard:email-list",
+            },
+            {
+                "label": "Шаблоны SMS",
+                "url_name": "dashboard:sms-list",
+            },
+            {
+                "label": "Отправленные СМС",
+                "url_name": "dashboard:sended-sms",
             },
         ],
     },
@@ -392,8 +396,9 @@ OSCAR_INITIAL_LINE_STATUS = 'Новый заказ'
 
 # This dict defines the new order statuses than an order can move to
 OSCAR_ORDER_STATUS_PIPELINE = {
-    'Ожидает оплаты': ('Обрабатывается', 'Отменен'), \
     'Обрабатывается': ('Готовится', 'Отменен'),
+    'Ожидает оплаты': ('Оплачен', 'Отменен'),
+    'Оплачен': ('Готовится', 'Отменен'),
     'Готовится': ('Готов', 'Отменен'),
     'Готов': ('Доставляется', 'Завершен', 'Отменен'),
     'Доставляется': ('Завершен', 'Отменен'),
@@ -411,33 +416,33 @@ OSCAR_ORDER_STATUS_CASCADE = {
     'Отменен': 'Отменен',
 }
 
-# Payment
-# ====
-
-# PAYMENT_SUCCESS_URL=
-# PAYMENT_CANCEL_URL=
+ORDER_ACTIVE_STATUSES = (
+    'Готовится', 
+    'Готов', 
+    'Доставляется',
+)
 
 # Payment choices
 WEBSHOP_PAYMENT_CHOICES = (
-    ('SBP', 'Yoomoney'),
-    ('CARD', 'Карта'),
-    ('CASH', 'Наличными курьеру при получении'),
-    ('COURIER-CARD', 'Картой курьеру при получении'),
+    ('SBP', 'СБП Онлайн'),
+    ('CARD', 'Карта Онлайн'),
+    ('CASH', 'Наличные'),
+    # ('COURIER-CARD', 'Картой курьеру при получении'),
 )
 
-ONLINE_PAYMENTS = [
+ONLINE_PAYMENTS = (
     'CARD',
     'SBP',
-]
+)
 
-OFFLINE_PAYMENTS = [
+OFFLINE_PAYMENTS = (
     'CASH',
-    'COURIER-CARD',
-]
+    # 'COURIER-CARD',
+)
 
-CASH_PAYMENTS = [
+CASH_PAYMENTS = (
     'CASH',
-]
+)
 
 PAYMENT_STATUS = {
     'succeeded': 'Успешная оплата',

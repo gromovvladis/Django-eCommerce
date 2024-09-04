@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import Permission
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
@@ -130,9 +131,19 @@ class PartnerCreateView(generic.CreateView):
 
     def get_success_url(self):
         messages.success(
-            self.request, "Точка продажи '%s' успешно создана." % self.object.name
+            self.request, "Точка продажи '%s' успешно создана. Доступно добавление персонала." % self.object.name
         )
-        return reverse("dashboard:partner-list")
+        # Используем reverse для получения строки URL
+        return reverse("dashboard:partner-manage", kwargs={"pk": self.object.id})
+        
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.address = self.object.addresses.model(partner=self.object)
+        self.object.address.line1 = form.cleaned_data["line1"]
+        self.object.address.coords_long = form.cleaned_data["coords_long"]
+        self.object.address.coords_lat = form.cleaned_data["coords_lat"]
+        self.object.address.save()
+        return super().form_valid(form)
 
 
 class PartnerManageView(generic.UpdateView):
@@ -165,12 +176,12 @@ class PartnerManageView(generic.UpdateView):
         return ctx
 
     def form_valid(self, form):
+        self.partner.name = form.cleaned_data["name"]
+        self.partner.save()
         messages.success(
             self.request,
             "Точка продажи '%s' успешно обновлена." % self.partner.name,
         )
-        self.partner.name = form.cleaned_data["name"]
-        self.partner.save()
         return super().form_valid(form)
 
 

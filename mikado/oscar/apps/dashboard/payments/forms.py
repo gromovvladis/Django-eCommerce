@@ -155,7 +155,7 @@ class ShippingAddressForm(PhoneNumberMixin, AbstractAddressForm):
 
 
 class OrderStatusForm(forms.Form):
-    new_status = forms.ChoiceField(label="Статус нового заказа", choices=())
+    new_status = forms.ChoiceField(label="Новый статус", choices=())
 
     def __init__(self, order, *args, **kwargs):
         super().__init__(*args, **kwargs)

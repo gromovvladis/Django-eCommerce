@@ -598,9 +598,9 @@ if (line1_container){
         var color = ""
         deliveryZones.each(function (zona) {
             if (zona.properties.get('available')) {
-                color = "#59ff85"
+                color = "#59ff85";
             } else {
-                color = "#ed4543"
+                color = "#ed4543";
             }
             zona.options.set({
                 fillColor: color,

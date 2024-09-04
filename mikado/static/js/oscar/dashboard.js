@@ -366,19 +366,28 @@ var oscar = (function(o, $) {
             },
             initTable: function() {
                 var table = $('form table'),
-                    input = $('<input type="checkbox" />').css({
-                        'vertical-align': 'top'
-                    });
-                    // input = $('<input type="checkbox" />').css({
-                    //     'margin-right': '5px',
-                    //     'vertical-align': 'top'
-                    // });
+                checkboxes = document.querySelectorAll('input[name="selected_line"]'),
+                actionsLinesDiv = document.getElementById('actions-lines'),
+                input = $('<input type="checkbox"/>');
                 $('th:first', table).prepend(input);
+                function toggleActionsDiv() {
+                    const isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+                    if (isChecked) {
+                        actionsLinesDiv.classList.remove('d-none');
+                    } else {
+                        actionsLinesDiv.classList.add('d-none');
+                    }
+                };
                 $(input).change(function(){
                     $('tr', table).each(function() {
                         $('td:first input', this).prop("checked", $(input).is(':checked'));
                     });
+                    toggleActionsDiv();
                 });
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', toggleActionsDiv);
+                });
+                toggleActionsDiv();
             }
         },
         reordering: (function() {

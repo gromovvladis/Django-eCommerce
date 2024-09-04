@@ -100,8 +100,8 @@ def get_notif(child, models):
             'all_orders': all_orders,
             'feedback_product': feedback_product,
             'feedback_order': feedback_order,
-            'delivery_now': delivery_now,
-            'delivery_kitchen': delivery_kitchen,
+            'delivery_active': delivery_active,
+            'delivery_partner': delivery_partner,
             'delivery_couriers': delivery_couriers,
         }
         function_to_call = function_map.get(child["notification"])
@@ -117,7 +117,7 @@ def stock_alerts(models):
 
 def active_orders(models):
     orders = models['orders']
-    active_statuses = ['Ожидает оплаты', 'Оплачен', 'Обрабатывается', 'Готовится', 'Готов', 'Доставляется']
+    active_statuses = settings.ORDER_ACTIVE_STATUSES
     return orders.filter(status__in=active_statuses).count()
 
 def all_orders(models):
@@ -132,11 +132,11 @@ def feedback_order(models):
     order_review = models['order_review']
     return order_review.count()
 
-def delivery_now(models):
+def delivery_active(models):
     delivery = models['delivery']
     return delivery.count()
 
-def delivery_kitchen(models):
+def delivery_partner(models):
     delivery = models['delivery']
     return delivery.count()
 
