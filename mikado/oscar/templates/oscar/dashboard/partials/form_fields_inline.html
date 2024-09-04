@@ -4,7 +4,7 @@
     {% if field.is_hidden %}
         {{ field }}
     {% else %}
-        <div class="form-group form-flex-inline{% if field.errors %} error{% endif %} my-2">
+        <div class="form-group form-flex-inline{% if field.errors %} error{% endif %}">
             {{ field.label_tag }}
             {% render_field field class+='form-control' %}
             {% for error in field.errors %}

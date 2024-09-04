@@ -740,6 +740,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         ctx["form"] = self.form
         ctx["order_statuses"] = Order.all_statuses()
         ctx["search_filters"] = self.get_search_filter_descriptions()
+        ctx["title"] = "Все заказы"
         return ctx
 
     def is_csv_download(self):
@@ -838,7 +839,7 @@ class OrderActiveListView(OrderListView):
         """
         Build the queryset for this list.
         """
-        active_statuses = ["Обрабатывается", "Готовится", "Готов", "Доставляется"]
+        active_statuses = settings.ORDER_ACTIVE_STATUSES
         queryset = sort_queryset(
             self.base_queryset, self.request, ["number", "total"]
         ).filter(status__in=active_statuses)
@@ -916,6 +917,11 @@ class OrderActiveListView(OrderListView):
                 output_field=DurationField()
             )
         )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = "Активные заказы"
+        return ctx
 
 
 class OrderDetailView(EventHandlerMixin, DetailView):

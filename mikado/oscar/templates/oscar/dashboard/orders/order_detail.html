@@ -65,18 +65,6 @@
                         <th>Сумма заказов</th>
                         <td>{{ user_info.order_amount|default:"-"|currency }}</td>
                     </tr>
-                    {% comment %} <tr>
-                        <th>Имя</th>
-                        <th>Номер телефона</th>
-                        <th>Дата регистрации</th>
-                        <th>Количество заказов</th>
-                    </tr>
-                    <tr>
-                        <td>{{ order.user.get_full_name|default:"-" }}</td>
-                        <td>{{ order.user.username|default:"-" }}</td>
-                        <td>{{ order.user.date_joined|default:"-" }}</td>
-                        <td>{{ user_info|default:"1" }}</td>
-                    </tr> {% endcomment %}
                 {% else %}
                     <tr><td>Аккаунт пользователя удален</td></tr>
                 {% endif %}
@@ -85,7 +73,7 @@
     {% endblock customer_information %}
 
     {% block order_information %}
-        <table class="table table-striped table-bordered table-hover">
+        <table class="table table-striped table-bordered table-hover" id="order-table">
             <caption class="table-caption" data-target="#orderinfo-body" data-toggle="collapse" aria-controls="orderinfo-body" aria-expanded="false">
                 <div class="d-flex justify-space-between" >
                     <h3>
@@ -136,33 +124,6 @@
                         </span>
                     </td>
                 </tr>
-
-            {% comment %} 
-                <tr>
-                    <th>Сумма заказа</th>
-                    <th>Время заказа</th>
-                    <th>Дата</th>
-                    <th>Статус</th>
-                </tr>
-                <tr>
-                    <td>{{ order.total|currency:order.currency }}</td>
-                    <td>
-                        {{ order.order_time }}
-                    </td>
-                    <td>
-                        Создан: {{ order.date_placed|date }} {{ order.date_placed|time }}
-                        {% if order.date_finish %}
-                            <br>
-                            Завершен:  {{ order.date_finish|date }} {{ order.date_finish|time }}
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="badge badge-96 {% if order.status == "Завершен" %}badge-success{% elif order.status == "Отменен" %}badge-danger{% elif order.status == "Готовится" %}badge-info{% else %}badge-warning{% endif %}">
-                            {{ order.status|default:"N/A" }}
-                        </span>
-                    </td>
-                </tr> 
-            {% endcomment %}
             </tbody>
         </table>
     {% endblock order_information %}
@@ -170,16 +131,10 @@
     {% block additional_order_information %}
     {% endblock additional_order_information %}
 
-
-    {% comment %} <div class="page-header d-flex justify-content-between">
-        <h1>Детали заказа</h1>
-    </div> {% endcomment %}
-
-
     <div class="tabbable dashboard">
 
-        <ul class="nav nav-tabs mb-3 mb-lg-4 p-0" role="tablist">
-            {% block nav_tabs %}
+        {% block nav_tabs %}
+            <ul class="nav nav-tabs mb-3 mb-lg-4 p-0" role="tablist">
                 <div class="tabs-button-wrapper">
                     <div class="nav tabs-button d-flex fill">
                         <div class="tabs-button__active-block" style="width: 135px; left: 0px;"><div class="fill-width fill-height"></div></div>
@@ -191,15 +146,19 @@
                         </button>
                         <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'shipping' %}active{% endif %}" href="#shipping" data-toggle="tab">
                             <i class="fa-solid fa-truck-fast"></i>
-                            <span>
-                                Доставка
-                            </span>
+                            <span>Доставка</span>
+                            {% if order.shipping_address %}
+                                <i class="spinner-border-sm badge-info rounded-circle ml-1"></i>
+                            {% endif %}
                         </button>
                         <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'payment' %}active{% endif %}" href="#payment" data-toggle="tab">
                             <i class="fa-regular fa-credit-card"></i>
-                            <span>
-                                Оплата
-                            </span>
+                            <span>Оплата</span>
+                            {% if order_paid >= order.total %}
+                                <i class="spinner-border-sm badge-success rounded-circle ml-1"></i>
+                            {% else %}
+                                <i class="spinner-border-sm badge-danger rounded-circle ml-1"></i>
+                            {% endif %}
                         </button>
                         <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'discounts' %}active{% endif %}" href="#discounts" data-toggle="tab">
                             <i class="fa-solid fa-percent"></i>
@@ -209,14 +168,17 @@
                         </button>
                         <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'notes' %}active{% endif %}" href="#notes" data-toggle="tab">
                             <i class="fa-regular fa-note-sticky"></i>
-                            <span>
-                                Заметки
-                            </span>
+                            <span>Заметки</span>
+                            {% with notes=order.notes.all %}
+                                {% if notes %}
+                                    <div class="dropdown-item-badge">{{ notes.count }}</div>
+                                {% endif %}
+                            {% endwith %}
                         </button>
                     </div>
                 </div>
-            {% endblock nav_tabs %}
-        </ul>
+            </ul>
+        {% endblock nav_tabs %}
 
         <div class="tab-content">
             <div class="tab-pane fade {% if active_tab == 'lines' %}show active{% endif %}" id="lines" role="tabpanel">
@@ -231,6 +193,7 @@
                 </div>
                 <form id="order_lines_form" method="post" class="form-inline1">
                     {% csrf_token %}
+                    
                     {% block order_lines %}
                         <table class="table table-striped table-bordered table-hover">
                             <thead>
@@ -244,7 +207,6 @@
                                     <th>Точка продажи</th>
                                     <th>SKU</th>
                                     <th>Цена</th>
-                                    {% comment %} <th>{% trans "Actions" %}</th> {% endcomment %}
                                     <th></th>
                                 </tr>
                             </thead>
@@ -286,7 +248,6 @@
                                     <td colspan="8"></td>
                                     <th>Скидки</th>
                                     <td class="text-right">{{ order.total_discount|currency:order.currency }}</td>
-                                    {% comment %} <td></td> {% endcomment %}
                                 </tr>
                                 {% with discounts=order.basket_discounts %}
                                     {% if discounts %}
@@ -294,7 +255,6 @@
                                             <td colspan="8"></td>
                                             <th>Сумма заказа без скидки</th>
                                             <td class="text-right">{{ order.basket_total_before_discounts|currency:order.currency }}</td>
-                                            {% comment %} <td></td> {% endcomment %}
                                         </tr>
                                         {% for discount in discounts %}
                                             <tr>
@@ -305,21 +265,18 @@
                                                 </td>
                                                 <td class="text-right"></td>
                                                 <td class="text-right">- {{ discount.amount|currency:order.currency }}</td>
-                                                {% comment %} <td></td> {% endcomment %}
                                             </tr>
                                         {% endfor %}
                                         <tr>
                                             <td colspan="8"></td>
                                             <th>Сумма заказа со скидкой</th>
                                             <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
-                                            {% comment %} <td></td> {% endcomment %}
                                         </tr>
                                     {% else %}
                                         <tr>
                                             <td colspan="8"></td>
                                             <th>Продукты</th>
                                             <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
-                                            {% comment %} <td></td> {% endcomment %}
                                         </tr>
                                     {% endif %}
                                 {% endwith %}
@@ -329,7 +286,6 @@
                                         <td colspan="8"></td>
                                         <td>Доставка без скидки</td>
                                         <td class="text-right">{{ order.shipping_before_discounts|currency:order.currency }}</td>
-                                        {% comment %} <td></td> {% endcomment %}
                                     </tr>
                                     {% for discount in order.shipping_discounts %}
                                         <tr>
@@ -340,21 +296,18 @@
                                             </td>
                                             <td></td>
                                             <td class="text-right">- {{ discount.amount|currency:order.currency }}</td>
-                                            {% comment %} <td></td> {% endcomment %}
                                         </tr>
                                     {% endfor %}
                                     <tr>
                                         <td colspan="8"></td>
                                         <th>Доставка</th>
                                         <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
-                                        {% comment %} <td></td> {% endcomment %}
                                     </tr>
                                 {% else %}
                                     <tr>
                                         <td colspan="8"></td>
                                         <th>Доставка</th>
                                         <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
-                                        {% comment %} <td></td> {% endcomment %}
                                     </tr>
                                 {% endif %}
 
@@ -365,7 +318,6 @@
                                                 <td colspan="8"></td>
                                                 <th>Доплата {{ charge.name }}</th>
                                                 <th class="text-right">{{ charge.money|currency:order.currency }}</th>
-                                                {% comment %} <td></td> {% endcomment %}
                                             </tr>
                                         {% endfor %}
                                     {% endif %}
@@ -375,18 +327,20 @@
                                     <td colspan="8"></td>
                                     <th>Итого</th>
                                     <th class="text-right">{{ order.total|currency:order.currency }}</th>
-                                    {% comment %} <td></td> {% endcomment %}
                                 </tr>
                             </tbody>
                         </table>
                     {% endblock order_lines %}
-
-                    {% comment %}
-                        This is the important block within this template: you will almost certainly want to
-                        override this block to provide your own form widgets that suit your order processing
-                        flow.  The default contents shows a range of widgets - more than is sensible really.
-                    {% endcomment %}
+                    
                     {% block line_actions %}
+                    <div class="d-none mb-4" id="actions-lines">
+                        <div class="table-header">
+                            <div class="d-flex justify-space-between" >
+                                <h3>
+                                    <i class="fa-solid fa-rotate"></i> Действия
+                                </h3>
+                            </div>
+                        </div>
                         <div class="card card-body bg-light">
                             <h3>С выбранными позициями:</h3>
                             <div class="form-inline mb-sm-2">
@@ -452,67 +406,83 @@
                                 <button type="submit" class="btn btn-primary">Подтвердить</button>
                             </div>
                         </div>
+                    </div>
                     {% endblock line_actions %}
-                </form>
-
-                <form method="post" id="order_status_form" class="mb-3">
-                    {% csrf_token %}
-                    {% block order_actions %}
-                        <div class="card card-body bg-light">
-                            <h3><i class="fas fa-exclamation-triangle"></i> Изменить статус заказа:</h3>
-                            {% if order_status_form.has_choices %}
-                                {% include "oscar/dashboard/partials/form_fields.html" with form=order_status_form %}
-                                <input type="hidden" value="change_order_status" name="order_action" />
-                                <div class="flex-nowrap">
-                                    <button type="submit" class="btn btn-primary">Выберете статус</button>
-                                </div>
-                            {% else %}
-                                Статус этого заказа нельзя изменить.
-                            {% endif %}
-                        </div>
-                    {% endblock %}
                 </form>
 
                 {% block order_status_changes %}
                     <div class="table-header" data-target="#status-body" data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
                         <div class="d-flex justify-space-between" >
                             <h3>
-                                <i class="fa-solid fa-rotate"></i> Изменения статуса заказа
+                                <i class="fas fa-exclamation-triangle"></i>  Cтатус заказа
                             </h3>
                             <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
                             <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
                         </div>
                     </div>
-                    {% with status_changes=order.status_changes.all %}
-                        <table class="table table-striped table-bordered table-hover collapse" id="status-body">
-                            {% if status_changes %}
-                                <thead>
-                                    <tr>
-                                        <th>Старый статус</th>
-                                        <th>Новый статус</th>
-                                        <th>Дата</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for status_change in status_changes %}
+                    <div class="collapse" id="status-body">
+                        <form method="post" id="order_status_form">
+                            {% csrf_token %}
+                            {% block order_actions %}
+                                <div class="card card-body mb-3">
+                                    <h3>Изменить статус заказа:</h3>
+                                    {% if order_status_form.has_choices %}
+                                        <div class="form-inline fill-width d-flex justify-content-between">
+                                            <div class="form-group form-flex-inline">
+                                                {% include "oscar/dashboard/partials/form_fields.html" with form=order_status_form %}
+                                            </div>
+                                            <input type="hidden" value="change_order_status" name="order_action" />
+                                            <div class="btn-form d-flex">
+                                                <button class="btn btn-primary flex-fill" type="submit" data-loading-text="Изменение...">
+                                                    <i class="fas fa-search"></i>
+                                                    <span class="ml-2">
+                                                        Изменить статус
+                                                    </span>
+                                                </button>                                                
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        Статус этого заказа нельзя изменить.
+                                    {% endif %}
+                                </div>
+                            {% endblock %}
+                        </form>
+                        {% with status_changes=order.status_changes.all %}
+                            <table class="table table-striped table-bordered table-hover" >
+                                {% if status_changes %}
+                                <caption>
+                                    <h3>
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                        История изменений статуса
+                                    </h3>
+                                </caption>
+                                    <thead>
                                         <tr>
-                                            <td>{{ status_change.old_status }}</td>
-                                            <td>{{ status_change.new_status }}</td>
-                                            <td>{{ status_change.date_created }}</td>
+                                            <th>Старый статус</th>
+                                            <th>Новый статус</th>
+                                            <th>Дата</th>
                                         </tr>
-                                    {% endfor %}
-                                </tbody>
-                            {% else %}
-                                <tbody>
-                                    <tr>
-                                        <td class="empty">Нет изменений статуса</td>
-                                    </tr>
-                                </tbody>
-                            {% endif %}
-                        </table>
-                    {% endwith %}
+                                    </thead>
+                                    <tbody>
+                                        {% for status_change in status_changes %}
+                                            <tr>
+                                                <td>{{ status_change.old_status }}</td>
+                                                <td>{{ status_change.new_status }}</td>
+                                                <td>{{ status_change.date_created }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                {% else %}
+                                    <tbody>
+                                        <tr>
+                                            <td class="empty">Нет изменений статуса</td>
+                                        </tr>
+                                    </tbody>
+                                {% endif %}
+                            </table>
+                        {% endwith %}
+                    </div>
                 {% endblock %}
-
             </div>
 
             <div class="tab-pane fade {% if active_tab == 'shipping' %}show active{% endif %}" id="shipping" role="tabpanel">
@@ -634,9 +604,7 @@
                         {% endwith %}
                     {% endblock %}
                     
-                {% endblock %}
-
-                
+                {% endblock %}           
             </div>
 
             <div class="tab-pane fade {% if active_tab == 'payment' %}show active{% endif %}" id="payment" role="tabpanel">
@@ -970,9 +938,7 @@
                                         <th>Тип</th>
                                         <th>Пользователь</th>
                                         <th>Дата</th>
-                                        {% if note.is_editable %}
-                                            <th>Действия</th>
-                                        {% endif %}
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 {% for note in notes %}
@@ -1004,6 +970,8 @@
                                                         </form>
                                                     </div>
                                                 </td>
+                                            {% else %}
+                                            -
                                             {% endif %}
                                             <td class="toggle-row">
                                                 <button class="btn btn-secondary" type="button">
@@ -1050,6 +1018,7 @@
             {% block extra_tabs %}{% endblock %}
         </div>
     </div>
+
 {% endblock dashboard_content %}
 
 {% block onbodyload %}

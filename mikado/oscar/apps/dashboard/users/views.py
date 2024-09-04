@@ -162,7 +162,6 @@ class PasswordResetView(SingleObjectMixin, FormView):
         return reverse("dashboard:user-detail", kwargs={"pk": self.object.id})
 
 
-
 class StaffGroupCreateView(CreateView):
     model = Group
     form_class = GroupForm

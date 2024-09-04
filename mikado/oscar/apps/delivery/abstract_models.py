@@ -16,10 +16,8 @@ class AbstractDeliveryZona(models.Model):
     """
     Delivery zonas. Dublicate in json file.
     """
-
-    number = models.PositiveIntegerField("Номер зоны доставки", unique=True)
     name = models.CharField("Название", max_length=255, blank=True, null=True)
-    order_price = models.PositiveIntegerField("Минимальная цена заказа", default=700)
+    order_price = models.PositiveIntegerField("Минимальная сумма заказа", default=700)
     delivery_price = models.PositiveIntegerField("Стоимость доставки", default=0)
     coords = models.CharField(
         "Координаты", 
@@ -33,54 +31,79 @@ class AbstractDeliveryZona(models.Model):
     def __str__(self):
         return "Зона №%s - %s" % (self.number, self.description)
 
-
     class Meta:
         abstract = True
         verbose_name = "Зона доставки"
         verbose_name_plural = "Зоны доставки"
 
     # Saving
-
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.update_json() 
-
+            
     @classmethod
     def update_json(cls):
-
         all_zones = cls.objects.all()
-        zones_list = []
 
-        for zona in all_zones:
+        user_zones_list = []
+        admin_zones_list = []
 
-            coords = []
+        # Вспомогательная функция для преобразования строк координат в список кортежей
+        def parse_coords(coord_string):
+            return [
+                tuple(map(float, crd.replace("]", "").replace("[", "").split(",")))
+                for crd in coord_string.split('],')
+            ]
 
-            for crd in zona.coords.split('],'):
-                crd = crd.replace("]", "").replace("[", "")
-                crd = crd.split(",")
-                coords.append((float(crd[0]), float(crd[1])))
+        # Вспомогательная функция для создания JSON объектов зоны
+        def create_feature(zona, coords, is_admin=False):
+            properties = {
+                "number": zona.id,
+                "available": zona.isAvailable,
+            }
+            if is_admin:
+                properties["hide"] = zona.isHide
 
-            zones_list.append({
+            return {
                 "type": "Feature",
                 "geometry": {
                     "type": "Polygon",
-                    "coordinates": [
-                        coords
-                    ],
+                    "coordinates": [coords],
                 },
-                "properties": {
-                    "number": zona.number,
-                    "available": zona.isAvailable
-                }
-            })
+                "properties": properties
+            }
 
-        _json = {
+        # Обработка каждой зоны
+        for zona in all_zones:
+            coords = parse_coords(zona.coords)
+
+            # Создаем объекты зон для пользователей и администраторов
+            if not zona.isHide:
+                user_zones_list.append(create_feature(zona, coords))
+
+            admin_zones_list.append(create_feature(zona, coords, is_admin=True))
+
+        # Создаем JSON объекты
+        user_json = {
             "type": "FeatureCollection",
-            "features": zones_list
+            "features": user_zones_list
         }
 
-        file = open(_dir + '/js/delivery/geojson/delivery_zones.geojson', 'w')
-        json.dump(_json, file)
+        admin_json = {
+            "type": "FeatureCollection",
+            "features": admin_zones_list
+        }
+
+        # Оптимизированная запись файлов с использованием контекстного менеджера
+        file_paths = {
+            'user': _dir + '/js/delivery/geojson/delivery_zones.geojson',
+            'admin': _dir + '/js/dashboard/delivery/geojson/delivery_zones.geojson'
+        }
+
+        with open(file_paths['user'], 'w') as user_file, open(file_paths['admin'], 'w') as admin_file:
+            json.dump(user_json, user_file)
+            json.dump(admin_json, admin_file)
+
 
 # -------- Курьер и его смены ---------------
 

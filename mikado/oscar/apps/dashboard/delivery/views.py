@@ -1,4 +1,5 @@
 # pylint: disable=attribute-defined-outside-init
+import json
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -18,7 +19,48 @@ from rest_framework.permissions import IsAdminUser
 DeliveryZona = get_model("delivery", "DeliveryZona")
 DeliveryZonaForm = get_class("dashboard.delivery.forms", "DeliveryZonaForm")
 DeliveryZonesTable = get_class("dashboard.delivery.tables", "DeliveryZonesTable")
+
+_dir = settings.STATIC_PRIVATE_ROOT
  
+# ====== zones =================================
+
+class DeliveryZonesGeoJsonView(APIView):
+    """
+    Return the 'delivery all zones json'.
+    """
+
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        json_file = json.loads(open(_dir + '/js/dashboard/delivery/geojson/delivery_zones.geojson', 'rb').read())
+        return http.JsonResponse(json_file, status=202)
+
+ 
+class DeliveryZonaView(APIView):
+    """
+    Return the 'delivery zona params' Only Dashboard.
+    """
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAdminUser]
+    model = DeliveryZona
+
+    def post(self, request, *args, **kwargs):
+        try: 
+            zona_id = request.POST.get('zona_id')
+            zona = self.model.objects.get(id=zona_id)
+            res = {
+                'number': zona.id,
+                'name': zona.name,
+                'order_price': zona.order_price,
+                'delivery_price': zona.delivery_price,
+                'isAvailable': zona.isAvailable,
+                'isHide': zona.isHide,
+            }
+            return http.JsonResponse(res, status=200)
+        except Exception:
+            return http.JsonResponse({"error": "Зона доставки не найдена"}, status=200)
+
 
 class DeliveryZonesView(SingleTableView):
     """
@@ -72,8 +114,8 @@ class DeliveryZonesUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["number"] = self.object.number
-        ctx["title"] = "Обновить зону доставки '%s'" % self.object.number
+        ctx["number"] = self.object.id
+        ctx["title"] = "Обновить зону доставки №%s" % self.object.id
         return ctx
 
     def get_success_url(self):
@@ -87,54 +129,13 @@ class DeliveryZonesDeleteView(CategoryListMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = "Удалить зону доставки '%s'" % self.object.number
-        ctx["number"] = self.object.number
+        ctx["title"] = "Удалить зону доставки '%s'" % self.object.id
+        ctx["number"] = self.object.id
         ctx["description"] = self.object.description
         return ctx
 
     def get_success_url(self):
         messages.info(self.request, "Зона доставки успешно удалена")
-        return reverse("dashboard:delivery-zones")
-
-
-class DeliveryZonaView(APIView):
-    """
-    Return the 'delivery zona params' Only Dashboard.
-    """
-    authentication_classes = [SessionAuthentication]
-    permission_classes = [IsAdminUser]
-    model = DeliveryZona
-
-    def post(self, request, *args, **kwargs):
-        try: 
-            zona_id = request.POST.get('zona_id')
-            zona = self.model.objects.get(number=zona_id)
-            res = {
-                'number': zona.number,
-                'description': zona.description,
-                'order_price': zona.order_price,
-                'delivery_price': zona.delivery_price,
-                'isAvailable': zona.isAvailable,
-                'isHide': zona.isHide,
-            }
-            return http.JsonResponse(res, status=200)
-        except Exception:
-            return http.JsonResponse({"error": "Зона доставки не найдена"}, status=200)
-
-
-class DeliveryZonesUpdateView(UpdateView):
-    template_name = "oscar/dashboard/delivery/delivery_form.html"
-    model = DeliveryZona
-    form_class = DeliveryZonaForm
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["number"] = self.object.number
-        ctx["title"] = "Обновить зону доставки '%s'" % self.object.number
-        return ctx
-
-    def get_success_url(self):
-        messages.info(self.request, "Зона доставки успешно обновлена")
         return reverse("dashboard:delivery-zones")
 
 
@@ -144,7 +145,7 @@ class DeliveryZonesHideView(UpdateView):
     def post(self, request, *args, **kwargs):
         try:
             zona_id = kwargs.get('pk')
-            zona = self.model.objects.get(number=zona_id)
+            zona = self.model.objects.get(id=zona_id)
             zona.isHide = not zona.isHide
             zona.save()
             return self.get_success_url()
@@ -166,7 +167,7 @@ class DeliveryZonesAvailableView(View):
     def post(self, request, *args, **kwargs):
         try:
             zona_id = kwargs.get('pk')
-            zona = self.model.objects.get(number=zona_id)
+            zona = self.model.objects.get(id=zona_id)
             zona.isAvailable = not zona.isAvailable
             zona.save()
             return self.get_success_url()
@@ -182,34 +183,32 @@ class DeliveryZonesAvailableView(View):
         return redirect("dashboard:delivery-zones")
 
 
+# ====== zones =================================
 
 
+class DeliveryActiveView(View):
+    pass
+
+class DeliveryListView(View):
+    pass
 
 
-
-
-
-
-
-
-
-
-
+# ====== zones =================================
 
 
 
 class DeliveryStatsView(View):
     pass
 
-class DeliveryNowView(View):
+class DeliveryPartnerView(View):
+    pass
+
+class DeliveryCouriersView(View):
     pass
 
 class DeliveryCouriersListView(View):
     pass
 
-class DeliveryKitchenView(View):
-    pass
-
-class DeliveryCouriersView(View):
+class DeliveryCouriersDetailView(View):
     pass
 

@@ -1646,7 +1646,7 @@ class AbstractProductAdditional(models.Model):
         "catalogue.Additional",
         on_delete=models.CASCADE,
         # related_name="product_additional",
-        verbose_name="Рекомендуемый продукт",
+        verbose_name="Дополнительный продукт",
     )
     ranking = models.PositiveSmallIntegerField(
         "Порядок",

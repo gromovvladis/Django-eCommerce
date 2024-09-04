@@ -1,19 +1,18 @@
 {% extends 'oscar/dashboard/layout.html' %}
 {% load category_tags %}
-{% load i18n %}
 {% load static %}
 
 {% block body_class %}{{ block.super }} create-page catalogue{% endblock %}
 
 {% block title %}
-    {{ title }} | {% trans "Categories" %} | {{ block.super }}
+    {{ title }} | Зоны доставки | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+                <a href="{% url 'dashboard:index' %}">Главная</a>
             </li>
             <li class="breadcrumb-item">
                 <a href="{% url 'dashboard:delivery-zones' %}">Зоны доставки</a>
@@ -29,9 +28,15 @@
 
 {% block dashboard_content %}
 
-    <div class="delivery__map">
-        <div class="v-map__wrapper">
-            <div id="map" class="v-map">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table-header">
+                <h2 class="d-flex"><i class="fa-solid fa-map"></i> Зоны доствки на карте</h2>
+            </div>
+            <div class="delivery__map table">
+                <div class="v-map__wrapper">
+                    <div id="map" class="v-map"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -49,16 +54,6 @@
                                 <h3>Данные зоны доставки</h3>
                             </div>
                             <div class="card card-body bg-light option-details">
-
-                                {% comment %}
-                                    If the Option form has field_errors, partials/form_fields.html
-                                    will render an error message.
-                                    This means that there'll be 2 error messages,
-                                    one from the partial and one from the view. Perhaps there should be
-                                    an option allowing hiding of the error message in the template.
-                                    For now we copy paste what we need from the template.
-                                {% endcomment %}
-
                                 {% if form.non_field_errors %}
                                     {% for error in form.non_field_errors %}
                                         <div class="alert alert-danger">
@@ -66,7 +61,6 @@
                                         </div>
                                     {% endfor %}
                                 {% endif %}
-
                                 {% for field in form %}
                                     {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
                                 {% endfor %}
@@ -79,34 +73,38 @@
 
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
-                <div class="form-actions">
-                    <div class="float-right">
-                        <a href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
-                            {% trans "Cancel" %}
-                        </a>
-                        {% trans "or" %}
-                        <button class="btn btn-primary" type="submit">
-                            {% trans "Save" %}
+                <div class="d-flex justify-content-end">
+                    <div class="float-right">  
+                        <a class="btn btn-danger mr-2" href="{% url 'dashboard:delivery-zones' %}">
+                            <i class="fa-regular fa-circle-xmark"></i> 
+                            Отменить
+                        </a>             
+                        <button class="btn btn-primary" type="submit" data-loading-text="Сохранение...">
+                            <i class="fa-regular fa-floppy-disk"></i>
+                            Сохранить
                         </button>
                     </div>
                 </div>
             </div>
         {% endblock fixed_actions_group %}
     </form>
-
 {% endblock dashboard_content %}
 
+{% block externalscripts %}
+    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&lang=ru_RU"></script>
+{% endblock %}
+
+{% block templatescripts %}
+    var csrf_token = "{{ csrf_token }}";
+    var url_delivery_zones = "{% url 'dashboard:delivery-zona-json' %}";
+    var url_delivery_zona = "{% url 'dashboard:delivery-zona' %}";
+{% endblock %}
 
 {% block extrascripts %}
     {{ block.super }}
-    <script>
-        var csrf_token = "{{ csrf_token }}";
-        var url_delivery_zona = "{% url 'dashboard:delivery-zona' %}";
-        var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
-    </script>
-    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&lang=ru_RU"></script>
     <script type="application/javascript" src="{% static "js/dashboard/delivery/delivery-zones-dashboard.js" %}"></script>
-    <script>
-        createMap("{{ number }}");
-    </script>
+{% endblock %}
+
+{% block onbodyload %}
+    createMap("{{ number }}");
 {% endblock %}

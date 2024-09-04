@@ -13,7 +13,6 @@ class DeliveryZonaForm(forms.ModelForm):
     class Meta:
         model = DeliveryZona
         fields = [
-            "number",
             "name",
             "order_price",
             "delivery_price",

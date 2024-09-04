@@ -17,6 +17,17 @@ class PartnerSearchForm(forms.Form):
 
 
 class PartnerCreateForm(forms.ModelForm):
+
+    line1 = forms.CharField(
+        required=False, max_length=128, label="Улица, дом"
+    )
+    coords_long = forms.CharField(
+        required=False, max_length=128, label="Координаты долгота"
+    )
+    coords_lat = forms.CharField(
+        required=False, max_length=128, label="Координаты широта"
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Partner.name is optional and that is okay. But if creating through
@@ -26,7 +37,20 @@ class PartnerCreateForm(forms.ModelForm):
 
     class Meta:
         model = Partner
-        fields = ("name",)
+        fields = (
+            "name",
+        )
+        widgets = {
+            'line1': forms.TextInput(attrs={
+                'readonly': "true"
+            }),
+            'coords_long': forms.TextInput(attrs={
+                'readonly': "true"
+            }),
+            'coords_lat': forms.TextInput(attrs={
+                'readonly': "true"
+            }),
+        }
 
 
 class ExistingUserForm(forms.ModelForm):

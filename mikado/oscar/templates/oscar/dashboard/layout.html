@@ -55,7 +55,7 @@
                                 >
                                     <span>
                                         {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
-                                        <span class="item_text arrow-dropdown ml-2">{{ item.label }}</span>
+                                        <span class="item_text arrow-dropdown ml-sm-2">{{ item.label }}</span>
                                     </span>
                                     <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>
                                 </button>
@@ -74,7 +74,7 @@
                                 <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
                                     <span>
                                         {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
-                                        <span class="item_text ml-2">{{ item.label }}</span>
+                                        <span class="item_text ml-sm-2">{{ item.label }}</span>
                                     </span>
                                     <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>
                                 </a>
