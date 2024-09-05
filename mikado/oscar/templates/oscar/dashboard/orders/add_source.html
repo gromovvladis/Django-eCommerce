@@ -30,7 +30,7 @@
         {% csrf_token %}
         {% include "oscar/dashboard/partials/form_fields.html" with form=form style='horizontal' %}
         <div class="form-actions d-flex justify-content-end fill-width">
-            <a class="btn btn-danger ml-2" href="{% url 'dashboard:order-detail' number=order.number %}">Назад</a>
+            <a class="btn btn-danger mr-2" href="{% url 'dashboard:order-detail' number=order.number %}">Назад</a>
             <button type="submit" class="btn btn-primary" data-loading-text="Добавление...">Добавить</button>
         </div>
     </form>

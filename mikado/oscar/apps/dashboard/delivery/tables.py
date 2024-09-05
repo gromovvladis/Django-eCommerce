@@ -61,4 +61,6 @@ class DeliveryZonesTable(DashboardTable):
         model = DeliveryZona
         fields = ("id", "name", "delivery_price", "order_price", "isAvailable", "isHide")
         sequence = ("id", "name", "delivery_price", "order_price", "...", "isAvailable", "isHide", "actions")
+        
+        empty_text = "Нет зон доставки"
 

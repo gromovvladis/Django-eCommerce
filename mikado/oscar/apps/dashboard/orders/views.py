@@ -51,8 +51,6 @@ OrderStatusForm = get_class("dashboard.orders.forms", "OrderStatusForm")
 OrderTable = get_class("dashboard.orders.tables", "OrderTable")
 ProductSearchForm = get_class("dashboard.catalogue.forms", "ProductSearchForm")
 
-
-
 Voucher = get_model("voucher", "Voucher")
 Basket = get_model("basket", "Basket")
 StockAlert = get_model("partner", "StockAlert")
@@ -138,7 +136,7 @@ class OrderStatsView(FormView):
         if range_type == 'days':
             range_time = (end - start).days
         elif range_type == 'weeks':
-            range_time = (end - start).days // 7
+            range_time = max(1, (end - start).days // 7)
         elif range_type == 'months':
             start_time = start_time.replace(day=1)
             range_time = diff.years * 12 + diff.months + (1 if diff.days > 0 else 0)
@@ -319,7 +317,6 @@ class OrderStatsView(FormView):
                 .order_by('-total_quantity')
                 [:5]
             )
-
             stats[f"orders_{period}"] = orders_period.count()
             stats[f"revenue_{period}"] = orders_period.aggregate(Sum('total'))['total__sum'] or D('0.00')
             stats[f"average_costs_{period}"] = orders_period.aggregate(Avg("total"))["total__avg"] or D('0.00')
@@ -342,7 +339,6 @@ class OrderStatsView(FormView):
             
             # Разбивка заказов по статусам
             stats[f"order_status_breakdown_{period}"] = orders.filter(date_placed__range=(start_date, end_date)).order_by("status").values("status").annotate(freq=Count("id"))
-
 
         return stats
 
@@ -1361,5 +1357,3 @@ class ShippingAddressUpdateView(UpdateView):
                 "number": self.object.order.number,
             },
         )
-
-
