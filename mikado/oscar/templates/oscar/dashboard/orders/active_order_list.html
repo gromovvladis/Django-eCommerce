@@ -1,0 +1,43 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load render_table from django_tables2 %}
+{% load sorting_tags %}
+{% load widget_tweaks %}
+{% load dashboard_tags %}
+
+{% block body_class %}{{ block.super }} orders{% endblock %}
+
+{% block title %}
+    {{ title }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header d-flex justify-content-between">
+        <h1>Активные заказы</h1>
+    </div>
+{% endblock header %}
+
+{% block dashboard_content %}
+    <div class="mobile-table order_table">
+        {% if orders %} 
+            {% render_table orders %}  
+        {% else %}
+            <p class="empty">Заказы не найдены</p>
+        {% endif %}
+    </div>
+{% endblock dashboard_content %}
+
+{% block onbodyload %}
+    {{ block.super }}
+    {% if form.errors %}
+    $('#SearchModal').modal('show');
+    {% endif %}
+{% endblock onbodyload %}
