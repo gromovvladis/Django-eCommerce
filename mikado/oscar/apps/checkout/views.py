@@ -712,7 +712,6 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
 
 
 class UpdateTotalsView(View):
-
     def get(self, request, *args, **kwargs):
         try:
             new_method = request.GET.get('shipping_method')
