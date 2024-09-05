@@ -277,8 +277,8 @@ class OrderSearchForm(forms.Form):
     )
 
     format_choices = (
-        ("html", "HTML"),
-        ("csv", "CSV"),
+        ("html", "Показать на сайте"),
+        ("csv", "Скачать CSV (Excel)"),
     )
     response_format = forms.ChoiceField(
         widget=forms.RadioSelect,

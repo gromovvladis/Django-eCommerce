@@ -29,8 +29,7 @@
     {% endif %}
 {% endwith %}
 </p>
-
 <p>
-    <a href="{{ product.get_absolute_url }}" class="btn btn-info mb-2 mr-2">Смотреть на сайте</a>
-    <a href="{% url 'dashboard:catalogue-product' pk=product.pk %}{% querystring %}" class="btn btn-success mb-2">Редактировать снова</a>
+    <a href="{{ product.get_absolute_url }}" class="btn btn-info mb-1 mr-1">Смотреть на сайте</a>
+    <a href="{% url 'dashboard:catalogue-product' pk=product.pk %}{% querystring %}" class="btn btn-success mb-1">Редактировать снова</a>
 </p>

@@ -460,7 +460,6 @@ class OrderStatsView(FormView):
         return stats
 
 
-
 class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
     """
     Dashboard view for a list of orders.
@@ -831,6 +830,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
 
 class OrderActiveListView(OrderListView):
+    template_name = "oscar/dashboard/orders/active_order_list.html"
     def get_queryset(self):
         """
         Build the queryset for this list.
