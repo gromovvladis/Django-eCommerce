@@ -9306,9 +9306,10 @@ html.drawer .v-app__side {
 }
 
 .v-button--profile {
-    max-width: 48px;
-    min-width: 48px;
+    max-width: 44px;
+    min-width: 44px;
     border-radius: 50%;
+    padding: .5rem;
 }
 
 @media screen and (min-width:768px) {
@@ -17513,9 +17514,9 @@ ymaps[class*="search__suggest-item_selected"] {
     z-index: 5;
 }
 
-.search__input-wrapper {
+/* .search__input-wrapper {
     border-bottom: 1px solid #f3f3f7
-}
+} */
 
 .search__loading svg {
     width: 48px;

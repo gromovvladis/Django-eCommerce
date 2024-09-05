@@ -149,7 +149,6 @@ class OrderCreator(object):
             "order_time": order_time,
             "shipping": shipping_charge.money,
             "shipping_method": shipping_method.name,
-            # "shipping_code": shipping_method.code,
         }
         if shipping_address:
             order_data["shipping_address"] = shipping_address

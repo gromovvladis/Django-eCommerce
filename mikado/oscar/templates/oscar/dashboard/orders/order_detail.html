@@ -934,7 +934,7 @@
                             {% if notes %}
                                 <thead>
                                     <tr>
-                                        <th>Сообщение</th>
+                                        <th class="title">Сообщение</th>
                                         <th>Тип</th>
                                         <th>Пользователь</th>
                                         <th>Дата</th>
@@ -948,8 +948,8 @@
                                             <td data-label="Тип">{{ note.note_type|default:"-" }}</td>
                                             <td data-label="Пользователь">{{ note.user|default:"-" }}</td>
                                             <td data-label="Дата">{{ note.date_created }}</td>
-                                            {% if note.is_editable %}
-                                                <td class="actions">
+                                            <td class="actions">
+                                                {% if not note.is_editable %}
                                                     <div class="d-flex justify-content-center">
                                                         <a href="{% url 'dashboard:order-detail-note' number=order.number note_id=note.id %}#notes" class="btn btn-info mr-2">
                                                             <i class="fa-solid fa-pencil"></i>
@@ -969,10 +969,8 @@
                                                             </button>
                                                         </form>
                                                     </div>
-                                                </td>
-                                            {% else %}
-                                            -
-                                            {% endif %}
+                                                {% endif %}
+                                            </td>
                                             <td class="toggle-row">
                                                 <button class="btn btn-secondary" type="button">
                                                     <i class="fa-solid fa-chevron-up"></i>

@@ -143,8 +143,8 @@ class ZonaBasedShipping(Base):
         """"Returns the shipping charges and minimum order price"""
         
         zona_id = 0
-        shipping_charge = 0
-        min_order = 700
+        shipping_charge = D("0.0")
+        min_order = D("700.0")
 
         zones = ZonesUtils.getAvailableZones()
 

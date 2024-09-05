@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views import generic
 from urllib.parse import unquote
+from decimal import Decimal as D
 
 from django.template.loader import render_to_string
 
@@ -144,8 +145,8 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
 
         ctx = super().get_context_data(**kwargs) 
 
-        shipping_charge = prices.Price(currency=self.request.basket.currency, money=0)
-        min_order = prices.Price(currency=self.request.basket.currency, money=700)
+        shipping_charge = prices.Price(currency=self.request.basket.currency, money=D("0.0"))
+        min_order = prices.Price(currency=self.request.basket.currency, money=D("700.0"))
 
         method = self.get_default_shipping_method(self.request.basket)
         ctx["shipping_method"] = method
@@ -158,12 +159,9 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
             if address and address.coords_lat and address.coords_long: 
                 shipping_charge, min_order = method.calculate(self.request.basket, address)
        
-
         #payment form
         ctx["methods"] = self._methods
-        
         ctx["min_order"] = min_order
-
         ctx["shipping_charge"] = shipping_charge
 
         #promocode
@@ -354,7 +352,6 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         shipping_charge,
         order_note,
         order_time,
-        # min_order,
         email_or_change,
         order_total,
         payment_kwargs=None,

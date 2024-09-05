@@ -59,5 +59,6 @@ $(code_input).on('keyup', function(event){
         $(voucher_btn).prop("disabled", false);
     } else {
         $(voucher_btn).prop("disabled", true);
+        $(voucher_message).html("");
     }
 })

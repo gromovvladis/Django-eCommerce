@@ -240,7 +240,8 @@ class CheckoutSessionMixin(object):
         email_or_change = self.get_email_or_change(basket)
 
         if not shipping_method:
-            total = shipping_charge = surcharges = min_order = None
+            # total = shipping_charge = surcharges = min_order = None
+            shipping_charge = surcharges = min_order = prices.Price(currency=basket.currency, money=D("0.00"))
         elif shipping_method.code == NoShippingRequired().code:
             shipping_address = None 
             shipping_charge = min_order = prices.Price(currency=basket.currency, money=D("0.00"))

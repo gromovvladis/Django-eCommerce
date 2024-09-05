@@ -36,4 +36,7 @@ def order_totals_and_shipping(basket, shipping_charge):
     Template tag for calculating the shipping charge for a given shipping
     method and basket, and injecting it into the template context.
     """
-    return basket.total + shipping_charge
+    if shipping_charge:
+        return basket.total + shipping_charge
+    
+    return basket.total

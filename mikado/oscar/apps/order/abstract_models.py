@@ -801,13 +801,13 @@ class AbstractLine(models.Model):
         basket
         """
         
-        # переделай. если несолько продуктов с разными параметрами но один продукт типа товар2, то он добавит каждого по 1 если доступен всего 1, получается всего будет 2, изза этого ощиьки в форме
         if not self.product:
             return False, (
                 ("'%(title)s' больше недоступно") % {"title": self.title}
             )
 
         try:
+            # переделай. если несолько продуктов с разными параметрами но один продукт типа товар2, то он добавит каждого по 1 если доступен всего 1, получается всего будет 2, изза этого ощиьки в форме
             basket_line = basket.lines.get(product_id=self.product.id)
         except basket.lines.model.DoesNotExist:
             desired_qty = self.quantity
