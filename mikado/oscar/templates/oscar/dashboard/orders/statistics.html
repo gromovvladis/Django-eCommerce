@@ -26,6 +26,7 @@
 {% block navtext %}{{ title }}{% endblock %}
 
 {% block dashboard_content %}
+
     <div class="table-wrapper mb-4">
         <div class="table-header d-flex justify-space-between" data-target="#search-body" 
         data-toggle="collapse" aria-controls="search-body" aria-expanded="false">
@@ -121,7 +122,7 @@
         <div class="tab-pane fade {% if active_tab == 'day' %}show active{% endif %}" id="statistic_day" data-id="report-tab" role="tabpanel">   
             <div class="content-block rounded">
                 {% if report_exist_days %}
-                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-2 v-carousel__navs">
+                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 v-carousel__navs">
                         <button class="mr-4" data-id="prev-page">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 24 24" fill="none" stroke="#007bff" height="20px">
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -137,6 +138,19 @@
                     <div class="chart-container my-2">
                         <canvas class="canvas-graph" data-id="graph-chart"></canvas>
                     </div>
+
+                    <div class="d-flex flex-column flex-sm-row justify-content-center mt-4">
+                        <div class="legend-chart legend-chart--graph" data-id="legend-graph-chart"></div>
+                        <div class="range-container" data-id="range-container">
+                            <label class="mb-2">Элементов на графике: <span data-id="range-value">10</span></label>
+                            <div class="range-values">
+                                <span data-id="range-min">5</span>
+                                <input type="range" data-id="graph-range" min="5" max="30" value="10">
+                                <span data-id="range-max">30</span>
+                            </div>
+                        </div>
+                    </div>
+
                 {% else %}
                     <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_days|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
                     <div class="empty-report" style="min-height: 350px;">
@@ -260,10 +274,10 @@
                             <div class="tabs-button-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button tabs-button__icon" href="#top_product_price_day" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_price_day" data-toggle="tab">
                                         По стоимости
                                     </button>
-                                    <button role="button" class="tabs-button__button tabs-button__icon" href="#top_product_count_day" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_count_day" data-toggle="tab">
                                         По количеству
                                     </button>
                                 </div>
@@ -271,15 +285,18 @@
         
                             <div class="tab-pane fade show active chart-container" id="top_product_price_day" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
+                                    <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-        
+
                             <div class="tab-pane fade chart-container" id="top_product_count_day" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
+                                    <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 {% endif %}
@@ -290,7 +307,7 @@
         <div class="tab-pane fade {% if active_tab == 'week' %}show active{% endif %}" id="statistic_week" data-id="report-tab" role="tabpanel">
             <div class="content-block rounded">
                 {% if report_exist_weeks %}
-                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-2 v-carousel__navs">
+                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 v-carousel__navs">
                         <button class="mr-4" data-id="prev-page">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 24 24" fill="none" stroke="#007bff" height="20px">
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -306,6 +323,19 @@
                     <div class="chart-container my-2">
                         <canvas class="canvas-graph" data-id="graph-chart"></canvas>
                     </div>
+
+                    <div class="d-flex flex-column flex-sm-row justify-content-center mt-4">
+                        <div class="legend-chart legend-chart--graph" data-id="legend-graph-chart"></div>
+                        <div class="range-container" data-id="range-container">
+                            <label class="mb-2">Элементов на графике: <span data-id="range-value">10</span></label>
+                            <div class="range-values">
+                                <span data-id="range-min">5</span>
+                                <input type="range" data-id="graph-range" min="5" max="30" value="10">
+                                <span data-id="range-max">30</span>
+                            </div>
+                        </div>
+                    </div>
+
                 {% else %}
                     <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_weeks|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
                     <div class="empty-report" style="min-height: 350px;">
@@ -429,26 +459,29 @@
                             <div class="tabs-button-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button tabs-button__icon" href="#top_product_price_weeks" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_price_weeks" data-toggle="tab">
                                         По стоимости
                                     </button>
-                                    <button role="button" class="tabs-button__button tabs-button__icon" href="#top_product_count_weeks" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_count_weeks" data-toggle="tab">
                                         По количеству
                                     </button>
                                 </div>
                             </div>
         
-                            <div class="tab-pane fade show active chart-container" id="top_product_price_weeks" role="tabpanel">
+                            <div class="tab-pane fade show active chart-container" id="top_product_price_day" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
+                                    <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-        
-                            <div class="tab-pane fade chart-container" id="top_product_count_weeks" role="tabpanel">
+
+                            <div class="tab-pane fade chart-container" id="top_product_count_day" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
+                                    <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 {% endif %}
@@ -458,7 +491,7 @@
         <div class="tab-pane fade {% if active_tab == 'month' %}show active{% endif %}" id="statistic_month" data-id="report-tab" role="tabpanel">
             <div class="content-block rounded">
                 {% if report_exist_months %}
-                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-2 v-carousel__navs">
+                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 v-carousel__navs">
                         <button class="mr-4" data-id="prev-page">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 24 24" fill="none" stroke="#007bff" height="20px">
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -474,6 +507,19 @@
                     <div class="chart-container my-2">
                         <canvas class="canvas-graph" data-id="graph-chart"></canvas>
                     </div>
+                    
+                    <div class="d-flex flex-column flex-sm-row justify-content-center mt-4">
+                        <div class="legend-chart legend-chart--graph" data-id="legend-graph-chart"></div>
+                        <div class="range-container" data-id="range-container">
+                            <label class="mb-2">Элементов на графике: <span data-id="range-value">10</span></label>
+                            <div class="range-values">
+                                <span data-id="range-min">5</span>
+                                <input type="range" data-id="graph-range" min="5" max="30" value="10">
+                                <span data-id="range-max">30</span>
+                            </div>
+                        </div>
+                    </div>
+
                 {% else %}
                     <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_months|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
                     <div class="empty-report" style="min-height: 350px;">
@@ -597,26 +643,29 @@
                             <div class="tabs-button-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button tabs-button__icon" href="#top_product_price_months" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_price_months" data-toggle="tab">
                                         По стоимости
                                     </button>
-                                    <button role="button" class="tabs-button__button tabs-button__icon" href="#top_product_count_months" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_count_months" data-toggle="tab">
                                         По количеству
                                     </button>
                                 </div>
                             </div>
         
-                            <div class="tab-pane fade show active chart-container" id="top_product_price_months" role="tabpanel">
+                            <div class="tab-pane fade show active chart-container" id="top_product_price_day" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
+                                    <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-        
-                            <div class="tab-pane fade chart-container" id="top_product_count_months" role="tabpanel">
+
+                            <div class="tab-pane fade chart-container" id="top_product_count_day" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
+                                    <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 {% endif %}
@@ -626,7 +675,7 @@
         <div class="tab-pane fade {% if active_tab == 'year' %}show active{% endif %}" id="statistic_year" data-id="report-tab" role="tabpanel">
             <div class="content-block rounded">
                 {% if report_exist_years %}
-                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-2 v-carousel__navs">
+                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 v-carousel__navs">
                         <button class="mr-4" data-id="prev-page">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 24 24" fill="none" stroke="#007bff" height="20px">
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -642,7 +691,20 @@
                     <div class="chart-container my-2">
                         <canvas class="canvas-graph" data-id="graph-chart"></canvas>
                     </div>
-                {% else %}
+
+                    <div class="d-flex flex-column flex-sm-row justify-content-center mt-4">
+                        <div class="legend-chart legend-chart--graph" data-id="legend-graph-chart"></div>
+                        <div class="range-container" data-id="range-container">
+                            <label class="mb-2">Элементов на графике: <span data-id="range-value">10</span></label>
+                            <div class="range-values">
+                                <span data-id="range-min">5</span>
+                                <input type="range" data-id="graph-range" min="5" max="30" value="10">
+                                <span data-id="range-max">30</span>
+                            </div>
+                        </div>
+                    </div>
+
+                {% else %} 
                     <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_weeks|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
                     <div class="empty-report" style="min-height: 350px;">
                         <span>
@@ -765,26 +827,29 @@
                             <div class="tabs-button-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button tabs-button__icon" href="#top_product_price_years" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_price_years" data-toggle="tab">
                                         По стоимости
                                     </button>
-                                    <button role="button" class="tabs-button__button tabs-button__icon" href="#top_product_count_years" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_count_years" data-toggle="tab">
                                         По количеству
                                     </button>
                                 </div>
                             </div>
         
-                            <div class="tab-pane fade show active chart-container" id="top_product_price_years" role="tabpanel">
+                            <div class="tab-pane fade show active chart-container" id="top_product_price_day" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
+                                    <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-        
-                            <div class="tab-pane fade chart-container" id="top_product_count_years" role="tabpanel">
+
+                            <div class="tab-pane fade chart-container" id="top_product_count_day" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
+                                    <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 {% endif %}

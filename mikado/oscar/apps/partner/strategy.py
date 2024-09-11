@@ -59,6 +59,7 @@ class Base(object):
     def __init__(self, request=None):
         self.request = request
         self.user = None
+        self.partner = None
         if request and request.user.is_authenticated:
             self.user = request.user
 
@@ -212,7 +213,7 @@ class StockRequired(object):
     """
 
     def availability_policy(self, product, stockrecord):
-        if not stockrecord:
+        if not stockrecord or not stockrecord.is_public:
             return Unavailable()
         if not product.get_product_class().track_stock:
             return Available()

@@ -18,7 +18,7 @@ ZonesUtils = get_class("delivery.zones", "ZonesUtils")
 
 _dir = settings.STATIC_PRIVATE_ROOT
 
-class DeliveryNowView(View):
+class DeliveryNowView(APIView):
 
     permission_classes = [AllowAny]
     map = Map()
@@ -203,7 +203,6 @@ class DeliveryZonesGeoJsonView(APIView):
 
     permission_classes = [AllowAny]
     
-
     def get(self, request, *args, **kwargs):
-        json_file = json.loads(open(_dir + '/js/delivery/geojson/delivery_zones.geojson', 'rb').read())
+        json_file = json.loads(open(_dir + '/js/frontend/delivery/geojson/delivery_zones.geojson', 'rb').read())
         return http.JsonResponse(json_file, status=202)

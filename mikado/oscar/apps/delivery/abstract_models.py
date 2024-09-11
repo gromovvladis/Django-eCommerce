@@ -96,7 +96,7 @@ class AbstractDeliveryZona(models.Model):
 
         # Оптимизированная запись файлов с использованием контекстного менеджера
         file_paths = {
-            'user': _dir + '/js/delivery/geojson/delivery_zones.geojson',
+            'user': _dir + '/js/frontend/delivery/geojson/delivery_zones.geojson',
             'admin': _dir + '/js/dashboard/delivery/geojson/delivery_zones.geojson'
         }
 

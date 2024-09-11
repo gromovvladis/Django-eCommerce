@@ -50,7 +50,7 @@ class Unavailable(Base):
     """
 
     code = "unavailable"
-    message = "Недоступно"
+    message = "Временно недоступно"
 
 
 class Available(Base):
@@ -86,7 +86,7 @@ class StockRequired(Base):
 
     def is_purchase_permitted(self, quantity):
         if self.num_available <= 0:
-            return False, "нет в наличии"
+            return False, "Нет в наличии"
         if quantity > self.num_available:
             msg = "максимум %(max)d доступно для покупки" % {"max": self.num_available}
             return False, msg

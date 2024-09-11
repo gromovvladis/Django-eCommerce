@@ -392,7 +392,7 @@ SMS_AUTH_SETTINGS = {
 OSCAR_INITIAL_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = 'Ожидает оплаты'
 OSCAR_PAID_ONLINE_PAYMENT_ORDER_STATUS = 'Обрабатывается'
-OSCAR_INITIAL_LINE_STATUS = 'Новый заказ'
+OSCAR_INITIAL_LINE_STATUS = 'Обрабатывается'
 
 # This dict defines the new order statuses than an order can move to
 OSCAR_ORDER_STATUS_PIPELINE = {
@@ -409,10 +409,9 @@ OSCAR_ORDER_STATUS_PIPELINE = {
 # This dict defines the line statuses that will be set when an order's status
 # is changed
 OSCAR_ORDER_STATUS_CASCADE = {
-    'Обрабатывается': 'Ожидание',
     'Готовится': 'Готовится',
     'Готов': 'Готов',
-    'Завершен': 'Доставлен',
+    'Завершен': 'Завершен',
     'Отменен': 'Отменен',
 }
 

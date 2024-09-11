@@ -52,6 +52,7 @@ class SuggestionsView(APIView, BaseSearchView):
     permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
+        dfuery_string=request.POST.get('q', '')
         sqs = SearchQuerySet().auto_query(query_string=request.POST.get('q', ''), fieldname='title')[:20]
 
         products = []

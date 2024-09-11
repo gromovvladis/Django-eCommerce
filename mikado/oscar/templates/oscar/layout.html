@@ -7,9 +7,9 @@
 
 {% block styles %}
     {{ block.super }}
-    {% compress css %}   
-        <link rel="stylesheet" href="{% static "css/planet-styles.css" %}"/>
-    {% endcompress %}
+    {% comment %} {% compress css %}    {% endcomment %}
+        <link rel="stylesheet" href="{% static "css/frontend/planet-styles.css" %}"/>
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}
 
 {% block layout %}
@@ -130,11 +130,11 @@
     </div>
 
     {% block auth %}
-        <div id="auth_modal" class="d-none"></div>
+        <div id="modal" class="d-none"></div>
     {% endblock %}
 
     {% block cookie %}
-        <div id="we_use_cookie"></div>
+        <div data-id="cookie"></div>
     {% endblock %}
 
 {% endblock %}
@@ -147,15 +147,18 @@
 {% endblock %}
 
 {% block scripts %}
-    {% compress js %}
-        <script src="{% static "js/slider/slider.js" %}" defer></script>
-        <script src="{% static "js/slider/homepage-sliders.js" %}" defer></script>
-        <script src="{% static "js/catalogue/add-to-cart-compact.js" %}" defer></script>
-        <script src="{% static "js/delivery/delivery.js" %}" defer></script>
-        <script src="{% static "js/basket/basket.js" %}" defer></script>
+    {% comment %} {% compress js %} {% endcomment %}
+        <script src="{% static "js/thirdpaty/slider/slider.js" %}" defer></script>
+        <script src="{% static "js/frontend/homepage/homepage-sliders.js" %}" defer></script>
+        <script src="{% static "js/frontend/catalogue/add-to-cart-compact.js" %}" defer></script>
+        <script src="{% static "js/frontend/delivery/delivery.js" %}" defer></script>
+        <script src="{% static "js/frontend/basket/basket.js" %}" defer></script>
 
-        <script src="{% static "js/auth/auth.js" %}" defer></script>
-        <script src="{% static "js/cookie/cookies/cookie-main.js" %}" defer></script>
-        <script src="{% static "js/footer/footer.js" %}" defer></script>
-    {% endcompress %}
+        <script src="{% static "js/frontend/catalogue/add-to-cart.js" %}" defer></script>
+        <script src="{% static "js/frontend/catalogue/add-to-wishlist.js" %}" defer></script>
+
+        <script src="{% static "js/frontend/auth/auth.js" %}" defer></script>
+        <script src="{% static "js/frontend/cookie/cookie-main.js" %}" defer></script>
+        <script src="{% static "js/frontend/footer/footer.js" %}" defer></script>
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}

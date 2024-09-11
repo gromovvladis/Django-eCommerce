@@ -77,6 +77,15 @@ class AbstractOrder(models.Model):
         on_delete=models.SET_NULL,
     )
 
+    partner = models.ForeignKey(
+        "partner.Partner",
+        related_name="orders",
+        null=True,
+        blank=False,
+        verbose_name="Точка продажи",
+        on_delete=models.SET_NULL,
+    )
+
     shipping_method = models.CharField("Способ доставки", max_length=128, blank=True)
 
     # Identifies shipping code
@@ -659,7 +668,7 @@ class AbstractLine(models.Model):
             if attribute.additional:
                 value = attribute.value
                 if value > 0:
-                    addit.append("%s (%s)" % (attribute.additional.name, value))
+                    addit.append("%s (%s шт.)" % (attribute.additional.name, value))
             if addit:
                 d = "%s" % (", ".join(addit))
         return d

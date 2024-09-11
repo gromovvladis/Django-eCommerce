@@ -22,7 +22,7 @@ class CustomerConfig(OscarConfig):
         self.order_history_view = get_class("customer.views", "OrderHistoryView")
         self.order_detail_view = get_class("customer.views", "OrderDetailView")
 
-        self.order_line_view = get_class("customer.views", "OrderLineView")
+        # self.order_line_view = get_class("customer.views", "OrderLineView")
 
         self.address_list_view = get_class("customer.views", "AddressListView")
         self.address_create_view = get_class("customer.views", "AddressCreateView")
@@ -86,11 +86,11 @@ class CustomerConfig(OscarConfig):
                 login_required(self.order_detail_view.as_view()),
                 name="order",
             ),
-            path(
-                "orders/<str:order_number>/<int:line_id>/",
-                login_required(self.order_line_view.as_view()),
-                name="order-line",
-            ),
+            # path(
+            #     "orders/<str:order_number>/<int:line_id>/",
+            #     login_required(self.order_line_view.as_view()),
+            #     name="order-line",
+            # ),
             # Address book
             path(
                 "addresses/",

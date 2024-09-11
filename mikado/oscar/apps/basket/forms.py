@@ -3,6 +3,7 @@ from django import forms
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.forms.utils import ErrorDict
+from django.db.models import Sum
 from oscar.core.loading import get_model
 
 Line = get_model("basket", "line")
@@ -388,3 +389,38 @@ class SimpleAddToBasketForm(SimpleAddToBasketMixin, AddToBasketForm):
     class SimpleAddToBasketForm(SimpleAddToBasketMixin, AddToBasketForm):
         pass
     """
+
+
+class SavedLineForm(forms.ModelForm):
+    move_to_basket = forms.BooleanField(
+        initial=False, required=False, label="Добавить в корзину"
+    )
+
+    class Meta:
+        model = Line
+        fields = ("id", "move_to_basket")
+
+    def __init__(self, strategy, basket, *args, **kwargs):
+        self.strategy = strategy
+        self.basket = basket
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data["move_to_basket"]:
+            # skip further validation (see issue #666)
+            return cleaned_data
+
+        # Get total quantity of all lines with this product (there's normally
+        # only one but there can be more if you allow product options).
+        lines = self.basket.lines.filter(product=self.instance.product)
+        current_qty = lines.aggregate(Sum("quantity"))["quantity__sum"] or 0
+        desired_qty = current_qty + self.instance.quantity
+
+        result = self.strategy.fetch_for_product(self.instance.product)
+        is_available, reason = result.availability.is_purchase_permitted(
+            quantity=desired_qty
+        )
+        if not is_available:
+            raise forms.ValidationError(reason)
+        return cleaned_data

@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 from django import shortcuts
 from django import http
 from django.contrib.sessions.serializers import JSONSerializer
@@ -10,14 +11,16 @@ from extra_views import ModelFormSetView
 
 from oscar.apps.basket.signals import basket_addition
 from oscar.core.loading import get_class, get_classes, get_model
-from oscar.core.utils import is_ajax, safe_referrer
+from oscar.core.utils import is_ajax, redirect_to_referrer, safe_referrer
 
 Applicator = get_class("offer.applicator", "Applicator")
-(BasketLineForm, AddToBasketForm) = get_classes(
+(BasketLineForm, AddToBasketForm, SavedLineForm) = get_classes(
     "basket.forms",
-    ("BasketLineForm", "AddToBasketForm"),
+    ("BasketLineForm", "AddToBasketForm", "SavedLineForm"),
 )
-BasketLineFormSet = get_class("basket.formsets", "BasketLineFormSet")
+BasketLineFormSet, SavedLineFormSet = get_classes(
+    "basket.formsets", ("BasketLineFormSet", "SavedLineFormSet")
+)
 Repository = get_class("shipping.repository", "Repository")
 OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 BasketMessageGenerator = get_class("basket.utils", "BasketMessageGenerator")
@@ -35,6 +38,46 @@ class BasketView(ModelFormSetView):
     form_class = BasketLineForm
     factory_kwargs = {"extra": 0, "can_delete": True}
     template_name = "oscar/basket/basket.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        # self.saved_basket, _ = self.basket_model.saved.get_or_create(
+            # owner=self.request.user
+        # )
+        # self.saved_basket.strategy = self.request.basket.strategy
+        # self.check_lines(self.saved_basket)
+        return super().dispatch(request, *args, **kwargs)
+    
+    def check_lines(self, saved_basket):
+
+        warnings = []
+        lines_to_save = []
+        lines = self.request.basket.all_lines()
+
+        for line in lines:
+            warning = line.get_warning()
+            if warning:
+                warnings.append(warning)
+                lines_to_save.append(line)
+
+        if not saved_basket.is_empty:
+            self.move_lines_from_saved_basket(saved_basket)
+
+        if lines_to_save:
+            self.move_lines_to_saved_basket(saved_basket, lines_to_save)
+
+
+    def move_lines_to_saved_basket(self, saved_basket, lines):
+        for line in lines:
+            saved_basket.merge_line(line)
+
+
+    def move_lines_from_saved_basket(self, saved_basket):
+        lines = saved_basket.all_lines()
+        for line in lines:
+            warning = line.get_warning()
+            if not warning:
+                self.request.basket.merge_line(line)
+
 
     def get_formset_kwargs(self):
         kwargs = super().get_formset_kwargs()
@@ -86,6 +129,19 @@ class BasketView(ModelFormSetView):
         # estimated order total is beforehand.
         context["upsell_messages"] = self.get_upsell_messages(self.request.basket)
         context["order_total"] = OrderTotalCalculator().calculate(self.request.basket)
+
+        # if not self.saved_basket.is_empty:
+        #     saved_queryset = self.saved_basket.all_lines()
+        #     formset = SavedLineFormSet(
+        #         strategy=self.request.strategy,
+        #         basket=self.request.basket,
+        #         queryset=saved_queryset,
+        #         prefix="saved",
+        #     )
+        #     context["saved_formset"] = formset
+
+        # context["saved_basket"] = self.saved_basket.all_lines()
+
         return context
 
     def get_success_url(self):
@@ -191,7 +247,7 @@ class EmptyBasketView(View):
         if not basket.id:
             return http.JsonResponse({"url": url, "status": 403}, status = 403)
         try:
-            basket.delete()
+            basket.flush()
         except Exception as e:
             pass
         
@@ -292,3 +348,69 @@ class BasketAddView(FormView):
         ):
             return post_url
         return safe_referrer(self.request, "basket:summary")
+
+
+class SavedView(ModelFormSetView):
+    model = get_model("basket", "line")
+    basket_model = get_model("basket", "basket")
+    formset_class = SavedLineFormSet
+    form_class = SavedLineForm
+    factory_kwargs = {"extra": 0, "can_delete": True}
+
+    def get(self, request, *args, **kwargs):
+        return shortcuts.redirect("basket:summary")
+
+    def get_queryset(self):
+        """
+        Return list of :py:class:`Line <oscar.apps.basket.abstract_models.AbstractLine>`
+        instances associated with the saved basked associated with the currently
+        authenticated user.
+        """
+        try:
+            saved_basket = self.basket_model.saved.get(owner=self.request.user)
+            saved_basket.strategy = self.request.strategy
+            return saved_basket.all_lines()
+        except self.basket_model.DoesNotExist:
+            return []
+
+    def get_success_url(self):
+        return safe_referrer(self.request, "basket:summary")
+
+    def get_formset_kwargs(self):
+        kwargs = super().get_formset_kwargs()
+        kwargs["prefix"] = "saved"
+        kwargs["basket"] = self.request.basket
+        kwargs["strategy"] = self.request.strategy
+        return kwargs
+
+    def formset_valid(self, formset):
+        offers_before = self.request.basket.applied_offers()
+
+        is_move = False
+        for form in formset:
+            if form.cleaned_data.get("move_to_basket", False):
+                is_move = True
+                msg = render_to_string(
+                    "oscar/basket/messages/line_restored.html", {"line": form.instance}
+                )
+                messages.info(self.request, msg, extra_tags="safe noicon")
+                real_basket = self.request.basket
+                real_basket.merge_line(form.instance)
+
+        if is_move:
+            # As we're changing the basket, we need to check if it qualifies
+            # for any new offers.
+            BasketMessageGenerator().apply_messages(self.request, offers_before)
+            response = shortcuts.redirect(self.get_success_url())
+        else:
+            response = super().formset_valid(formset)
+        return response
+
+    def formset_invalid(self, formset):
+        messages.error(
+            self.request,
+            "\n".join(
+                error for ed in formset.errors for el in ed.values() for error in el
+            ),
+        )
+        return redirect_to_referrer(self.request, "basket:summary")

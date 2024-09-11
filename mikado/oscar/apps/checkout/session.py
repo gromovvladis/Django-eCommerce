@@ -62,8 +62,8 @@ class CheckoutSessionMixin(object):
         try:
             self.check_pre_conditions(request)
         except exceptions.FailedPreCondition as e:
-            # for message in e.messages:
-                # messages.warning(request, message)
+            for message in e.messages:
+                messages.warning(request, message)
             return http.HttpResponseRedirect(e.url)
 
         return super().dispatch(request, *args, **kwargs)
@@ -128,8 +128,8 @@ class CheckoutSessionMixin(object):
             if not is_permitted:
                 # Create a more meaningful message to show on the basket page
                 msg = (
-                    '"%(title)s" больше нельзя купить (%(reason)s). '
-                    'Пожалуйста, скорректируйте корзину, чтобы продолжить'
+                    '"%(title)s" больше нельзя купить ( %(reason)s ).'
+                    # 'Пожалуйста, скорректируйте корзину, чтобы продолжить'
                 ) % {"title": line.product.get_title(), "reason": reason}
                 messages_list.append(msg)
         if messages_list:

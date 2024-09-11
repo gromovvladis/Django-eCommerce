@@ -114,7 +114,6 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         
         return initial
     
-
     def post(self, request, *args, **kwargs):
         """
         Handle POST requests: instantiate a form instance with the passed
@@ -126,20 +125,17 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         else:
             return self.form_invalid(form)
 
-    
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["methods"] = self._methods
         return kwargs
 
-    
     def get_voucher_form(self):
         """
         This is a separate method so that it's easy to e.g. not return a form
         if there are no vouchers available.
         """
         return CheckoutVoucherForm()
-    
     
     def get_context_data(self, **kwargs):
 
@@ -179,10 +175,8 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
     def get_success_response(self):
         return redirect(self.get_success_url())
 
-    
     def get_available_addresses(self):
         return self.request.user.addresses.first()
-
 
     def get_available_shipping_methods(self):
         """
@@ -199,13 +193,11 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
             request=self.request,
         )
 
-
     def post(self, request, *args, **kwargs):
         self._methods = self.get_available_shipping_methods()
         super().post(request, *args, **kwargs)
         return redirect(self.get_success_url())
-
-     
+  
     def get(self, request, *args, **kwargs):
         self._methods = self.get_available_shipping_methods()
         if len(self._methods) == 0:
@@ -217,7 +209,6 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
             return redirect("checkout:checkoutview")
 
         return super().get(request, *args, **kwargs)
-
 
     def form_valid(self, form):
 
@@ -249,7 +240,6 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         self.checkout_session.set_order_time(form.cleaned_data['order_time'])
         self.checkout_session.set_email_or_change(form.cleaned_data['email_or_change'])
         
-
     def is_shipping_address_set(self, address_fields, shipping_method):
         if shipping_method == "zona-shipping":
             requred_fields = ['line1', 'line2', 'line3', 'line4', 'coords_long', 'coords_lat']
@@ -271,7 +261,6 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
     # переделай
     def is_time_set(self, order_time):
         return True
-    
     
     def form_invalid(self, form):
         messages.error(
@@ -431,7 +420,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         except Exception as e:
             # Hopefully you only ever reach this in development
             logger.exception(
-                "Заказ #%s: ошибка во время перезвата размещения заказа (%s)",
+                "Заказ #%s: ошибка во время размещения размещения заказа (%s)",
                 order_number,
                 e,
             )

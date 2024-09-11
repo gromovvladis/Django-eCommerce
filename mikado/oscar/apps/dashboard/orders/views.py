@@ -44,6 +44,7 @@ PaymentEventType = get_model("order", "PaymentEventType")
 EventHandlerMixin = get_class("order.mixins", "EventHandlerMixin")
 OrderStatsForm = get_class("dashboard.orders.forms", "OrderStatsForm")
 OrderSearchForm = get_class("dashboard.orders.forms", "OrderSearchForm")
+ActiveOrderSearchForm = get_class("dashboard.orders.forms", "ActiveOrderSearchForm")
 OrderNoteForm = get_class("dashboard.orders.forms", "OrderNoteForm")
 ShippingAddressForm = get_class("dashboard.orders.forms", "ShippingAddressForm")
 OrderStatusForm = get_class("dashboard.orders.forms", "OrderStatusForm")
@@ -536,6 +537,11 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
         data = self.form.cleaned_data
 
+        if data["partner_point"]:
+            queryset = self.base_queryset.filter(
+                partner__code=data["partner_point"]
+            )
+
         if data["order_number"]:
             queryset = self.base_queryset.filter(
                 number__istartswith=data["order_number"]
@@ -831,6 +837,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
 class OrderActiveListView(OrderListView):
     template_name = "oscar/dashboard/orders/active_order_list.html"
+    form_class = ActiveOrderSearchForm
     def get_queryset(self):
         """
         Build the queryset for this list.
@@ -846,61 +853,10 @@ class OrderActiveListView(OrderListView):
 
         data = self.form.cleaned_data
 
-        if data["order_number"]:
+        if data["partner_point"]:
             queryset = self.base_queryset.filter(
-                number__istartswith=data["order_number"]
-            )
-
-        if data["username"]:
-            # If the value is two words, then assume they are first name and
-            # last name
-            # parts = data["username"].split()
-
-            # if len(parts) == 1:
-            #     parts = [data["name"], data["name"]]
-            # else:
-            #     parts = [parts[0], parts[1:]]
-
-            # query = Q(user__name__istartswith=parts[0])
-            # queryset = queryset.filter(user__username__istartswith=parts[0]).distinct()
-            queryset = queryset.filter(user__username__istartswith=data["username"]).distinct()
-
-        if data["product_title"]:
-            queryset = queryset.filter(
-                lines__title__istartswith=data["product_title"]
-            ).distinct()
-
-        if data["upc"]:
-            queryset = queryset.filter(lines__upc=data["upc"])
-
-        if data["partner_sku"]:
-            queryset = queryset.filter(lines__partner_sku=data["partner_sku"])
-
-        if data["date_from"] and data["date_to"]:
-            date_to = datetime_combine(data["date_to"], datetime.time.max)
-            date_from = datetime_combine(data["date_from"], datetime.time.min)
-            queryset = queryset.filter(
-                date_placed__gte=date_from, date_placed__lt=date_to
-            )
-        elif data["date_from"]:
-            date_from = datetime_combine(data["date_from"], datetime.time.min)
-            queryset = queryset.filter(date_placed__gte=date_from)
-        elif data["date_to"]:
-            date_to = datetime_combine(data["date_to"], datetime.time.max)
-            queryset = queryset.filter(date_placed__lt=date_to)
-
-        if data["voucher"]:
-            queryset = queryset.filter(
-                discounts__voucher_code=data["voucher"]
-            ).distinct()
-
-        if data["payment_method"]:
-            queryset = queryset.filter(
-                sources__source_type__code=data["payment_method"]
-            ).distinct()
-
-        if data["status"]:
-            queryset = queryset.filter(status=data["status"])
+                partner__code=data["partner_point"]
+        )
 
         return queryset.annotate(
             num_products=Sum("basket__lines__quantity"),
@@ -916,6 +872,8 @@ class OrderActiveListView(OrderListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx["form"] = self.form
+        ctx["order_statuses"] = Order.all_statuses()
         ctx["title"] = "Активные заказы"
         return ctx
 

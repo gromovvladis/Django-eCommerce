@@ -20,8 +20,20 @@
 {% endblock %}
 
 {% block header %}
-    <div class="page-header d-flex justify-content-between">
+    <div class="page-header d-flex justify-content-start">
         <h1>Заказы</h1>
+        <form method="get" class="d-flex align-items-end no-widget-init ml-2" id="partner_form">
+            {% for field in form %}
+                {% if "partner_point" in field.id_for_label %}
+                    {% render_field field class+='partner-point' %}
+                    {% for error in field.errors %}
+                        <ul class="error-block">
+                            <li>{{ error }}</li>
+                        </ul>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </form>
     </div>
 {% endblock header %}
 
@@ -42,7 +54,6 @@
                             {% render_field field class+='form-control' %}
                         {% else %}
                             <div class="form-group form-flex-inline">
-                            {% comment %} <div class="form-group form-flex-inline my-0"> {% endcomment %}
                                 {{ field.label_tag }}
                                 {% render_field field class+='form-control' %}
                                 {% for error in field.errors %}
@@ -97,7 +108,7 @@
             {% render_table orders %}  
             {% csrf_token %}
             {% if orders.paginated_rows %}
-                <div class="table-wrapper mb-4">
+                <div class="table-wrapper mb-4 d-none" id="actions_lines">
                     <div class="table-header d-flex justify-space-between" data-target="#status-body" 
                     data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
                         <h3><i class="fa-solid fa-list-check"></i>Изменить статус заказа и скачать заказы</h3>
@@ -153,6 +164,6 @@
     {{ block.super }}
     oscar.dashboard.orders.initTable();
     {% if form.errors %}
-    $('#SearchModal').modal('show');
+        $('#SearchModal').modal('show');
     {% endif %}
 {% endblock onbodyload %}

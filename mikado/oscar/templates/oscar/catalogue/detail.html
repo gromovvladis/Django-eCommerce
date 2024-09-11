@@ -189,11 +189,3 @@
         </symbol>
     </svg>
 {% endblock %}
-
-{% block extrascripts %}
-    {{ block.super }}
-    {% compress js %}
-        <script src="{% static "js/catalogue/add-to-cart.js" %}" async></script>
-        <script src="{% static "js/catalogue/add-to-wishlist.js" %}" async></script>
-    {% endcompress %}
-{% endblock %}
