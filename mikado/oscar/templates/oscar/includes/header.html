@@ -6,6 +6,11 @@
         class="header__logo d-sm-flex shrink router-link-exact-active router-link-active mr-1"
         aria-current="page">
         {% icon file_name='header/logo' size=45%}
+        {% if partners_select %}
+            {% for partner in partners_select %}
+                {{ partner.name }}
+            {% endfor %}
+        {% endif %}
     </a>
 </div>
 

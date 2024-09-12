@@ -10,6 +10,11 @@
       {% else %}
         gtag('config', "{{ google_analytics_id }}");
       {% endif %}
-      {% block extratracking %}{% endblock %}
+      {% block google_transaction %}{% endblock %}
     </script>
+{% endif %}
+{% if yandex_analytics_id %}
+  <script>
+    {% block yandex_transaction %}{% endblock %}
+  </script>
 {% endif %}

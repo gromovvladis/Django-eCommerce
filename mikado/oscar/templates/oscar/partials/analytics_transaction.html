@@ -1,7 +1,6 @@
-{% extends "oscar/partials/google_analytics.html" %}
-{% load l10n %}
+{% extends "oscar/partials/analytics.html" %}
 
-{% block extratracking %}
+{% block google_transaction %}
     gtag('event', 'purchase', {
       "transaction_id": '{{ order.number|escapejs }}',
       "affiliation": '{{ shop_name|escapejs }}',
@@ -20,4 +19,8 @@
           {% endfor %}
       ]
     });
+{% endblock %}
+
+{% block yandex_transaction %}
+  (){};
 {% endblock %}
