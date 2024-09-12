@@ -92,7 +92,7 @@ if (cartWrapper){
         })
         .then(response => response.json())
         .then(html => {
-            upsellMessages.innerHTML = html.upsellMessages;
+            upsellMessages.innerHTML = html.upsell_messages;
         })
         .catch(error => console.error('Error:', error));
     }

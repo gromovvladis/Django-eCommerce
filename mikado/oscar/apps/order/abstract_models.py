@@ -77,19 +77,7 @@ class AbstractOrder(models.Model):
         on_delete=models.SET_NULL,
     )
 
-    partner = models.ForeignKey(
-        "partner.Partner",
-        related_name="orders",
-        null=True,
-        blank=False,
-        verbose_name="Точка продажи",
-        on_delete=models.SET_NULL,
-    )
-
     shipping_method = models.CharField("Способ доставки", max_length=128, blank=True)
-
-    # Identifies shipping code
-    # shipping_code = models.CharField(blank=True, max_length=128, default="")
 
     # Use this field to indicate that an order is on hold / awaiting payment
     status = models.CharField("Статус", max_length=100, blank=True)

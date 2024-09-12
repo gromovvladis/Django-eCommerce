@@ -28,7 +28,7 @@ if (addBasketForm) {
         xhr.onload = function () {
             var response = JSON.parse(xhr.responseText);
             if (xhr.status >= 200 && xhr.status < 300) {
-                cart_nums.forEach(function(element) {
+                cartNums.forEach(function(element) {
                     element.innerHTML = response.cart_nums; // Вставляем HTML в каждый элемент
                 });
                 cartAdded();

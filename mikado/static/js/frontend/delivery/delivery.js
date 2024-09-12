@@ -1,22 +1,21 @@
-var line1_container = document.querySelector('#line1_container');
+var line1Container = document.querySelector('#line1_container');
 
-if (line1_container){
-    var line1 = line1_container.querySelector('#id_line1');
-    var suggests = line1_container.querySelector('#suggest_list');
-    var clean_address = line1_container.querySelector('#clean_address');
-    var open_map = line1_container.querySelector('#open_map');
+if (line1Container){
+    var line1 = line1Container.querySelector('#id_line1');
+    var suggests = line1Container.querySelector('#suggest_list');
+    var cleanBtn = line1Container.querySelector('#clean_address');
+    var open_map = line1Container.querySelector('#open_map');
     
-    var map_container = document.querySelector('.delivery__map');
-    var mapdiv = map_container.querySelector('#map');
-    var controls = map_container.querySelector('#map_controls');
-    var saveButton = map_container.querySelector('#submit_address');
+    var mapContainer = document.querySelector('.delivery__map');
+    var mapDiv = mapContainer.querySelector('#map');
+    var controls = mapContainer.querySelector('#map_controls');
+    var saveButton = mapContainer.querySelector('#submit_address');
     
     var lon = document.querySelector('#id_coords_long');
     var lat = document.querySelector('#id_coords_lat');
-    var shipping_method = document.querySelector('#id_method_code');
     
     var hints = document.querySelector('#line1_hints');
-    var delivery_time = document.querySelector('#delivery_time');
+    var deliveryTime = document.querySelector('#delivery_time');
     
     const MAPCENTER = [56.0435, 92.9075];
     const DELIVERYBOUNDS = [[56.043545, 92.6406], [55.9460, 93.2584]];
@@ -118,7 +117,7 @@ if (line1_container){
         });
     
         document.addEventListener('mousedown', function(event) {
-            if (!line1_container.contains(event.target)) {
+            if (!line1Container.contains(event.target)) {
                 suggests.classList.add('d-none');
                 if (selection > -1){
                     suggests[0].children[selection].classList.remove('hover');
@@ -279,7 +278,7 @@ if (line1_container){
         ymaps.ready(function () {
     
             if (!map) {
-                map = new ymaps.Map(mapdiv, {
+                map = new ymaps.Map(mapDiv, {
                     center: MAPCENTER,
                     zoom: 12,
                     controls: [],
@@ -311,7 +310,7 @@ if (line1_container){
                 });
 
     
-                if (mapdiv.getAttribute('data-full-screen')){
+                if (mapDiv.getAttribute('data-full-screen')){
     
                     closeButton = new ymaps.control.Button({     
                         options: {
@@ -331,7 +330,7 @@ if (line1_container){
     
                     closeButton.events.add('click', function () {
     
-                        map_container.classList.remove('open');
+                        mapContainer.classList.remove('open');
                         map.geoObjects.remove(placemark);
                         controls.classList.add('d-none');
                     
@@ -452,7 +451,7 @@ if (line1_container){
                 map.controls.add(geolocationControl);
     
                 saveButton.addEventListener('click', function() {
-                    map_container.classList.remove('open');
+                    mapContainer.classList.remove('open');
                     if (addressInfo) {
                         line1.value = addressInfo.address;
                         addressCaptured(addressInfo.coords, addressInfo.address);
@@ -625,8 +624,6 @@ if (line1_container){
     // ====================  ADDRESS RESOLVER  ===========================
     
     
-    
-    
     // время можно показывать пользователю на странице и менять в ордер тайм
     function timeCaptured(result){
         console.log("timeCaptured");
@@ -636,9 +633,9 @@ if (line1_container){
                 hints.innerHTML = result.error;
                 hints.classList.remove('d-none');
             }
-            if (delivery_time){
-                delivery_time.innerHTML = '';
-                delivery_time.classList.remove('active');
+            if (deliveryTime){
+                deliveryTime.innerHTML = '';
+                deliveryTime.classList.remove('active');
             }
             controls.classList.add('d-none');
             line1.setAttribute('valid', 'false');
@@ -646,9 +643,9 @@ if (line1_container){
         } else {
             hints.innerHTML = "";
             hints.classList.add('d-none');
-            if (delivery_time){
-                delivery_time.classList.add('active');
-                delivery_time.innerHTML = result.delivery_time_text;
+            if (deliveryTime){
+                deliveryTime.classList.add('active');
+                deliveryTime.innerHTML = result.delivery_time_text;
             }
             line1.setAttribute('valid', 'true');
             shippingCharge(result.zonaId);
@@ -701,8 +698,8 @@ if (line1_container){
         })
         .catch(error => {
             console.log('error GetTime', error);
-            if (delivery_time){
-                delivery_time.classList.remove('active');
+            if (deliveryTime){
+                deliveryTime.classList.remove('active');
             }
         });
         
@@ -724,7 +721,7 @@ if (line1_container){
 
         line1.readOnly = true;
         suggests.classList.add('d-none');
-        line1_container.classList.remove('not-valid');
+        line1Container.classList.remove('not-valid');
     
         GetTime({coords: coords, address: address, shippingMethod: shippingMethod, zonaId:getZonaId(coords)}).then(function(result) {
             timeCaptured(result);
@@ -749,8 +746,8 @@ if (line1_container){
         line1.value = '';
         line1.readOnly = false;
         hints.classList.add('d-none');
-        if (delivery_time){
-            delivery_time.classList.remove('active');
+        if (deliveryTime){
+            deliveryTime.classList.remove('active');
         }
         controls.classList.add('d-none');
         saveButton.disabled = true;        
@@ -767,8 +764,8 @@ if (line1_container){
         }
     
         hints.innerHTML = "";
-        if (delivery_time){ 
-            delivery_time.innerHTML = "";
+        if (deliveryTime){ 
+            deliveryTime.innerHTML = "";
         }
         line1.setAttribute('captured', 'false');
         line1.setAttribute('valid', 'false');
@@ -779,7 +776,7 @@ if (line1_container){
     }
     
     // кнопка очистить адрес
-    clean_address.addEventListener('click', function() {
+    cleanBtn.addEventListener('click', function() {
         cleanAddress();
         validate();
     });
@@ -791,7 +788,7 @@ if (line1_container){
             console.log("map open");
             addressInfo = null;
             createMap(line1.value);
-            map_container.classList.add('open');
+            mapContainer.classList.add('open');
             action_back = function() {};
         });
     }

@@ -1,11 +1,11 @@
 var line1 = document.querySelector('#id_line1');
 
-var suggests = document.querySelector('#suggest_list'); //
-var clean_address = document.querySelector('#clean_address'); //
+var suggests = document.querySelector('#suggest_list');
+var cleanAddress = document.querySelector('#clean_address');
 
-var map_container = document.querySelector('.delivery__map');
-var mapdiv = map_container.querySelector('#map');
-// var controls = map_container.querySelector('#map_controls');
+var mapContainer = document.querySelector('.delivery__map');
+var mapdiv = mapContainer.querySelector('#map');
+// var controls = mapContainer.querySelector('#map_controls');
 
 var lon = document.querySelector('#id_coords_long');
 var lat = document.querySelector('#id_coords_lat');
@@ -307,7 +307,7 @@ function ZonesInit(json) {
 }
 
 // кнопка очистить адрес
-$(clean_address).on('click', function(){
+$(cleanAddress).on('click', function(){
     console.log("cleanAddress");
     $(line1).val('');
     $(lon).val('');

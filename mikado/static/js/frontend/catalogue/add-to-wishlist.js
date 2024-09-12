@@ -19,7 +19,6 @@ if (wishlistForm) {
                 var response = JSON.parse(xhr.responseText);
                 url = response.url;
                 wishlistBtn.innerHTML = response.html;
-                wishlistBtn.disabled = false;
             }
             wishlistBtn.disabled = false;
             wishlistBtn.classList.remove('loading');

@@ -48,7 +48,7 @@
                     </div>
             
                     {% comment %} promocode {% endcomment %}
-                    <div class="v-promo mb-3 mb-sm-4">
+                    <div class="v-promo mb-3">
                         <form class="v-promo__input-wrapper d-flex align-center g-1 g-sm-2" id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
                             <div data-id="v-input-field" class="v-input d-flex align-center fill-width v-input__padding{% if voucher_form.initial.code %} v-input__label-active{% endif %}">
                                 <div class="v-input__wrapper">

@@ -11,14 +11,15 @@ var errorAmount = checkoutErrors.querySelector('[data-error="amount"]');
 var amountValid = true;
 var addressValid = true;
 
-var orderTime = document.getElementById('id_orderTime');
+var orderTime = document.getElementById('id_order_time');
 var deliveryTimeBtn = document.querySelectorAll('[data-id="delivery-time"]');
 var deliveryTimeLater = document.getElementById('delivery_time_later');
 
 var shippingMethodButtons = document.querySelectorAll('[data-id="delivery-method-button"]');
-var delivery_method_block = document.querySelector('[data-id="delivery-method-block"]');
-var delivery_time_block = document.querySelector('[data-id="delivery-time-block"]');
-var time_title = document.querySelector('[data-id="order-time-title"]');
+var methodSwaper = document.querySelector('[data-id="delivery-method-block"]');
+var timeSwaper = document.querySelector('[data-id="delivery-time-block"]');
+var timeTitle = document.querySelector('[data-id="order-time-title"]');
+var shipping = document.querySelector('#id_method_code');
 
 var checkoutTotals = document.getElementById('checkout_totals');
 var checkout_fields = document.querySelectorAll('[data-id="v-input-field"]');
@@ -56,18 +57,18 @@ document.addEventListener('DOMContentLoaded', function () {
 shippingMethodButtons.forEach(function(button) {
     button.addEventListener('click', function() {
         shippingMethod = this.value;
-        shippingMethod.value = shippingMethod;
+        shipping.value = shippingMethod;
         let leftPosition = this.getBoundingClientRect().left - this.parentElement.getBoundingClientRect().left;
-        delivery_method_block.style.left = `${leftPosition}px`;
+        methodSwaper.style.left = `${leftPosition}px`;
         GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
             timeCaptured(result);
         });
         if (shippingMethod === "self-pick-up") {
             addressFields.classList.add('d-none');
-            time_title.innerHTML = 'Время самовывоза';
+            timeTitle.innerHTML = 'Время самовывоза';
         } else {
             addressFields.classList.remove('d-none');
-            time_title.innerHTML = 'Время доставки';
+            timeTitle.innerHTML = 'Время доставки';
         }
         getNewTotals(shippingMethod);
     });
@@ -77,7 +78,7 @@ shippingMethodButtons.forEach(function(button) {
 deliveryTimeBtn.forEach(function(time_btn) {
     time_btn.addEventListener('click', function() {
         let leftPosition = time_btn.getBoundingClientRect().left - time_btn.parentElement.getBoundingClientRect().left;
-        delivery_time_block.style.left = `${leftPosition}px`;
+        timeSwaper.style.left = `${leftPosition}px`;
 
         var delivery_time_method = time_btn.getAttribute("data-type");
         if (delivery_time_method === "now") {
@@ -172,8 +173,8 @@ textares.forEach(function(textarea) {
 });
 
 // Не отправлять форму enter-ом
-document.getElementById('place_order_form').addEventListener('keypress', function(event) {
-    if (event.which === 13) {
+document.getElementById('place_order_form').addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
         event.preventDefault();
     }
 });
@@ -206,7 +207,7 @@ function checkValid() {
 // Валидация по адресу
 function validateAddress() {
     addressValid = true;
-    shippingMethod = shippingMethod.value;
+    shippingMethod = shipping.value;
     if (shippingMethod === "zona-shipping") {
         if (!line1.value || line1.getAttribute('captured') === "false" || line1.getAttribute('valid') === "false") {
             addressValid = false;

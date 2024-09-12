@@ -18429,8 +18429,8 @@ ymaps[class*="search__suggest-item_selected"] {
     font-weight: 400;
     font-style: normal;
     color: #717171;
-    margin-bottom: 10px;
-    margin-top: 15px;
+    margin-bottom: 1rem;
+    margin-top: 1.5rem;
 }
 
 /* .v-order-checkout__items span{

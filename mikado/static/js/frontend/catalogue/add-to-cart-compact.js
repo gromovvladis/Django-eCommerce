@@ -28,7 +28,7 @@ function findNewForms() {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         var response = JSON.parse(xhr.responseText);
                         cartNums.forEach(function(element) {
-                            element.innerHTML = response.cartNums; // Вставляем HTML в каждый элемент
+                            element.innerHTML = response.cart_nums; // Вставляем HTML в каждый элемент
                         });
                         cartAdded();
                     } else if (xhr.status >= 400 && xhr.status < 500) {

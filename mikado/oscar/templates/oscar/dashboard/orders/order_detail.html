@@ -20,7 +20,7 @@
 {% endblock %}
 
 {% block navtext %}
- {{ order.partner|default:"-" }} | Заказ №{{ order.number }}
+ {{ order.basket.partner|default:"-" }} | Заказ №{{ order.number }}
 {% endblock  %}
 
 {% block dashboard_content %}
@@ -105,10 +105,10 @@
                 <tr>
                     <th>Точка продажи</th>
                     <td>
-                        {% if order.partner %}
-                            <a href="{% url 'dashboard:partner-manage' pk=order.partner.id %}">{{ order.partner|default:"-" }}</a>
+                        {% if order.basket.partner %}
+                            <a href="{% url 'dashboard:partner-manage' pk=order.basket.partner.id %}">{{ order.basket.partner|default:"-" }}</a>
                         {% else %}
-                            {{ order.partner|default:"-" }}
+                            {{ order.basket.partner|default:"-" }}
                         {% endif %}
                     </td>
                 </tr>
