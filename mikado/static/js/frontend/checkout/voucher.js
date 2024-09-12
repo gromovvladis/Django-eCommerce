@@ -1,18 +1,17 @@
-var voucher_form = document.getElementById('voucher_form');
-var voucher_btn = voucher_form.querySelector('#voucher_btn');
-var remove_form = document.querySelector('[data-id="voucher-remove"]');
-var code_input = document.getElementById('id_code');
-var voucher_message = document.getElementById('voucher_message');
+var voucherForm = document.getElementById('voucher_form');
+var voucherBtn = voucherForm.querySelector('#voucher_btn');
+var removeForm = document.querySelector('[data-id="voucher-remove"]');
+var codeInput = document.getElementById('id_code');
+var voucherMessage = document.getElementById('voucher_message');
 
 document.addEventListener('DOMContentLoaded', function () {
-    if (remove_form){
-        delete_promo(remove_form);
+    if (removeForm){
+        delete_promo(removeForm);
     }
 });
 
-
-function delete_promo(remove_form) {
-    remove_form.addEventListener('submit', function (event) {
+function delete_promo(removeForm) {
+    removeForm.addEventListener('submit', function (event) {
         event.preventDefault();
         let btn = this.querySelector(".remove_promocode");
         btn.setAttribute("disabled", true);
@@ -22,22 +21,19 @@ function delete_promo(remove_form) {
             body: new URLSearchParams(new FormData(this))
         }).then(response => response.json())
         .then(data => {
-            voucher_message.innerHTML = data.message;
-            code_input.value = '';
+            voucherMessage.innerHTML = data.message;
+            codeInput.value = '';
             voucher_func(data);
             btn.removeAttribute("disabled");
         });
     });
 }
 
-
-
-
-voucher_form.addEventListener('submit', function (event) {
+voucherForm.addEventListener('submit', function (event) {
     event.preventDefault();
-    voucher_btn.disabled = true;
-    voucher_btn.textContent = 'Проверка';
-    voucher_message.innerHTML = '';
+    voucherBtn.disabled = true;
+    voucherBtn.textContent = 'Проверка';
+    voucherMessage.innerHTML = '';
 
     fetch(url_voucher, {
         method: this.getAttribute('method'),
@@ -45,29 +41,27 @@ voucher_form.addEventListener('submit', function (event) {
     }).then(response => response.json())
     .then(data => {
         voucher_func(data);
-        voucher_message.innerHTML = data.message;
-        voucher_btn.textContent = 'Применить';
-        voucher_btn.disabled = false;
+        voucherMessage.innerHTML = data.message;
+        voucherBtn.textContent = 'Применить';
+        voucherBtn.disabled = false;
     });
 
 });
 
-
 function voucher_func(response) {
     if (response.status == 202) {
         document.getElementById('checkout_totals').innerHTML = response.new_totals;
-        code_input.value = '';
-        remove_form = document.querySelector('[data-id="voucher-remove"]');
-        delete_promo(remove_form);
+        codeInput.value = '';
+        removeForm = document.querySelector('[data-id="voucher-remove"]');
+        delete_promo(removeForm);
     }
 }
 
-code_input.addEventListener('keyup', function(event){
-    if (code_input.value !== "" && event.code !== 'Enter') {
-        voucher_btn.disabled = false;
+codeInput.addEventListener('keyup', function(event){
+    if (codeInput.value !== "" && event.code !== 'Enter') {
+        voucherBtn.disabled = false;
     } else {
-        voucher_btn.disabled = true;
-        voucher_message.innerHTML = "";
+        voucherBtn.disabled = true;
+        voucherMessage.innerHTML = "";
     }
 });
-

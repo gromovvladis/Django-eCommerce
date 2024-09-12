@@ -173,7 +173,6 @@ function authModalLoaded() {
     modalLoaded = true;
 }
 
-
 function openAuthModal(redirect_url = '') {
     if (modalLoaded) {
         modal.classList.toggle('d-none');

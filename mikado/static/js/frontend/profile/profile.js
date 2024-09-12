@@ -17,10 +17,6 @@ profileTabs.forEach(function(tab) {
     });
 });
 
-
-console.log(profileWrapper);
-console.log(profileWrapper.classList.contains('open'));
-
 if (profileWrapper && profileWrapper.classList.contains('open')) {
     actionBack = function() {
         profileWrapper.classList.remove('open');

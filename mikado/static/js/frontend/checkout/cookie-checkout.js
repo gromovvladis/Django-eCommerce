@@ -1,4 +1,4 @@
-var order_note = document.getElementById('id_order_note');
+var orderNote = document.getElementById('id_order_note');
 var notes = document.getElementById('id_notes');
 window.onbeforeunload = function() {
     if (line1.getAttribute('captured') === 'true') {
@@ -8,5 +8,5 @@ window.onbeforeunload = function() {
         Cookies.set('line4', line4.value);
         Cookies.set('notes', notes.value);
     }
-    Cookies.set('order_note', order_note.value);
+    Cookies.set('orderNote', orderNote.value);
 };

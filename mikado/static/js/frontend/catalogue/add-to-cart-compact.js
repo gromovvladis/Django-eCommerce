@@ -1,4 +1,4 @@
-var cart_nums = document.querySelectorAll('[data-id="cart-nums"]');
+var cartNums = document.querySelectorAll('[data-id="cart-nums"]');
 var cartAdded = () => {};
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -27,8 +27,8 @@ function findNewForms() {
                 xhr.onload = function () {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         var response = JSON.parse(xhr.responseText);
-                        cart_nums.forEach(function(element) {
-                            element.innerHTML = response.cart_nums; // Вставляем HTML в каждый элемент
+                        cartNums.forEach(function(element) {
+                            element.innerHTML = response.cartNums; // Вставляем HTML в каждый элемент
                         });
                         cartAdded();
                     } else if (xhr.status >= 400 && xhr.status < 500) {

@@ -1,6 +1,4 @@
-// Получаем элементы по идентификатору и атрибутам
 var saveAddress = document.getElementById('save_address');
-// var line1 = document.getElementById('id_line1'); // предполагается, что line1 уже был объявлен
 var line2 = document.getElementById('id_line2');
 var line3 = document.getElementById('id_line3');
 var line4 = document.getElementById('id_line4');

@@ -1,7 +1,4 @@
-// Получаем элемент формы по идентификатору
 var setAddressForm = document.getElementById('set_address');
-// var saveButton = document.getElementById('save_button'); // Предполагается, что saveButton был объявлен
-// var line1 = document.getElementById('id_line1'); // Предполагается, что line1 был объявлен
 
 // Инициализация адреса при загрузке страницы
 document.addEventListener('DOMContentLoaded', function () {
