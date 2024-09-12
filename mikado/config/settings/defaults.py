@@ -1,6 +1,5 @@
 from django.urls import reverse_lazy
 
-# OSCAR_SHOP_NAME = "Микадо Красноярск"
 OSCAR_HOMEPAGE = reverse_lazy("home:index")
 PARTNER_SELECT = True
 

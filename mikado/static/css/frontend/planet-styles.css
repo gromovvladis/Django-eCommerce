@@ -7067,7 +7067,7 @@ pre {
 
 .v-app__cookies {
     position: fixed;
-    z-index: 1000;
+    z-index: 900;
     left: 0;
     width: 100%;
     bottom: 0;

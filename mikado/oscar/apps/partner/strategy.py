@@ -205,6 +205,32 @@ class UseFirstStockRecord:
             pass
 
 
+class UsePartnerSelectStockRecord:
+    """
+    Stockrecord selection mixin for use with the ``Structured`` base strategy.
+    This mixin picks the first (normally only) stockrecord to fulfil a product.
+    """
+
+    def select_stockrecord(self, product):
+        # We deliberately fetch by index here, to ensure that no additional database queries are made
+        # when stockrecords have already been prefetched in a queryset annotated using ProductQuerySet.base_queryset
+        try:
+            partner_id = 1
+            
+            if self.request:
+                partner_basket = self.request.basket.partner_id
+                partner_cookies = self.request.COOKIES.get("partner", None)
+
+                if partner_basket is not None:
+                    partner_id = partner_basket
+                elif partner_cookies is not None:
+                    partner_id = partner_cookies
+
+            return product.stockrecords.filter(partner_id=partner_id)[0]
+        except IndexError:
+            pass
+
+
 class StockRequired(object):
     """
     Availability policy mixin for use with the ``Structured`` base strategy.
@@ -364,11 +390,10 @@ class DeferredTax(object):
 # charge tax!
 
 
-class Default(UseFirstStockRecord, StockRequired, NoTax, Structured):
+class Default(UsePartnerSelectStockRecord, StockRequired, NoTax, Structured):
     """
     Default stock/price strategy that uses the first found stockrecord for a
     product, ensures that stock is available (unless the product class
     indicates that we don't need to track stock) and charges zero tax.
     """
     rate = D(0)
-

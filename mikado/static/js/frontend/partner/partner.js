@@ -1,32 +1,26 @@
-var modal = document.getElementById('modal');
-var authLoaded = false;
+var partnerLoaded = false;
 
-function loadAuthModal(redirect_url) {
-    fetch(url_auth_api, {
+function loadPartnerModal() {
+    fetch(url_partner_api, {
         method: 'GET'
     })
     .then(response => response.json())
     .then(data => {
-        modal.innerHTML = data.auth_modal;
-        authModalLoaded(redirect_url);
+        console.log('Partner modal data:', data);
+        modal.innerHTML = data.partner_modal;
+        partnerModalLoaded();
         modal.classList.toggle('d-none');
         document.body.classList.toggle('fixed');
+        setCookie("partner", data.partner_default);
     })
     .catch(error => {
-        console.error('Error fetching auth modal:', error);
+        console.error('Error fetching partner modal:', error);
     });
 }
 
-function authModalLoaded(redirect_url) {
+function partnerModalLoaded() {
 
-    var auth_form = document.getElementById('auth_form');
-    var btnSms = auth_form.querySelector('#sms_form_btn');
-    var btnAuth = auth_form.querySelector('#auth_form_btn');
-    var errorSms = auth_form.querySelector('#error_id_username');
-    var errorAuth = auth_form.querySelector('#error_id_password');
-    var phoneInput = auth_form.querySelector('#id_username');
-    var codeInput = auth_form.querySelector('#id_password');
-    var passwordGroup = auth_form.querySelector('#auth_id_password');
+    var partner_form = document.getElementById('partner_form');
     
     auth_form.addEventListener('submit', function(event) {
         event.preventDefault();
@@ -34,7 +28,6 @@ function authModalLoaded(redirect_url) {
         btnClickFunc(auth_type);
         let formData = new URLSearchParams(new FormData(this))
         formData.append('action', auth_type);
-        formData.append('redirect_url', redirect_url);
 
         fetch(auth_form.getAttribute('action'), {
             method: auth_form.getAttribute('method'),
@@ -45,6 +38,7 @@ function authModalLoaded(redirect_url) {
         })
         .then(response => response.json())
         .then(data => {
+            console.log(data);
             if (data.status == 200) {
                 successFunc(auth_type, data);
             } else {
@@ -95,7 +89,7 @@ function authModalLoaded(redirect_url) {
                 }
             }, 1000);
         } else {
-            window.location.href = response.success;
+            window.location.href = response.succeeded;
         }
     }
 
@@ -104,72 +98,30 @@ function authModalLoaded(redirect_url) {
         if (authType == "sms") {
             btnSms.disabled = false;
             btnSms.innerHTML = 'Отправить код';
-            errorSms.textContent = response.error;
+            errorSms.textContent = response.errors;
         } else {
             btnAuth.disabled = false;
             btnAuth.innerHTML = 'Подтвердить и войти';
-            errorAuth.textContent = response.error;
+            errorAuth.textContent = response.errors;
         }
     }
 
-    let phoneStr = '';
-    let formattedStr = '';
-    let deleteMode = false;
-    
-    const defaultFormat = '+7 ({0}{1}{2}) {3}{4}{5}-{6}{7}{8}{9}';
-
-    phoneInput.addEventListener('keydown', (e) => {
-        deleteMode = (e.key === 'Backspace');
-    });
-        
-    phoneInput.addEventListener('input', (e) => {
-        if (deleteMode) {
-            phoneInput.value = phoneInput.value;
-            phoneStr = parsePhoneString(phoneInput.value);
-        } else {
-            if (e.inputType == 'insertText' && !isNaN(parseInt(e.data))) {
-                if (phoneStr.length <= 10){
-                    phoneStr += e.data;
-                }
-            }
-            phoneInput.value = formatPhoneString();
-        }
-        btnSms.disabled = phoneStr.length !== 10;
-    });
-
-    function formatPhoneString() {
-        let strArr = phoneStr.split('');
-        formattedStr = defaultFormat;
-        for (let i = 0; i < strArr.length; i++) {
-            formattedStr = formattedStr.replace(`{${i}}`, strArr[i]);
-        }
-        return formattedStr.indexOf('{') === -1 ? formattedStr : formattedStr.substring(0, formattedStr.indexOf('{'));
-    }
-    
-    function parsePhoneString(str) {
-        return str.replace('+7', '').replace(' ', '').replace(' ', '').replace('(', '').replace(')', '').replace('-', '');
-    }
-
-    codeInput.addEventListener('input', function() {
-        codeInput.value = codeInput.value.replace(/\D/g, '');
-        btnAuth.disabled = codeInput.value.length !== 4;
-    });
-
-    codeInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            btnAuth.click();
-        }
-    });
-
-    authLoaded = true;
+    authLoaded = false;
+    partnerLoaded = true;
 }
 
-function openAuthModal(redirect_url = '') {
-    if (authLoaded) {
+function initPartner(basketPartner=null) {
+    if (!basketPartner && !(getCookie("partner"))) {
+        openPartnerModal();
+    }
+}
+
+function openPartnerModal() {
+    if (partnerLoaded) {
         modal.classList.toggle('d-none');
         document.body.classList.toggle('fixed');
     } else {
-        loadAuthModal(redirect_url);
+        loadPartnerModal();
     }
 }
+

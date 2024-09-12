@@ -5,15 +5,16 @@ var searchInput = document.querySelector('[data-id="v-input-search-field"]');
 
 function getCsrfToken() {
     // Extract CSRF token from cookies
-    var cookies = document.cookie.split(';');
-    var csrf_token = null;
-
-    cookies.forEach(function(cookie) {
-        var cookieParts = cookie.trim().split('=');
-        if (cookieParts[0] === 'csrftoken') {
-            csrf_token = cookieParts[1];
-        }
-    });
+    var csrf_token = getCookie('csrftoken');
+    
+    // var cookies = document.cookie.split(';');
+    // var csrf_token = null;
+    // cookies.forEach(function(cookie) {
+    //     var cookieParts = cookie.trim().split('=');
+    //     if (cookieParts[0] === 'csrftoken') {
+    //         csrf_token = cookieParts[1];
+    //     }
+    // });
 
     // Extract from cookies fails for HTML-Only cookies
     if (!csrf_token) {

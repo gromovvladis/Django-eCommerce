@@ -2,8 +2,7 @@ var setAddressForm = document.getElementById('set_address');
 
 // Инициализация адреса при загрузке страницы
 document.addEventListener('DOMContentLoaded', function () {
-    var adr = document.cookie.split('; ').find(row => row.startsWith('line1='));
-    adr = adr ? decodeURIComponent(adr.split('=')[1]) : null;
+    var adr = getCookie("line1");
 
     if (adr && line1) {
         line1.readOnly = true;

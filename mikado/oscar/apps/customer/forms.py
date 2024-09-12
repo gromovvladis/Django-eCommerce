@@ -7,7 +7,6 @@ from django.contrib.auth import forms as auth_forms
 from django.contrib.sites.shortcuts import get_current_site
 from django.core import validators
 from django.core.exceptions import ValidationError
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.module_loading import import_string
 
 from phonenumber_field.modelfields import PhoneNumberField
@@ -15,7 +14,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 
 from oscar.apps.customer.utils import get_password_reset_url, normalise_email
 from oscar.core.compat import existing_user_fields, get_user_model
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_class
 from oscar.core.utils import datetime_combine
 
 CustomerDispatcher = get_class("customer.utils", "CustomerDispatcher")
@@ -83,8 +82,6 @@ class PhoneAuthenticationForm(forms.Form):
         validators=[validators.RegexValidator(r'^\d{1,10}$')]
     )
 
-    redirect_url = forms.CharField(widget=forms.HiddenInput, required=False)
-    
     error_messages = {
         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
         "inactive": "Этот аккаунт не активен.",
@@ -133,12 +130,6 @@ class PhoneAuthenticationForm(forms.Form):
                 self.confirm_login_allowed(self.user_cache)
 
         return self.user_cache
-
-
-    def clean_redirect_url(self):
-        url = self.cleaned_data["redirect_url"].strip()
-        if url and url_has_allowed_host_and_scheme(url, self.host):
-            return url
         
 
     def save(self, commit=True):
@@ -192,7 +183,6 @@ class PhoneUserCreationForm(forms.Form):
         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
         "inactive": "Этот аккаунт не активен.",
     }
-    redirect_url = forms.CharField(widget=forms.HiddenInput, required=False)
 
     class Meta:
         model = User
@@ -207,12 +197,6 @@ class PhoneUserCreationForm(forms.Form):
         # Validate after self.instance is updated with form data
         # otherwise validators can't access email
         # see django.contrib.auth.forms.UserCreationForm
-
-    def clean_redirect_url(self):
-        url = self.cleaned_data["redirect_url"].strip()
-        if url and url_has_allowed_host_and_scheme(url, self.host):
-            return url
-        return settings.LOGIN_REDIRECT_URL
 
     def save(self, commit=True):
         user = super().save(commit=commit)

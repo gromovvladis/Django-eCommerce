@@ -6,6 +6,6 @@ var notes = document.getElementById('id_notes');
 // Обработчик для предупреждения при закрытии страницы
 window.onbeforeunload = function() {
     if (line1.getAttribute('captured') === 'true') {
-        document.cookie = "line1=" + encodeURIComponent(line1.value) + "; path=/";
+        setCookie("line1", line1.value)
     }
 };

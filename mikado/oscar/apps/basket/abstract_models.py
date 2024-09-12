@@ -1,4 +1,3 @@
-from locale import currency
 import zlib
 from decimal import Decimal as D
 from operator import itemgetter
@@ -12,7 +11,7 @@ from django.utils.encoding import smart_str
 from django.utils.timezone import now
 
 from oscar.core.compat import AUTH_USER_MODEL
-from oscar.core.loading import get_class, get_classes
+from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import get_default_currency
 from oscar.models.fields.slugfield import SlugField
 
@@ -52,17 +51,18 @@ class AbstractBasket(models.Model):
     # Basket statuses
     # - Frozen is for when a basket is in the process of being submitted
     #   and we need to prevent any changes to it.
-    OPEN, MERGED, SAVED, FROZEN, SUBMITTED = (
+    # OPEN, MERGED, SAVED, FROZEN, SUBMITTED = (
+    OPEN, MERGED, FROZEN, SUBMITTED = (
         "Open",
         "Merged",
-        "Saved",
+        # "Saved",
         "Frozen",
         "Submitted",
     )
     STATUS_CHOICES = (
         (OPEN, "Открыто - сейчас активна"),
         (MERGED, "Объединено – заменено другой корзиной"),
-        (SAVED, "Сохранено - можно будет заказать позже или в другой точке продажи"),
+        # (SAVED, "Сохранено - можно будет заказать позже или в другой точке продажи"),
         (FROZEN, "Заморожено – корзину нельзя изменить"),
         (SUBMITTED, "Потдвержено - заказано"),
     )
@@ -83,7 +83,8 @@ class AbstractBasket(models.Model):
 
     # Only if a basket is in one of these statuses can it be edited
     # editable_statuses = (OPEN,)
-    editable_statuses = (OPEN, SAVED)
+    editable_statuses = (OPEN,)
+    # editable_statuses = (OPEN, SAVED)
 
     class Meta:
         abstract = True
@@ -93,7 +94,7 @@ class AbstractBasket(models.Model):
 
     objects = models.Manager()
     open = OpenBasketManager()
-    saved = SavedBasketManager()
+    # saved = SavedBasketManager()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -249,11 +250,11 @@ class AbstractBasket(models.Model):
         Returns (line, created).
           line: the matching basket line
           created: whether the line was created or updated
-
         """
         line, created = self.get_line(product, quantity, options, additionals)
 
         if created:
+            self.check_partner(line)
             for option_dict in options:
                 line.attributes.create(
                     option=option_dict["option"], value=option_dict["value"]
@@ -274,6 +275,22 @@ class AbstractBasket(models.Model):
     add_product.alters_data = True
     add = add_product
 
+
+    def check_partner(self, line):
+                
+        if not self.partner_id or self.is_empty():
+            self.partner_id = line.stockrecord.partner_id
+            self.save()
+        else:
+            Partner = get_model("partner", "Partner")
+            if line.stockrecord.partner_id != self.partner_id:
+                raise ValueError(
+                    (
+                        "Данный товар не доступен в %s, закажите его в %s"
+                    )
+                    % (Partner.objects.get(partner_id=self.partner_id).addresses.first().line1, Partner.objects.get(partner_id=line.stockrecord.partner_id).addresses.first().line1)
+                )
+            
 
     def remove_product(self, product, quantity=1, options=None):
         """
@@ -509,7 +526,7 @@ class AbstractBasket(models.Model):
                 pass
             except TypeError:
                 # Handle Unavailable products with no known price
-                info = self.get_stock_info(line.product, line.attributes.all())
+                info = self.get_stock_info(line.product, line.options, line.additions)
                 if info.availability.is_available_to_buy:
                     raise
         return total
@@ -906,8 +923,9 @@ class AbstractLine(models.Model):
     @property
     def unit_price(self):
         price_item =  self.purchase_info.price.money
-        price_additionals =  self.additions_total
-        return price_additionals + price_item
+        if price_item:
+            price_item = price_item + self.additions_total
+        return price_item
 
     @property
     def line_price(self):

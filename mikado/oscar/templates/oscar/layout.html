@@ -142,6 +142,7 @@
 {% comment %} {% compress js preload %} {% endcomment %}
 {% block templatescripts %}
     var url_get_cookie = "{% url 'home:cookies' %}";
+    var url_partner_api = "{% url 'partner:select' %}";
     var url_auth_api = "{% url 'customer:api-login' %}";
     var url_auth = "{% url 'customer:login' %}";
 {% endblock %}
@@ -149,16 +150,22 @@
 {% block scripts %}
     {% comment %} {% compress js %} {% endcomment %}
         <script src="{% static "js/thirdpaty/slider/slider.js" %}" defer></script>
-        <script src="{% static "js/frontend/homepage/homepage-sliders.js" %}" defer></script>
-        <script src="{% static "js/frontend/catalogue/add-to-cart-compact.js" %}" defer></script>
-        <script src="{% static "js/frontend/delivery/delivery.js" %}" defer></script>
-        <script src="{% static "js/frontend/basket/basket.js" %}" defer></script>
 
+        <script src="{% static "js/frontend/cookie/cookie-main.js" %}" defer></script>
+        <script src="{% static "js/frontend/homepage/homepage-sliders.js" %}" defer></script>
+        <script src="{% static "js/frontend/delivery/delivery.js" %}" defer></script>
+        
+        <script src="{% static "js/frontend/catalogue/add-to-cart-compact.js" %}" defer></script>
         <script src="{% static "js/frontend/catalogue/add-to-cart.js" %}" defer></script>
         <script src="{% static "js/frontend/catalogue/add-to-wishlist.js" %}" defer></script>
+        <script src="{% static "js/frontend/basket/basket.js" %}" defer></script>
 
         <script src="{% static "js/frontend/auth/auth.js" %}" defer></script>
-        <script src="{% static "js/frontend/cookie/cookie-main.js" %}" defer></script>
+        <script src="{% static "js/frontend/partner/partner.js" %}" defer></script>
         <script src="{% static "js/frontend/footer/footer.js" %}" defer></script>
     {% comment %} {% endcompress %} {% endcomment %}
+{% endblock %}
+
+{% block onbodyload %}
+    initPartner({{ request.basket.partner.id }});
 {% endblock %}

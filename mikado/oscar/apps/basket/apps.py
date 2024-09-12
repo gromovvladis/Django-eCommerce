@@ -19,7 +19,7 @@ class BasketConfig(OscarConfig):
         self.add_view = get_class("basket.views", "BasketAddView")
         self.empty_view = get_class("basket.views", "EmptyBasketView")
         self.upsell_view = get_class("basket.views", "GetUpsellMasseges")
-        self.saved_view = get_class("basket.views", "SavedView")
+        # self.saved_view = get_class("basket.views", "SavedView")
 
     def get_urls(self):
         urls = [
@@ -27,6 +27,6 @@ class BasketConfig(OscarConfig):
             path("add/<str:slug>/", self.add_view.as_view(), name="add"),
             path("empty/", csrf_exempt(self.empty_view.as_view()), name="empty"),
             path("upsell/", self.upsell_view.as_view(), name="upsell"),
-            path("saved/", self.saved_view.as_view(), name="saved"),
+            # path("saved/", self.saved_view.as_view(), name="saved"),
         ]
         return self.post_process_urls(urls)

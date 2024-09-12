@@ -69,7 +69,7 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
     permission_classes = [AllowAny]
 
     template_name = "oscar/customer/auth_modal.html"
-    auth_form_class = PhoneAuthenticationForm
+    form_class = PhoneAuthenticationForm
     redirect_field_name = "next"
 
     def get(self, request, *args, **kwargs):
@@ -81,9 +81,9 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
 
 
     def get_context_data(self, *args, **kwargs):
-        ctx = {}
-        ctx["auth_form"] = self.get_auth_form()
-        return ctx
+        return {
+            "auth_form": self.get_auth_form()
+        }
 
 
     def post(self, request, *args, **kwargs):
@@ -96,7 +96,7 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
 
     # AUTH
     def get_auth_form(self, bind_data=False):
-        return self.auth_form_class(**self.get_auth_form_kwargs(bind_data))
+        return self.form_class(**self.get_auth_form_kwargs(bind_data))
 
 
     def get_auth_form_kwargs(self, bind_data=False):
@@ -104,7 +104,6 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
         kwargs["request"] = self.request
         kwargs["host"] = self.request.get_host()
         kwargs["initial"] = {
-            "redirect_url": self.request.GET.get(self.redirect_field_name, ""),
             "username": self.request.POST.get("username"),
         }
         if bind_data and self.request.method in ("POST", "PUT"):
@@ -139,13 +138,13 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
 
                 url = self.get_auth_success_url(form)
 
-                return http.JsonResponse({"secceded": url, "status": 200}, status=200)
+                return http.JsonResponse({"success": url, "status": 200}, status=200)
 
-        return http.JsonResponse({"errors": "Код не верный", "status": 400}, status=404)
+        return http.JsonResponse({"error": "Код не верный", "status": 400}, status=404)
 
 
     def get_auth_success_url(self, form):    
-        redirect_url = form.cleaned_data["redirect_url"]
+        redirect_url = self.request.POST.get('redirect_url')
         if redirect_url:
             return redirect_url
         
@@ -179,10 +178,7 @@ class AccountAuthView(generic.TemplateView, AccountAuthModalView):
     """
     Resiter via sms.
     """
-
     template_name = "oscar/customer/auth.html"
-    auth_form_class = PhoneAuthenticationForm
-    redirect_field_name = "next"
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
