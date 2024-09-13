@@ -1,19 +1,19 @@
 {% load svg_tags %}
+{% load partner_tags %}
 
 <div class="v-app__header-left d-flex mr-sm-2 mr-md-3">
     {% comment %} ------------- лого --------------- {% endcomment %}
     <a href="{{ homepage_url }}" data-id="header-logo"
         class="header__logo d-sm-flex shrink router-link-exact-active router-link-active mr-1"
         aria-current="page">
-        {% icon file_name='header/logo' size=45%}
-
-        {% if partners_select %}
-            {% for partner in partners_select %}
-                {{ partner.name }}
-            {% endfor %}
-        {% endif %}
-        
+        {% icon file_name='header/logo' size=45%}        
     </a>
+    {% if partners_select %}
+        <button onclick="openPartnerModal()">
+            {% selected_partner request as partner %}
+            {{ partner }}
+        </button>
+    {% endif %}
 </div>
 
 <div class="v-app__header-right d-flex">

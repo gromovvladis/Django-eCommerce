@@ -21,17 +21,12 @@ function loadPartnerModal() {
 function partnerModalLoaded() {
 
     var partner_form = document.getElementById('partner_form');
-    
-    auth_form.addEventListener('submit', function(event) {
+    console.log('Partner')
+    partner_form.addEventListener('submit', function(event) {
         event.preventDefault();
-        auth_type = event.submitter.name
-        btnClickFunc(auth_type);
-        let formData = new URLSearchParams(new FormData(this))
-        formData.append('action', auth_type);
-
-        fetch(auth_form.getAttribute('action'), {
-            method: auth_form.getAttribute('method'),
-            body: formData.toString(),
+        fetch(partner_form.getAttribute('action'), {
+            method: partner_form.getAttribute('method'),
+            body: new URLSearchParams(new FormData(this)).toString(),
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
@@ -39,61 +34,23 @@ function partnerModalLoaded() {
         .then(response => response.json())
         .then(data => {
             console.log(data);
-            if (data.status == 200) {
-                successFunc(auth_type, data);
-            } else {
-                errorFunc(auth_type, data);
-            }
+            successFunc(data);
         })
         .catch(error => {
-            errorFunc(auth_type, error);
+            errorFunc(error);
         });
     });
 
-    function btnClickFunc(authType) {
-        if (authType == "sms") {
-            btnSms.disabled = true;
-            btnSms.innerHTML = 'Отправка';
-            errorSms.innerHTML = '';
-            errorAuth.innerHTML = '';
-            codeInput.value = "";
-        } else {
-            btnAuth.disabled = true;
-            btnAuth.innerHTML = 'Загрузка';
-            errorAuth.innerHTML = '';
-        }
-    }
-
-    function successFunc(authType, response) {
+    function successFunc(response) {
         console.log("successFunc", response);
-        if (authType == "sms") {
-            btnSms.classList.remove('v-auth-modal__repeat-button', 'v-button', 'v-button--main');
-            btnSms.classList.add('v-auth-modal__repeat-text');
-            passwordGroup.classList.remove('d-none');
-            passwordGroup.classList.add('v-input', 'v-input__label-active');
-            passwordGroup.querySelector('input').focus();
-            btnAuth.classList.remove('d-none');
-            btnAuth.classList.add('v-button', 'v-button--main');
-            phoneInput.readOnly = true;
-            var seconds = 30;
-            var intId = setInterval(function() {
-                if (seconds > 0) {
-                    seconds--;
-                    btnSms.textContent = "Повторить SMS: " + seconds;
-                } else {
-                    clearInterval(intId);
-                    btnSms.disabled = false;
-                    btnSms.textContent = "Повторить SMS";
-                    btnSms.classList.remove('v-auth-modal__repeat-text');
-                    btnSms.classList.add('v-auth-modal__repeat-button');
-                }
-            }, 1000);
-        } else {
-            window.location.href = response.succeeded;
-        }
+        // if (authType == "sms") {
+        
+        // } else {
+        //     window.location.href = response.succeeded;
+        // }
     }
 
-    function errorFunc(authType, response) {
+    function errorFunc(response) {
         console.log("errorFunc", response);
         if (authType == "sms") {
             btnSms.disabled = false;

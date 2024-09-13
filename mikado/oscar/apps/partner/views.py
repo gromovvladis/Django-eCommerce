@@ -38,11 +38,13 @@ class PartnerSelectModalView(APIView):
         }
 
     def post(self, request, *args, **kwargs):
-        form = self.get_auth_form()
+        form = self.get_partner_form()
         if form.is_valid():
-                partner_id = form.clean_data["partner_id"]
-                request.basket.partner_id = partner_id
-                return http.JsonResponse({"success": "Точка продажи выбрана", "status": 200}, status=200)
+            partner_id = form.clean_data["partner_id"]
+            request.basket.partner_id = partner_id
+            response = http.JsonResponse({"success": "Точка продажи выбрана", "status": 200}, status=200)
+            response.set_cookie('partner', partner_id)
+            return response
 
         return http.JsonResponse({"error": "Код не верный", "status": 400}, status=404)
 
