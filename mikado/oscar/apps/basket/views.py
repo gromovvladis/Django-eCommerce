@@ -1,5 +1,4 @@
 # from pyexpat.errors import messages
-from django.contrib import messages
 from django import shortcuts
 from django import http
 from django.contrib.sessions.serializers import JSONSerializer
@@ -9,19 +8,18 @@ from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import FormView, View
 from extra_views import ModelFormSetView
+from django.db.models import F
 
 from oscar.apps.basket.signals import basket_addition
 from oscar.core.loading import get_class, get_classes, get_model
-from oscar.core.utils import is_ajax, redirect_to_referrer, safe_referrer
+from oscar.core.utils import is_ajax, safe_referrer
 
 Applicator = get_class("offer.applicator", "Applicator")
-(BasketLineForm, AddToBasketForm, SavedLineForm) = get_classes(
+(BasketLineForm, AddToBasketForm) = get_classes(
     "basket.forms",
-    ("BasketLineForm", "AddToBasketForm", "SavedLineForm"),
+    ("BasketLineForm", "AddToBasketForm"),
 )
-BasketLineFormSet, SavedLineFormSet = get_classes(
-    "basket.formsets", ("BasketLineFormSet", "SavedLineFormSet")
-)
+BasketLineFormSet = get_class("basket.formsets","BasketLineFormSet")
 Repository = get_class("shipping.repository", "Repository")
 OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 BasketMessageGenerator = get_class("basket.utils", "BasketMessageGenerator")
@@ -45,19 +43,25 @@ class BasketView(ModelFormSetView):
         return super().dispatch(request, *args, **kwargs)
     
     def check_lines(self):
-        warnings = []
-        lines = self.request.basket.all_lines()
+        if not is_ajax(self.request):
+            updated = False
+            lines = self.request.basket.all_lines()
+            # lines = self.request.basket._all_lines()
+            # переделай. когда товаров к корзине больше чем можем продать нужно чтобы они автоматически уменьшались. если форма не валидная то хоть чтонибудб делай.
+            for line in lines:
+                if line.quantity == 0:
+                    updated = True
+                    try:
+                        line.delete()
+                    except Exception:
+                        pass
+                else: 
+                    line.get_warning()
 
-        for line in lines:
-            warning = line.get_warning()
-            if warning:
-                warnings.append(warning)
-                line.delete()
-                
-        if warnings:
-            self.request.basket._lines = None
-            messages.warning(self.request, ",\n".join(warnings))
-
+            if updated:
+                self.request.basket.reset_offer_applications()
+                Applicator().apply(self.request.basket, self.request.user, self.request)
+            
 
     def get_formset_kwargs(self):
         kwargs = super().get_formset_kwargs()
@@ -69,25 +73,9 @@ class BasketView(ModelFormSetView):
         Return list of :py:class:`Line <oscar.apps.basket.abstract_models.AbstractLine>`
         instances associated with the current basket.
         """
-        updated = False
-        lines = self.request.basket.all_lines()
-
-        # переделай. когда товаров к корзине больше чем можем продать нужно чтобы они автоматически уменьшались. если форма не валидная то хоть чтонибудб делай.
-        if not is_ajax(self.request):
-            for line in lines:
-                if line.quantity == 0:
-                    updated = True
-                    try:
-                        lines.get(id=line.id).delete()
-                        lines.update()
-                    except Exception:
-                        pass
-            if updated:
-                self.request.basket.reset_offer_applications()
-                Applicator().apply(self.request.basket, self.request.user, self.request)
-
-        return lines
-
+        return self.request.basket.all_lines()
+        # return self.request.basket._all_lines()
+    
     def get_upsell_messages(self, basket):
         offers = Applicator().get_offers(basket, self.request.user, self.request)
         applied_offers = list(basket.offer_applications.offers.values())
@@ -128,7 +116,6 @@ class BasketView(ModelFormSetView):
         return safe_referrer(self.request, "basket:summary")
 
     def formset_valid(self, formset):
-
         if is_ajax(self.request):
             self.object_list = formset.save()
             self.request.basket = Basket.objects.get(
@@ -328,69 +315,3 @@ class BasketAddView(FormView):
         ):
             return post_url
         return safe_referrer(self.request, "basket:summary")
-
-
-# class SavedView(ModelFormSetView):
-#     model = get_model("basket", "line")
-#     basket_model = get_model("basket", "basket")
-#     formset_class = SavedLineFormSet
-#     form_class = SavedLineForm
-#     factory_kwargs = {"extra": 0, "can_delete": True}
-
-#     def get(self, request, *args, **kwargs):
-#         return shortcuts.redirect("basket:summary")
-
-#     def get_queryset(self):
-#         """
-#         Return list of :py:class:`Line <oscar.apps.basket.abstract_models.AbstractLine>`
-#         instances associated with the saved basked associated with the currently
-#         authenticated user.
-#         """
-#         try:
-#             saved_basket = self.basket_model.saved.get(owner=self.request.user)
-#             saved_basket.strategy = self.request.strategy
-#             return saved_basket.all_lines()
-#         except self.basket_model.DoesNotExist:
-#             return []
-
-#     def get_success_url(self):
-#         return safe_referrer(self.request, "basket:summary")
-
-#     def get_formset_kwargs(self):
-#         kwargs = super().get_formset_kwargs()
-#         kwargs["prefix"] = "saved"
-#         kwargs["basket"] = self.request.basket
-#         kwargs["strategy"] = self.request.strategy
-#         return kwargs
-
-#     def formset_valid(self, formset):
-#         offers_before = self.request.basket.applied_offers()
-
-#         is_move = False
-#         for form in formset:
-#             if form.cleaned_data.get("move_to_basket", False):
-#                 is_move = True
-#                 msg = render_to_string(
-#                     "oscar/basket/messages/line_restored.html", {"line": form.instance}
-#                 )
-#                 messages.info(self.request, msg, extra_tags="safe noicon")
-#                 real_basket = self.request.basket
-#                 real_basket.merge_line(form.instance)
-
-#         if is_move:
-#             # As we're changing the basket, we need to check if it qualifies
-#             # for any new offers.
-#             BasketMessageGenerator().apply_messages(self.request, offers_before)
-#             response = shortcuts.redirect(self.get_success_url())
-#         else:
-#             response = super().formset_valid(formset)
-#         return response
-
-#     def formset_invalid(self, formset):
-#         messages.error(
-#             self.request,
-#             "\n".join(
-#                 error for ed in formset.errors for el in ed.values() for error in el
-#             ),
-#         )
-#         return redirect_to_referrer(self.request, "basket:summary")

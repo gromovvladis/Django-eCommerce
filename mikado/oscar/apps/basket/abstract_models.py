@@ -11,7 +11,7 @@ from django.utils.encoding import smart_str
 from django.utils.timezone import now
 
 from oscar.core.compat import AUTH_USER_MODEL
-from oscar.core.loading import get_class, get_classes, get_model
+from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 from oscar.models.fields.slugfield import SlugField
 
@@ -19,15 +19,12 @@ OfferApplications = get_class("offer.results", "OfferApplications")
 Unavailable = get_class("partner.availability", "Unavailable")
 StockRequired = get_class("partner.availability", "StockRequired")
 LineDiscountRegistry = get_class("basket.utils", "LineDiscountRegistry")
-OpenBasketManager, SavedBasketManager = get_classes(
-    "basket.managers", ["OpenBasketManager", "SavedBasketManager"]
-)
+OpenBasketManager = get_class("basket.managers", "OpenBasketManager")
 
 class AbstractBasket(models.Model):
     """
     Basket object
     """
-
     # Baskets can be anonymously owned - hence this field is nullable.  When a
     # anon user signs in, their two baskets are merged.
     owner = models.ForeignKey(
@@ -51,18 +48,15 @@ class AbstractBasket(models.Model):
     # Basket statuses
     # - Frozen is for when a basket is in the process of being submitted
     #   and we need to prevent any changes to it.
-    # OPEN, MERGED, SAVED, FROZEN, SUBMITTED = (
     OPEN, MERGED, FROZEN, SUBMITTED = (
         "Open",
         "Merged",
-        # "Saved",
         "Frozen",
         "Submitted",
     )
     STATUS_CHOICES = (
         (OPEN, "Открыто - сейчас активна"),
         (MERGED, "Объединено – заменено другой корзиной"),
-        # (SAVED, "Сохранено - можно будет заказать позже или в другой точке продажи"),
         (FROZEN, "Заморожено – корзину нельзя изменить"),
         (SUBMITTED, "Потдвержено - заказано"),
     )
@@ -82,9 +76,7 @@ class AbstractBasket(models.Model):
     date_submitted = models.DateTimeField("Дата подтверждения", null=True, blank=True)
 
     # Only if a basket is in one of these statuses can it be edited
-    # editable_statuses = (OPEN,)
     editable_statuses = (OPEN,)
-    # editable_statuses = (OPEN, SAVED)
 
     class Meta:
         abstract = True
@@ -94,7 +86,6 @@ class AbstractBasket(models.Model):
 
     objects = models.Manager()
     open = OpenBasketManager()
-    # saved = SavedBasketManager()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -138,6 +129,30 @@ class AbstractBasket(models.Model):
 
     strategy = property(_get_strategy, _set_strategy)
 
+    # def _all_lines(self):
+    #     """
+    #     Return a cached set of basket lines.
+
+    #     This is important for offers as they alter the line models and you
+    #     don't want to reload them from the DB as that information would be
+    #     lost.
+    #     """
+    #     if self.id is None:
+    #         return self.lines.model.objects.none()  # pylint: disable=E1101
+    #     if self._lines is None:
+    #         self._lines = (
+    #             self.lines.select_related("product", "stockrecord")
+    #             .prefetch_related("attributes", "product__images", "product__categories", "product__stockrecords")
+    #             .order_by(self._meta.pk.name)
+    #         )
+    #     return self._lines
+
+    # def all_lines(self):
+    #     if self.partner_id:
+    #         return self._all_lines().filter(product__stockrecords__partner_id=self.partner_id) 
+    #     return self._all_lines()  
+
+
     def all_lines(self):
         """
         Return a cached set of basket lines.
@@ -167,7 +182,7 @@ class AbstractBasket(models.Model):
             max_allowed = basket_threshold - total_basket_quantity
             return max_allowed, basket_threshold
         return None, None
-
+    
     def is_quantity_allowed(self, qty, line=None):
         """
         Test whether the passed quantity of items can be added to the basket
@@ -238,7 +253,21 @@ class AbstractBasket(models.Model):
         # them.
         return self.strategy.fetch_for_product(product)
 
-
+    def check_partner(self, line):
+                
+        if not self.partner_id or self.is_empty:
+            self.partner_id = line.stockrecord.partner_id
+            self.save()
+        else:
+            if line.stockrecord.partner_id != self.partner_id:
+                Partner = get_model("partner", "Partner")
+                raise ValueError(
+                    (
+                        "Данный товар не доступен в %s, закажите его в %s"
+                    )
+                    % (Partner.objects.get(partner_id=self.partner_id).addresses.first().line1, Partner.objects.get(partner_id=line.stockrecord.partner_id).addresses.first().line1)
+                )
+            
     def add_product(self, product, quantity=1, options=None, additionals=None):
         """
         Add a product to the basket
@@ -275,23 +304,6 @@ class AbstractBasket(models.Model):
     add_product.alters_data = True
     add = add_product
 
-
-    def check_partner(self, line):
-                
-        if not self.partner_id or self.is_empty():
-            self.partner_id = line.stockrecord.partner_id
-            self.save()
-        else:
-            Partner = get_model("partner", "Partner")
-            if line.stockrecord.partner_id != self.partner_id:
-                raise ValueError(
-                    (
-                        "Данный товар не доступен в %s, закажите его в %s"
-                    )
-                    % (Partner.objects.get(partner_id=self.partner_id).addresses.first().line1, Partner.objects.get(partner_id=line.stockrecord.partner_id).addresses.first().line1)
-                )
-            
-
     def remove_product(self, product, quantity=1, options=None):
         """
         Remove a product from the basket
@@ -301,7 +313,6 @@ class AbstractBasket(models.Model):
 
         if created:
             return
-
         else:
             line.quantity = max(0, line.quantity - quantity)
             line.save()
@@ -431,6 +442,8 @@ class AbstractBasket(models.Model):
         basket.date_merged = now()
         basket._lines = None
         basket.save()
+        self.partner_id = basket.partner_id
+        self.save()
         # Ensure all vouchers are moved to the new basket
         for voucher in basket.vouchers.all():
             basket.vouchers.remove(voucher)
@@ -880,6 +893,53 @@ class AbstractLine(models.Model):
         return self.quantity_without_offer_discount(
             offer
         ) + self.quantity_with_offer_discount(offer)
+    
+    def get_warning(self):
+        """
+        Return a warning message about this basket line if one is applicable
+
+        This could be things like the price has changed
+        """
+        if isinstance(self.purchase_info.availability, Unavailable):
+            msg = "Временно не доступен"
+            self.warning = msg
+            return msg
+        elif isinstance(self.purchase_info.availability, StockRequired):
+            # max_quantity = line.get_max_quantity()  # метод для получения максимального количества товара
+            # if line.quantity > max_quantity:
+            #     line.quantity = max_quantity
+            #     line.save()
+            #     updated = True
+            available, msg = self.purchase_info.availability.is_purchase_permitted(self.quantity)
+            if not available:
+                self.warning = msg
+                return msg
+
+        # if not self.price:
+        #     return
+
+        # Compare current price to price when added to basket
+        # current_price = self.purchase_info.price.money
+        # if current_price != self.price:
+        #     product_prices = {
+        #         "product": self.product.get_title(),
+        #         "old_price": currency(self.price, self.price_currency),
+        #         "new_price": currency(current_price, self.price_currency),
+        #     }
+        #     if current_price_incl_tax > self.price:
+        #         warning = (
+        #             "The price of '%(product)s' has increased from"
+        #             " %(old_price)s to %(new_price)s since you added"
+        #             " it to your basket"
+        #         )
+        #         return warning % product_prices
+        #     else:
+        #         warning = (
+        #             "The price of '%(product)s' has decreased from"
+        #             " %(old_price)s to %(new_price)s since you added"
+        #             " it to your basket"
+        #         )
+        #         return warning % product_prices
 
     # ==========
     # Properties
@@ -1009,49 +1069,6 @@ class AbstractLine(models.Model):
             old_price = self.stockrecord.old_price + additions_total
 
         return old_price
-    
-    
-    def get_warning(self):
-        """
-        Return a warning message about this basket line if one is applicable
-
-        This could be things like the price has changed
-        """
-        if isinstance(self.purchase_info.availability, Unavailable):
-            msg = "'%(product)s' временно не доступен"
-            return (msg) % {"product": self.product.get_title()}
-        elif isinstance(self.purchase_info.availability, StockRequired):
-            available, msg = self.purchase_info.availability.is_purchase_permitted(self.quantity)
-            if not available:
-                return msg
-            
-        return False
-
-        # if not self.price:
-        #     return
-
-        # Compare current price to price when added to basket
-        # current_price = self.purchase_info.price.money
-        # if current_price != self.price:
-        #     product_prices = {
-        #         "product": self.product.get_title(),
-        #         "old_price": currency(self.price, self.price_currency),
-        #         "new_price": currency(current_price, self.price_currency),
-        #     }
-        #     if current_price_incl_tax > self.price:
-        #         warning = (
-        #             "The price of '%(product)s' has increased from"
-        #             " %(old_price)s to %(new_price)s since you added"
-        #             " it to your basket"
-        #         )
-        #         return warning % product_prices
-        #     else:
-        #         warning = (
-        #             "The price of '%(product)s' has decreased from"
-        #             " %(old_price)s to %(new_price)s since you added"
-        #             " it to your basket"
-        #         )
-        #         return warning % product_prices
 
 
 

@@ -22,19 +22,3 @@ class OpenBasketManager(models.Manager):
     #     except self.model.DoesNotExist:
     #         basket = self.model.objects.create(status=self.status_filter, owner=kwargs['owner'])
     #     return basket
-
-
-
-class SavedBasketManager(models.Manager):
-    """For searching/creating SAVED baskets only."""
-
-    status_filter = "Saved"
-
-    def get_queryset(self):
-        return super().get_queryset().filter(status=self.status_filter)
-
-    def create(self, **kwargs):
-        return self.get_queryset().create(status=self.status_filter, **kwargs)
-
-    def get_or_create(self, **kwargs):
-        return self.get_queryset().get_or_create(status=self.status_filter, **kwargs)

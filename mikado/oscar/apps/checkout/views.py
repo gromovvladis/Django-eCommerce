@@ -50,7 +50,7 @@ class IndexView(CheckoutSessionMixin, generic.FormView):
     """
 
     success_url = reverse_lazy("checkout:checkoutview")
-    pre_conditions = ["check_basket_is_not_empty", "check_basket_is_valid"]
+    pre_conditions = ["delete_non_valid_lines", "check_basket_is_not_empty", "check_basket_is_valid"]
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:

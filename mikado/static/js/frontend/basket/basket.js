@@ -14,53 +14,58 @@ if (cartWrapper){
 
     forms.forEach(function(form_item) {
         var quantity = form_item.querySelector('[data-id="quantity-input"]');
-        var more = form_item.querySelector('[data-id="order-button-plus"]');
-        var less = form_item.querySelector('[data-id="order-button-minus"]');
         var clean = form_item.querySelector('[data-id="dish-order-delete-link"]');
+        if (quantity.type != 'hidden'){
+            var more = form_item.querySelector('[data-id="order-button-plus"]');
+            var less = form_item.querySelector('[data-id="order-button-minus"]');
+            if (quantity.value == quantity.getAttribute('max')) {
+                more.disabled = true;
+            }
+    
+            more.addEventListener('click', function() {
+                if (parseInt(quantity.value) < parseInt(quantity.getAttribute('max'))) {
+                    quantity.value = parseInt(quantity.value) + 1;
+                    less.disabled = false;
+                }
+                if (parseInt(quantity.value) == parseInt(quantity.getAttribute('max'))) {
+                    this.disabled = true;
+                }
+                form_item.classList.remove('empty');
+                basketForm();
+            });
+    
+            less.addEventListener('click', function() {
+                if (parseInt(quantity.value) > 0) {
+                    quantity.value = parseInt(quantity.value) - 1;
+                    more.disabled = false;
+                }
+                if (parseInt(quantity.value) == 0) {
+                    this.disabled = true;
+                    form_item.classList.add('empty');
+                }
+                basketForm();
+            });
 
-        if (quantity.value == quantity.getAttribute('max')) {
-            more.disabled = true;
+            clean.addEventListener('click', function() {
+                less.disabled = true;
+                form_item.classList.add('empty');
+                quantity.value = 0;
+                basketForm();
+            });
+
+        } else {
+            clean.addEventListener('click', function() {
+                quantity.value = 0;
+                basketForm();
+                form_item.remove();
+            });
         }
 
-        more.addEventListener('click', function() {
-            if (parseInt(quantity.value) < parseInt(quantity.getAttribute('max'))) {
-                quantity.value = parseInt(quantity.value) + 1;
-                less.disabled = false;
-            }
-            if (parseInt(quantity.value) == parseInt(quantity.getAttribute('max'))) {
-                this.disabled = true;
-            }
-            form_item.classList.remove('empty');
-            basketForm();
-        });
-
-        less.addEventListener('click', function() {
-            if (parseInt(quantity.value) > 0) {
-                quantity.value = parseInt(quantity.value) - 1;
-                more.disabled = false;
-            }
-            if (parseInt(quantity.value) == 0) {
-                this.disabled = true;
-                form_item.classList.add('empty');
-            }
-            basketForm();
-        });
-
-        clean.addEventListener('click', function() {
-            less.disabled = true;
-            form_item.classList.add('empty');
-            quantity.value = 0;
-            basketForm();
-        });
-
         function basketForm() {
-            var form = basketSummary;
-            form.classList.add('loading');
-
-            const formData = new FormData(form);
-            const method = form.getAttribute('method');
+            basketSummary.classList.add('loading');
+            const formData = new FormData(basketSummary);
+            const method = basketSummary.getAttribute('method');
             const url = document.URL;
-
             fetch(url, {
                 method: method,
                 body: formData,
@@ -70,7 +75,8 @@ if (cartWrapper){
             })
             .then(response => response.json())
             .then(data => {
-                form.classList.remove('loading');
+                console.log('loaded')
+                basketSummary.classList.remove('loading');
                 if (data.status == 202) {
                     basketTotals.forEach(function(element) {
                         element.innerHTML = data.new_totals;

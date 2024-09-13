@@ -6848,44 +6848,112 @@ pre {
 
 
 
-
 .alert {
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, .06);
-    border-radius: 15px;
+    position: relative;
     font-size: .9rem;
+    /* padding: 0.75rem 1.25rem; */
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    /* margin-bottom: 1rem; */
+    /* margin-top: 1rem; */
+    background: #fff;
+    border: 1px solid transparent;
+    -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .07);
+    box-shadow: 0 0 10px rgba(0, 0, 0, .07);
+    overflow: hidden;
+    border-radius: 10px;
 }
 
+.alert::before {
+    content: ""; 
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 5px; 
+    background-color: transparent;
+}
 .alert-link {
     font-weight: 700;
 }
 
 .alert-primary {
-    color: #004085;
-    background-color: #f5f5ff;
+    color: #002d5d;
+}
+.alert-primary::before {
+    background-color: var(--color-info)
+}
+/* .alert-primary hr {
+border-top-color: #9fcdff;
+} */
+.alert-primary .alert-link {
+color: #002752;
+}
+    
+.alert-success {
+color: #044813;
+}
+.alert-success::before {
+background-color: var(--color-background-green)
+}
+/* .alert-success hr {
+border-top-color: #b1dfbb;
+} */
+.alert-success .alert-link {
+color: #0b2e13;
+}
+  
+.alert-light {
+color: #383d41;
+}
+.alert-light::before {
+background-color: var(--color-button-primary)
+}
+/* .alert-light hr {
+border-top-color: #c8cbcf;
+} */
+.alert-light .alert-link {
+color: #202326;
 }
 
-.alert-success {
-    color: #001f07;
-    background-color: #f1fff4;
-}
 
 .alert-info {
-    color: #073e48;
+color: #0c5460;
 }
-
+.alert-info::before {
+background-color: var(--color-info)
+}
+/* .alert-info hr {
+border-top-color: #abdde5;
+} */
+.alert-info .alert-link {
+color: #062c33;
+}
+  
 .alert-warning {
-    color: #856404;
-    background-color: #fff8df;
+color: #856404;
 }
-
+.alert-warning::before {
+background-color: #ffc107;
+}
+/* .alert-warning hr {
+border-top-color: #ffe8a1;
+} */
+.alert-warning .alert-link {
+color: #533f03;
+}
+  
 .alert-danger {
-    color: #721c24;
-    background-color: #fee5e7;
+color: #721c24;
 }
-
-.alert-light {
-    color: #818182;
-    background-color: #fefefe;
+.alert-danger::before {
+background-color: var(--color-secondary)
+}
+/* .alert-danger hr {
+border-top-color: #f1b0b7;
+} */
+.alert-danger .alert-link {
+color: #491217;
 }
 
 
@@ -8317,7 +8385,7 @@ html.drawer .v-app__side {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.7); /* Полупрозрачный белый фон */
+    background-color: rgba(255, 255, 255, 0.6); /* Полупрозрачный белый фон */
     color: #555555; /* Цвет текста */
     font-size: .9rem; /* Размер шрифта */
     font-weight: 500;
@@ -10567,15 +10635,14 @@ html.drawer .v-app__side {
     overflow: hidden
 }
 
-.dish.unavailable::before {
+.dish.unavailable .dish-item-image::before {
     content: '';
     z-index: 10;
-    border-radius: 14px;
     width: 100%;
     height: 100%;
     display: block;
     position: absolute;
-    background: #fff6;
+    background: #ffffff87;
 }
 
 .dish__name {
@@ -10605,17 +10672,11 @@ html.drawer .v-app__side {
     color: #608d42
 }
 
-.dish__not-available,
-.dish__profit {
-    
+.dish__profit{
     font-size: .75rem;
     line-height: .9rem;
     font-weight: 400;
     font-style: normal
-}
-
-.dish__not-available {
-    color: var(--color-secondary);
 }
 
 .dish--is-special-offer a {
@@ -13357,11 +13418,11 @@ html {
     overflow: unset
 }
 
-html:not(.auth-open) .grecaptcha-badge {
+/* html:not(.auth-open) .grecaptcha-badge {
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important
-}
+} */
 
 html.dish-page .v-app__nav .v-app-nav__back,
 html.info-page .v-app__nav .v-app-nav__back,
@@ -14568,10 +14629,20 @@ ymaps[class*="search__suggest-item_selected"] {
     height: 44px
 }
 
-.v-app .badge {
-    
+.v-app .error-mark {
     font-size: .75rem;
-    line-height: .875rem;
+    line-height: 1.25rem;
+    font-weight: 400;
+    font-style: normal;
+    padding: .3rem .5rem;
+    border-radius: 20px;
+    background-color: var(--color-secondary);
+    color: #fff;
+
+}
+.v-app .notif-badge,
+.v-app .badge {
+    font-size: .75rem;
     font-weight: 400;
     font-style: normal;
     position: absolute;
@@ -14585,16 +14656,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .v-app .notif-badge {
-    
-    font-size: .75rem;
-    line-height: .875rem;
-    font-weight: 400;
-    font-style: normal;
-    border-radius: 50%;
     background-color: var(--color-info);
-    color: #fff;
-    width: 1.25rem;
-    line-height: 1.25rem;
 }
 
 /* .v-app .wrapper--small {

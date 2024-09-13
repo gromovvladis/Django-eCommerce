@@ -5512,7 +5512,6 @@ a.badge-dark:focus, a.badge-dark.focus {
   /* margin-top: 1rem; */
   background: #fff;
   border: 1px solid transparent;
-  border-radius: 0.75rem;
   -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .07);
   box-shadow: 0 0 10px rgba(0, 0, 0, .07);
   overflow: hidden;
@@ -5565,7 +5564,7 @@ a.badge-dark:focus, a.badge-dark.focus {
 .alert-secondary {
   color: #383d41;
 }
-.alert-primary::before {
+.alert-secondary::before {
   background-color: var(--secondary)
 }
 .alert-secondary hr {

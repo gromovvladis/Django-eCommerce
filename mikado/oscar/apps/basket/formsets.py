@@ -5,8 +5,6 @@ from oscar.core.loading import get_class, get_model
 
 Line = get_model("basket", "line")
 BasketLineForm = get_class("basket.forms", "BasketLineForm")
-SavedLineForm = get_class("basket.forms", "SavedLineForm")
-
 
 class BaseBasketLineFormSet(BaseModelFormSet):
     def __init__(self, strategy, *args, **kwargs):
@@ -29,7 +27,6 @@ class BaseBasketLineFormSet(BaseModelFormSet):
             return True
 
 
-
     @cached_property
     def forms_with_instances(self):
         return [f for f in self.forms if f.instance.id]
@@ -44,21 +41,3 @@ class BaseBasketLineFormSet(BaseModelFormSet):
 BasketLineFormSet = modelformset_factory(
     Line, form=BasketLineForm, formset=BaseBasketLineFormSet, extra=0, can_delete=True
 )
-
-
-class BaseSavedLineFormSet(BaseModelFormSet):
-    def __init__(self, strategy, basket, *args, **kwargs):
-        self.strategy = strategy
-        self.basket = basket
-        super().__init__(*args, **kwargs)
-
-    def _construct_form(self, i, **kwargs):
-        return super()._construct_form(
-            i, strategy=self.strategy, basket=self.basket, **kwargs
-        )
-
-
-SavedLineFormSet = modelformset_factory(
-    Line, form=SavedLineForm, formset=BaseSavedLineFormSet, extra=0, can_delete=True
-)
-
