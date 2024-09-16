@@ -1,6 +1,46 @@
 {% load svg_tags %}
 {% load widget_tweaks %}
 
+<style>
+    /* Скрываем радио-кнопку */
+input[type="radio"] {
+    display: none;
+}
+
+/* Базовые стили для label */
+label {
+    display: inline-block;
+    padding: .5rem 1rem;
+    border-radius: 10px;
+    margin-bottom: .5rem;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Эффект наведения */
+label:hover {
+    background-color: #f0f0f0;
+}
+
+
+/* Стили для выбранного радио-кнопкой элемента */
+input[type="radio"]:checked + label, /* Редкий случай, когда label идет после input */
+label input[type="radio"]:checked + label { /* Используется, когда input внутри label */
+    background-color: #4CAF50; /* Зеленый фон для выбранного */
+    color: white; /* Белый текст */
+    border-color: #4CAF50; /* Зеленая рамка */
+}
+
+label input[type="radio"]:checked {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+
+    </style>
+
 <div class="v-modal pos-fixed d-flex align-center justify-center" data-id="modal-close">
     <div class="v-modal__content scrollbar px-2 pt-6 pd-sm-4">
 
@@ -22,17 +62,19 @@
                     </button>
                 </div>
             </header>
-            {% comment %} <p class="v-modal__message mt-1 mt-sm-2"> Выбирете точку </p> {% endcomment %}
         </div>
 
         <div class="v-auth flex flex-column text-start">
-            <form id="partner_form" action="{{ request.get_full_path }}" method="post" class="card card-body bg-light">
+            <form id="partner_form" action="{{ request.get_full_path }}" method="post" class="card card-body bg-light d-flex flex-column">
                 {% csrf_token %}
-
-                {% comment %} поля {% endcomment %}
-                {% render_field partner_form.partner_id data-id="partner-select-option" %}
-
+                {% for radio in partner_form.partner_id %}
+                    <label for="{{ radio.id_for_label }}">
+                        {{ radio.choice_label }}
+                    </label>
+                    {{ radio.tag }}
+                {% endfor %}
             </form>    
         </div>
+        
     </div>
 </div>

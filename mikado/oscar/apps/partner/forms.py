@@ -19,8 +19,8 @@ class PartnerSelectForm(forms.Form):
 
         partners_select = cache.get('partners_select')
         if not partners_select:
-            partners_select = Partner.objects.all()
-            cache.set("partners_select", partners_select, 7200)
+            partners_select = Partner.objects.prefetch_related("addresses").all()
+            cache.set("partners_select", partners_select, 21600)
         
         for partner in partners_select:
             partner_id_list.append((partner.id, partner.name))

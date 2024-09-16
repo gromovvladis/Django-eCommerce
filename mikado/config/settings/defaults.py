@@ -2,6 +2,7 @@ from django.urls import reverse_lazy
 
 OSCAR_HOMEPAGE = reverse_lazy("home:index")
 PARTNER_SELECT = True
+PARTNER_DEFAULT = 1
 
 # Dynamic class loading
 OSCAR_DYNAMIC_CLASS_LOADER = "oscar.core.loading.default_class_loader"

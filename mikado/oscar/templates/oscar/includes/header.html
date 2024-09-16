@@ -9,9 +9,13 @@
         {% icon file_name='header/logo' size=45%}        
     </a>
     {% if partners_select %}
-        <button onclick="openPartnerModal()">
+        <button onclick="openPartnerModal()" class="text-left">
             {% selected_partner request as partner %}
             {{ partner }}
+            <br>
+            <span class="text--grey">
+                {{ partner.primary_address }}
+            </span>
         </button>
     {% endif %}
 </div>
