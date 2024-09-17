@@ -14,6 +14,7 @@ from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 from oscar.models.fields.slugfield import SlugField
+from django.utils.functional import cached_property
 
 OfferApplications = get_class("offer.results", "OfferApplications")
 Unavailable = get_class("partner.availability", "Unavailable")
@@ -129,31 +130,7 @@ class AbstractBasket(models.Model):
 
     strategy = property(_get_strategy, _set_strategy)
 
-    # def _all_lines(self):
-    #     """
-    #     Return a cached set of basket lines.
-
-    #     This is important for offers as they alter the line models and you
-    #     don't want to reload them from the DB as that information would be
-    #     lost.
-    #     """
-    #     if self.id is None:
-    #         return self.lines.model.objects.none()  # pylint: disable=E1101
-    #     if self._lines is None:
-    #         self._lines = (
-    #             self.lines.select_related("product", "stockrecord")
-    #             .prefetch_related("attributes", "product__images", "product__categories", "product__stockrecords")
-    #             .order_by(self._meta.pk.name)
-    #         )
-    #     return self._lines
-
-    # def all_lines(self):
-    #     if self.partner_id:
-    #         return self._all_lines().filter(product__stockrecords__partner_id=self.partner_id) 
-    #     return self._all_lines()  
-
-
-    def all_lines(self):
+    def _all_lines(self):
         """
         Return a cached set of basket lines.
 
@@ -170,6 +147,30 @@ class AbstractBasket(models.Model):
                 .order_by(self._meta.pk.name)
             )
         return self._lines
+
+    def all_lines(self):
+        if self.partner_id:
+            return self._all_lines().filter(product__stockrecords__partner_id=self.partner_id) 
+        return self._all_lines()  
+
+
+    # def all_lines(self):
+    #     """
+    #     Return a cached set of basket lines.
+
+    #     This is important for offers as they alter the line models and you
+    #     don't want to reload them from the DB as that information would be
+    #     lost.
+    #     """
+    #     if self.id is None:
+    #         return self.lines.model.objects.none()  # pylint: disable=E1101
+    #     if self._lines is None:
+    #         self._lines = (
+    #             self.lines.select_related("product", "stockrecord")
+    #             .prefetch_related("attributes", "product__images", "product__categories", "product__stockrecords")
+    #             .order_by(self._meta.pk.name)
+    #         )
+    #     return self._lines
 
     def max_allowed_quantity(self):
         """
@@ -549,11 +550,19 @@ class AbstractBasket(models.Model):
     # ==========
 
     @property
-    def is_empty(self):
-        """
+    def has_valid_lines(self):
+        """ 
         Test if this basket is empty
         """
-        return self.id is None or self.num_items == 0
+        return self.id is not None and self.num_items > 0
+    
+
+    @property
+    def is_empty(self):
+        """ 
+        Test if this basket is empty
+        """
+        return self.id is None or sum(line.quantity for line in self._all_lines()) == 0
 
     @property
     def total(self):
@@ -618,6 +627,11 @@ class AbstractBasket(models.Model):
     def num_lines(self):
         """Return number of lines"""
         return self.all_lines().count()
+
+    @property
+    def num_all_items(self):
+        """Return number of items"""
+        return sum(line.quantity for line in self._all_lines())
 
     @property
     def num_items(self):
@@ -1070,6 +1084,9 @@ class AbstractLine(models.Model):
 
         return old_price
 
+    @cached_property
+    def has_topping(self):
+        return self.product.variant or self.attributes.all()
 
 
 class AbstractLineAttribute(models.Model):

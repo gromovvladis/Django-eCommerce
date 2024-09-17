@@ -34,19 +34,9 @@
                         </span>
                     </button>
 
-                    {% comment %} ------------- кнопка корзина --------------- {% endcomment %}
-                    <a data-id="nav-basket-btn" class="v-app-nav__button d-none d-sm-flex mr-1" href='{% url 'basket:summary' %}'>
-                        <div class="d-flex aling-center mr-1">
-                            {% icon file_name='header/cart' size=17 stroke='#fff'%}
-                        </div>
-                        Корзина
-                        <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
-                    </a>
-
-
                     <div class="cats_header fill-height fill-width">
        
-                        <div class="v-app-nav__title d-flex d-sm-none text-center">
+                        <div class="v-app-nav__title d-flex d-sm-none text-center d-flex">
                             {% block nav_title %}{% endblock %}
                         </div>
 
@@ -64,17 +54,27 @@
                             {% endif %}
                         </ul>
                         
-                        <div role="separator" class="v-spacer"></div>
+                        {% comment %} <div role="separator" class="v-spacer"></div> {% endcomment %}
 
                         {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
                         <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
-                            class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-1 mr-2 shrink" aria-label="Поиск">
+                            class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-0 mr-1 shrink" aria-label="Поиск">
+                            {% comment %} class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-1 mr-2 shrink" aria-label="Поиск"> {% endcomment %}
                             <span class="v-button__wrapper d-flex">
                                 {% icon file_name='header/search' size=20 fill='#111'%}
                             </span>
                         </a>
 
                     </div>
+
+                    {% comment %} ------------- кнопка корзина --------------- {% endcomment %}
+                    <a data-id="nav-basket-btn" class="v-app-nav__button d-none d-sm-flex ml-3" href='{% url 'basket:summary' %}'>
+                        <div class="d-flex aling-center mr-1">
+                            {% icon file_name='header/cart' size=17 stroke='#fff'%}
+                        </div>
+                        Корзина
+                        <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
+                    </a>
 
                     <div class="v-app-nav__title v-app-nav__title--center d-flex d-sm-none text-center">
                         {% block nav_title_center %}{% endblock %}

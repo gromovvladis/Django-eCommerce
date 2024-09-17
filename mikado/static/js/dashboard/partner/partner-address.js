@@ -265,8 +265,8 @@ function showBalloon(coords, address=null, captured=false) {
     ymaps.geocode(coords, {results: 1, boundedBy:DELIVERYBOUNDS}).then(function (result) {
         console.log("balloonTime");
         var coords = result.geoObjects.get(0).geometry.getCoordinates();
-        var address = result.geoObjects.get(0).getAddressLine();
-        $(line1).val(result.geoObjects.get(0).getAddressLine());
+        var address = result.geoObjects.get(0).properties._data.name;
+        $(line1).val(result.geoObjects.get(0).properties._data.name);
         $(lon).val(coords[0]);
         $(lat).val(coords[1]);
 

@@ -1,5 +1,6 @@
 {% extends "oscar/layout.html" %}
 
+{% load partner_tags %}
 {% load svg_tags %}
 {% load static %}
 {% load cache %}
@@ -17,6 +18,13 @@
         aria-current="page" aria-label="Домашняя страница">
         {% icon file_name='header/logo' %}
     </a>
+    {% if partners_select %}
+        <button onclick="openPartnerModal()" class="text-left d-flex flex-column ml-2 pd-0">
+            {% selected_partner request as partner %}
+            <span class="header_partner">{{ partner }}</span>
+            <span class="header_address">{{ partner.primary_address }}</span>
+        </button>
+    {% endif %}
 {% endblock %}
 
 {% block carousel %}

@@ -1,46 +1,6 @@
 {% load svg_tags %}
 {% load widget_tweaks %}
 
-<style>
-    /* Скрываем радио-кнопку */
-input[type="radio"] {
-    display: none;
-}
-
-/* Базовые стили для label */
-label {
-    display: inline-block;
-    padding: .5rem 1rem;
-    border-radius: 10px;
-    margin-bottom: .5rem;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s, border-color 0.3s;
-}
-
-/* Эффект наведения */
-label:hover {
-    background-color: #f0f0f0;
-}
-
-
-/* Стили для выбранного радио-кнопкой элемента */
-input[type="radio"]:checked + label, /* Редкий случай, когда label идет после input */
-label input[type="radio"]:checked + label { /* Используется, когда input внутри label */
-    background-color: #4CAF50; /* Зеленый фон для выбранного */
-    color: white; /* Белый текст */
-    border-color: #4CAF50; /* Зеленая рамка */
-}
-
-label input[type="radio"]:checked {
-    background-color: #4CAF50;
-    color: white;
-    border-color: #4CAF50;
-}
-
-
-    </style>
-
 <div class="v-modal pos-fixed d-flex align-center justify-center" data-id="modal-close">
     <div class="v-modal__content scrollbar px-2 pt-6 pd-sm-4">
 
@@ -52,7 +12,7 @@ label input[type="radio"]:checked {
             </span>
         </button>
 
-        <div class="d-flex flex-column align-center justify-center align-sm-start mb-3 mb-sm-2">
+        <div class="d-flex flex-column align-center justify-center align-sm-start mb-3">
             <header class="fill-width d-flex justify-sm-space-between">
                 <div class="v-modal__title">Адрес</div>
                 <div class="d-none d-sm-flex">
@@ -68,10 +28,17 @@ label input[type="radio"]:checked {
             <form id="partner_form" action="{{ request.get_full_path }}" method="post" class="card card-body bg-light d-flex flex-column">
                 {% csrf_token %}
                 {% for radio in partner_form.partner_id %}
-                    <label for="{{ radio.id_for_label }}">
-                        {{ radio.choice_label }}
-                    </label>
-                    {{ radio.tag }}
+                    <div class="partner_select mb-2 d-flex flex-column {% if radio.data.selected %}checked{% endif %}">
+                        <div class="d-none">{{ radio.tag }}</div>
+                        <label for="{{ radio.id_for_label }}" class="header_partner">
+                            {{ radio.choice_label }}
+                        </label>
+                        {% for partner in partner_form.partners %}
+                            {% if partner.id == radio.data.value %}
+                                <span class="header_address">{{ partner.primary_address }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 {% endfor %}
             </form>    
         </div>

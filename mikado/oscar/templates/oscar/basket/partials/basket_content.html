@@ -59,14 +59,14 @@
                                                     </button>
                                                 </div>
 
-                                                <div class="v-dish-order__toppings d-flex fill-width flex-wrap" data-id="dish-order-toppings">
+                                                <div class="v-dish-order__toppings d-flex fill-width flex-wrap {% if not line.has_topping %}d-none{% endif %}" data-id="dish-order-toppings">
                                                     <span class="d-flex">{{ line.variants }}</span>
                                                     <span class="d-flex">{{ line.options }}</span>
                                                     <span class="d-flex">{{ line.additions }}</span>
                                                 </div>
 
                                                 {% if line.warning %}
-                                                    <div><span class="error-mark">{{ line.warning }}</span></div>
+                                                    <div class="mb-1"><span class="error-mark">{{ line.warning }}</span></div>
                                                     {% render_field form.quantity readonly="true" type="hidden" data-id="quantity-input" %}
                                                 {% else %}
                                                     <div role="separator" class="v-spacer"></div>
@@ -118,7 +118,7 @@
 
                     <div role="separator" class="v-spacer"></div>
                     
-                    <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink">
+                    <button {% if not basket.has_valid_lines %}disabled{% endif %} onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink">
                         <span class="v-button__value">
                              Оформить заказ
                         </span>
@@ -154,7 +154,7 @@
         </div>
     </div>
     <div class="px-2 pt-1 pb-2 fill-width">
-        <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink fill-width">        
+        <button {% if not basket.has_valid_lines %}disabled{% endif %} onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink fill-width">        
             <span class="v-button__value">
                  Оформить заказ
             </span>

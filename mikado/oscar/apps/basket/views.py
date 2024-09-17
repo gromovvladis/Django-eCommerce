@@ -45,22 +45,21 @@ class BasketView(ModelFormSetView):
     def check_lines(self):
         if not is_ajax(self.request):
             updated = False
-            lines = self.request.basket.all_lines()
-            # lines = self.request.basket._all_lines()
             # переделай. когда товаров к корзине больше чем можем продать нужно чтобы они автоматически уменьшались. если форма не валидная то хоть чтонибудб делай.
-            for line in lines:
+            for line in self.request.basket._all_lines():
                 if line.quantity == 0:
                     updated = True
                     try:
                         line.delete()
                     except Exception:
                         pass
-                else: 
-                    line.get_warning()
 
             if updated:
                 self.request.basket.reset_offer_applications()
                 Applicator().apply(self.request.basket, self.request.user, self.request)
+
+            for line in self.request.basket._all_lines():
+                line.get_warning()
             
 
     def get_formset_kwargs(self):
@@ -73,8 +72,7 @@ class BasketView(ModelFormSetView):
         Return list of :py:class:`Line <oscar.apps.basket.abstract_models.AbstractLine>`
         instances associated with the current basket.
         """
-        return self.request.basket.all_lines()
-        # return self.request.basket._all_lines()
+        return self.request.basket._all_lines()
     
     def get_upsell_messages(self, basket):
         offers = Applicator().get_offers(basket, self.request.user, self.request)

@@ -25,5 +25,5 @@ class PartnerSelectForm(forms.Form):
         for partner in partners_select:
             partner_id_list.append((partner.id, partner.name))
 
-
         self.fields["partner_id"].choices = partner_id_list
+        self.partners = partners_select

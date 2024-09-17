@@ -8441,10 +8441,6 @@ html.drawer .v-app__side {
     color: transparent !important
 }
 
-.v-image__inner--product img {
-    width: calc(100% + 20px);
-    max-width: calc(100% + 20px);
-}
 
 .v-image__inner--topping {
     padding-bottom: 80%;
@@ -9643,8 +9639,9 @@ html.drawer .v-app__side {
     font-style: normal;
 
 
-    padding-right: 30px;
-    padding-left: 20px;
+    /* padding-right: 1rem; */
+    /* padding-left: 1rem; */
+    padding: 0 1rem;
 
     /* position: absolute; */
     /* top: 50%; */
@@ -9654,10 +9651,12 @@ html.drawer .v-app__side {
     display: -webkit-inline-box;
     display: -ms-inline-flexbox;
     display: inline-flex;
+    /* -ms-flex-direction: column; */
+    /* flex-direction: column; */
+
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column;
+
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
@@ -10639,7 +10638,7 @@ html.drawer .v-app__side {
     content: '';
     z-index: 10;
     width: 100%;
-    height: 100%;
+    height: calc(100% + 20px);
     display: block;
     position: absolute;
     background: #ffffff87;
@@ -11059,7 +11058,8 @@ input[type="number"]:focus {
     font-weight: 400;
     font-style: normal;
     color: #717171;
-    margin-top: .125rem
+    /* margin-top: .125rem; */
+    margin-bottom: .5rem;
 }
 
 .v-dish-order__delete svg {
@@ -11142,9 +11142,9 @@ input[type="number"]:focus {
         color: #000
     }
 
-    .v-dish-order__toppings {
+    /* .v-dish-order__toppings {
         margin-top: .25rem
-    }
+    } */
 
     .v-dish-order__delete svg {
         width: 26px;
@@ -14386,8 +14386,36 @@ ymaps[class*="search__suggest-item_selected"] {
 
 
 
+.header_partner{
+    font-weight: 500;
+    transition: all .1s linear;
+    cursor: pointer;
+}
+
+.partner_select.checked .header_partner{
+    color: var(--color-secondary);
+}
+
+/* Базовые стили для label */
+.partner_select {
+    margin-bottom: .5rem;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Эффект наведения */
+.partner_select:hover .header_partner {
+    color: var(--color-primary);
+}
 
 
+
+
+
+.header_address{
+    font-size: .8rem;
+    color: #888;
+}
 
 
 .cats_header {
@@ -14457,7 +14485,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .cats_header {
-        padding-left: 10px;
+        padding-right: 10px;
     }
 }
 

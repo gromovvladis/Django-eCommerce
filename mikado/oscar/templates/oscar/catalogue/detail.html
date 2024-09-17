@@ -90,20 +90,32 @@
                             </header>
 
                             {% if not session.availability.is_available_to_buy %}
-                                <span class="error-mark">Временно не доставляем</span>
+                                <div class="mt-1">
+                                    <span class="error-mark">Временно не доставляем</span>
+                                </div>
                             {% endif %}
 
-                            {% comment %}------------- если есть скидка ---------------{% endcomment %}                        
-                            <div class="d-flex mt-1 align-end mb-md-1">
-                                <div class="dish-page__price{% if session.price.old_price %} new-price{% endif %} mr-1">
-                                    <span data-id="dish-price-main">{{ session.price.money|formate_price }}</span>
-                                    <span> {{ currency_symbol }}</span>
+                            {% comment %}------------- если есть скидка ---------------{% endcomment %}
+                            {% if session.price.money %}
+                                <div class="d-flex mt-1 align-end mb-md-1">
+                                    <div class="dish-page__price{% if session.price.old_price %} new-price{% endif %} mr-1">
+                                        <span data-id="dish-price-main">{{ session.price.money|formate_price }}</span>
+                                        <span> {{ currency_symbol }}</span>
+                                    </div>
+                                    <div class="dish-page__old-price{% if not session.price.old_price %} d-none{% endif %}">
+                                        <span data-id="dish-old-price-main">{{ session.price.old_price|formate_price }}</span>
+                                        <span> {{ currency_symbol }}</span>
+                                    </div>
                                 </div>
-                                <div class="dish-page__old-price{% if not session.price.old_price %} d-none{% endif %}">
-                                    <span data-id="dish-old-price-main">{{ session.price.old_price|formate_price }}</span>
-                                    <span> {{ currency_symbol }}</span>
+                            {% elif session.stockrecords %}
+                                <div class="mt-2 mb-1">
+                                    <h2 class="mb-1">Доступно:</h2>
+                                    {% for rec in session.stockrecords %}
+                                        <p class="mb-1 text--green">{{ rec.partner }}</p>
+                                    {% endfor %}
                                 </div>
-                            </div>
+                            {% endif %}
+
                         {% endcache %}
                         
                         <div class="dish-page__scroll-block d-flex flex-column grow-1 scrollbar--white">

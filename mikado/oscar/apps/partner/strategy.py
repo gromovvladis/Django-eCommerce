@@ -11,7 +11,7 @@ FixedPrice = get_class("partner.prices", "FixedPrice")
 TaxInclusiveFixedPrice = get_class("partner.prices", "TaxInclusiveFixedPrice")
 
 # A container for policies
-PurchaseInfo = namedtuple("PurchaseInfo", ["price", "availability", "stockrecord"])
+PurchaseInfo = namedtuple("PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords"])
 
 
 class Selector(object):
@@ -129,6 +129,7 @@ class Structured(Base):
             price=self.pricing_policy(product, stockrecord),
             availability=self.availability_policy(product, stockrecord),
             stockrecord=stockrecord,
+            stockrecords=product.stockrecords.all(),
         )
 
     def fetch_for_parent(self, product):
@@ -138,6 +139,7 @@ class Structured(Base):
             price=self.parent_pricing_policy(product, children_stock),
             availability=self.parent_availability_policy(product, children_stock),
             stockrecord=None,
+            stockrecords=None,
         )
 
     def select_stockrecord(self, product):
@@ -211,7 +213,7 @@ class UsePartnerSelectStockRecord:
     This mixin picks the first (normally only) stockrecord to fulfil a product.
     """
 
-    def select_stockrecord(self, product):
+    def select_stockrecord(self, product, stockrecords=None):
         # We deliberately fetch by index here, to ensure that no additional database queries are made
         # when stockrecords have already been prefetched in a queryset annotated using ProductQuerySet.base_queryset
         try:
@@ -227,6 +229,7 @@ class UsePartnerSelectStockRecord:
                     partner_id = partner_cookies
 
             return product.stockrecords.filter(partner_id=partner_id)[0]
+        
         except IndexError:
             pass
 
