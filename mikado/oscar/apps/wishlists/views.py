@@ -1,8 +1,6 @@
 from django.conf import settings
-from django.contrib import messages
-from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 
 from oscar.core.loading import get_model

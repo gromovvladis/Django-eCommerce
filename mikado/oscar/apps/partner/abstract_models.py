@@ -159,6 +159,13 @@ class AbstractStockRecord(models.Model):
         "Граница малых запасов", blank=True, null=True
     )
 
+    is_public = models.BooleanField(
+        "Доступен",
+        default=True,
+        db_index=True,
+        help_text="Продукт доступен к покупке",
+    )
+
     # Date information
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)

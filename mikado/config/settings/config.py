@@ -1,5 +1,4 @@
 # pylint: disable=W0201
-
 # from oscar.core.loading import get_class
 # from django.urls import path, reverse_lazy
 from django.apps import apps
@@ -11,7 +10,7 @@ class Shop(OscarConfig):
     name = "oscar"
 
     def ready(self):
-        from django.contrib.auth.forms import SetPasswordForm
+        # from django.contrib.auth.forms import SetPasswordForm
         # import .checks  # pylint: disable=W0611
         from .checks import startup_check
 
@@ -28,14 +27,15 @@ class Shop(OscarConfig):
         self.shipping_app = apps.get_app_config("shipping")
         self.address_app = apps.get_app_config("address")
         self.payment_app = apps.get_app_config("payment")
+        self.partner_app = apps.get_app_config("partner")
         self.delivery_app = apps.get_app_config("delivery")
+        self.telegram_app = apps.get_app_config("telegram")
 
         # self.password_reset_form = get_class("customer.forms", "PasswordResetForm")
         # self.set_password_form = SetPasswordForm
 
     def get_urls(self):
-        from django.contrib.auth import views as auth_views
-
+        # from django.contrib.auth import views as auth_views
         # from oscar.views.decorators import login_forbidden
 
         urls = [
@@ -51,7 +51,9 @@ class Shop(OscarConfig):
             path("shipping/", self.shipping_app.urls),
             path("address/", self.address_app.urls),
             path("payment/", self.payment_app.urls),
+            path("partner/", self.partner_app.urls),
             path("delivery/", self.delivery_app.urls),
+            path("telegram/", self.telegram_app.urls),
             # Password reset - as we're using Django's default view functions,
             # we can't namespace these urls as that prevents
             # the reverse function from working.

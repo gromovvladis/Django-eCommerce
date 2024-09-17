@@ -259,6 +259,7 @@
                                                     <th>Цена до скидки</th>
                                                     <th>Цена</th>
                                                     <th>Валюта</th>
+                                                    <th>Доступен</th>
                                                     <th>Удалить</th>
                                                     {% comment %} <th class="actions"></th> {% endcomment %}
                                                 </tr>
@@ -285,6 +286,7 @@
                                                         <td data-label="Цена до скидки">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.old_price nolabel=True %}</td>
                                                         <td data-label="Цена">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price nolabel=True %}</td>
                                                         <td data-label="Валюта">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price_currency nolabel=True %}</td>
+                                                        <td data-label="Доступен">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.is_public nolabel=True %}</td>
                                                         <td data-label="Удалить">
                                                             {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.id nolabel=True %}
                                                             {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.DELETE nolabel=True %}

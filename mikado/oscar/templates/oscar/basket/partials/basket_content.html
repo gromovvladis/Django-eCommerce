@@ -1,13 +1,11 @@
 {% load image_tags %}
 {% load currency_filters %}
-{% load purchase_info_tags %}
 {% load widget_tweaks %}
 {% load svg_tags %}
 {% load static %}
 
 <div class="cart-page__wrapper d-flex flex-column flex-md-row pd-0 pd-sm-2">
     <div class="v-cart__block pos-relative d-flex flex-column fill-width">
-
         <header class="v-cart__header d-sm-flex justify-space-between align-center pb-2">
             <p class="v-cart__title">Корзина</p>
             <button data-id="modal-open-close" class="v-cart__clear" aria-label="Очистить корзину">
@@ -15,32 +13,30 @@
                 <span style="margin-left: .25rem;">Очистить</span>
             </button>
         </header>
-
         {% if not basket.is_empty %}
             <div class="v-cart-wrapper d-flex flex-column justify-start fill-height scrollbar--white px-2 px-sm-0" data-id="cart-wrapper">
                 <div class="upsell-messages" id="upsell_messages">
                     {% include 'oscar/basket/partials/upsell_messages.html' with editable=1 %}
                 </div>
-
+                
                 {% block basket_form_main %}
-                    <form method="post" data-id="basket-formset" class="v-cart-form d-flex flex-column fill-width basket_summary">
-                        {% csrf_token %}
-                        {{ formset.management_form }}
+                    <form data-id="basket-formset" method="post" class="v-cart-form d-flex flex-column fill-width">
                         <div class="v-cart-items d-flex flex-column fill-width shrink">
+                            {% csrf_token %}
+                            {{ formset.management_form }}
                             {% for form in formset %}
-                                {{ form.id }}
                                 {% with line=form.instance product=form.instance.product %}
-                                    {% purchase_info_for_line request line as session %}
                                     <div data-id="cart-item-form" class="v-cart-items--item">
+                                        {{ form.id }}
                                         <div class="v-dish-order d-flex fill-width">
                                             <div class="v-dish-order__picture">
                                                 <a href="{{ product.get_absolute_url }}" aria-label="{{ product.get_title }}"
                                                     class="v-dish-image fill-width"
                                                     data-id="dish-order-image-link">
-                                                    <div class="v-image">
+                                                    <div class="v-image {% if line.warning %}v-image--unavailable{% endif %}">
                                                         <div class="v-image__inner" style="padding-bottom: 72.072%;">
                                                             {% with image=product.primary_image %}
-                                                                {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
+                                                                {% oscar_thumbnail image.original "200x" upscale=False as thumb %}
                                                                 <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy"/>
                                                             {% endwith %}
                                                         </div>
@@ -63,49 +59,53 @@
                                                     </button>
                                                 </div>
 
-                                                <div class="v-dish-order__toppings d-flex fill-width flex-wrap" data-id="dish-order-toppings">
+                                                <div class="v-dish-order__toppings d-flex fill-width flex-wrap {% if not line.has_topping %}d-none{% endif %}" data-id="dish-order-toppings">
                                                     <span class="d-flex">{{ line.variants }}</span>
                                                     <span class="d-flex">{{ line.options }}</span>
                                                     <span class="d-flex">{{ line.additions }}</span>
-                                                </div>                                        
-                                            
-                                                <div role="separator" class="v-spacer"></div>
-
-                                                <div class="d-flex fill-width mt-1 pos-relative align-center">
-
-                                                    <div class="v-order-button pos-relative" data-id="order-buttons">
-                                                        <button type="button" data-id="order-button-minus" class="v-order-button--elem" aria-label="Уменьшить">
-                                                            <svg viewBox="0 0 24 24" fill="none">
-                                                                <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                            </svg>
-                                                        </button>
-                                                        {% render_field form.quantity class="v-order-button--elem v-order-button--value" readonly="true" data-id="quantity-input" %}
-                                                        <button type="button" data-id="order-button-plus" class="v-order-button--elem" aria-label="Увеличить">
-                                                            <svg viewBox="0 0 24 24" fill="none">
-                                                                <path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-
-                                                    <div role="separator" class="v-spacer"></div>
-                                                    
-                                                    <span class="v-prices d-flex flex-column align-start">
-                                                        <span class="v-prices__price no-wrap">
-                                                            {{ line.unit_price|currency:line.price_currency }}
-                                                        </span>
-                                                    </span>
-
                                                 </div>
+
+                                                {% if line.warning %}
+                                                    <div class="mb-1"><span class="error-mark">{{ line.warning }}</span></div>
+                                                    {% render_field form.quantity readonly="true" type="hidden" data-id="quantity-input" %}
+                                                {% else %}
+                                                    <div role="separator" class="v-spacer"></div>
+                                                    <div class="d-flex fill-width mt-1 pos-relative align-center">
+
+                                                        <div class="v-order-button pos-relative" data-id="order-buttons">
+                                                            <button type="button" data-id="order-button-minus" class="v-order-button--elem" aria-label="Уменьшить">
+                                                                <svg viewBox="0 0 24 24" fill="none">
+                                                                    <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                </svg>
+                                                            </button>
+                                                            {% render_field form.quantity class="v-order-button--elem v-order-button--value" readonly="true" data-id="quantity-input" %}
+                                                            <button type="button" data-id="order-button-plus" class="v-order-button--elem" aria-label="Увеличить">
+                                                                <svg viewBox="0 0 24 24" fill="none">
+                                                                    <path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+
+                                                        <div role="separator" class="v-spacer"></div>
+                                                        
+                                                        <span class="v-prices d-flex flex-column align-start">
+                                                            <span class="v-prices__price no-wrap">
+                                                                {{ line.unit_price|currency:line.price_currency }}
+                                                            </span>
+                                                        </span>
+
+                                                    </div>
+                                                {% endif %}
+
                                             </div>
                                         </div>
                                     </div>  
                                 {% endwith %}
-                            {% endfor %} 
+                            {% endfor %}                             
                         </div>
                     </form>
-                {% endblock %}                
+                {% endblock %}   
             </div>
-
             <div class="v-cart__info pd-2 pb-sm-0 px-sm-0" data-id="cart-info">
                 <div class="v-cart__submit d-flex align-end">
                     
@@ -118,7 +118,7 @@
 
                     <div role="separator" class="v-spacer"></div>
                     
-                    <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink">
+                    <button {% if not basket.has_valid_lines %}disabled{% endif %} onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink">
                         <span class="v-button__value">
                              Оформить заказ
                         </span>
@@ -126,9 +126,7 @@
 
                 </div>
             </div>
-
             {% include "oscar/basket/partials/empty_cart.html" %}    
-
         {% else %}
             <div data-test-id="alert-modal-overlay" class="v-alert v-alert--blur d-flex align-center justify-center">
                 <div class="v-alert__block d-flex flex-column justify-center align-center pd-2 pd-sm-3">
@@ -143,12 +141,10 @@
                 </div>
             </div>
         {% endif %}
-
     </div>
 </div>
 
 <div class="cart-page__totals d-flex flex-column flex-md-row pd-0 pd-sm-2">
-    
     <div class="v-cart__submit d-flex align-end fill-width">
         <div class="v-cart__total d-flex flex-column fill-width">
             <span class="v-cart__title pd-0 pd-sm-2" style="border-bottom: 1px solid #f3f3f7;">Сумма заказа</span>
@@ -157,13 +153,11 @@
             </div>
         </div>
     </div>
-
     <div class="px-2 pt-1 pb-2 fill-width">
-        <button onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink fill-width">        
+        <button {% if not basket.has_valid_lines %}disabled{% endif %} onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink fill-width">        
             <span class="v-button__value">
                  Оформить заказ
             </span>
         </button>
     </div>
-
 </div>

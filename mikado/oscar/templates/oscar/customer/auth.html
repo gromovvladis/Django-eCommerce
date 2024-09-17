@@ -20,8 +20,8 @@
 {% block breadcrumbs %}{% endblock %}
 
 {% block content %}
-    <div class="v-auth-modal pos-fixed d-flex align-center justify-center">
-        <div class="v-auth-modal__content scrollbar px-2 pt-6 pd-sm-4">
+    <div class="v-modal pos-fixed d-flex align-center justify-center">
+        <div class="v-modal__content scrollbar px-2 pt-6 pd-sm-4">
 
             <button onclick="getBack()" data-id="close-auth-modal" class="v-button v-app-header__back v-button--small justify-center shrink d-block d-sm-none" style="top: -38px;">
                 <span class="v-button__wrapper">
@@ -33,7 +33,7 @@
 
             <div class="d-flex flex-column align-center justify-center align-sm-start mb-3 mb-sm-2">
                 <header class="fill-width d-flex justify-center justify-sm-space-between align-center">
-                    <div class="v-auth-modal__title">Войти</div>
+                    <div class="v-modal__title">Войти</div>
                     <div class="d-none d-sm-flex">
                         <button data-id="close-button"
                             class="v-close-button d-flex justify-center align-center">
@@ -43,7 +43,7 @@
                         </button>
                     </div>
                 </header>
-                <p class="v-auth-modal__message mt-1 mt-sm-2"> Введите номер телефона, чтобы авторизоваться </p>
+                <p class="v-modal__message mt-1 mt-sm-2"> Введите номер телефона, чтобы авторизоваться </p>
             </div>
 
 
@@ -59,7 +59,7 @@
                         <div>
 
                             {% comment %} кнопки {% endcomment %}
-                            <div class="v-auth-modal__submit flex-column align-center px-2 px-sm-0 py-2 py-sm-0">
+                            <div class="v-modal__submit flex-column align-center px-2 px-sm-0 py-2 py-sm-0">
 
                                 <button id="sms_form_btn" type="submit" name="sms_submit" value="SMS"
                                     disabled="disabled" data-id="auth-submit-btn" onclick="document.getElementById('auth_type').value='sms'"

@@ -12,7 +12,7 @@
 {% block extrastyles %}
     {{ block.super }}
     {% compress css %}  
-        <link rel="stylesheet" href="{% static "css/air-datepicker.css" %}"/>
+        <link rel="stylesheet" href="{% static "css/thirdpaty/datetimepicker/air-datepicker.css" %}"/>
     {% endcompress %}
 {% endblock %}
 
@@ -170,12 +170,12 @@
 {% block extrascripts %}
     {{ block.super }}
     {% compress js %}
-        <script src="{% static "js/datetimepicker/air-datepicker.js" %}" defer></script>
+        <script src="{% static "js/frontend/profile/profile.js" %}" defer></script>
     {% endcompress %}
     {% compress js %}
-        <script src="{% static "js/datetimepicker/filter-time-timepicker.js" %}" defer></script>
+        <script src="{% static "js/thirdpaty/datetimepicker/air-datepicker.js" %}" defer></script>
     {% endcompress %}
     {% compress js %}
-        <script src="{% static "js/profile/profile.js" %}" async></script>
+        <script src="{% static "js/frontend/datetimepicker/filter-time-timepicker.js" %}" defer></script>
     {% endcompress %}
 {% endblock %}

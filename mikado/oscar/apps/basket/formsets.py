@@ -6,7 +6,6 @@ from oscar.core.loading import get_class, get_model
 Line = get_model("basket", "line")
 BasketLineForm = get_class("basket.forms", "BasketLineForm")
 
-
 class BaseBasketLineFormSet(BaseModelFormSet):
     def __init__(self, strategy, *args, **kwargs):
         self.strategy = strategy
@@ -26,7 +25,6 @@ class BaseBasketLineFormSet(BaseModelFormSet):
 
         if not form.instance.id:
             return True
-
 
 
     @cached_property

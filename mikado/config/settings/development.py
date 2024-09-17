@@ -1,4 +1,5 @@
 from .settings import *
+from yookassa import Configuration
 
 # =============
 # DATABASES
@@ -96,3 +97,18 @@ Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'
 
 YANDEX_API_KEY = "27bbbf17-40e2-4c01-a257-9b145870aa2a"
 GIS_API_KEY = "6013c28d-62ae-4764-a509-f403d2ee92c6"
+
+
+# =============
+# TRACING
+# =============
+
+GOOGLE_ANALYTICS_ID = None
+YANDEX_ANALYTICS_ID = None
+
+
+# =============
+# TELEGRAM
+# =============
+
+TELEGRAM_BOT_TOKEN = "7049440653:AAGgOGQwFbG9XenISUUvDXjqZxwxe2Ft5U0"

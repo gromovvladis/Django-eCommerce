@@ -13,7 +13,7 @@
     </li>
                         
     <li class="profile__menu-list">
-        <button data-link="{% url 'customer:order-list' %}" class="profile__menu-button{% if active_tab == "history" %} active{% endif %}" data-id="profile-tab">
+        <button data-link="{% url 'customer:order-list' %}" class="profile__menu-button{% if active_tab == "orders" %} active{% endif %}" data-id="profile-tab">
             История заказов 
             <div role="separator" class="v-spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}

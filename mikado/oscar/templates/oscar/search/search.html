@@ -62,12 +62,6 @@
 {% block extrascripts %}
     {{ block.super }}
     {% compress js %}
-        <script src="{% static "js/oscar/ui.js" %}" defer></script>
-        <script src="{% static "js/search/search.js" %}" async></script>
+        <script src="{% static "js/frontend/search/search.js" %}" defer></script>
     {% endcompress %}
-{% endblock %}
-
-{% block onbodyload %}
-    {{ block.super }}
-    oscar.search.init();
 {% endblock %}

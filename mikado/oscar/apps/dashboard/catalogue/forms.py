@@ -157,6 +157,7 @@ class StockRecordForm(forms.ModelForm):
             "price_currency",
             "num_in_stock",
             "low_stock_threshold",
+            "is_public",
         ]
 
 

@@ -24,7 +24,7 @@
 
         {% block tracking %}
             {# Default to using Google analytics #}
-            {% comment %} {% include "oscar/partials/google_analytics.html" %} {% endcomment %}
+            {% include "oscar/partials/analytics.html" %}
         {% endblock %}
 
     </head>
@@ -40,10 +40,6 @@
 
         {# Scripts loaded from a CDN. #}
         {% block cdn_scripts %}
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-            <script>window.jQuery || document.write('<script src="{% static "js/jquery/jquery.min.js" %}"><\/script>')</script>
-            <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" async></script>
-            <script>window.Cookies || document.write('<script src="{% static "js/cookie/js-cookie.min.js" %}" async><\/script>')</script>
         {% endblock %}
         
         {# Функции / переменные шаблона #}
@@ -59,7 +55,7 @@
         {% block extrascripts %}{% endblock %}
             
         {# Block for body onload functions #}
-        <script>$(function(){ {% block onbodyload %}{% endblock %} })</script>
+        <script>document.addEventListener('DOMContentLoaded', function() { {% block onbodyload %}{% endblock %} })</script>
 
     </body>
 </html>

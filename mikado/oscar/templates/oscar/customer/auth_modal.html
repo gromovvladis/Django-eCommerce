@@ -1,6 +1,6 @@
 {% load svg_tags %}
-<div class="v-auth-modal pos-fixed d-flex align-center justify-center" data-id="modal-close">
-    <div class="v-auth-modal__content scrollbar px-2 pt-6 pd-sm-4">
+<div class="v-modal pos-fixed d-flex align-center justify-center" data-id="modal-close">
+    <div class="v-modal__content scrollbar px-2 pt-6 pd-sm-4">
 
         <button onclick="openAuthModal()" data-id="close-auth-modal" class="v-button v-app-header__back v-button--small justify-center shrink d-block d-sm-none" style="top: -38px;">
             <span class="v-button__wrapper">
@@ -12,7 +12,7 @@
 
         <div class="d-flex flex-column align-center justify-center align-sm-start mb-3 mb-sm-2">
             <header class="fill-width d-flex justify-center justify-sm-space-between align-center">
-                <div class="v-auth-modal__title">Войти</div>
+                <div class="v-modal__title">Войти</div>
                 <div class="d-none d-sm-flex">
                     <button data-id="close-button" onclick="openAuthModal()"
                         class="v-close-button d-flex justify-center align-center">
@@ -20,7 +20,7 @@
                     </button>
                 </div>
             </header>
-            <p class="v-auth-modal__message mt-1 mt-sm-2"> Введите номер телефона, чтобы авторизоваться </p>
+            <p class="v-modal__message mt-1 mt-sm-2"> Введите номер телефона, чтобы авторизоваться </p>
         </div>
 
 
@@ -29,17 +29,16 @@
                 {% csrf_token %}
 
                 {% comment %} поля {% endcomment %}
-                <input type="hidden" id="auth_type" name="action" value="">
                 {% include "oscar/partials/form_auth.html" with form=auth_form %}
 
                 <div class="d-flex flex-column fill-height mt-3 mt-sm-2">
                     <div>
 
                         {% comment %} кнопки {% endcomment %}
-                        <div class="v-auth-modal__submit flex-column align-center px-2 px-sm-0 py-2 py-sm-0">
+                        <div class="v-modal__submit flex-column align-center px-2 px-sm-0 py-2 py-sm-0">
 
-                            <button id="sms_form_btn" type="submit" name="sms_submit" value="SMS"
-                                disabled="disabled" data-id="auth-submit-btn" onclick="document.getElementById('auth_type').value='sms'"
+                            <button id="sms_form_btn" type="submit" name="sms"
+                                disabled="disabled" data-id="auth-submit-btn"
                                 class="v-button fill-width v-button--main justify-center shrink">
                                 <span class="v-button__wrapper">
                                     <span class="v-button__value"> 
@@ -48,8 +47,8 @@
                                 </span>
                             </button>
 
-                            <button name="auth_submit" type="submit" id="auth_form_btn" onclick="document.getElementById('auth_type').value='auth'"
-                                disabled="disabled" data-id="auth-submit-btn" value="Auth"
+                            <button id="auth_form_btn" type="submit" name="auth"
+                                disabled="disabled" data-id="auth-submit-btn"
                                 class="fill-width d-none justify-center shrink mt-2">
                                 <span class="v-button__wrapper">
                                     <span class="v-button__value"> 
@@ -69,12 +68,6 @@
                                 <ul class="d-flex flex-column align-center fill-width mt-1">
                                     <li class="fill-width">
                                         <span data-id="auth-privacy-btn" class="v-checkbox v-checkbox--active">
-                                            {% comment %} <span type="checkbox"
-                                                value="privacyPolitic" class="v-checkbox__box">
-                                                <svg viewBox="-2 -2 28 28" fill="none" stroke="#fff">
-                                                    <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                </svg>
-                                            </span> {% endcomment %}
                                             <span
                                                 class="v-auth-agreement__item-title v-checkbox__name"> с 
                                                 <a href="#" class="v-auth-agreement__link">политикой конфиденциальности</a>, 
@@ -84,18 +77,6 @@
                                             </span>
                                         </span>
                                     </li>
-                                    {% comment %} <li class="fill-width">
-                                        <button data-id="auth-promo-btn" class="v-checkbox v-checkbox--active">
-                                            <span type="checkbox" value="promoAgree" class="v-checkbox__box">
-                                                <svg>
-                                                    <use xlink:href="/img/icons.svg#done_24"></use>
-                                                </svg>
-                                            </span>
-                                            <span  class="v-auth-agreement__item-title v-checkbox__name"> на получение
-                                                рекламных сообщений о продукции «СитиПицца» 
-                                            </span>
-                                        </button
-                                    ></li> {% endcomment %}
                                 </ul>
                             </div>
                         </div>

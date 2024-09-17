@@ -25,7 +25,6 @@ def notify_admin_about_new_order(sender, view, **kwargs):
             'user': kwargs['order'].user.get_name_and_phone(),
             'user_id': kwargs['order'].user.id,
             'source': kwargs['order'].sources.first().source_type.name,
-            'status': kwargs['order'].status,
             'shipping_method': kwargs['order'].shipping_method,
             'order_time': order_time,
             'number': kwargs['order'].number,
@@ -45,11 +44,20 @@ def notify_user_about_order_status(sender, order, **kwargs):
     if not settings.DEBUG:
         ctx = {
             'user_id': order.user.id,
-            'title': order.title,
+            'number': kwargs['order'].number,
             'new_status': kwargs['new_status'],
             'url': order.get_absolute_url(),
             'order_id': kwargs['order'].id,
         }
         _notify_user_about_order_status.delay(ctx)
+    else:
+        ctx = {
+            'user_id': order.user.id,
+            'number': order.number,
+            'new_status': kwargs['new_status'],
+            'url': order.get_absolute_url(),
+            'order_id': kwargs['order'].id,
+        }
+        _notify_user_about_order_status(ctx)
     
 order_status_changed.connect(notify_user_about_order_status)

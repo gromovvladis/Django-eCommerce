@@ -101,6 +101,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField("Email", blank=True)
 
     name = models.CharField("Имя", max_length=255, blank=True)
+    telegram_id = models.CharField("Телеграм ID", max_length=255, blank=True)
 
     is_staff = models.BooleanField(
         "Это сотрудник?",

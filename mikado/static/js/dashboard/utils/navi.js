@@ -58,8 +58,11 @@ $(".tabs-button__button").on('click', function(){
 });
 
 $(window).resize(function() {
-  var active_label = $(".tabs-button__button").filter('.active');
-  if ($(active_label).length > 0) {
-    $(".tabs-button__active-block").offset({'left':$(active_label).offset().left});
-  }
-})
+  $(".tabs-button__button").filter('.active').each(function() {
+    var activeLabel = $(this);
+    var activeBlock = activeLabel.closest('.tabs-button').find('.tabs-button__active-block');
+    if (activeLabel.length > 0 && activeBlock.length > 0) {
+      activeBlock.offset({ 'left': activeLabel.offset().left });
+    }
+  });
+});

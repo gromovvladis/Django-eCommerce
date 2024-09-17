@@ -164,7 +164,7 @@
 
 {% block tracking %}
     {% if send_analytics_event %}
-        {% include "oscar/partials/google_analytics_transaction.html" %}
+        {% include "oscar/partials/analytics_transaction.html" %}
     {% endif %}
 {% endblock %}
 
@@ -202,6 +202,6 @@
 {% block extrascripts %}
     {{ block.super }}
     {% compress js %}
-        <script src="{% static "js/thank-you/thank-you.js" %}"></script>
+        <script src="{% static "js/frontend/thank-you/thank-you.js" %}"></script>
     {% endcompress %}
 {% endblock %}

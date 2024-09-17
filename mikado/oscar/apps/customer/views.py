@@ -69,7 +69,7 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
     permission_classes = [AllowAny]
 
     template_name = "oscar/customer/auth_modal.html"
-    auth_form_class = PhoneAuthenticationForm
+    form_class = PhoneAuthenticationForm
     redirect_field_name = "next"
 
     def get(self, request, *args, **kwargs):
@@ -81,9 +81,9 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
 
 
     def get_context_data(self, *args, **kwargs):
-        ctx = {}
-        ctx["auth_form"] = self.get_auth_form()
-        return ctx
+        return {
+            "auth_form": self.get_auth_form()
+        }
 
 
     def post(self, request, *args, **kwargs):
@@ -91,12 +91,12 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
             return self.validate_sms_form()
         if request.POST.get('action') == "auth":
             return self.validate_auth_form()
-        return http.JsonResponse({"errors": "Bad responce", "status": 400}, status=400)
+        return http.JsonResponse({"errors": "Ошибка авторизации", "status": 400}, status=400)
 
 
     # AUTH
     def get_auth_form(self, bind_data=False):
-        return self.auth_form_class(**self.get_auth_form_kwargs(bind_data))
+        return self.form_class(**self.get_auth_form_kwargs(bind_data))
 
 
     def get_auth_form_kwargs(self, bind_data=False):
@@ -104,7 +104,6 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
         kwargs["request"] = self.request
         kwargs["host"] = self.request.get_host()
         kwargs["initial"] = {
-            "redirect_url": self.request.GET.get(self.redirect_field_name, ""),
             "username": self.request.POST.get("username"),
         }
         if bind_data and self.request.method in ("POST", "PUT"):
@@ -139,13 +138,13 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
 
                 url = self.get_auth_success_url(form)
 
-                return http.JsonResponse({"secceded": url, "status": 200}, status=200)
+                return http.JsonResponse({"success": url, "status": 200}, status=200)
 
-        return http.JsonResponse({"errors": "Код не верный", "status": 400}, status=404)
+        return http.JsonResponse({"error": "Код не верный", "status": 400}, status=404)
 
 
     def get_auth_success_url(self, form):    
-        redirect_url = form.cleaned_data["redirect_url"]
+        redirect_url = self.request.POST.get('redirect_url')
         if redirect_url:
             return redirect_url
         
@@ -179,10 +178,7 @@ class AccountAuthView(generic.TemplateView, AccountAuthModalView):
     """
     Resiter via sms.
     """
-
     template_name = "oscar/customer/auth.html"
-    auth_form_class = PhoneAuthenticationForm
-    redirect_field_name = "next"
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -298,7 +294,7 @@ class OrderHistoryView(PageTitleMixin, generic.ListView):
     model = Order
     form_class = OrderSearchForm
     page_title = "История заказов"
-    active_tab = "history"
+    active_tab = "orders"
 
     def get(self, request, *args, **kwargs):
         if "date_range" in request.GET:
@@ -344,7 +340,7 @@ class OrderHistoryView(PageTitleMixin, generic.ListView):
 
 class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
     model = Order
-    active_tab = "history"
+    active_tab = "orders"
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -423,44 +419,44 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
             self.response = redirect("customer:order-list")
 
 
-class OrderLineView(PostActionMixin, generic.DetailView):
-    """Customer order line"""
+# class OrderLineView(PostActionMixin, generic.DetailView):
+#     """Customer order line"""
 
-    def get_object(self, queryset=None):
-        order = get_object_or_404(
-            Order, user=self.request.user, number=self.kwargs["order_number"]
-        )
-        return order.lines.get(id=self.kwargs["line_id"])
+#     def get_object(self, queryset=None):
+#         order = get_object_or_404(
+#             Order, user=self.request.user, number=self.kwargs["order_number"]
+#         )
+#         return order.lines.get(id=self.kwargs["line_id"])
 
-    def do_reorder(self, line):
-        self.response = redirect("customer:order", self.kwargs["order_number"])
-        basket = self.request.basket
+#     def do_reorder(self, line):
+#         self.response = redirect("customer:order", self.kwargs["order_number"])
+#         basket = self.request.basket
 
-        line_available_to_reorder, reason = line.is_available_to_reorder(
-            basket, self.request.strategy
-        )
+#         line_available_to_reorder, reason = line.is_available_to_reorder(
+#             basket, self.request.strategy
+#         )
 
-        if not line_available_to_reorder:
-            messages.warning(self.request, reason)
-            return
+#         if not line_available_to_reorder:
+#             messages.warning(self.request, reason)
+#             return
 
-        # We need to pass response to the get_or_create... method
-        # as a new basket might need to be created
-        self.response = redirect("basket:summary")
+#         # We need to pass response to the get_or_create... method
+#         # as a new basket might need to be created
+#         self.response = redirect("basket:summary")
 
-        # Convert line attributes into basket options
-        options = []
-        for attribute in line.attributes.all():
-            if attribute.option:
-                options.append({"option": attribute.option, "value": attribute.value})
-        basket.add_product(line.product, line.quantity, options)
+#         # Convert line attributes into basket options
+#         options = []
+#         for attribute in line.attributes.all():
+#             if attribute.option:
+#                 options.append({"option": attribute.option, "value": attribute.value})
+#         basket.add_product(line.product, line.quantity, options)
 
-        if line.quantity > 1:
-            msg = "%(qty)d шт. - '%(product)s' были добавлены в вашу корзину" % {"qty": line.quantity, "product": line.product}
-        else:
-            msg = "'%s' добавлен в вашу корзину" % line.product
+#         if line.quantity > 1:
+#             msg = "%(qty)d шт. - '%(product)s' были добавлены в вашу корзину" % {"qty": line.quantity, "product": line.product}
+#         else:
+#             msg = "'%s' добавлен в вашу корзину" % line.product
 
-        messages.info(self.request, msg)
+#         messages.info(self.request, msg)
 
 
 # ------------

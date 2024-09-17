@@ -79,9 +79,6 @@ class AbstractOrder(models.Model):
 
     shipping_method = models.CharField("Способ доставки", max_length=128, blank=True)
 
-    # Identifies shipping code
-    # shipping_code = models.CharField(blank=True, max_length=128, default="")
-
     # Use this field to indicate that an order is on hold / awaiting payment
     status = models.CharField("Статус", max_length=100, blank=True)
 
@@ -659,7 +656,7 @@ class AbstractLine(models.Model):
             if attribute.additional:
                 value = attribute.value
                 if value > 0:
-                    addit.append("%s (%s)" % (attribute.additional.name, value))
+                    addit.append("%s (%s шт.)" % (attribute.additional.name, value))
             if addit:
                 d = "%s" % (", ".join(addit))
         return d

@@ -29,7 +29,7 @@
 {% block extrastyles %}
     {{ block.super }}
     {% compress css %}  
-        <link rel="stylesheet" href="{% static "css/air-datepicker.css" %}"/>
+        <link rel="stylesheet" href="{% static "css/thirdpaty/datetimepicker/air-datepicker.css" %}"/>
     {% endcompress %}
 {% endblock %}
 
@@ -48,7 +48,7 @@
                     </div>
             
                     {% comment %} promocode {% endcomment %}
-                    <div class="v-promo mb-3 mb-sm-4">
+                    <div class="v-promo mb-3">
                         <form class="v-promo__input-wrapper d-flex align-center g-1 g-sm-2" id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
                             <div data-id="v-input-field" class="v-input d-flex align-center fill-width v-input__padding{% if voucher_form.initial.code %} v-input__label-active{% endif %}">
                                 <div class="v-input__wrapper">
@@ -130,12 +130,12 @@
 {% block extrascripts %}
     {{ block.super }}
     {% compress js %}
-        <script src="{% static "js/datetimepicker/air-datepicker.js" %}" defer></script>
+        <script src="{% static "js/thirdpaty/datetimepicker/air-datepicker.js" %}" defer></script>
     {% endcompress %}
     {% compress js %}
-        <script src="{% static "js/checkout/checkout-main.js" %}" defer></script>
-        <script src="{% static "js/datetimepicker/order-timepicker.js" %}" defer></script>
-        <script src="{% static "js/checkout/voucher.js" %}" defer></script>
-        <script src="{% static "js/checkout/cookie-checkout.js" %}" async></script>
+        <script src="{% static "js/frontend/checkout/checkout-main.js" %}" defer></script>
+        <script src="{% static "js/frontend/datetimepicker/order-timepicker.js" %}" defer></script>
+        <script src="{% static "js/frontend/checkout/voucher.js" %}" defer></script>
+        <script src="{% static "js/frontend/checkout/cookie-checkout.js" %}" defer></script>
     {% endcompress %}
 {% endblock %}

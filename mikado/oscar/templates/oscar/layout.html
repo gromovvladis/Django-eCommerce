@@ -7,9 +7,9 @@
 
 {% block styles %}
     {{ block.super }}
-    {% compress css %}   
-        <link rel="stylesheet" href="{% static "css/planet-styles.css" %}"/>
-    {% endcompress %}
+    {% comment %} {% compress css %}    {% endcomment %}
+        <link rel="stylesheet" href="{% static "css/frontend/planet-styles.css" %}"/>
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}
 
 {% block layout %}
@@ -34,19 +34,9 @@
                         </span>
                     </button>
 
-                    {% comment %} ------------- кнопка корзина --------------- {% endcomment %}
-                    <a data-id="nav-basket-btn" class="v-app-nav__button d-none d-sm-flex mr-1" href='{% url 'basket:summary' %}'>
-                        <div class="d-flex aling-center mr-1">
-                            {% icon file_name='header/cart' size=17 stroke='#fff'%}
-                        </div>
-                        Корзина
-                        <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
-                    </a>
-
-
                     <div class="cats_header fill-height fill-width">
        
-                        <div class="v-app-nav__title d-flex d-sm-none text-center">
+                        <div class="v-app-nav__title d-flex d-sm-none text-center d-flex">
                             {% block nav_title %}{% endblock %}
                         </div>
 
@@ -64,17 +54,27 @@
                             {% endif %}
                         </ul>
                         
-                        <div role="separator" class="v-spacer"></div>
+                        {% comment %} <div role="separator" class="v-spacer"></div> {% endcomment %}
 
                         {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
                         <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
-                            class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-1 mr-2 shrink" aria-label="Поиск">
+                            class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-0 mr-1 shrink" aria-label="Поиск">
+                            {% comment %} class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-1 mr-2 shrink" aria-label="Поиск"> {% endcomment %}
                             <span class="v-button__wrapper d-flex">
                                 {% icon file_name='header/search' size=20 fill='#111'%}
                             </span>
                         </a>
 
                     </div>
+
+                    {% comment %} ------------- кнопка корзина --------------- {% endcomment %}
+                    <a data-id="nav-basket-btn" class="v-app-nav__button d-none d-sm-flex ml-3" href='{% url 'basket:summary' %}'>
+                        <div class="d-flex aling-center mr-1">
+                            {% icon file_name='header/cart' size=17 stroke='#fff'%}
+                        </div>
+                        Корзина
+                        <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
+                    </a>
 
                     <div class="v-app-nav__title v-app-nav__title--center d-flex d-sm-none text-center">
                         {% block nav_title_center %}{% endblock %}
@@ -130,11 +130,11 @@
     </div>
 
     {% block auth %}
-        <div id="auth_modal" class="d-none"></div>
+        <div id="modal" class="d-none"></div>
     {% endblock %}
 
     {% block cookie %}
-        <div id="we_use_cookie"></div>
+        <div data-id="cookie"></div>
     {% endblock %}
 
 {% endblock %}
@@ -142,20 +142,30 @@
 {% comment %} {% compress js preload %} {% endcomment %}
 {% block templatescripts %}
     var url_get_cookie = "{% url 'home:cookies' %}";
+    var url_partner_api = "{% url 'partner:select' %}";
     var url_auth_api = "{% url 'customer:api-login' %}";
     var url_auth = "{% url 'customer:login' %}";
 {% endblock %}
 
 {% block scripts %}
-    {% compress js %}
-        <script src="{% static "js/slider/slider.js" %}" defer></script>
-        <script src="{% static "js/slider/homepage-sliders.js" %}" defer></script>
-        <script src="{% static "js/catalogue/add-to-cart-compact.js" %}" defer></script>
-        <script src="{% static "js/delivery/delivery.js" %}" defer></script>
-        <script src="{% static "js/basket/basket.js" %}" defer></script>
+    {% comment %} {% compress js %} {% endcomment %}
+        <script src="{% static "js/thirdpaty/slider/slider.js" %}" defer></script>
 
-        <script src="{% static "js/auth/auth.js" %}" defer></script>
-        <script src="{% static "js/cookie/cookies/cookie-main.js" %}" defer></script>
-        <script src="{% static "js/footer/footer.js" %}" defer></script>
-    {% endcompress %}
+        <script src="{% static "js/frontend/cookie/cookie-main.js" %}" defer></script>
+        <script src="{% static "js/frontend/homepage/homepage-sliders.js" %}" defer></script>
+        <script src="{% static "js/frontend/delivery/delivery.js" %}" defer></script>
+        
+        <script src="{% static "js/frontend/catalogue/add-to-cart-compact.js" %}" defer></script>
+        <script src="{% static "js/frontend/catalogue/add-to-cart.js" %}" defer></script>
+        <script src="{% static "js/frontend/catalogue/add-to-wishlist.js" %}" defer></script>
+        <script src="{% static "js/frontend/basket/basket.js" %}" defer></script>
+
+        <script src="{% static "js/frontend/auth/auth.js" %}" defer></script>
+        <script src="{% static "js/frontend/partner/partner.js" %}" defer></script>
+        <script src="{% static "js/frontend/footer/footer.js" %}" defer></script>
+    {% comment %} {% endcompress %} {% endcomment %}
+{% endblock %}
+
+{% block onbodyload %}
+    initPartner({{ request.basket.partner.id }});
 {% endblock %}

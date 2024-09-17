@@ -57,11 +57,10 @@ def _notify_user_about_order_status(ctx: dict):
     if ctx['status'] == "Обрабатывается" or ctx['status'] == "Ожидает оплаты":
         status="Warning"
 
-
     context = {
-        'order': ctx['order'],
+        'title': "Просмотреть заказ №%s" % ctx['number'],
+        'url': ctx['url'],
         'new_status': ctx['new_status'],
-        'description': description
     }
 
     Notification.objects.create(

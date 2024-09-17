@@ -146,7 +146,8 @@ class BasketMiddleware:
             # that they have just signed in and we need to merge their cookie
             # basket into their user basket, then delete the cookie.
             try:
-                basket, __ = manager.get_or_create(owner=request.user)
+                # basket = manager.get_or_create(owner=request.user)
+                basket, is_created = manager.get_or_create(owner=request.user)
             except Basket.MultipleObjectsReturned:
                 # Not sure quite how we end up here with multiple baskets.
                 # We merge them and create a fresh one

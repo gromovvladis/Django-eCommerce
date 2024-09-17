@@ -11,21 +11,21 @@ from django.utils.encoding import smart_str
 from django.utils.timezone import now
 
 from oscar.core.compat import AUTH_USER_MODEL
-from oscar.core.loading import get_class, get_classes
+from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 from oscar.models.fields.slugfield import SlugField
+from django.utils.functional import cached_property
 
 OfferApplications = get_class("offer.results", "OfferApplications")
 Unavailable = get_class("partner.availability", "Unavailable")
+StockRequired = get_class("partner.availability", "StockRequired")
 LineDiscountRegistry = get_class("basket.utils", "LineDiscountRegistry")
 OpenBasketManager = get_class("basket.managers", "OpenBasketManager")
-
 
 class AbstractBasket(models.Model):
     """
     Basket object
     """
-
     # Baskets can be anonymously owned - hence this field is nullable.  When a
     # anon user signs in, their two baskets are merged.
     owner = models.ForeignKey(
@@ -35,6 +35,15 @@ class AbstractBasket(models.Model):
         related_name="baskets",
         on_delete=models.CASCADE,
         verbose_name="Владелец",
+    )
+
+    partner = models.ForeignKey(
+        "partner.Partner",
+        related_name="baskets",
+        null=True,
+        blank=False,
+        verbose_name="Точка продажи",
+        on_delete=models.SET_NULL,
     )
 
     # Basket statuses
@@ -78,7 +87,6 @@ class AbstractBasket(models.Model):
 
     objects = models.Manager()
     open = OpenBasketManager()
-    # saved = SavedBasketManager()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -122,7 +130,7 @@ class AbstractBasket(models.Model):
 
     strategy = property(_get_strategy, _set_strategy)
 
-    def all_lines(self):
+    def _all_lines(self):
         """
         Return a cached set of basket lines.
 
@@ -140,6 +148,30 @@ class AbstractBasket(models.Model):
             )
         return self._lines
 
+    def all_lines(self):
+        if self.partner_id:
+            return self._all_lines().filter(product__stockrecords__partner_id=self.partner_id) 
+        return self._all_lines()  
+
+
+    # def all_lines(self):
+    #     """
+    #     Return a cached set of basket lines.
+
+    #     This is important for offers as they alter the line models and you
+    #     don't want to reload them from the DB as that information would be
+    #     lost.
+    #     """
+    #     if self.id is None:
+    #         return self.lines.model.objects.none()  # pylint: disable=E1101
+    #     if self._lines is None:
+    #         self._lines = (
+    #             self.lines.select_related("product", "stockrecord")
+    #             .prefetch_related("attributes", "product__images", "product__categories", "product__stockrecords")
+    #             .order_by(self._meta.pk.name)
+    #         )
+    #     return self._lines
+
     def max_allowed_quantity(self):
         """
         Returns maximum product quantity, that can be added to the basket
@@ -151,7 +183,7 @@ class AbstractBasket(models.Model):
             max_allowed = basket_threshold - total_basket_quantity
             return max_allowed, basket_threshold
         return None, None
-
+    
     def is_quantity_allowed(self, qty, line=None):
         """
         Test whether the passed quantity of items can be added to the basket
@@ -222,7 +254,21 @@ class AbstractBasket(models.Model):
         # them.
         return self.strategy.fetch_for_product(product)
 
-
+    def check_partner(self, line):
+                
+        if not self.partner_id or self.is_empty:
+            self.partner_id = line.stockrecord.partner_id
+            self.save()
+        else:
+            if line.stockrecord.partner_id != self.partner_id:
+                Partner = get_model("partner", "Partner")
+                raise ValueError(
+                    (
+                        "Данный товар не доступен в %s, закажите его в %s"
+                    )
+                    % (Partner.objects.get(partner_id=self.partner_id).addresses.first().line1, Partner.objects.get(partner_id=line.stockrecord.partner_id).addresses.first().line1)
+                )
+            
     def add_product(self, product, quantity=1, options=None, additionals=None):
         """
         Add a product to the basket
@@ -234,11 +280,11 @@ class AbstractBasket(models.Model):
         Returns (line, created).
           line: the matching basket line
           created: whether the line was created or updated
-
         """
         line, created = self.get_line(product, quantity, options, additionals)
 
         if created:
+            self.check_partner(line)
             for option_dict in options:
                 line.attributes.create(
                     option=option_dict["option"], value=option_dict["value"]
@@ -259,7 +305,6 @@ class AbstractBasket(models.Model):
     add_product.alters_data = True
     add = add_product
 
-
     def remove_product(self, product, quantity=1, options=None):
         """
         Remove a product from the basket
@@ -269,7 +314,6 @@ class AbstractBasket(models.Model):
 
         if created:
             return
-
         else:
             line.quantity = max(0, line.quantity - quantity)
             line.save()
@@ -367,6 +411,7 @@ class AbstractBasket(models.Model):
             existing_line = self.lines.get(line_reference=line.line_reference)
         except ObjectDoesNotExist:
             # Line does not already exist - reassign its basket
+            line.basket._lines = None
             line.basket = self
             line.save()
         else:
@@ -398,6 +443,8 @@ class AbstractBasket(models.Model):
         basket.date_merged = now()
         basket._lines = None
         basket.save()
+        self.partner_id = basket.partner_id
+        self.save()
         # Ensure all vouchers are moved to the new basket
         for voucher in basket.vouchers.all():
             basket.vouchers.remove(voucher)
@@ -493,7 +540,7 @@ class AbstractBasket(models.Model):
                 pass
             except TypeError:
                 # Handle Unavailable products with no known price
-                info = self.get_stock_info(line.product, line.attributes.all())
+                info = self.get_stock_info(line.product, line.options, line.additions)
                 if info.availability.is_available_to_buy:
                     raise
         return total
@@ -503,11 +550,19 @@ class AbstractBasket(models.Model):
     # ==========
 
     @property
-    def is_empty(self):
-        """
+    def has_valid_lines(self):
+        """ 
         Test if this basket is empty
         """
-        return self.id is None or self.num_items == 0
+        return self.id is not None and self.num_items > 0
+    
+
+    @property
+    def is_empty(self):
+        """ 
+        Test if this basket is empty
+        """
+        return self.id is None or sum(line.quantity for line in self._all_lines()) == 0
 
     @property
     def total(self):
@@ -572,6 +627,11 @@ class AbstractBasket(models.Model):
     def num_lines(self):
         """Return number of lines"""
         return self.all_lines().count()
+
+    @property
+    def num_all_items(self):
+        """Return number of items"""
+        return sum(line.quantity for line in self._all_lines())
 
     @property
     def num_items(self):
@@ -847,6 +907,53 @@ class AbstractLine(models.Model):
         return self.quantity_without_offer_discount(
             offer
         ) + self.quantity_with_offer_discount(offer)
+    
+    def get_warning(self):
+        """
+        Return a warning message about this basket line if one is applicable
+
+        This could be things like the price has changed
+        """
+        if isinstance(self.purchase_info.availability, Unavailable):
+            msg = "Временно не доступен"
+            self.warning = msg
+            return msg
+        elif isinstance(self.purchase_info.availability, StockRequired):
+            # max_quantity = line.get_max_quantity()  # метод для получения максимального количества товара
+            # if line.quantity > max_quantity:
+            #     line.quantity = max_quantity
+            #     line.save()
+            #     updated = True
+            available, msg = self.purchase_info.availability.is_purchase_permitted(self.quantity)
+            if not available:
+                self.warning = msg
+                return msg
+
+        # if not self.price:
+        #     return
+
+        # Compare current price to price when added to basket
+        # current_price = self.purchase_info.price.money
+        # if current_price != self.price:
+        #     product_prices = {
+        #         "product": self.product.get_title(),
+        #         "old_price": currency(self.price, self.price_currency),
+        #         "new_price": currency(current_price, self.price_currency),
+        #     }
+        #     if current_price_incl_tax > self.price:
+        #         warning = (
+        #             "The price of '%(product)s' has increased from"
+        #             " %(old_price)s to %(new_price)s since you added"
+        #             " it to your basket"
+        #         )
+        #         return warning % product_prices
+        #     else:
+        #         warning = (
+        #             "The price of '%(product)s' has decreased from"
+        #             " %(old_price)s to %(new_price)s since you added"
+        #             " it to your basket"
+        #         )
+        #         return warning % product_prices
 
     # ==========
     # Properties
@@ -890,8 +997,9 @@ class AbstractLine(models.Model):
     @property
     def unit_price(self):
         price_item =  self.purchase_info.price.money
-        price_additionals =  self.additions_total
-        return price_additionals + price_item
+        if price_item:
+            price_item = price_item + self.additions_total
+        return price_item
 
     @property
     def line_price(self):
@@ -952,9 +1060,10 @@ class AbstractLine(models.Model):
     @property 
     def additions_total(self):
         total = D("0.00")
-        for attribute in self.attributes.all():
-            if attribute.additional:
-                total += attribute.value * attribute.additional.price 
+        if self.pk:
+            for attribute in self.attributes.all():
+                if attribute.additional:
+                    total += attribute.value * attribute.additional.price 
 
         return total
     
@@ -974,6 +1083,10 @@ class AbstractLine(models.Model):
             old_price = self.stockrecord.old_price + additions_total
 
         return old_price
+
+    @cached_property
+    def has_topping(self):
+        return self.product.variant or self.attributes.all()
 
 
 class AbstractLineAttribute(models.Model):

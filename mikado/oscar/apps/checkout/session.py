@@ -62,8 +62,8 @@ class CheckoutSessionMixin(object):
         try:
             self.check_pre_conditions(request)
         except exceptions.FailedPreCondition as e:
-            # for message in e.messages:
-                # messages.warning(request, message)
+            for message in e.messages:
+                messages.warning(request, message)
             return http.HttpResponseRedirect(e.url)
 
         return super().dispatch(request, *args, **kwargs)
@@ -112,6 +112,17 @@ class CheckoutSessionMixin(object):
                 message="Для оформления заказа вам необходимо добавить товары в корзину",
             )
 
+    def delete_non_valid_lines(self, request):
+        lines = self.request.basket.all_lines()
+        for line in lines:
+            is_available = line.purchase_info.availability.is_available_to_buy
+            if line.quantity == 0 or not is_available:
+                try:
+                    line.delete()
+                    request.basket._lines = None
+                except Exception:
+                    pass
+
     def check_basket_is_valid(self, request):
         """
         Check that the basket is permitted to be submitted as an order. That
@@ -128,8 +139,8 @@ class CheckoutSessionMixin(object):
             if not is_permitted:
                 # Create a more meaningful message to show on the basket page
                 msg = (
-                    '"%(title)s" больше нельзя купить (%(reason)s). '
-                    'Пожалуйста, скорректируйте корзину, чтобы продолжить'
+                    '"%(title)s" больше нельзя купить (%(reason)s).'
+                    # 'Пожалуйста, скорректируйте корзину, чтобы продолжить'
                 ) % {"title": line.product.get_title(), "reason": reason}
                 messages_list.append(msg)
         if messages_list:

@@ -9,6 +9,7 @@ from oscar.core.loading import get_class, get_model
 from oscar.forms.mixins import PhoneNumberMixin
 from oscar.forms.widgets import DatePickerInput, DateRangeInput
 
+Partner = get_model("partner", "Partner")
 Order = get_model("order", "Order")
 OrderNote = get_model("order", "OrderNote")
 ShippingAddress = get_model("order", "ShippingAddress")
@@ -244,7 +245,11 @@ class OrderSearchForm(forms.Form):
         label="Номер заказа",
         widget=forms.TextInput(attrs={
             'placeholder': '100000',
-        }),)
+        }),
+    )
+    partner_point = forms.ChoiceField(
+        label="Точка продажи", required=False, choices=()
+    )
     username = forms.CharField(
         required=False, 
         label="Телефон клиента", 
@@ -308,6 +313,7 @@ class OrderSearchForm(forms.Form):
 
         super().__init__(data, *args, **kwargs)
         self.fields["payment_method"].choices = self.payment_method_choices()
+        self.fields["partner_point"].choices = self.partner_choices()
         
         usesrname = kwargs.pop('usesrname', None)
         if usesrname:
@@ -340,6 +346,63 @@ class OrderSearchForm(forms.Form):
     def payment_method_choices(self):
         return (("", "---------"),) + tuple(
             [(src.code, src.name) for src in SourceType.objects.all()]
+        )
+
+    def partner_choices(self):
+        return (("", "Все точки продаж"),) + tuple(
+            [(src.code, src.name) for src in Partner.objects.all()]
+        )
+
+
+class ActiveOrderSearchForm(forms.Form):
+    partner_point = forms.ChoiceField(
+        label="Точка продажи", required=False, choices=()
+    )
+    def __init__(self, *args, **kwargs):
+        # Ensure that 'response_format' is always set
+        if "data" in kwargs:
+            data = kwargs["data"]
+            del kwargs["data"]
+        elif len(args) > 0:
+            data = args[0]
+            args = args[1:]
+        else:
+            data = None
+
+        super().__init__(data, *args, **kwargs)
+        self.fields["partner_point"].choices = self.partner_choices()
+
+
+    def format_phone_number(self, phone_number):
+        # Простейший способ форматирования номера телефона
+        phone_number = re.sub(r'\D', '', phone_number)  # Удаляем все нецифровые символы
+        if len(phone_number) == 11 and phone_number.startswith('7'):
+            phone_number = '+7 ({}) {}-{}'.format(
+                phone_number[1:4],
+                phone_number[4:7],
+                phone_number[7:]
+            )
+        return phone_number
+    
+    def clean_username(self):
+        phone_number = self.cleaned_data.get('username', '')
+        if phone_number:
+            return self.remove_non_digits(phone_number)
+        
+        return ''
+    
+    def remove_non_digits(self, phone_number):
+        # Удаляем все нецифровые символы
+        return '+' + re.sub(r'\D', '', phone_number)
+
+    def payment_method_choices(self):
+        return (("", "---------"),) + tuple(
+            [(src.code, src.name) for src in SourceType.objects.all()]
+        )
+
+    def partner_choices(self):
+        return (("", "Все точки продаж"),) + tuple(
+            [(src.code, src.name) for src in Partner.objects.all()]
         )
 
 

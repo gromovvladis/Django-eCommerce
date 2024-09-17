@@ -159,6 +159,6 @@
 {% block extrascripts %}
     {{ block.super }}
     {% compress js %}
-        <script src="{% static "js/profile/profile.js" %}" async></script>
+        <script src="{% static "js/frontend/profile/profile.js" %}" defer></script>
     {% endcompress %}
 {% endblock %}

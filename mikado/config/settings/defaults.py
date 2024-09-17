@@ -1,9 +1,8 @@
 from django.urls import reverse_lazy
-from yookassa import Configuration
 
-
-# OSCAR_SHOP_NAME = "Микадо Красноярск"
 OSCAR_HOMEPAGE = reverse_lazy("home:index")
+PARTNER_SELECT = True
+PARTNER_DEFAULT = 1
 
 # Dynamic class loading
 OSCAR_DYNAMIC_CLASS_LOADER = "oscar.core.loading.default_class_loader"
@@ -37,12 +36,6 @@ OSCAR_DELETE_IMAGE_FILES = True
 # Copy this image from oscar/static/img to your MEDIA_ROOT folder.
 # It needs to be there so Sorl can resize it.
 OSCAR_MISSING_IMAGE_URL = "image_not_found.jpg"
-
-# Address settings
-# OSCAR_REQUIRED_ADDRESS_FIELDS = (
-#     "line1",
-#     "line2",
-# )
 
 # Pagination settings
 
@@ -337,13 +330,9 @@ OSCAR_DASHBOARD_NAVIGATION = [
 OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION = "oscar.apps.dashboard.nav.default_access_fn"
 
 # Search facets
-
 OSCAR_THUMBNAILER = "oscar.core.thumbnails.SorlThumbnail"
-
 OSCAR_URL_SCHEMA = "http"
-
 OSCAR_SAVE_SENT_EMAILS_TO_DB = True
-
 
 #rest settings
 REST_FRAMEWORK = {
@@ -353,11 +342,9 @@ REST_FRAMEWORK = {
     'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework.authentication.TokenAuthentication',
     ),
 
     'DEFAULT_PARSER_CLASSES': (
-        #'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser'
     ),
@@ -392,7 +379,7 @@ SMS_AUTH_SETTINGS = {
 OSCAR_INITIAL_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = 'Ожидает оплаты'
 OSCAR_PAID_ONLINE_PAYMENT_ORDER_STATUS = 'Обрабатывается'
-OSCAR_INITIAL_LINE_STATUS = 'Новый заказ'
+OSCAR_INITIAL_LINE_STATUS = 'Обрабатывается'
 
 # This dict defines the new order statuses than an order can move to
 OSCAR_ORDER_STATUS_PIPELINE = {
@@ -409,10 +396,9 @@ OSCAR_ORDER_STATUS_PIPELINE = {
 # This dict defines the line statuses that will be set when an order's status
 # is changed
 OSCAR_ORDER_STATUS_CASCADE = {
-    'Обрабатывается': 'Ожидание',
     'Готовится': 'Готовится',
     'Готов': 'Готов',
-    'Завершен': 'Доставлен',
+    'Завершен': 'Завершен',
     'Отменен': 'Отменен',
 }
 

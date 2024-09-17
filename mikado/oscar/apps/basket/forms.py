@@ -3,12 +3,13 @@ from django import forms
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.forms.utils import ErrorDict
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 
 Line = get_model("basket", "line")
 Basket = get_model("basket", "basket")
 Option = get_model("catalogue", "option")
 Product = get_model("catalogue", "product")
+Unavailable = get_class("partner.availability", "Unavailable")
 
 def _option_text_field(form, product, option):
     return forms.CharField(
@@ -146,7 +147,7 @@ class BasketLineForm(forms.ModelForm):
 
     def clean_quantity(self):
         qty = self.cleaned_data["quantity"] or 0
-        if qty > 0:
+        if not isinstance(self.instance.purchase_info.availability, Unavailable) and qty > 0:
             self.check_max_allowed_quantity(qty)
             self.check_permission(qty)
         return qty

@@ -137,14 +137,11 @@ class WishListRemoveProduct(LineMixin, View):
 
     def _delete(self):
         self.object.delete()
-        if is_ajax(self.request):
-            return http.JsonResponse({
-                "html": '<svg width="24" height="24"><use xlink:href="#remove-from-wishlist"></use></svg>',
-                "url": reverse_lazy('customer:wishlist-add-product', kwargs={"product_pk": self.product.id}),
-                "status": 200
-                }, status=200)
-        
-        return self.get_success_response()
+        return http.JsonResponse({
+            "html": '<svg width="24" height="24"><use xlink:href="#remove-from-wishlist"></use></svg>',
+            "url": reverse_lazy('customer:wishlist-add-product', kwargs={"product_pk": self.product.id}),
+            "status": 200
+            }, status=200)
 
     def get_success_response(self):
         return redirect(reverse("customer:wishlist"))

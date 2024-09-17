@@ -1,0 +1,26 @@
+{% extends "oscar/partials/analytics.html" %}
+
+{% block google_transaction %}
+    gtag('event', 'purchase', {
+      "transaction_id": '{{ order.number|escapejs }}',
+      "affiliation": '{{ shop_name|escapejs }}',
+      "value": '{{ order.total|unlocalize|escapejs }}',
+      "currency": '{{ order.currency|escapejs }}',
+      "shipping": '{{ order.shipping|unlocalize|escapejs }}',
+      items: [
+          {% for line in order.lines.all %}
+          {
+            'id': '{{ line.partner_sku|escapejs }}',
+            'name': '{{ line.title|escapejs }}',
+            'category': '{{ line.category|default:"Uncategorised"|escapejs }}',
+            'price': '{{ line.unit_price|unlocalize|escapejs }}',
+            'quantity': '{{ line.quantity|escapejs }}'
+         }{% if not forloop.last %},{% endif %}
+          {% endfor %}
+      ]
+    });
+{% endblock %}
+
+{% block yandex_transaction %}
+  (){};
+{% endblock %}

@@ -7,12 +7,12 @@
 {% load static %}
 
 {% block styles %}
-    {% compress css %}   
-    <link rel="stylesheet" href="{% static "js/select2/select2.min.css" %}" />
-    <link rel="stylesheet" href="{% static "css/select2-bootstrap.min.css" %}" />
-    <link rel="stylesheet" href="{% static "css/air-datepicker.css" %}"/>
-    <link rel="stylesheet" href="{% static "css/dashboard.css" %}" />
-    {% endcompress %}
+    {% comment %} {% compress css %}    {% endcomment %}
+    <link rel="stylesheet" href="{% static "css/thirdpaty/select2/select2.min.css" %}"/>
+    <link rel="stylesheet" href="{% static "css/thirdpaty/select2/select2-bootstrap.min.css" %}"/>
+    <link rel="stylesheet" href="{% static "css/thirdpaty/datetimepicker/air-datepicker.css" %}"/>
+    <link rel="stylesheet" href="{% static "css/dashboard/dashboard.css" %}"/>
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}
 
 {% block title %}Панель управления {{ block.super }}{% endblock %}
@@ -90,7 +90,7 @@
                             <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.username }}</span>
                         </button>
 
-                        <ul class="dropdown-menu text-small shadow-sm" aria-labelledby="nav-account">
+                        <ul class="dropdown-menu text-small actions mb-2" aria-labelledby="nav-account">
                             <li><a class="dropdown-item" href="#">Задачи: 0</a></li>
                             <li><a class="dropdown-item" href="{% url 'customer:summary' %}">Аккаунт</a></li>
                             <li><a class="dropdown-item" href="{{ homepage_url }}">Магазин</a></li>
@@ -140,20 +140,21 @@
 
 {# Local scripts #}
 {% block scripts %}
-        {% compress js %}
-            <script src="{% static "js/bootstrap4/bootstrap.bundle.min.js" %}"></script>
-            <script src="{% static "js/oscar/ui.js" %}"></script>
-            <script src="{% static "js/mousewheel/jquery.mousewheel.js" %}"></script>
-            <script src="{% static "js/inputmask/jquery.inputmask.min.js" %}"></script>
-            <script src="{% static "js/select2/select2.min.js" %}"></script>
-            <script src="{% static "js/jquery-draggable/jquery-draggable-min.js" %}"></script>
-            <script src="{% static "js/oscar/RelatedObjectLookups.js" %}"></script>
-            <script src="{% static "js/oscar/dashboard.js" %}"></script>
-            <script src="{% static "js/slider/slider.js" %}"></script>
-            <script src="{% static "js/tinymce/jquery.tinymce.min.js" %}"></script>
-            <script src="{% static "js/datetimepicker/air-datepicker.js" %}"></script>
+        {% comment %} {% compress js %} {% endcomment %}
+            <script src="{% static "js/thirdpaty/bootstrap4/bootstrap.bundle.min.js" %}"></script>
+            <script src="{% static "js/thirdpaty/mousewheel/jquery.mousewheel.js" %}"></script>
+            <script src="{% static "js/thirdpaty/inputmask/jquery.inputmask.min.js" %}"></script>
+            <script src="{% static "js/thirdpaty/select2/select2.min.js" %}"></script>
+            <script src="{% static "js/thirdpaty/jquery-draggable/jquery-draggable-min.js" %}"></script>
+            <script src="{% static "js/thirdpaty/slider/slider.js" %}"></script>
+            <script src="{% static "js/thirdpaty/tinymce/jquery.tinymce.min.js" %}"></script>
+            <script src="{% static "js/thirdpaty/datetimepicker/air-datepicker.js" %}"></script>
 
-            <script src="{% static "js/dashboard/index/dashboard-sliders.js" %}"></script>
+            <script src="{% static "js/dashboard/oscar/RelatedObjectLookups.js" %}"></script>
+            <script src="{% static "js/dashboard/oscar/ui.js" %}"></script>
+            <script src="{% static "js/dashboard/oscar/dashboard.js" %}"></script>
+
+            <script src="{% static "js/dashboard/statictic/dashboard-sliders.js" %}"></script>
             <script src="{% static "js/dashboard/utils/navi.js" %}"></script>
             <script src="{% static "js/dashboard/utils/table.js" %}"></script>
             <script src="{% static "js/dashboard/utils/photo.js" %}"></script>
@@ -161,8 +162,8 @@
             <script src="{% static "js/dashboard/utils/datepicker.js" %}"></script>
             <script src="{% static "js/dashboard/utils/phone-mask.js" %}"></script>
             <script src="{% static "js/dashboard/utils/map.js" %}"></script>
-        {% endcompress %}
-        <script src="{% static "js/tinymce/tinymce.min.js" %}"></script>
+        {% comment %} {% endcompress %} {% endcomment %}
+        <script src="{% static "js/thirdpaty/tinymce/tinymce.min.js" %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
 {% endblock %}
 

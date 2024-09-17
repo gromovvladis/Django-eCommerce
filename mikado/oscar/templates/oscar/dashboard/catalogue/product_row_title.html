@@ -5,5 +5,5 @@
         <span class="small">{{ record.variant }}</span>
         <br>
     {% endif %}
-    <span class="text-muted small">UPC: {{ record.upc }}</span>
+    <span class="text-muted small">UPC: {{ record.upc|default:"-" }}</span>
 </div>
