@@ -155,6 +155,7 @@
             include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
             ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
+            http2 on;
             gzip_static on;
             gzip on;
             gzip_comp_level 5;
