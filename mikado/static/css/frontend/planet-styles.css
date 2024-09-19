@@ -14398,7 +14398,6 @@ ymaps[class*="search__suggest-item_selected"] {
 
 /* Базовые стили для label */
 .partner_select {
-    margin-bottom: .5rem;
     cursor: pointer;
     transition: background-color 0.3s, border-color 0.3s;
 }

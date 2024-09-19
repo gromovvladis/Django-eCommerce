@@ -32,17 +32,12 @@
                             {% elif notification.status == "Success" %}--success
                             {% elif notification.status == "Warning" %}--warning{% else %}--info{% endif %} mr-1">
                         </div>
-                    </div>
-                    <div>
                         <h1>       
                             {% if notification.subject %}
                                 {{ notification.subject|safe }}
                             {% endif %}
                         </h1>
                     </div>
-                </div>
-                <div>
-                    1
                 </div>
             </div>
         </div>

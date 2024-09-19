@@ -19,7 +19,7 @@
         {% icon file_name='header/logo' %}
     </a>
     {% if partners_select %}
-        <button onclick="openPartnerModal()" class="text-left d-flex flex-column ml-2 pd-0">
+        <button onclick="openPartnerModal()" class="partner_select checked text-left d-flex flex-column ml-2 pd-0">
             {% selected_partner request as partner %}
             <span class="header_partner">{{ partner }}</span>
             <span class="header_address">{{ partner.primary_address }}</span>

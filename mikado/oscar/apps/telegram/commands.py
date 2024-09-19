@@ -102,6 +102,10 @@ def send_telegram_message_to_users(text, users=None):
         users = get_staffs()
     for user in users:
         try:
+            # loop = asyncio.get_event_loop()
+            # if loop.is_closed():
+            #     loop = asyncio.new_event_loop()
+            #     asyncio.set_event_loop(loop)
             async_to_sync(application.bot.send_message)(chat_id=user.telegram_id, text=text)
         except Exception as e:
             logging.error(f"Ошибка при отправке уведомления: {e}")
