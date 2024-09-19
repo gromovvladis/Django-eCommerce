@@ -28,7 +28,7 @@ def notify_admin_about_new_order(sender, view, **kwargs):
         'total': int(kwargs['order'].total),
         'order': order,
         'order_id': kwargs['order'].id,
-        'url': kwargs['order'].get_absolute_url(),
+        'url': kwargs['order'].get_full_url(),
     }
     
     if not settings.DEBUG: 
