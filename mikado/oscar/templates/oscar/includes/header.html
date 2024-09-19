@@ -11,8 +11,10 @@
     {% if partners_select %}
         <button onclick="openPartnerModal()" class="partner_select text-left d-flex flex-column checked">
             {% selected_partner request as partner %}
-            <span class="header_partner">{{ partner }}</span>
-            <span class="header_address">{{ partner.primary_address }}</span>
+            {% if partner %}
+                <span class="header_partner">{{ partner }}</span>
+                <span class="header_address">{{ partner.primary_address }}</span>
+            {% endif %}
         </button>
     {% endif %}
 </div>
