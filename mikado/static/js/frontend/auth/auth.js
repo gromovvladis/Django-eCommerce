@@ -71,7 +71,6 @@ function authModalLoaded(redirect_url) {
     }
 
     function successFunc(authType, response) {
-        console.log("successFunc", response);
         if (authType == "sms") {
             btnSms.classList.remove('v-auth-modal__repeat-button', 'v-button', 'v-button--main');
             btnSms.classList.add('v-auth-modal__repeat-text');
@@ -100,7 +99,6 @@ function authModalLoaded(redirect_url) {
     }
 
     function errorFunc(authType, response) {
-        console.log("errorFunc", response);
         if (authType == "sms") {
             btnSms.disabled = false;
             btnSms.innerHTML = 'Отправить код';

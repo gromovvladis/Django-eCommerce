@@ -37,6 +37,9 @@ function partnerModalLoaded() {
             .then(data => {
                 if(data.refresh){
                     window.location.reload();
+                } else {
+                    modal.classList.toggle('d-none');
+                    document.body.classList.toggle('fixed');
                 };
             })
             .catch(error => {
