@@ -48,16 +48,16 @@ class HomeView(ListView):
 
     def get(self, request, *args, **kwargs):
 
-        from oscar.apps.communication.tasks import _celery_send_telegram_message_to_users
+        from oscar.apps.communication.tasks import _send_telegram_message_to_users
         if request.user.is_authenticated:
             msg = "Пользователь '%s' посетил Домашнюю страницу" % request.user.username
         else: 
             msg = "Неавторизованный пользователь посетил Домашнюю страницу"
-            
+
         if not settings.DEBUG: 
-            _celery_send_telegram_message_to_users.delay(msg)
+            _send_telegram_message_to_users.delay(msg)
         else:
-            _celery_send_telegram_message_to_users(msg)
+            _send_telegram_message_to_users(msg)
 
         return super().get(request, *args, **kwargs)
 

@@ -2,8 +2,7 @@ import datetime
 from django.conf import settings
 from oscar.apps.checkout.signals import post_payment
 from oscar.apps.order.signals import order_status_changed
-from oscar.apps.telegram.commands import send_telegram_message_to_users
-from .tasks import _notify_admin_about_new_order, _notify_user_about_new_order, _notify_user_about_order_status, _celery_send_telegram_message_to_users
+from .tasks import _notify_admin_about_new_order, _notify_user_about_new_order, _notify_user_about_order_status, _send_telegram_message_new_order
 
 def notify_admin_about_new_order(sender, view, **kwargs):
 
@@ -29,17 +28,17 @@ def notify_admin_about_new_order(sender, view, **kwargs):
         'total': int(kwargs['order'].total),
         'order': order,
         'order_id': kwargs['order'].id,
+        'url': kwargs['order'].get_absolute_url(),
     }
     
     if not settings.DEBUG: 
         _notify_admin_about_new_order.delay(ctx)
         _notify_user_about_new_order.delay(ctx)
-        _celery_send_telegram_message_to_users.delay("Эамвамвамвам")
+        _send_telegram_message_new_order.delay(ctx)
     else: 
         _notify_admin_about_new_order(ctx)
         _notify_user_about_new_order(ctx)
-        _celery_send_telegram_message_to_users("Эамвамвамвам")
-        # send_telegram_message_to_users("Эамвамвамвам")
+        _send_telegram_message_new_order(ctx)
 
 post_payment.connect(notify_admin_about_new_order) 
 
