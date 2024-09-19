@@ -161,7 +161,7 @@
             gzip_types application/x-javascript application/javascript text/css image/jpeg image/png;  
 
         }
-        
+
         server {
 
             if ($host = www.mikado-sushi.ru) {
@@ -201,10 +201,11 @@
     переходим в папку супервизора
         cd /etc/supervisor/conf.d/
 
-    в этой папке создаем ссылки на файлы конфигураций mikado.conf, celery.conf
+    в этой папке создаем ссылки на файлы конфигураций mikado.conf, celery.conf, telegram.conf,
     создаем ссылку:
         sudo ln /home/vladis/mikado/config/mikado.conf
         sudo ln /home/vladis/mikado/config/celery.conf
+        sudo ln /home/vladis/mikado/config/telegram.conf
 
     активируем супервизора:
         sudo update-rc.d supervisor enable
