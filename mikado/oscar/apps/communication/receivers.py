@@ -2,9 +2,9 @@ import datetime
 from django.conf import settings
 from oscar.apps.checkout.signals import post_payment
 from oscar.apps.order.signals import order_status_changed
-from .tasks import _notify_admin_about_new_order, _notify_user_about_new_order, _notify_user_about_order_status, _send_telegram_message_new_order
+from .tasks import _notify_admin_about_new_order, _notify_customer_about_new_order, _notify_customer_about_order_status, _send_telegram_message_new_order
 
-def notify_admin_about_new_order(sender, view, **kwargs):
+def notify_about_new_order(sender, view, **kwargs):
 
     order_list = []
 
@@ -33,16 +33,16 @@ def notify_admin_about_new_order(sender, view, **kwargs):
     
     if not settings.DEBUG: 
         _notify_admin_about_new_order.delay(ctx)
-        _notify_user_about_new_order.delay(ctx)
+        _notify_customer_about_new_order.delay(ctx)
         _send_telegram_message_new_order.delay(ctx)
     else: 
         _notify_admin_about_new_order(ctx)
-        _notify_user_about_new_order(ctx)
+        _notify_customer_about_new_order(ctx)
         _send_telegram_message_new_order(ctx)
 
-post_payment.connect(notify_admin_about_new_order) 
+post_payment.connect(notify_about_new_order) 
 
-def notify_user_about_order_status(sender, order, **kwargs):
+def notify_customer_about_order_status(sender, order, **kwargs):
     ctx = {
         'user_id': order.user.id,
         'number': kwargs['order'].number,
@@ -52,8 +52,8 @@ def notify_user_about_order_status(sender, order, **kwargs):
     }
 
     if not settings.DEBUG:
-        _notify_user_about_order_status.delay(ctx)
+        _notify_customer_about_order_status.delay(ctx)
     else:
-        _notify_user_about_order_status(ctx)
+        _notify_customer_about_order_status(ctx)
     
-order_status_changed.connect(notify_user_about_order_status)
+order_status_changed.connect(notify_customer_about_order_status)

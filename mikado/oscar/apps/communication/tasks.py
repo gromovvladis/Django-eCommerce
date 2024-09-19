@@ -28,7 +28,7 @@ def _notify_admin_about_new_order(ctx: dict):
         )
 
 @shared_task()
-def _notify_user_about_new_order(ctx: dict):
+def _notify_customer_about_new_order(ctx: dict):
     
     subject = "Новый заказ"
     message_tpl = loader.get_template("oscar/customer/alerts/new_order_message.html")
@@ -46,7 +46,7 @@ def _notify_user_about_new_order(ctx: dict):
     )
 
 @shared_task()
-def _notify_user_about_order_status(ctx: dict):
+def _notify_customer_about_order_status(ctx: dict):
     
     subject = "Статус заказа изменен"
     message_tpl = loader.get_template("oscar/customer/alerts/order_status_chenged_message.html")
