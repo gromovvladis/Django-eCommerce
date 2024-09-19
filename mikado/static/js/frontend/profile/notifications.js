@@ -3,7 +3,7 @@ var notificationsForm = document.querySelector('[data-id="profile-notifications-
 
 if (notificationsForm) {
     var notificationsLi = notificationsForm.querySelectorAll('[data-id="profile-notifications-item"]');
-    var notificationsNums = document.querySelector('[data-id="notifications-nums"]');
+    var notificationsNums = document.querySelectorAll('[data-id="notifications-nums"]');
 
     notificationsLi.forEach(function (li) {
         var btn = li.querySelector('button');
@@ -17,19 +17,22 @@ if (notificationsForm) {
             fetch(actionUrl, {
                 method: method,
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    // 'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken
                 },
-                body: JSON.stringify({
+                body: new URLSearchParams({
                     "data-behaviours": dataBehaviours,
                     "data-notification": dataNotification
-                })
+                }).toString()
             })
             .then(response => response.json())
             .then(data => {
                 li.remove();
                 if (data.action === "archive") {
-                    notificationsNums.textContent = data.num_unread;
+                    notificationsNums.forEach(function(element) {
+                        element.textContent = data.num_unread;
+                    });
                     if (data.num_unread === 0) {
                         document.querySelector('[data-id="notification-empty"]').textContent = 'Список уведомлений пуст';
                     }

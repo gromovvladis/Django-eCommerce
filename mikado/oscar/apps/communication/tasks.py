@@ -75,19 +75,20 @@ def _notify_user_about_order_status(ctx: dict):
         status=status,
     )
 
-# @shared_task
-# def _celery_send_telegram_message_to_users(text, users=None):
-#     loop = asyncio.new_event_loop()
-#     asyncio.set_event_loop(loop)   
-#     try:
-#         loop.run_until_complete(async_send_telegram_message_to_users(text, users))
-#     except Exception as e:
-#         logger.error(f"Ошибка при отправке уведомления: {e}")
-#     finally:
-#         loop.close() 
-
+@shared_task
+def _send_telegram_message_new_order(ctx: dict):
+    msg = (
+        f"<b>Новый заказ №{ctx['number']}</b>\n\n"
+        f"{ctx['order']}\n\n"
+        f"Время заказа: {ctx['order_time']}\n"
+        f"Пользователь: {ctx['user']}\n"
+        f"Оплата: {ctx['source']}\n"
+        f"Доставка: {ctx['shipping_method']}\n"
+        f"Сумма: {ctx['total']} ₽\n\n"
+        f"<a href='{ctx['url']}'>Смотреть на сайте</a>"
+    )
+    send_telegram_message_to_users(msg, 'HTML')
 
 @shared_task
-def _celery_send_telegram_message_to_users(text, users=None):
-    send_telegram_message_to_users(text, users=None)
-    
+def _send_telegram_message_to_users(msg: str):
+    send_telegram_message_to_users(msg)

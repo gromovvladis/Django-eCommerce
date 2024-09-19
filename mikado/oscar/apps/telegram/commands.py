@@ -87,17 +87,17 @@ def get_staffs():
 
 
 # Функция для отправки уведомления администраторам асинхроно
-async def async_send_telegram_message_to_users(text, users=None):
+async def async_send_telegram_message_to_users(text, parse_mode=None, users=None):
     if users is None:
         users = await sync_to_async(get_staffs)()
     for user in users:
         try:
-            await application.bot.send_message(chat_id=user.telegram_id, text=text)
+            await application.bot.send_message(chat_id=user.telegram_id, text=text, parse_mode=parse_mode)
         except Exception as e:
             logging.error(f"Ошибка при отправке уведомления: {e}")
 
 # Функция для отправки уведомления администраторам синхронно
-def send_telegram_message_to_users(text, users=None):
+def send_telegram_message_to_users(text, parse_mode=None, users=None):
     if users is None:
         users = get_staffs()
     for user in users:
@@ -106,7 +106,7 @@ def send_telegram_message_to_users(text, users=None):
             # if loop.is_closed():
             #     loop = asyncio.new_event_loop()
             #     asyncio.set_event_loop(loop)
-            async_to_sync(application.bot.send_message)(chat_id=user.telegram_id, text=text)
+            async_to_sync(application.bot.send_message)(chat_id=user.telegram_id, text=text, parse_mode=parse_mode)
         except Exception as e:
             logging.error(f"Ошибка при отправке уведомления: {e}")
 
