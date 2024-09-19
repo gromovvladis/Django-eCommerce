@@ -58,7 +58,7 @@ class HomeView(ListView):
         if not settings.DEBUG: 
             _send_telegram_message_to_users.delay(msg)
         else:
-            _send_telegram_message_to_users.delay(msg)
+            _send_telegram_message_to_users(msg)
 
         return super().get(request, *args, **kwargs)
 
