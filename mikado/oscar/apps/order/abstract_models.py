@@ -7,6 +7,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.signing import BadSignature, Signer
 from django.db import models
 from django.db.models import Sum
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 from django.utils.timezone import now
@@ -338,6 +339,12 @@ class AbstractOrder(models.Model):
         # useful when importing orders from another system).
         self.set_date_placed_default()
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        """
+        Return a order's absolute URL
+        """
+        return reverse("customer:order", kwargs={"order_number": self.number})
 
 
 class AbstractOrderNote(models.Model):
