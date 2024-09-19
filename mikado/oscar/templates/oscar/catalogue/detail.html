@@ -61,11 +61,11 @@
                                 </div>
                             </div>
                         </div>
+                    {% endcache %}
                         {% iffeature "wishlists" %}
                             {% include "oscar/catalogue/partials/add_to_wishlist.html" %}
                         {% endiffeature %} 
                     </div>
-                {% endcache %}
 
                 <div class="dish-page__content d-flex flex-column shrink px-2 mt-2 px-sm-0 mt-sm-0 pl-md-2">
                     <div class="dish-page__content-wrapper d-flex flex-column fill-width fill-height">

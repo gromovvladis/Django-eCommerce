@@ -37,15 +37,22 @@ function partnerModalLoaded() {
             .then(data => {
                 if(data.refresh){
                     window.location.reload();
-                } else {
-                    modal.classList.toggle('d-none');
-                    document.body.classList.toggle('fixed');
                 };
             })
             .catch(error => {
                 console.log("errorFunc", response);
             });
+            
         });
+
+        radio.addEventListener('click', function(event) {
+            if (radio.checked) {
+                console.log("radio.checked")
+                modal.classList.toggle('d-none');
+                document.body.classList.toggle('fixed');
+            }
+        });
+
     });
 
     authLoaded = false;
