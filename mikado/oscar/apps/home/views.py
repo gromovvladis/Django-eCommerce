@@ -48,7 +48,8 @@ class HomeView(ListView):
 
     def get(self, request, *args, **kwargs):
 
-        from oscar.apps.communication.tasks import _send_telegram_message_to_users
+        from oscar.apps.order.models import Order
+        from oscar.apps.communication.tasks import _send_telegram_message_to_users, _send_telegram_message_new_order
         if request.user.is_authenticated:
             msg = "Пользователь '%s' посетил Домашнюю страницу" % request.user.username
         else: 
@@ -57,7 +58,7 @@ class HomeView(ListView):
         if not settings.DEBUG: 
             _send_telegram_message_to_users.delay(msg)
         else:
-            _send_telegram_message_to_users(msg)
+            _send_telegram_message_to_users.delay(msg)
 
         return super().get(request, *args, **kwargs)
 
