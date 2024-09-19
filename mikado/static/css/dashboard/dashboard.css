@@ -1552,7 +1552,7 @@ pre code {
   font-weight: 500;
   /* margin-top: 2rem; */
   border-radius: 10px;
-  background: #f8f8f8 url(../../static/svg/dashboard/sad.svg) repeat 50px 50px;
+  background: #f8f8f8 url(../../../../static/svg/dashboard/sad.svg) repeat 50px 50px;
   background-size: 100px 100px;
 }
 
