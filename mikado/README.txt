@@ -51,6 +51,19 @@
         \q     / выйти из пользователя "postgres=#"
 
 
+    На случай, если понадобится удалить базу данных:
+        cd ~postgres/ / переходим в папку postgres/
+        sudo -u postgres psql / запускаем в консоли возможность управлять PostgresQL
+
+        Прерываем все текущие изменения:
+            SELECT pg_terminate_backend(pid)
+            FROM pg_stat_activity
+            WHERE datname = 'mikado';
+
+        Удаляем БД:
+            DROP DATABASE mikado; / удаляем
+
+
 4. Проверяем версию Python и создаем venv
     python -V / версия питона 2+
     python3 -V / версия питона 3+
@@ -102,18 +115,23 @@
 
 
 8. Конфигурация NGINX
-    открываем фаил конфигурации NGING:
-    sudo nano /etc/nginx/sites-available/default 
+
+    нужно удалить, если есть фаил
+    sudo rm /etc/nginx/sites-enabled/default
+
+    открываем фаил конфигурации NGING для основного сайта:
+    sudo nano /etc/nginx/sites-available/mikado-sushi 
 
     очистить фаил команда: ALT + T
-    после установки сертификата дописать "http2" после "listen 433" - listen 433 ssl http2;
 
     Конфигурация:
+
         server {
-            listen 80;
+	
             server_name mikado-sushi.ru www.mikado-sushi.ru 5.35.89.111;
             access_log  /var/log/nginx/logger.log;
-            client_max_body_size 20M;
+            client_max_body_size 50M;
+
             location /media/ {
                 root /home/vladis/mikado/public/;
                 expires 30d;
@@ -129,14 +147,43 @@
                 proxy_set_header Host $server_name;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-            http2 on;
-            gzip on;
-            gzip_disable "msie6";
-            gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript;
-
             }
+            
+            listen 443 ssl http2; # managed by Certbot
+            ssl_certificate /etc/letsencrypt/live/mikado-sushi.ru/fullchain.pem; # managed by Certbot
+            ssl_certificate_key /etc/letsencrypt/live/mikado-sushi.ru/privkey.pem; # managed by Certbot
+            include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+            ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+            gzip_static on;
+            gzip on;
+            gzip_comp_level 5;
+            gzip_types application/x-javascript application/javascript text/css image/jpeg image/png;  
+
         }
+        
+        server {
+
+            if ($host = www.mikado-sushi.ru) {
+                return 301 https://$host$request_uri;
+            } # managed by Certbot
+
+
+            if ($host = mikado-sushi.ru) {
+                return 301 https://$host$request_uri;
+            } # managed by Certbot
+
+
+            listen 80;
+            server_name mikado-sushi.ru www.mikado-sushi.ru 5.35.89.111;
+            return 404; # managed by Certbot
+
+        }
+
+    Активируйте сайты сайта:
+        sudo ln -s /etc/nginx/sites-available/mikado-sushi /etc/nginx/sites-enabled/
+
+    после установки сертификата дописать "http2" после "listen 433" - listen 433 ssl http2;    
 
     Перезапускаем NGING:
         sudo service nginx restart
@@ -213,6 +260,21 @@
     python manage.py compress
     sudo supervisorctl restart all
     redis-cli Flushall
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ============================================= Доп возможности =================================================
@@ -485,3 +547,90 @@ sudo -u postgres pg_dump -Fc mikado > /home/vladis/mikado-backup.sql
 2. Получаем у каждого курьера ближайшее свободное время доставки. Проверяем курьеров, у которых есть незавершённые доставки в этом же районе (или соседнем) сегодня но не больше чем за 40 минут до времени заказа и 40 минут после времени поездки (ближайшее свободное время без по пути), и не позже конца времёни приготовления заказа. Проверяем возможность добавить доставку до этой доставки (по возможности передвинуть время приготовления и вставить текущую доставку в начало поездки). Не забываем, что готовить повар может когда курьера нет, а курьеру нужно время на обратную дорогу, чтобы вернуться. Если уже созданных доставок под такие требования нет, то проверяем после (добавляем время приготовления, но не двигаем предыдущие доставки). Если 1-й или 2-й вариант подошли заносим в список курьера и время. Делаем для каждого и сортируем. Заносим в список получаем список [курьер, время, по пути=да/нет] - 3 параметра. По ним выбираем оптимальный.
 3. По времени доставки определяем свободных курьеров из списка или курьеров, которые будут в той же зоне доставки. Если курьеров нет, то время самовывоза +15 минут (Яндекс курьер)
 4. Проверяем 
+
+
+
+3.1. Подключаем PG Admin
+
+    sudo apt-get install python3-pip build-essential python3-dev libssl-dev libffi-dev
+
+    apt list --upgradable / проверяем обновления
+    sudo apt upgrade XXXXXXXXXXX / если есть обновления, то устанавливаем
+
+    sudo apt update / обноваляем
+    sudo apt install pgadmin4 / устанавливаем PGAdmin
+
+    / возможно придется перезапустить NGING (если он уже запущен) так как pgAdmin4 пытается запустить Apache
+        sudo systemctl stop apache2 / останавливаем Apache
+        sudo systemctl disable apache2 / отключаем Apache
+        sudo service nginx restart / перезапускаем NGING
+
+    Для инициализации конфигурации в директории /usr/local/lib/python3.11/dist-packages/pgadmin4/ необходимо создать файл config_local.py:
+        sudo mkdir -p /usr/local/lib/python3.11/dist-packages/pgadmin4/ / создаем директорию ВАЖНО ПРОВЕРИТЬ ВЕРСИЮ PYTHON
+        sudo nano /usr/local/lib/python3.11/dist-packages/pgadmin4/config_local.py / создаем фаил ВАЖНО ПРОВЕРИТЬ ВЕРСИЮ PYTHON
+
+    файл config_local.py:
+        LOG_FILE = '/var/log/pgadmin/pgadmin.log'
+        SQLITE_PATH = '/var/lib/pgadmin/pgadmin.db'
+        SESSION_DB_PATH = '/var/lib/pgadmin/sessions'
+        STORAGE_DIR = '/var/lib/pgadmin/storage'
+        SERVER_MODE = True
+        ALLOW_SAVE_PASSWORD = True
+        DEFAULT_SERVER_PORT = 5050
+
+
+    чтобы видеть работу портов можно установить lsof: 
+        sudo apt install lsof
+        sudo lsof -i :8000 / проверка 8000 порта
+
+
+    Для установки uwsgi необходимо выполнить команду:
+        sudo apt-get install uwsgi-core uwsgi-plugin-python3
+
+
+    sudo uwsgi --http-socket :5050 --plugin python3 --chdir /usr/local/lib/python3.11/dist-packages/pgadmin4/ --wsgi-file /usr/local/lib/python3.11/dist-packages/pgadmin4/pgAdmin4.wsgi
+
+    sudo uwsgi --http-socket :5050 --plugin python3 --chdir /usr/local/lib/python3.11/dist-packages/pgadmin4/ --wsgi-file /usr/local/lib/python3.11/dist-packages/pgadmin4/pgAdmin4.wsgi --uid vladis --gid www-data
+
+    
+    sudo rm /etc/apt/sources.list.d/pgadmin4.list / Удалите старую запись репозитория (если была добавлена)
+    curl https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo tee /etc/apt/trusted.gpg.d/pgadmin.asc
+    sudo sh -c 'echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list' / Добавьте репозиторий снова (эту строку и строку выше можно запустить за раз)
+
+    sudo apt update / Обновите репозитории
+    sudo apt install pgadmin4 / Установите pgAdmin4
+
+
+    создай файл в директории через FileZila
+    usr/pgadmin4/config_local.py
+    с текстом:
+    DEFAULT_SERVER_PORT = 5050
+
+
+    Установка pgAdmin4 как системного сервиса
+    Если вы хотите, чтобы pgAdmin4 работал как системный сервис, вам нужно создать файл юнита. Вот как это сделать
+    sudo nano /etc/systemd/system/pgadmin4.service / Создайте файл юнита
+
+    Вставьте следующее содержание:
+        [Unit]
+        Description=pgAdmin 4
+        After=network.target
+
+        [Service]
+        User=vladis
+        Group=www-data
+        WorkingDirectory=/usr/pgadmin4
+        ExecStart=/usr/bin/python3 /usr/pgadmin4/bin/pgAdmin4
+        Restart=always
+
+        [Install]
+        WantedBy=multi-user.target
+
+    sudo systemctl daemon-reload / Перезагрузите системные службы
+    sudo systemctl start pgadmin4 / Запустите pgAdmin4 как сервис
+    sudo systemctl enable pgadmin4 / Чтобы включить его автозапуск при загрузке, выполните
+
+
+    Теперь вы сможете управлять pgAdmin4 с помощью systemctl
+
+    кароче не получилось :(

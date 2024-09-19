@@ -16,13 +16,16 @@ def selected_partner(request):
         partners_select = Partner.objects.prefetch_related("addresses").all()
         cache.set("partners_select", partners_select, 21600)
 
-    partner_id = partner_default     
-    partner_basket = request.basket.partner_id
-    partner_cookies = request.COOKIES.get("partner", None)
+    if partners_select:
+        partner_id = partner_default     
+        partner_basket = request.basket.partner_id
+        partner_cookies = request.COOKIES.get("partner", None)
 
-    if partner_basket is not None:
-        partner_id = partner_basket
-    elif partner_cookies is not None:
-        partner_id = partner_cookies
+        if partner_basket is not None:
+            partner_id = partner_basket
+        elif partner_cookies is not None:
+            partner_id = partner_cookies
 
-    return Partner.objects.get(id=partner_id) 
+        return Partner.objects.get(id=partner_id) 
+    else:
+        return None
