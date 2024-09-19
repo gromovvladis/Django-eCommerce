@@ -1,9 +1,9 @@
-import logging
-from celery.signals import setup_logging
 import os
-from celery import Celery
+import logging
 from decouple import config
 from django.conf import settings
+from celery.signals import setup_logging
+from celery import Celery
 
 BROKER_URL = "redis://127.0.0.1:6379"
 CELERY_BROKER_URL = BROKER_URL
