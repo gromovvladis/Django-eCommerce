@@ -7,12 +7,12 @@
 {% load static %}
 
 {% block styles %}
-    {% comment %} {% compress css %}    {% endcomment %}
-    <link rel="stylesheet" href="{% static "css/thirdpaty/select2/select2.min.css" %}"/>
-    <link rel="stylesheet" href="{% static "css/thirdpaty/select2/select2-bootstrap.min.css" %}"/>
-    <link rel="stylesheet" href="{% static "css/thirdpaty/datetimepicker/air-datepicker.css" %}"/>
-    <link rel="stylesheet" href="{% static "css/dashboard/dashboard.css" %}"/>
-    {% comment %} {% endcompress %} {% endcomment %}
+    {% compress css %}   
+        <link rel="stylesheet" href="{% static "css/thirdpaty/select2/select2.min.css" %}"/>
+        <link rel="stylesheet" href="{% static "css/thirdpaty/select2/select2-bootstrap.min.css" %}"/>
+        <link rel="stylesheet" href="{% static "css/thirdpaty/datetimepicker/air-datepicker.css" %}"/>
+        <link rel="stylesheet" href="{% static "css/dashboard/dashboard.css" %}"/>
+    {% endcompress %}
 {% endblock %}
 
 {% block title %}Панель управления {{ block.super }}{% endblock %}
@@ -140,7 +140,7 @@
 
 {# Local scripts #}
 {% block scripts %}
-        {% comment %} {% compress js %} {% endcomment %}
+        {% compress js %}
             <script src="{% static "js/thirdpaty/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/thirdpaty/mousewheel/jquery.mousewheel.js" %}"></script>
             <script src="{% static "js/thirdpaty/inputmask/jquery.inputmask.min.js" %}"></script>
@@ -162,7 +162,7 @@
             <script src="{% static "js/dashboard/utils/datepicker.js" %}"></script>
             <script src="{% static "js/dashboard/utils/phone-mask.js" %}"></script>
             <script src="{% static "js/dashboard/utils/map.js" %}"></script>
-        {% comment %} {% endcompress %} {% endcomment %}
+        {% endcompress %}
         <script src="{% static "js/thirdpaty/tinymce/tinymce.min.js" %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
 {% endblock %}
