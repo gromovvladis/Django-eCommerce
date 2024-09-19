@@ -8,8 +8,6 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.authentication import SessionAuthentication
 
-from django.core.cache import cache
-
 
 User = get_user_model()
 Partner = get_model("partner", "Partner")

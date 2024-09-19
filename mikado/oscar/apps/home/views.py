@@ -47,6 +47,9 @@ class HomeView(ListView):
         return actions
 
     def get(self, request, *args, **kwargs):
+        from oscar.apps.telegram.commands import send_telegram_message_to_users, get_staffs
+        users = get_staffs()
+        send_telegram_message_to_users("Посетил HOMEPAGE!", users)
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):

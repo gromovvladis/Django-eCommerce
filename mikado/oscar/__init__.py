@@ -1,4 +1,6 @@
 from .run_celery import app as celery_app
+# from telegram_bot import application as telegram_app
+# __all__ = ("celery_app", "telegram_app")
 __all__ = ("celery_app",)
 
 # Use 'alpha', 'beta', 'rc' or 'final' as the 4th element to indicate release type.
@@ -33,23 +35,29 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.flatpages",
-    "oscar.config.Shop",
-    "oscar.apps.analytics.apps.AnalyticsConfig",
-    "oscar.apps.checkout.apps.CheckoutConfig",
-    "oscar.apps.address.apps.AddressConfig",
-    "oscar.apps.shipping.apps.ShippingConfig",
-    "oscar.apps.catalogue.apps.CatalogueConfig",
-    "oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig",
-    "oscar.apps.communication.apps.CommunicationConfig",
-    "oscar.apps.partner.apps.PartnerConfig",
-    "oscar.apps.basket.apps.BasketConfig",
-    "oscar.apps.payment.apps.PaymentConfig",
-    "oscar.apps.offer.apps.OfferConfig",
-    "oscar.apps.order.apps.OrderConfig",
-    "oscar.apps.customer.apps.CustomerConfig",
-    "oscar.apps.search.apps.SearchConfig",
-    "oscar.apps.voucher.apps.VoucherConfig",
-    "oscar.apps.wishlists.apps.WishlistsConfig",
+
+    "config.settings.config.Shop",
+
+    'oscar.apps.home.apps.HomeConfig',
+    'oscar.apps.analytics.apps.AnalyticsConfig',
+    'oscar.apps.checkout.apps.CheckoutConfig',
+    'oscar.apps.address.apps.AddressConfig',
+    'oscar.apps.shipping.apps.ShippingConfig',
+    'oscar.apps.delivery.apps.DeliveryConfig',
+    'oscar.apps.catalogue.apps.CatalogueConfig',
+    'oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig',
+    'oscar.apps.communication.apps.CommunicationConfig',
+    'oscar.apps.partner.apps.PartnerConfig',
+    'oscar.apps.basket.apps.BasketConfig',
+    'oscar.apps.payment.apps.PaymentConfig',
+    'oscar.apps.offer.apps.OfferConfig',
+    'oscar.apps.order.apps.OrderConfig',
+    'oscar.apps.customer.apps.CustomerConfig',
+    'oscar.apps.search.apps.SearchConfig',
+    'oscar.apps.voucher.apps.VoucherConfig',
+    'oscar.apps.wishlists.apps.WishlistsConfig',
+    'oscar.apps.telegram.apps.TelegramConfig',
+
     "oscar.apps.dashboard.apps.DashboardConfig",
     "oscar.apps.dashboard.reports.apps.ReportsDashboardConfig",
     "oscar.apps.dashboard.users.apps.UsersDashboardConfig",
@@ -63,6 +71,12 @@ INSTALLED_APPS = [
     "oscar.apps.dashboard.vouchers.apps.VouchersDashboardConfig",
     "oscar.apps.dashboard.communications.apps.CommunicationsDashboardConfig",
     "oscar.apps.dashboard.shipping.apps.ShippingDashboardConfig",
+    
+    'oscar.apps.dashboard.payments.apps.PaymentsDashboardConfig',
+    'oscar.apps.dashboard.crm.apps.CRMDashboardConfig',
+    'oscar.apps.dashboard.delivery.apps.DeliveryDashboardConfig',
+    'oscar.apps.dashboard.telegram.apps.TelegramDashboardConfig',
+
     # 3rd-party apps that oscar depends on
     "widget_tweaks",
     "haystack",
@@ -71,4 +85,4 @@ INSTALLED_APPS = [
 ]
 
 
-default_app_config = "oscar.config.Shop"
+default_app_config = "config.settings.config.Shop"
