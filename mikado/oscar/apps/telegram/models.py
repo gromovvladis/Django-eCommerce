@@ -12,9 +12,9 @@ if not is_model_registered("telegram", "TelegramMassage"):
     __all__.append("TelegramMassage")
 
 
-if not is_model_registered("telegram", "TelegramStaff"):
+if not is_model_registered("telegram", "TelegramUser"):
 
-    class TelegramStaff(abstract_models.AbstractTelegramStaff):
+    class TelegramUser(abstract_models.AbstractTelegramUser):
         pass
 
-    __all__.append("TelegramStaff")
+    __all__.append("TelegramUser")
