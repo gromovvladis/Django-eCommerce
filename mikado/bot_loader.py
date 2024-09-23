@@ -9,5 +9,5 @@ bot = Bot(token=settings.TELEGRAM_BOT_TOKEN, default=DefaultBotProperties(parse_
 if settings.DEBUG:
     storage = MemoryStorage()
 else:
-    storage = RedisStorage('redis://@127.0.0.1:6379/5', pool_size=10, prefix='bot_fsm') 
+    storage = RedisStorage.from_url('redis://127.0.0.1:6379/5', prefix='bot_fsm')
 dp = Dispatcher(storage=storage)
