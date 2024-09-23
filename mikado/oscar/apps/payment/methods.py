@@ -21,6 +21,7 @@ from yookassa.domain.response.payment_response import PaymentResponse
 
 
 logger = logging.getLogger("oscar.payment")
+thank_you_url = reverse_lazy('checkout:thank-you')
 
 class PaymentManager:
     """
@@ -85,7 +86,7 @@ class PaymentManager:
 class PaymentMethodHelper(object):
 
     def __init__(self, payment_method):
-        self.success_url = f"https://{settings.ALLOWED_HOSTS[0]}{reverse_lazy("checkout:thank-you")}"
+        self.success_url = f"https://{settings.ALLOWED_HOSTS[0]}{thank_you_url}"
         self.payment_method = payment_method
     
 
