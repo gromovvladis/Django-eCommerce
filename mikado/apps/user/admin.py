@@ -5,6 +5,7 @@ from oscar.apps.customer.forms import PhoneUserCreationForm, UserForm
 from oscar.core.loading import get_model
 
 User = get_model("user", "User")
+Staff = get_model("user", "Staff")
 
 # class CustomUserAdmin(UserAdmin):
 #     add_form = PhoneUserCreationForm
@@ -28,3 +29,4 @@ User = get_model("user", "User")
 
 # admin.site.register(User, CustomUserAdmin)
 admin.site.register(User)
+admin.site.register(Staff) 
