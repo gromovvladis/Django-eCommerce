@@ -68,6 +68,11 @@ class Staff(models.Model):
     
     def __str__(self):
         return "%s - %s %s" % (self.user, self.last_name, self.first_name)
+    
+    class Meta:
+        db_table = "auth_staff"
+        verbose_name = "Персонал"
+        verbose_name_plural = "Персонал"
 
 
 class UserManager(BaseUserManager):

@@ -68,25 +68,17 @@ def link_telegram_to_staff(phone_number: str, user_id: str):
     """
     Привязывает Telegram ID к пользователю и создает/обновляет запись в Staff.
     """
-    try:
-        # Ищем пользователя с правами staff или группами
-        user = User.objects.filter(
-            Q(is_staff=True) | Q(groups__isnull=False)
-        ).get(username=phone_number)
-        user.telegram_id = user_id
-        user.save()
-    except User.DoesNotExist:
-        return None, False
+    # Ищем пользователя с правами staff или группами
+    user = User.objects.filter(
+        Q(is_staff=True) | Q(groups__isnull=False)
+    ).get(username=phone_number)
+    user.telegram_id = user_id
+    user.save()
     
-    # Пробуем получить или создать запись Staff
-    try:
-        staff, created = Staff.objects.get_or_create(
-            user=user,
-            defaults={'is_active': user.is_active, 'telegram_id': user_id, 'notif': Staff.NEW}
-        )
-    except Staff.DoesNotExist:
-        # Обработка на случай, если создание Staff не удается
-        return None, False
+    staff, created = Staff.objects.get_or_create(
+        user=user,
+        defaults={'is_active': user.is_active, 'telegram_id': user_id, 'notif': Staff.NEW}
+    )
 
     # Если запись не была создана, обновляем необходимые поля
     if not created:
