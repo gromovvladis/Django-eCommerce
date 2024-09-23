@@ -9,7 +9,7 @@ from oscar.core import compat
 from django.contrib.auth.models import Group
 
 
-class Profile(models.Model):
+class Staff(models.Model):
     """
     Dummy profile model used for testing
     """
@@ -18,7 +18,7 @@ class Profile(models.Model):
 
     last_name = models.CharField("Фамилия", blank=False, null=False, max_length=255)
     first_name = models.CharField("Имя", blank=False, null=False, max_length=255)
-    middle_name = models.CharField("Отчество", blank=True, null=True, max_length=255)
+    middle_name = models.CharField("Отчество", blank=True, null=False, max_length=255)
 
     job = models.CharField("Должность", max_length=127, null=False)
 
@@ -32,10 +32,42 @@ class Profile(models.Model):
 
     image = models.ImageField(blank=True, null=True, verbose_name='Фото', upload_to="profile")
 
+    telegram_id = models.CharField("ID Телеграм чата", max_length=128)
+
+    is_active = models.BooleanField(
+        "Активен",
+        default=True,
+        db_index=True,
+        help_text="Активен сотрудник или нет",
+    )
+
+    NEW, STATUS, TECHNICAL, OFF = 'new-order', 'status-order', 'technical', 'off'
+    NOTIF_CHOICES = (
+        ('new-order', ' Только уведомления о новых заказах'),
+        ('status-order', 'Уведомления об изменении заказов и новых заказах'),
+        ('technical', 'Технические уведомления'),
+        ('off', 'Отключить уведомления'),
+    )
+
+    notif = models.CharField("Уведомления", choices=NOTIF_CHOICES, max_length=128, default=NEW)
+
     @staticmethod
     def get_job_choices():
         groups = Group.objects.all()
         return [(group.id, group.name) for group in groups]
+    
+    def get_user(self):
+        return self.user
+    
+    def set_user(self, user):
+        self.user = user
+        self.save()
+
+    def has_permission(self):
+        return self.is_active
+    
+    def __str__(self):
+        return "%s - %s %s" % (self.user, self.last_name, self.first_name)
 
 
 class UserManager(BaseUserManager):
@@ -66,11 +98,6 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
 
-        # user_created.send(
-        #     sender=self,
-        #     user=user,
-        # )
-
         return user
 
 
@@ -95,30 +122,41 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=12,
         unique=True,
         blank=False,
+        db_index=True,
         help_text="Формат телефона: '+7 (900) 000-0000",
     )
 
     email = models.EmailField("Email", blank=True)
 
     name = models.CharField("Имя", max_length=255, blank=True)
-    telegram_id = models.CharField("Телеграм ID", max_length=255, blank=True)
+    telegram_id = models.CharField("Телеграм ID", max_length=255, blank=True, db_index=True,)
 
     is_staff = models.BooleanField(
         "Это сотрудник?",
         default=False,
+        db_index=True,
         help_text="Повар, Курьер, Менеджер и т.д.",
     )
     is_active = models.BooleanField(
         "Активен",
         default=True,
-        help_text=
-            "Активен пользователь или нет",
+        db_index=True,
+        help_text="Активен пользователь или нет",
     )
     is_email_verified = models.BooleanField(
         "Email verified",
         default=False,
         help_text="Email подтвержден или нет",
     )
+
+    ORDER, OFFER, OFF = 'order', 'offer', 'off'
+    NOTIF_CHOICES = (
+        ('order', 'Только уведомления о заказах'),
+        ('offer', 'Уведомления об персональных акциях и предложениях'),
+        ('off', 'Отключить уведомления'),
+    )
+
+    notif = models.CharField("Уведомления", choices=NOTIF_CHOICES, max_length=128, default=ORDER)
     
     date_joined = models.DateTimeField("Дата регистрации", default=timezone.now)
     last_login = models.DateTimeField("Дата последнего входа ", default=timezone.now)

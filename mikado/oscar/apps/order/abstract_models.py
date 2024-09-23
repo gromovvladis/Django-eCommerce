@@ -32,7 +32,7 @@ class AbstractOrder(models.Model):
     )
 
     # We track the site that each order is placed within
-    # site = models.CharField(verbose_name="Источник заказа", null=True, blank=True, max_length=128)
+    site = models.CharField(verbose_name="Источник заказа", null=True, blank=True, max_length=128)
 
     basket = models.ForeignKey(
         "basket.Basket",

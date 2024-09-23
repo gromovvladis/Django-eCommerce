@@ -1,16 +1,15 @@
-import asyncio
-from asyncio.log import logger
 from django.template import loader
 from celery import shared_task
-from oscar.apps.telegram.commands import async_send_telegram_message_to_users, send_telegram_message_to_users, get_staffs
+from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs, send_message
 from oscar.core.loading import get_model
 from django.contrib.auth import get_user_model
 
 Notification = get_model("communication", "Notification")
+TelegramMassage = get_model("telegram", "TelegramMassage")
 User = get_user_model()
 
 @shared_task
-def _notify_admin_about_new_order(ctx: dict):
+def _notify_staff_about_new_order(ctx: dict):
 
     subject = "Пользовательский заказ"
     message_tpl = loader.get_template("oscar/customer/alerts/staff_new_order_message.html")
@@ -76,5 +75,23 @@ def _notify_customer_about_order_status(ctx: dict):
     )
 
 @shared_task
-def _send_telegram_message_to_users(msg: str, parse_mode: str = None):
-    send_telegram_message_to_users(msg, parse_mode)
+def _send_telegram_message_new_order_to_staff(ctx: dict):
+    msg = (
+        f"<b>Новый заказ №{ctx['number']}</b>\n\n"
+        f"{ctx['order']}\n\n"
+        f"Время заказа: {ctx['order_time']}\n"
+        f"Пользователь: {ctx['user']}\n"
+        f"Оплата: {ctx['source']}\n"
+        f"Доставка: {ctx['shipping_method']}\n"
+        f"Сумма: {ctx['total']} ₽\n\n"
+        f"<a href='{ctx['url']}'>Смотреть на сайте</a>"
+    )
+    send_message_to_staffs(msg, TelegramMassage.NEW)
+
+@shared_task
+def _send_telegram_message_to_staffs(msg: str, type: str = TelegramMassage.MISC, partner_id: str = None):
+    send_message_to_staffs(msg, type, partner_id)
+
+@shared_task
+def _send_telegram_message_to_user(telegram_id: int, msg: str, type: str):
+    send_message(telegram_id, msg, type)

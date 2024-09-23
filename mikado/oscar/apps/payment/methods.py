@@ -85,10 +85,7 @@ class PaymentManager:
 class PaymentMethodHelper(object):
 
     def __init__(self, payment_method):
-        url_domain = Site.objects.get_current().domain
-        url_path = reverse_lazy("checkout:thank-you")
-        success_url_path = url_domain + url_path
-        self.success_url = success_url_path
+        self.success_url = f"https://{settings.ALLOWED_HOSTS[0]}{reverse_lazy("checkout:thank-you")}"
         self.payment_method = payment_method
     
 
