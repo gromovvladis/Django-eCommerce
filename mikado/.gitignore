@@ -39,7 +39,6 @@ db.sqlite
 .idea
 .vscode
 
-
 # Docs
 /docs/build/*
 /src/oscar/static/
