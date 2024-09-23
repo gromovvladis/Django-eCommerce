@@ -7,7 +7,7 @@ from aiogram import types
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 
-from oscar.apps.telegram.models import TelegramUser
+from apps.user.models import Staff
 from oscar.apps.telegram.bot.const_texts import *
 from oscar.apps.telegram.bot.states.states import UserRegister
 from oscar.apps.telegram.bot.keyboards.default import make_buttons, contact_request_button
@@ -31,7 +31,7 @@ async def register_get_or_create_user(message: types.Message, state: FSMContext)
 
     user = await get_user_model().objects.filter(username=phone_number).afirst()
     if user:
-        telegram_user = await TelegramUser.objects.aget_or_create(chat_id=message.from_user.id)
+        telegram_user = await Staff.objects.aget_or_create(chat_id=message.from_user.id)
         await sync_to_async(telegram_user.set_user)(user)
         await message.answer(
             text=c_successfully_register,

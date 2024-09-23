@@ -115,7 +115,7 @@ class AbstractCourier(models.Model):
     ]
         
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile = models.OneToOneField("user.Profile", on_delete=models.CASCADE)
+    profile = models.OneToOneField("user.Staff", on_delete=models.CASCADE)
     type = models.CharField(max_length=50, choices=STATUS_CHOICES, default='driving')
 
     def __str__(self):

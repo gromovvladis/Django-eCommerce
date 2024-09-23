@@ -2,7 +2,7 @@ import datetime
 from django.conf import settings
 from oscar.apps.checkout.signals import post_payment
 from oscar.apps.order.signals import order_status_changed
-from .tasks import _notify_admin_about_new_order, _notify_customer_about_new_order, _notify_customer_about_order_status, _send_telegram_message_new_order
+from .tasks import _notify_staff_about_new_order, _notify_customer_about_new_order, _notify_customer_about_order_status, _send_telegram_message_new_order_to_staff
 
 def notify_about_new_order(sender, view, **kwargs):
 
@@ -32,13 +32,13 @@ def notify_about_new_order(sender, view, **kwargs):
     }
     
     if not settings.DEBUG: 
-        _notify_admin_about_new_order.delay(ctx)
+        _notify_staff_about_new_order.delay(ctx)
         _notify_customer_about_new_order.delay(ctx)
-        _send_telegram_message_new_order.delay(ctx)
+        _send_telegram_message_new_order_to_staff.delay(ctx)
     else: 
-        _notify_admin_about_new_order(ctx)
+        _notify_staff_about_new_order(ctx)
         _notify_customer_about_new_order(ctx)
-        _send_telegram_message_new_order(ctx)
+        _send_telegram_message_new_order_to_staff(ctx)
 
 post_payment.connect(notify_about_new_order) 
 

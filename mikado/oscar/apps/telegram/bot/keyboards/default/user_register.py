@@ -1,27 +1,19 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from oscar.apps.telegram.bot.const_texts import c_share_phone_number, c_cancel
+from oscar.apps.telegram.bot.const_texts import start_phone_number, start_cancel
 
-
-def make_buttons(words: list, row_width: int = 1) -> ReplyKeyboardMarkup:
-    buttons_group = ReplyKeyboardMarkup(
-        row_width=row_width, resize_keyboard=True)
-    for word in words:
-        if word is not None:
-            buttons_group.insert(KeyboardButton(text=word))
-    return buttons_group
-
-
-contact_request_button = ReplyKeyboardMarkup(
+contact_request_buttons = ReplyKeyboardMarkup(
     resize_keyboard=True,
+    one_time_keyboard=True,
+    input_field_placeholder="Авторизация по номеру телефона",
     keyboard=[
         [
             KeyboardButton(
-                text=c_share_phone_number,
+                text=start_phone_number,
                 request_contact=True
             )
         ],
         [
-            KeyboardButton(text=c_cancel)
+            KeyboardButton(text=start_cancel)
         ]
     ]
 )

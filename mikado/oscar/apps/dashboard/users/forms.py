@@ -10,7 +10,7 @@ from django.conf import settings
 from oscar.core.loading import get_model
 
 User = get_user_model()
-Profile = get_model("user", "Profile")
+Staff = get_model("user", "Staff")
 
 
 class UserSearchForm(forms.Form):
@@ -50,7 +50,7 @@ class StaffCreationForm(forms.ModelForm):
     )
     gender = forms.ChoiceField(
         label="Пол",
-        choices=Profile.gender_choices, 
+        choices=Staff.gender_choices, 
         required=False
     )
     age = forms.IntegerField(label="Возраст", required=False)
@@ -97,7 +97,7 @@ class StaffCreationForm(forms.ModelForm):
     def __init__(self, partner, *args, **kwargs):
         self.partner = partner
         super().__init__(*args, **kwargs)
-        self.fields['job'].choices = Profile.get_job_choices()
+        self.fields['job'].choices = Staff.get_job_choices()
 
     def _post_clean(self):
         super()._post_clean()
@@ -122,7 +122,7 @@ class StaffCreationForm(forms.ModelForm):
 
         if staff:
             # Если это сотрудник, создаем профиль
-            Profile.objects.create(
+            Staff.objects.create(
                 user=user,
                 first_name=self.cleaned_data.get('first_name', ''),
                 last_name=self.cleaned_data.get('last_name', ''),

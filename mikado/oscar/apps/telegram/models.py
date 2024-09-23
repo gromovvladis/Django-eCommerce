@@ -10,11 +10,3 @@ if not is_model_registered("telegram", "TelegramMassage"):
         pass
 
     __all__.append("TelegramMassage")
-
-
-if not is_model_registered("telegram", "TelegramUser"):
-
-    class TelegramUser(abstract_models.AbstractTelegramUser):
-        pass
-
-    __all__.append("TelegramUser")

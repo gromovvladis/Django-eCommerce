@@ -23,9 +23,13 @@ class Command(BaseCommand):
     help = 'RUN COMMAND: python manage.py runbot'
 
     def handle(self, *args, **options):
-        asyncio.run(self.start_polling())
+        try:
+            asyncio.run(self.start_polling())
+        except KeyboardInterrupt:
+            logging.info("Bot Off")
 
     async def start_polling(self):
-        logging.info("Start")
+        logging.info("Bot Start")
         await on_startup(bot, dp)
         await dp.start_polling(bot)
+
