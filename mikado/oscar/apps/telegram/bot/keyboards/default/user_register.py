@@ -1,5 +1,5 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from oscar.apps.telegram.bot.const_texts import start_phone_number, start_cancel
+from oscar.apps.telegram.bot.const_texts import start_phone_number, cancel_btn
 
 contact_request_buttons = ReplyKeyboardMarkup(
     resize_keyboard=True,
@@ -13,7 +13,7 @@ contact_request_buttons = ReplyKeyboardMarkup(
             )
         ],
         [
-            KeyboardButton(text=start_cancel)
+            KeyboardButton(text=cancel_btn)
         ]
     ]
 )

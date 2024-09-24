@@ -9,10 +9,10 @@ DEFAULT_BOT = settings.TELEGRAM_BOT_TOKEN
 
 from oscar.core.loading import get_model
 Staff = get_model("user", "Staff")
-TelegramMassage = get_model("telegram", "TelegramMassage")
+TelegramMessage = get_model("telegram", "TelegramMessage")
 
 # Синхронная функция отправки сообщения через Telegram API
-def send_message(chat_id: int, text: str, type: str = TelegramMassage.MISC, bot_token: str = DEFAULT_BOT,  **kwargs):
+def send_message(chat_id: int, text: str, type: str = TelegramMessage.MISC, user = None, bot_token: str = DEFAULT_BOT,  **kwargs):
     """
     Синхронная реализация отправки сообщения через Telegram API.
 
@@ -40,35 +40,36 @@ def send_message(chat_id: int, text: str, type: str = TelegramMassage.MISC, bot_
         # Получаем JSON-ответ
         response_data = response.json()
 
-        user, created = User.objects.get_or_create(telegram_id=chat_id)
-
-        # Сохраняем сообщение в базу данных
-        TelegramMassage.objects.create(
-            user=user,
-            type=type,
-            massage=text,
-        )
+        if user is not None:
+            # Сохраняем сообщение в базу данных
+            TelegramMessage.objects.create(
+                user=user,
+                type=type,
+                message=text,
+            )
 
         return response_data
 
+    except requests.exceptions.HTTPError as http_err:
+        raise Exception(f"HTTP error occurred: {http_err}")
     except requests.exceptions.HTTPError as http_err:
         raise Exception(f"HTTP error occurred: {http_err}")
     except Exception as err:
         raise Exception(f"An error occurred: {err}")
     
 
-def send_message_to_staffs(text: str, type: str = TelegramMassage.MISC, partner_id: str = None, bot_token: str = DEFAULT_BOT, **kwargs):
-    if type == TelegramMassage.TECHNICAL:
-        staffs = Staff.objects.filter(is_active=True, notif=Staff.TECHNICAL)
-    elif type == TelegramMassage.STATUS: 
-        staffs = Staff.objects.filter(is_active=True, notif__in=[Staff.STATUS, Staff.TECHNICAL])
+def send_message_to_staffs(text: str, type: str = TelegramMessage.MISC, partner_id: str = None, bot_token: str = DEFAULT_BOT, **kwargs):
+    if type == TelegramMessage.TECHNICAL:
+        staffs = Staff.objects.filter(is_active=True, notif=Staff.TECHNICAL).select_related("user")
+    elif type == TelegramMessage.STATUS: 
+        staffs = Staff.objects.filter(is_active=True, notif__in=[Staff.STATUS, Staff.TECHNICAL]).select_related("user")
     else:
-        staffs = Staff.objects.filter(is_active=True).exclude(notif=Staff.OFF)
+        staffs = Staff.objects.filter(is_active=True).exclude(notif=Staff.OFF).select_related("user")
     
     if partner_id:
         staffs = staffs.filter(
-            Q(user__partners__id=partner_id) | Q(user__is_staff=True)
+            Q(user__partners__id=partner_id) | Q(user__is_superuser=True)
         )
 
     for staff in staffs:
-        send_message(staff.telegram_id, text, type, bot_token, **kwargs)
+        send_message(staff.telegram_id, text, type, staff.user, bot_token, **kwargs)

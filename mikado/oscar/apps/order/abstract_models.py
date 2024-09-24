@@ -352,6 +352,13 @@ class AbstractOrder(models.Model):
         """
         return f"https://{settings.ALLOWED_HOSTS[0]}{self.get_absolute_url()}"
 
+    def get_staff_url(self):
+        """
+        Return a order's absolute URL
+        """
+        url = reverse("dashboard:order-detail", kwargs={"number": self.number})
+        return f"https://{settings.ALLOWED_HOSTS[0]}{url}"
+
 
 
 class AbstractOrderNote(models.Model):

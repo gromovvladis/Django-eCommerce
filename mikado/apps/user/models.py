@@ -20,7 +20,7 @@ class Staff(models.Model):
     first_name = models.CharField("Имя", blank=False, null=False, max_length=255)
     middle_name = models.CharField("Отчество", blank=True, null=False, max_length=255)
 
-    job = models.CharField("Должность", max_length=127, null=False)
+    job = models.CharField("Должность", max_length=127, null=False, db_index=True)
 
     MALE, FEMALE = 'М', 'Ж'
     gender_choices = (
@@ -28,7 +28,7 @@ class Staff(models.Model):
         (FEMALE, 'Женщина'))
     gender = models.CharField(max_length=1, choices=gender_choices,
                               verbose_name='Пол', null=False)
-    age = models.PositiveIntegerField(verbose_name='Возраст', null=True, blank=True)
+    age = models.PositiveIntegerField(verbose_name='Возраст', null=False, blank=True)
 
     image = models.ImageField(blank=True, null=True, verbose_name='Фото', upload_to="profile")
 
@@ -43,13 +43,13 @@ class Staff(models.Model):
 
     NEW, STATUS, TECHNICAL, OFF = 'new-order', 'status-order', 'technical', 'off'
     NOTIF_CHOICES = (
-        ('new-order', ' Только уведомления о новых заказах'),
+        ('new-order', 'Только уведомления о новых заказах'),
         ('status-order', 'Уведомления об изменении заказов и новых заказах'),
         ('technical', 'Технические уведомления'),
         ('off', 'Отключить уведомления'),
     )
 
-    notif = models.CharField("Уведомления", choices=NOTIF_CHOICES, max_length=128, default=NEW)
+    notif = models.CharField("Уведомления", choices=NOTIF_CHOICES, max_length=128, default=NEW, db_index=True)
 
     @staticmethod
     def get_job_choices():
@@ -134,7 +134,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField("Email", blank=True)
 
     name = models.CharField("Имя", max_length=255, blank=True)
-    telegram_id = models.CharField("Телеграм ID", max_length=255, blank=True, db_index=True,)
+
+    telegram_id = models.CharField("Телеграм ID", max_length=255, blank=True)
 
     is_staff = models.BooleanField(
         "Это сотрудник?",
@@ -142,18 +143,20 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_index=True,
         help_text="Повар, Курьер, Менеджер и т.д.",
     )
+
     is_active = models.BooleanField(
         "Активен",
         default=True,
         db_index=True,
         help_text="Активен пользователь или нет",
     )
+
     is_email_verified = models.BooleanField(
         "Email verified",
         default=False,
         help_text="Email подтвержден или нет",
     )
-
+    
     ORDER, OFFER, OFF = 'order', 'offer', 'off'
     NOTIF_CHOICES = (
         ('order', 'Только уведомления о заказах'),
@@ -161,7 +164,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('off', 'Отключить уведомления'),
     )
 
-    notif = models.CharField("Уведомления", choices=NOTIF_CHOICES, max_length=128, default=ORDER)
+    notif = models.CharField("Уведомления", choices=NOTIF_CHOICES, max_length=128, default=ORDER, db_index=True)
     
     date_joined = models.DateTimeField("Дата регистрации", default=timezone.now)
     last_login = models.DateTimeField("Дата последнего входа ", default=timezone.now)
@@ -209,11 +212,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         Return the user's avatar image.
         """
         name = self.get_full_name()
-
-        if name:
-            return name[0]
-
-        return 'А'
+        return name[0] if name else 'А'
 
     
     def get_name_and_phone(self):
