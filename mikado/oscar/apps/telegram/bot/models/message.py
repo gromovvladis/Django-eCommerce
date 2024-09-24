@@ -2,9 +2,6 @@ from asgiref.sync import sync_to_async
 
 from oscar.core.loading import get_model
 
-import logging
-logger = logging.getLogger(__name__)
-
 TelegramMessage = get_model("telegram", "TelegramMessage")
 
 @sync_to_async

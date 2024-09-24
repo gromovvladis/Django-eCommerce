@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 from asgiref.sync import sync_to_async
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
@@ -25,10 +22,6 @@ async def get_user_by_telegram_id(telegram_id: int):
 
 async def get_or_create_staff_by_user_id(user_id: int):
     user, created = await Staff.objects.aget_or_create(telegram_id=user_id)
-    if created:
-        logger.info(f"user {user_id} was added to DB")
-    else:
-        logger.info(f"User {user_id} is already exist")
     return user
 
 

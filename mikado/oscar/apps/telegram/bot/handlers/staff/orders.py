@@ -4,7 +4,6 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 
 from oscar.apps.telegram.bot.keyboards.inline.orders import orders_keyboard
-from oscar.apps.telegram.bot.keyboards.default.staff_keyboard import staff_buttons
 from oscar.apps.telegram.bot.states.states import StaffOrders
 from oscar.apps.telegram.bot.models import get_orders, get_orders_message, get_period, check_staff_status
 

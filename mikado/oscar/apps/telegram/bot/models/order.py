@@ -1,8 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
-import logging
-logger = logging.getLogger(__name__)
 
 from asgiref.sync import sync_to_async
 

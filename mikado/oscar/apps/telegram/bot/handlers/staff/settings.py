@@ -76,16 +76,11 @@ async def nofit_off(callback: CallbackQuery, state: FSMContext):
 @settings_router.message(Command('site'))
 async def open_site(message: Message, state: FSMContext):
     await state.set_state(OpenSite.open_site)
-    await message.answer("Нажмите на кнопку ниже, чтобы открыть сайт", reply_markup=open_site_button)
+    sent_message = await message.answer("Нажмите на кнопку ниже, чтобы открыть сайт", reply_markup=open_site_button)
+    await state.update_data(sent_message_id=sent_message.message_id)
 
 
 @settings_router.message(OpenSite.open_site)
 async def handle_webapp_return(message: Message, state: FSMContext):
-    # data = await state.get_data()
-    # sent_message_id = data.get("sent_message_id")
-
-    # await message.bot.edit_message_reply_markup(
-    #     message_id=sent_message_id,
-    #     reply_markup=staff_buttons
-    # )
+    await message.answer("Меню сайта закрыто", reply_markup=staff_buttons)
     await state.clear()
