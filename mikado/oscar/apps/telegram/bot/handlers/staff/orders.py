@@ -22,7 +22,7 @@ async def process_orders(callback: CallbackQuery, state: FSMContext, period: str
     msg_list = await get_orders_message(orders)
     await callback.answer()
     await callback.message.edit_reply_markup()
-    await callback.message.edit_text(f"Заказы за {period} \n\n Начало периода: {start.strftime("%d.%m.%Y %H:%M")}\n Конец периода: {end.strftime("%d.%m.%Y %H:%M")}")
+    await callback.message.edit_text(f"Заказы за {period} \n\n Начало периода: {start.strftime('%d.%m.%Y %H:%M')}\n Конец периода: {end.strftime('%d.%m.%Y %H:%M')}")
 
     for i in range(0, len(msg_list), 10):
         msg = "\n\n".join(msg_list[i:i + 10])
