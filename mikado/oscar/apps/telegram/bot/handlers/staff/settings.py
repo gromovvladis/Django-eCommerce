@@ -1,0 +1,91 @@
+from aiogram import F, Router
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message, CallbackQuery
+from aiogram.filters import Command
+
+from oscar.apps.telegram.bot.keyboards.default.edit_status import edit_notif_buttons
+from oscar.apps.telegram.bot.keyboards.inline.notifications import notif_keyboard
+from oscar.apps.telegram.bot.keyboards.default.open_site import open_site_button
+from oscar.apps.telegram.bot.keyboards.default.staff_keyboard import staff_buttons
+from oscar.apps.telegram.bot.models.user import change_nofit, check_staff_status, get_current_notif
+from oscar.apps.telegram.bot.states.states import StaffNotif, OpenSite
+from oscar.apps.telegram.bot.const_texts import notif_edit, cancel_btn
+
+settings_router = Router()
+
+    
+# ============= settings ================
+
+
+@settings_router.message(Command('settings'))
+async def nofit(message: Message, state: FSMContext):
+    if await check_staff_status(message, state):
+        await state.set_state(StaffNotif.notif_status)
+        telegram_id = message.from_user.id
+        current_notif = await get_current_notif(telegram_id)
+        await message.answer(f"Настройка уведомлений.\nТекущий статус уведомлений: <b>{current_notif}</b>", reply_markup=edit_notif_buttons)
+
+
+@settings_router.message(StaffNotif.notif_status, F.text == notif_edit)
+async def nofit_edit(message: Message, state: FSMContext):
+    await state.set_state(StaffNotif.status_edit)
+    await message.answer("Выберите новую настройку уведомлений", reply_markup=notif_keyboard)
+
+
+@settings_router.message(StaffNotif.notif_status, F.text == cancel_btn)
+async def nofit_cancel(message: Message, state: FSMContext):
+    await message.edit_reply_markup(reply_markup=None)
+    await state.clear()
+
+
+@settings_router.callback_query(StaffNotif.status_edit, F.data == 'new-order')
+async def nofit_new(callback: CallbackQuery, state: FSMContext):
+    msg = await change_nofit(callback.message.from_user.id, 'new-order')
+    await callback.answer()
+    await callback.message.answer(msg, reply_markup=staff_buttons)
+    await state.clear()
+
+
+@settings_router.callback_query(StaffNotif.status_edit, F.data == 'status-order')
+async def nofit_status(callback: CallbackQuery, state: FSMContext):
+    msg = await change_nofit(callback.message.from_user.id, 'status-order')
+    await callback.answer()
+    await callback.message.answer(msg, reply_markup=staff_buttons)
+    await state.clear()
+
+
+@settings_router.callback_query(StaffNotif.status_edit, F.data == 'technical')
+async def nofit_technical(callback: CallbackQuery, state: FSMContext):
+    msg = await change_nofit(callback.message.from_user.id, 'technical')
+    await callback.answer()
+    await callback.message.answer(msg, reply_markup=staff_buttons)
+    await state.clear()
+
+
+@settings_router.callback_query(StaffNotif.status_edit, F.data == 'off')
+async def nofit_off(callback: CallbackQuery, state: FSMContext):
+    msg = await change_nofit(callback.message.from_user.id, 'off')
+    await callback.answer()
+    await callback.message.answer(msg, reply_markup=staff_buttons)
+    await state.clear()
+
+
+# ============= open site ================
+
+
+@settings_router.message(Command('site'))
+async def open_site(message: Message, state: FSMContext):
+    await state.set_state(OpenSite.open_site)
+    await message.answer("Нажмите на кнопку ниже, чтобы открыть сайт", reply_markup=open_site_button)
+
+
+@settings_router.message(OpenSite.open_site)
+async def handle_webapp_return(message: Message, state: FSMContext):
+    # data = await state.get_data()
+    # sent_message_id = data.get("sent_message_id")
+
+    # await message.bot.edit_message_reply_markup(
+    #     message_id=sent_message_id,
+    #     reply_markup=staff_buttons
+    # )
+    await state.clear()

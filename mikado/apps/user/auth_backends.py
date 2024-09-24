@@ -1,3 +1,4 @@
+from datetime import timezone
 from django.contrib.auth.backends import ModelBackend
 from django.core.exceptions import ImproperlyConfigured
 
@@ -13,7 +14,6 @@ if hasattr(User, "REQUIRED_FIELDS"):
         )
 
 class PhoneBackend(ModelBackend):
-
     # pylint: disable=keyword-arg-before-vararg
     def _authenticate(self, username, password):
 
@@ -23,6 +23,8 @@ class PhoneBackend(ModelBackend):
 
         try:
             user, is_created = AuthService.execute(phone_number=username, code=password)
+            user.last_login = timezone.now()
+            user.save()
             return user
         except Exception as e:
             return None

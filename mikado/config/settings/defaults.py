@@ -50,9 +50,6 @@ OSCAR_STOCK_ALERTS_PER_PAGE = 20
 OSCAR_DASHBOARD_ITEMS_PER_PAGE = 40
 OSCAR_DASHBOARD_PAYMENTS_PER_PAGE = 40
 
-# Reviews
-OSCAR_MODERATE_REVIEWS = False
-
 # Accounts
 OSCAR_ACCOUNTS_REDIRECT_URL = "customer:profile-view"
 
@@ -83,9 +80,6 @@ OSCAR_OFFERS_IMPLEMENTED_TYPES = [
     "SITE",
     "VOUCHER",
 ]
-
-# Hidden Oscar features, e.g. wishlists or reviews
-OSCAR_HIDDEN_FEATURES = []
 
 # Menu structure of the dashboard navigation
 OSCAR_DASHBOARD_NAVIGATION = [
@@ -327,6 +321,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "url_name": "dashboard:reports-index",
     },
 ]
+
 OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION = "oscar.apps.dashboard.nav.default_access_fn"
 
 # Search facets
@@ -334,7 +329,7 @@ OSCAR_THUMBNAILER = "oscar.core.thumbnails.SorlThumbnail"
 OSCAR_URL_SCHEMA = "http"
 OSCAR_SAVE_SENT_EMAILS_TO_DB = True
 
-#rest settings
+# Rest settings
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -356,10 +351,8 @@ REST_FRAMEWORK = {
     ]
 }
 
-
 AUTH_USER_MODEL = 'user.User'
 PHONENUMBER_DEFAULT_REGION = 'RU'
-
 
 SMS_AUTH_SETTINGS = {
     "SMS_CELERY_FILE_NAME": "run_celery",

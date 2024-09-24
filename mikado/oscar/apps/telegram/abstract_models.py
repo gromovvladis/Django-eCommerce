@@ -1,7 +1,7 @@
 from django.db import models
 from oscar.core.compat import AUTH_USER_MODEL
 
-class AbstractTelegramMassage(models.Model):
+class AbstractTelegramMessage(models.Model):
     """
     Implements the interface declared by shipping.base.Base
     """
@@ -19,7 +19,7 @@ class AbstractTelegramMassage(models.Model):
     )
     type = models.CharField("Тип сообщения", max_length=128, choices=TYPE_CHOICES, default=MISC)
 
-    massage = models.TextField("Описание", blank=True)
+    message = models.TextField("Описание", blank=True)
     date_sent = models.DateTimeField("Дата отправки", auto_now_add=True)
 
     class Meta:

@@ -305,20 +305,20 @@ PHONE_BACKEND = "apps.user.auth_backends.PhoneBackend"
 
 AUTHENTICATION_BACKENDS = (
     'apps.user.auth_backends.PhoneBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    # 'django.contrib.auth.backends.ModelBackend',
 )
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 6,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-]
+# AUTH_PASSWORD_VALIDATORS = [
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+#         'OPTIONS': {
+#             'min_length': 6,
+#         }
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+#     },
+# ]
 
 LOGIN_REDIRECT_URL = '/'
 APPEND_SLASH = True

@@ -4,9 +4,9 @@ from oscar.core.loading import is_model_registered
 __all__ = []
 
 
-if not is_model_registered("telegram", "TelegramMassage"):
+if not is_model_registered("telegram", "TelegramMessage"):
 
-    class TelegramMassage(abstract_models.AbstractTelegramMassage):
+    class TelegramMessage(abstract_models.AbstractTelegramMessage):
         pass
 
-    __all__.append("TelegramMassage")
+    __all__.append("TelegramMessage")

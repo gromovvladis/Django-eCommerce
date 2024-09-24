@@ -1,6 +1,6 @@
 from django.contrib import admin
 from oscar.core.loading import get_model
 
-TelegramMassage = get_model("telegram", "TelegramMassage")
+TelegramMessage = get_model("telegram", "TelegramMessage")
 
-admin.site.register(TelegramMassage)
+admin.site.register(TelegramMessage)

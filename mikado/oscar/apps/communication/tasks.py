@@ -5,7 +5,7 @@ from oscar.core.loading import get_model
 from django.contrib.auth import get_user_model
 
 Notification = get_model("communication", "Notification")
-TelegramMassage = get_model("telegram", "TelegramMassage")
+TelegramMessage = get_model("telegram", "TelegramMessage")
 User = get_user_model()
 
 @shared_task
@@ -77,19 +77,18 @@ def _notify_customer_about_order_status(ctx: dict):
 @shared_task
 def _send_telegram_message_new_order_to_staff(ctx: dict):
     msg = (
-        f"<b>Новый заказ №{ctx['number']}</b>\n\n"
+        f"<b><a href='{ctx['url']}'>Новый заказ №{ctx['number']}</a></b>\n\n"
         f"{ctx['order']}\n\n"
         f"Время заказа: {ctx['order_time']}\n"
         f"Пользователь: {ctx['user']}\n"
         f"Оплата: {ctx['source']}\n"
         f"Доставка: {ctx['shipping_method']}\n"
         f"Сумма: {ctx['total']} ₽\n\n"
-        f"<a href='{ctx['url']}'>Смотреть на сайте</a>"
     )
-    send_message_to_staffs(msg, TelegramMassage.NEW)
+    send_message_to_staffs(msg, TelegramMessage.NEW)
 
 @shared_task
-def _send_telegram_message_to_staffs(msg: str, type: str = TelegramMassage.MISC, partner_id: str = None):
+def _send_telegram_message_to_staffs(msg: str, type: str = TelegramMessage.MISC, partner_id: str = None):
     send_message_to_staffs(msg, type, partner_id)
 
 @shared_task
