@@ -14,7 +14,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 
 async def on_startup(bot, dp):
-    logging.info("on_startup")
     await set_default_commands(dp)
     await on_startup_notify(bot)
 

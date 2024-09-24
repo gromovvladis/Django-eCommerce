@@ -1,4 +1,4 @@
-cancel_btn = "Отмена ❌"
+cancel_btn = "Отмена"
 start_phone_number = "Авторизоваться по номеру телефона"
 
 staff_orders_today = "Заказы за сегодня"
