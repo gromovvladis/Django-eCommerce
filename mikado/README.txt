@@ -208,6 +208,9 @@
         sudo ln /home/vladis/mikado/config/celery.conf
         sudo ln /home/vladis/mikado/config/telegram.conf
 
+        для проверки телеграм бота: 
+            /home/vladis/venv/bin/python /home/vladis/mikado/manage.py runbot
+
     активируем супервизора:
         sudo update-rc.d supervisor enable
 

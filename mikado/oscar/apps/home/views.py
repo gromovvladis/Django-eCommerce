@@ -46,22 +46,6 @@ class HomeView(ListView):
 
         return actions
 
-    def get(self, request, *args, **kwargs):
-
-        from oscar.apps.communication.tasks import _send_telegram_message_to_staffs
-        
-        if request.user.is_authenticated:
-            msg = "Пользователь '%s' посетил Домашнюю страницу" % request.user.username
-        else: 
-            msg = "Неавторизованный пользователь посетил Домашнюю страницу"
-
-        if not settings.DEBUG: 
-            _send_telegram_message_to_staffs.delay(msg, "MISC")
-        else:
-            _send_telegram_message_to_staffs(msg, "MISC")
-
-        return super().get(request, *args, **kwargs)
-
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["summary"] = "Доставка суши и роллов | Микадо Красноярск "
