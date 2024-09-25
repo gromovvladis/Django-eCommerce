@@ -169,9 +169,9 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
                     return http.JsonResponse({"secceded": "Смс выслано", "status": 200}, status=200)
 
             except Exception as e:
-                return http.JsonResponse({"errors": e.message, "status": 403}, status=403)
+                return http.JsonResponse({"error": e.message, "status": 403}, status=403)
 
-        return http.JsonResponse({"errors": "Укажите корректный номер телефона", "status": 400}, status=400)
+        return http.JsonResponse({"error": "Укажите корректный номер телефона", "status": 400}, status=400)
     
 
 class AccountAuthView(generic.TemplateView, AccountAuthModalView):
