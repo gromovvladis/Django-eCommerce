@@ -1,4 +1,4 @@
-from datetime import timezone
+from django.utils import timezone
 from django.contrib.auth.backends import ModelBackend
 from django.core.exceptions import ImproperlyConfigured
 
@@ -26,7 +26,7 @@ class PhoneBackend(ModelBackend):
             user.last_login = timezone.now()
             user.save()
             return user
-        except Exception as e:
+        except Exception:
             return None
 
 
