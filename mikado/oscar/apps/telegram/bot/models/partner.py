@@ -10,7 +10,7 @@ def get_partners(user):
 @sync_to_async
 def partners_list(partners):
     if not partners.exists():
-        return ("Нет точек продаж, к которым в прикреплены, как сотрудник.",)
+        return "Нет точек продаж, к которым в прикреплены, как сотрудник."
     else:
         msg_list = ["Точки продажи к которым вы приклеплены, как сотрудник:"]
         for partner in partners:
