@@ -138,7 +138,6 @@
 
 {% endblock %}
 
-{% comment %} {% compress js preload %} {% endcomment %}
 {% block templatescripts %}
     var csrf_token = "{{ csrf_token }}";
     var url_get_cookie = "{% url 'home:cookies' %}";
