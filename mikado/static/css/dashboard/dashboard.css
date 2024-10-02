@@ -12229,6 +12229,7 @@ readers do not read off random characters that represent icons */
 
 .fa-house-flag::before {
   content: "\e50d";
+  /* content: "\e50d"; */
 }
 
 .fa-person-circle-minus::before {
@@ -19497,7 +19498,7 @@ caption {
   position: absolute;
   /* top: 0; */
   bottom: 0;
-  left: 5rem;
+  left: 4.5rem;
   right: 0;
   height: calc(100% - 2rem);
   /* height: 100%; */
@@ -20184,6 +20185,7 @@ input[type="number"]:focus {
     font-size: 1.1rem;
     line-height: 1.1rem;
     font-weight: 500;
+    background-color: transparent;
 }
 
 .partner-point:focus-visible{

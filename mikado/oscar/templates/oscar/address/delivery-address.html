@@ -129,7 +129,6 @@
 
 {% block templatescripts %}
     {{ block.super }}
-    var csrf_token = "{{csrf_token}}";
     var url_time = "{% url 'delivery:delivery-now' %}";
     var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
 {% endblock %}

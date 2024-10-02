@@ -1,3 +1,4 @@
+import re
 import zlib
 from decimal import Decimal as D
 from operator import itemgetter
@@ -368,12 +369,12 @@ class AbstractBasket(models.Model):
         # audit and sometimes caching.
         defaults = {
             "quantity": quantity,
-            "price": stock_info.price.money,
+            # "price": stock_info.price.money,
             "price_currency": stock_info.price.currency,
             "tax_code": stock_info.price.tax_code,
         }
 
-        defaults["price"] = stock_info.price.money
+        # defaults["price"] = stock_info.price.money
 
         line, created = self.lines.get_or_create(
             line_reference=line_ref,
@@ -496,6 +497,29 @@ class AbstractBasket(models.Model):
     # =======
     # Helpers
     # =======
+
+
+    def change_basket_partner(self, new_partner_id):
+        self.partner_id = new_partner_id
+        self.save()
+        self.update_lines()
+
+
+    def update_lines(self):
+        for line in self.all_lines():
+            new_stockrecord = line.product.stockrecords.filter(partner_id=self.partner_id).first()
+            if new_stockrecord is not None:
+                line.stockrecord = new_stockrecord
+                line.line_reference = self.replace_stockrecord(line.line_reference, new_stockrecord.id)
+                # line.line_reference = self._create_line_reference(
+                #     line.product, line.stockrecord, line.get_options(), line.get_additions()
+                # )
+                line.save()
+
+
+    def replace_stockrecord(self, s: str, new: str) -> str:
+        return re.sub(r'^([^_]+)_([^_]+)', rf'\1_{new}', s)
+    
 
     def _create_line_reference(self, product, stockrecord, options, additionals):
         """
@@ -788,9 +812,9 @@ class AbstractLine(models.Model):
     price_currency = models.CharField(
         "Валюта", max_length=12, default=get_default_currency
     )
-    price = models.DecimalField(
-        "Цена", decimal_places=2, max_digits=12, null=True
-    )
+    # price = models.DecimalField(
+    #     "Цена", decimal_places=2, max_digits=12, null=True
+    # ) 
     tax_code = models.CharField(
         "Налоговый код", max_length=64, blank=True, null=True
     )
@@ -858,7 +882,7 @@ class AbstractLine(models.Model):
         """
         Return a breakdown of line prices after discounts have been applied.
 
-        Returns a list of (unit_price, unit_price, quantity)
+        Returns a list of (unit_price, quantity)
         tuples.
         """
         prices = []
@@ -869,9 +893,9 @@ class AbstractLine(models.Model):
         else:
             # Need to split the discount among the affected quantity
             # of products.
-            item_discount = self.discount_value / int(
-                self.discounts.num_consumed()
-            )
+            # item_discount = self.discount_value / int(
+            #     self.discounts.num_consumed()
+            # )
             prices.append(
                 (
                     self.unit_price,
@@ -954,6 +978,23 @@ class AbstractLine(models.Model):
         #             " it to your basket"
         #         )
         #         return warning % product_prices
+
+    def get_options(self):
+        ops = []
+        for attribute in self.attributes.all():
+            if attribute.option:
+                if isinstance(attribute.value, list):
+                    ops.append(attribute)
+
+        return ops
+    
+    def get_additions(self):
+        addit = []
+        for attribute in self.attributes.all():
+            if attribute.additional:
+                if attribute.value > 0:
+                    addit.append(attribute)
+        return addit
 
     # ==========
     # Properties

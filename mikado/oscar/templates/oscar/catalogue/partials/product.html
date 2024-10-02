@@ -56,10 +56,10 @@
                 {% comment %} ------------- цена --------------- {% endcomment %}
                 
                 <div class="align-center fill-width px-sm-2 pb-sm-2 v-card__actions d-flex align-end">
-                    {% include "oscar/catalogue/partials/product_price.html" %}
-                    <div role="separator" class="v-spacer"></div>
-                    {% comment %} ------------- кнопка добавить --------------- {% endcomment %}
                     {% if session.availability.is_available_to_buy and session.price.exists %}
+                        {% include "oscar/catalogue/partials/product_price.html" %}
+                        <div role="separator" class="v-spacer"></div>
+                        {% comment %} ------------- кнопка добавить --------------- {% endcomment %}
                         {% if not product.is_parent and not product.has_options %}
                             {% include "oscar/catalogue/partials/add_to_basket_form_compact.html" %}
                         {% else %}

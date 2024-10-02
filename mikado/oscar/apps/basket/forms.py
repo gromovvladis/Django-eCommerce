@@ -374,7 +374,6 @@ class SimpleAddToBasketMixin:
         super().__init__(*args, **kwargs)
         if "quantity" in self.fields:
             self.fields["quantity"].initial = 1
-            # self.fields["quantity"].widget = forms.HiddenInput()
 
 
 class SimpleAddToBasketForm(SimpleAddToBasketMixin, AddToBasketForm):

@@ -3,28 +3,28 @@ var searchResult = document.querySelector('#search_result');
 var searchBtn = document.querySelector('#search_clean_btn');
 var searchInput = document.querySelector('[data-id="v-input-search-field"]');
 
-function getCsrfToken() {
-    // Extract CSRF token from cookies
-    var csrf_token = getCookie('csrftoken');
+// function getCsrfToken() {
+//     // Extract CSRF token from cookies
+//     // var csrf_token = getCookie('csrftoken');
     
-    // var cookies = document.cookie.split(';');
-    // var csrf_token = null;
-    // cookies.forEach(function(cookie) {
-    //     var cookieParts = cookie.trim().split('=');
-    //     if (cookieParts[0] === 'csrftoken') {
-    //         csrf_token = cookieParts[1];
-    //     }
-    // });
+//     // var cookies = document.cookie.split(';');
+//     // var csrf_token = null;
+//     // cookies.forEach(function(cookie) {
+//     //     var cookieParts = cookie.trim().split('=');
+//     //     if (cookieParts[0] === 'csrftoken') {
+//     //         csrf_token = cookieParts[1];
+//     //     }
+//     // });
 
-    // Extract from cookies fails for HTML-Only cookies
-    if (!csrf_token) {
-        var csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
-        if (csrfInput) {
-            csrf_token = csrfInput.value;
-        }
-    }
-    return csrf_token;
-}
+//     // Extract from cookies fails for HTML-Only cookies
+//     if (!csrf_token) {
+//         var csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+//         if (csrfInput) {
+//             csrf_token = csrfInput.value;
+//         }
+//     }
+//     return csrf_token;
+// }
 
 var Autocomplete = function(options) {
     this.url = url_suggestions;
@@ -60,7 +60,8 @@ Autocomplete.prototype.fetch = function(query) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': getCsrfToken()
+            'X-CSRFToken': csrf_token
+            // 'X-CSRFToken': getCsrfToken()
         },
         body: new URLSearchParams({ 'q': query }).toString() 
     })

@@ -138,7 +138,7 @@ class EventHandler(object):
         This takes into account the previous prices that have been charged for
         this event.
 
-        Note that shipping is not including in this subtotal.  You need to
+        Note that shipping is not including in this subtotal. You need to
         subclass and extend this method if you want to include shipping costs.
         """
         total = D("0.00")

@@ -38,7 +38,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="table-header">
-                <h2 class="d-flex"><i class="fa-solid fa-house-medical-flag"></i> Зоны доствки на карте</h2>
+                <h2 class="d-flex"><i class="fa-solid fa-house"></i> Зоны доствки на карте</h2>
             </div>
             <div class="delivery__map table">
                 <div class="v-map__wrapper">
@@ -63,7 +63,7 @@
 {% endblock %}
 
 {% block templatescripts %}
-    var csrf_token = "{{ csrf_token }}";
+    {{ block.super }}
     var url_delivery_zones = "{% url 'dashboard:delivery-zona-json' %}";
     var url_delivery_zona = "{% url 'dashboard:delivery-zona' %}";
 {% endblock %}

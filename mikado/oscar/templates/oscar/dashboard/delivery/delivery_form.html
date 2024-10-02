@@ -95,7 +95,7 @@
 {% endblock %}
 
 {% block templatescripts %}
-    var csrf_token = "{{ csrf_token }}";
+    {{ block.super }}
     var url_delivery_zones = "{% url 'dashboard:delivery-zona-json' %}";
     var url_delivery_zona = "{% url 'dashboard:delivery-zona' %}";
 {% endblock %}

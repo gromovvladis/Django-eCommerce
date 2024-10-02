@@ -25,7 +25,7 @@
         <div class="col-md-12">
             <div class="table-header">
                 <h2 class="d-flex">
-                    <i class="fa-solid fa-house-medical-flag"></i> Создать точку продажи
+                    <i class="fa-solid fa-house"></i> Создать точку продажи
                 </h2>
             </div>
             <div class="delivery__map">
@@ -43,7 +43,7 @@
 {% endblock %}
 
 {% block templatescripts %}
-    var csrf_token = "{{ csrf_token }}";
+    {{ block.super }}
     var url_delivery_zones = "{% url 'dashboard:delivery-zona-json' %}";
 {% endblock %}
 

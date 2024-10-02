@@ -157,8 +157,8 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
        
         #payment form
         ctx["methods"] = self._methods
-        ctx["min_order"] = min_order
-        ctx["shipping_charge"] = shipping_charge
+        ctx["min_order"] = int(min_order.money)
+        ctx["shipping_charge"] = int(shipping_charge.money)
 
         #promocode
         ctx["voucher_form"] = self.get_voucher_form()

@@ -70,7 +70,8 @@
                                                     {% render_field form.quantity readonly="true" type="hidden" data-id="quantity-input" %}
                                                 {% else %}
                                                     <div role="separator" class="v-spacer"></div>
-                                                    <div class="d-flex fill-width mt-1 pos-relative align-center">
+                                                    {% comment %} <div class="d-flex fill-width mt-1 pos-relative align-center"> {% endcomment %}
+                                                    <div class="d-flex fill-width pos-relative align-center">
 
                                                         <div class="v-order-button pos-relative" data-id="order-buttons">
                                                             <button type="button" data-id="order-button-minus" class="v-order-button--elem" aria-label="Уменьшить">

@@ -49,18 +49,16 @@ function validateAddress() {
     
     // Проверка поля line1
     if (!line1.value || line1.getAttribute('captured') === "false" || line1.getAttribute('valid') === "false") {
-        console.log('line1 invalid');
         valid = false;
         errorAddress.classList.remove('d-none');
-        line1.classList.add("not-valid");
+        line1_container.classList.add("not-valid");
     } else {
         errorAddress.classList.add('d-none');
-        line1.classList.remove("not-valid");
+        line1_container.classList.add("not-valid");
     }
 
     // Проверка поля line2
     if (line2.value > 1000 || line2.value < 1) {
-        console.log('line2 invalid');
         valid = false;
         errorFlat.classList.remove('d-none');
         line2.classList.add("not-valid");
@@ -71,7 +69,6 @@ function validateAddress() {
 
     // Проверка поля line3
     if (line3.value > 100 || line3.value < 1) {
-        console.log('line3 invalid');
         valid = false;
         errorEnter.classList.remove('d-none');
         line3.classList.add("not-valid");
@@ -82,7 +79,6 @@ function validateAddress() {
 
     // Проверка поля line4
     if (line4.value > 100 || line4.value < 1) {
-        console.log('line4 invalid');
         valid = false;
         errorFloor.classList.remove('d-none');
         line4.classList.add("not-valid");
@@ -90,8 +86,6 @@ function validateAddress() {
         errorFloor.classList.add('d-none');
         line4.classList.remove("not-valid");
     }
-
-    console.log("validate " + valid);
 
     // Управление доступностью кнопки сохранения и ошибок
     saveAddress.disabled = !valid;

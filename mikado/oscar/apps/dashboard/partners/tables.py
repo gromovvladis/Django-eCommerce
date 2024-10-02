@@ -34,7 +34,7 @@ class PartnerListTable(DashboardTable):
         attrs = {'th': {'class': 'actions'},}
     )
 
-    icon = "fas fa-house-flag"
+    icon = "fas fa-house"
     caption = ngettext_lazy("%s Точка продажи", "%s Точек продаж")
 
     class Meta(DashboardTable.Meta):
