@@ -192,13 +192,10 @@ function validateCheckout() {
 }
 
 function checkValid() {
-    console.log('checkValid');
     if (amountValid && addressValid) {
-        console.log('checkValid VALID');
         submitBtn.disabled = false;
         checkoutErrors.classList.add('d-none');
     } else {
-        console.log('checkValid NO VALID');
         submitBtn.disabled = true;
         checkoutErrors.classList.remove('d-none');    
     }
@@ -260,7 +257,6 @@ function validateTotals() {
 
 // Начисляем стоимость доставки в зависимости от зоны
 function shippingCharge(zonaId = null) {
-    console.log("ShippingCharge");
     getNewTotals(shippingMethod, zonaId);
 }
 
@@ -272,7 +268,6 @@ submitBtn.addEventListener('click', function() {
 // Таймер обновления времени доставки к адресу каждые 5 минут
 function updateTimes() {
     setInterval(function() {
-        console.log('upd timer');
         GetTime({adrs: line1.value, shippingMethod: shippingMethod}).then(function(result) {
             timeCaptured(result);
         });

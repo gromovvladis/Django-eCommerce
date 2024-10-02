@@ -10,7 +10,8 @@
 {% block title %}Заказ №{{ order.number }} | {{ block.super }}{% endblock %}
 {% block nav_title %}Заказ №{{ order.number }}{% endblock %}
 {% block nav_title_center %}Заказ №{{ order.number }}{% endblock %}
-{% block wrapper_class %}checkout fill-width pd-2 pb-sm-4 pt-sm-2 checkout__container{% endblock %}
+{% block wrapper_class %}checkout fill-width pd-2 pb-4 checkout__container{% endblock %}
+{% comment %} {% block wrapper_class %}checkout fill-width pd-2 pb-sm-4 pt-sm-2 checkout__container{% endblock %} {% endcomment %}
 {% block app_class %}v-app---thank{% endblock %}
 {% block nav_class %}v-app__nav--thank{% endblock %}
 
@@ -31,16 +32,22 @@
             <div class="v-order__wrapper  d-flex flex-column">
                 <div class="v-order__info-wrapper d-flex flex-column fill-width">
                     <div class="v-order__title d-flex mb-4 justify-start align-center">
-                        <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
-                            {% if order.status == "Ожидает оплаты" %}
+                        {% if order.status == "Ожидает оплаты" %}
+                            <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
                                 <use xlink:href="#svg-order-pending"></use>
-                            {% elif order.status == "Отменен" %}
+                            </svg>
+                            <h1>Заказ оформлен!</h1>
+                        {% elif order.status == "Отменен" %}
+                            <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
                                 <use xlink:href="#svg-order-cancel"></use>
-                            {% else %}
+                            </svg>
+                            <h1>Заказ не оформлен :(</h1>
+                        {% else %}
+                            <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
                                 <use xlink:href="#svg-order-success"></use>
-                            {% endif %}
-                        </svg>
-                        <h1> Заказ оформлен! </h1>
+                            </svg>
+                            <h1>Заказ оформлен!</h1>
+                        {% endif %}
                     </div>
 
                     {% block shipping_info %}
@@ -195,7 +202,6 @@
 {% block templatescripts %}
     {{ block.super }}
     action_back = function(){window.location.href="{{ homepage_url }}"};
-    var csrf_token = "{{ csrf_token }}";
     var update_payment_url = "{% url 'payment:update' pk=order.pk %}";
 {% endblock %}
 

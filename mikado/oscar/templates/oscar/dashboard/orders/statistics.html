@@ -859,6 +859,7 @@
 {% endblock dashboard_content %}
 
 {% block templatescripts %}
+    {{ block.super }}
     var products_titles = {{ top_products_titles|safe }}
     var products_sums = {{ top_products_sums|safe }}
     var products_quantities = {{ top_products_quantities|safe }}
@@ -866,7 +867,7 @@
 {% endblock %}
 
 {% block extrascripts %}
-    {% comment %} {% compress js %} {% endcomment %}
-        <script src="{% static "js/dashboard/utils/statistic-orders.js" %}" async></script>
-    {% comment %} {% endcompress %} {% endcomment %}
+    {% compress js %}
+        <script src="{% static "js/dashboard/orders/statistic-orders.js" %}" async></script>
+    {% endcompress %}
 {% endblock %}

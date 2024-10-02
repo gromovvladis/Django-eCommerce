@@ -1,5 +1,6 @@
 from collections import namedtuple
 from decimal import Decimal as D
+from django.conf import settings
 
 from oscar.core.loading import get_class
 
@@ -12,7 +13,7 @@ TaxInclusiveFixedPrice = get_class("partner.prices", "TaxInclusiveFixedPrice")
 
 # A container for policies
 PurchaseInfo = namedtuple("PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords"])
-
+default_partner = settings.PARTNER_DEFAULT
 
 class Selector(object):
     """
@@ -217,7 +218,7 @@ class UsePartnerSelectStockRecord:
         # We deliberately fetch by index here, to ensure that no additional database queries are made
         # when stockrecords have already been prefetched in a queryset annotated using ProductQuerySet.base_queryset
         try:
-            partner_id = 1
+            partner_id = default_partner
             
             if self.request:
                 partner_basket = self.request.basket.partner_id

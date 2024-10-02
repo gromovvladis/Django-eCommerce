@@ -16,6 +16,7 @@ from django.template.loader import render_to_string
 from oscar.views.generic import PostActionMixin
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from rest_framework.authentication import SessionAuthentication
 
 import sys
 sys.path.append(".")
@@ -67,6 +68,7 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
     Resiter via sms.
     """
     permission_classes = [AllowAny]
+    authentication_classes = [SessionAuthentication]
 
     template_name = "oscar/customer/auth_modal.html"
     form_class = PhoneAuthenticationForm

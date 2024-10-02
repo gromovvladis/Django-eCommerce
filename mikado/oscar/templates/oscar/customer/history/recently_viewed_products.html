@@ -2,7 +2,7 @@
 
 {% with products_sliced=products|slice:":4" %}
     {% if products_sliced %}
-        <div class="dish-page__related mt-2 px-2 px-sm-0 mt-md-4">
+        <div class="dish-page__related mt-2 mb-1 px-2 px-sm-0 mt-md-4">
             <h2>Недавно просмотренные блюда</h2>
             <div class="v-dishes mt-2 row">
                 {% for product in products_sliced %}

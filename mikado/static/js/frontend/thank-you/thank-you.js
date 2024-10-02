@@ -20,10 +20,10 @@ if (waitingPayment) {
 }
 
 function getPaymentInfo() {
-    fetch(updatePaymentUrl, {
+    fetch(update_payment_url, {
         method: 'GET',
         headers: {
-            'X-CSRFToken': csrfToken
+            'X-CSRFToken': csrf_token
         }
     })
     .then(response => response.json())

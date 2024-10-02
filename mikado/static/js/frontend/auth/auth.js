@@ -17,7 +17,7 @@ function loadAuthModal(redirect_url) {
     });
 }
 
-function authModalLoaded(redirect_url) {
+function authModalLoaded(redirect_url=null) {
 
     var auth_form = document.getElementById('auth_form');
     var btnSms = auth_form.querySelector('#sms_form_btn');
@@ -34,7 +34,9 @@ function authModalLoaded(redirect_url) {
         btnClickFunc(auth_type);
         let formData = new URLSearchParams(new FormData(this))
         formData.append('action', auth_type);
-        formData.append('redirect_url', redirect_url);
+        if (redirect_url) {
+            formData.append('redirect_url', redirect_url);
+        }
 
         fetch(auth_form.getAttribute('action'), {
             method: auth_form.getAttribute('method'),

@@ -58,8 +58,7 @@
 
                         {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
                         <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
-                            class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-0 mr-1 shrink" aria-label="Поиск">
-                            {% comment %} class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-1 mr-2 shrink" aria-label="Поиск"> {% endcomment %}
+                            class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-0 mr-2 shrink" aria-label="Поиск">
                             <span class="v-button__wrapper d-flex">
                                 {% icon file_name='header/search' size=20 fill='#111'%}
                             </span>
@@ -139,8 +138,8 @@
 
 {% endblock %}
 
-{% comment %} {% compress js preload %} {% endcomment %}
 {% block templatescripts %}
+    var csrf_token = "{{ csrf_token }}";
     var url_get_cookie = "{% url 'home:cookies' %}";
     var url_partner_api = "{% url 'partner:select' %}";
     var url_auth_api = "{% url 'customer:api-login' %}";

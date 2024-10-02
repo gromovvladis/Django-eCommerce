@@ -10,7 +10,6 @@ if (notificationsForm) {
         btn.addEventListener('click', function () {
             var dataBehaviours = btn.getAttribute('data-behaviours');
             var dataNotification = btn.getAttribute('data-notification');
-            var csrfToken = notificationsForm.querySelector('[name="csrfmiddlewaretoken"]').value;
             var method = notificationsForm.getAttribute('method');
             var actionUrl = notificationsForm.getAttribute('action');
 
@@ -19,7 +18,7 @@ if (notificationsForm) {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     // 'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
+                    'X-CSRFToken': csrf_token
                 },
                 body: new URLSearchParams({
                     "data-behaviours": dataBehaviours,

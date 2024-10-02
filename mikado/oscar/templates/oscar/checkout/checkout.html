@@ -9,7 +9,7 @@
 {% block title %}Оформление заказа | {{ block.super }}{% endblock %}
 {% block nav_title %}Оформление заказа{% endblock %}
 {% block nav_title_center %}Оформление заказа{% endblock %}
-{% block wrapper_class %}checkout fill-width pd-2 pb-sm-4 pt-sm-2 checkout__container{% endblock %}
+{% block wrapper_class %}checkout fill-width pd-2 pb-sm-4 checkout__container{% endblock %}
 {% block app_class %}v-app---checkout{% endblock %}
 {% block nav_class %}v-app__nav--checkout{% endblock %}
 
@@ -92,7 +92,7 @@
                             <span data-error="flat" class="v-error-list__error d-flex fill-width d-none">Укажите номер квартиры</span>
                             <span data-error="enter" class="v-error-list__error d-flex fill-width d-none">Укажите подъезд</span>
                             <span data-error="floor" class="v-error-list__error d-flex fill-width d-none">Укажите этаж</span>
-                            <span data-error="amount" class="v-error-list__error d-flex fill-width d-none">Минимальная сумма заказа для доставки {{ min_order.money }} ₽</span>
+                            <span data-error="amount" class="v-error-list__error d-flex fill-width d-none">Минимальная сумма заказа для доставки {{ min_order }} ₽</span>
                         </div>
                     </div>
 
@@ -115,7 +115,6 @@
 
 {% block templatescripts %}
     {{ block.super }}
-    var csrf_token = "{{ csrf_token }}";
     var url_voucher = "{% url 'checkout:vouchers-add' %}";
     var url_update_totals = "{% url 'checkout:update-totals' %}";
     var url_time = "{% url 'delivery:delivery-now' %}";

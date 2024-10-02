@@ -512,14 +512,14 @@ class AbstractLine(models.Model):
 
     # A line reference is the ID that a partner uses to represent this
     # particular line (it's not the same as a SKU).
-    partner_line_reference = models.CharField(
-        "Код точки продажи",
-        max_length=128,
-        blank=True,
-        help_text=(
-            "Это номер позиции, который партнер использует в своей системе."
-        ),
-    )
+    # partner_line_reference = models.CharField(
+    #     "Код точки продажи",
+    #     max_length=128,
+    #     blank=True,
+    #     help_text=(
+    #         "Это номер позиции, который партнер использует в своей системе."
+    #     ),
+    # )
     partner_line_notes = models.TextField("Примечание точки продажи", blank=True)
 
     # We keep a link to the stockrecord used for this line which allows us to

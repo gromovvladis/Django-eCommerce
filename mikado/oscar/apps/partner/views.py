@@ -43,8 +43,7 @@ class PartnerSelectModalView(APIView):
             partner_id = form.cleaned_data["partner_id"]
             if request.basket:
                 if request.basket.partner_id != int(partner_id):
-                    request.basket.partner_id = partner_id
-                    request.basket.save()
+                    request.basket.change_basket_partner(partner_id)
                     response = http.JsonResponse({"refresh": True, "status": 200}, status=200)
                 else:
                     response = http.JsonResponse({"refresh": False, "status": 200}, status=200)
