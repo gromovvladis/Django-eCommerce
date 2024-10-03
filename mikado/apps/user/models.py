@@ -75,7 +75,8 @@ class Staff(models.Model):
     
     @property
     def get_full_name(self):
-        return "%s %s %s" % (self.last_name, self.first_name, self.middle_name)
+        name = f"{self.last_name} {self.first_name} {self.middle_name}".strip()
+        return name if name else "ФИО не указаны"
     
     class Meta:
         db_table = "auth_staff"
