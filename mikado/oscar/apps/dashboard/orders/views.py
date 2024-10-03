@@ -539,7 +539,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
         if data["partner_point"]:
             queryset = self.base_queryset.filter(
-                partner__code=data["partner_point"]
+                basket__partner__code=data["partner_point"]
             )
 
         if data["order_number"]:
@@ -855,7 +855,7 @@ class OrderActiveListView(OrderListView):
 
         if data["partner_point"]:
             queryset = self.base_queryset.filter(
-                partner__code=data["partner_point"]
+                basket__partner__code=data["partner_point"]
         )
 
         return queryset.annotate(
