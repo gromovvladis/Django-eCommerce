@@ -59,9 +59,9 @@ Autocomplete.prototype.fetch = function(query) {
     fetch(this.url, {
         method: 'POST',
         headers: {
+            'X-Requested-With': 'XMLHttpRequest',
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrf_token
-            // 'X-CSRFToken': getCsrfToken()
+            'X-CSRFToken': csrf_token,
         },
         body: new URLSearchParams({ 'q': query }).toString() 
     })

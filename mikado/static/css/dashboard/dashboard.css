@@ -20407,9 +20407,9 @@ input[type="number"]:focus {
     padding: 1rem !important;
   }
 
-  .mobile-table .number{
+  /* .mobile-table .number{
     display: none;
-  }
+  } */
 
   .mobile-table table .actions{
     left: 50px;

@@ -20,11 +20,19 @@
 </div>
 
 <div class="v-app__header-right d-flex">
+  
+    {% comment %} ------------- Поиск --------------- {% endcomment %}
+    <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button" class="v-app-header__button d-flex flex-column mr-4 align-center">
+        <span class="v-app-header__button-picture">  
+            {% icon file_name='header/search' size=26 fill='#111'%}
+        </span>
+        Поиск
+    </a>
 
     {% comment %} ------------- Доставка --------------- {% endcomment %}
     <a href="{% url 'address:delivery-address' %}" data-id="address-button" class="v-app-header__button d-flex flex-column mr-4 align-center">
         <span class="v-app-header__button-picture">  
-            {% icon file_name='map/delivery' size=26 stroke='#000'%}
+            {% icon file_name='map/delivery' size=26 stroke='#111'%}
         </span>
         Доставка
     </a>

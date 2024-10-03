@@ -69,6 +69,14 @@ class Staff(models.Model):
     def __str__(self):
         return "%s - %s %s" % (self.user, self.last_name, self.first_name)
     
+    @property
+    def get_job(self):
+        return self.job if self.job else "Не задана"
+    
+    @property
+    def get_full_name(self):
+        return "%s %s %s" % (self.last_name, self.first_name, self.middle_name)
+    
     class Meta:
         db_table = "auth_staff"
         verbose_name = "Персонал"

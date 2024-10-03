@@ -48,7 +48,7 @@ function validateAddress() {
     var valid = true;
     
     // Проверка поля line1
-    if (!line1.value || line1.getAttribute('captured') === "false" || line1.getAttribute('valid') === "false") {
+    if (!line1.value || line1.getAttribute('captured') != "true" || line1.getAttribute('valid') != "true") {
         valid = false;
         errorAddress.classList.remove('d-none');
         line1_container.classList.add("not-valid");

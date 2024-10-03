@@ -390,29 +390,31 @@ class GISMap:
 
     def coordinates(self, geoObject) -> tuple[Decimal, ...]:
         """Fetch coordinates (longitude, latitude) for passed address."""
-        data = geoObject["result"]
-
-        if not data:
+        try:
+            data = geoObject["result"]
+            
+            if not data:
+                return None
+            
+            coordinates = data['items'][0]["point"]
+            return coordinates['lon'], coordinates['lat']
+        except Exception:
             return None
-        data
-        coordinates = data['items'][0]["point"]
-        return coordinates['lon'], coordinates['lat']
-    
+        
     def address(self, geoObject) -> str:
-        """Fetch address for passed coordinates."""
-        data = geoObject["result"]
+        """Fetch address for the provided coordinates."""
+        try:
+            data = geoObject.get("result", {})
 
-        if not data:
+            if not data or not data.get('items'):
+                return "Адрес не найден"
+
+            address = data['items'][0].get("address_name") or data['items'][0].get("name")
+
+            return address if address else "Адрес не найден"
+            
+        except Exception:
             return None
-        
-        adr = data['items'][0].get("address_name")
-        
-        if not adr:
-            adr = data['items'][0].get("name")
-
-        if not adr:
-            adr = "Адрес не найден"
-        return adr
 
     def routeTime(self, start_point, end_point):
         try:

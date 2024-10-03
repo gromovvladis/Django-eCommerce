@@ -29,11 +29,10 @@ class DeliveryNowView(APIView):
         basket = request.basket
 
         if shipping_method == "zona-shipping":
-            coords = request.POST.get('coords')
+            coords = request.POST.get('coords').split(",")
             address = request.POST.get('address')
             zona_id = request.POST.get('zonaId')
-            rote_time = request.POST.get('roteTime')
-            result = self.delivery(coords, address, zona_id, rote_time, basket)
+            result = self.delivery(coords, address, zona_id, basket)
         else: 
             result = self.pickup(basket)
 
@@ -55,23 +54,26 @@ class DeliveryNowView(APIView):
         }
     
     
-    def delivery(self, coords, address, zona_id, rote_time, basket):
+    def delivery(self, coords, address, zona_id, basket):
+
+        if not address and not any(item.strip() != '' for item in coords):
+            return {"error": "Укажите адрес"}
 
         if not coords:
             geoObject = self.getGeoobject(address=address)
             coords = self.getCoords(geoObject)
 
         if not address:
-            geoObject = self.getGeoobject(coords=coords.split(","))
+            geoObject = self.getGeoobject(coords=coords)
             address = self.getAddress(geoObject)
 
-        if not address or not coords:
+        if not address or not any(item.strip() != '' for item in coords):
             return {"error": "Адрес не найден"}
         
         zones = ZonesUtils.getAvailableZones()
 
         if not zona_id:
-            zona_id = ZonesUtils.getZonaId(coords.split(","), zones)
+            zona_id = ZonesUtils.getZonaId(coords, zones)
 
         if not zona_id or zona_id == "0":
             return {"error": "Адрес вне зоны доставки"}
@@ -80,7 +82,7 @@ class DeliveryNowView(APIView):
             return {
                 "coords": coords,
                 "address": address,
-                "error": "Временно не доствляем",
+                "error": "Временно не доставляем",
                 "delivery_time_text": "Доставка по данному адресу временно не осуществляется", # Доставим через Х мин.
             }
         
@@ -96,7 +98,7 @@ class DeliveryNowView(APIView):
                 "delivery_time_text": "Заказ возможен на отложенное время",
             }
 
-        order_minutes = self.deliveryTime(coords, zona_id, rote_time, basket)
+        order_minutes = self.deliveryTime(coords, zona_id, basket)
         delivery_time_text = "Доставим через %s мин." % order_minutes
         time_utc = format(datetime.datetime.today() + datetime.timedelta(minutes=order_minutes),'%d.%m.%Y %H:%M')
         
@@ -144,7 +146,7 @@ class DeliveryNowView(APIView):
 #  Timers
 # ===================
 
-    def deliveryTime(self, coords, zona_id, rote_time, basket):
+    def deliveryTime(self, coords, zona_id, basket):
         """Получает координы обекта, до которого нужно простроить маршрут. 
         Маршрут строим от точки, которая будет задана в корзине у стокрекорд партнера 
         Возвращает инфорамию о поездке (растояние, время)"""
@@ -161,7 +163,7 @@ class DeliveryNowView(APIView):
             start_point = [56.050918, 92.904378]
             
         end_points = []
-        end_points.append(coords.split(','))
+        end_points.append(coords)
         rote_time = self.map.routeTime(start_point, end_points)
 
 

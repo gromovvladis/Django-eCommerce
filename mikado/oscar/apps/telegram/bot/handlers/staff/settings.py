@@ -8,8 +8,8 @@ from oscar.apps.telegram.bot.keyboards.inline.notifications import notif_keyboar
 from oscar.apps.telegram.bot.keyboards.default.open_site import open_site_button
 from oscar.apps.telegram.bot.keyboards.default.staff_keyboard import staff_buttons
 from oscar.apps.telegram.bot.models.user import change_nofit, check_staff_status, get_current_notif
-from oscar.apps.telegram.bot.states.states import StaffNotif, OpenSite
-from oscar.apps.telegram.bot.const_texts import notif_edit, cancel_btn
+from oscar.apps.telegram.bot.states.states import StaffNotif, StaffSite
+from oscar.apps.telegram.bot.const_texts import notif_edit_text, cancel_text
 
 settings_router = Router()
 
@@ -23,18 +23,18 @@ async def nofit(message: Message, state: FSMContext):
         await state.set_state(StaffNotif.notif_status)
         telegram_id = message.from_user.id
         current_notif = await get_current_notif(telegram_id)
-        await message.answer(f"Настройка уведомлений.\nТекущий статус уведомлений: <b>{current_notif}</b>", reply_markup=edit_notif_buttons)
+        await message.answer(f"Настройка уведомлений.\n\nТекущий статус уведомлений: <b>{current_notif}</b>", reply_markup=edit_notif_buttons)
 
 
-@settings_router.message(StaffNotif.notif_status, F.text == notif_edit)
+@settings_router.message(StaffNotif.notif_status, F.text == notif_edit_text)
 async def nofit_edit(message: Message, state: FSMContext):
     await state.set_state(StaffNotif.status_edit)
     await message.answer("Выберите новую настройку уведомлений", reply_markup=notif_keyboard)
 
 
-@settings_router.message(StaffNotif.notif_status, F.text == cancel_btn)
+@settings_router.message(StaffNotif.notif_status, F.text == cancel_text)
 async def nofit_cancel(message: Message, state: FSMContext):
-    await message.edit_reply_markup(reply_markup=None)
+    await message.answer("Настройки не изменены", reply_markup=staff_buttons)
     await state.clear()
 
 
@@ -75,12 +75,11 @@ async def nofit_off(callback: CallbackQuery, state: FSMContext):
 
 @settings_router.message(Command('site'))
 async def open_site(message: Message, state: FSMContext):
-    await state.set_state(OpenSite.open_site)
-    sent_message = await message.answer("Нажмите на кнопку ниже, чтобы открыть сайт", reply_markup=open_site_button)
-    await state.update_data(sent_message_id=sent_message.message_id)
+    await state.set_state(StaffSite.open_site)
+    await message.answer("Нажмите на кнопку ниже, чтобы открыть сайт", reply_markup=open_site_button)
 
 
-@settings_router.message(OpenSite.open_site)
+@settings_router.message(StaffSite.open_site, F.text == cancel_text)
 async def handle_webapp_return(message: Message, state: FSMContext):
     await message.answer("Меню сайта закрыто", reply_markup=staff_buttons)
     await state.clear()

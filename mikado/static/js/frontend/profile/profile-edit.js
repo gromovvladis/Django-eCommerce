@@ -36,7 +36,9 @@ profileForm.addEventListener('submit', function (event) {
         method: profileForm.getAttribute('method'),
         body: data,
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrf_token,
         }
     })
     .then(response => response.json())

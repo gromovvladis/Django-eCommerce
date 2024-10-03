@@ -86,15 +86,13 @@ deliveryTimeBtn.forEach(function(time_btn) {
                 orderTime.value = result.timeUTC;
                 timeCaptured(result);
             });
-            delivery_time.classList.remove('hidden');
-            delivery_time.classList.add('active');
             deliveryTimeLater.classList.add('hidden');
             deliveryTimeLater.classList.remove('active');
         } else {
             deliveryTimeLater.classList.remove('hidden');
             deliveryTimeLater.classList.add('active');
-            delivery_time.classList.add('hidden');
-            delivery_time.classList.remove('active');
+            deliveryTime.classList.add('hidden');
+            deliveryTime.classList.remove('active');
         }
     });
 });
@@ -114,7 +112,8 @@ function getNewTotals(selectedMethod, zonaId = null) {
     fetch(url, {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrf_token
         }
     })
     .then(response => response.json())
@@ -206,7 +205,7 @@ function validateAddress() {
     addressValid = true;
     shippingMethod = shipping.value;
     if (shippingMethod === "zona-shipping") {
-        if (!line1.value || line1.getAttribute('captured') === "false" || line1.getAttribute('valid') === "false") {
+        if (!line1.value || line1.getAttribute('captured') != "true" || line1.getAttribute('valid') != "true") {
             addressValid = false;
             errorAddress.classList.remove('d-none');
             line1_container.classList.add("not-valid");
@@ -268,7 +267,7 @@ submitBtn.addEventListener('click', function() {
 // Таймер обновления времени доставки к адресу каждые 5 минут
 function updateTimes() {
     setInterval(function() {
-        GetTime({adrs: line1.value, shippingMethod: shippingMethod}).then(function(result) {
+        GetTime({address: line1.value, shippingMethod: shippingMethod}).then(function(result) {
             timeCaptured(result);
         });
     }, 300000);

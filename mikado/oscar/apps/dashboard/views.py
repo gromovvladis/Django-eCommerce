@@ -206,7 +206,7 @@ class IndexView(TemplateView):
                 "baskets": Basket.objects.filter(status=Basket.OPEN),
                 "users": users,
                 "customers": users.filter(orders__isnull=False).distinct(),
-                "lines": Line.objects.filter(),
+                "lines": Line.objects.all(),
                 "products": Product.objects.all(),
             }
 
@@ -377,6 +377,8 @@ class IndexView(TemplateView):
             "total_customers_2orders": customers.annotate(order_count=Count('orders')).filter(order_count__gte=2).count(),
             "total_customers_5orders": customers.annotate(order_count=Count('orders')).filter(order_count__gte=5).count(),
             "total_customers": customers.count(),
+            "guest_baskets": baskets.filter(owner__isnull=True).count(),
+            "customers_baskets": baskets.filter(owner__isnull=False).count(),
             "total_open_baskets": baskets.count(),
             "total_orders": orders.count(),
             "total_lines": lines.count(),

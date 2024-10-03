@@ -2,7 +2,7 @@
 {% load purchase_info_tags %}
 {% load cache %}
 
-{% cache 1800 product_compact_price product.id %}
+{% cache 1800 product_compact_price product.id product.stockrecords %}
     {% if session.price.exists %}
         {% if product.is_parent %}
             {% if session.price.variations_price  %}

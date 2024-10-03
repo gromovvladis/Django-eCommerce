@@ -70,7 +70,9 @@ if (cartWrapper){
                 method: method,
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrf_token,
                 }
             })
             .then(response => response.json())
@@ -95,6 +97,10 @@ if (cartWrapper){
     function getUpsellMessages() {
         fetch(url_upsell_masseges, {
             method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrf_token,
+            }
         })
         .then(response => response.json())
         .then(html => {
@@ -112,6 +118,10 @@ if (cartWrapper){
     emptyCart.addEventListener('click', function() {
         fetch(url_empty_basket, {
             method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrf_token,
+            }
         })
         .then(response => response.json())
         .then(data => {

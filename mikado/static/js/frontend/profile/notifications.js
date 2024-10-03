@@ -17,7 +17,7 @@ if (notificationsForm) {
                 method: method,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    // 'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRFToken': csrf_token
                 },
                 body: new URLSearchParams({

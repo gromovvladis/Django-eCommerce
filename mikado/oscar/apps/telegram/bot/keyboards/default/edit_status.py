@@ -1,5 +1,5 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from oscar.apps.telegram.bot.const_texts import notif_edit, cancel_btn
+from oscar.apps.telegram.bot.const_texts import notif_edit_text, cancel_text
 
 edit_notif_buttons = ReplyKeyboardMarkup(
     resize_keyboard=True,
@@ -8,11 +8,11 @@ edit_notif_buttons = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(
-                text=notif_edit,
+                text=notif_edit_text,
             )
         ],
         [
-            KeyboardButton(text=cancel_btn)
+            KeyboardButton(text=cancel_text)
         ]
     ]
 )

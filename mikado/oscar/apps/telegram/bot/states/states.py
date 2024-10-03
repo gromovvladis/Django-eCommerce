@@ -10,5 +10,8 @@ class StaffNotif(StatesGroup):
     notif_status = State()
     status_edit = State()
 
-class OpenSite(StatesGroup):
+class StaffSite(StatesGroup):
     open_site = State()
+
+class StaffReport(StatesGroup):
+    get_report = State()
