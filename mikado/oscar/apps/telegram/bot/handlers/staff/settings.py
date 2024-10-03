@@ -34,6 +34,7 @@ async def nofit_edit(message: Message, state: FSMContext):
 
 @settings_router.message(StaffNotif.notif_status, F.text == cancel_text)
 async def nofit_cancel(message: Message, state: FSMContext):
+    await message.edit_reply_markup()
     await message.answer("Настройки не изменены", reply_markup=staff_buttons)
     await state.clear()
 
@@ -42,6 +43,7 @@ async def nofit_cancel(message: Message, state: FSMContext):
 async def nofit_new(callback: CallbackQuery, state: FSMContext):
     msg = await change_nofit(callback.message.from_user.id, 'new-order')
     await callback.answer()
+    await callback.message.edit_reply_markup()
     await callback.message.answer(msg, reply_markup=staff_buttons)
     await state.clear()
 
@@ -50,6 +52,7 @@ async def nofit_new(callback: CallbackQuery, state: FSMContext):
 async def nofit_status(callback: CallbackQuery, state: FSMContext):
     msg = await change_nofit(callback.message.from_user.id, 'status-order')
     await callback.answer()
+    await callback.message.edit_reply_markup()
     await callback.message.answer(msg, reply_markup=staff_buttons)
     await state.clear()
 
@@ -58,6 +61,7 @@ async def nofit_status(callback: CallbackQuery, state: FSMContext):
 async def nofit_technical(callback: CallbackQuery, state: FSMContext):
     msg = await change_nofit(callback.message.from_user.id, 'technical')
     await callback.answer()
+    await callback.message.edit_reply_markup()
     await callback.message.answer(msg, reply_markup=staff_buttons)
     await state.clear()
 
@@ -66,6 +70,7 @@ async def nofit_technical(callback: CallbackQuery, state: FSMContext):
 async def nofit_off(callback: CallbackQuery, state: FSMContext):
     msg = await change_nofit(callback.message.from_user.id, 'off')
     await callback.answer()
+    await callback.message.edit_reply_markup()
     await callback.message.answer(msg, reply_markup=staff_buttons)
     await state.clear()
 
