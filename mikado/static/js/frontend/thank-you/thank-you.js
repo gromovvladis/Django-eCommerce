@@ -23,7 +23,8 @@ function getPaymentInfo() {
     fetch(update_payment_url, {
         method: 'GET',
         headers: {
-            'X-CSRFToken': csrf_token
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrf_token,
         }
     })
     .then(response => response.json())

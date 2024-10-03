@@ -1,5 +1,5 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from oscar.apps.telegram.bot.const_texts import staff_orders_today, staff_orders_week, staff_orders_month, staff_list
+from oscar.apps.telegram.bot.const_texts import report_text, staffs_text, customers_text
 
 staff_buttons = ReplyKeyboardMarkup(
     resize_keyboard=True,
@@ -8,17 +8,14 @@ staff_buttons = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(
-                text=staff_orders_today,
+                text=report_text,
             ),
             KeyboardButton(
-                text=staff_orders_week,
+                text=staffs_text,
             ),
             KeyboardButton(
-                text=staff_orders_month,
+                text=customers_text,
             )
-        ],
-        [
-            KeyboardButton(text=staff_list)
         ]
     ]
 )

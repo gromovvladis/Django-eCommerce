@@ -13764,7 +13764,7 @@ html::-webkit-scrollbar-thumb {
     border-radius: 15px !important;
     -webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, .09);
     box-shadow: 0px 0px 15px rgba(0, 0, 0, .09);
-    top: 60px;
+    top: 50px;
     right: 0px;
     left: 0px;
     z-index: 490;
@@ -14397,14 +14397,22 @@ ymaps[class*="search__suggest-item_selected"] {
     cursor: pointer;
 }
 
-.partner_select.checked .header_partner{
-    color: var(--color-secondary);
-}
-
 /* Базовые стили для label */
 .partner_select {
     cursor: pointer;
     transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Базовые стили для label */
+/* .v-app-nav .partner_select { */
+/* .v-app__header-left .partner_select {
+    border-radius: 10px;
+    background: rgb(243, 243, 247);
+    padding: 0.35rem 1rem;
+} */
+
+.partner_select.checked .header_partner{
+    color: var(--color-secondary);
 }
 
 /* Эффект наведения */
@@ -14523,12 +14531,6 @@ ymaps[class*="search__suggest-item_selected"] {
     padding-bottom: 0;
 }
 
-.v-app---home .v-app-nav__button--search {
-    display: -webkit-box !important;
-    display: -ms-flexbox !important;
-    display: flex !important
-}
-
 .v-app---home .v-app-nav .cats {
     left: 0;
     -webkit-transform: translateY(-50%);
@@ -14543,7 +14545,6 @@ ymaps[class*="search__suggest-item_selected"] {
 .v-app-nav {
     padding: 0 1rem;
 }
-
 
 
 @media screen and (max-width:768px) {
@@ -14570,6 +14571,10 @@ ymaps[class*="search__suggest-item_selected"] {
     /* .v-app---home .v-app-nav__button--search {
         display: none !important
     } */
+
+    .v-app-nav__button--search {
+        display: none !important;
+    }
 
     .v-app---home .v-app-nav .cats {
         left: unset;
@@ -18216,11 +18221,13 @@ ymaps[class*="search__suggest-item_selected"] {
     -webkit-box-flex: 1;
     -ms-flex: 1 0 100%;
     flex: 1 0 100%
+
 }
 
 .v-delivery--line1 {
     overscroll-behavior-x: contain;
     padding: .25rem .25rem .25rem 1rem !important;
+    border-radius: 15px;
 }
 
 .v-delivery--address-input {

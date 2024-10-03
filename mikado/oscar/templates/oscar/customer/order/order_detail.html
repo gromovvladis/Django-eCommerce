@@ -27,9 +27,9 @@
 {% endblock %}
 
 {% block tabcontent %}
-    <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
+    <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4 mb-1">
         <div class="v-order__title d-flex justify-space-between mb-2 justify-start align-center">
-            <div class="d-flex">
+            <div class="d-flex align-center">
                 <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
                     {% if order.status == "Ожидает оплаты" %}
                         <use xlink:href="#svg-order-pending"></use>
@@ -140,6 +140,8 @@
                         {% endfor %}
                     </address>
 
+                    <div class="v-checkout__detail-text mt-1">Заказ будет доставлен: {{ order.order_time|date:"d.m H:i" }}</div>
+
                     {% if order.shipping_address.notes %}
                         <div class="v-checkout__detail-text mb-1">
                             <span>Инструкции курьеру: </span>
@@ -162,12 +164,14 @@
                         <h2>Адрес самовывоза</h2>
                     </div>
 
-                    <a href="{% url 'address:pickup-address' %}" class="v-checkout__detail-text mb-2">
-                        <address> Красноясрк, ул. 9 Мая 77,
+                    <a href="{% url 'address:pickup-address' %}" class="v-checkout__detail-text">
+                        <address> {{ order.basket.partner }}
                             <br>
-                            ТРЦ "Планета" Фудкорд Mikado
+                            {{ order.basket.partner.primary_address }}
                         </address>
                     </a>
+
+                    <div class="v-checkout__detail-text mt-1">Заказ будет готов: {{ order.order_time|date:"d.m H:i" }}</div>
 
                 {% endif %}
             </div>
@@ -197,7 +201,7 @@
                     <span>{{ source.amount_allocated|currency:source.currency }}</span>
                 </div>   
             
-                <div class="v-checkout__detail-text mr-2 mt-1">
+                <div class="v-checkout__detail-text mr-2">
                     <span >Статус заказа: </span>
                     <strong><span class="text--info" data-id="payment-status">{{ order.status }}</span></strong>
                 </div>  

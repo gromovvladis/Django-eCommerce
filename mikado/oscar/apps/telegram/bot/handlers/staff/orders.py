@@ -13,7 +13,7 @@ orders_router = Router()
 # ============= orders ================
 
 
-async def process_orders(callback: CallbackQuery, state: FSMContext, period: str):
+async def process_orders(callback: CallbackQuery, period: str):
     """
     Получает заказы за указанный период, формирует сообщение и очищает состояние.
     """
@@ -28,8 +28,6 @@ async def process_orders(callback: CallbackQuery, state: FSMContext, period: str
         msg = "\n\n".join(msg_list[i:i + 10])
         await callback.message.answer(msg)
 
-    await state.clear()
-
 
 @orders_router.message(Command('orders'))
 async def orders(message: Message, state: FSMContext):
@@ -40,17 +38,20 @@ async def orders(message: Message, state: FSMContext):
 
 @orders_router.callback_query(StaffOrders.orders, F.data == 'orders_today')
 async def orders_today(callback: CallbackQuery, state: FSMContext):
-    await process_orders(callback, state, 'сегодня')
+    await process_orders(callback, 'сегодня')
+    await state.clear()
 
 
 @orders_router.callback_query(StaffOrders.orders, F.data == 'orders_week')
 async def orders_yesterday(callback: CallbackQuery, state: FSMContext):
-    await process_orders(callback, state, 'неделю')
+    await process_orders(callback, 'неделю')
+    await state.clear()
 
 
 @orders_router.callback_query(StaffOrders.orders, F.data == 'orders_month')
 async def orders_week(callback: CallbackQuery, state: FSMContext):
-    await process_orders(callback, state, 'месяц')
+    await process_orders(callback, 'месяц')
+    await state.clear()
 
 
 # ============= active orders ================

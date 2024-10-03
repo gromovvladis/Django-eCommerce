@@ -3,7 +3,11 @@ var authLoaded = false;
 
 function loadAuthModal(redirect_url) {
     fetch(url_auth_api, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrf_token,
+        }
     })
     .then(response => response.json())
     .then(data => {
@@ -43,6 +47,8 @@ function authModalLoaded(redirect_url=null) {
             body: formData.toString(),
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrf_token,
             },
         })
         .then(response => response.json())

@@ -2,7 +2,11 @@ var partnerLoaded = false;
 
 function loadPartnerModal() {
     fetch(url_partner_api, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrf_token,
+        }
     })
     .then(response => response.json())
     .then(data => {
@@ -30,8 +34,10 @@ function partnerModalLoaded() {
                 method: partner_form.getAttribute('method'),
                 body: new URLSearchParams(new FormData(partner_form)).toString(),
                 headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
                     'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                    'X-CSRFToken': csrf_token,
+                }
             })
             .then(response => response.json())
             .then(data => {

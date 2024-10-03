@@ -6,7 +6,7 @@ from aiogram.types import ReplyKeyboardRemove
 
 from oscar.apps.telegram.bot.keyboards.default.user_register import contact_request_buttons
 from oscar.apps.telegram.bot.keyboards.default.staff_keyboard import staff_buttons
-from oscar.apps.telegram.bot.const_texts import cancel_btn
+from oscar.apps.telegram.bot.const_texts import cancel_text
 from oscar.apps.telegram.bot.states.states import UserAuth
 from oscar.apps.telegram.bot.models import get_staff_by_contact
 
@@ -31,7 +31,7 @@ async def register_number(message: Message, state: FSMContext):
     await state.clear()
 
 
-@start_router.message(UserAuth.phone_number, F.text == cancel_btn)
+@start_router.message(UserAuth.phone_number, F.text == cancel_text)
 async def register_number(message: Message, state: FSMContext):
     await message.edit_reply_markup(reply_markup=None)
     await state.clear()

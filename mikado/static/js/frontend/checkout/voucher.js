@@ -18,7 +18,11 @@ function delete_promo(removeForm) {
 
         fetch(this.getAttribute('action'), {
             method: this.getAttribute('method'),
-            body: new URLSearchParams(new FormData(this))
+            body: new URLSearchParams(new FormData(this)),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrf_token,
+            }
         }).then(response => response.json())
         .then(data => {
             voucherMessage.innerHTML = data.message;
@@ -37,7 +41,11 @@ voucherForm.addEventListener('submit', function (event) {
 
     fetch(url_voucher, {
         method: this.getAttribute('method'),
-        body: new URLSearchParams(new FormData(this))
+        body: new URLSearchParams(new FormData(this)),
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrf_token,
+        }
     }).then(response => response.json())
     .then(data => {
         voucher_func(data);

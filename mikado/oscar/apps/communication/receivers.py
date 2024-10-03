@@ -29,11 +29,12 @@ def notify_about_new_order(sender, view, **kwargs):
         'order': order,
         'order_id': kwargs['order'].id,
         'url': kwargs['order'].get_full_url(),
+        'staff_url': kwargs['order'].get_staff_url(),
     }
     
     if not settings.DEBUG: 
-        _notify_staff_about_new_order.delay(ctx)
         _notify_customer_about_new_order.delay(ctx)
+        _notify_staff_about_new_order.delay(ctx)
         _send_telegram_message_new_order_to_staff.delay(ctx)
     else: 
         _notify_staff_about_new_order(ctx)

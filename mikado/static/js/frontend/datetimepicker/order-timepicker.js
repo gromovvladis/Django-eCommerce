@@ -58,7 +58,9 @@ function AirDatepickerTime() {
     fetch(url_delivery_later, {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrf_token,
         }
     })
     .then(response => response.json())

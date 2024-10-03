@@ -77,7 +77,7 @@ def _notify_customer_about_order_status(ctx: dict):
 @shared_task
 def _send_telegram_message_new_order_to_staff(ctx: dict):
     msg = (
-        f"<b><a href='{ctx['url']}'>Новый заказ №{ctx['number']}</a></b>\n\n"
+        f"<b><a href='{ctx['staff_url']}'>Новый заказ №{ctx['number']}</a></b>\n\n"
         f"{ctx['order']}\n\n"
         f"Время заказа: {ctx['order_time']}\n"
         f"Пользователь: {ctx['user']}\n"

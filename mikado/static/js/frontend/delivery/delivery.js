@@ -636,6 +636,7 @@ if (line1Container){
             if (deliveryTime){
                 deliveryTime.innerHTML = '';
                 deliveryTime.classList.remove('active');
+                deliveryTime.classList.add('hidden');
             }
             controls.classList.add('d-none');
             line1.setAttribute('valid', 'false');
@@ -645,6 +646,7 @@ if (line1Container){
             hints.classList.add('d-none');
             if (deliveryTime){
                 deliveryTime.classList.add('active');
+                deliveryTime.classList.remove('hidden');
                 deliveryTime.innerHTML = result.delivery_time_text;
             }
             line1.setAttribute('valid', 'true');
@@ -655,11 +657,10 @@ if (line1Container){
     }
     
     // запрос времени доставки на сервере со временем
-    function GetTime({coords, address, shippingMethod, zonaId} = {}){
-        console.log('GetTime')
-
-        var roteTime;
+    function GetTime({coords='', address='', shippingMethod='', zonaId=''} = {}){
+        console.log('GetTime');
         
+        // if (Array.isArray(coords)){
         if (Array.isArray(coords)){
             coords = coords.join(",")
         }
@@ -668,7 +669,6 @@ if (line1Container){
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                // 'Content-Type': 'application/json',
                 'X-CSRFToken': csrf_token
             },
             body: new URLSearchParams({
@@ -676,14 +676,11 @@ if (line1Container){
                 "address": address,
                 "shipping_method": shippingMethod,
                 "zonaId": zonaId,
-                "roteTime": roteTime
             }).toString() 
         })
         .then(response => response.json())
         .then(response => {
             return new Promise((resolve, reject) => {
-                // console.log(response.status);
-                console.log(response);
                 resolve(response);
                 // switch (response.status) {
                 //     case 202:
