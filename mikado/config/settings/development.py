@@ -88,8 +88,9 @@ SMS_AUTH_SETTINGS["SMS_AUTH_PROVIDER_API_TOKEN"] = "eZKAeSTM6ElHOWJ7Sry6sSSexq9R
 # Yoomaney settings
 # =============
 
-Configuration.account_id = 396529
-Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'
+Configuration.account_id = 470199
+Configuration.secret_key = 'test_NbCwf5jnxkwJN7IzigODrtShMkQfsZRO_yU_SzEIa50'
+# Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'
 
 # =============
 # MAP settings

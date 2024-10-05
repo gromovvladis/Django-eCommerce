@@ -11,7 +11,6 @@ from django.contrib import messages
 from yookassa import Refund
 from yookassa import Payment
 
-from yookassa.domain.notification import WebhookNotification
 from yookassa.domain.models.receipt import Receipt
 from yookassa.domain.common.confirmation_type import ConfirmationType
 from yookassa.domain.request.payment_request_builder import PaymentRequestBuilder
@@ -171,10 +170,7 @@ class PaymentMethodHelper(object):
         
 
 class AbstractPaymentMethod(PaymentMethodHelper):
-    
-    # def __init__(self, payment_method):
-    #     super().__init__(payment_method)
-    
+
     #override pass
     def pay(self, order, amount=None, email=None):
         return None
@@ -351,7 +347,7 @@ class Yoomoney(AbstractPaymentMethod):
             pay = Payment.create(request, uuid.uuid4())
 
         except Exception as e:
-            raise UnableToTakePayment('Не возможно произвести оплату')
+            raise UnableToTakePayment(f'Ошибка создания платежа ЮКасса {e}')
 
         return pay
 

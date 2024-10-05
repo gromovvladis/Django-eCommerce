@@ -1,4 +1,5 @@
 import json
+import ipaddress
 import logging
 from django import http
 from oscar.core.loading import get_class, get_model
@@ -57,7 +58,7 @@ class YookassaPaymentHandler(APIView):
 
     permission_classes = [AllowAny]
 
-    IP = [
+    IP_RANGES = [
         '185.71.76.0/27',
         '185.71.77.0/27',
         '77.75.153.0/25',
@@ -68,72 +69,83 @@ class YookassaPaymentHandler(APIView):
         '127.0.0.1',
     ]
 
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Преобразуем IP-диапазоны в объекты ipaddress для быстрого поиска
+        self.allowed_ips = [ipaddress.ip_network(ip) for ip in self.IP_RANGES]
+
+
     def get_client_ip(self, request):
+        """Получение IP-адреса клиента с учётом прокси."""
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0]
+            ip = x_forwarded_for.split(',')[0].strip()
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
 
-    def post(self, request, *args, **kwargs):
-        trans_id = ""
+
+    def is_ip_allowed(self, ip):
+        """Проверка, принадлежит ли IP к разрешённым диапазонам."""
         try:
+            ip_obj = ipaddress.ip_address(ip)
+            return any(ip_obj in network for network in self.allowed_ips)
+        except ValueError:
+            logger.error("Неверный IP-адрес: %s", ip)
+            return False
+
+
+    def post(self, request, *args, **kwargs):
+        try:
+            request_ip = self.get_client_ip(request)
+            if not self.is_ip_allowed(request_ip):
+                logger.warning("Недопустимый IP: %s", request_ip)
+                return http.JsonResponse({'error': 'ip error', "status": 400}, status=400)
+        
             event_json = json.loads(request.body)
             notification = WebhookNotification(event_json)
+            if not hasattr(notification, 'event') or not hasattr(notification.object, 'id'):
+                logger.error("Недостаточно данных в уведомлении: %s", event_json)
+                return http.JsonResponse({'error': 'invalid notification data', "status": 400}, status=400)
 
             event = notification.event
             trans_id = notification.object.id
-
             source = Source.objects.get(Q(payment_id=trans_id) | Q(refund_id=trans_id))
-            
-            request_ip = self.get_client_ip(request)
 
-            if request_ip in self.IP and source:
-                if "payment" in event:
-                    try:
-                        pay_code = source.reference
-                        payment = PaymentManager(pay_code).get_method()
-                        payment.update(
-                            source=source, 
-                            payment=notification.object,
-                        )
-                        return http.JsonResponse({'success': 'ok', "status": 200}, status=200)
-                    
-                    except Exception:
-                        return http.JsonResponse({'error': 'fail', "status": 400}, status=400)
-                    
-                elif "refund" in event:
-                    try:
-                        pay_code = source.reference
-                        payment = PaymentManager(pay_code).get_method()
-                        payment.update(
-                            source=source, 
-                            refund=notification.object,
-                        )
-                        return http.JsonResponse({'success': 'ok', "status": 200}, status=200)
-                    
-                    except Exception:
-                        return http.JsonResponse({'error': 'fail', "status": 400}, status=400)
-                    
-                else:
-                    logger.error(
-                        "Транзакция не имеет тип refund или payment её статус: %s",
-                        event
-                    )
-                    return http.JsonResponse({'error': 'fail', "status": 400}, status=400)
+            if "payment" in event:
+                pay_code = source.reference
+                payment = PaymentManager(pay_code).get_method()
+                payment.update(
+                    source=source, 
+                    payment=notification.object,
+                )
+            elif "refund" in event:
+                pay_code = source.reference
+                payment = PaymentManager(pay_code).get_method()
+                payment.update(
+                    source=source, 
+                    refund=notification.object,
+                )
             else:
                 logger.error(
-                    "Не удалось получить источник платежа или IP недопустимый. Источник:%s, IP: %s",
-                    event,
-                    request.ip
+                    "Транзакция не имеет тип refund или payment её статус: %s",
+                    event
                 )
-                return http.JsonResponse({'error': 'fail', "status": 400}, status=400)
-            
-        except Exception:
-            logger.error(
-                "Ошибка при получении trans_id или source. trans_id: %s, IP: %s",
-                trans_id,
-                self.get_client_ip(request),
-            )
-            return http.JsonResponse({'error': 'fail', "status": 400}, status=400)
+                return http.JsonResponse({'error': 'no refund | no payment', "status": 400}, status=400)
+       
+        except Source.DoesNotExist:
+            logger.error("Источник не найден для trans_id: %s", trans_id)
+        except Source.MultipleObjectsReturned:
+            logger.error("Найдено несколько источников для trans_id: %s", trans_id)
+        except json.JSONDecodeError as e:
+            logger.error("Ошибка декодирования JSON: %s. Тело запроса: %s", e, request.body)
+            return http.JsonResponse({'error': 'invalid JSON', "status": 400}, status=400)
+        except KeyError as e:
+            logger.error("Отсутствующий ключ в JSON: %s. Тело запроса: %s", e, request.body)
+            return http.JsonResponse({'error': 'missing key', "status": 400}, status=400)
+        except Exception as e:
+            logger.exception("Неожиданная ошибка: %s. Тело запроса: %s", e, request.body)
+            return http.JsonResponse({'error': 'server error', "status": 500}, status=500)
+        
+        return http.JsonResponse({'success': 'ok', "status": 200}, status=200)
