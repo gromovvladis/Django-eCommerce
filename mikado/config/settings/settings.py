@@ -3,7 +3,7 @@ import os
 from django.contrib.messages import constants as messages
 from .defaults import *
 from decouple import config
-from datetime import datetime
+# from datetime import datetime
 
 # =============
 # Path helper
@@ -105,116 +105,116 @@ if DEBUG:
 # LOGGING
 # =============
 
-if not DEBUG:
-    LOG_DIR = location('logs')
-    LOG_FILE = '/logs_' + datetime.now().strftime("%Y-%m-%d_%H-%M") + ".log"
-    LOG_PATH = LOG_DIR + LOG_FILE
+# if not DEBUG:
+#     LOG_DIR = location('logs')
+#     LOG_FILE = '/logs_' + datetime.now().strftime("%Y-%m-%d_%H-%M") + ".log"
+#     LOG_PATH = LOG_DIR + LOG_FILE
 
-    if not os.path.exists(LOG_DIR):
-        os.mkdir(LOG_DIR)
+#     if not os.path.exists(LOG_DIR):
+#         os.mkdir(LOG_DIR)
 
-    if not os.path.exists(LOG_PATH):
-        f = open(LOG_PATH, 'a').close() #create empty log file
-    else:
-        f = open(LOG_PATH,"w").close()
+#     if not os.path.exists(LOG_PATH):
+#         f = open(LOG_PATH, 'a').close() #create empty log file
+#     else:
+#         f = open(LOG_PATH,"w").close()
 
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
-            },
-            'simple': {
-                'format': '[%(asctime)s] %(message)s'
-            },
-        },
-        'root': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-        },
-        'handlers': {
-            'null': {
-                'level': 'DEBUG',
-                'class': 'logging.NullHandler',
-            },
-            'console': {
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-                'formatter': 'simple'
-            },
-            'file': {
-                'level': 'DEBUG',
-                'class': 'logging.FileHandler',
-                'formatter': 'verbose',
-                'filename': LOG_PATH,
-                'encoding': 'UTF-8',
-            },
-        },
-        'loggers': {
-            'oscar': {
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-            'oscar.catalogue.import': {
-                'handlers': ['console','file'],
-                'level': 'INFO',
-                'propagate': False,
-            },
-            'oscar.alerts': {
-                'handlers': ['null','file'],
-                'level': 'INFO',
-                'propagate': False,
-            },
-            'django': {
-                'handlers': ['file'],
-                'level': 'DEBUG',
-                'propagate': True,
-            },
-            # Django loggers
-            'django': {
-                'handlers': ['null', 'file'],
-                'propagate': True,
-                'level': 'INFO',
-            },
-            'django': {
-                'handlers': ['file'],
-                'propagate': True,
-                'level': 'ERROR',
-            },
-            'django': {
-                'handlers': ['file'],
-                'propagate': True,
-                'level': 'WARNING',
-            },
-            'django.request': {
-                'handlers': ['console','file'],
-                'level': 'ERROR',
-                'propagate': True,
-            },
-            'django.db.backends': {
-                'handlers': ['file'],
-                'level': 'WARNING',
-                'propagate': True,
-            },
-            'django.security.DisallowedHost': {
-                'handlers': ['null','file'],
-                'propagate': False,
-            },
+#     LOGGING = {
+#         'version': 1,
+#         'disable_existing_loggers': False,
+#         'formatters': {
+#             'verbose': {
+#                 'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
+#             },
+#             'simple': {
+#                 'format': '[%(asctime)s] %(message)s'
+#             },
+#         },
+#         'root': {
+#             'level': 'DEBUG',
+#             'handlers': ['console'],
+#         },
+#         'handlers': {
+#             'null': {
+#                 'level': 'DEBUG',
+#                 'class': 'logging.NullHandler',
+#             },
+#             'console': {
+#                 'level': 'DEBUG',
+#                 'class': 'logging.StreamHandler',
+#                 'formatter': 'simple'
+#             },
+#             'file': {
+#                 'level': 'DEBUG',
+#                 'class': 'logging.FileHandler',
+#                 'formatter': 'verbose',
+#                 'filename': LOG_PATH,
+#                 'encoding': 'UTF-8',
+#             },
+#         },
+#         'loggers': {
+#             'oscar': {
+#                 'level': 'DEBUG',
+#                 'propagate': True,
+#             },
+#             'oscar.catalogue.import': {
+#                 'handlers': ['console','file'],
+#                 'level': 'INFO',
+#                 'propagate': False,
+#             },
+#             'oscar.alerts': {
+#                 'handlers': ['null','file'],
+#                 'level': 'INFO',
+#                 'propagate': False,
+#             },
+#             'django': {
+#                 'handlers': ['file'],
+#                 'level': 'DEBUG',
+#                 'propagate': True,
+#             },
+#             # Django loggers
+#             'django': {
+#                 'handlers': ['null', 'file'],
+#                 'propagate': True,
+#                 'level': 'INFO',
+#             },
+#             'django': {
+#                 'handlers': ['file'],
+#                 'propagate': True,
+#                 'level': 'ERROR',
+#             },
+#             'django': {
+#                 'handlers': ['file'],
+#                 'propagate': True,
+#                 'level': 'WARNING',
+#             },
+#             'django.request': {
+#                 'handlers': ['console','file'],
+#                 'level': 'ERROR',
+#                 'propagate': True,
+#             },
+#             'django.db.backends': {
+#                 'handlers': ['file'],
+#                 'level': 'WARNING',
+#                 'propagate': True,
+#             },
+#             'django.security.DisallowedHost': {
+#                 'handlers': ['null','file'],
+#                 'propagate': False,
+#             },
 
-            # Third party
-            'raven': {
-                'level': 'DEBUG',
-                'handlers': ['console', 'file'],
-                'propagate': False,
-            },
-            'sorl.thumbnail': {
-                'handlers': ['console', 'file'],
-                'propagate': True,
-                'level': 'INFO',
-            },
-        }
-    }
+#             # Third party
+#             'raven': {
+#                 'level': 'DEBUG',
+#                 'handlers': ['console', 'file'],
+#                 'propagate': False,
+#             },
+#             'sorl.thumbnail': {
+#                 'handlers': ['console', 'file'],
+#                 'propagate': True,
+#                 'level': 'INFO',
+#             },
+#         }
+#     }
 
 # =============
 # APPS

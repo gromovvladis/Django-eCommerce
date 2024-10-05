@@ -53,14 +53,14 @@ def _notify_customer_about_order_status(ctx: dict):
 
     status="Info"
 
-    if ctx['status'] == "Отменен":
+    if ctx['new_status'] == "Отменен":
         status="Canceled"
 
-    if ctx['status'] == "Обрабатывается" or ctx['status'] == "Ожидает оплаты":
+    if ctx['new_status'] == "Обрабатывается" or ctx['new_status'] == "Ожидает оплаты":
         status="Warning"
 
     context = {
-        'title': "Просмотреть заказ №%s" % ctx['number'],
+        'title': "Посмотреть заказ №%s" % ctx['number'],
         'url': ctx['url'],
         'new_status': ctx['new_status'],
     }

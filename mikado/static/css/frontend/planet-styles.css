@@ -14374,6 +14374,7 @@ ymaps[class*="search__suggest-item_selected"] {
     .v-app__nav--checkout .cats_header,
     .v-app__nav--thank .cats_header,
     .v-app__nav--cart .cats_header,
+    .v-app__nav--error .cats_header,
     .v-app__nav--profile .cats_header,
     .v-app__nav--action .cats_header {
         display: none;
@@ -14382,7 +14383,9 @@ ymaps[class*="search__suggest-item_selected"] {
 
 
 
-
+.error-code{
+    font-size: 3rem !important;
+}
 
 
 .v-app__nav--dish .v-app-nav__title {
@@ -14504,6 +14507,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .v-app---flatpage .v-app-nav__back,
 .v-app---action .v-app-nav__back,
 .v-app---actions .v-app-nav__back,
+.v-app---error .v-app-nav__back,
 .v-app---profile .v-app-nav__back,
 .v-app---profile .v-app-nav__profile-link,
 .v-app---cart .v-app-nav__back,

@@ -1,14 +1,14 @@
 {% extends "oscar/error.html" %}
-{% load i18n %}
 
-{% block title %}
-    {% trans 'Permission denied!' %} | {{ block.super }}
-{% endblock %}
+{% block title %} Нет доступа | {{ block.super }}{% endblock %}
 
-{% block error_heading %}
-    {% trans "Permission denied!" %}
-{% endblock %}
+{% block nav_title %}Нет доступа{% endblock %}
+{% block nav_title_center %}Нет доступа{% endblock %}
+
+{% block error_code %}403{% endblock %}
 
 {% block error_message %}
-    <p>{% trans "We're sorry but you are not permitted to access this page." %}</p>
+    <p class="font-bold mb-2">Ошибка доступа</p>
+    <p class="text--grey">У вас нет доступа к этой странице</p>
+    <p class="text--grey">И здесь нет ничего вкусного :)</p>
 {% endblock %}
