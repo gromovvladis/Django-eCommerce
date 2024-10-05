@@ -446,27 +446,23 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
             logger.info("Заказ #%s: перенаправление на страницу оплаты %s", order_number, e.url)
             signals.post_payment.send_robust(sender=self, view=self, order=order)
             response = http.HttpResponseRedirect(e.url)
-            response.delete_cookie('notes')
-            response.delete_cookie('order_note')
-            response.delete_cookie('line1')
-            response.delete_cookie('line2')
-            response.delete_cookie('line3')
-            response.delete_cookie('line4')
+            cookies_to_delete = ['notes', 'order_note', 'line1', 'line2', 'line3', 'line4']
+            for cookie in cookies_to_delete:
+                response.delete_cookie(cookie)
             return response
         except UnableToTakePayment as e:
             # Something went wrong with payment but in an anticipated way.  Eg
             # their bankcard has expired, wrong card number - that kind of
             # thing. This type of exception is supposed to set a friendly error
             # message that makes sense to the customer.
+            self.restore_frozen_basket()
             msg = str(e)
             signals.error_order.send_robust(sender=self, error=e, order_number=order_number)
             logger.warning(
-                "Заказ #%s: Невозможно произвести оплату (%s) - корзина достпуна",
+                "Заказ #%s: Невозможно произвести оплату (%s) - корзина доступна",
                 order_number,
                 msg,
             )
-            self.restore_frozen_basket()
-
             # We assume that the details submitted on the payment details view
             # were invalid (e.g. expired bankcard).
             return self.render_payment_details(
