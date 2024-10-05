@@ -1,14 +1,17 @@
 {% extends "oscar/layout.html" %}
-{% block layout %}
 
-<div class="container">
-    <div class="jumbotron">
-        <h1>{% block error_heading %}Упс!{% endblock %}</h1>
+{% block wrapper_class %}fill-width px-2 py-3 pb-sm-4 pt-sm-2{% endblock %}
+
+{% block app_class %}v-app---error{% endblock %}
+{% block nav_class %}v-app__nav--error{% endblock %}
+
+{% block content %}
+
+    <div class="error-container d-flex flex-column justify-center align-center my-6">
+        <h1 class="error-code mb-1">{% block error_code %}{% endblock %}</h1>
         {% block error_message %}{% endblock %}
-        <p>
-            <a class="btn btn-primary btn-lg" onclick="javascript:history.go(-1);">Вернуться на прошлую страницу</a>
-            <a class="btn btn-primary btn-lg" href="{{ homepage_url }}">На главную</a>
-        </p>
+        <div class="d-flex mt-2">
+            <a class="v-button v-button--main v-button--second" href="{{ homepage_url }}">На главную страницу</a>
+        </div>
     </div>
-</div>
 {% endblock %}

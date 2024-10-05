@@ -4,14 +4,13 @@ from decimal import ROUND_UP
 from decimal import Decimal as D
 
 from django.contrib import messages
-from django.contrib.auth import views as auth_views
-from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Avg, Count, Sum
 from django.template.response import TemplateResponse
 from django.urls import reverse_lazy
 from django.utils.timezone import now
 from django.views.generic import TemplateView
 
+from oscar.apps.customer.views import AccountAuthView
 from oscar.apps.dashboard.orders.views import queryset_orders_for_user
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
@@ -538,11 +537,12 @@ class PopUpWindowDeleteMixin(PopUpWindowMixin):
         return self.delete(request, *args, **kwargs)
 
 
-class LoginView(auth_views.LoginView):
+class LoginView(AccountAuthView):
     template_name = "oscar/dashboard/login.html"
-    authentication_form = AuthenticationForm
-    login_redirect_url = reverse_lazy("dashboard:index")
 
-    def get_success_url(self):
-        url = self.get_redirect_url()
-        return url or self.login_redirect_url
+    def get_auth_success_url(self, form):    
+        redirect_url = self.request.POST.get('redirect_url')
+        if redirect_url:
+            return redirect_url
+        
+        return reverse_lazy("dashboard:index")

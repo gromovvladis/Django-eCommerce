@@ -7,11 +7,11 @@ from oscar.apps.payment.exceptions import DebitedAmountIsNotEqualsRefunded, Unab
 from oscar.apps.payment.models import Source, Transaction
 from oscar.apps.order.models import Order, PaymentEvent, PaymentEventType
 from django.contrib import messages
-from django.contrib.sites.models import Site
 
 from yookassa import Refund
 from yookassa import Payment
 
+from yookassa.domain.notification import WebhookNotification
 from yookassa.domain.models.receipt import Receipt
 from yookassa.domain.common.confirmation_type import ConfirmationType
 from yookassa.domain.request.payment_request_builder import PaymentRequestBuilder
@@ -172,8 +172,8 @@ class PaymentMethodHelper(object):
 
 class AbstractPaymentMethod(PaymentMethodHelper):
     
-    def __init__(self, payment_method):
-        super().__init__(payment_method)
+    # def __init__(self, payment_method):
+    #     super().__init__(payment_method)
     
     #override pass
     def pay(self, order, amount=None, email=None):
@@ -191,71 +191,67 @@ class AbstractPaymentMethod(PaymentMethodHelper):
     def get_refund_api(self, refund_id):
         pass
 
-    # isinstance PaymentResponse
+
     def create_payment_transaction(self, payment, source):
-        
-        if isinstance(payment, PaymentResponse):
+    
+        payment_transactions = self.get_transactions(source).filter(txn_type="Payment")
+        existing_transactions = []
 
-            payment_transactions = self.get_transactions(source).filter(txn_type="Payment")
-            existing_transactions = []
+        if payment_transactions:    
+            for trans in payment_transactions:
+                existing_transactions.append(trans.status)
 
-            if payment_transactions:    
-                for trans in payment_transactions:
-                    existing_transactions.append(trans.status)
+        if payment.status not in existing_transactions:
 
-            if payment.status not in existing_transactions:
+            reference = str(source.reference) + " Payment" 
+            if payment.payment_method:
+                reference = payment.payment_method.title
 
-                reference = str(source.reference) + " Payment" 
-                if payment.payment_method:
-                    reference = payment.payment_method.title
+            source.new_payment(
+                amount=payment.amount.value, 
+                reference=reference, 
+                paid=payment.paid,
+                refundable=payment.refundable,
+                status=payment.status,
+                code=payment.id,
+                receipt=payment.receipt_registration
+            )
 
-                source.new_payment(
-                    amount=payment.amount.value, 
-                    reference=reference, 
-                    paid=payment.paid,
-                    refundable=payment.refundable,
-                    status=payment.status,
-                    code=payment.id,
-                    receipt=payment.receipt_registration
-                )
-
-                order = source.order
-                self.add_event(payment, self.payment_status_list() , order)
-                return self.change_order_status(
-                    tnx_status=payment.status, 
-                    tnx_type='payment', 
-                    order=order,
-                )
+            order = source.order
+            self.add_event(payment, self.payment_status_list() , order)
+            return self.change_order_status(
+                tnx_status=payment.status, 
+                tnx_type='payment', 
+                order=order,
+            )
             
-    # isinstance RefundResponse
+            
     def create_refund_transaction(self, refund, source):
-        
-        if isinstance(refund, RefundResponse):
+        refund_transactions = self.get_transactions(source).filter(txn_type="Refund")
+        existing_transactions = []
 
-            refund_transactions = self.get_transactions(source).filter(txn_type="Refund")
-            existing_transactions = []
+        if refund_transactions:    
+            for trans in refund_transactions:
+                existing_transactions.append(trans.status)
 
-            if refund_transactions:    
-                for trans in refund_transactions:
-                    existing_transactions.append(trans.status)
+        if refund.status not in existing_transactions:
 
-            if refund.status not in existing_transactions:
+            source.new_refund(
+                amount=refund.amount.value, 
+                reference=str(source.reference) + " Refund", 
+                status=refund.status,
+                code=refund.id,
+                receipt=refund.receipt_registration,
+            )
 
-                source.new_refund(
-                    amount=refund.amount.value, 
-                    reference=str(source.reference) + " Refund", 
-                    status=refund.status,
-                    code=refund.id,
-                    receipt=refund.receipt_registration,
-                )
+            order = source.order
+            self.add_event(refund, self.refund_status_list() , order)
+            return self.change_order_status(
+                tnx_status=refund.status, 
+                tnx_type='refund', 
+                order=order,
+            )
 
-                order = source.order
-                self.add_event(refund, self.refund_status_list() , order)
-                return self.change_order_status(
-                    tnx_status=refund.status, 
-                    tnx_type='refund', 
-                    order=order,
-                )
 
     def update(self, source, payment=None, refund=None): 
 
@@ -294,6 +290,7 @@ class AbstractPaymentMethod(PaymentMethodHelper):
         
         return new_status or old_status
         
+
     def __str__(self) -> str:
         return self.payment_method
 
@@ -415,10 +412,9 @@ class Yoomoney(AbstractPaymentMethod):
         return refund_responce
     
     def get_payment_api(self, pay_id):
-        
         try:
             responce = Payment.find_one(pay_id)
-        except Exception as e:
+        except Exception:
             return None
         
         return responce
@@ -441,71 +437,12 @@ class Cash(AbstractPaymentMethod):
         fff = 1
 
     def create_payment_transaction(self, payment, source):
-        
-        if isinstance(payment, PaymentResponse):
-
-            payment_transactions = self.get_transactions(source).filter(txn_type="Payment")
-            existing_transactions = []
-
-            if payment_transactions:    
-                for trans in payment_transactions:
-                    existing_transactions.append(trans.status)
-
-            if payment.status not in existing_transactions:
-
-                reference = str(source.reference) + " Payment" 
-                if payment.payment_method:
-                    reference = payment.payment_method.title
-
-                source.new_payment(
-                    amount=payment.amount.value, 
-                    reference=reference, 
-                    paid=payment.paid,
-                    refundable=payment.refundable,
-                    status=payment.status,
-                    code=payment.id,
-                    receipt=payment.receipt_registration
-                )
-
-                order = source.order
-                self.add_event(payment, self.payment_status_list() , order)
-                return self.change_order_status(
-                    tnx_status=payment.status, 
-                    tnx_type='payment', 
-                    order=order,
-                )
-            
-    # isinstance RefundResponse
+        pass
+       
+      
     def create_refund_transaction(self, refund, source):
-        
-        if isinstance(refund, RefundResponse):
-
-            refund_transactions = self.get_transactions(source).filter(txn_type="Refund")
-            existing_transactions = []
-
-            if refund_transactions:    
-                for trans in refund_transactions:
-                    existing_transactions.append(trans.status)
-
-            if refund.status not in existing_transactions:
-
-                source.new_refund(
-                    amount=refund.amount.value, 
-                    reference=str(source.reference) + " Refund", 
-                    status=refund.status,
-                    code=refund.id,
-                    receipt=refund.receipt_registration,
-                )
-
-                order = source.order
-                self.add_event(refund, self.refund_status_list() , order)
-                return self.change_order_status(
-                    tnx_status=refund.status, 
-                    tnx_type='refund', 
-                    order=order,
-                )
-
-
+        pass
+    
  
 class CourierCard(AbstractPaymentMethod):
     def pay(self, order, amount=None):

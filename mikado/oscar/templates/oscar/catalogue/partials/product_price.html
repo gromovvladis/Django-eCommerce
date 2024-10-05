@@ -1,51 +1,48 @@
 {% load currency_filters %}
 {% load purchase_info_tags %}
-{% load cache %}
 
-{% cache 1800 product_compact_price product.id product.stockrecords %}
-    {% if session.price.exists %}
-        {% if product.is_parent %}
-            {% if session.price.variations_price  %}
-            {% purchase_info_min_price session.price.variations_price.items as min_price %}
+{% if session.price.exists %}
+    {% if product.is_parent %}
+        {% if session.price.variations_price  %}
+        {% purchase_info_min_price session.price.variations_price.items as min_price %}
+            <div class="py-1 mr-1">
+                <span class="v-prices d-flex flex-column align-start">
+                    <span class="v-prices__price no-wrap">
+                        от {{ min_price|currency:session.price.currency }}
+                    </span>
+                </span>
+            </div> 
+        {% endif %}
+    {% else %}
+        {% if session.price.exists %}
+            {% if session.price.money == 0 %}
                 <div class="py-1 mr-1">
                     <span class="v-prices d-flex flex-column align-start">
                         <span class="v-prices__price no-wrap">
-                            от {{ min_price|currency:session.price.currency }}
+                            0 Р
                         </span>
                     </span>
-                </div> 
+                </div>
+            {% else %}
+                <div>
+                    <span class="v-prices d-flex flex-column align-start mr-1">
+                        {% if session.price.old_price %}
+                            <span class="dish__mobile-total-price v-prices__price shrink no-wrap py-1">
+                                {{ session.price.money|currency:session.price.currency }}
+                            </span>    
+                            <span class="dish__mobile-total-label dish__profit d-flex align-center mt-05">
+                                Цена по акции
+                            </span>
+                        {% else %}
+                            <span class="v-prices__price no-wrap py-1">
+                                {{ session.price.money|currency:session.price.currency }}
+                            </span>
+                        {% endif %}
+                    </span>
+                </div>
             {% endif %}
         {% else %}
-            {% if session.price.exists %}
-                {% if session.price.money == 0 %}
-                    <div class="py-1 mr-1">
-                        <span class="v-prices d-flex flex-column align-start">
-                            <span class="v-prices__price no-wrap">
-                                0 Р
-                            </span>
-                        </span>
-                    </div>
-                {% else %}
-                    <div>
-                        <span class="v-prices d-flex flex-column align-start mr-1">
-                            {% if session.price.old_price %}
-                                <span class="dish__mobile-total-price v-prices__price shrink no-wrap py-1">
-                                    {{ session.price.money|currency:session.price.currency }}
-                                </span>    
-                                <span class="dish__mobile-total-label dish__profit d-flex align-center mt-05">
-                                    Цена по акции
-                                </span>
-                            {% else %}
-                                <span class="v-prices__price no-wrap py-1">
-                                    {{ session.price.money|currency:session.price.currency }}
-                                </span>
-                            {% endif %}
-                        </span>
-                    </div>
-                {% endif %}
-            {% else %}
-                <p class="price_color">&nbsp;</p>
-            {% endif %}
+            <p class="price_color">&nbsp;</p>
         {% endif %}
     {% endif %}
-{% endcache %}
+{% endif %}

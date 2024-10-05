@@ -18376,7 +18376,7 @@ readers do not read off random characters that represent icons */
   content: "\f1d8";
 }
 
-.fa-tillypad::before {
+.fa-crm::before {
   content: "\f109";
 }
 

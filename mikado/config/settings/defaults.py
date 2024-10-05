@@ -250,8 +250,8 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
-        "label": "Tillypad",
-        "icon": "fas fa-tillypad",
+        "label": "CRM Сиситема",
+        "icon": "fas fa-crm",
         "children": [
             {
                 "label": "Отправленные заказы",

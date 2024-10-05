@@ -10,11 +10,11 @@ class PaymentConfig(OscarConfig):
 
     def ready(self):
             self.update_payment_view = get_class("payment.views", "UpdatePayment")
-            self.yookassa_payment_status_view = get_class("payment.views", "YookassaPaymentStatus")
+            self.yookassa_payment_handler_view = get_class("payment.views", "YookassaPaymentHandler")
 
     def get_urls(self):
         urls = [
             path("update/<int:pk>/", self.update_payment_view.as_view(), name="update"),
-            path("api/yookassa/", csrf_exempt(self.yookassa_payment_status_view.as_view()), name="yokassa",),
+            path("api/yookassa/", csrf_exempt(self.yookassa_payment_handler_view.as_view()), name="yokassa",),
         ]
         return self.post_process_urls(urls)
