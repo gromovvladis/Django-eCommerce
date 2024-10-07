@@ -7,7 +7,7 @@ from oscar.core.loading import get_class, get_model
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-from yookassa.domain.notification import WebhookNotification
+from yookassa.domain.notification import WebhookNotificationFactory
 
 PaymentManager = get_class("payment.methods", "PaymentManager")
 Yoomoney = get_class("payment.methods", "Yoomoney")
@@ -58,6 +58,7 @@ class YookassaPaymentHandler(APIView):
 
     permission_classes = [AllowAny]
 
+
     IP_RANGES = [
         '185.71.76.0/27',
         '185.71.77.0/27',
@@ -101,28 +102,21 @@ class YookassaPaymentHandler(APIView):
             request_ip = self.get_client_ip(request)
             if not self.is_ip_allowed(request_ip):
                 logger.warning("Недопустимый IP: %s", request_ip)
-                return http.JsonResponse({'error': 'ip error', "status": 400}, status=400)
+                return http.JsonResponse({'error': 'ip error'}, status=400)
         
             event_json = json.loads(request.body)
-            notification = WebhookNotification(event_json)
-            if not hasattr(notification, 'event') or not hasattr(notification.object, 'id'):
-                logger.error("Недостаточно данных в уведомлении: %s", event_json)
-                return http.JsonResponse({'error': 'invalid notification data', "status": 400}, status=400)
+            notification = WebhookNotificationFactory().create(event_json)
 
-            event = notification.event
             trans_id = notification.object.id
             source = Source.objects.get(Q(payment_id=trans_id) | Q(refund_id=trans_id))
+            payment = PaymentManager(source.reference).get_method()
 
-            if "payment" in event:
-                pay_code = source.reference
-                payment = PaymentManager(pay_code).get_method()
+            if "payment" in notification.event:
                 payment.update(
                     source=source, 
                     payment=notification.object,
                 )
-            elif "refund" in event:
-                pay_code = source.reference
-                payment = PaymentManager(pay_code).get_method()
+            elif "refund" in notification.event:
                 payment.update(
                     source=source, 
                     refund=notification.object,
@@ -130,9 +124,9 @@ class YookassaPaymentHandler(APIView):
             else:
                 logger.error(
                     "Транзакция не имеет тип refund или payment её статус: %s",
-                    event
+                    notification.event
                 )
-                return http.JsonResponse({'error': 'no refund | no payment', "status": 400}, status=400)
+                return http.JsonResponse({'error': 'no refund | no payment'}, status=400)
        
         except Source.DoesNotExist:
             logger.error("Источник не найден для trans_id: %s", trans_id)
@@ -140,12 +134,17 @@ class YookassaPaymentHandler(APIView):
             logger.error("Найдено несколько источников для trans_id: %s", trans_id)
         except json.JSONDecodeError as e:
             logger.error("Ошибка декодирования JSON: %s. Тело запроса: %s", e, request.body)
-            return http.JsonResponse({'error': 'invalid JSON', "status": 400}, status=400)
+            return http.JsonResponse({'error': 'invalid JSON'}, status=400)
         except KeyError as e:
             logger.error("Отсутствующий ключ в JSON: %s. Тело запроса: %s", e, request.body)
-            return http.JsonResponse({'error': 'missing key', "status": 400}, status=400)
+            return http.JsonResponse({'error': 'missing key'}, status=400)
+        except ValueError as e:
+            logger.exception(e)
+            return http.JsonResponse({'error': 'data and event error'}, status=400)
+        except TypeError as e:
+            logger.exception(e)
+            return http.JsonResponse({'error': 'data error'}, status=400)
         except Exception as e:
             logger.exception("Неожиданная ошибка: %s. Тело запроса: %s", e, request.body)
-            return http.JsonResponse({'error': 'server error', "status": 500}, status=500)
         
-        return http.JsonResponse({'success': 'ok', "status": 200}, status=200)
+        return http.JsonResponse({'success': 'ok'}, status=200)

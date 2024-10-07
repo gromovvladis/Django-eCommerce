@@ -1,4 +1,6 @@
+import logging
 from decimal import Decimal as D
+
 from django.conf import settings
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
@@ -8,13 +10,12 @@ from django.views.generic import DetailView, UpdateView, DeleteView, CreateView
 from django_tables2 import SingleTableView
 from django.views.generic.edit import FormView
 
-from oscar.apps.payment.exceptions import DebitedAmountIsNotEqualsRefunded
-from oscar.apps.payment.methods import PaymentManager
-from oscar.core.compat import get_user_model
-from oscar.core.loading import get_class, get_classes, get_model
 from yookassa import Payment, Refund
 
-import logging
+from oscar.apps.payment.exceptions import DebitedAmountIsNotEqualsRefunded
+from oscar.core.compat import get_user_model
+from oscar.core.loading import get_class, get_classes, get_model
+
 logger = logging.getLogger("oscar.dashboard")
 
 User = get_user_model()
@@ -25,7 +26,7 @@ SourceType = get_model("payment", "SourceType")
 PaymentListTable, RefundListTable = get_classes("dashboard.payments.tables", ["PaymentListTable", "RefundListTable"])
 NewSourceForm = get_class("dashboard.orders.forms", "NewSourceForm")
 NewTransactionForm = get_class("dashboard.orders.forms", "NewTransactionForm")
-
+PaymentManager = get_class("payment.methods", "PaymentManager")
 
 class TransactionsListView(SingleTableView):
     context_object_name = 'transactions'
@@ -338,7 +339,7 @@ class RefundTransactionView(DetailView):
             )
             payment_method.create_refund_transaction(refund, self.object.source)
 
-            logger.info('Транзакция №{0} была отменена пользователем #{1}'.format(self.object.id ,request.user.id)) 
+            logger.info('Транзакция №{0} была отменена пользователем. Деньги вернулись клиенту #{1}'.format(self.object.id ,request.user.id)) 
         except Exception as e:
             messages.error(request, "Возврат не удался")
         else:

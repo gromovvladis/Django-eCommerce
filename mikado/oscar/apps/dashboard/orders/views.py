@@ -344,123 +344,6 @@ class OrderStatsView(FormView):
         return stats
 
 
-    # def get_stats(self, filters):
-
-        start_date = None
-        end_date = now()
-
-        if filters.get('date_placed__range') is not None:
-            start_date, end_date = filters['date_placed__range']
-            start_date_days = start_date_weeks = start_date_months = start_date_years = start_date
-        elif filters.get('date_placed__gte') is not None:
-            start_date = start_date_days = start_date_weeks = start_date_months = start_date_years = filters['date_placed__gte']
-        elif filters.get('date_placed__lte') is not None:
-            end_date = filters['date_placed__lte']
-
-        data = self.get_data(filters)
-
-        orders = data['orders']
-        alerts = data['alerts']
-        baskets = data['baskets']
-        users = data['users']
-        customers = data['customers']
-        lines = data['lines']
-        products = data['products']
-
-        if start_date is None:
-            ord = orders.first()
-            if ord is None:
-                start_date = start_date_days = start_date_weeks = start_date_months = start_date_years = ord.date_placed
-            else:
-                start_date = start_date_days = start_date_weeks = start_date_months = start_date_years = end_date - datetime.timedelta(days=60)
-
-
-        start_graph_days = max(start_date, end_date - datetime.timedelta(days=60))
-        start_graph_weeks = max(start_date, end_date - datetime.timedelta(weeks=20))
-        start_graph_months = max(start_date, end_date - relativedelta(months=12))
-        start_graph_years = max(start_date, end_date - relativedelta(years=3))
-
-
-        user = self.request.user
-        if not user.is_staff:
-            partners_ids = tuple(user.partners.values_list("id", flat=True))
-            orders = orders.filter(lines__partner_id__in=partners_ids).distinct()
-            alerts = alerts.filter(stockrecord__partner_id__in=partners_ids)
-            baskets = baskets.filter(
-                lines__stockrecord__partner_id__in=partners_ids
-            ).distinct()
-            customers = customers.filter(
-                orders__lines__partner_id__in=partners_ids
-            ).distinct()
-            lines = lines.filter(partner_id__in=partners_ids)
-            products = products.filter(stockrecords__partner_id__in=partners_ids)
-
-
-        orders_days = orders.filter(date_placed__range=(start_date_days, end_date))
-        orders_weeks = orders.filter(date_placed__range=(start_date_weeks, end_date))
-        orders_months = orders.filter(date_placed__range=(start_date_months, end_date))
-        orders_years = orders.filter(date_placed__range=(start_date_years, end_date))
-
-        stats = {
-
-            "start_date_days": start_date_days,
-            "start_date_weeks": start_date_weeks,
-            "start_date_months": start_date_months,
-            "start_date_years": start_date_years,
-
-            "start_graph_days": start_graph_days,
-            "start_graph_weeks": start_graph_weeks,
-            "start_graph_months": start_graph_months,
-            "start_graph_years": start_graph_years,
-
-            "end_time": end_date,
-
-            "days_report_dict": self.get_report(orders, start_graph_days, end_date, "day"),
-            "weeks_report_dict": self.get_report(orders, start_graph_weeks, end_date, "week"),
-            "months_report_dict": self.get_report(orders, start_graph_months, end_date, "month"),
-            "years_report_dict": self.get_report(orders, start_graph_years, end_date, "year"),
-
-            "orders_days": orders_days,
-            "alerts_days": alerts.filter(date_created__range=(start_date_days, end_date)),
-            "baskets_days": baskets.filter(date_created__range=(start_date_days, end_date)),
-            "users_days": users.filter(date_joined__range=(start_date_days, end_date)),
-            "customers_days": customers.filter(date_joined__range=(start_date_days, end_date)),
-            "lines_days": lines.filter(order__in=orders_days),
-            "products_days": products.filter(date_created__range=(start_date_days, end_date)),
-
-            "orders_weeks": orders_weeks,
-            "alerts_weeks": alerts.filter(date_created__range=(start_date_weeks, end_date)),
-            "baskets_weeks": baskets.filter(date_created__range=(start_date_weeks, end_date)),
-            "users_weeks": users.filter(date_joined__range=(start_date_weeks, end_date)),
-            "customers_weeks": customers.filter(date_joined__range=(start_date_weeks, end_date)),
-            "lines_weeks": lines.filter(order__in=orders_weeks),
-            "products_weeks": products.filter(date_created__range=(start_date_weeks, end_date)),
-
-            "orders_months": orders_months,
-            "alerts_months": alerts.filter(date_created__range=(start_date_months, end_date)),
-            "baskets_months": baskets.filter(date_created__range=(start_date_months, end_date)),
-            "users_months": users.filter(date_joined__range=(start_date_months, end_date)),
-            "customers_months": customers.filter(date_joined__range=(start_date_months, end_date)),
-            "lines_months": lines.filter(order__in=orders_months),
-            "products_months": products.filter(date_created__range=(start_date_months, end_date)),
-
-            "orders_years": orders_years,
-            "alerts_years": alerts.filter(date_created__range=(start_date_years, end_date)),
-            "baskets_years": baskets.filter(date_created__range=(start_date_years, end_date)),
-            "users_years": users.filter(date_joined__range=(start_date_years, end_date)),
-            "customers_years": customers.filter(date_joined__range=(start_date_years, end_date)),
-            "lines_years": lines.filter(order__in=orders_years),
-            "products_years": products.filter(date_created__range=(start_date_years, end_date)),
-
-            "order_status_breakdown": orders.order_by("status")
-            .values("status")
-            .annotate(freq=Count("id")),
-
-        }
-
-        return stats
-
-
 class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
     """
     Dashboard view for a list of orders.
@@ -494,9 +377,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
     def dispatch(self, request, *args, **kwargs):
         # base_queryset is equal to all orders the user is allowed to access
-        self.base_queryset = queryset_orders_for_user(request.user).order_by(
-            "-order_time"
-        ).annotate(
+        self.base_queryset = queryset_orders_for_user(request.user).annotate(
             num_products=Sum("basket__lines__quantity"),
             source=Max("sources__reference"),
             amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
@@ -529,6 +410,8 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         """
         queryset = sort_queryset(
             self.base_queryset, self.request, ["number", "total"]
+        ).order_by(
+            "-date_placed"
         )
 
         self.form = self.form_class(self.request.GET)
@@ -838,6 +721,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 class OrderActiveListView(OrderListView):
     template_name = "oscar/dashboard/orders/active_order_list.html"
     form_class = ActiveOrderSearchForm
+    
     def get_queryset(self):
         """
         Build the queryset for this list.
@@ -845,7 +729,9 @@ class OrderActiveListView(OrderListView):
         active_statuses = settings.ORDER_ACTIVE_STATUSES
         queryset = sort_queryset(
             self.base_queryset, self.request, ["number", "total"]
-        ).filter(status__in=active_statuses)
+        ).filter(status__in=active_statuses).order_by(
+            "order_time"
+        )
 
         self.form = self.form_class(self.request.GET)
         if not self.form.is_valid():

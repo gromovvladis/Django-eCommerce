@@ -88,46 +88,40 @@ class PaymentMethodHelper(object):
         self.success_url = f"https://{settings.ALLOWED_HOSTS[0]}{thank_you_url}"
         self.payment_method = payment_method
     
-
     def get_method(self):
         return self.payment_method
-
 
     def get_transactions(self, payment_source):
         return Transaction.objects.filter(source_id=payment_source.id)
 
-
     def payment_status_list(self):
         return settings.PAYMENT_STATUS
-
 
     def refund_status_list(self):
         return settings.REFUND_STATUS
 
-
     def payment_status_order(self):
         return settings.PAYMENT_ORDER_STATUS
-
 
     def refund_status_order(self):
         return settings.REFUND_ORDER_STATUS
 
-
-    def get_status(self, status_list, status):
-
-        if status == 'succeeded':
+    def get_status(self, status_list, tnx_status, updated):
+        if updated:
+            return "Обновление транзакции"
+        elif tnx_status == 'succeeded':
             return status_list['succeeded']
-        elif status == 'canceled':
+        elif tnx_status == 'canceled':
             return status_list['canceled']
+        elif tnx_status == 'pending':
+            return status_list['pending']
 
-        return status_list['pending']
-
-
-    def add_event(self, transaction, transaction_status_list, order):
+    def add_event(self, order, transaction, transaction_status_list=None, updated=False):
         event_type, __ = PaymentEventType.objects.get_or_create(
             name=self.get_status(
                 transaction_status_list, 
-                transaction.status
+                transaction.status,
+                updated
             )
         )
         event = PaymentEvent(event_type=event_type, amount=transaction.amount.value, reference=transaction.id)
@@ -138,36 +132,27 @@ class PaymentMethodHelper(object):
                 event=event, line=line, quantity=line.quantity
             )
 
-    
     def change_order_status(self, tnx_status, tnx_type, order):
         
         current_status = order.status
 
-        status_to_change = [
-            settings.OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS, 
-            settings.OSCAR_INITIAL_ORDER_STATUS,
-            settings.OSCAR_PAID_ONLINE_PAYMENT_ORDER_STATUS
-        ]
+        if tnx_type == 'payment':
+            status_list = self.payment_status_order() 
+        elif tnx_type == 'refund':
+            status_list = self.refund_status_order() 
+        else:
+            logger.error('Неизвестный тип транзакции. Транзакция: {1}, Заказ: {2}'.format(tnx_type , order.number)) 
+            return messages.error(self.request, "Неизвестный тип транзакции")
+            
+        new_status = self.get_status(
+            status_list=status_list, 
+            tnx_status=tnx_status,
+            updated=False
+        )
 
-        if current_status in status_to_change:
-
-            if tnx_type == 'payment':
-                status_list = self.payment_status_order() 
-            elif tnx_type == 'refund':
-                status_list = self.refund_status_order() 
-            else:
-                return messages.error(self.request, "Неизвестный тип транзакции")
-                
-            new_status = self.get_status(
-                status_list=status_list, 
-                status=tnx_status
-            )
-
-            if new_status != current_status:
-                order.set_status(new_status)
-
-            return new_status
-        
+        if new_status and new_status != current_status:
+            order.set_status(new_status)
+    
 
 class AbstractPaymentMethod(PaymentMethodHelper):
 
@@ -188,8 +173,74 @@ class AbstractPaymentMethod(PaymentMethodHelper):
         pass
 
 
-    def create_payment_transaction(self, payment, source):
-    
+    def _check_payment_balance(self, payment, source):
+        debited = payment.amount.value
+        payment_refunded = payment.refunded_amount.value
+        source_balance = source.amount_debited - source.amount_refunded
+        transaction_balance = debited - payment_refunded
+
+        if source_balance != transaction_balance:
+            logger.error(
+                "Сумма транзакции заказа №(%s) не равна балансу источника оплаты. "
+                "Требуется ручная проверка. Транзакция оплаты: №(%s)",
+                source.order.number,
+                payment.id,
+            )
+            raise DebitedAmountIsNotEqualsRefunded(
+                "Сумма оплаты не равна балансу источника оплаты. "
+                "Требуется ручная проверка. На данный момент оплачено: {0} Р.".format(float(transaction_balance))
+            )
+
+
+    def _check_refund_balance(self, refund, payment, source):
+
+        refund_refunded = refund.amount.value
+        source_refunded = source.amount_refunded
+
+        if refund_refunded != source_refunded:
+            logger.error(
+                "Сумма возврата заказа №(%s) не равна возврату источника оплаты. "
+                "Требуется ручная проверка. Транзакция возврата: №(%s)",
+                source.order.number,
+                refund.id,
+            )
+            raise DebitedAmountIsNotEqualsRefunded(
+                "Сумма возврата не равна возврату источника оплаты. "
+                "Требуется ручная проверка. На данный момент возвращено: {0} Р.".format(float(refund_refunded))
+            )
+
+        if isinstance(payment, PaymentResponse):
+            payment_refunded = payment.refunded_amount.value
+            refund_refunded = refund.amount.value
+            if refund_refunded != payment_refunded:
+                logger.error(
+                    "Сумма возврата заказа №(%s) не равна сумме возврата в объекте оплаты. "
+                    "Требуется ручная проверка. Транзакция оплаты: №(%s). Транзакция возврата: №(%s)",
+                    source.order.number,
+                    payment.id,
+                    refund.id,
+                )
+                raise DebitedAmountIsNotEqualsRefunded(
+                    "Сумма возврата не равна сумме прихода. "
+                    "Требуется ручная проверка. На данный момент оплачено: {0} Р.".format(float(payment_refunded))
+                )
+            
+
+    def update(self, source, payment=None, refund=None): 
+        
+        if isinstance(payment, PaymentResponse):
+            self.update_payment(payment, source)
+            if payment.status == 'succeeded':
+                self._check_payment_balance(payment, source)
+
+        if isinstance(refund, RefundResponse):
+            self.update_refund(refund, source)
+            if refund.status == 'succeeded':
+                self._check_refund_balance(refund, payment, source)
+
+
+    def update_payment(self, payment, source):
+        
         payment_transactions = self.get_transactions(source).filter(txn_type="Payment")
         existing_transactions = []
 
@@ -198,31 +249,64 @@ class AbstractPaymentMethod(PaymentMethodHelper):
                 existing_transactions.append(trans.status)
 
         if payment.status not in existing_transactions:
+            self.create_payment_transaction(payment, source)
+        else:
+            self.update_payment_transaction(payment, source)
 
+
+    def create_payment_transaction(self, payment, source):
+    
+        if payment.payment_method:
+            reference = payment.payment_method.title
+        else:
             reference = str(source.reference) + " Payment" 
-            if payment.payment_method:
-                reference = payment.payment_method.title
 
-            source.new_payment(
-                amount=payment.amount.value, 
-                reference=reference, 
-                paid=payment.paid,
-                refundable=payment.refundable,
-                status=payment.status,
-                code=payment.id,
-                receipt=payment.receipt_registration
-            )
+        source.new_payment(
+            amount=payment.amount.value, 
+            reference=reference, 
+            paid=payment.paid,
+            refundable=payment.refundable,
+            status=payment.status,
+            code=payment.id,
+            receipt=payment.receipt_registration
+        )
 
-            order = source.order
-            self.add_event(payment, self.payment_status_list() , order)
-            return self.change_order_status(
+        self.add_event(order=source.order, transaction=payment, transaction_status_list=self.payment_status_list())
+
+        self.change_order_status(
+            tnx_status=payment.status, 
+            tnx_type='payment', 
+            order=source.order,
+        )
+
+
+    def update_payment_transaction(self, payment, source):
+
+        if payment.payment_method:
+            reference = payment.payment_method.title 
+        else:
+            reference = str(source.reference) + " Payment"
+
+        updated = source.update_payment(
+            amount=payment.amount.value, 
+            reference=reference, 
+            paid=payment.paid,
+            refundable=payment.refundable,
+            status=payment.status,
+            code=payment.id,
+            receipt=payment.receipt_registration
+        )
+
+        if updated:
+            self.add_event(order=source.order, transaction=payment, updated=True)
+            self.change_order_status(
                 tnx_status=payment.status, 
                 tnx_type='payment', 
-                order=order,
+                order=source.order,
             )
-            
-            
-    def create_refund_transaction(self, refund, source):
+
+
+    def update_refund(self, refund, source):
         refund_transactions = self.get_transactions(source).filter(txn_type="Refund")
         existing_transactions = []
 
@@ -231,61 +315,46 @@ class AbstractPaymentMethod(PaymentMethodHelper):
                 existing_transactions.append(trans.status)
 
         if refund.status not in existing_transactions:
+            self.create_refund_transaction(refund, source)
+        else:
+            self.update_refund_transaction(refund, source)
 
-            source.new_refund(
-                amount=refund.amount.value, 
-                reference=str(source.reference) + " Refund", 
-                status=refund.status,
-                code=refund.id,
-                receipt=refund.receipt_registration,
-            )
 
-            order = source.order
-            self.add_event(refund, self.refund_status_list() , order)
-            return self.change_order_status(
+    def create_refund_transaction(self, refund, source):
+        source.new_refund(
+            amount=refund.amount.value, 
+            reference=str(source.reference) + " Refund", 
+            status=refund.status,
+            code=refund.id,
+            receipt=refund.receipt_registration,
+        )
+
+        self.add_event(order=source.order, transaction=refund, transaction_status_list=self.refund_status_list())
+        
+        self.change_order_status(
+            tnx_status=refund.status, 
+            tnx_type='refund', 
+            order=source.order,
+        )
+
+
+    def update_refund_transaction(self, refund, source):
+        updated = source.update_payment(
+            amount=refund.amount.value, 
+            reference=str(source.reference) + " Refund", 
+            status=refund.status,
+            code=refund.id,
+            receipt=refund.receipt_registration,
+        )
+
+        if updated:
+            self.add_event(order=source.order, transaction=refund, updated=True)
+            self.change_order_status(
                 tnx_status=refund.status, 
                 tnx_type='refund', 
-                order=order,
+                order=source.order,
             )
 
-
-    def update(self, source, payment=None, refund=None): 
-
-        old_status = source.order.status
-        new_status = ""
-        debited = 0
-        payment_responce_refunded = 0
-        refund_responce_refunded = 0
-        pay_id = 'X' 
-        refund_id = 'X' 
-    
-        if isinstance(payment, PaymentResponse):
-            new_status = self.create_payment_transaction(payment, source)
-            pay_id = payment.id
-            if payment.status == 'succeeded':
-                debited = payment.amount.value
-                payment_responce_refunded = payment.refunded_amount.value
-
-        if isinstance(refund, RefundResponse):
-            new_status = self.create_refund_transaction(refund, source)
-            refund_id = refund.id
-            refund_responce_refunded = refund.amount.value
-
-        source_balance = source.amount_debited - source.amount_refunded
-        transaction_balance = debited - payment_responce_refunded
-
-        if source_balance != transaction_balance or refund_responce_refunded != payment_responce_refunded:
-            logger.error(
-                "Сумма возврата заказа №(%s) не равна сумме прихода. Требуется ручная проверка. Транзакция оплаты: №(%s). Транзакция возврата: №(%s)"
-                "Order #%s: unable to take payment (%s) - restoring basket",
-                source.order.number,
-                pay_id,
-                refund_id,
-            )
-            raise DebitedAmountIsNotEqualsRefunded("Сумма возврата не равна сумме прихода. Требуется ручная проверка. На данный момент оплачено: {0} Р.".format(float(transaction_balance)))
-        
-        return new_status or old_status
-        
 
     def __str__(self) -> str:
         return self.payment_method
@@ -427,14 +496,16 @@ class Yoomoney(AbstractPaymentMethod):
 
 class Cash(AbstractPaymentMethod):
     def pay(self, order, amount=None, email=None):
-        ggg = 1
+        pass
 
     def refund(self, transaction, amount=None):
-        fff = 1
+        pass
+
+    def update(self, source, payment=None, refund=None):
+        pass
 
     def create_payment_transaction(self, payment, source):
-        pass
-       
+        pass 
       
     def create_refund_transaction(self, refund, source):
         pass

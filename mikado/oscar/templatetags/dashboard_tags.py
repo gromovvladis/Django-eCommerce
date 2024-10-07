@@ -80,8 +80,10 @@ def from_now(value):
         return f"{hours} ч."
 
     minutes = int(delta.total_seconds() // 60 % 60) 
-    if hours:
+    if minutes:
         return f"{minutes} мин."
+    
+    return "-"
 
 
 
