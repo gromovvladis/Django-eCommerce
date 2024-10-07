@@ -228,15 +228,31 @@ class AbstractPaymentMethod(PaymentMethodHelper):
 
     def update(self, source, payment=None, refund=None): 
         
+        refund_updated = False
+        payment_updated = False
+
+        if isinstance(refund, RefundResponse):
+            refund_updated = self.update_refund(refund, source)
+            if refund.status == 'succeeded':
+                self._check_refund_balance(refund, payment, source)
+        
         if isinstance(payment, PaymentResponse):
-            self.update_payment(payment, source)
+            payment_updated = self.update_payment(payment, source)
             if payment.status == 'succeeded':
                 self._check_payment_balance(payment, source)
 
-        if isinstance(refund, RefundResponse):
-            self.update_refund(refund, source)
-            if refund.status == 'succeeded':
-                self._check_refund_balance(refund, payment, source)
+        if refund_updated:
+            self.change_order_status(
+                tnx_status=refund.status, 
+                tnx_type='refund', 
+                order=source.order,
+            )
+        elif payment_updated:
+            self.change_order_status(
+                tnx_status=payment.status, 
+                tnx_type='payment',  
+                order=source.order,
+            )
 
 
     def update_payment(self, payment, source):
@@ -250,8 +266,9 @@ class AbstractPaymentMethod(PaymentMethodHelper):
 
         if payment.status not in existing_transactions:
             self.create_payment_transaction(payment, source)
+            return True
         else:
-            self.update_payment_transaction(payment, source)
+            return self.update_payment_transaction(payment, source)
 
 
     def create_payment_transaction(self, payment, source):
@@ -273,12 +290,6 @@ class AbstractPaymentMethod(PaymentMethodHelper):
 
         self.add_event(order=source.order, transaction=payment, transaction_status_list=self.payment_status_list())
 
-        self.change_order_status(
-            tnx_status=payment.status, 
-            tnx_type='payment', 
-            order=source.order,
-        )
-
 
     def update_payment_transaction(self, payment, source):
 
@@ -299,11 +310,8 @@ class AbstractPaymentMethod(PaymentMethodHelper):
 
         if updated:
             self.add_event(order=source.order, transaction=payment, updated=True)
-            self.change_order_status(
-                tnx_status=payment.status, 
-                tnx_type='payment', 
-                order=source.order,
-            )
+        
+        return updated
 
 
     def update_refund(self, refund, source):
@@ -316,8 +324,9 @@ class AbstractPaymentMethod(PaymentMethodHelper):
 
         if refund.status not in existing_transactions:
             self.create_refund_transaction(refund, source)
+            return True
         else:
-            self.update_refund_transaction(refund, source)
+            return self.update_refund_transaction(refund, source)
 
 
     def create_refund_transaction(self, refund, source):
@@ -330,16 +339,10 @@ class AbstractPaymentMethod(PaymentMethodHelper):
         )
 
         self.add_event(order=source.order, transaction=refund, transaction_status_list=self.refund_status_list())
-        
-        self.change_order_status(
-            tnx_status=refund.status, 
-            tnx_type='refund', 
-            order=source.order,
-        )
 
 
     def update_refund_transaction(self, refund, source):
-        updated = source.update_payment(
+        updated = source.update_refund(
             amount=refund.amount.value, 
             reference=str(source.reference) + " Refund", 
             status=refund.status,
@@ -349,11 +352,8 @@ class AbstractPaymentMethod(PaymentMethodHelper):
 
         if updated:
             self.add_event(order=source.order, transaction=refund, updated=True)
-            self.change_order_status(
-                tnx_status=refund.status, 
-                tnx_type='refund', 
-                order=source.order,
-            )
+        
+        return updated
 
 
     def __str__(self) -> str:

@@ -130,8 +130,8 @@ class AbstractSource(models.Model):
         abstract = True
         app_label = "payment"
         ordering = ["pk"]
-        verbose_name = "Источник"
-        verbose_name_plural = "Источники"
+        verbose_name = "Источник оплаты"
+        verbose_name_plural = "Источники оплаты"
 
     def __str__(self):
         description = "Сумма к оплате - %(amount)s способом оплаты - %(type)s" % {
@@ -164,7 +164,7 @@ class AbstractSource(models.Model):
     ):
         """
         Register the data for a transaction that can't be created yet due to FK
-        constraints.  This happens at checkout where create an payment source
+        constraints. This happens at checkout where create an payment source
         and a transaction but can't save them until the order model exists.
         """
         if self.deferred_txns is None:
@@ -183,28 +183,6 @@ class AbstractSource(models.Model):
             refundable=refundable,
             receipt=receipt
         )
-
-
-    def _update_transaction(self, txn_type, amount, reference, status, paid, code, refundable, receipt):
-        """
-        Обновление или создание транзакции с кодом 'code'.
-        """
-        transaction, created = self.transactions.get_or_create(code=code)
-
-        fields_to_update = {
-            'amount': amount,
-            'txn_type': txn_type,
-            'reference': reference,
-            'status': status,
-            'paid': paid,
-            'refundable': refundable,
-            'receipt': receipt,
-        }
-
-        for field, new_value in fields_to_update.items():
-            setattr(transaction, field, new_value)
-
-        transaction.save()
 
     # =======
     # Actions
@@ -239,8 +217,7 @@ class AbstractSource(models.Model):
         """
         Добавление новой транзакции оплаты
         """ 
-        if receipt is None:
-            receipt = False
+        receipt = receipt or False
 
         if status == 'succeeded':
             self.amount_debited += amount
@@ -255,41 +232,44 @@ class AbstractSource(models.Model):
 
     new_payment.alters_data = True
 
-    def update_payment(self, amount, reference, paid, refundable, status, code, receipt):
+    def update_payment(self, amount=None, reference="", status="", paid="", code="", refundable=True, receipt=False):
         """
         Обновление существующей транзакции оплаты.
         """
         if status != 'succeeded':
             return
 
-        # Определение, нужно ли обновление
-        updated_fields = [
-            ('amount_debited', amount, self.amount_debited),
-            ('payment_id', code, self.payment_id),
-            ('paid', paid, self.paid),
-            ('refundable', refundable, self.refundable)
-        ]
+        receipt = receipt or False
 
-        # Обновляем поля, если значения изменились
-        updated = False
-        for attr, new_value, current_value in updated_fields:
-            if new_value != current_value:
-                setattr(self, attr, new_value)
+        try:
+            updated = False
+            transaction = self.transactions.get(code=code)
+
+            if transaction.amount != amount:
+                self.amount_debited += amount - transaction.amount
+                transaction.amount = amount
                 updated = True
 
-        # Если были изменения, сохраняем объект и обновляем транзакцию
-        if updated:
-            self.save()
-            self._update_transaction(
-                AbstractTransaction.PAYMENT, 
-                amount, 
-                reference, 
-                status, 
-                paid, 
-                code, 
-                refundable, 
-                receipt
-            )
+            if transaction.paid != paid or self.paid != paid:
+                self.paid = paid
+                transaction.paid = paid
+                updated = True
+
+            if transaction.refundable != refundable or self.refundable != refundable:
+                self.refundable = refundable
+                transaction.refundable = refundable
+                updated = True
+
+            if self.payment_id != transaction.code:
+                self.payment_id = code
+                updated = True
+
+            if updated:
+                self.save()
+                transaction.save()
+
+        except self.transactions.model.DoesNotExist:
+            self.new_payment(amount, reference, status, paid, code, refundable, receipt)
 
         return updated
 
@@ -311,8 +291,7 @@ class AbstractSource(models.Model):
         """
         Добавление новой транзакции возврата
         """
-        if receipt is None:
-            receipt = False
+        receipt = receipt or False
 
         if status == 'succeeded':
             self.amount_refunded += amount
@@ -334,33 +313,40 @@ class AbstractSource(models.Model):
         """
         if status != 'succeeded':
             return
-    
-        updated_fields = [
-            ('amount_refunded', amount, self.amount_refunded),
-            ('refund_id', code, self.refund_id),
-            ('paid', paid, self.paid),
-            ('refundable', refundable, self.refundable)
-        ]
 
-        updated = False
-        for attr, new_value, current_value in updated_fields:
-            if new_value != current_value:
-                setattr(self, attr, new_value)
+        receipt = receipt or False
+
+        try:
+            updated = False
+            transaction = self.transactions.get(code=code)
+
+            if transaction.amount != amount:
+                self.amount_refunded += amount - transaction.amount
+                transaction.amount = amount
                 updated = True
 
-        # Если были изменения, сохраняем объект и обновляем транзакцию
-        if updated:
-            self.save()
-            self._update_transaction(
-                AbstractTransaction.REFUND, 
-                amount, 
-                reference, 
-                status, 
-                paid, 
-                code, 
-                refundable, 
-                receipt
-            )
+            if transaction.paid != paid or self.paid != paid:
+                self.paid = paid
+                transaction.paid = paid
+                updated = True
+
+            if transaction.refundable != refundable or self.refundable != refundable:
+                self.refundable = refundable
+                transaction.refundable = refundable
+                updated = True
+
+            if self.refund_id != transaction.code:
+                self.refund_id = code
+                updated = True
+
+            if updated:
+                self.save()
+                transaction.save()
+
+        except self.transactions.model.DoesNotExist:
+            self.new_payment(amount, reference, status, paid, code, refundable, receipt)
+
+        return updated
             
     update_refund.alters_data = True
 
