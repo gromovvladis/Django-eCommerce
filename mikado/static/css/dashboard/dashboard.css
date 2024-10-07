@@ -4868,7 +4868,7 @@ input[type=button].btn-block {
 
 
 
-.tabs-button-wrapper {
+.half-wrapper {
   max-width: 100%;
   width: 100%;
 }
@@ -4952,13 +4952,9 @@ input[type=button].btn-block {
       min-height: 44px
   }
 
-  .tabs-button-wrapper{
+  .half-wrapper{
     max-width: 680px;
   }
-
-  /* .tabs-button__icon{
-    padding: 1rem;
-  } */
 
   .tabs-button__icon span{
     display: inline-block;

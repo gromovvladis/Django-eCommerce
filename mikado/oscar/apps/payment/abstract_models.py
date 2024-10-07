@@ -184,6 +184,28 @@ class AbstractSource(models.Model):
             receipt=receipt
         )
 
+
+    def _update_transaction(self, txn_type, amount, reference, status, paid, code, refundable, receipt):
+        """
+        Обновление или создание транзакции с кодом 'code'.
+        """
+        transaction, created = self.transactions.get_or_create(code=code)
+
+        fields_to_update = {
+            'amount': amount,
+            'txn_type': txn_type,
+            'reference': reference,
+            'status': status,
+            'paid': paid,
+            'refundable': refundable,
+            'receipt': receipt,
+        }
+
+        for field, new_value in fields_to_update.items():
+            setattr(transaction, field, new_value)
+
+        transaction.save()
+
     # =======
     # Actions
     # =======
@@ -233,6 +255,46 @@ class AbstractSource(models.Model):
 
     new_payment.alters_data = True
 
+    def update_payment(self, amount, reference, paid, refundable, status, code, receipt):
+        """
+        Обновление существующей транзакции оплаты.
+        """
+        if status != 'succeeded':
+            return
+
+        # Определение, нужно ли обновление
+        updated_fields = [
+            ('amount_debited', amount, self.amount_debited),
+            ('payment_id', code, self.payment_id),
+            ('paid', paid, self.paid),
+            ('refundable', refundable, self.refundable)
+        ]
+
+        # Обновляем поля, если значения изменились
+        updated = False
+        for attr, new_value, current_value in updated_fields:
+            if new_value != current_value:
+                setattr(self, attr, new_value)
+                updated = True
+
+        # Если были изменения, сохраняем объект и обновляем транзакцию
+        if updated:
+            self.save()
+            self._update_transaction(
+                AbstractTransaction.PAYMENT, 
+                amount, 
+                reference, 
+                status, 
+                paid, 
+                code, 
+                refundable, 
+                receipt
+            )
+
+        return updated
+
+    update_payment.alters_data = True
+
     #REFUND
     def refund(self, amount, reference="", status="", paid="", code="", refundable=False, receipt=False):
         """
@@ -266,6 +328,41 @@ class AbstractSource(models.Model):
 
     new_refund.alters_data = True
 
+    def update_refund(self, amount=None, reference="", status="", paid=False, code="", refundable=False, receipt=False):
+        """
+        Обновление существующей транзакции возврата.
+        """
+        if status != 'succeeded':
+            return
+    
+        updated_fields = [
+            ('amount_refunded', amount, self.amount_refunded),
+            ('refund_id', code, self.refund_id),
+            ('paid', paid, self.paid),
+            ('refundable', refundable, self.refundable)
+        ]
+
+        updated = False
+        for attr, new_value, current_value in updated_fields:
+            if new_value != current_value:
+                setattr(self, attr, new_value)
+                updated = True
+
+        # Если были изменения, сохраняем объект и обновляем транзакцию
+        if updated:
+            self.save()
+            self._update_transaction(
+                AbstractTransaction.REFUND, 
+                amount, 
+                reference, 
+                status, 
+                paid, 
+                code, 
+                refundable, 
+                receipt
+            )
+            
+    update_refund.alters_data = True
 
     # ==========
     # Properties
