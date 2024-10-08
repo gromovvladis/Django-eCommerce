@@ -1,4 +1,3 @@
-# from pyexpat.errors import messages
 from django import shortcuts
 from django import http
 from django.contrib.sessions.serializers import JSONSerializer
@@ -8,7 +7,6 @@ from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import FormView, View
 from extra_views import ModelFormSetView
-from django.db.models import F
 
 from oscar.apps.basket.signals import basket_addition
 from oscar.core.loading import get_class, get_classes, get_model
@@ -96,20 +94,8 @@ class BasketView(ModelFormSetView):
         context["upsell_messages"] = self.get_upsell_messages(self.request.basket)
         context["order_total"] = OrderTotalCalculator().calculate(self.request.basket)
 
-        # if not self.saved_basket.is_empty:
-        #     saved_queryset = self.saved_basket.all_lines()
-        #     formset = SavedLineFormSet(
-        #         strategy=self.request.strategy,
-        #         basket=self.request.basket,
-        #         queryset=saved_queryset,
-        #         prefix="saved",
-        #     )
-        #     context["saved_formset"] = formset
-
-        # context["saved_basket"] = self.saved_basket.all_lines()
-
         return context
-
+    
     def get_success_url(self):
         return safe_referrer(self.request, "basket:summary")
 
@@ -213,7 +199,7 @@ class EmptyBasketView(View):
             return http.JsonResponse({"url": url, "status": 403}, status = 403)
         try:
             basket.flush()
-        except Exception as e:
+        except Exception:
             pass
         
         return http.JsonResponse({"url": url, "status": 200}, status = 200)

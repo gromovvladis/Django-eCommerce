@@ -19,6 +19,7 @@ class SearchInput(Input):
 
     input_type = "search"
 
+
 class SearchForm(FacetedSearchForm):
     """
     In Haystack, the search form is used for interpreting
@@ -91,12 +92,6 @@ class SearchForm(FacetedSearchForm):
                 continue
             field_name, value = facet_kv.split(":", 1)
 
-            # Validate query facets as they as passed unescaped to Solr
-            if field_name in VALID_FACET_QUERIES:
-                if value not in VALID_FACET_QUERIES[field_name]:
-                    # Invalid query value
-                    continue
-
             selected_multi_facets[field_name].append(value)
 
         return selected_multi_facets
@@ -113,11 +108,6 @@ class SearchForm(FacetedSearchForm):
         for field, values in self.selected_multi_facets.items():
             if not values:
                 continue
-            if field in VALID_FACET_QUERIES:
-                # Query facet - don't wrap value in speech marks and don't
-                # clean value. Query values should have been validated by this
-                # point and so we don't need to escape them.
-                sqs = sqs.narrow("%s:(%s)" % (field, " OR ".join(values)))
             else:
                 # Field facet - clean and quote the values
                 clean_values = ['"%s"' % sqs.query.clean(val) for val in values]

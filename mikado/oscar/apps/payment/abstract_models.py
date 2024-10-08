@@ -250,8 +250,7 @@ class AbstractSource(models.Model):
                 transaction.amount = amount
                 updated = True
 
-            if transaction.paid != paid or self.paid != paid:
-                self.paid = paid
+            if transaction.paid != paid:
                 transaction.paid = paid
                 updated = True
 

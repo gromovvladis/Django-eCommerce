@@ -37,11 +37,13 @@ const baseURL = window.location.origin;
 
 // Инициализация адреса
 document.addEventListener('DOMContentLoaded', function () {
-    var addressInital = line1.value;
-    if (addressInital) {
-        line1.readOnly = true;
-        line1.setAttribute('captured', true);
-        createMap(addressInital);
+    if (line1){
+        var addressInital = line1.value;
+        if (addressInital) {
+            line1.readOnly = true;
+            line1.setAttribute('captured', true);
+            createMap(addressInital);
+        }
     }
     validateCheckout();
     textares.forEach(function(textarea) {
@@ -54,25 +56,27 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Смена метода доставки
-shippingMethodButtons.forEach(function(button) {
-    button.addEventListener('click', function() {
-        shippingMethod = this.value;
-        shipping.value = shippingMethod;
-        let leftPosition = this.getBoundingClientRect().left - this.parentElement.getBoundingClientRect().left;
-        methodSwaper.style.left = `${leftPosition}px`;
-        GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
-            timeCaptured(result);
+if (shippingMethodButtons){
+    shippingMethodButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            shippingMethod = this.value;
+            shipping.value = shippingMethod;
+            let leftPosition = this.getBoundingClientRect().left - this.parentElement.getBoundingClientRect().left;
+            methodSwaper.style.left = `${leftPosition}px`;
+            GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
+                timeCaptured(result);
+            });
+            if (shippingMethod === "self-pick-up") {
+                addressFields.classList.add('d-none');
+                timeTitle.innerHTML = 'Время самовывоза';
+            } else {
+                addressFields.classList.remove('d-none');
+                timeTitle.innerHTML = 'Время доставки';
+            }
+            getNewTotals(shippingMethod);
         });
-        if (shippingMethod === "self-pick-up") {
-            addressFields.classList.add('d-none');
-            timeTitle.innerHTML = 'Время самовывоза';
-        } else {
-            addressFields.classList.remove('d-none');
-            timeTitle.innerHTML = 'Время доставки';
-        }
-        getNewTotals(shippingMethod);
     });
-});
+}
 
 // Выбрана доставка "самовывоз как можно скорее"
 deliveryTimeBtn.forEach(function(time_btn) {
@@ -82,10 +86,17 @@ deliveryTimeBtn.forEach(function(time_btn) {
 
         var delivery_time_method = time_btn.getAttribute("data-type");
         if (delivery_time_method === "now") {
-            GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
-                orderTime.value = result.timeUTC;
-                timeCaptured(result);
-            });
+            if (addressFields){
+                GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
+                    orderTime.value = result.timeUTC;
+                    timeCaptured(result);
+                });
+            } else {
+                GetTime({shippingMethod: shippingMethod}).then(function(result) {
+                    orderTime.value = result.timeUTC;
+                    timeCaptured(result);
+                });
+            }
             deliveryTimeLater.classList.add('hidden');
             deliveryTimeLater.classList.remove('active');
         } else {
@@ -112,6 +123,7 @@ function getNewTotals(selectedMethod, zonaId = null) {
     fetch(url, {
         method: 'GET',
         headers: {
+            'X-Requested-With': 'XMLHttpRequest',
             'Content-Type': 'application/json',
             'X-CSRFToken': csrf_token
         }
@@ -202,43 +214,45 @@ function checkValid() {
 
 // Валидация по адресу
 function validateAddress() {
-    addressValid = true;
-    shippingMethod = shipping.value;
-    if (shippingMethod === "zona-shipping") {
-        if (!line1.value || line1.getAttribute('captured') != "true" || line1.getAttribute('valid') != "true") {
-            addressValid = false;
-            errorAddress.classList.remove('d-none');
-            line1_container.classList.add("not-valid");
-        } else {
-            errorAddress.classList.add('d-none');
-            line1_container.classList.remove("not-valid");
-        }
-
-        if (line2.value > 1000 || line2.value < 1) {
-            addressValid = false;
-            errorFlat.classList.remove('d-none');
-            line2.classList.add("not-valid");
-        } else {
-            errorFlat.classList.add('d-none');
-            line2.classList.remove("not-valid");
-        }
-
-        if (line3.value > 100 || line3.value < 1) {
-            addressValid = false;
-            errorEnter.classList.remove('d-none');
-            line3.classList.add("not-valid");
-        } else {
-            errorEnter.classList.add('d-none');
-            line3.classList.remove("not-valid");
-        }
-
-        if (line4.value > 100 || line4.value < 1) {
-            addressValid = false;
-            errorFloor.classList.remove('d-none');
-            line4.classList.add("not-valid");
-        } else {
-            errorFloor.classList.add('d-none');
-            line4.classList.remove("not-valid");
+    if (addressFields){
+        addressValid = true;
+        shippingMethod = shipping.value;
+        if (shippingMethod === "zona-shipping") {
+            if (!line1.value || line1.getAttribute('captured') != "true" || line1.getAttribute('valid') != "true") {
+                addressValid = false;
+                errorAddress.classList.remove('d-none');
+                line1_container.classList.add("not-valid");
+            } else {
+                errorAddress.classList.add('d-none');
+                line1_container.classList.remove("not-valid");
+            }
+    
+            if (line2.value > 1000 || line2.value < 1) {
+                addressValid = false;
+                errorFlat.classList.remove('d-none');
+                line2.classList.add("not-valid");
+            } else {
+                errorFlat.classList.add('d-none');
+                line2.classList.remove("not-valid");
+            }
+    
+            if (line3.value > 100 || line3.value < 1) {
+                addressValid = false;
+                errorEnter.classList.remove('d-none');
+                line3.classList.add("not-valid");
+            } else {
+                errorEnter.classList.add('d-none');
+                line3.classList.remove("not-valid");
+            }
+    
+            if (line4.value > 100 || line4.value < 1) {
+                addressValid = false;
+                errorFloor.classList.remove('d-none');
+                line4.classList.add("not-valid");
+            } else {
+                errorFloor.classList.add('d-none');
+                line4.classList.remove("not-valid");
+            }
         }
     }
 }

@@ -71,7 +71,7 @@ class IndexView(CheckoutSessionMixin, generic.FormView):
 
 class CheckoutView(CheckoutSessionMixin,  generic.FormView):
    
-    template_name = "oscar/checkout/form-all.html"
+    template_name = "oscar/checkout/checkout_form.html"
     form_class = CheckoutForm
     success_url = reverse_lazy("checkout:payment-details")
     pre_conditions = [
@@ -87,8 +87,8 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
 
         initial = {}
         
-        if self.request.COOKIES.get('order_note'):
-            initial['order_note'] = unquote(unquote(self.request.COOKIES.get('order_note')))
+        if self.request.COOKIES.get('orderNote'):
+            initial['order_note'] = unquote(unquote(self.request.COOKIES.get('orderNote')))
         
         user_address = self.get_available_addresses()
 

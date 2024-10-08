@@ -134,8 +134,10 @@ class UpdateSourceView(UpdateView):
             )
             logger.info("Способ оплаты был обновлен пользователем {0}".format(request.user.id)) 
         except DebitedAmountIsNotEqualsRefunded as e:
+            logger.error(e) 
             messages.error(request, e)
         except Exception as e:
+            logger.error('Ошибка при обновлении транзакции: №{1}, Пользователь: {2}, Ошибка: {3}'.format(self.object, self.request.user.id, e)) 
             messages.error(request, "Ошибка обновления. Попробуйте позже")
         else:
             messages.info(request, u"Информация об источнике оплаты успешно обновлена")
@@ -216,6 +218,7 @@ class AddSourceView(FormView):
             new_source.save()
             messages.success(self.request, "Способ оплаты был успешно добавлен!")
         except Exception as e:
+            logger.error('Ошибка при добавлении способа оплаты для заказа: №{1}, Пользователь: {2}, Ошибка: {3}'.format(self.order, self.request.user.id, e)) 
             messages.error(self.request, f"Ошибка при добавлении способа оплаты: {e}")
     
         return HttpResponseRedirect(self.get_success_url())
@@ -267,6 +270,7 @@ class AddTransactionView(CreateView):
 
             messages.success(self.request, "Новая транзакция была успешно добавлена!")
         except Exception as e:
+            logger.error('Ошибка создание транзакции для источника оплаты: {1}, Пользователь: {2}, Ошибка: {3}'.format(source, self.request.user.id, e)) 
             messages.error(self.request, "Невозможно добавить транзакцию!")
     
         return HttpResponseRedirect(self.get_success_url())
@@ -338,9 +342,16 @@ class RefundTransactionView(DetailView):
                 amount=amount,
             )
             payment_method.create_refund_transaction(refund, self.object.source)
+            
+            payment_method.change_order_status(
+                tnx_status=refund.status, 
+                tnx_type='refund', 
+                order=self.object.source.order,
+            )
 
             logger.info('Транзакция №{0} была отменена пользователем. Деньги вернулись клиенту #{1}'.format(self.object.id ,request.user.id)) 
         except Exception as e:
+            logger.error('Ошибка возврата транзакции #{1}, Пользователь: {2}, Ошибка: {3}'.format(self.object.id ,request.user.id, e)) 
             messages.error(request, "Возврат не удался")
         else:
             messages.info(request, "Возврат совершен!")

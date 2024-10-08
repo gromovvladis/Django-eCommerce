@@ -74,7 +74,7 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
         elif obj.has_stockrecords:
             result = strategy.fetch_for_product(obj)
 
-        if result:
+        if result.price:
             return result.price.money
 
     def prepare_num_in_stock(self, obj):
@@ -84,7 +84,8 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
             return None
         elif obj.has_stockrecords:
             result = strategy.fetch_for_product(obj)
-            return result.stockrecord.net_stock_level
+            if result.stockrecord:
+                return result.stockrecord.net_stock_level
 
     def prepare(self, obj):
         prepared_data = super().prepare(obj)

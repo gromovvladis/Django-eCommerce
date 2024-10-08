@@ -68,7 +68,7 @@ if (cartWrapper){
             const url = document.URL;
             fetch(url, {
                 method: method,
-                body: formData,
+                body: new URLSearchParams(formData),
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -77,7 +77,6 @@ if (cartWrapper){
             })
             .then(response => response.json())
             .then(data => {
-                console.log('loaded')
                 basketSummary.classList.remove('loading');
                 if (data.status == 202) {
                     basketTotals.forEach(function(element) {
@@ -99,6 +98,7 @@ if (cartWrapper){
             method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': csrf_token,
             }
         })
@@ -120,6 +120,7 @@ if (cartWrapper){
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': csrf_token,
             }
         })
