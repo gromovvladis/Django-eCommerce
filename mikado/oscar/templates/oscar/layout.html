@@ -147,7 +147,7 @@
 {% endblock %}
 
 {% block scripts %}
-    {% comment %} {% compress js %} {% endcomment %}
+    {% compress js %}
         <script src="{% static "js/thirdpaty/slider/slider.js" %}" defer></script>
 
         <script src="{% static "js/frontend/cookie/cookie-main.js" %}" defer></script>
@@ -162,7 +162,7 @@
         <script src="{% static "js/frontend/auth/auth.js" %}" defer></script>
         <script src="{% static "js/frontend/partner/partner.js" %}" defer></script>
         <script src="{% static "js/frontend/footer/footer.js" %}" defer></script>
-    {% comment %} {% endcompress %} {% endcomment %}
+    {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}
