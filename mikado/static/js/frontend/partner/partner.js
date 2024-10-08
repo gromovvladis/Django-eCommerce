@@ -5,6 +5,7 @@ function loadPartnerModal() {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': csrf_token,
         }
     })
@@ -14,7 +15,6 @@ function loadPartnerModal() {
         partnerModalLoaded();
         modal.classList.toggle('d-none');
         document.body.classList.toggle('fixed');
-        setCookie("partner", data.partner_default);
     })
     .catch(error => {
         console.error(error);
@@ -53,7 +53,6 @@ function partnerModalLoaded() {
 
         radio.addEventListener('click', function(event) {
             if (radio.checked) {
-                console.log("radio.checked")
                 modal.classList.toggle('d-none');
                 document.body.classList.toggle('fixed');
             }
@@ -67,7 +66,12 @@ function partnerModalLoaded() {
 }
 
 function initPartner(basketPartner=null) {
-    if (!basketPartner && !(getCookie("partner"))) {
+    if (!basketPartner && !getCookie("partner")) {
+
+        console.log("partner open")
+        console.log(basketPartner)
+        console.log(getCookie("partner"))
+
         openPartnerModal();
     }
 }

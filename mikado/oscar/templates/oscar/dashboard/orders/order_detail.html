@@ -779,7 +779,7 @@
                                             <th>Тип транзакции</th>
                                             <th>Сумма</th>
                                             <th class="text-table-center">Оплачено</th>
-                                            <th class="text-table-center">Чек</th>
+                                            {% comment %} <th class="text-table-center">Чек</th> {% endcomment %}
                                             <th>Дата</th>
                                             <th>Сделать возврат</th>
                                         </tr>
@@ -812,13 +812,11 @@
                                                 </td>
                                                 <td data-label="Сумма" class="status">{{ txn.amount|currency:order.currency }}</td>
                                                 <td class="is_public" data-label="Оплачено">{{ txn.paid|yesno:"✔️,❌" }}</td>
-                                                <td class="is_public" data-label="Чек">{{ txn.receipt|yesno:"✔️,❌" }}</td>
+                                                {% comment %} <td class="is_public" data-label="Чек">{{ txn.receipt|yesno:"✔️,❌" }}</td> {% endcomment %}
                                                 <td data-label="Дата">{{ txn.date_created }}</td>
                                                 <td data-label="Сумма">
                                                     {% if txn.txn_type == "Payment" and txn.source_refundable and txn.refundable %}
                                                         <a href="{% url 'dashboard:refund-transaction' pk=txn.id %}">Вернуть деньги</a>
-                                                    {% elif txn.txn_type == "Payment" and not txn.source_refundable and txn.refundable %}
-                                                        Деньги вовращены
                                                     {% elif txn.txn_type == "Refund" %}
                                                         -
                                                     {% else %}

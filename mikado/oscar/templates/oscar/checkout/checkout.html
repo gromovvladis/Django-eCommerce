@@ -128,13 +128,13 @@
 
 {% block extrascripts %}
     {{ block.super }}
-    {% compress js %}
+    {% comment %} {% compress js %} {% endcomment %}
         <script src="{% static "js/thirdpaty/datetimepicker/air-datepicker.js" %}" defer></script>
-    {% endcompress %}
-    {% compress js %}
+    {% comment %} {% endcompress %} {% endcomment %}
+    {% comment %} {% compress js %} {% endcomment %}
         <script src="{% static "js/frontend/checkout/checkout-main.js" %}" defer></script>
         <script src="{% static "js/frontend/datetimepicker/order-timepicker.js" %}" defer></script>
         <script src="{% static "js/frontend/checkout/voucher.js" %}" defer></script>
         <script src="{% static "js/frontend/checkout/cookie-checkout.js" %}" defer></script>
-    {% endcompress %}
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}

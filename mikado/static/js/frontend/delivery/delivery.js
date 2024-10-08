@@ -1,4 +1,5 @@
-var line1Container = document.querySelector('#line1_container');
+var line1Container = document.getElementById('line1_container');
+var deliveryTime = document.getElementById('delivery_time');
 
 if (line1Container){
     var line1 = line1Container.querySelector('#id_line1');
@@ -11,11 +12,10 @@ if (line1Container){
     var controls = mapContainer.querySelector('#map_controls');
     var saveButton = mapContainer.querySelector('#submit_address');
     
-    var lon = document.querySelector('#id_coords_long');
-    var lat = document.querySelector('#id_coords_lat');
+    var lon = document.getElementById('id_coords_long');
+    var lat = document.getElementById('id_coords_lat');
     
-    var hints = document.querySelector('#line1_hints');
-    var deliveryTime = document.querySelector('#delivery_time');
+    var hints = document.getElementById('line1_hints');
     
     const MAPCENTER = [56.0435, 92.9075];
     const DELIVERYBOUNDS = [[56.043545, 92.6406], [55.9460, 93.2584]];
@@ -328,18 +328,23 @@ if (line1Container){
     
                     map.controls.add(closeButton);
     
-                    closeButton.events.add('click', function () {
-    
+                    closeButton.events.add('click', function (event) {
+
+
                         mapContainer.classList.remove('open');
                         map.geoObjects.remove(placemark);
                         controls.classList.add('d-none');
                     
                         addressInfo = null;
                         placemark = null;
-    
+
+                        
+                        event.preventDefault();
+                        event.stopPropagation();
+                        
                         setTimeout(() => {
-                            action_back = null;
-                          }, 500);
+                            actionBack = null;
+                          }, 700);
                     });
         
                     cleanButton = new ymaps.control.Button({     
@@ -623,85 +628,7 @@ if (line1Container){
     
     // ====================  ADDRESS RESOLVER  ===========================
     
-    
-    // время можно показывать пользователю на странице и менять в ордер тайм
-    function timeCaptured(result){
-        console.log("timeCaptured");
-        
-        if (result.error){
-            if (hints){
-                hints.innerHTML = result.error;
-                hints.classList.remove('d-none');
-            }
-            if (deliveryTime){
-                deliveryTime.innerHTML = '';
-                deliveryTime.classList.remove('active');
-                deliveryTime.classList.add('hidden');
-            }
-            controls.classList.add('d-none');
-            line1.setAttribute('valid', 'false');
-            validate();
-        } else {
-            hints.innerHTML = "";
-            hints.classList.add('d-none');
-            if (deliveryTime){
-                deliveryTime.classList.add('active');
-                deliveryTime.classList.remove('hidden');
-                deliveryTime.innerHTML = result.delivery_time_text;
-            }
-            line1.setAttribute('valid', 'true');
-            shippingCharge(result.zonaId);
-        }
-        
-        
-    }
-    
-    // запрос времени доставки на сервере со временем
-    function GetTime({coords='', address='', shippingMethod='', zonaId=''} = {}){
-        console.log('GetTime');
-        
-        // if (Array.isArray(coords)){
-        if (Array.isArray(coords)){
-            coords = coords.join(",")
-        }
-
-        return fetch(url_time, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrf_token
-            },
-            body: new URLSearchParams({
-                "coords": coords,
-                "address": address,
-                "shipping_method": shippingMethod,
-                "zonaId": zonaId,
-            }).toString() 
-        })
-        .then(response => response.json())
-        .then(response => {
-            return new Promise((resolve, reject) => {
-                resolve(response);
-                // switch (response.status) {
-                //     case 202:
-                //     case 200:
-                //         resolve(response);
-                //         break;
-                //     default:
-                //         reject(new Error('Unexpected status code', response.status));
-                //         break;
-                // }
-            });
-        })
-        .catch(error => {
-            console.log('error GetTime', error);
-            if (deliveryTime){
-                deliveryTime.classList.remove('active');
-            }
-        });
-        
-    }
-    
+     
     // проверка адреса в зоне доставки
     function getZonaId(coords) {
         console.log("getZonaId");
@@ -732,9 +659,7 @@ if (line1Container){
     }
     
     
-    
     // ====================  HELPERS  ===========================
-    
     
     
     // очистить адрес
@@ -786,8 +711,81 @@ if (line1Container){
             addressInfo = null;
             createMap(line1.value);
             mapContainer.classList.add('open');
-            action_back = function() {};
+            actionBack = function() {};
         });
     }
     
+}
+
+ // запрос времени доставки на сервере со временем
+ function GetTime({coords='', address='', shippingMethod='', zonaId=''} = {}){
+    console.log('GetTime');
+    
+    if (Array.isArray(coords)){
+        coords = coords.join(",")
+    }
+
+    return fetch(url_time, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrf_token
+        },
+        body: new URLSearchParams({
+            "coords": coords,
+            "address": address,
+            "shipping_method": shippingMethod,
+            "zonaId": zonaId,
+        }).toString() 
+    })
+    .then(response => response.json())
+    .then(response => {
+        return new Promise((resolve, reject) => {
+            resolve(response);
+        });
+    })
+    .catch(error => {
+        console.log('error GetTime', error);
+        if (deliveryTime){
+            deliveryTime.classList.remove('active');
+        }
+    });
+    
+}
+
+// время можно показывать пользователю на странице и менять в ордер тайм
+function timeCaptured(result){
+    console.log("timeCaptured");
+    
+    if (result.error){
+        if (hints){
+            hints.innerHTML = result.error;
+            hints.classList.remove('d-none');
+        }
+        if (deliveryTime){
+            deliveryTime.innerHTML = '';
+            deliveryTime.classList.remove('active');
+            deliveryTime.classList.add('hidden');
+        }
+        if (line1){
+            line1.setAttribute('valid', 'false');
+        }
+        controls.classList.add('d-none');
+        validate();
+    } else {
+        if (hints){
+            hints.innerHTML = "";
+            hints.classList.add('d-none');
+        }
+        if (deliveryTime){
+            deliveryTime.classList.add('active');
+            deliveryTime.classList.remove('hidden');
+            deliveryTime.innerHTML = result.delivery_time_text;
+        }
+        if (line1){
+            line1.setAttribute('valid', 'true');
+            shippingCharge(result.zonaId);
+        }
+    }
 }

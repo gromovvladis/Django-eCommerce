@@ -24,12 +24,12 @@ function getPaymentInfo() {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': csrf_token,
         }
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data.status);
         closeModal(data);
     })
     .catch(error => console.error('Error:', error));

@@ -25,11 +25,26 @@ class PartnerSelectModalView(APIView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
-        partner_select = render_to_string(self.template_name, context, request=request)
-        return http.JsonResponse({
-             "partner_modal": partner_select,
-             "partner_default": partner_default,
-        }, status = 202)
+        partner_modal_content = render_to_string(self.template_name, context, request=request)
+
+        response = http.JsonResponse({
+            "partner_modal": partner_modal_content,
+        }, status=200)
+        
+        # Получаем данные о партнере из куки и корзины
+        cookie_partner = request.COOKIES.get('partner')
+        basket_partner = getattr(request.basket, 'partner_id', None)
+        basket_partner = str(basket_partner) if basket_partner is not None else None
+
+        if basket_partner and basket_partner != cookie_partner:
+            # Устанавливаем партнера из корзины, если данные не совпадают с куки
+            response.set_cookie("partner", basket_partner)
+        elif not cookie_partner and not basket_partner:
+            # Если данные о партнере отсутствуют в куки и корзине, устанавливаем по умолчанию
+            response.set_cookie("partner", partner_default)
+
+        # Возвращаем JSON-ответ с данными
+        return response
 
 
     def get_context_data(self, *args, **kwargs):

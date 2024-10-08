@@ -40,7 +40,7 @@ class PaymentManager:
     
     @classmethod
     def get_sources(self, pk):
-        return Source.objects.filter(order_id=pk)
+        return Source.objects.filter(order_id=pk).select_related("order")
     
     @classmethod
     def get_last_source(self, pk:int):
@@ -173,45 +173,51 @@ class AbstractPaymentMethod(PaymentMethodHelper):
         pass
 
 
-    def _check_payment_balance(self, payment, source):
-        debited = payment.amount.value
-        payment_refunded = payment.refunded_amount.value
-        source_balance = source.amount_debited - source.amount_refunded
-        transaction_balance = debited - payment_refunded
+    def _check_balance(self, refund, payment, source):
+        
+        if isinstance(refund, RefundResponse) and refund.status == 'succeeded':
+            
+            refund_refunded = refund.amount.value
+            source_refunded = source.amount_refunded
 
-        if source_balance != transaction_balance:
-            logger.error(
-                "Сумма транзакции заказа №(%s) не равна балансу источника оплаты. "
-                "Требуется ручная проверка. Транзакция оплаты: №(%s)",
-                source.order.number,
-                payment.id,
-            )
-            raise DebitedAmountIsNotEqualsRefunded(
-                "Сумма оплаты не равна балансу источника оплаты. "
-                "Требуется ручная проверка. На данный момент оплачено: {0} Р.".format(float(transaction_balance))
-            )
+            if refund_refunded != source_refunded:
+                logger.error(
+                    "Сумма возврата заказа №(%s) не равна возврату источника оплаты. "
+                    "Требуется ручная проверка. Транзакция возврата: №(%s)",
+                    source.order.number,
+                    refund.id,
+                )
+                raise DebitedAmountIsNotEqualsRefunded(
+                    "Сумма возврата не равна возврату источника оплаты. "
+                    "Требуется ручная проверка. На данный момент возвращено: {0} Р.".format(float(refund_refunded))
+                )
 
+        if isinstance(payment, PaymentResponse) and payment.status == 'succeeded':
+            
+            debited = payment.amount.value
+            payment_refunded = payment.refunded_amount.value
+            source_balance = source.amount_debited - source.amount_refunded
+            transaction_balance = debited - payment_refunded
 
-    def _check_refund_balance(self, refund, payment, source):
+            if source_balance != transaction_balance:
+                logger.error(
+                    "Сумма транзакции заказа №(%s) не равна балансу источника оплаты. "
+                    "Требуется ручная проверка. Транзакция оплаты: №(%s)",
+                    source.order.number,
+                    payment.id,
+                )
+                raise DebitedAmountIsNotEqualsRefunded(
+                    "Сумма оплаты не равна балансу источника оплаты. "
+                    "Требуется ручная проверка. На данный момент оплачено: {0} Р.".format(float(transaction_balance))
+                )
+            
+        
+        if (isinstance(payment, PaymentResponse) and payment.status == 'succeeded' and
+            isinstance(refund, RefundResponse) and refund.status == 'succeeded'):
 
-        refund_refunded = refund.amount.value
-        source_refunded = source.amount_refunded
-
-        if refund_refunded != source_refunded:
-            logger.error(
-                "Сумма возврата заказа №(%s) не равна возврату источника оплаты. "
-                "Требуется ручная проверка. Транзакция возврата: №(%s)",
-                source.order.number,
-                refund.id,
-            )
-            raise DebitedAmountIsNotEqualsRefunded(
-                "Сумма возврата не равна возврату источника оплаты. "
-                "Требуется ручная проверка. На данный момент возвращено: {0} Р.".format(float(refund_refunded))
-            )
-
-        if isinstance(payment, PaymentResponse):
             payment_refunded = payment.refunded_amount.value
             refund_refunded = refund.amount.value
+
             if refund_refunded != payment_refunded:
                 logger.error(
                     "Сумма возврата заказа №(%s) не равна сумме возврата в объекте оплаты. "
@@ -233,13 +239,11 @@ class AbstractPaymentMethod(PaymentMethodHelper):
 
         if isinstance(refund, RefundResponse):
             refund_updated = self.update_refund(refund, source)
-            if refund.status == 'succeeded':
-                self._check_refund_balance(refund, payment, source)
         
         if isinstance(payment, PaymentResponse):
             payment_updated = self.update_payment(payment, source)
-            if payment.status == 'succeeded':
-                self._check_payment_balance(payment, source)
+
+        self._check_balance(refund, payment, source)
 
         if refund_updated:
             self.change_order_status(
@@ -470,8 +474,9 @@ class Yoomoney(AbstractPaymentMethod):
 
                 request = builder.build()
                 refund_responce = Refund.create(request)
-    
-        except Exception as e:
+                transaction.refundable = False
+                transaction.save()
+        except Exception:
             raise UnableToRefund('Не возможно произвести возврат')
 
         return refund_responce

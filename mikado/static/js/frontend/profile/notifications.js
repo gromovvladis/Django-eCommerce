@@ -16,8 +16,8 @@ if (notificationsForm) {
             fetch(actionUrl, {
                 method: method,
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
                     'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRFToken': csrf_token
                 },
                 body: new URLSearchParams({

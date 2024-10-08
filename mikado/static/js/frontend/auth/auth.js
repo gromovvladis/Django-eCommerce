@@ -6,6 +6,7 @@ function loadAuthModal(redirect_url) {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': csrf_token,
         }
     })
@@ -46,8 +47,8 @@ function authModalLoaded(redirect_url=null) {
             method: auth_form.getAttribute('method'),
             body: formData.toString(),
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
                 'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': csrf_token,
             },
         })
