@@ -32,8 +32,14 @@ async def nofit_edit(message: Message, state: FSMContext):
     await message.answer("Выберите новую настройку уведомлений", reply_markup=notif_keyboard)
 
 
-@settings_router.message(F.state.in_((StaffNotif.status_edit, StaffNotif.notif_status)), F.text == cancel_text)
+@settings_router.message(StaffNotif.status_edit, F.text == cancel_text)
 async def nofit_cancel(message: Message, state: FSMContext):
+    await message.answer("Настройки не изменены", reply_markup=staff_buttons)
+    await state.clear()
+
+
+@settings_router.message(StaffNotif.notif_status, F.text == cancel_text)
+async def nofit_cancel2(message: Message, state: FSMContext):
     await message.answer("Настройки не изменены", reply_markup=staff_buttons)
     await state.clear()
 

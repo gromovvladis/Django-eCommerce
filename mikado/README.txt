@@ -270,6 +270,8 @@
     sudo supervisorctl restart all
     redis-cli Flushall
 
+    sudo supervisorctl stop all
+
 
 
 
