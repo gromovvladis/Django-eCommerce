@@ -2,8 +2,10 @@ import json
 import requests
 from django.conf import settings
 
-evator_app_token = settings.EVOTOR_TOKEN
+import logging
+logger = logging.getLogger("oscar.crm")
 
+evator_app_token = settings.EVOTOR_TOKEN
 cashier_login = settings.MOBILE_CASHIER_LOGIN
 cashier_pass = settings.MOBILE_CASHIER_PASSWORD
 
@@ -84,15 +86,18 @@ class EvotorAPICloud:
             elif method == "DELETE":
                 response = requests.delete(url, headers=self.headers)
             else:
+                logger.error(f"Ошибка HTTP запроса. Неизвестный http метод: {method}")
                 raise ValueError(f"Unsupported HTTP method: {method}")
 
             response.raise_for_status()  # Проверка на успешный статус запроса (2xx)
             return response.json()       # Возврат данных в формате JSON
 
         except requests.exceptions.HTTPError as http_err:
-            print(f"HTTP error occurred: {http_err}")
+            logger.error(f"Ошибка HTTP запроса при отправке Эвотор запроса: {http_err}")
+            return {"error": f"HTTP error occurred: {http_err}"}
         except Exception as err:
-            print(f"Other error occurred: {err}")
+            logger.error(f"Неизвестная ошибка при отправке Эвотор запроса: {err}")
+            return {"error": f"Other error occurred: {err}"}
 
 
 class EvotorPartnerClient(EvotorAPICloud):

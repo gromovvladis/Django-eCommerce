@@ -30,7 +30,8 @@ db.sqlite
 /public/static/*
 /public/media/*
 /whoosh_index/*
-/migrations/
+
+# migrations
 /migrations/*
 
 # IDE files
