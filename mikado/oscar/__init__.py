@@ -1,6 +1,4 @@
 from .run_celery import app as celery_app
-# from telegram_bot import application as telegram_app
-# __all__ = ("celery_app", "telegram_app")
 __all__ = ("celery_app",)
 
 # Use 'alpha', 'beta', 'rc' or 'final' as the 4th element to indicate release type.
@@ -57,6 +55,7 @@ INSTALLED_APPS = [
     'oscar.apps.voucher.apps.VoucherConfig',
     'oscar.apps.wishlists.apps.WishlistsConfig',
     'oscar.apps.telegram.apps.TelegramConfig',
+    'oscar.apps.crm.apps.CRMConfig',
 
     "oscar.apps.dashboard.apps.DashboardConfig",
     "oscar.apps.dashboard.reports.apps.ReportsDashboardConfig",

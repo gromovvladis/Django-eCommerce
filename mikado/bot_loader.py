@@ -5,7 +5,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from django.conf import settings
 from aiogram.client.bot import DefaultBotProperties
 
-bot = Bot(token=settings.TELEGRAM_BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token=settings.TELEGRAM_STAFF_BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 if settings.DEBUG:
     storage = MemoryStorage()
 else:

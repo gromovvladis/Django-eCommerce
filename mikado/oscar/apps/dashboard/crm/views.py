@@ -1,21 +1,19 @@
-from decimal import Decimal as D
-
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q, Sum, fields
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import JsonResponse
+from django.template.response import TemplateResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView, CreateView, View
+from django_tables2 import SingleTableView
 
-from oscar.apps.telegram.models import TelegramMessage
+from oscar.apps.crm.client import EvatorCloud
 from oscar.core.loading import get_class, get_model
 from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs
 
-from django.http import JsonResponse
-from rest_framework.views import APIView
-from crm.client import EvotorAPIClient
 
 import logging
 logger = logging.getLogger("oscar.dashboard")
@@ -25,162 +23,146 @@ Order = get_model("order", "Order")
 Line = get_model("order", "Line")
 
 
-# ========= API Endpoints (Уведомления) =========
+class CRMOrderListView(View):
+    # template_name = 'oscar/dashboard/crm/crm_orders_list.html'
+    # table_class = CRMOrderTable
+    # context_table_name = "orders"
+    # paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+    
+    template_name = 'oscar/dashboard/crm/test_list.html'
+    context_object_name = "test"
+    
+    # def get_queryset(self):
+    def get_context_data(self):
+        try:
+            res = EvatorCloud().get_terminals()
+        except Exception as e:
+            res = []
+            logger.error("Error CRMOrderListView - %s" % str(e))
 
-class CRMStaffEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/staffs """
+        return res
+    
     def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMStaffEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMStaffEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
+        context = self.get_context_data()
+        return TemplateResponse(request, self.template_name, {self.context_object_name: context})
 
 
-class CRMTerminalEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/terminals """
+
+class CRMPartnerListView(View):
+    # template_name = 'oscar/dashboard/crm/crm_partners_list.html'
+    # table_class = CRMPartnerTable
+    # context_table_name = "partners"
+    # paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+    
+    template_name = 'oscar/dashboard/crm/test_list.html'
+    context_object_name = "test"
+    
+    def get_context_data(self):
+        try:
+            res = EvatorCloud().get_partners()
+        except Exception as e:
+            res = []
+            logger.error("Error CRMPartnerListView - %s" % str(e))
+
+        return res
+    
     def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMTerminalEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
+        context = self.get_context_data()
+        return TemplateResponse(request, self.template_name, {self.context_object_name: context})
+    
 
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMTerminalEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
+class CRMStaffListView(View):
+    # template_name = 'oscar/dashboard/crm/crm_staffs_list.html'
+    # table_class = CRMStaffTable
+    # context_table_name = "staffs"
+    # paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+    
+    template_name = 'oscar/dashboard/crm/test_list.html'
+    context_object_name = "test"
+    
+    def get_context_data(self):
+        try:
+            res = EvatorCloud().get_staffs()
+        except Exception as e:
+            res = []
+            logger.error("Error CRMStaffListView - %s" % str(e))
 
-
-class CRMPartnerEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/partners """
+        return res
+    
     def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMPartnerEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMPartnerEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
+        context = self.get_context_data()
+        return TemplateResponse(request, self.template_name, {self.context_object_name: context})
 
 
-class CRMProductEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/products """
+
+class CRMProductListView(View):
+    # template_name = 'oscar/dashboard/crm/crm_products_list.html'
+    # table_class = CRMProductTable
+    # context_table_name = "products"
+    # paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+    
+    template_name = 'oscar/dashboard/crm/test_list.html'
+    context_object_name = "test"
+    
+    def get_context_data(self):
+        try:
+            res = EvatorCloud().get_products()
+        except Exception as e:
+            res = []
+            logger.error("Error CRMProductListView - %s" % str(e))
+
+        return res
+    
+    
     def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMProductEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMProductEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
+        context = self.get_context_data()
+        return TemplateResponse(request, self.template_name, {self.context_object_name: context})
+    
 
 
-class CRMReceiptEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/receipts """
+class CRMReceiptListView(View):
+    # template_name = 'oscar/dashboard/crm/crm_receipts_list.html'
+    # table_class = CRMReceiptTable
+    # context_table_name = "receipts"
+    # paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+    
+    template_name = 'oscar/dashboard/crm/test_list.html'
+    context_object_name = "test"
+    
+    def get_context_data(self):
+        try:
+            res = EvatorCloud().get_terminals()
+        except Exception as e:
+            res = []
+            logger.error("Error CRMReceiptListView - %s" % str(e))
+
+        return res
+
     def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMReceiptEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMReceiptEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
+        context = self.get_context_data()
+        return TemplateResponse(request, self.template_name, {self.context_object_name: context})
+    
 
 
-class CRMDocsEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/docs """
+class CRMDocListView(View):
+    # template_name = 'oscar/dashboard/crm/crm_receipts_list.html'
+    # table_class = CRMReceiptTable
+    # context_table_name = "receipts"
+    # paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+    
+    template_name = 'oscar/dashboard/crm/test_list.html'
+    context_object_name = "test"
+    
+    def get_context_data(self):
+        try:
+            res = EvatorCloud().get_docs()
+        except Exception as e:
+            res = []
+            logger.error("Error CRMDocListView - %s" % str(e))
+
+        return res
+    
     def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMDocsEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMDocsEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-
-
-class CRMSubscriptionSetupEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/subscription/setup """
-    def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMSubscriptionSetupEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMSubscriptionSetupEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-
-
-class CRMSubscriptionEventEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/subscription/event """
-    def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMSubscriptionEventEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMSubscriptionEventEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-
-
-class CRMTokenEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/user/token """
-    def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMTokenEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMTokenEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-
-
-class CRMUserCreateEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/user/create """
-    def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMUserCreateEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMUserCreateEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-
-
-class CRMUserVerifyEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/user/verify """
-    def get(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMUserVerifyEndpointView get", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-      
-
-    def post(self, request, *args, **kwargs):
-        send_message_to_staffs("CRMUserVerifyEndpointView post", TelegramMessage.NEW)
-        return JsonResponse({"ok": "ok"}, status = 200)
-
-
-# ========= Dashboard views =========
-
-
-class CRMOrderListView(ListView):
-    pass
-
-
-class CRMPartnerListView(ListView):
-    pass
-
-
-class CRMStaffListView(ListView):
-    pass
-
-
-class CRMProductListView(ListView):
-    pass
-
-
-class CRMReceiptListView(ListView):
-    pass
-
-
-class CRMDocListView(ListView):
-    pass
+        context = self.get_context_data()
+        return TemplateResponse(request, self.template_name, {self.context_object_name: context})
+    
