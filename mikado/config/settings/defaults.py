@@ -254,24 +254,28 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "icon": "fas fa-crm",
         "children": [
             {
-                "label": "Отправленные заказы",
+                "label": "Заказы",
                 "url_name": "dashboard:crm-orders",
             },
             {
-                "label": "Стоп-лист",
-                "url_name": "dashboard:crm-stop-list",
+                "label": "Точки продаж",
+                "url_name": "dashboard:crm-partners",
             },
             {
-                "label": "Прейскурант",
-                "url_name": "dashboard:crm-price-list",
+                "label": "Персонал",
+                "url_name": "dashboard:crm-staffs",
             },
             {
-                "label": "Курьеры",
-                "url_name": "dashboard:crm-couriers",
+                "label": "Продукты",
+                "url_name": "dashboard:crm-products",
             },
             {
-                "label": "Доставки",
-                "url_name": "dashboard:crm-delivery",
+                "label": "Чеки",
+                "url_name": "dashboard:crm-receipts",
+            },
+            {
+                "label": "Документы",
+                "url_name": "dashboard:crm-docs",
             },
         ],
     },

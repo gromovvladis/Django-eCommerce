@@ -197,6 +197,15 @@
     Запускаем Certbot:
         sudo certbot --nginx
 
+    Установка сертификата Минцифры
+        Скачать файлы (скачаются в корень):
+            wget https://gu-st.ru/content/lending/russian_trusted_sub_ca_pem.crt
+            wget https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt
+        Переместите файлы сертификатов в хранилище сертификатов в каталог /usr/local/share/ca-certificates/
+        update-ca-certificates / Обновить сертификаты
+        openssl s_client -connect sberbank.ru:443 2>/dev/null | grep 'Verify return code' / проверка
+        Verify return code: 0 (ok) / если такоей ответ, то сертификаты вставли
+
 
 10. Запускаем Supervisor для сайта и для Celery
     переходим в папку супервизора

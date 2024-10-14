@@ -1,8 +1,3 @@
-# pylint: disable=wildcard-import, unused-wildcard-import
-
-"""
-Promo goods
-"""
 from oscar.apps.home.abstract_models import *
 from oscar.core.loading import is_model_registered
 
