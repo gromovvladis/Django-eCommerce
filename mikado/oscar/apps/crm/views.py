@@ -1,3 +1,4 @@
+import json
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
@@ -14,6 +15,7 @@ from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 
 
 import logging
@@ -28,114 +30,220 @@ CRMUser = get_model("crm", "CRMUser")
 # ========= API Endpoints (Уведомления) =========
 
 class CRMStaffEndpointView(APIView):
+
+    permission_classes = [AllowAny]
+
     """ https://mikado-sushi.ru/crm/api/staffs """
     def get(self, request, *args, **kwargs):
         send_message_to_staffs("CRMStaffEndpointView GET", TelegramMessage.NEW)
-        logging.info(f"CRMStaffEndpointView get {request}")
-        send_message_to_staffs(f"CRMStaffEndpointView get {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+
+        logging.info(f"CRMStaffEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMStaffEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
       
 
     def post(self, request, *args, **kwargs):
         send_message_to_staffs("CRMProductEndpointView POST", TelegramMessage.NEW)
-        logging.info(f"CRMStaffEndpointView post {request}")
-        send_message_to_staffs(f"CRMStaffEndpointView post {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMStaffEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMStaffEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
 
 
 class CRMTerminalEndpointView(APIView):
+
+    permission_classes = [AllowAny]
+
     """ https://mikado-sushi.ru/crm/api/terminals """
     def get(self, request, *args, **kwargs):
         send_message_to_staffs("CRMTerminalEndpointView GET", TelegramMessage.NEW)
-        logging.info(f"CRMTerminalEndpointView get {request}")
-        send_message_to_staffs(f"CRMTerminalEndpointView get {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMTerminalEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMTerminalEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
       
 
     def post(self, request, *args, **kwargs):
         send_message_to_staffs("CRMProductEndpointView POST", TelegramMessage.NEW)
-        logging.info(f"CRMTerminalEndpointView post {request}")
-        send_message_to_staffs(f"CRMTerminalEndpointView post {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMTerminalEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMTerminalEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
 
 
 class CRMPartnerEndpointView(APIView):
+
+    permission_classes = [AllowAny]
+
     """ https://mikado-sushi.ru/crm/api/partners """
     def get(self, request, *args, **kwargs):
         send_message_to_staffs("CRMPartnerEndpointView GET", TelegramMessage.NEW)
-        logging.info(f"CRMPartnerEndpointView get {request}")
-        send_message_to_staffs(f"CRMPartnerEndpointView get {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMPartnerEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMPartnerEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
       
 
     def post(self, request, *args, **kwargs):
         send_message_to_staffs("CRMProductEndpointView POST", TelegramMessage.NEW)
-        logging.info(f"CRMPartnerEndpointView post {request}")
-        send_message_to_staffs(f"CRMPartnerEndpointView post {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMPartnerEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMPartnerEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
 
 
 class CRMProductEndpointView(APIView):
+
+    permission_classes = [AllowAny]
+
     """ https://mikado-sushi.ru/crm/api/products """
     def get(self, request, *args, **kwargs):
         send_message_to_staffs("CRMProductEndpointView GET", TelegramMessage.NEW)
-        logging.info(f"CRMProductEndpointView get {request}")
-        send_message_to_staffs(f"CRMProductEndpointView get {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMProductEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMProductEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
       
 
     def post(self, request, *args, **kwargs):
         send_message_to_staffs("CRMProductEndpointView POST", TelegramMessage.NEW)
-        logging.info(f"CRMProductEndpointView post {request}")
-        send_message_to_staffs(f"CRMProductEndpointView post {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMProductEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMProductEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
 
 
 class CRMReceiptEndpointView(APIView):
+
+    permission_classes = [AllowAny]
+
     """ https://mikado-sushi.ru/crm/api/receipts """
     def get(self, request, *args, **kwargs):
         send_message_to_staffs("CRMReceiptEndpointView EVENT", TelegramMessage.NEW)
-        logging.info(f"CRMReceiptEndpointView get {request}")
-        send_message_to_staffs(f"CRMReceiptEndpointView get {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMReceiptEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMReceiptEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
       
 
     def post(self, request, *args, **kwargs):
         send_message_to_staffs("CRMReceiptEndpointView POST", TelegramMessage.NEW)
-        logging.info(f"CRMReceiptEndpointView post {request}")
-        send_message_to_staffs(f"CRMReceiptEndpointView post {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMReceiptEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMReceiptEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
 
 
 class CRMDocsEndpointView(APIView):
+
+    permission_classes = [AllowAny]
+
     """ https://mikado-sushi.ru/crm/api/docs """
     def get(self, request, *args, **kwargs):
         send_message_to_staffs("CRMDocsEndpointView GET", TelegramMessage.NEW)
-        logging.info(f"CRMDocsEndpointView get {request}")
-        send_message_to_staffs(f"CRMDocsEndpointView get {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMDocsEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMDocsEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
       
 
     def post(self, request, *args, **kwargs):
         send_message_to_staffs("CRMDocsEndpointView POST", TelegramMessage.NEW)
-        logging.info(f"CRMDocsEndpointView post {request}")
-        send_message_to_staffs(f"CRMDocsEndpointView post {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMDocsEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMDocsEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
 
 
 class CRMInstallationEndpointView(APIView):
+
+    permission_classes = [AllowAny]
+
     """ https://mikado-sushi.ru/crm/api/subscription/setup """
     def get(self, request, *args, **kwargs):
         send_message_to_staffs("CRMInstallationEndpointView GET", TelegramMessage.NEW)
-        logging.info(f"CRMInstallationEndpointView get {request}")
-        send_message_to_staffs(f"CRMInstallationEndpointView get {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMInstallationEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMInstallationEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
         return JsonResponse({"ok": "ok"}, status = 200)
       
 
     def post(self, request, *args, **kwargs):
         send_message_to_staffs("CRMInstallationEndpointView POST", TelegramMessage.NEW)
-        logging.info(f"CRMInstallationEndpointView post {request}")
-        send_message_to_staffs(f"CRMInstallationEndpointView post {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMInstallationEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMInstallationEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
         return JsonResponse({"ok": "ok"}, status = 200)
 
 
@@ -144,22 +252,33 @@ class CRMInstallationEndpointView(APIView):
 
 
 class CRMRegisterEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/user/create """
+    """ https://mikado-sushi.ru/crm/api/user/register """
 
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         send_message_to_staffs("CRMRegisterEndpointView GET", TelegramMessage.NEW)
-        logging.info(f"CRMRegisterEndpointView get {request}")
-        send_message_to_staffs(f"CRMRegisterEndpointView get {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMRegisterEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMRegisterEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         return JsonResponse({"ok": "ok"}, status = 200)
       
     def post(self, request, *args, **kwargs):
-
         send_message_to_staffs("CRMRegisterEndpointView POST", TelegramMessage.NEW)
-        logging.info(f"CRMRegisterEndpointView post {request}")
-        send_message_to_staffs(f"CRMRegisterEndpointView post {request}", TelegramMessage.TECHNICAL)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMRegisterEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMRegisterEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
 
         serializer = CRMUserRegisterSerializer(data=request.data)
         if not serializer.is_valid():
@@ -201,22 +320,33 @@ class CRMRegisterEndpointView(APIView):
 
 
 class CRMLoginEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/user/verify """
+    """ https://mikado-sushi.ru/crm/api/user/login """
       
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [AllowAny]
     
     def get(self, request, *args, **kwargs):
         send_message_to_staffs("CRMLoginEndpointView GET", TelegramMessage.NEW)
-        logging.info(f"CRMLoginEndpointView get {request}")
-        send_message_to_staffs(f"CRMLoginEndpointView get {request}", TelegramMessage.NEW)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMLoginEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMLoginEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
         return JsonResponse({"ok": "ok"}, status = 200)
 
     def post(self, request):
-
         send_message_to_staffs("CRMLoginEndpointView POST", TelegramMessage.NEW)
-        logging.info(f"CRMLoginEndpointView get {request}")
-        send_message_to_staffs(f"CRMLoginEndpointView get {request}", TelegramMessage.NEW)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "query_params": request.query_params.dict(),
+        }
+        logging.info(f"CRMLoginEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"CRMLoginEndpointView get request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
 
         serializer = CRMUserLoginSerializer(data=request.data)
         if not serializer.is_valid():

@@ -4,6 +4,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model
 
+import logging
+logger = logging.getLogger("oscar.telegram")
+
 User = get_user_model()
 Staff = get_model("user", "Staff")
 TelegramMessage = get_model("telegram", "TelegramMessage")
@@ -55,8 +58,10 @@ def send_message(chat_id: int, text: str, type: str = TelegramMessage.MISC, user
         return response_data
 
     except requests.exceptions.HTTPError as http_err:
+        logger.error(f"Ошибка HTTP запроса при отправке телеграм сообщения синхроно: {http_err}")
         raise Exception(f"HTTP error occurred: {http_err}")
     except Exception as err:
+        logger.error(f"Ошибка при отправке телеграм сообщения синхроно: {err}")
         raise Exception(f"An error occurred: {err}")
     
 
