@@ -5,7 +5,8 @@ from django.conf import settings
 import logging
 logger = logging.getLogger("oscar.crm")
 
-evator_app_token = settings.EVOTOR_TOKEN
+evator_cloud_token = settings.EVOTOR_CLOUD_TOKEN
+
 cashier_login = settings.MOBILE_CASHIER_LOGIN
 cashier_pass = settings.MOBILE_CASHIER_PASSWORD
 
@@ -39,7 +40,7 @@ class EvotorAPICloud:
    
     def __init__(
             self, 
-            api_token: str = evator_app_token,   # Токен приложения для авторизации в кассе. Получается у разработчика Эвотор Облако.
+            cloud_token: str = evator_cloud_token,   # Токен приложения для авторизации в кассе. Получается у разработчика Эвотор Облако.
             base_url: str = "https://api.evotor.ru/api/", 
         ):
         """
@@ -49,12 +50,12 @@ class EvotorAPICloud:
         :param base_url: Базовый URL для API. По умолчанию 'https://api.evotor.ru/api/'. Для запросов к облаку
         :param cashier_url: Базовый URL для API. По умолчанию 'https://api.evotor.ru/api/'. Для запросов к кассе
         """
-        self.api_token = api_token
+        self.cloud_token = cloud_token
         self.base_url = base_url
 
         self.headers = {
-            "X-Authorization": self.api_token,
-            "Authorization": f"Bearer {self.api_token}",
+            "X-Authorization": self.cloud_token,
+            "Authorization": f"Bearer {self.cloud_token}",
             "Content-Type": "application/vnd.evotor.v2+json",
             "Accept": "application/vnd.evotor.v2+json",
         }

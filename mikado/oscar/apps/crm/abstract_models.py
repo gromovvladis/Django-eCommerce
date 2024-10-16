@@ -1,32 +1,38 @@
-import uuid
 from django.db import models
 
+class AbstractCRMEvent(models.Model):
 
-class AbstractCRMUser(models.Model):
-    user_id = models.CharField(max_length=20, unique=True)
-    custom_field = models.TextField(blank=True, null=True)
+    body = models.TextField()
 
-    def __str__(self):
-        return self.user_id
+    TERMINAL, PARTNER, RECEIPT, DOC = "TERMINAL", "PARTNER", "RECEIPT", "DOC"
+    INSTALLATION, STAFF, PRODUCT, MICS  = "INSTALLATION", "STAFF", "PRODUCT", "MICS"
+    sender_choices = (
+        (TERMINAL, "Терминал"),
+        (PARTNER, "Точка продажи"),
+        (RECEIPT, "Чек"),
+        (DOC, "Документы"),
+        (INSTALLATION, "Установка / Удаление"),
+        (STAFF, "Персонал"),
+        (PRODUCT, "Продукты"),
+        (MICS, "Неизвестно"),
+    )
+    sender = models.CharField(max_length=32, choices=sender_choices, default=MICS)
     
+    CREATION, DELETE, UPDATE, INFO = "CREATION", "DELETE", "UPDATE", "INFO"
+    type_choices = (   
+        (CREATION, "Создание"),
+        (DELETE, "Удаление"),
+        (UPDATE, "Обновление"),
+        (INFO, "Инфо"),
+    )
+    type = models.CharField(max_length=255, choices=type_choices, default=INFO)
+
+    date_sent = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         abstract = True
-
-
-class AbstractCRMToken(models.Model):
-    key = models.CharField(max_length=40, primary_key=True, editable=False)
-    crm_user = models.OneToOneField("crm.CRMUser", on_delete=models.CASCADE, related_name='token')
-    created = models.DateTimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        if not self.key:
-            self.key = self.generate_key()
-        super().save(*args, **kwargs)
-
-    @staticmethod
-    def generate_key():
-        return uuid.uuid4().hex
-    
-    class Meta:
-        abstract = True
+        app_label = "crm"
+        ordering = ("-date_sent",)
+        verbose_name = "Событие СRM"
+        verbose_name_plural = "События СRM"
 

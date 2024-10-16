@@ -1,5 +1,5 @@
 
-from django_tables2 import A, LinkColumn, TemplateColumn
+from django_tables2 import A, TemplateColumn
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class
@@ -8,13 +8,14 @@ DashboardTable = get_class("dashboard.tables", "DashboardTable")
 
 class PaymentListTable(DashboardTable):
 
-    id = LinkColumn("dashboard:payment-detail", args=[A("id")], verbose_name='Номер транзакции')
-
-    amount = TemplateColumn(
-        verbose_name="Сумма",
-        template_name="oscar/dashboard/payments/payments_row_amount.html",
-        accessor=A("amount"),
-        order_by="amount.value",
+    order = TemplateColumn(
+        verbose_name="Заказ",
+        template_name="oscar/dashboard/payments/payments_row_order.html",
+        accessor=A("description"),
+        order_by="description",
+        attrs = {'th': {'class': 'name'},
+                 'td': {'class': 'name'},
+        },
     )
 
     status = TemplateColumn(
@@ -22,27 +23,31 @@ class PaymentListTable(DashboardTable):
         template_name="oscar/dashboard/payments/payments_row_status.html",
         accessor=A("status"),
         order_by="status",
+        attrs = {'th': {'class': 'status'},}
     )
-    
+
+    amount = TemplateColumn(
+        verbose_name="Сумма",
+        template_name="oscar/dashboard/payments/payments_row_amount.html",
+        accessor=A("amount"),
+        order_by="amount.value",
+        attrs = {'th': {'class': 'price'}}
+    )
+
     paid = TemplateColumn(
         verbose_name="Оплачено",
-        template_name="oscar/dashboard/payments/payments_row_paid.html",
+        template_name="oscar/dashboard/table/boolean.html",
         accessor=A("paid"),
         order_by="paid",
+        attrs = {'th': {'class': 'paid'},}
     )
 
     refundable = TemplateColumn(
         verbose_name="Возврат возможен",
-        template_name="oscar/dashboard/payments/payments_row_refundable.html",
+        template_name="oscar/dashboard/table/boolean.html",
         accessor=A("refundable"),
         order_by="refundable",
-    )
-
-    order = TemplateColumn(
-        verbose_name="Заказ",
-        template_name="oscar/dashboard/payments/payments_row_order.html",
-        accessor=A("description"),
-        order_by="description",
+        attrs = {'th': {'class': 'paid'},}
     )
 
     created_at = TemplateColumn(
@@ -50,31 +55,33 @@ class PaymentListTable(DashboardTable):
         template_name="oscar/dashboard/payments/payments_row_created_at.html",
         accessor=A("created_at"),
         order_by="created_at",
+        attrs = {'th': {'class': 'date'},}
     )
 
     actions = TemplateColumn(
-        verbose_name="Действия",
+        verbose_name="",
         template_name="oscar/dashboard/payments/payments_row_actions.html",
         orderable=False,
+        attrs = {'th': {'class': 'actions'},}
     )
 
     icon = "sitemap"
     caption = ngettext_lazy("%s Платеж", "%s Платежей")
 
     class Meta(DashboardTable.Meta):
-        fields = ("id", "order", "amount", "status", "paid", "refundable", "created_at", "actions")
-        sequence = ("id", "order", "amount", "status", "paid", "refundable", "created_at", "..." , "actions")
+        fields = ("order", "amount", "status", "paid", "refundable", "created_at", "actions")
+        sequence = ("order", "amount", "status", "paid", "refundable", "created_at", "..." , "actions")
 
+        empty_text = "Нет созданых платежей"
 
 class RefundListTable(DashboardTable):
 
-    id = LinkColumn("dashboard:refund-detail", args=[A("id")], verbose_name='Номер транзакции')
-
-    amount = TemplateColumn(
-        verbose_name="Сумма",
-        template_name="oscar/dashboard/payments/payments_row_amount.html",
-        accessor=A("amount"),
-        order_by="amount.value",
+    order = TemplateColumn(
+        verbose_name="Заказ",
+        template_name="oscar/dashboard/payments/payments_row_order.html",
+        accessor=A("description"),
+        order_by="description",
+        attrs = {'th': {'class': 'name'},},
     )
 
     status = TemplateColumn(
@@ -83,14 +90,14 @@ class RefundListTable(DashboardTable):
         accessor=A("status"),
         order_by="status",
     )
-
-    order = TemplateColumn(
-        verbose_name="Заказ",
-        template_name="oscar/dashboard/payments/payments_row_order.html",
-        accessor=A("description"),
-        order_by="description",
-    )
     
+    amount = TemplateColumn(
+        verbose_name="Сумма",
+        template_name="oscar/dashboard/payments/payments_row_amount.html",
+        accessor=A("amount"),
+        order_by="amount.value",
+    )
+
     cancellation_details = TemplateColumn(
         verbose_name="Детали возврата",
         template_name="oscar/dashboard/payments/payments_row_cancellation_details.html",
@@ -115,5 +122,7 @@ class RefundListTable(DashboardTable):
     caption = ngettext_lazy("%s Возврат", "%s Возвратов")
 
     class Meta(DashboardTable.Meta):
-        fields = ("id", "order", "amount", "status", "cancellation_details", "created_at", "actions")
-        sequence = ("id", "order", "amount", "status", "cancellation_details", "created_at", "..." , "actions")
+        fields = ("order", "amount", "status", "cancellation_details", "created_at", "actions")
+        sequence = ("order", "amount", "status", "cancellation_details", "created_at", "..." , "actions")
+
+        empty_text = "Нет созданых возвратов"
