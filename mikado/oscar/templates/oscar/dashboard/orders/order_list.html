@@ -6,9 +6,7 @@
 
 {% block body_class %}{{ block.super }} orders{% endblock %}
 
-{% block title %}
-    {{ title }} | {{ block.super }}
-{% endblock %}
+{% block title %}{{ title }} | {{ block.super }}{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
@@ -102,7 +100,6 @@
             {% endif %}
         </div>
     </div>
-
     <form method="post" id="orders_form" class="mobile-table order_table">
         {% if orders %} 
             {% render_table orders %}  
@@ -157,7 +154,6 @@
             <p class="empty">Заказы не найдены</p>
         {% endif %}
     </form>
-
 {% endblock dashboard_content %}
 
 {% block onbodyload %}

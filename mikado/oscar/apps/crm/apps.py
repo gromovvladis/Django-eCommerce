@@ -23,7 +23,7 @@ class CRMConfig(OscarConfig):
         self.crm_api_docs_list_view = get_class("crm.views", "CRMDocsEndpointView")
         self.crm_api_installation_view = get_class("crm.views", "CRMInstallationEndpointView")
 
-        self.crm_api_user_register_view = get_class("crm.views", "CRMRegisterEndpointView")
+        # self.crm_api_user_register_view = get_class("crm.views", "CRMRegisterEndpointView")
         self.crm_api_user_login_view = get_class("crm.views", "CRMLoginEndpointView")
 
     def get_urls(self):
@@ -38,7 +38,7 @@ class CRMConfig(OscarConfig):
 
             path("api/installation/event/", self.crm_api_installation_view.as_view(), name="api-installation"),
             
-            path("api/user/register/", self.crm_api_user_register_view.as_view(), name="api-register"),
+            # path("api/user/register/", self.crm_api_user_register_view.as_view(), name="api-register"),
             path("api/user/login/", self.crm_api_user_login_view.as_view(), name="api-login"),
         ]
         return self.post_process_urls(urls)

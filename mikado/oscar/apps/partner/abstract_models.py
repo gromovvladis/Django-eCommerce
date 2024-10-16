@@ -27,6 +27,11 @@ class AbstractPartner(models.Model):
         blank=True,
         db_index=True,
     )
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+    )
 
     #: A partner can have users assigned to it. This is used
     #: for access modelling in the permission-based dashboard

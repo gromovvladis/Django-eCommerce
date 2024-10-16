@@ -29,7 +29,6 @@ NewTransactionForm = get_class("dashboard.orders.forms", "NewTransactionForm")
 PaymentManager = get_class("payment.methods", "PaymentManager")
 
 class TransactionsListView(SingleTableView):
-    context_object_name = 'transactions'
     template_name = 'oscar/dashboard/payments/payments_list.html'
     paginate_by = settings.OSCAR_DASHBOARD_PAYMENTS_PER_PAGE
 
@@ -60,6 +59,7 @@ class TransactionsListView(SingleTableView):
 
 
 class PaymentsListView(TransactionsListView):
+    context_table_name = 'payments'
     table_class = PaymentListTable
     model = Payment
 
@@ -71,6 +71,7 @@ class PaymentsListView(TransactionsListView):
 
 
 class RefundsListView(TransactionsListView):
+    context_table_name = 'refunds'
     table_class = RefundListTable
     model = Refund
 
