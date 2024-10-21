@@ -267,7 +267,7 @@
     ssh vladis@5.35.89.111
     source venv/bin/activate
     cd mikado
-    git pull https://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@github.com/gromovvladis/mikado.git
+    git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
     python manage.py collectstatic
@@ -275,11 +275,12 @@
     sudo supervisorctl restart all
     redis-cli Flushall
 
-    git pull https://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@github.com/gromovvladis/mikado.git
+    git pull https://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@github.com/gromovvladis/mikado.git
     sudo supervisorctl restart all
     redis-cli Flushall
 
     sudo supervisorctl stop all
+    sudo supervisorctl stop mikado
 
 
 

@@ -1,10 +1,10 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load static %}
+{% load render_table from django_tables2 %}
 {% load currency_filters %}
 {% load dashboard_tags %}
-{% load render_table from django_tables2 %}
+{% load static %}
 
-{% block body_class %}{{ block.super }} payment-detal{% endblock %}
+{% block body_class %}{{ block.super }} payment-detail{% endblock %}
 
 {% block title %}{{ title }} | {{ block.super }}{% endblock %}
 
@@ -14,47 +14,68 @@
             <li class="breadcrumb-item">
                 <a href="{% url 'dashboard:index' %}">Панель управления</a>
             </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard:refunds-list' %}">Возвраты</a>
+            </li>
             <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block header %}
-    <div class="page-header d-flex justify-content-between">
+    <div class="page-header d-flex flex-column justify-content-start">
         <h1>{{ title }}</h1>
-        <p>Возврат №{{ refund.id }}</p>
+        <p class="d-flex align-items-end no-widget-init mt-1 mb-0 text-muted">
+            Возврат №{{ refund.id }}
+        </p>
     </div>
 {% endblock header %}
 
 {% block dashboard_content %}
 
     {% payment_date refund.created_at as date %}
-    <table class="table table-bordered table-hover">
-        <caption><i class="fas fa-payments"></i>Информация о платеже</caption>
-            <tr>
-                <th>ID Возврата</th>
-                <th>Сумма</th>
-                <th>Статус</th>
-                <th>Дата создания</th>
-                <th>ID Платежа</th>
-            </tr>
-            <tr>
-                <td>{{ refund.id }}</td>
-                <td>{{ refund.amount.value|currency }}</td>
-                <td>
-                    {% if refund.status == "succeeded" %}
-                        <span class="badge badge-success">Возвращено</span>
-                    {% elif refund.status == "canceled" %}
-                        <span class="badge badge-danger">Возврат не удался</span>
-                    {% elif refund.status == "pending"  %}
-                        <span class="badge badge-pending">Обрабатывается</span>
-                    {% endif %}
-                </td>
-                <td>{{ date }}</td>
-                <td>
-                    <a href="{% url 'dashboard:payment-detail' pk=refund.payment_id %}">{{ refund.payment_id }}</a>
-                </td>
-            </tr>
-    </table>
+    {% payment_order refund.description as number %}
+    <div class="mobile-table">
+        <div class="table-container">
+            <table class="table table-bordered table-hover">
+                <caption><i class="fas fa-payments"></i>Информация о платеже</caption>
+                <thead>
+                    <tr>
+                        {% comment %} <th>ID Возврата</th> {% endcomment %}
+                        <th class="title">Заказ</th>
+                        <th class="amount">Сумма</th>
+                        <th class="status">Статус</th>
+                        <th class="date">Дата создания</th>
+                        <th class="payment">ID Платежа</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="mobile-open pt-0">
+                        {% comment %} <td>{{ refund.id }}</td> {% endcomment %}
+                        <td class="title" data-label="Заказ">
+                            <div class="d-flex align-items-center">
+                                <span class="spinner-border-sm {% if refund.status == "succeeded" %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
+                                <a href="{% url 'dashboard:order-detail' number=number %}">{{ refund.description }}</a>
+                            </div>
+                        </td>
+                        <td class="amount" data-label="Сумма">{{ refund.amount.value|currency }}</td>
+                        <td class="status" data-label="Статус">
+                            {% if refund.status == "succeeded" %}
+                                <span class="badge badge-success">Возвращено</span>
+                            {% elif refund.status == "canceled" %}
+                                <span class="badge badge-danger">Возврат не удался</span>
+                            {% elif refund.status == "pending"  %}
+                                <span class="badge badge-pending">Обрабатывается</span>
+                            {% endif %}
+                        </td>
+                        <td class="date" data-label="Дата">{{ date }}</td>
+                        <td class="payment" data-label="Платеж">
+                            <a href="{% url 'dashboard:payment-detail' pk=refund.payment_id %}">{{ refund.payment_id }}</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 {% endblock dashboard_content %}

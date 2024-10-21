@@ -28,18 +28,20 @@ site_login = settings.EVOTOR_SITE_LOGIN
 site_pass = settings.EVOTOR_SITE_PASS
 
 
-# ========= API Endpoints (Уведомления) =========
-
+# ========= вспомогательные функции =========
 
 
 def is_valid_site_token(request):
     # Проверка токена сайта
     auth_header = request.headers.get('Authorization')
-    if not auth_header or auth_header != site_token:
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return Response({"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    auth_token = auth_header.split(" ")[1]
+    if not auth_header or auth_token != site_token:
         return Response({"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED)
     
     return None  # Если все проверки прошли, возвращаем None
-
 
 def is_valid_user_token(request):
     # Получение данных пользователя
@@ -51,7 +53,6 @@ def is_valid_user_token(request):
         return Response({"errors": [{"code": 1006}]}, status=status.HTTP_401_UNAUTHORIZED)
 
     return None  # Если все проверки прошли, возвращаем None
-
 
 
 def is_valid_site_and_user_tokens(request):
@@ -70,6 +71,18 @@ def test_function(request):
 
 
 # ========= API Endpoints (Уведомления) =========
+
+# сериализаторы
+#  1. персонал
+#  2. заказ
+#  3. продукт
+#  4. точка продажи
+
+# новые модели
+#  1. терминал
+#  2. чек
+#  3. документ
+#  4. событие
 
 class CRMStaffEndpointView(APIView):
 
@@ -229,6 +242,24 @@ class CRMInstallationEndpointView(APIView):
 # === login / register
 
 
+class CRMLoginEndpointView(APIView):
+    """ https://mikado-sushi.ru/crm/api/user/login """
+      
+    authentication_classes = []
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        
+        test_function(request)
+
+        not_allowed = is_valid_site_and_user_tokens(request)
+        if not_allowed:
+            return not_allowed
+
+        return Response({"userId": request.data.get('userId'), "token": user_token}, status=status.HTTP_200_OK)
+        
+
+
 # class CRMRegisterEndpointView(APIView):
 #     """ https://mikado-sushi.ru/crm/api/user/register """
 
@@ -252,23 +283,3 @@ class CRMInstallationEndpointView(APIView):
 #         send_message_to_staffs(f"CRMRegisterEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
 
 #         return Response({"error": "Регистрация возможна только на ресурсе сайта. Свяжитесь с администрацией сайта"}, status=status.HTTP_409_CONFLICT)
-
-
-class CRMLoginEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/user/login """
-      
-    authentication_classes = []
-    permission_classes = [AllowAny]
-    
-    def post(self, request):
-        
-        test_function(request)
-
-        not_allowed = is_valid_site_and_user_tokens(request)
-        if not_allowed:
-            return not_allowed
-
-        send_message_to_staffs(f"CRMLoginEndpointView post: login alowed", TelegramMessage.NEW)
-
-        return Response({"userId": request.data.get('userId'), "token": user_token}, status=status.HTTP_200_OK)
-        
