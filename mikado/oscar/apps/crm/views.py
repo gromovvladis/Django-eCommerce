@@ -4,12 +4,17 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q, Sum, fields
 from django.http import JsonResponse
+from django.utils import timezone
 
+from oscar.apps.crm.client import EvatorCloud
+from oscar.apps.partner.serializers import PartnerSerializer
+from oscar.apps.partner.models import PartnerAddress
 from oscar.apps.telegram.models import TelegramMessage
 from oscar.core.loading import get_class, get_model
 from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs
 
 
+from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -20,6 +25,7 @@ import logging
 logger = logging.getLogger("oscar.crm")
 
 CRMEvent = get_model("crm", "CRMEvent")
+Partner = get_model("partner", "Partner")
 
 site_token = settings.EVOTOR_SITE_TOKEN
 user_token = settings.EVOTOR_SITE_USER_TOKEN
@@ -44,6 +50,18 @@ def is_valid_site_token(request):
     return None  # Если все проверки прошли, возвращаем None
 
 def is_valid_user_token(request):
+    # Проверка токена сайта
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return Response({"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    auth_token = auth_header.split(" ")[1]
+    if not auth_header or auth_token != user_token:
+        return Response({"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    return None  # Если все проверки прошли, возвращаем None
+
+def is_valid_user_login_and_pass(request):
     # Получение данных пользователя
     user_data = request.data
     login = user_data.get('login')
@@ -54,9 +72,9 @@ def is_valid_user_token(request):
 
     return None  # Если все проверки прошли, возвращаем None
 
-
 def is_valid_site_and_user_tokens(request):
-    return is_valid_site_token(request) or is_valid_user_token(request)
+    return is_valid_site_token(request) or is_valid_user_login_and_pass(request)
+
 
 
 def test_function(request):
@@ -73,37 +91,41 @@ def test_function(request):
 # ========= API Endpoints (Уведомления) =========
 
 # сериализаторы
-#  1. персонал
-#  2. заказ
+#  1. точка продажи и терминалы +
+#  2. персонал +
+
 #  3. продукт
-#  4. точка продажи
+#  3.1 категории и варианты продуктов (схемы и модификации)
+
+#  4. заказ
 
 # новые модели
-#  1. терминал
-#  2. чек
-#  3. документ
-#  4. событие
+#  1. чек 
+#  2. документ 
+#  3. событие +
 
-class CRMStaffEndpointView(APIView):
+
+# добавь испльзование курсора, если объектов много
+
+class CRMPartnerEndpointView(APIView):
 
     permission_classes = [AllowAny]
 
-    """ https://mikado-sushi.ru/crm/api/staffs """
+    """ https://mikado-sushi.ru/crm/api/partners """
 
-    def post(self, request, *args, **kwargs):
-        
-        test_function(request)
-        
-        not_allowed = is_valid_site_token(request)
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs): 
+        test_function(request)  
+        not_allowed = is_valid_user_token(request)
         if not_allowed:
-            return not_allowed
+            return not_allowed  
         
-        CRMEvent.objects.create(
-            body=f"Staff recived {request.data}", 
-            sender_choices=CRMEvent.STAFF,
-            type=CRMEvent.INFO, 
-        )
-        return JsonResponse({"ok": "ok"}, status = 200)
+        partners_json = request.data.get('items')
+        EvatorCloud().create_or_update_partners(partners_json)
+
+        return JsonResponse({"status": "ok"}, status = 200) 
 
 
 class CRMTerminalEndpointView(APIView):
@@ -112,42 +134,66 @@ class CRMTerminalEndpointView(APIView):
 
     """ https://mikado-sushi.ru/crm/api/terminals """
 
-    def post(self, request, *args, **kwargs):
-                
-        test_function(request)
-        
-        not_allowed = is_valid_site_token(request)
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs): 
+        test_function(request)  
+        not_allowed = is_valid_user_token(request)
         if not_allowed:
-            return not_allowed
+            return not_allowed  
         
-        CRMEvent.objects.create(
-            body=f"Terminals recived {request.data}", 
-            sender_choices=CRMEvent.TERMINAL,
-            type=CRMEvent.INFO, 
-        )
-        return JsonResponse({"ok": "ok"}, status = 200)
+        terminals_json = request.data.get('items')
+        EvatorCloud().create_or_update_terminals(terminals_json)
+
+        return JsonResponse({"status": "ok"}, status = 200) 
 
 
-class CRMPartnerEndpointView(APIView):
+class CRMStaffEndpointView(APIView):
 
     permission_classes = [AllowAny]
 
-    """ https://mikado-sushi.ru/crm/api/partners """
+    """ https://mikado-sushi.ru/crm/api/staffs """
 
-    def post(self, request, *args, **kwargs):
-                
-        test_function(request)
-        
-        not_allowed = is_valid_site_token(request)
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs): 
+        test_function(request)  
+        not_allowed = is_valid_user_token(request)
         if not_allowed:
-            return not_allowed
+            return not_allowed  
         
-        CRMEvent.objects.create(
-            body=f"Terminals recived {request.data}", 
-            sender_choices=CRMEvent.PARTNER,
-            type=CRMEvent.INFO, 
-        )
-        return JsonResponse({"ok": "ok"}, status = 200)
+        staffs_json = request.data.get('items')
+        EvatorCloud().create_or_update_staffs(staffs_json)
+
+        return JsonResponse({"status": "ok"}, status = 200) 
+
+
+class CRMRoleEndpointView(APIView):
+
+    permission_classes = [AllowAny]
+
+    """ https://mikado-sushi.ru/crm/api/roles """
+
+
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs): 
+        test_function(request)  
+        not_allowed = is_valid_user_token(request)
+        if not_allowed:
+            return not_allowed  
+        
+        roles_json = request.data.get('items')
+        EvatorCloud().create_or_update_roles(roles_json)
+
+        return JsonResponse({"status": "ok"}, status = 200) 
+
+
+
+
 
 
 class CRMProductEndpointView(APIView):
@@ -166,7 +212,7 @@ class CRMProductEndpointView(APIView):
         
         CRMEvent.objects.create(
             body=f"Terminals recived {request.data}", 
-            sender_choices=CRMEvent.PRODUCT,
+            sender=CRMEvent.PRODUCT,
             type=CRMEvent.INFO, 
         )
         return JsonResponse({"ok": "ok"}, status = 200)
@@ -188,7 +234,7 @@ class CRMReceiptEndpointView(APIView):
         
         CRMEvent.objects.create(
             body=f"Terminals recived {request.data}", 
-            sender_choices=CRMEvent.RECEIPT,
+            sender=CRMEvent.RECEIPT,
             type=CRMEvent.INFO, 
         )
         return JsonResponse({"ok": "ok"}, status = 200)
@@ -210,7 +256,7 @@ class CRMDocsEndpointView(APIView):
         
         CRMEvent.objects.create(
             body=f"Terminals recived {request.data}", 
-            sender_choices=CRMEvent.DOC,
+            sender=CRMEvent.DOC,
             type=CRMEvent.INFO, 
         )
         return JsonResponse({"ok": "ok"}, status = 200)
@@ -232,7 +278,7 @@ class CRMInstallationEndpointView(APIView):
         
         CRMEvent.objects.create(
             body=f"Terminals recived {request.data}", 
-            sender_choices=CRMEvent.INSTALLATION,
+            sender=CRMEvent.INSTALLATION,
             type=CRMEvent.INFO, 
         )
         return JsonResponse({"ok": "ok"}, status = 200)

@@ -25,4 +25,5 @@ class UserTable(DashboardTable):
     icon = "fas fa-users"
 
     class Meta(DashboardTable.Meta):
-        template_name = "oscar/dashboard/users/table.html"
+        pass
+        # template_name = "oscar/dashboard/users/table.html"

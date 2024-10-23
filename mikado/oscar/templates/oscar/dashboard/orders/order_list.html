@@ -101,9 +101,9 @@
         </div>
     </div>
     <form method="post" id="orders_form" class="mobile-table order_table">
+        {% csrf_token %}
         {% if orders %} 
             {% render_table orders %}  
-            {% csrf_token %}
             {% if orders.paginated_rows %}
                 <div class="table-wrapper mb-4 d-none" id="actions_lines">
                     <div class="table-header d-flex justify-space-between" data-target="#status-body" 

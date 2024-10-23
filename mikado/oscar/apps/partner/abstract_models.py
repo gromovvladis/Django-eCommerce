@@ -1,3 +1,4 @@
+import datetime
 from django.db import models, router
 from django.db.models import F, signals
 from django.db.models.functions import Coalesce, Least
@@ -31,6 +32,7 @@ class AbstractPartner(models.Model):
         "ID Эвотор",
         max_length=128,
         blank=True,
+        null=True,
     )
 
     #: A partner can have users assigned to it. This is used
@@ -38,6 +40,18 @@ class AbstractPartner(models.Model):
     users = models.ManyToManyField(
         AUTH_USER_MODEL, related_name="partners", blank=True, verbose_name="Пользователи"
     )
+
+    start_worktime = models.TimeField(
+        "Время начала смены", default=datetime.time(9, 0)  
+    )
+    end_worktime = models.TimeField(
+        "Время окончания смены", default=datetime.time(21, 0)
+    )
+
+    terminals = models.ManyToManyField("partner.Terminal", related_name="partners", verbose_name="Терминал", blank=True)
+
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True, db_index=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
     @property
     def display_name(self):
@@ -89,6 +103,66 @@ class AbstractPartner(models.Model):
         return self.display_name
 
 
+class AbstractTerminal(models.Model):
+    """
+    Терминал из магазина Эвотор
+    """
+
+    name = models.CharField(
+        "Название",
+        max_length=128,
+        blank=True,
+    )
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+    )
+    device_model = models.CharField(
+        "Модель терминала", max_length=128, blank=True, null=True
+    )
+    imei = models.CharField(
+        "Код imei", max_length=128, unique=True,
+    )
+    serial_number = models.CharField(
+        "Серийный номер", max_length=128, unique=True,
+    )
+
+    coords_long = models.CharField("Координаты долгота", max_length=255, blank=True, null=True)
+    coords_lat = models.CharField("Координаты широта", max_length=255, blank=True, null=True)
+
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True, db_index=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
+
+    @property
+    def display_name(self):
+        return self.name
+
+    class Meta:
+        abstract = True
+        app_label = "partner"
+        ordering = ("name", "serial_number")
+        permissions = (("dashboard_access", "Can access dashboard"),)
+        verbose_name = "Смарт терминал Эвотор"
+        verbose_name_plural = "Смарт терминалы Эвотор"
+
+    def __str__(self):
+        return self.display_name
+
+
+class AbstractBarCode(models.Model):
+
+    code = models.CharField("Штрих-код", max_length=128, unique=True,)
+    
+    class Meta:
+        abstract = True
+        app_label = "partner"
+        ordering = ("code",)
+        permissions = (("dashboard_access", "Can access dashboard"),)
+        verbose_name = "Штрих-код"
+        verbose_name_plural = "Штрих-коды"
+
+
 class AbstractStockRecord(models.Model):
     """
     A stock record.
@@ -124,6 +198,13 @@ class AbstractStockRecord(models.Model):
         "Валюта", max_length=12, default=get_default_currency
     )
 
+    bar_codes = models.ManyToManyField(
+        "partner.BarCode", 
+        related_name="bars", 
+        verbose_name="Штрих-коды", 
+        blank=True
+    )
+
     # This is the base price for calculations - whether this is inclusive or exclusive of
     # tax depends on your implementation, as this is highly domain-specific.
     # It is nullable because some items don't have a fixed
@@ -144,7 +225,28 @@ class AbstractStockRecord(models.Model):
         blank=True,
         null=True,
         help_text="Цена до скидки. Оставить пустым, если скидки нет",
-        # validators=[MinValueValidator(price)]
+    )
+
+    cost_price = models.DecimalField(
+        "Цена закупки",
+        decimal_places=2,
+        max_digits=12, 
+        blank=True,
+        null=True,
+        help_text="Цена закупки продукта",
+    )
+
+    NO_VAT, VAT_10, VAT_18, VAT_0, VAT_18_118, VAT_10_110 = "NO_VAT", "VAT_10", "VAT_18", "VAT_0", "VAT_18_118", "VAT_10_110"
+    VAT_CHOICES = (
+        (NO_VAT, "Без НДС."),
+        (VAT_0, "Основная ставка 0%"),
+        (VAT_10, "Основная ставка 10%."),
+        (VAT_10_110, "Расчётная ставка 10%."),
+        (VAT_18, "Основная ставка 18%. С первого января 2019 года может указывать как на 18%, так и на 20% ставку."),
+        (VAT_18_118, "Расчётная ставка 18%. С первого января 2019 года может указывать как на 18%, так и на 20% ставку."),
+    )
+    tax = models.CharField(
+        "Налог в процентах", default=NO_VAT, choices=VAT_CHOICES, max_length=128
     )
 
     #: Number of items in stock

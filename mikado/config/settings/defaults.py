@@ -145,9 +145,23 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Статистика",
                 "url_name": "dashboard:order-stats",
             },
+        ],
+    },
+    {
+        "label": "Точки продажи",
+        "icon": "fas fa-store",
+        "children": [
             {
                 "label": "Точки продаж",
                 "url_name": "dashboard:partner-list",
+            },
+            {
+                "label": "Группы персонала",
+                "url_name": "dashboard:group-list",
+            },
+            {
+                "label": "Персонал",
+                "url_name": "dashboard:staff-list",
             },
         ],
     },
@@ -186,7 +200,6 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Курьеры",
                 "url_name": "dashboard:delivery-couriers-list",
             },
-
         ],
     },
     {
@@ -209,15 +222,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "children": [
             {
                 "label": "Клиенты",
-                "url_name": "dashboard:customers",
-            },
-            {
-                "label": "Группы персонала",
-                "url_name": "dashboard:groups",
-            },
-            {
-                "label": "Персонал",
-                "url_name": "dashboard:staff",
+                "url_name": "dashboard:customer-list",
             },
             {
                 "label": "Отзывы к товарам",

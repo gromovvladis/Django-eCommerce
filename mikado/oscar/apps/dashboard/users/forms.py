@@ -14,8 +14,8 @@ Staff = get_model("user", "Staff")
 
 
 class UserSearchForm(forms.Form):
-    username = forms.CharField(required=False, label="Номер телефона пользователя")
-    name = forms.CharField(required=False, label=("Имя пользователя", "Имя"))
+    username = forms.CharField(required=False, label="Номер телефона")
+    name = forms.CharField(required=False, label="Имя пользователя")
 
 
 class StaffCreationForm(forms.ModelForm):
@@ -25,7 +25,6 @@ class StaffCreationForm(forms.ModelForm):
         blank=True,
         help_text="Номер телефона пользователя в формате +7 (900) 000-0000",
     )
-
     last_name = forms.CharField(
         label="Фамилия",
         required=False,
@@ -41,8 +40,7 @@ class StaffCreationForm(forms.ModelForm):
         required=False,
         help_text="Отчество сотрудника. Пример: 'Иванович'. Необязательно",
     )
-
-    job = forms.ChoiceField(
+    role = forms.ChoiceField(
         label="Должность",
         choices=[],
         required=False,
@@ -59,29 +57,18 @@ class StaffCreationForm(forms.ModelForm):
 
 # ----------------------------------------------------------------
 
-    STAFF = (
+    IS_STAFF = (
         (True, "Сотрудник"),
         (False, "Клиент"),
     )
-    staff = forms.ChoiceField(
-        choices=STAFF,
+    is_staff = forms.ChoiceField(
+        choices=IS_STAFF,
         widget=forms.RadioSelect,
         label="Роль пользователя",
         initial=False,
     )
 
 # ----------------------------------------------------------------
-
-    ROLE_CHOICES = (
-        ("staff", "Полный доступ к панели управления"),
-        ("limited", "Ограниченный доступ к панели управления"),
-    )
-    role = forms.ChoiceField(
-        choices=ROLE_CHOICES,
-        widget=forms.RadioSelect,
-        label="Роль пользователя",
-        initial="limited",
-    )
 
     error_messages = {
         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
@@ -97,7 +84,7 @@ class StaffCreationForm(forms.ModelForm):
     def __init__(self, partner, *args, **kwargs):
         self.partner = partner
         super().__init__(*args, **kwargs)
-        self.fields['job'].choices = Staff.get_job_choices()
+        self.fields['role'].choices = Staff.get_job_choices()
 
     def _post_clean(self):
         super()._post_clean()
@@ -113,35 +100,25 @@ class StaffCreationForm(forms.ModelForm):
     
 
     def save(self, commit=True):
-        role = self.cleaned_data.get("role", "limited") 
-        staff = self.cleaned_data.get("staff", "limited")
+        # role = self.cleaned_data.get("role", "limited") 
+        is_staff = self.cleaned_data.get("staff", False)
         user = super().save(commit=False)
-        user.is_staff = role == "staff" 
+        user.is_staff = is_staff
         user.save()
         self.partner.users.add(user)
 
-        if staff:
+        if is_staff:
             # Если это сотрудник, создаем профиль
             Staff.objects.create(
                 user=user,
                 first_name=self.cleaned_data.get('first_name', ''),
                 last_name=self.cleaned_data.get('last_name', ''),
                 middle_name=self.cleaned_data.get('middle_name', ''),
-                job=self.cleaned_data.get('job', ''),
+                role=self.cleaned_data.get('role', ''),
                 gender=self.cleaned_data.get('gender', ''),
                 age=self.cleaned_data.get('age', None),
                 image=self.cleaned_data.get('image', None)
             )
-        elif role == "limited":
-
-            job = self.cleaned_data.get("job", "limited") 
-
-            if job == "Менеджер":
-                pass
-            elif job == "Курьер":
-                pass
-            elif job == "Сотрудник кухни":
-                pass
 
         return user
 
@@ -151,12 +128,11 @@ class StaffCreationForm(forms.ModelForm):
         sequence = (
             "username",
             "email",
-            "staff",
-            "role",
+            "is_staff",
             "last_name",
             "first_name",
             "middle_name",
-            "job",
+            "role",
             "gender",
             "age",
             "image",
@@ -174,24 +150,6 @@ class StaffCreationForm(forms.ModelForm):
 #     def __init__(self, *args, **kwargs):
 #         super().__init__(*args, **kwargs)
 #         self.fields['permissions'].queryset = Permission.objects.all()  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #             # Обработка доступа для пользователя с ограниченным доступом
@@ -230,9 +188,6 @@ class StaffCreationForm(forms.ModelForm):
 
 #             # # Добавляем разрешения пользователю
 #             # user.user_permissions.set(dashboard_access_perm, clear=True)
-
-
-
 
 #     # def save(self, commit=True):
     

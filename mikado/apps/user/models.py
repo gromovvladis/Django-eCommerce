@@ -20,19 +20,26 @@ class Staff(models.Model):
     first_name = models.CharField("Имя", blank=False, null=False, max_length=255)
     middle_name = models.CharField("Отчество", blank=True, null=False, max_length=255)
 
-    job = models.CharField("Должность", max_length=127, null=False, db_index=True)
+    role = models.ForeignKey(
+        Group,
+        on_delete=models.SET_NULL,
+        related_name="staffs",
+        verbose_name="Должность",
+        null=True,
+    )
 
     MALE, FEMALE = 'М', 'Ж'
     gender_choices = (
         (MALE, 'Мужчина'), 
         (FEMALE, 'Женщина'))
     gender = models.CharField(max_length=1, choices=gender_choices,
-                              verbose_name='Пол', null=False)
-    age = models.PositiveIntegerField(verbose_name='Возраст', null=False, blank=True)
+                              verbose_name='Пол', null=True, blank=True)
+    age = models.PositiveIntegerField(verbose_name='Возраст', null=True, blank=True)
 
     image = models.ImageField(blank=True, null=True, verbose_name='Фото', upload_to="profile")
 
-    telegram_id = models.CharField("ID Телеграм чата", max_length=128)
+    telegram_id = models.CharField("ID Телеграм чата", max_length=128, null=True, blank=True)
+    evotor_id = models.CharField("ID Телеграм чата", max_length=128, null=True, blank=True)
 
     is_active = models.BooleanField(
         "Активен",
@@ -52,7 +59,7 @@ class Staff(models.Model):
     notif = models.CharField("Уведомления", choices=NOTIF_CHOICES, max_length=128, default=NEW, db_index=True)
 
     @staticmethod
-    def get_job_choices():
+    def get_role_choices():
         groups = Group.objects.all()
         return [(group.id, group.name) for group in groups]
     
@@ -70,8 +77,8 @@ class Staff(models.Model):
         return "%s - %s %s" % (self.user, self.last_name, self.first_name)
     
     @property
-    def get_job(self):
-        return self.job if self.job else "Не задана"
+    def get_role(self):
+        return self.role if self.role else "Не задана"
     
     @property
     def get_full_name(self):

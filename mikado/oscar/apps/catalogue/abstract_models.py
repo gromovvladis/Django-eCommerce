@@ -82,6 +82,25 @@ class AbstractProductClass(models.Model):
 
     name = models.CharField("Имя", max_length=128)
     slug = AutoSlugField("Ярлык", max_length=128, unique=True, populate_from="name")
+    EMPTY, PCS, KG, LITR, MLITR, METR, COMPLECT, UPAC, ED = "", "шт", "кг", "л", "мл", "м", "компл", "упак", "ед"
+    MEASURE_CHOICES = (
+        (EMPTY, "Не задано"),
+        (PCS, "шт. - штуки"),
+        (KG, "кг. - килограммы"),
+        (LITR, "л. - литры"),
+        (MLITR, "мл. - миллилитры"),
+        (METR, "м. - метры"),
+        (COMPLECT, "компл. - комплекты"),
+        (UPAC, "упак. - упаковки"),
+        (ED, "ед. - единицы"),
+    )
+    measure_name = models.CharField(
+        "Единицы изменения", 
+        max_length=128,
+        null=False,
+        choices=MEASURE_CHOICES,
+        default=EMPTY
+    )
 
     #: Some product type don't require shipping (e.g. digital products) - we use
     #: this field to take some shortcuts in the checkout.
@@ -418,14 +437,26 @@ class AbstractProduct(models.Model):
         help_text="Показывать этот продукт в результатах поиска и каталогах.",
     )
 
+    evotor_code = models.CharField(
+        "Code Эвотор (По умолчанию = ID)",
+        max_length=128,
+        blank=True,
+    )
+
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+    )
+
     upc = NullCharField(
-        "Товарный код продукта UPC",
+        "Товарный код продукта UPC (Артикул)",
         max_length=64,
         blank=True,
         null=True,
         unique=True,
         help_text=(
-            "Универсальный код продукта (UPC) является идентификатором для "
+            "Универсальный код продукта (Артикул) является идентификатором для "
             "продукта, который не является специфичным для конкретного товара. "
             "Например, ISBN книги"
         ),

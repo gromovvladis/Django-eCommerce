@@ -1,9 +1,20 @@
 import json
 import requests
-from django.conf import settings
-
 import logging
+from django.conf import settings
+from django.contrib.auth.models import Group
+
+from oscar.apps.customer.serializers import GroupSerializer, StaffSerializer
+from oscar.apps.partner.serializers import PartnerSerializer, TerminalSerializer
+from oscar.core.loading import get_model
+
 logger = logging.getLogger("oscar.crm")
+
+CRMEvent = get_model("crm", "CRMEvent")
+Partner = get_model("partner", "Partner")
+Terminal = get_model("partner", "Terminal")
+Staff = get_model("user", "Staff")
+GroupEvotor = get_model("auth", "GroupEvotor")
 
 evator_cloud_token = settings.EVOTOR_CLOUD_TOKEN
 
@@ -169,7 +180,76 @@ class EvotorPartnerClient(EvotorAPICloud):
         """
         endpoint = "devices"
         return self.send_request(endpoint)
- 
+    
+    def update_partners(self):
+        """
+        Обновить информацию о магазинах
+        """
+        cloud_partners = self.get_partners()
+        self.create_or_update_partners(cloud_partners.get('items'))
+
+    def update_terminals(self):
+        """
+        Обновить информацию о магазинах
+        """
+        cloud_terminals = self.get_terminals()
+        self.create_or_update_terminals(cloud_terminals.get('items'))
+
+    def create_or_update_partners(self, partners_json):
+        try:
+            evotor_ids = []
+            for partner_json in partners_json:
+                evotor_id = partner_json.get('id')
+                evotor_ids.append(evotor_id)
+                partner, created = Partner.objects.get_or_create(evotor_id=evotor_id)
+                serializer = PartnerSerializer(partner, data=partner_json)
+                
+                if serializer.is_valid():
+                    serializer.save() 
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body="Partner created / or updated",
+                        sender=CRMEvent.PARTNER,
+                        type=event_type,
+                    )
+                else: 
+                    logger.error(f"Ошибка сериализации точки продажи: {serializer.errors}")
+            
+            for partner in Partner.objects.all():
+                if partner.evotor_id not in evotor_ids:
+                    partner.evotor_id = None
+                    partner.save()
+
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении точки продажи: {e}", exc_info=True)
+
+    def create_or_update_terminals(self, terminals_json):
+        try:
+            evotor_ids = []
+            for terminal_json in terminals_json:
+                evotor_id = terminal_json.get('id')
+                evotor_ids.append(evotor_id)
+                partner, created = Terminal.objects.get_or_create(evotor_id=evotor_id)
+                serializer = TerminalSerializer(partner, data=terminal_json)
+                
+                if serializer.is_valid():
+                    serializer.save() 
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body="Partner created / or updated",
+                        sender=CRMEvent.TERMINAL,
+                        type=event_type,
+                    )
+                else: 
+                    logger.error(f"Ошибка сериализации терминала: {serializer.errors}")
+
+            for terminal in Terminal.objects.all():
+                if terminal.evotor_id not in evotor_ids:
+                    partner.delete()
+
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении терминалов: {e}", exc_info=True)
+
 
 class EvotorStaffClient(EvotorAPICloud):
 
@@ -208,7 +288,7 @@ class EvotorStaffClient(EvotorAPICloud):
         """
         endpoint = "employees"
         return self.send_request(endpoint)
-    
+
     def get_staff_by_id(self, staff_id):
         """
         Получить данные сотрудника по идентификатору
@@ -289,114 +369,77 @@ class EvotorStaffClient(EvotorAPICloud):
         endpoint = "employees"
         return self.send_request(endpoint, "POST", staff_data)
   
-
-class EvotorDocClient(EvotorAPICloud):
-
-    def get_docs(self, store_id):
+    def update_staffs(self):
         """
-        Получить список документов
-
-        Возвращает массив документов
-        GET /stores/{store-id}/documents
-
-        Все доку разные. Смотри ссылку
-        https://developer.evotor.ru/docs/rest_api_get_store_documents.html
-
-        Может передать cursor (Если обектов больше 1000)
-
-        ОТВЕТ: 
-            {
-                "items": [
-                    {
-                    "type": "OPEN_SESSION",
-                    "id": "20170222-D58C-40E0-8051-B53ADFF38860",
-                    "extras": {},
-                    "number": 1234,
-                    "close_date": "2017-01-10T09:33:19.757+0000",
-                    "time_zone_offset": 10800000,
-                    "session_id": "1022722e-9441-4beb-beae-c6bc5e7af30d",
-                    "session_number": 80,
-                    "close_user_id": "20170417-46B8-40B9-802E-4DEB67C07565",
-                    "device_id": "20170928-9441-4BEB-BEAE-C6BC5E7AF30D",
-                    "store_id": "20170928-3176-40EB-80E2-A11F032E282A",
-                    "user_id": "09-012345678901234",
-                    "version": "V2",
-                    "body": {}
-                    }
-                ],
-                "paging": {
-                    "next_cursor": "string"
-                }
-            }
+        Обновить информацию о сотрудниках
         """
-        endpoint = f"stores/{store_id}/documents"
-        return self.send_request(endpoint)
-    
-    def get_doc_by_id(self, store_id, doc_id):
-        """
-        Получить документ по идентификатору
+        cloud_roles = self.get_staffs_role()
+        cloud_staffs = self.get_staffs()
+        self.create_or_update_roles(cloud_roles.get('items'))
+        self.create_or_update_staffs(cloud_staffs.get('items'))
 
-        Возвращает документ с указанным идентификатором
-        GET /stores/{store-id}/documents/{document-id}
+    def create_or_update_roles(self, roles_json):
+        try:
+            evotor_ids = []
+            for role_json in roles_json:
+                name = role_json.get('name')
+                role, created = Group.objects.get_or_create(name=name)
+                serializer = GroupSerializer(role, data=role_json)
 
-        ОТВЕТ: 
-            {
-            "type": "OPEN_SESSION",
-            "id": "20170222-D58C-40E0-8051-B53ADFF38860",
-            "extras": {},
-            "number": 1234,
-            "close_date": "2017-01-10T09:33:19.757+0000",
-            "time_zone_offset": 10800000,
-            "session_id": "1022722e-9441-4beb-beae-c6bc5e7af30d",
-            "session_number": 80,
-            "close_user_id": "20170417-46B8-40B9-802E-4DEB67C07565",
-            "device_id": "20170928-9441-4BEB-BEAE-C6BC5E7AF30D",
-            "store_id": "20170928-3176-40EB-80E2-A11F032E282A",
-            "user_id": "09-012345678901234",
-            "version": "V2",
-            "body": {}
-            }
-        """
-        endpoint = f"stores/{store_id}/documents/{doc_id}"
-        return self.send_request(endpoint)
-    
-    def get_docs_by_terminal_id(self, store_id, terminal_id):
-        """
-        Получить список документов по идентификатору смарт-терминала
+                evotor_id = role_json.get('id')
+                evotor_ids.append((evotor_id, role.id))
+                
+                if serializer.is_valid():
+                    serializer.save() 
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body="Role role created / or updated",
+                        sender=CRMEvent.STAFF,
+                        type=event_type,
+                    )
+                else: 
+                    logger.error(f"Ошибка сериализации роли сотрудника: {serializer.errors}")
 
-        Получить список документов по идентификатору смарт-терминала
-        GET /stores/{store-id}/devices/{device-id}/documents
+            for group_evotor in GroupEvotor.objects.all():
+                if (group_evotor.evotor_id, group_evotor.group_id) not in evotor_ids:
+                    group_evotor.delete()
 
-        Может передать cursor (Если обектов больше 1000)
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении ролей персонала: {e}")
 
-        ОТВЕТ: 
-            {
-                "items": [
-                    {
-                    "type": "OPEN_SESSION",
-                    "id": "20170222-D58C-40E0-8051-B53ADFF38860",
-                    "extras": {},
-                    "number": 1234,
-                    "close_date": "2017-01-10T09:33:19.757+0000",
-                    "time_zone_offset": 10800000,
-                    "session_id": "1022722e-9441-4beb-beae-c6bc5e7af30d",
-                    "session_number": 80,
-                    "close_user_id": "20170417-46B8-40B9-802E-4DEB67C07565",
-                    "device_id": "20170928-9441-4BEB-BEAE-C6BC5E7AF30D",
-                    "store_id": "20170928-3176-40EB-80E2-A11F032E282A",
-                    "user_id": "09-012345678901234",
-                    "version": "V2",
-                    "body": {}
-                    }
-                ],
-                "paging": {
-                    "next_cursor": "string"
-                }
-            }
-        """
-        endpoint = f"stores/{store_id}/devices/{terminal_id}/documents"
-        return self.send_request(endpoint)
- 
+    def create_or_update_staffs(self, staffs_json):
+        try:
+            evotor_ids = []
+            created = False
+            for staff_json in staffs_json:
+                evotor_id = staff_json.get('id')
+                evotor_ids.append(evotor_id)
+                try:
+                    staff = Staff.objects.get(evotor_id=evotor_id)
+                    serializer = StaffSerializer(staff, data=staff_json)
+                except Staff.DoesNotExist:
+                    created = True
+                    serializer = StaffSerializer(data=staff_json)
+                
+                if serializer.is_valid():
+                    serializer.save() 
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body="Staff created / or updated",
+                        sender=CRMEvent.STAFF,
+                        type=event_type,
+                    )
+                else: 
+                    logger.error(f"Ошибка сериализации сотрудника: {serializer.errors}")
+
+            for staff in Staff.objects.all():
+                if staff.evotor_id not in evotor_ids:
+                    staff.evotor_id = None
+                    staff.save()
+
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении списка сотрудников: {e}")
+
  
 class EvotorProductClient(EvotorAPICloud):
     """" 
@@ -734,11 +777,117 @@ class EvotorProductClient(EvotorAPICloud):
         endpoint = f"stores/{store_id}/products/{product_id}"
         return self.send_request(endpoint, "DELETE", products_data)
 
-
-
     def create_variants(self, store_id, parent_id, variants):
         pass
 
+
+class EvotorDocClient(EvotorAPICloud):
+
+    def get_docs(self, store_id):
+        """
+        Получить список документов
+
+        Возвращает массив документов
+        GET /stores/{store-id}/documents
+
+        Все доку разные. Смотри ссылку
+        https://developer.evotor.ru/docs/rest_api_get_store_documents.html
+
+        Может передать cursor (Если обектов больше 1000)
+
+        ОТВЕТ: 
+            {
+                "items": [
+                    {
+                    "type": "OPEN_SESSION",
+                    "id": "20170222-D58C-40E0-8051-B53ADFF38860",
+                    "extras": {},
+                    "number": 1234,
+                    "close_date": "2017-01-10T09:33:19.757+0000",
+                    "time_zone_offset": 10800000,
+                    "session_id": "1022722e-9441-4beb-beae-c6bc5e7af30d",
+                    "session_number": 80,
+                    "close_user_id": "20170417-46B8-40B9-802E-4DEB67C07565",
+                    "device_id": "20170928-9441-4BEB-BEAE-C6BC5E7AF30D",
+                    "store_id": "20170928-3176-40EB-80E2-A11F032E282A",
+                    "user_id": "09-012345678901234",
+                    "version": "V2",
+                    "body": {}
+                    }
+                ],
+                "paging": {
+                    "next_cursor": "string"
+                }
+            }
+        """
+        endpoint = f"stores/{store_id}/documents"
+        return self.send_request(endpoint)
+    
+    def get_doc_by_id(self, store_id, doc_id):
+        """
+        Получить документ по идентификатору
+
+        Возвращает документ с указанным идентификатором
+        GET /stores/{store-id}/documents/{document-id}
+
+        ОТВЕТ: 
+            {
+            "type": "OPEN_SESSION",
+            "id": "20170222-D58C-40E0-8051-B53ADFF38860",
+            "extras": {},
+            "number": 1234,
+            "close_date": "2017-01-10T09:33:19.757+0000",
+            "time_zone_offset": 10800000,
+            "session_id": "1022722e-9441-4beb-beae-c6bc5e7af30d",
+            "session_number": 80,
+            "close_user_id": "20170417-46B8-40B9-802E-4DEB67C07565",
+            "device_id": "20170928-9441-4BEB-BEAE-C6BC5E7AF30D",
+            "store_id": "20170928-3176-40EB-80E2-A11F032E282A",
+            "user_id": "09-012345678901234",
+            "version": "V2",
+            "body": {}
+            }
+        """
+        endpoint = f"stores/{store_id}/documents/{doc_id}"
+        return self.send_request(endpoint)
+    
+    def get_docs_by_terminal_id(self, store_id, terminal_id):
+        """
+        Получить список документов по идентификатору смарт-терминала
+
+        Получить список документов по идентификатору смарт-терминала
+        GET /stores/{store-id}/devices/{device-id}/documents
+
+        Может передать cursor (Если обектов больше 1000)
+
+        ОТВЕТ: 
+            {
+                "items": [
+                    {
+                    "type": "OPEN_SESSION",
+                    "id": "20170222-D58C-40E0-8051-B53ADFF38860",
+                    "extras": {},
+                    "number": 1234,
+                    "close_date": "2017-01-10T09:33:19.757+0000",
+                    "time_zone_offset": 10800000,
+                    "session_id": "1022722e-9441-4beb-beae-c6bc5e7af30d",
+                    "session_number": 80,
+                    "close_user_id": "20170417-46B8-40B9-802E-4DEB67C07565",
+                    "device_id": "20170928-9441-4BEB-BEAE-C6BC5E7AF30D",
+                    "store_id": "20170928-3176-40EB-80E2-A11F032E282A",
+                    "user_id": "09-012345678901234",
+                    "version": "V2",
+                    "body": {}
+                    }
+                ],
+                "paging": {
+                    "next_cursor": "string"
+                }
+            }
+        """
+        endpoint = f"stores/{store_id}/devices/{terminal_id}/documents"
+        return self.send_request(endpoint)
+ 
 
 class EvotorPushNotifClient(EvotorAPICloud):
     

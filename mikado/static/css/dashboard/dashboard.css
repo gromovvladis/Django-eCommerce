@@ -2435,9 +2435,9 @@ textarea.form-control {
     align-items: center;
     margin-bottom: 1rem;
   }
-  .form-inline .form-group:last-child {
+  /* .form-inline .form-group:last-child {
     margin-bottom: 0;
-  }
+  } */
   .form-inline .form-control {
     display: inline-block;
     width: auto;

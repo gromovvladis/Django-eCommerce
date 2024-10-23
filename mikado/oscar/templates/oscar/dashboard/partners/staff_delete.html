@@ -8,26 +8,24 @@
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
             <li class="breadcrumb-item">
                 <a href="{% url 'dashboard:delivery-zones' %}">
-                    Зоны доставки
+                    Персонал
                 </a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">Удалить зону доставки?</li>
+            <li class="breadcrumb-item active" aria-current="page">Удалить сотрудника?</li>
         </ol>
     </nav>
 {% endblock %}
 
-{% block navtext %}
-    Удалить зону доставки?
-{% endblock %}
+{% block navtext %}Удаление{% endblock %}
 
 {% block dashboard_content %}
     <div class="table-header">
-        <h2>Удалить зону доставки?</h2>
+        <h2>Удалить сотрудника?</h2>
     </div>
     <form method="post" class="card card-body bg-light">
         {% csrf_token %}
         {{ form }}
-            <p>Удалить зону доставки <strong>№{{ number }}</strong> - Вы уверены?</p>
+            <p>Удалить сотрудника <strong>{{ staff.get_full_name }}</strong> - Вы уверены?</p>
             <p>{{ description }}</p>
         <div class="form-actions">
             <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">Удалить</button>

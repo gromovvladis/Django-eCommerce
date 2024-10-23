@@ -44,7 +44,6 @@ class TransactionsListView(SingleTableView):
         
         if status:
             params['status'] = status
-
             self.search_filters.append((('Статус соответствует "%s"' % status), (("status", status),)))
 
         if date_lte:
@@ -52,18 +51,11 @@ class TransactionsListView(SingleTableView):
             self.search_filters.append((
                 ("Размещено до {end_date}").format(end_date=date_lte), (("date_to", date_lte),)
             ))
-            # self.search_filters.append((
-            #     ("Размещено до {end_date}").format(end_date=date_lte.strftime('%d.%m.%Y')), (("date_to", date_lte),)
-            # ))
-
         if date_gte:
             params['created_at.gte'] = date_gte
             self.search_filters.append((
                 ("Размещено после {start_date}").format(start_date=date_gte), (("date_from", date_gte),)
             ))
-            # self.search_filters.append((
-            #     ("Размещено после {start_date}").format(start_date=date_gte.strftime('%d.%m.%Y')), (("date_from", date_gte),)
-            # ))
 
         try: 
             res = self.model.list(params=params).items

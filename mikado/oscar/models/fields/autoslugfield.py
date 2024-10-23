@@ -68,7 +68,7 @@ class AutoSlugField(SlugField):
             self._populate_from = populate_from
             self._populate_from_org = populate_from
         self.separator = kwargs.pop("separator", "-")
-        self.overwrite = kwargs.pop("overwrite", False)
+        self.overwrite = kwargs.pop("overwrite", True)
         self.uppercase = kwargs.pop("uppercase", False)
         self.allow_duplicates = kwargs.pop("allow_duplicates", False)
 
