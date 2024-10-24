@@ -278,6 +278,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.formsets = {
             "category_formset": self.category_formset,
             "image_formset": self.image_formset,

@@ -10,7 +10,8 @@ class RangesDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управления - Диапозоны"
 
     default_permissions = [
-        "is_staff",
+        "staff.full_access",
+        "catalogue.full_access",
     ]
 
     # pylint: disable=attribute-defined-outside-init

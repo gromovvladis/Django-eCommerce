@@ -2,11 +2,9 @@
 import re
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.models import Permission
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
-from django.views import generic
 from django_tables2 import SingleTableView
 
 from django.db.models import Q
@@ -14,15 +12,13 @@ from django.db.models import Q
 from django.contrib.auth.models import Group
 
 from oscar.apps.customer.utils import normalise_email
-from oscar.apps.dashboard.users.forms import UserSearchForm
 from oscar.apps.dashboard.users.views import CustomerListView
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 
-from oscar.views.generic import BulkEditMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.views.generic.edit import FormMixin
+from django.views.generic import CreateView, UpdateView, DeleteView, ListView, View
 from django_tables2 import SingleTableView
+from django.db.models import Exists, OuterRef, BooleanField
 
 User = get_user_model()
 Staff = get_model("user", "Staff")
@@ -43,11 +39,13 @@ Partner = get_model("partner", "Partner")
         "ExistingUserForm",
     ],
 )
+StaffForm = get_class("dashboard.users.forms","StaffForm")
 GroupForm = get_class("dashboard.users.forms","GroupForm")
-StaffCreationForm = get_class("dashboard.users.forms", "StaffCreationForm")
 PartnerListTable = get_class("dashboard.partners.tables", "PartnerListTable")
 GroupListTable = get_class("dashboard.partners.tables", "GroupListTable")
 StaffListTable = get_class("dashboard.partners.tables", "StaffListTable")
+PartnerStaffListTable = get_class("dashboard.partners.tables", "PartnerStaffListTable")
+
 
 class PartnerListView(SingleTableView):
     context_table_name = "partners"
@@ -113,7 +111,7 @@ class PartnerListView(SingleTableView):
         return queryset.distinct()
 
 
-class PartnerCreateView(generic.CreateView):
+class PartnerCreateView(CreateView):
     model = Partner
     template_name = "oscar/dashboard/partners/partner_form.html"
     form_class = PartnerCreateForm
@@ -141,7 +139,7 @@ class PartnerCreateView(generic.CreateView):
         return super().form_valid(form)
 
 
-class PartnerManageView(generic.UpdateView):
+class PartnerManageView(UpdateView):
     """
     This multi-purpose view renders out a form to edit the partner's details,
     the associated address and a list of all associated users.
@@ -186,7 +184,7 @@ class PartnerManageView(generic.UpdateView):
         return super().form_valid(form)
 
 
-class PartnerDeleteView(generic.DeleteView):
+class PartnerDeleteView(DeleteView):
     model = Partner
     template_name = "oscar/dashboard/partners/partner_delete.html"
 
@@ -197,156 +195,13 @@ class PartnerDeleteView(generic.DeleteView):
         return reverse("dashboard:partner-list")
 
 
-# =============
-# Partner users
-# =============
-
-
-class PartnerUserCreateView(generic.CreateView):
-    model = User
-    template_name = "oscar/dashboard/partners/partner_user_form.html"
-    form_class = StaffCreationForm
-
-    def dispatch(self, request, *args, **kwargs):
-        self.partner = get_object_or_404(Partner, pk=kwargs.get("partner_pk", None))
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["partner"] = self.partner
-        ctx["title"] = "Создать пользователя"
-        return ctx
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["partner"] = self.partner
-        return kwargs
-
-    def get_success_url(self):
-        name = self.object.get_full_name() or self.object.username
-        messages.success(self.request, "Пользователь '%s' успешно создан." % name)
-        return reverse("dashboard:partner-list")
-
-
-class PartnerUserSelectView(generic.ListView):
-    template_name = "oscar/dashboard/partners/partner_user_select.html"
-    form_class = UserPhoneForm
-    context_object_name = "users"
-
-    def dispatch(self, request, *args, **kwargs):
-        self.partner = get_object_or_404(Partner, pk=kwargs.get("partner_pk", None))
-        return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        data = None
-        if "email" in request.GET:
-            data = request.GET
-        self.form = self.form_class(data)
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["partner"] = self.partner
-        ctx["form"] = self.form
-        return ctx
-
-    def get_queryset(self):
-        if self.form.is_valid():
-            email = normalise_email(self.form.cleaned_data["email"])
-            return User.objects.filter(email__icontains=email)
-        else:
-            return User.objects.none()
-
-
-class PartnerUserLinkView(generic.View):
-    def get(self, request, user_pk, partner_pk):
-        # need to allow GET to make Undo link in PartnerUserUnlinkView work
-        return self.post(request, user_pk, partner_pk)
-
-    def post(self, request, user_pk, partner_pk):
-        user = get_object_or_404(User, pk=user_pk)
-        name = user.get_full_name() or user.email
-        partner = get_object_or_404(Partner, pk=partner_pk)
-        if self.link_user(user, partner):
-            messages.success(
-                request,
-                "Пользователь '%(name)s' был прикреплен к точке продаж - '%(partner_name)s'"
-                % {"name": name, "partner_name": partner.name},
-            )
-        else:
-            messages.info(
-                request,
-                "Пользователь '%(name)s' уже прикреплен к точке продаж - '%(partner_name)s'"
-                % {"name": name, "partner_name": partner.name},
-            )
-        return redirect("dashboard:partner-manage", pk=partner_pk)
-
-    def link_user(self, user, partner):
-        """
-        Links a user to a partner, and adds the dashboard permission if needed.
-
-        Returns False if the user was linked already; True otherwise.
-        """
-        if partner.users.filter(pk=user.pk).exists():
-            return False
-        partner.users.add(user)
-        if not user.is_staff:
-            dashboard_access_perm = Permission.objects.get(
-                codename="dashboard_access", content_type__app_label="partner"
-            )
-            user.user_permissions.add(dashboard_access_perm)
-        return True
-
-
-class PartnerUserUnlinkView(generic.View):
-    def unlink_user(self, user, partner):
-        """
-        Unlinks a user from a partner, and removes the dashboard permission
-        if they are not linked to any other partners.
-
-        Returns False if the user was not linked to the partner; True
-        otherwise.
-        """
-        if not partner.users.filter(pk=user.pk).exists():
-            return False
-        partner.users.remove(user)
-        if not user.is_staff and not user.partners.exists():
-            dashboard_access_perm = Permission.objects.get(
-                codename="dashboard_access", content_type__app_label="partner"
-            )
-            user.user_permissions.remove(dashboard_access_perm)
-        return True
-
-    def post(self, request, user_pk, partner_pk):
-        user = get_object_or_404(User, pk=user_pk)
-        name = user.get_full_name() or user.email
-        partner = get_object_or_404(Partner, pk=partner_pk)
-        if self.unlink_user(user, partner):
-            msg = render_to_string(
-                "oscar/dashboard/partners/messages/user_unlinked.html",
-                {
-                    "user_name": name,
-                    "partner_name": partner.name,
-                    "user_pk": user_pk,
-                    "partner_pk": partner_pk,
-                },
-            )
-            messages.success(self.request, msg, extra_tags="safe noicon")
-        else:
-            messages.error(
-                request,
-                "Пользователь '%(name)s' не прикреплен к точке продаж - '%(partner_name)s'"
-                % {"name": name, "partner_name": partner.name},
-            )
-        return redirect("dashboard:partner-manage", pk=partner_pk)
-
 
 # =====
 # Users
 # =====
 
 
-class PartnerUserUpdateView(generic.UpdateView):
+class PartnerUserUpdateView(UpdateView):
     template_name = "oscar/dashboard/partners/partner_user_form.html"
     form_class = ExistingUserForm
 
@@ -381,7 +236,7 @@ class StaffListView(CustomerListView):
 
     def get_queryset(self):
         self.search_filters = []
-        queryset = Staff._default_manager.prefetch_related("user").all()
+        queryset = Staff._default_manager.prefetch_related("user", "user__partners").all()
         return self.apply_search(queryset)
 
     def apply_search(self, queryset):
@@ -466,14 +321,14 @@ class StaffStatusView(UpdateView):
 
 
 class StaffDetailView(UpdateView):
-    model = Group
-    form_class = GroupForm
-    template_name = "oscar/dashboard/partners/group_create.html"
-    success_url = reverse_lazy('dashboard:group-list')
-    permission_required = 'auth.add_group'
+    model = Staff
+    form_class = StaffForm
+    template_name = "oscar/dashboard/partners/staff_detail.html"
+    success_url = reverse_lazy('dashboard:staff-list')
+    # permission_required = 'auth.add_group'
 
     def form_valid(self, form):
-        messages.success(self.request, 'Группа успешно изменена!')
+        messages.success(self.request, 'Сотрудник успешно изменен!')
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -482,18 +337,18 @@ class StaffDetailView(UpdateView):
 
 
 class StaffCreateView(CreateView):
-    model = Group
-    form_class = GroupForm
-    template_name = "oscar/dashboard/partners/group_create.html"
-    success_url = reverse_lazy('dashboard:group-list')
-    permission_required = 'auth.add_group'
+    model = Staff
+    form_class = StaffForm
+    template_name = "oscar/dashboard/partners/staff_create.html"
+    success_url = reverse_lazy('dashboard:staff-list')
+    # permission_required = 'auth.add_group'
 
     def form_valid(self, form):
-        messages.success(self.request, 'Группа успешно создана!')
+        messages.success(self.request, 'Сотрудник успешно создан!')
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Ошибка при создании группы. Проверьте введенные данные.')
+        messages.error(self.request, 'Ошибка при создании сотрудника. Проверьте введенные данные.')
         return super().form_invalid(form)
 
 
@@ -507,12 +362,146 @@ class StaffDeleteView(DeleteView):
         return reverse("dashboard:staff-list")
 
 
+# =============
+# Partner users
+# =============
+
+
+class PartnerStaffCreateView(StaffCreateView):
+    success_url = reverse_lazy('dashboard:partner-list')
+
+    def dispatch(self, request, *args, **kwargs):
+        self.partner = get_object_or_404(Partner, pk=kwargs.get("partner_pk", None))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["partner"] = self.partner
+        return ctx
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["partner"] = self.partner
+        return kwargs
+    
+
+class PartnerStaffSelectView(StaffListView):
+    template_name = "oscar/dashboard/partners/partner_user_select.html"
+    table_class = PartnerStaffListTable
+
+    def dispatch(self, request, *args, **kwargs):
+        self.partner = get_object_or_404(Partner, pk=kwargs.get("partner_pk", None))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["partner"] = self.partner
+        ctx["form"] = self.form
+        return ctx
+
+    def get_queryset(self):
+        self.search_filters = []
+        partner_exists = Partner.objects.filter(users=OuterRef('user'), id=self.partner.id)
+        queryset = Staff._default_manager.prefetch_related("user", "user__partners").annotate(
+            is_related_to_partner=Exists(partner_exists, output_field=BooleanField())
+        ).all()
+        return self.apply_search(queryset)
+
+
+class PartnerStaffLinkView(View):
+    def get(self, request, user_pk, partner_pk):
+        # need to allow GET to make Undo link in PartnerUserUnlinkView work
+        return self.post(request, user_pk, partner_pk)
+
+    def post(self, request, user_pk, partner_pk):
+        user = get_object_or_404(User, pk=user_pk)
+        name = user.get_full_name() or user.username
+        partner = get_object_or_404(Partner, pk=partner_pk)
+        if self.link_user(user, partner):
+            messages.success(
+                request,
+                "Пользователь '%(name)s' был прикреплен к точке продаж - '%(partner_name)s'"
+                % {"name": name, "partner_name": partner.name},
+            )
+        else:
+            messages.info(
+                request,
+                "Пользователь '%(name)s' уже прикреплен к точке продаж - '%(partner_name)s'"
+                % {"name": name, "partner_name": partner.name},
+            )
+        return redirect("dashboard:partner-user-select", partner_pk=partner_pk)
+
+    def link_user(self, user, partner):
+        """
+        Links a user to a partner, and adds the dashboard permission if needed.
+
+        Returns False if the user was linked already; True otherwise.
+        """
+        if partner.users.filter(pk=user.pk).exists():
+            return False
+        partner.users.add(user)
+        # if not user.is_staff:
+            # dashboard_access_perm = Permission.objects.get(
+            #     codename="dashboard_access", content_type__app_label="partner"
+            # )
+            # user.user_permissions.add(dashboard_access_perm)
+        return True
+
+
+class PartnerStaffUnlinkView(View):
+    def unlink_user(self, user, partner):
+        """
+        Unlinks a user from a partner, and removes the dashboard permission
+        if they are not linked to any other partners.
+
+        Returns False if the user was not linked to the partner; True
+        otherwise.
+        """
+        if not partner.users.filter(pk=user.pk).exists():
+            return False
+        partner.users.remove(user)
+        # if not user.is_staff and not user.partners.exists():
+        #     dashboard_access_perm = Permission.objects.get(
+        #         codename="dashboard_access", content_type__app_label="partner"
+        #     )
+        #     user.user_permissions.remove(dashboard_access_perm)
+        return True
+    
+    def get(self, request, user_pk, partner_pk):
+        # need to allow GET to make Undo link in PartnerUserUnlinkView work
+        return self.post(request, user_pk, partner_pk)
+
+    def post(self, request, user_pk, partner_pk):
+        user = get_object_or_404(User, pk=user_pk)
+        name = user.get_full_name() or user.username
+        partner = get_object_or_404(Partner, pk=partner_pk)
+        if self.unlink_user(user, partner):
+            msg = render_to_string(
+                "oscar/dashboard/partners/messages/user_unlinked.html",
+                {
+                    "user_name": name,
+                    "partner_name": partner.name,
+                    "user_pk": user_pk,
+                    "partner_pk": partner_pk,
+                },
+            )
+            messages.success(self.request, msg, extra_tags="safe noicon")
+        else:
+            messages.error(
+                request,
+                "Пользователь '%(name)s' не прикреплен к точке продаж - '%(partner_name)s'"
+                % {"name": name, "partner_name": partner.name},
+            )
+        return redirect("dashboard:partner-user-select", partner_pk=partner_pk)
+
+
+
 # =====
 # Groups
 # =====
 
 
-class StaffGroupListView(SingleTableView):
+class GroupListView(SingleTableView):
     context_table_name = "groups"
     template_name = "oscar/dashboard/partners/group_list.html"
     table_class = GroupListTable
@@ -524,12 +513,18 @@ class StaffGroupListView(SingleTableView):
         return dict(per_page=settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE)
 
 
-class StaffGroupDetailView(UpdateView):
+class GroupDetailView(UpdateView):
     model = Group
     form_class = GroupForm
-    template_name = "oscar/dashboard/partners/group_create.html"
+    template_name = "oscar/dashboard/partners/group_detail.html"
     success_url = reverse_lazy('dashboard:group-list')
-    permission_required = 'auth.add_group'
+    # permission_required = 'auth.add_group'
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.get_object().name
+        return context
 
     def form_valid(self, form):
         messages.success(self.request, 'Группа успешно изменена!')
@@ -540,12 +535,12 @@ class StaffGroupDetailView(UpdateView):
         return super().form_invalid(form)
 
 
-class StaffGroupCreateView(CreateView):
+class GroupCreateView(CreateView):
     model = Group
     form_class = GroupForm
     template_name = "oscar/dashboard/partners/group_create.html"
     success_url = reverse_lazy('dashboard:group-list')
-    permission_required = 'auth.add_group'
+    # permission_required = 'auth.add_group'
 
     def form_valid(self, form):
         messages.success(self.request, 'Группа успешно создана!')
@@ -554,3 +549,13 @@ class StaffGroupCreateView(CreateView):
     def form_invalid(self, form):
         messages.error(self.request, 'Ошибка при создании группы. Проверьте введенные данные.')
         return super().form_invalid(form)
+
+
+class GroupDeleteView(DeleteView):
+    model = Group
+    template_name = "oscar/dashboard/partners/group_delete.html"
+    context_object_name = "group"
+
+    def get_success_url(self):
+        messages.success(self.request, "Группы персонала успешно удалена")
+        return reverse("dashboard:group-list")

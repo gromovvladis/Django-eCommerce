@@ -87,6 +87,9 @@ class Staff(models.Model):
     
     class Meta:
         db_table = "auth_staff"
+        permissions = (
+            ("full_access", "Полный доступ ко всему сайту"),   
+        )
         verbose_name = "Персонал"
         verbose_name_plural = "Персонал"
 
@@ -230,9 +233,21 @@ class User(AbstractBaseUser, PermissionsMixin):
         name = self.get_full_name()
         return name[0] if name else 'А'
 
-    
     def get_name_and_phone(self):
-        name = self.get_full_name()
+        name = self.name
+        if name:
+            return "%s (%s)" % (name, self.username)
+        
+        return "%s" % self.username 
+    
+    def get_staff_name(self):
+        staff_profile = self.profile
+        if staff_profile:
+            staff_name = staff_profile.get_full_name
+            staff_role = staff_profile.role.name if staff_profile.role else " - "
+            return "%s (%s)" % (staff_name, staff_role)
+        
+        name = self.name
         if name:
             return "%s (%s)" % (name, self.username)
         

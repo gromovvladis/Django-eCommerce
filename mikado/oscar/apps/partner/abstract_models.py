@@ -95,7 +95,6 @@ class AbstractPartner(models.Model):
         abstract = True
         app_label = "partner"
         ordering = ("name", "code")
-        permissions = (("dashboard_access", "Can access dashboard"),)
         verbose_name = "Точка продажи"
         verbose_name_plural = "Точка продажи"
 
@@ -142,7 +141,6 @@ class AbstractTerminal(models.Model):
         abstract = True
         app_label = "partner"
         ordering = ("name", "serial_number")
-        permissions = (("dashboard_access", "Can access dashboard"),)
         verbose_name = "Смарт терминал Эвотор"
         verbose_name_plural = "Смарт терминалы Эвотор"
 
@@ -158,7 +156,6 @@ class AbstractBarCode(models.Model):
         abstract = True
         app_label = "partner"
         ordering = ("code",)
-        permissions = (("dashboard_access", "Can access dashboard"),)
         verbose_name = "Штрих-код"
         verbose_name_plural = "Штрих-коды"
 

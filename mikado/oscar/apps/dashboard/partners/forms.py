@@ -9,7 +9,7 @@ from oscar.forms import widgets
 User = get_user_model()
 Partner = get_model("partner", "Partner")
 PartnerAddress = get_model("partner", "PartnerAddress")
-PhoneUserCreationForm = get_class("customer.forms", "PhoneUserCreationForm")
+# PhoneUserCreationForm = get_class("customer.forms", "PhoneUserCreationForm")
 
 
 class PartnerSearchForm(forms.Form):
@@ -113,14 +113,14 @@ class ExistingUserForm(forms.ModelForm):
             user.set_password(self.cleaned_data["password1"])
         user.save()
 
-        dashboard_perm = Permission.objects.get(
-            codename="dashboard_access", content_type__app_label="partner"
-        )
-        user_has_perm = user.user_permissions.filter(pk=dashboard_perm.pk).exists()
-        if role == "limited" and not user_has_perm:
-            user.user_permissions.add(dashboard_perm)
-        elif role == "staff" and user_has_perm:
-            user.user_permissions.remove(dashboard_perm)
+        # dashboard_perm = Permission.objects.get(
+        #     codename="dashboard_access", content_type__app_label="partner"
+        # )
+        # user_has_perm = user.user_permissions.filter(pk=dashboard_perm.pk).exists()
+        # if role == "limited" and not user_has_perm:
+        #     user.user_permissions.add(dashboard_perm)
+        # elif role == "staff" and user_has_perm:
+        #     user.user_permissions.remove(dashboard_perm)
         return user
 
     class Meta:

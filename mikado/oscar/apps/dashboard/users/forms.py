@@ -1,12 +1,13 @@
+import phonenumbers
+
 from django import forms
-from django.contrib.auth.models import Group, Permission
-
-from django.utils.http import url_has_allowed_host_and_scheme
-from oscar.core.compat import existing_user_fields, get_user_model
-from phonenumber_field.modelfields import PhoneNumberField
-
 from django.conf import settings
+from django.contrib.auth.models import Group, Permission
+from django.utils.http import url_has_allowed_host_and_scheme
 
+from phonenumber_field.phonenumber import PhoneNumber
+
+from oscar.core.compat import get_user_model
 from oscar.core.loading import get_model
 
 User = get_user_model()
@@ -18,11 +19,11 @@ class UserSearchForm(forms.Form):
     name = forms.CharField(required=False, label="Имя пользователя")
 
 
-class StaffCreationForm(forms.ModelForm):
+class StaffForm(forms.ModelForm):
     
-    username = PhoneNumberField(
-        "Номер телефона",
-        blank=True,
+    username = forms.CharField(
+        label="Номер телефона",
+        required=True,
         help_text="Номер телефона пользователя в формате +7 (900) 000-0000",
     )
     last_name = forms.CharField(
@@ -51,24 +52,14 @@ class StaffCreationForm(forms.ModelForm):
         choices=Staff.gender_choices, 
         required=False
     )
+    is_active = forms.BooleanField(
+        label="Активен",
+        initial=True,
+        required=True,
+        help_text="Активен сотрудник или нет",
+    )
     age = forms.IntegerField(label="Возраст", required=False)
     image = forms.ImageField(label="Фото", required=False)
-
-
-# ----------------------------------------------------------------
-
-    IS_STAFF = (
-        (True, "Сотрудник"),
-        (False, "Клиент"),
-    )
-    is_staff = forms.ChoiceField(
-        choices=IS_STAFF,
-        widget=forms.RadioSelect,
-        label="Роль пользователя",
-        initial=False,
-    )
-
-# ----------------------------------------------------------------
 
     error_messages = {
         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
@@ -77,20 +68,24 @@ class StaffCreationForm(forms.ModelForm):
     redirect_url = forms.CharField(widget=forms.HiddenInput, required=False)
 
     class Meta:
-        model = User
-        fields = ('username', 'email', 'name', 'is_staff', 'is_active')
+        model = Staff
+        fields = ('username', 'last_name', 'first_name', 'middle_name', 'role', 'gender', 'is_active', 'age', 'image')
+        sequence = (
+            "username",
+            "last_name",
+            "first_name",
+            "middle_name",
+            "role",
+            "gender",
+            "is_active",
+            "age",
+            "image",
+        )
 
-
-    def __init__(self, partner, *args, **kwargs):
+    def __init__(self, partner=None, *args, **kwargs):
         self.partner = partner
         super().__init__(*args, **kwargs)
-        self.fields['role'].choices = Staff.get_job_choices()
-
-    def _post_clean(self):
-        super()._post_clean()
-        # Validate after self.instance is updated with form data
-        # otherwise validators can't access email
-        # see django.contrib.auth.forms.UserCreationForm
+        self.fields['role'].choices = Staff.get_role_choices()
 
     def clean_redirect_url(self):
         url = self.cleaned_data["redirect_url"].strip()
@@ -98,46 +93,160 @@ class StaffCreationForm(forms.ModelForm):
             return url
         return settings.LOGIN_REDIRECT_URL
     
+    def clean_role(self):
+        # Получаем значение роли
+        role_id = self.cleaned_data.get('role')
+        if role_id:
+            try:
+                return Group.objects.get(id=role_id)
+            except Group.DoesNotExist:
+                raise forms.ValidationError("Выбранная роль не существует.")
+        return None
+    
+    def clean_username(self):
+        number = self.cleaned_data.get("username")
+
+        try:
+            username = PhoneNumber.from_string(number, region='RU')
+            if not username.is_valid():
+                self.add_error(
+                    "username", "Это недопустимый формат телефона."
+                )
+        except phonenumbers.NumberParseException:
+            self.add_error(
+                "username", "Это недействительный формат телефона.",
+            )
+            return number
+
+        return username
 
     def save(self, commit=True):
-        # role = self.cleaned_data.get("role", "limited") 
-        is_staff = self.cleaned_data.get("staff", False)
-        user = super().save(commit=False)
-        user.is_staff = is_staff
+        username = self.cleaned_data.get("username", None)
+        user, created = User.objects.get_or_create(username=username)
+        user.is_staff = True
         user.save()
-        self.partner.users.add(user)
+        if self.partner:
+            self.partner.users.add(user)
 
-        if is_staff:
-            # Если это сотрудник, создаем профиль
-            Staff.objects.create(
-                user=user,
-                first_name=self.cleaned_data.get('first_name', ''),
-                last_name=self.cleaned_data.get('last_name', ''),
-                middle_name=self.cleaned_data.get('middle_name', ''),
-                role=self.cleaned_data.get('role', ''),
-                gender=self.cleaned_data.get('gender', ''),
-                age=self.cleaned_data.get('age', None),
-                image=self.cleaned_data.get('image', None)
-            )
+        staff = Staff.objects.create(
+            user=user,
+            first_name=self.cleaned_data.get('first_name', ''),
+            last_name=self.cleaned_data.get('last_name', ''),
+            middle_name=self.cleaned_data.get('middle_name', ''),
+            role=self.cleaned_data.get('role', ''),
+            gender=self.cleaned_data.get('gender', ''),
+            is_active=self.cleaned_data.get('is_active', False),
+            age=self.cleaned_data.get('age', None),
+            image=self.cleaned_data.get('image', None)
+        )
 
-        return user
+        return staff
+
+
+class GroupForm(forms.ModelForm):
+    """"
+    товары / product +
+       полный доступ / product.full_access
+       просматривать / product.read
+       изменять наличие / product.change_stockrecord
+        
+    заказы / order +
+       полный доступ / order.full_access
+       просматривать / order.read
+       изменять / order.change_order
+       изменять статус / order.change_order_status
+       изменять оплату / order.change_order_payment
+
+    доставка / partner
+       полный доступ / delivery.full_access
+       просматривать / delivery.read
+       изменять доставки / delivery.change_delivery
+
+    оплата / payment +
+       полный доступ / payment.full_access
+       просматривать / payment.read
+       изменять платежи / payment.make_refund
+
+    точки продажи / partner +
+       полный доступ / staff.full_access
+
+    клиенты /user +
+       полный доступ / staff.full_access
+
+    скидки / offer +
+       полный доступ / staff.full_access
+
+    црм / crm +
+       полный доступ / staff.full_access
+
+    телеграм / telegram +
+       полный доступ / staff.full_access
+
+    контент / page +
+       полный доступ / staff.full_access
+
+    отчеты / report +
+       полный доступ / staff.full_access
+    """
+
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
 
     class Meta:
-        model = User
-        fields = existing_user_fields(["username", "email"])
-        sequence = (
-            "username",
-            "email",
-            "is_staff",
-            "last_name",
-            "first_name",
-            "middle_name",
-            "role",
-            "gender",
-            "age",
-            "image",
+        model = Group
+        fields = ['name', 'permissions']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Получаем все разрешения из базы данных один раз
+        permissions = Permission.objects.select_related('content_type').filter(
+            content_type__app_label__in=[
+                'group',
+                'address',
+                'shipping',
+                'delivery',
+                'catalogue',
+                'communication',
+                'reviews',
+                'user',
+                'voucher',
+                'home',
+                'offer',
+                'order',
+                'partner',
+                'payment',
+            ]
         )
+
+
+
+        # Словарь для хранения сгруппированных разрешений по приложениям
+        grouped_permissions = {}
         
+        # Группируем разрешения по приложениям
+        for permission in permissions:
+            app_label = permission.content_type.app_label
+            if app_label not in grouped_permissions:
+                grouped_permissions[app_label] = []
+            grouped_permissions[app_label].append((permission.id, permission.name))
+        
+        # Преобразуем сгруппированные разрешения в формат для виджета
+        self.fields['permissions'].choices = [
+            (app_label, grouped_permissions[app_label]) for app_label in grouped_permissions
+        ]
+        
+        # Устанавливаем queryset для permissions
+        self.fields['permissions'].queryset = permissions
+
+
+   
+
+
+
 
 # class GroupForm(forms.ModelForm):
 #     class Meta:
@@ -192,60 +301,10 @@ class StaffCreationForm(forms.ModelForm):
 #     # def save(self, commit=True):
     
 
-class GroupForm(forms.ModelForm):
-    permissions = forms.ModelMultipleChoiceField(
-        queryset=Permission.objects.none(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
-
-    class Meta:
-        model = Group
-        fields = ['name', 'permissions']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Получаем все разрешения из базы данных один раз
-        permissions = Permission.objects.select_related('content_type').filter(
-            content_type__app_label__in=[
-                'address',
-                'shipping',
-                'delivery',
-                'catalogue',
-                'communication',
-                'reviews',
-                'user',
-                'voucher',
-                'home',
-                'offer',
-                'order',
-                'partner',
-                'payment',
-            ]
-        )
-
-        # Словарь для хранения сгруппированных разрешений по приложениям
-        grouped_permissions = {}
-        
-        # Группируем разрешения по приложениям
-        for permission in permissions:
-            app_label = permission.content_type.app_label
-            if app_label not in grouped_permissions:
-                grouped_permissions[app_label] = []
-            grouped_permissions[app_label].append((permission.id, permission.name))
-        
-        # Преобразуем сгруппированные разрешения в формат для виджета
-        self.fields['permissions'].choices = [
-            (app_label, grouped_permissions[app_label]) for app_label in grouped_permissions
-        ]
-        
-        # Устанавливаем queryset для permissions
-        self.fields['permissions'].queryset = permissions
-
-
 
 # ----------------------------------------------------------------
+
+
 
     # PRODUCTS = (
     #     ("view", "Доступ к просмотру товаров"),

@@ -1,0 +1,12 @@
+{% with partners=record.user.partners.all %}
+    {% if partners %}
+        {% for partner in partners %}
+            <a href="{% url 'dashboard:partner-manage' pk=partner.id %}">
+                {{ partner.name }}
+            </a>
+            {% if not forloop.last %},{% endif %}
+        {% endfor %}
+    {% else %}
+        -
+    {% endif %}
+{% endwith %}

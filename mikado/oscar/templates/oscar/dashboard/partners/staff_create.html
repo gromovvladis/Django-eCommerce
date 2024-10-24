@@ -1,0 +1,45 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% block body_class %}{{ block.super }} create-page{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard:delivery-zones' %}">
+                    Персонал
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Создать сотрудника</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block navtext %}Создать сотрудника{% endblock %}
+
+{% block dashboard_content %}
+    <div class="table-header">
+        <h2>Информация о сотруднике</h2>
+    </div>
+    <form method="post" class="card card-body mb-4 bg-light">
+        {% csrf_token %}
+        <span class="error-block">{{ form.non_field_errors }}</span>
+        {% for field in form %}
+                {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
+        {% endfor %}
+
+
+        <div class="d-flex fill-width mt-3 justify-content-end">
+            <a class="btn btn-danger mr-2" href="{% url 'dashboard:staff-list' %}">
+                <i class="fa-regular fa-circle-xmark"></i> 
+                Отменить
+            </a>             
+            <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+                <i class="fa-regular fa-floppy-disk"></i>
+                Сохранить
+            </button>
+        </div>
+
+    </form>
+{% endblock %}

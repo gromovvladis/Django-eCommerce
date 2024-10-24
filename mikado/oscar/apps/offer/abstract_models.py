@@ -154,7 +154,7 @@ class AbstractConditionalOffer(models.Model):
         "offer.Benefit",
         on_delete=models.CASCADE,
         related_name="offers",
-        verbose_name="Выгода",
+        verbose_name="Предложение скидки",
     )
 
     # Some complicated situations require offers to be applied in a set order.
@@ -581,8 +581,8 @@ class AbstractBenefit(BaseOfferMixin, models.Model):
     class Meta:
         abstract = True
         app_label = "offer"
-        verbose_name = "Выгода"
-        verbose_name_plural = "Выгоды"
+        verbose_name = "Предложение скидки"
+        verbose_name_plural = "Предложения скидки"
 
     @property
     def proxy_map(self):

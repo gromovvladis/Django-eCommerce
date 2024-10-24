@@ -126,6 +126,12 @@ class StaffListTable(DashboardTable):
         order_by="user",
         attrs = {'th': {'class': 'user'},}
     )
+    partners = TemplateColumn(
+        verbose_name="Точки продаж",
+        template_name="oscar/dashboard/partners/staff_row_partners.html",
+        order_by="partners",
+        attrs = {'th': {'class': 'partners'},}
+    )
     notif = TemplateColumn(
         verbose_name="Уведопления",
         template_name="oscar/dashboard/partners/staff_row_notif.html",
@@ -160,8 +166,66 @@ class StaffListTable(DashboardTable):
             "name",
             "role",
             "user",
+            "partners",
             "notif",
             "age",
+            "is_active",
+            "actions",
+        )
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
+        empty_text = "Нет созданых групп продажи"
+
+
+class PartnerStaffListTable(DashboardTable):
+    name = TemplateColumn(
+        verbose_name="Имя",
+        template_name="oscar/dashboard/partners/staff_row_name.html",
+        order_by="name",
+        attrs = {'th': {'class': 'name'},}
+    )
+    role = TemplateColumn(
+        verbose_name="Должность",
+        template_name="oscar/dashboard/partners/staff_row_role.html",
+        order_by="role",
+        attrs = {'th': {'class': 'role'},}
+    )
+    user = TemplateColumn(
+        verbose_name="Пользователь",
+        template_name="oscar/dashboard/partners/staff_row_user.html",
+        order_by="user",
+        attrs = {'th': {'class': 'user'},}
+    )
+    partners = TemplateColumn(
+        verbose_name="Точки продаж",
+        template_name="oscar/dashboard/partners/staff_row_partners.html",
+        order_by="partners",
+        attrs = {'th': {'class': 'partners'},}
+    )
+    is_active = TemplateColumn(
+        verbose_name="Активен",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by="is_active",
+        attrs = {'th': {'class': 'active'},}
+    )
+    actions = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/partners/partner_staff_row_actions.html",
+        orderable=False,
+        attrs = {'th': {'class': 'actions'},}
+    )
+
+    icon = "fas fa-id-card-clip"
+    caption = ngettext_lazy("%s Сотрудник", "%s Сотрудников")
+
+    class Meta(DashboardTable.Meta):
+        model = Staff
+        fields = (
+            "name",
+            "role",
+            "user",
+            "partners",
             "is_active",
             "actions",
         )

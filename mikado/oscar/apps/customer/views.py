@@ -30,10 +30,14 @@ PageTitleMixin, RegisterUserMixin = get_classes(
     "customer.mixins", ["PageTitleMixin", "RegisterUserMixin"]
 )
 CustomerDispatcher = get_class("customer.utils", "CustomerDispatcher")
-PhoneAuthenticationForm, PhoneUserCreationForm, OrderSearchForm = get_classes(
+PhoneAuthenticationForm, OrderSearchForm = get_classes(
     "customer.forms",
-    ["PhoneAuthenticationForm", "PhoneUserCreationForm", "OrderSearchForm"],
+    ["PhoneAuthenticationForm", "OrderSearchForm"],
 )
+# PhoneAuthenticationForm, PhoneUserCreationForm, OrderSearchForm = get_classes(
+#     "customer.forms",
+#     ["PhoneAuthenticationForm", "PhoneUserCreationForm", "OrderSearchForm"],
+# )
 ProfileForm = get_class("customer.forms", "ProfileForm")
 UserAddressForm = get_class("address.forms", "UserAddressForm")
 Order = get_model("order", "Order")

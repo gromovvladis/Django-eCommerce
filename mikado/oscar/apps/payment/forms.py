@@ -10,7 +10,6 @@ from oscar.core.loading import get_class, get_model
 from . import bankcards
 
 Bankcard = get_model("payment", "Bankcard")
-AbstractAddressForm = get_class("address.forms", "AbstractAddressForm")
 
 # List of card names for all the card types supported in payment.bankcards
 VALID_CARDS = set([card_type[0] for card_type in bankcards.CARD_TYPES])

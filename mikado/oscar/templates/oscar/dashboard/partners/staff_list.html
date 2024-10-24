@@ -18,6 +18,11 @@
 {% block header %}
     <div class="page-header d-flex justify-content-between">
         <h1>Сотрудники</h1>
+        <a href="{% url 'dashboard:staff-create' %}" class="btn btn-primary ml-3"><i class="fas fa-plus"></i> 
+            <span>
+                Создать сотрудника
+            </span>
+        </a>
     </div>
 {% endblock header %}
 
@@ -85,24 +90,6 @@
                     </div>
                     <div class="card card-body dropdown-list collapse" id="status-body">
                         <h2 class="mb-3">Изменить статус сотрудника</h2>
-                        {% comment %} <div class="float-right">
-                            <div class="form-inline">
-                                <i class="fas fa-sync-alt mr-1"></i> <span class="mr-2">Действия</span>
-                                <label class="mr-3">С выбранными пользователями</label>
-                    
-                                <div class="form-check mr-2">
-                                    <input id="make_active_check" class="form-check-input" type="radio" name="action" value="make_active" />
-                                    <label class="form-check-label" for="make_active_check">Сделать активными</label>
-                                </div>
-                    
-                                <div class="form-check mr-2">
-                                    <input id="make_inactive_check" class="form-check-input" type="radio" name="action" value="make_inactive" />
-                                    <label class="form-check-label" for="make_inactive_check"> Сделать неактивными
-                    
-                                <input type="submit" value="Изменить статус" class="btn btn-primary" />
-                            </div>
-                        </div> {% endcomment %}
-                        
                         <div class="form-inline fill-width justify-space-between">
                             <div class="form-group form-flex-inline">
                                 <label for="new_status_id">Новый статус</label>

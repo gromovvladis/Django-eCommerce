@@ -130,6 +130,11 @@ class AbstractSource(models.Model):
         abstract = True
         app_label = "payment"
         ordering = ["pk"]
+        permissions = (
+            ("full_access", "Полный доступ"),
+            ("read", "Просматривать платежи и возвраты"),
+            ("make_refund", "Остуществлять возвраты"),    
+        )
         verbose_name = "Источник оплаты"
         verbose_name_plural = "Источники оплаты"
 

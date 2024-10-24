@@ -7,14 +7,10 @@ const defaultFormat = '+7 ({0}{1}{2}) {3}{4}{5}-{6}{7}{8}{9}';
 
 if (phoneInput){
     phoneInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace')
-            deleteMode = true;
-        else
-            deleteMode = false;
-            
-        });
+        deleteMode = (e.key === 'Backspace');
+    });
         
-        phoneInput.addEventListener('input', (e) => {
+    phoneInput.addEventListener('input', (e) => {
         if (deleteMode) {
             phoneInput.value = phoneInput.value;
             phoneStr = parsePhoneString(phoneInput.value);
@@ -25,11 +21,6 @@ if (phoneInput){
                 }
             }
             phoneInput.value = formatPhoneString();
-        }
-        if (phoneStr.length == 10){
-            $(btn_sms).prop("disabled", false);
-        } else {
-            $(btn_sms).prop("disabled", true);
         }
     });
 }

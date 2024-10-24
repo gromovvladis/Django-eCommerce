@@ -9,16 +9,19 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
     verbose_name = "Каталог"
 
     default_permissions = [
-        "is_staff",
+        "staff.full_access",
+        "catalogue.full_access",
     ]
     permissions_map = _map = {
-        "catalogue-product": (["is_staff"], ["partner.dashboard_access"]),
-        "catalogue-product-create": (["is_staff"], ["partner.dashboard_access"]),
-        "catalogue-product-list": (["is_staff"], ["partner.dashboard_access"]),
-        "catalogue-product-delete": (["is_staff"], ["partner.dashboard_access"]),
-        "catalogue-product-lookup": (["is_staff"], ["partner.dashboard_access"]),
-        "catalogue-additional-lookup": (["is_staff"], ["partner.dashboard_access"]),
+        "catalogue-product": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.change_stockrecord"]),
+        
+        "catalogue-product-list": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
+        "catalogue-additional-list": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
+        
+        "stock-alert-list": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
+        "stock-alert-update-list": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
     }
+
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
@@ -141,6 +144,11 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 name="catalogue-product-delete",
             ),
             path(
+                "product-lookup/",
+                self.product_lookup_view.as_view(),
+                name="catalogue-product-lookup",
+            ),
+            path(
                 "stock-alerts/",
                 self.stock_alert_view.as_view(),
                 name="stock-alert-list",
@@ -149,11 +157,6 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 "stock-alerts/update/<int:pk>/",
                 self.stock_alert_update_view.as_view(),
                 name="stock-alert-update-list",
-            ),
-            path(
-                "product-lookup/",
-                self.product_lookup_view.as_view(),
-                name="catalogue-product-lookup",
             ),
             path(
                 "additional-lookup/",

@@ -34,7 +34,6 @@ ProductAttributesContainer = get_class(
     "catalogue.product_attributes", "ProductAttributesContainer"
 )
 
-
 # pylint: disable=abstract-method
 class ReverseStartsWith(StartsWith):
     """
@@ -132,6 +131,11 @@ class AbstractProductClass(models.Model):
         abstract = True
         app_label = "catalogue"
         ordering = ["name"]
+        permissions = (
+            ("full_access", "Полный доступ"),
+            ("read", "Просматривать товары и категории"),
+            ("change_stockrecord", "Изменять цену и наличие"),    
+        )
         verbose_name = "Класс товара"
         verbose_name_plural = "Классы товара"
 
@@ -400,6 +404,7 @@ class AbstractProductCategory(models.Model):
 
     def __str__(self):
         return "<productcategory for product '%s'>" % self.product
+
 
 class AbstractProduct(models.Model):
     """
@@ -1650,7 +1655,6 @@ class AbstractOption(models.Model):
         return self.name
 
 
-
 class AbstractProductAdditional(models.Model):
     """
     'Through' model for product additional
@@ -1696,7 +1700,6 @@ class AbstractProductAdditional(models.Model):
         unique_together = ("primary_class", "primary_product", "additional_product")
         verbose_name = "Дополнительный товар"
         verbose_name_plural = "Дополнительные товары"
-
 
 
 class AbstractAdditional(models.Model):

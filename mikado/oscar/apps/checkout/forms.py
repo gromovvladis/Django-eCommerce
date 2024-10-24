@@ -5,7 +5,6 @@ from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
 
 User = get_user_model()
-AbstractAddressForm = get_class("address.forms", "AbstractAddressForm")
 
 
 class CheckoutVoucherForm(forms.Form):
@@ -15,7 +14,7 @@ class CheckoutVoucherForm(forms.Form):
         return self.cleaned_data["code"].strip().upper()
 
 
-class CheckoutForm(AbstractAddressForm, forms.Form): 
+class CheckoutForm(forms.ModelForm, forms.Form): 
 
     method_code = forms.ChoiceField(label="Выберите способ доставки",widget=forms.HiddenInput)
 
