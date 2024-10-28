@@ -29,11 +29,13 @@ NewTransactionForm = get_class("dashboard.orders.forms", "NewTransactionForm")
 PaymentManager = get_class("payment.methods", "PaymentManager")
 
 class TransactionsListView(SingleTableView):
-    template_name = 'oscar/dashboard/payments/payments_list.html'
+    template_name = 'oscar/dashboard/payments/transaction_list.html'
+    context_table_name = 'transactions'
     paginate_by = settings.OSCAR_DASHBOARD_PAYMENTS_PER_PAGE
 
     def get_queryset(self):
 
+        self.search_filters = []
         status = self.request.GET.get('status')
         date_gte = self.request.GET.get('date_gte')
         date_lte = self.request.GET.get('date_lte')
@@ -42,12 +44,18 @@ class TransactionsListView(SingleTableView):
         
         if status:
             params['status'] = status
+            self.search_filters.append((('Статус соответствует "%s"' % status), (("status", status),)))
 
         if date_lte:
             params['created_at.lte'] = date_lte
-
+            self.search_filters.append((
+                ("Размещено до {end_date}").format(end_date=date_lte), (("date_to", date_lte),)
+            ))
         if date_gte:
             params['created_at.gte'] = date_gte
+            self.search_filters.append((
+                ("Размещено после {start_date}").format(start_date=date_gte), (("date_from", date_gte),)
+            ))
 
         try: 
             res = self.model.list(params=params).items
@@ -56,29 +64,29 @@ class TransactionsListView(SingleTableView):
             logger.error("Error Yokassa payments list - %s" % str(e))
 
         return res
-
+    
 
 class PaymentsListView(TransactionsListView):
-    context_table_name = 'payments'
     table_class = PaymentListTable
     model = Payment
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['search_filters'] = self.search_filters
         context['title'] = 'Список платежей Yookassa'
-        context['status_options'] = [('pending', 'Платеж создан и ожидает действий от пользователя'), ('waiting_for_capture', 'Платеж оплачен, деньги авторизованы и ожидают списания'), ('succeeded', 'Платеж успешно завершен'), ('canceled', 'Платеж отменен')]
+        context['status_options'] = [('succeeded', 'Платеж успешно завершен'), ('canceled', 'Платеж отменен'), ('pending', 'Платеж создан и ожидает оплаты от пользователя'), ('waiting_for_capture', 'Платеж оплачен, деньги авторизованы и ожидают списания')]
         return context
 
 
 class RefundsListView(TransactionsListView):
-    context_table_name = 'refunds'
     table_class = RefundListTable
     model = Refund
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['search_filters'] = self.search_filters
         context['title'] = 'Список возвратов Yookassa'
-        context['status_options'] = [('pending', 'Возврат создан'), ('succeeded', 'Возврат успешно завершен'), ('canceled', 'Возврат отменен')]
+        context['status_options'] = [('succeeded', 'Возврат успешно завершен'), ('canceled', 'Возврат отменен'), ('pending', 'Возврат в процессе обработки')]
         return context
    
 

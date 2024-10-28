@@ -10,16 +10,13 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управления - Доставка"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
+        "delivery.full_access",
     ]
+
     permissions_map = {
-        "delivery-stats": (["is_staff"], ["partner.dashboard_access"]),
-        "delivery-active": (["is_staff"], ["partner.dashboard_access"]),
-        "delivery-list": (["is_staff"], ["partner.dashboard_access"]),
-        "delivery-zones": (["is_staff"], ["partner.dashboard_access"]),
-        "delivery-couriers-list": (["is_staff"], ["partner.dashboard_access"]),
-        "delivery-partner": (["is_staff"], ["partner.dashboard_access"]),
-        "delivery-couriers": (["is_staff"], ["partner.dashboard_access"]),
+        "delivery-active": (["user.full_access"], ["delivery.full_access"], ["delivery.read"]),
+        "delivery-list": (["user.full_access"], ["delivery.full_access"], ["delivery.read"]),
     }
 
     # pylint: disable=attribute-defined-outside-init

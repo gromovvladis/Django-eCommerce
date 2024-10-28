@@ -77,7 +77,7 @@ class VoucherListView(generic.ListView):
             self.search_filters.append('Код - "%s"' % code)
         if offer_name:
             qs = qs.filter(offers__name__icontains=offer_name)
-            self.search_filters.append('Имя прдложения соответствует "%s"' % offer_name)
+            self.search_filters.append('Имя прeдложения соответствует "%s"' % offer_name)
         if is_active is not None:
             now = timezone.now()
             if is_active:

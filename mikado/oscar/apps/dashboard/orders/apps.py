@@ -10,16 +10,19 @@ class OrdersDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управления - Заказы"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
+        "order.full_access",
     ]
     permissions_map = {
-        "order-list": (["is_staff"], ["partner.dashboard_access"]),
-        "order-active-list": (["is_staff"], ["partner.dashboard_access"]),
-        "order-stats": (["is_staff"], ["partner.dashboard_access"]),
-        "order-detail": (["is_staff"], ["partner.dashboard_access"]),
-        "order-detail-note": (["is_staff"], ["partner.dashboard_access"]),
-        "order-line-detail": (["is_staff"], ["partner.dashboard_access"]),
-        "order-shipping-address": (["is_staff"], ["partner.dashboard_access"]),
+        "order-list": (["user.full_access"], ["order.full_access"], ["order.read"]),
+        "order-active-list": (["user.full_access"], ["order.full_access"], ["order.read"]),
+        "order-detail": (["user.full_access"], ["order.full_access"], ["order.read"]),
+        "order-line-detail": (["user.full_access"], ["order.full_access"], ["order.read"]),
+
+        "order-detail-note": (["user.full_access"], ["order.full_access"], ["order.change_order"]),
+        "order-shipping-address": (["user.full_access"], ["order.full_access"], ["order.change_order"]),
+
+        "order-stats": (["user.full_access"], ["order.full_access"]),
     }
 
     # pylint: disable=attribute-defined-outside-init

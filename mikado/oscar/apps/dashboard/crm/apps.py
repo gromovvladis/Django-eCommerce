@@ -10,16 +10,8 @@ class CRMDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управления - CRM"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
     ]
-    permissions_map = {
-        "crm-orders": (["is_staff"], ["partner.dashboard_access"]),
-        "crm-partners": (["is_staff"], ["partner.dashboard_access"]),
-        "crm-staffs": (["is_staff"], ["partner.dashboard_access"]),
-        "crm-products": (["is_staff"], ["partner.dashboard_access"]),
-        "crm-receipts": (["is_staff"], ["partner.dashboard_access"]),
-        "crm-docs": (["is_staff"], ["partner.dashboard_access"]),
-    }
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

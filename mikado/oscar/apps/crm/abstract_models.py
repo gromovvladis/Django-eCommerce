@@ -27,12 +27,12 @@ class AbstractCRMEvent(models.Model):
     )
     type = models.CharField(max_length=255, choices=type_choices, default=INFO)
 
-    date_sent = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
     class Meta:
         abstract = True
         app_label = "crm"
-        ordering = ("-date_sent",)
+        ordering = ("-date_created",)
         verbose_name = "Событие СRM"
         verbose_name_plural = "События СRM"
 

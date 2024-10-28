@@ -9,14 +9,10 @@
             {% with adr=record.primary_address %}
                 {% if adr %}
                     <button class="dropdown-item" onclick="openMap('{{ adr.line1 }}')">
-                        <span class="caption-button">
-                            Точка на карте
-                        </span>
+                        Точка на карте
                     </button>
                     <button class="dropdown-item" onclick="createRote('{{ adr.line1 }}')">
-                        <span class="caption-button">
-                            Маршрут до точки
-                        </span>
+                        Маршрут до точки
                     </button>
                 {% endif %}
             {% endwith %}

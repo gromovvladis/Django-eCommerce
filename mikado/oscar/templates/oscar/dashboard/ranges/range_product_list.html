@@ -337,16 +337,22 @@
 
   {% block fixed_actions_group %}
     <div class="fixed-actions-group">
+      <div class="container container-fluid">
         <div class="d-flex justify-content-end">  
             <a class="btn btn-danger mr-2" href="{% url 'dashboard:range-list' %}">
-                <i class="fa-regular fa-circle-xmark"></i> 
+              <i class="fa-regular fa-circle-xmark"></i> 
+              <span>
                 Отменить
+              </span>
             </a>             
             <a class="btn btn-primary" href="{% url 'dashboard:range-update' pk=range.id %}">
-                <i class="fa-solid fa-share"></i>
+              <i class="fa-solid fa-share"></i>
+              <span>
                 Назад
+              </span>
             </a>
         </div>
+      </div>
     </div>
   {% endblock fixed_actions_group %}
 

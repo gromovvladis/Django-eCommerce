@@ -44,13 +44,13 @@
                             <a class="btn btn-primary mr-2" href="{% url 'dashboard:partner-user-select' partner_pk=partner.pk %}">
                                 <i class="fa-solid fa-link"></i>
                                 <span class="caption-button">
-                                    Добавить персонал
+                                    Добавить сотрудника
                                 </span>
                             </a>
                             <a class="btn btn-info" href="{% url 'dashboard:partner-user-create' partner_pk=partner.pk %}">
                                 <i class="fa-solid fa-user-plus"></i>
                                 <span class="caption-button">
-                                    Создать пользователя
+                                    Создать сотрудника
                                 </span>
                             </a>             
                         </div>
@@ -72,13 +72,13 @@
                         {% for user in users %}
                             <tr>
                                 <td>
-                                    <a class="d-flex align-items-center" href="{% url 'dashboard:partner-user-update' partner_pk=partner.pk user_pk=user.id %}">
-                                        <span class="spinner-border-sm {% if user.gender == "М" %}badge-primary{% else %}badge-pink{% endif %}  rounded-circle mr-2">&nbsp;</span>
-                                        {{ user.name|default:"---" }}
+                                    <a class="d-flex align-items-center" href="{% url 'dashboard:staff-detail' pk=user.profile.id %}">
+                                        <span class="spinner-border-sm {% if user.profile.gender == "М" %}badge-primary{% else %}badge-pink{% endif %}  rounded-circle mr-2">&nbsp;</span>
+                                        {{ user.profile.get_full_name|default:user.username }}
                                     </a>
                                 </td>
                                 <td>
-                                    {{ user.staff }}
+                                    {{ user.profile.role }}
                                 </td>
                                 <td>{{ user.username }}</td>
                                 <td class="d-flex justify-content-end">

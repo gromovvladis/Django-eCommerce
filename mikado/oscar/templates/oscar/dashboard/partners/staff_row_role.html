@@ -1,0 +1,9 @@
+{% load django_tables2 %}
+
+{% if record.role %}
+    <a href="{% url 'dashboard:group-detail' pk=record.role_id %}">
+        {{ record.role }}
+    </a>
+{% else %}
+    -
+{% endif %}

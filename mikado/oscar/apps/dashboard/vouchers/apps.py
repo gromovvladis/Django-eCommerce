@@ -9,7 +9,7 @@ class VouchersDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управление - Промокоды"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
     ]
 
     # pylint: disable=attribute-defined-outside-init

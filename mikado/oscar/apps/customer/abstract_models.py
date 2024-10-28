@@ -1,10 +1,6 @@
 from django.db import models
 from django.urls import reverse
-from django.utils import timezone
-from django.utils.crypto import get_random_string
-
-from oscar.apps.catalogue.reviews.utils import get_default_review_status
-from oscar.core import validators
+from django.contrib.auth.models import Group
 
 from oscar.core.compat import AUTH_USER_MODEL
 
@@ -31,8 +27,6 @@ class AbstractOrderReview(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
-
-    # homepage = models.URLField("URL", blank=True)
 
     date_created = models.DateTimeField(auto_now_add=True)
 
@@ -70,3 +64,17 @@ class AbstractOrderReview(models.Model):
     def reviewer_name(self):
         if self.user:
             return self.user.get_full_name()
+        
+class AbstractGroupEvotor(models.Model):
+    group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name='evotor')
+    evotor_id = models.CharField(max_length=128 ,null=True, blank=True)
+
+    def __str__(self):
+        return self.group.name
+    
+    class Meta:
+        abstract = True
+        app_label = "auth"
+        unique_together = (("group", "evotor_id"),)
+        verbose_name ="Эвотор ID"
+        verbose_name_plural = "Эвотор ID"

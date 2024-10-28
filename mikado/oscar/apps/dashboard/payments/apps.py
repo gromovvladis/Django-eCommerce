@@ -10,8 +10,46 @@ class PaymentsDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управления - Онлайн-оплата Yookassa"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
     ]
+
+    permissions_map = _map = {
+        "payments-list": (["user.full_access"], ["payment.full_access"], ["payment.read"]),
+        "refunds-list": (["user.full_access"], ["payment.full_access"], ["payment.read"]),
+        "payment-detail": (["user.full_access"], ["payment.full_access"], ["payment.read"]),
+        "refund-detail": (["user.full_access"], ["payment.full_access"], ["payment.read"]),
+        
+        "refund-transaction": (
+            ["user.full_access"], 
+            ["payment.full_access"], 
+            ["payment.make_refund"],
+            ["order.change_order_payment"],
+        ),
+        "update-source": (
+            ["user.full_access"], 
+            ["payment.full_access"], 
+            ["payment.make_refund"],
+            ["order.change_order_payment"],
+        ),
+        "delete-source": (
+            ["user.full_access"], 
+            ["payment.full_access"], 
+            ["payment.make_refund"],
+            ["order.change_order_payment"],
+        ),
+        "add-source": (
+            ["user.full_access"], 
+            ["payment.full_access"], 
+            ["payment.make_refund"],
+            ["order.change_order_payment"],
+        ),
+        "add-transaction": (
+            ["user.full_access"], 
+            ["payment.full_access"], 
+            ["payment.make_refund"],
+            ["order.change_order_payment"],
+        ),
+    }
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

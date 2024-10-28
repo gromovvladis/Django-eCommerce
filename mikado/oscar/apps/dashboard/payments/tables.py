@@ -10,7 +10,7 @@ class PaymentListTable(DashboardTable):
 
     order = TemplateColumn(
         verbose_name="Заказ",
-        template_name="oscar/dashboard/payments/payments_row_order.html",
+        template_name="oscar/dashboard/payments/transaction_row_order.html",
         accessor=A("description"),
         order_by="description",
         attrs = {'th': {'class': 'name'},
@@ -20,7 +20,7 @@ class PaymentListTable(DashboardTable):
 
     status = TemplateColumn(
         verbose_name="Статус",
-        template_name="oscar/dashboard/payments/payments_row_status.html",
+        template_name="oscar/dashboard/payments/transaction_row_status.html",
         accessor=A("status"),
         order_by="status",
         attrs = {'th': {'class': 'status'},}
@@ -28,7 +28,7 @@ class PaymentListTable(DashboardTable):
 
     amount = TemplateColumn(
         verbose_name="Сумма",
-        template_name="oscar/dashboard/payments/payments_row_amount.html",
+        template_name="oscar/dashboard/payments/transaction_row_amount.html",
         accessor=A("amount"),
         order_by="amount.value",
         attrs = {'th': {'class': 'price'}}
@@ -52,7 +52,7 @@ class PaymentListTable(DashboardTable):
 
     created_at = TemplateColumn(
         verbose_name="Время создания",
-        template_name="oscar/dashboard/payments/payments_row_created_at.html",
+        template_name="oscar/dashboard/payments/transaction_row_created_at.html",
         accessor=A("created_at"),
         order_by="created_at",
         attrs = {'th': {'class': 'date'},}
@@ -60,7 +60,7 @@ class PaymentListTable(DashboardTable):
 
     actions = TemplateColumn(
         verbose_name="",
-        template_name="oscar/dashboard/payments/payments_row_actions.html",
+        template_name="oscar/dashboard/payments/payment_row_actions.html",
         orderable=False,
         attrs = {'th': {'class': 'actions'},}
     )
@@ -78,44 +78,49 @@ class RefundListTable(DashboardTable):
 
     order = TemplateColumn(
         verbose_name="Заказ",
-        template_name="oscar/dashboard/payments/payments_row_order.html",
+        template_name="oscar/dashboard/payments/transaction_row_order.html",
         accessor=A("description"),
         order_by="description",
-        attrs = {'th': {'class': 'name'},},
+        attrs = {'th': {'class': 'name'},
+                 'td': {'class': 'name'},
+        },
     )
 
     status = TemplateColumn(
         verbose_name="Статус",
-        template_name="oscar/dashboard/payments/payments_row_status.html",
+        template_name="oscar/dashboard/payments/transaction_row_status.html",
         accessor=A("status"),
         order_by="status",
+        attrs = {'th': {'class': 'status'},}
     )
     
     amount = TemplateColumn(
         verbose_name="Сумма",
-        template_name="oscar/dashboard/payments/payments_row_amount.html",
+        template_name="oscar/dashboard/payments/transaction_row_amount.html",
         accessor=A("amount"),
         order_by="amount.value",
+        attrs = {'th': {'class': 'price'}}
     )
 
     cancellation_details = TemplateColumn(
         verbose_name="Детали возврата",
-        template_name="oscar/dashboard/payments/payments_row_cancellation_details.html",
+        template_name="oscar/dashboard/payments/refund_row_cancellation_details.html",
         accessor=A("cancellation_details"),
         order_by="cancellation_details",
     )
 
     created_at = TemplateColumn(
         verbose_name="Время создания",
-        template_name="oscar/dashboard/payments/payments_row_created_at.html",
+        template_name="oscar/dashboard/payments/transaction_row_created_at.html",
         accessor=A("created_at"),
         order_by="created_at",
     )
 
     actions = TemplateColumn(
-        verbose_name="Действия",
-        template_name="oscar/dashboard/payments/refunds_row_actions.html",
+        verbose_name="",
+        template_name="oscar/dashboard/payments/refund_row_actions.html",
         orderable=False,
+        attrs = {'th': {'class': 'actions'},}
     )
 
     icon = "sitemap"

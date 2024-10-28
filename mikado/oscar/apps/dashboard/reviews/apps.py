@@ -9,7 +9,7 @@ class ReviewsDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управления - Отзывы"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
     ]
 
     # pylint: disable=attribute-defined-outside-init

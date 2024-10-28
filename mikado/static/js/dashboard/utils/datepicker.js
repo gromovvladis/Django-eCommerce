@@ -18,11 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
   var dateRangePickers = document.querySelectorAll('.daterange');
   var datePickers = document.querySelectorAll('.date');
   var datetimePickers = document.querySelectorAll('.datetime');
+  var timePickers = document.querySelectorAll('.time');
 
   dateRangePickers.forEach(function(picker) {
       // Найти input внутри текущего .datetime
       var input = picker.querySelector('input');
-      var button = picker.querySelector('.datetime-btn');
+    //   var button = picker.querySelector('.datetime-btn');
 
       // Инициализация Air Datepicker для текущего input
       var datepicker = new AirDatepicker(input, {
@@ -42,16 +43,16 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       // Открытие календаря при нажатии на кнопку
-      button.addEventListener('click', function() {
-          datepicker.show();
-      });
+    //   button.addEventListener('click', function() {
+    //       datepicker.show();
+    //   });
 
   });
 
   datePickers.forEach(function(picker) {
       // Найти input внутри текущего .datetime
       var input = picker.querySelector('input');
-      var button = picker.querySelector('.datetime-btn');
+    //   var button = picker.querySelector('.datetime-btn');
 
       // Инициализация Air Datepicker для текущего input
       var datepicker = new AirDatepicker(input, {
@@ -96,16 +97,16 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       // Открытие календаря при нажатии на кнопку
-      button.addEventListener('click', function() {
-          datepicker.show();
-      });
+    //   button.addEventListener('click', function() {
+    //       datepicker.show();
+    //   });
 
   });
 
   datetimePickers.forEach(function(picker) {
       // Найти input внутри текущего .datetime
       var input = picker.querySelector('input');
-      var button = picker.querySelector('.datetime-btn');
+    //   var button = picker.querySelector('.datetime-btn');
 
       // Инициализация Air Datepicker для текущего input
       var datepicker = new AirDatepicker(input, {
@@ -128,9 +129,40 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       // Открытие календаря при нажатии на кнопку
-      button.addEventListener('click', function() {
-          datepicker.show();
+    //   button.addEventListener('click', function() {
+    //       datepicker.show();
+    //   });
+  });
+
+  timePickers.forEach(function(picker) {
+      // Найти input внутри текущего .datetime
+      var input = picker.querySelector('input');
+    //   var button = picker.querySelector('.datetime-btn');
+
+      // Инициализация Air Datepicker для текущего input
+      var datepicker = new AirDatepicker(input, {
+          autoClose: true,
+          isMobile: true,
+          timepicker: true,
+          datapicker: false,
+
+          timeFormat: 'HH:mm',
+
+          minutesStep: 15,
+
+          toggleSelected: false,
+          locale: localLang,
+
+          dateTimeSeparator: " ",
+          
+          container: '.modal-body',
+
       });
+
+      // Открытие календаря при нажатии на кнопку
+    //   button.addEventListener('click', function() {
+    //       datepicker.show();
+    //   });
   });
 
 });

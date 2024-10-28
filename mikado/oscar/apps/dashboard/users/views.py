@@ -1,12 +1,10 @@
 # pylint: disable=attribute-defined-outside-init
+import re
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.models import Group
 from django.db.models import Q
 from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
-from django.views.generic import DetailView, FormView, ListView, CreateView
-from django.views.generic.detail import SingleObjectMixin
+from django.views.generic import DetailView
 from django.views.generic.edit import FormMixin
 from django_tables2 import SingleTableView
 
@@ -14,25 +12,23 @@ from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class
 from oscar.views.generic import BulkEditMixin
 
-GroupForm = get_class("dashboard.users.forms","GroupForm")
 UserSearchForm = get_class("dashboard.users.forms","UserSearchForm")
 PasswordResetForm = get_class("customer.forms", "PasswordResetForm")
 UserTable = get_class("dashboard.users.tables", "UserTable")
 User = get_user_model()
 
-
-
-class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
-    template_name = "oscar/dashboard/users/index.html"
+class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
+    template_name = "oscar/dashboard/users/customer_list.html"
     model = User
     actions = (
+        "make_nothing",
         "make_active",
         "make_inactive",
     )
     form_class = UserSearchForm
     table_class = UserTable
     context_table_name = "users"
-    desc_template = "%(main_filter)s %(email_filter)s %(name_filter)s"
+    desc_template = "%(main_filter)s %(phone_filter)s %(name_filter)s"
     description = ""
 
     def dispatch(self, request, *args, **kwargs):
@@ -59,6 +55,7 @@ class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
         return kwargs
 
     def get_queryset(self):
+        self.search_filters = []
         queryset = self.model.objects.select_related("userrecord").order_by(
             "-date_joined"
         )
@@ -68,7 +65,7 @@ class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
         # Set initial queryset description, used for template context
         self.desc_ctx = {
             "main_filter": "Все пользователи",
-            "email_filter": "",
+            "phone_filter": "",
             "name_filter": "",
         }
         if self.form.is_valid():
@@ -80,10 +77,12 @@ class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
         """
         Function is split out to allow customisation with little boilerplate.
         """
-        if data["email"]:
-            email = data["email"]
-            queryset = queryset.filter(email__istartswith=email)
-            self.desc_ctx["email_filter"] = " с email соответствующим '%s'" % email
+        if data["username"]:
+            # username = data["username"]
+            username = re.sub(r'[^\d+]', '', data["username"])
+            queryset = queryset.filter(username__istartswith=username)
+            self.desc_ctx["phone_filter"] = " с телефоном соответствующим '%s'" % username
+            self.search_filters.append((('Телефон начинается с "%s"' % username), (("username", data["username"]),)))
         if data["name"]:
             # If the value is two words, then assume they are first name and
             # last name
@@ -94,6 +93,7 @@ class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
                 condition &= Q(name__icontains=part)
             queryset = queryset.filter(condition).distinct()
             self.desc_ctx["name_filter"] = " с именем соответствующим '%s'" % data["name"]
+            self.search_filters.append((('Имя соответствует "%s"' % data["name"]), (("name", data["name"]),)))
 
         return queryset
 
@@ -105,7 +105,12 @@ class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["form"] = self.form
+        context["search_filters"] = self.search_filters
         return context
+    
+    def make_nothing(self, request, users):
+        messages.info(self.request, "Выберите статус 'Активен' или 'Не активен'")
+        return redirect("dashboard:customer-list")
 
     def make_inactive(self, request, users):
         return self._change_users_active_status(users, False)
@@ -119,11 +124,7 @@ class CustomersView(BulkEditMixin, FormMixin, SingleTableView):
                 user.is_active = value
                 user.save()
         messages.info(self.request, "Пользовательский статус был успешно изменен")
-        return redirect("dashboard:customers")
-
-
-class StaffView(BulkEditMixin, FormMixin, SingleTableView):
-    pass
+        return redirect("dashboard:customer-list")
 
 
 class UserDetailView(DetailView):
@@ -138,50 +139,28 @@ class UserDetailView(DetailView):
         return queryset
 
 
-class PasswordResetView(SingleObjectMixin, FormView):
-    form_class = PasswordResetForm
-    http_method_names = ["post"]
-    model = User
+# class PasswordResetView(SingleObjectMixin, FormView):
+#     form_class = PasswordResetForm
+#     http_method_names = ["post"]
+#     model = User
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        return super().post(request, *args, **kwargs)
+#     def post(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+#         return super().post(request, *args, **kwargs)
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["data"] = {"email": self.object.email}
-        return kwargs
+#     def get_form_kwargs(self):
+#         kwargs = super().get_form_kwargs()
+#         kwargs["data"] = {"email": self.object.email}
+#         return kwargs
 
-    def form_valid(self, form):
-        # The PasswordResetForm's save method sends the reset email
-        form.save(request=self.request)
-        return super().form_valid(form)
+#     def form_valid(self, form):
+#         # The PasswordResetForm's save method sends the reset email
+#         form.save(request=self.request)
+#         return super().form_valid(form)
 
-    def get_success_url(self):
-        messages.success(self.request, "Письмо для сброса пароля отправлено.")
-        return reverse("dashboard:user-detail", kwargs={"pk": self.object.id})
-
-
-class StaffGroupCreateView(CreateView):
-    model = Group
-    form_class = GroupForm
-    template_name = "oscar/dashboard/users/group_create.html"
-    success_url = reverse_lazy('dashboard:groups')
-    permission_required = 'auth.add_group'
-
-    def form_valid(self, form):
-        messages.success(self.request, 'Группа успешно создана!')
-        return super().form_valid(form)
-
-    def form_invalid(self, form):
-        messages.error(self.request, 'Ошибка при создании группы. Проверьте введенные данные.')
-        return super().form_invalid(form)
-
-
-class StaffGroupListView(ListView):
-    model = Group
-    template_name = "oscar/dashboard/users/group_list.html"
-    context_object_name = 'groups'  # Имя контекста для использования в шаблоне
+#     def get_success_url(self):
+#         messages.success(self.request, "Письмо для сброса пароля отправлено.")
+#         return reverse("dashboard:user-detail", kwargs={"pk": self.object.id})
 
 
 

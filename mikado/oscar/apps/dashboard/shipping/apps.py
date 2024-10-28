@@ -8,7 +8,9 @@ class ShippingDashboardConfig(OscarDashboardConfig):
     name = "oscar.apps.dashboard.shipping"
     verbose_name = "Панель управления - Доставка"
 
-    default_permissions = ["is_staff"]
+    default_permissions = [
+        "user.full_access",
+    ]
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

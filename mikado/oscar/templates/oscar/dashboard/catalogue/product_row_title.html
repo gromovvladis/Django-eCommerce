@@ -1,9 +1,20 @@
 {% load django_tables2 %}
 <div class="d-flex flex-column">
-    <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ value }}</a>
+    <div>
+        {% if record.evotor_id %}
+            <span class="text-success">
+                <i class="fa-solid fa-circle-check"></i>&nbsp; 
+            </span>
+        {% endif %}
+        {% if product_access %}
+            <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ value }}</a>
+        {% else %}
+            <span>{{ value }}</span>
+        {% endif %}
+    </div>
     {% if record.is_child and record.variant %}
         <span class="small">{{ record.variant }}</span>
         <br>
     {% endif %}
-    <span class="text-muted small">UPC: {{ record.upc|default:"-" }}</span>
+    <span class="text-muted small">Evotor: {{ record.upc|default:"-" }}</span>
 </div>

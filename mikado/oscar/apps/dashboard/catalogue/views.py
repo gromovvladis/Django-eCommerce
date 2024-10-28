@@ -41,6 +41,7 @@ from oscar.views.generic import ObjectLookupView
 )
 (
     StockRecordFormSet,
+    StockRecordStockFormSet,
     ProductCategoryFormSet,
     ProductImageFormSet,
     ProductRecommendationFormSet,
@@ -52,6 +53,7 @@ from oscar.views.generic import ObjectLookupView
     "dashboard.catalogue.formsets",
     (
         "StockRecordFormSet",
+        "StockRecordStockFormSet",
         "ProductCategoryFormSet",
         "ProductImageFormSet",
         "ProductRecommendationFormSet",
@@ -101,6 +103,8 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form
         ctx["productclass_form"] = self.productclass_form_class()
+        access = ["user.full_access", "catalogue.full_access", "catalogue.update_stockrecord"]
+        ctx["product_access"] = any(self.request.user.has_perm(perm) for perm in access)
         if self.request.GET:
             ctx["searching"] = True
         return ctx
@@ -267,28 +271,46 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
     context_object_name = "product"
 
     form_class = ProductForm
+
     category_formset = ProductCategoryFormSet
     image_formset = ProductImageFormSet
     recommendations_formset = ProductRecommendationFormSet
     additional_formset = ProductAdditionalFormSet
     stockrecord_formset = StockRecordFormSet
+    stockrecordstock_formset = StockRecordStockFormSet
+    # stockrecordstockandprice_formset = StockRecordStockAndPriceFormSet
 
     creating = False
     parent = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.formsets = {
-            "category_formset": self.category_formset,
-            "image_formset": self.image_formset,
-            "recommended_formset": self.recommendations_formset,
-            "additional_formset": self.additional_formset,
-            "stockrecord_formset": self.stockrecord_formset,
-        }
+        self.formsets = {}
+        self.full_access = False
 
     def dispatch(self, request, *args, **kwargs):
+        self.get_formsets(request)
         resp = super().dispatch(request, *args, **kwargs)
         return self.check_objects_or_redirect() or resp
+
+    def get_formsets(self, request):
+        full_access = ["user.full_access", "catalogue.full_access"]
+        stock_access = "catalogue.update_stockrecord"
+
+        if any(request.user.has_perm(perm) for perm in full_access):
+            self.formsets = {
+                "category_formset": self.category_formset,
+                "image_formset": self.image_formset,
+                "recommended_formset": self.recommendations_formset,
+                "additional_formset": self.additional_formset,
+                "stockrecord_formset": self.stockrecord_formset,
+            }
+            self.full_access = True
+        elif request.user.has_perm(stock_access):
+            self.formsets = {
+                "stockrecord_formset": self.stockrecordstock_formset,
+            }
+        return self.formsets
 
     def check_objects_or_redirect(self):
         """
@@ -348,6 +370,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         ctx["class_additionals"] = self.product_class.class_additionals.all()
         ctx["parent"] = self.parent
         ctx["title"] = self.get_page_title()
+        ctx["full_access"] = self.full_access
 
         for ctx_name, formset_class in self.formsets.items():
             if ctx_name not in ctx:
@@ -387,7 +410,10 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         """
         # Need to create the product here because the inline forms need it
         # can't use commit=False because ProductForm does not support it
-        if self.creating and form.is_valid():
+        
+        full_access = ["user.full_access", "catalogue.full_access"]
+
+        if self.creating and form.is_valid() and any(self.request.user.has_perm(perm) for perm in full_access):
             self.object = form.save()
 
         formsets = {}
@@ -400,15 +426,25 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
                 instance=self.object,
             )
 
-        is_valid = form.is_valid() and all(
-            [formset.is_valid() for formset in formsets.values()]
-        )
+        if any(self.request.user.has_perm(perm) for perm in full_access):
+            is_valid = form.is_valid() and all(
+                [formset.is_valid() for formset in formsets.values()]
+            )
 
-        cross_form_validation_result = self.clean(form, formsets)
-        if is_valid and cross_form_validation_result:
-            return self.forms_valid(form, formsets)
+            cross_form_validation_result = self.clean(form, formsets)
+            if is_valid and cross_form_validation_result:
+                return self.forms_valid(formsets, form)
+            else:
+                return self.forms_invalid(formsets, form)
         else:
-            return self.forms_invalid(form, formsets)
+            is_valid = all(
+                [formset.is_valid() for formset in formsets.values()]
+            )
+
+            if is_valid:
+                return self.forms_valid(formsets)
+            else:
+                return self.forms_invalid(formsets, form)
 
     # form_valid and form_invalid are called depending on the validation result
     # of just the product form and redisplay the form respectively return a
@@ -428,7 +464,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         """
         return True
 
-    def forms_valid(self, form, formsets):
+    def forms_valid(self, formsets, form=None):
         """
         Save all changes and display a success url.
         When creating the first child product, this method also sets the new
@@ -436,7 +472,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         """
         if self.creating:
             self.handle_adding_child(self.parent)
-        else:
+        elif form:
             # a just created product was already saved in process_all_forms()
             self.object = form.save()
 
@@ -449,22 +485,6 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             image.save()
 
         return HttpResponseRedirect(self.get_success_url())
-
-
-    # def update_alerts(self):
-    #     # Извлекаем все StockRecord, где num_in_stock больше low_stock_threshold
-    #     stock_records = StockRecord.objects.filter(product=self.object, num_in_stock__gt=F('low_stock_threshold'))
-
-    #     # Проходим по найденным StockRecord и обновляем соответствующие StockAlert
-    #     for stock_record in stock_records:
-    #         # Находим все связанные с этим StockRecord уведомления
-    #         stock_alerts = StockAlert.objects.filter(stockrecord=stock_record, status=StockAlert.OPEN)
-            
-    #         # Обновляем статус каждого найденного уведомления
-    #         for alert in stock_alerts:
-    #             alert.status = StockAlert.CLOSED
-    #             alert.date_closed = now()
-    #             alert.save()
 
     def handle_adding_child(self, parent):
         """
@@ -479,13 +499,17 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             parent.structure = Product.PARENT
             parent.save()
 
-    def forms_invalid(self, form, formsets):
+    def forms_invalid(self, formsets, form):
         # delete the temporary product again
         if self.creating and self.object and self.object.pk is not None:
             self.object.delete()
             self.object = None
 
         messages.error(self.request, "Отправленные вами данные недействительны. Исправьте ошибки ниже.")
+        
+        self.object = self.get_object()
+        self.get_formsets(self.request)
+
         ctx = self.get_context_data(form=form, **formsets)
         return self.render_to_response(ctx)
 
@@ -617,6 +641,8 @@ class StockAlertListView(SingleTableView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form
+        access = ["user.full_access", "catalogue.full_access", "catalogue.update_stockrecord"]
+        ctx["product_access"] = any(self.request.user.has_perm(perm) for perm in access)
         return ctx
     
     def get_table(self, **kwargs):
@@ -1223,6 +1249,8 @@ class AdditionalCreateUpdateView(generic.UpdateView):
         ctx = super().get_context_data(**kwargs)
         # pylint: disable=no-member
         ctx["title"] = self.get_title()
+        access = ["user.full_access", "catalogue.full_access", "catalogue.update_stockrecord"]
+        ctx["product_access"] = any(self.request.user.has_perm(perm) for perm in access)
         return ctx
 
     def form_invalid(self, form):

@@ -1,7 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-
-from oscar.apps.customer.forms import PhoneUserCreationForm, UserForm
 from oscar.core.loading import get_model
 
 User = get_model("user", "User")

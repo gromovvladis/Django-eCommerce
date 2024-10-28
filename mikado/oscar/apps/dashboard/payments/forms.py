@@ -12,7 +12,6 @@ Order = get_model("order", "Order")
 OrderNote = get_model("order", "OrderNote")
 ShippingAddress = get_model("order", "ShippingAddress")
 SourceType = get_model("payment", "SourceType")
-AbstractAddressForm = get_class("address.forms", "AbstractAddressForm")
 
 
 class OrderStatsForm(forms.Form):
@@ -142,7 +141,7 @@ class OrderNoteForm(forms.ModelForm):
         self.instance.user = user
 
 
-class ShippingAddressForm(PhoneNumberMixin, AbstractAddressForm):
+class ShippingAddressForm(PhoneNumberMixin, forms.ModelForm):
     class Meta:
         model = ShippingAddress
         fields = [

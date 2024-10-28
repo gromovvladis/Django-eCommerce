@@ -4,11 +4,7 @@ from oscar.core.loading import get_model
 UserAddress = get_model("address", "useraddress")
 
 
-class AbstractAddressForm(forms.ModelForm):
-    pass
-
-
-class UserAddressForm(AbstractAddressForm):
+class UserAddressForm(forms.ModelForm):
     class Meta:
         model = UserAddress
         fields = [
@@ -46,7 +42,7 @@ class UserAddressForm(AbstractAddressForm):
         self.instance.user = user
 
 
-class UserLiteAddressForm(AbstractAddressForm):
+class UserLiteAddressForm(forms.ModelForm):
     class Meta:
         model = UserAddress
         fields = [
