@@ -98,7 +98,7 @@ class GroupListTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Нет созданых групп продажи"
+        empty_text = "Нет созданых групп персонала"
 
 
 class StaffListTable(DashboardTable):
@@ -175,7 +175,7 @@ class StaffListTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Нет созданых групп продажи"
+        empty_text = "Список сотрудников пуст"
 
 
 class PartnerStaffListTable(DashboardTable):
@@ -232,4 +232,4 @@ class PartnerStaffListTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Нет созданых групп продажи"
+        empty_text = "Список персонала пуст"
