@@ -132,9 +132,9 @@ class AbstractProductClass(models.Model):
         app_label = "catalogue"
         ordering = ["name"]
         permissions = (
-            ("full_access", "Полный доступ"),
+            ("full_access", "Полный доступ к продуктам"),
             ("read", "Просматривать товары и категории"),
-            ("change_stockrecord", "Изменять цену и наличие"),    
+            ("update_stockrecord", "Изменять наличие товаров"),        
         )
         verbose_name = "Класс товара"
         verbose_name_plural = "Классы товара"

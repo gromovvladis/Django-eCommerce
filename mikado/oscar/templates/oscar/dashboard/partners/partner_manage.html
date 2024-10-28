@@ -72,13 +72,13 @@
                         {% for user in users %}
                             <tr>
                                 <td>
-                                    <a class="d-flex align-items-center" href="{% url 'dashboard:partner-user-update' partner_pk=partner.pk user_pk=user.id %}">
-                                        <span class="spinner-border-sm {% if user.gender == "М" %}badge-primary{% else %}badge-pink{% endif %}  rounded-circle mr-2">&nbsp;</span>
-                                        {{ user.name|default:"---" }}
+                                    <a class="d-flex align-items-center" href="{% url 'dashboard:staff-detail' pk=user.profile.id %}">
+                                        <span class="spinner-border-sm {% if user.profile.gender == "М" %}badge-primary{% else %}badge-pink{% endif %}  rounded-circle mr-2">&nbsp;</span>
+                                        {{ user.profile.get_full_name|default:user.username }}
                                     </a>
                                 </td>
                                 <td>
-                                    {{ user.staff }}
+                                    {{ user.profile.role }}
                                 </td>
                                 <td>{{ user.username }}</td>
                                 <td class="d-flex justify-content-end">

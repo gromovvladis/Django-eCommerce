@@ -27,16 +27,12 @@ Partner = get_model("partner", "Partner")
     PartnerSearchForm,
     PartnerCreateForm,
     PartnerAddressForm,
-    UserPhoneForm,
-    ExistingUserForm,
 ) = get_classes(
     "dashboard.partners.forms",
     [
         "PartnerSearchForm",
         "PartnerCreateForm",
         "PartnerAddressForm",
-        "UserPhoneForm",
-        "ExistingUserForm",
     ],
 )
 StaffForm = get_class("dashboard.users.forms","StaffForm")
@@ -72,9 +68,7 @@ class PartnerListView(SingleTableView):
         return ctx  
 
     def get_queryset(self):
-        qs = Partner._default_manager.prefetch_related("addresses", "users").all()
-        # qs = self.filter_queryset(qs)
-        # qs = sort_queryset(qs, self.request, ["name"])
+        qs = Partner._default_manager.prefetch_related("addresses", "users", "users__profile").all()
 
         self.description = "Все точки продажи"
 
@@ -201,27 +195,27 @@ class PartnerDeleteView(DeleteView):
 # =====
 
 
-class PartnerUserUpdateView(UpdateView):
-    template_name = "oscar/dashboard/partners/partner_user_form.html"
-    form_class = ExistingUserForm
+# class PartnerUserUpdateView(UpdateView):
+#     template_name = "oscar/dashboard/partners/partner_user_form.html"
+#     form_class = ExistingUserForm
 
-    def get_object(self, queryset=None):
-        self.partner = get_object_or_404(Partner, pk=self.kwargs["partner_pk"])
-        return get_object_or_404(
-            User, pk=self.kwargs["user_pk"], partners__pk=self.kwargs["partner_pk"]
-        )
+#     def get_object(self, queryset=None):
+#         self.partner = get_object_or_404(Partner, pk=self.kwargs["partner_pk"])
+#         return get_object_or_404(
+#             User, pk=self.kwargs["user_pk"], partners__pk=self.kwargs["partner_pk"]
+#         )
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        name = self.object.get_full_name() or self.object.email
-        ctx["partner"] = self.partner
-        ctx["title"] = "Редактировать пользователя '%s'" % name
-        return ctx
+#     def get_context_data(self, **kwargs):
+#         ctx = super().get_context_data(**kwargs)
+#         name = self.object.get_full_name() or self.object.email
+#         ctx["partner"] = self.partner
+#         ctx["title"] = "Редактировать пользователя '%s'" % name
+#         return ctx
 
-    def get_success_url(self):
-        name = self.object.get_full_name() or self.object.email
-        messages.success(self.request, "Пользователь '%s' был успешно обновлен." % name)
-        return reverse("dashboard:partner-list")
+#     def get_success_url(self):
+#         name = self.object.get_full_name() or self.object.email
+#         messages.success(self.request, "Пользователь '%s' был успешно обновлен." % name)
+#         return reverse("dashboard:partner-list")
 
 
 # =====

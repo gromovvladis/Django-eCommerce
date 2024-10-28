@@ -9,7 +9,7 @@ class UsersDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управления - Пользователи"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
     ]
 
     # pylint: disable=attribute-defined-outside-init

@@ -36,8 +36,6 @@ class Staff(models.Model):
                               verbose_name='Пол', null=True, blank=True)
     age = models.PositiveIntegerField(verbose_name='Возраст', null=True, blank=True)
 
-    image = models.ImageField(blank=True, null=True, verbose_name='Фото', upload_to="profile")
-
     telegram_id = models.CharField("ID Телеграм чата", max_length=128, null=True, blank=True)
     evotor_id = models.CharField("ID Телеграм чата", max_length=128, null=True, blank=True)
 

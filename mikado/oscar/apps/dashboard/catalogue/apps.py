@@ -9,17 +9,26 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
     verbose_name = "Каталог"
 
     default_permissions = [
-        "staff.full_access",
+        "user.full_access",
         "catalogue.full_access",
     ]
     permissions_map = _map = {
-        "catalogue-product": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.change_stockrecord"]),
+        "catalogue-product": (
+            ["user.full_access"],
+            ["catalogue.full_access"],
+            ["catalogue.update_stockrecord"],
+        ),
+        "catalogue-additional-update": (
+            ["user.full_access"],
+            ["catalogue.full_access"],
+            ["catalogue.update_stockrecord"],
+        ),
         
-        "catalogue-product-list": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
-        "catalogue-additional-list": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
+        "catalogue-product-list": (["user.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
+        "catalogue-additional-list": (["user.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
         
-        "stock-alert-list": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
-        "stock-alert-update-list": (["staff.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
+        "stock-alert-list": (["user.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
+        "stock-alert-update-list": (["user.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
     }
 
 
@@ -256,7 +265,9 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 name="catalogue-option-delete",
             ),
             path(
-                "additionals/", self.additionals_list_view.as_view(), name="catalogue-additional-list"
+                "additionals/", 
+                self.additionals_list_view.as_view(), 
+                name="catalogue-additional-list"
             ),
             path(
                 "additionals/create/",

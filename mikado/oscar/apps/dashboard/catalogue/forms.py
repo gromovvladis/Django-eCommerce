@@ -134,8 +134,8 @@ class StockRecordForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # Restrict accessible partners for non-staff users
-        if not self.user.is_staff:
-            self.fields["partner"].queryset = self.user.partners.all()
+        # if not self.user.is_staff:
+        #     self.fields["partner"].queryset = self.user.partners.all()
 
         # If not tracking stock, we hide the fields
         if not product_class.track_stock:
@@ -143,7 +143,7 @@ class StockRecordForm(forms.ModelForm):
                 if field_name in self.fields:
                     del self.fields[field_name]
         else:
-            for field_name in ["price", "num_in_stock"]:
+            for field_name in ["price", "old_price", "cost_price", "tax", "num_in_stock"]:
                 if field_name in self.fields:
                     self.fields[field_name].required = True
 
@@ -151,12 +151,65 @@ class StockRecordForm(forms.ModelForm):
         model = StockRecord
         fields = [
             "partner",
-            "partner_sku",
+            "cost_price",
             "old_price",
             "price",
             "price_currency",
+            "tax",
             "num_in_stock",
             "low_stock_threshold",
+            "is_public",
+        ]
+
+
+class StockRecordStockForm(forms.ModelForm):
+    def __init__(self, product_class, user, *args, **kwargs):
+        # The user kwarg is not used by stock StockRecordForm. We pass it
+        # anyway in case one wishes to customise the partner queryset
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+        # If not tracking stock, we hide the fields
+        if not product_class.track_stock:
+            for field_name in ["num_in_stock"]:
+                if field_name in self.fields:
+                    del self.fields[field_name]
+        else:
+            for field_name in ["num_in_stock"]:
+                if field_name in self.fields:
+                    self.fields[field_name].required = True
+
+    class Meta:
+        model = StockRecord
+        fields = [
+            "num_in_stock",
+            "is_public",
+        ]
+
+
+class StockRecordStockAndPriceForm(forms.ModelForm):
+    def __init__(self, product_class, user, *args, **kwargs):
+        # The user kwarg is not used by stock StockRecordForm. We pass it
+        # anyway in case one wishes to customise the partner queryset
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+        # If not tracking stock, we hide the fields
+        if not product_class.track_stock:
+            for field_name in ["num_in_stock"]:
+                if field_name in self.fields:
+                    del self.fields[field_name]
+        else:
+            for field_name in ["price", "old_price", "num_in_stock"]:
+                if field_name in self.fields:
+                    self.fields[field_name].required = True
+
+    class Meta:
+        model = StockRecord
+        fields = [
+            "price",
+            "old_price",
+            "num_in_stock",
             "is_public",
         ]
 
@@ -250,6 +303,12 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         "file": _attr_file_field,
         "image": _attr_image_field,
     }
+    evotor_update = forms.BooleanField(
+        label="Эвотор", 
+        required=False, 
+        initial=True,
+        help_text="Синхронизировать с Эвотор", 
+    )
 
     class Meta:
         model = Product
@@ -267,6 +326,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
             "slug",
             "meta_title",
             "meta_description",
+            "evotor_update",
         ]
         widgets = {
             "structure": forms.HiddenInput(),
@@ -353,7 +413,12 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         """
         for field_name in ["description", "short_description", "is_discountable"]:
             if field_name in self.fields:
-                del self.fields[field_name]                
+                del self.fields[field_name]     
+
+    def clean_evotor_update(self):
+        evotor_update = self.cleaned_data.get('evotor_update')
+        if evotor_update:
+            fff = 1           
 
     def _post_clean(self):
         """

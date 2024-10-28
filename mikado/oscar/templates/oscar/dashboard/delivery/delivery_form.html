@@ -73,16 +73,22 @@
 
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
-                <div class="d-flex justify-content-end">
-                    <div class="float-right">  
-                        <a class="btn btn-danger mr-2" href="{% url 'dashboard:delivery-zones' %}">
-                            <i class="fa-regular fa-circle-xmark"></i> 
-                            Отменить
-                        </a>             
-                        <button class="btn btn-primary" type="submit" data-loading-text="Сохранение...">
-                            <i class="fa-regular fa-floppy-disk"></i>
-                            Сохранить
-                        </button>
+                <div class="container container-fluid">
+                    <div class="d-flex justify-content-end">
+                        <div class="float-right">  
+                            <a class="btn btn-danger mr-2" href="{% url 'dashboard:delivery-zones' %}">
+                                <i class="fa-regular fa-circle-xmark"></i> 
+                                <span>
+                                    Отменить
+                                </span>
+                            </a>             
+                            <button class="btn btn-primary" type="submit" data-loading-text="Сохранение...">
+                                <i class="fa-regular fa-floppy-disk"></i>
+                                <span>
+                                    Сохранить
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

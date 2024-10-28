@@ -6,10 +6,10 @@ from oscar.core.loading import get_class
 class CommunicationsDashboardConfig(OscarDashboardConfig):
     label = "communications_dashboard"
     name = "oscar.apps.dashboard.communications"
-    verbose_name = "Панель управления коммуникациями"
+    verbose_name = "Панель управления - Сообщения"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
     ]
 
     # pylint: disable=attribute-defined-outside-init

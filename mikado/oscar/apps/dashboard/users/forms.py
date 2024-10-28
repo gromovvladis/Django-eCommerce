@@ -4,6 +4,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.apps import apps
 
 from phonenumber_field.phonenumber import PhoneNumber
 
@@ -59,7 +60,13 @@ class StaffForm(forms.ModelForm):
         help_text="Активен сотрудник или нет",
     )
     age = forms.IntegerField(label="Возраст", required=False)
-    image = forms.ImageField(label="Фото", required=False)
+
+    evotor_update = forms.BooleanField(
+        label="Эвотор", 
+        required=False, 
+        initial=True,
+        help_text="Синхронизировать с Эвотор", 
+    )
 
     error_messages = {
         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
@@ -69,7 +76,7 @@ class StaffForm(forms.ModelForm):
 
     class Meta:
         model = Staff
-        fields = ('username', 'last_name', 'first_name', 'middle_name', 'role', 'gender', 'is_active', 'age', 'image')
+        fields = ('username', 'last_name', 'first_name', 'middle_name', 'role', 'gender', 'age', 'is_active')
         sequence = (
             "username",
             "last_name",
@@ -77,15 +84,22 @@ class StaffForm(forms.ModelForm):
             "middle_name",
             "role",
             "gender",
-            "is_active",
             "age",
-            "image",
+            "is_active",
         )
+        widgets = {
+            'evotor_update': forms.CheckboxInput(attrs={
+                'class' : 'checkbox-ios-switch',
+            }),
+        }
 
     def __init__(self, partner=None, *args, **kwargs):
         self.partner = partner
         super().__init__(*args, **kwargs)
         self.fields['role'].choices = Staff.get_role_choices()
+        staff = kwargs['instance']
+        if staff:
+            self.fields['username'].initial = staff.user.username
 
     def clean_redirect_url(self):
         url = self.cleaned_data["redirect_url"].strip()
@@ -102,6 +116,11 @@ class StaffForm(forms.ModelForm):
             except Group.DoesNotExist:
                 raise forms.ValidationError("Выбранная роль не существует.")
         return None
+    
+    def clean_evotor_update(self):
+        evotor_update = self.cleaned_data.get('evotor_update')
+        if evotor_update:
+            fff = 1
     
     def clean_username(self):
         number = self.cleaned_data.get("username")
@@ -124,30 +143,59 @@ class StaffForm(forms.ModelForm):
         username = self.cleaned_data.get("username", None)
         user, created = User.objects.get_or_create(username=username)
         user.is_staff = True
-        user.save()
+        
         if self.partner:
             self.partner.users.add(user)
 
-        staff = Staff.objects.create(
-            user=user,
-            first_name=self.cleaned_data.get('first_name', ''),
-            last_name=self.cleaned_data.get('last_name', ''),
-            middle_name=self.cleaned_data.get('middle_name', ''),
-            role=self.cleaned_data.get('role', ''),
-            gender=self.cleaned_data.get('gender', ''),
-            is_active=self.cleaned_data.get('is_active', False),
-            age=self.cleaned_data.get('age', None),
-            image=self.cleaned_data.get('image', None)
-        )
+        if self.instance.pk:
+            staff = self.instance
+            role = self.cleaned_data.get('role', staff.role)
+
+            staff.user = user
+            staff.first_name = self.cleaned_data.get('first_name', staff.first_name)
+            staff.last_name = self.cleaned_data.get('last_name', staff.last_name)
+            staff.middle_name = self.cleaned_data.get('middle_name', staff.middle_name)
+            staff.role = role
+            staff.gender = self.cleaned_data.get('gender', staff.gender)
+            staff.is_active = self.cleaned_data.get('is_active', staff.is_active)
+            staff.age = self.cleaned_data.get('age', staff.age)
+            staff.save()
+
+            if role:
+                user.groups.clear()
+                group = Group.objects.get(name=role)
+                user.groups.add(group)
+
+        else:
+            # Создаем новый объект Staff, если он не существует
+            role = self.cleaned_data.get('role', '')
+            staff = Staff.objects.create(
+                user=user,
+                first_name=self.cleaned_data.get('first_name', ''),
+                last_name=self.cleaned_data.get('last_name', ''),
+                middle_name=self.cleaned_data.get('middle_name', ''),
+                role=role,
+                gender=self.cleaned_data.get('gender', ''),
+                is_active=self.cleaned_data.get('is_active', False),
+                age=self.cleaned_data.get('age', None),
+            )
+
+            if role:
+                user.groups.clear()
+                group = Group.objects.get(name=role)
+                user.groups.add(group)
+
+        user.save()
 
         return staff
 
 
 class GroupForm(forms.ModelForm):
     """"
-    товары / product +
+    товары / catalogue +
        полный доступ / product.full_access
        просматривать / product.read
+       изменять наличие и цену / product.change_price_and_stockrecord
        изменять наличие / product.change_stockrecord
         
     заказы / order +
@@ -157,7 +205,7 @@ class GroupForm(forms.ModelForm):
        изменять статус / order.change_order_status
        изменять оплату / order.change_order_payment
 
-    доставка / partner
+    доставка / delivery
        полный доступ / delivery.full_access
        просматривать / delivery.read
        изменять доставки / delivery.change_delivery
@@ -199,37 +247,29 @@ class GroupForm(forms.ModelForm):
         model = Group
         fields = ['name', 'permissions']
 
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Получаем все разрешения из базы данных один раз
-        permissions = Permission.objects.select_related('content_type').filter(
-            content_type__app_label__in=[
-                'group',
-                'address',
-                'shipping',
-                'delivery',
-                'catalogue',
-                'communication',
-                'reviews',
-                'user',
-                'voucher',
-                'home',
-                'offer',
-                'order',
-                'partner',
-                'payment',
+        permissions = Permission.objects.filter(
+            codename__in=[
+                'full_access',
+                'read',
+                'update_delivery',
+                'update_stockrecord',
+                'make_refund',
+                'update_order',
+                'update_order_status',
+                'update_order_payment',
             ]
         )
-
-
 
         # Словарь для хранения сгруппированных разрешений по приложениям
         grouped_permissions = {}
         
         # Группируем разрешения по приложениям
         for permission in permissions:
-            app_label = permission.content_type.app_label
+            app_label = self.get_app_verbose_name(permission.content_type.app_label)
             if app_label not in grouped_permissions:
                 grouped_permissions[app_label] = []
             grouped_permissions[app_label].append((permission.id, permission.name))
@@ -243,7 +283,12 @@ class GroupForm(forms.ModelForm):
         self.fields['permissions'].queryset = permissions
 
 
-   
+    def get_app_verbose_name(self, app_label):
+        try:
+            app_config = apps.get_app_config(app_label)
+            return app_config.verbose_name
+        except LookupError:
+            return app_label
 
 
 

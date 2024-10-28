@@ -1,4 +1,6 @@
 {% extends 'oscar/dashboard/layout.html' %}
+{% load widget_tweaks %}
+{% load currency_filters %}
 
 {% block body_class %}{{ block.super }} create-page catalogue{% endblock %}
 
@@ -59,63 +61,67 @@
                                 only one template block (instead of all affected) has to be altered.
                             {% endcomment %}
                             {% block tabs %}
-                                <li class="nav-item">
-                                    <a class="nav-link active" href="#product_details" data-toggle="tab">
-                                        Описание
+                                {% if full_access %}
+                                    <li class="nav-item">
+                                        <a class="nav-link active" href="#product_details" data-toggle="tab">
+                                            Описание
+                                        </a>
+                                    </li>
+                                    {% if not parent %}
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#product_category" data-toggle="tab">
+                                                Категории
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    {% if product_class.has_attributes %}
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#product_attributes" data-toggle="tab">
+                                                Атрибуты
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    <li class="nav-item">
+                                    <a class="nav-link" href="#product_images" data-toggle="tab">
+                                        Изображения
                                     </a>
-                                </li>
-                                {% if not parent %}
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#product_category" data-toggle="tab">
-                                            Категории
-                                        </a>
                                     </li>
                                 {% endif %}
-                                {% if product_class.has_attributes %}
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#product_attributes" data-toggle="tab">
-                                            Атрибуты
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                <li class="nav-item">
-                                  <a class="nav-link" href="#product_images" data-toggle="tab">
-                                      Изображения
-                                  </a>
-                                </li>
                                 {% if not product.is_parent %}
                                     <li class="nav-item">
-                                        <a class="nav-link" href="#product_stock" data-toggle="tab">
+                                        <a class="nav-link {% if not full_access %}active{% endif %}" href="#product_stock" data-toggle="tab">
                                             Наличие и цена
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if user.is_staff and not parent %}
+                                {% if full_access %}
+                                    {% if user.is_staff and not parent %}
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#child_products" data-toggle="tab">
+                                                Варианты
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    {% if not parent %}
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#product_recommended" data-toggle="tab">
+                                                Рекомендации
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    {% if not parent %}
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#product_additional" data-toggle="tab">
+                                                Дополнительные товары
+                                            </a>
+                                        </li>
+                                    {% endif %}
                                     <li class="nav-item">
-                                        <a class="nav-link" href="#child_products" data-toggle="tab">
-                                            Варианты
+                                        <a class="nav-link" href="#seo" data-toggle="tab">
+                                            SEO
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if not parent %}
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#product_recommended" data-toggle="tab">
-                                            Рекомендации
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                {% if not parent %}
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#product_additional" data-toggle="tab">
-                                            Дополнительные товары
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#seo" data-toggle="tab">
-                                        SEO
-                                    </a>
-                                </li>
                             {% endblock tabs %}
                         </ul>
                     </div>
@@ -126,121 +132,129 @@
                 <div class="tab-content">
                     {% block tab_content %}
                         {% block product_details %}
-                            <div class="tab-pane active" id="product_details">
-                                <div class="table-header">
-                                    <h3>Описание</h3>
-                                </div>
-                                <div class="card card-body product-details">
-                                    {% block product_details_content %}
-                                        <span class="error-block">{{ form.non_field_errors }}</span>
-                                        {% for field in form.hidden_fields %}
-                                            {{ field }}
-                                        {% endfor %}
+                            {% if full_access %}
+                                <div class="tab-pane active" id="product_details">
+                                    <div class="table-header">
+                                        <h3>Описание</h3>
+                                    </div>
+                                    <div class="card card-body product-details">
+                                        {% block product_details_content %}
+                                            <span class="error-block">{{ form.non_field_errors }}</span>
+                                            {% for field in form.hidden_fields %}
+                                                {{ field }}
+                                            {% endfor %}
 
-                                        {% for field in form.primary_form_fields %}
-                                            {% if 'attr' not in field.id_for_label %}
-                                                {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
-                                            {% endif %}
-                                        {% endfor %}
-                                    {% endblock product_details_content %}
+                                            {% for field in form.primary_form_fields %}
+                                                {% if 'attr' not in field.id_for_label and "evotor_update" not in field.id_for_label %}
+                                                    {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endblock product_details_content %}
+                                    </div>
                                 </div>
-                            </div>
+                            {% endif %}
                         {% endblock product_details %}
 
                         {% block product_categories %}
-                            <div class="tab-pane" id="product_category">
-                                {% block product_categories_content %}
-                                    {{ category_formset.non_form_errors }}
-                                    {{ category_formset.management_form }}  
-                                    <table class="table table-striped table-bordered">
-                                        <caption>
-                                            Категории
-                                        </caption>
-                                        <thead>
-                                            <tr style="text-align:center;">
-                                                <th>Категория</th>
-                                                <th class="text-danger">Удалить</th>
-                                            </tr>
-                                       </thead>
-                                       <tbody>
-                                           {% for category_form in category_formset %}
+                            {% if category_formset %}
+                                <div class="tab-pane" id="product_category">
+                                    {% block product_categories_content %}
+                                        {{ category_formset.non_form_errors }}
+                                        {{ category_formset.management_form }}  
+                                        <table class="table table-striped table-bordered">
+                                            <caption>
+                                                Категории
+                                            </caption>
+                                            <thead>
                                                 <tr style="text-align:center;">
-                                                    {% for field in category_form %}
-                                                        {% include 'oscar/dashboard/partials/form_table_field.html' with field=field nolabel=True %}
-                                                    {% endfor %}
+                                                    <th>Категория</th>
+                                                    <th class="text-danger">Удалить</th>
                                                 </tr>
-                                           {% endfor %}
-                                       </tbody>
-                                    </table>
-                                {% endblock product_categories_content %}
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                            {% for category_form in category_formset %}
+                                                    <tr style="text-align:center;">
+                                                        {% for field in category_form %}
+                                                            {% include 'oscar/dashboard/partials/form_table_field.html' with field=field nolabel=True %}
+                                                        {% endfor %}
+                                                    </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        </table>
+                                    {% endblock product_categories_content %}
+                                </div>
+                            {% endif %}
                         {% endblock product_categories %}
 
                         {% block product_attributes %}
-                            <div class="tab-pane" id="product_attributes">
-                                {% block product_attributes_content %}
-                                    <table class="table table-striped table-bordered">
-                                        <caption>
-                                            Атрибуты
-                                            <span class="badge badge-success ml-1">
-                                                Тип продукта: {{ product_class }}
-                                            </span>
-                                        </caption>
-                                        {% for field in form %}
-                                            {% if 'attr' in field.id_for_label %}
-                                                <tr>
-                                                    <td>
-                                                        {% include "oscar/dashboard/partials/form_field.html" %}
-                                                    </td>
-                                                </tr>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </table>
-                                {% endblock product_attributes_content %}
-                            </div>
+                            {% if full_access %}
+                                <div class="tab-pane" id="product_attributes">
+                                    {% block product_attributes_content %}
+                                        <table class="table table-striped table-bordered">
+                                            <caption>
+                                                Атрибуты
+                                                <span class="badge badge-success ml-1">
+                                                    Тип продукта: {{ product_class }}
+                                                </span>
+                                            </caption>
+                                            {% for field in form %}
+                                                {% if 'attr' in field.id_for_label %}
+                                                    <tr>
+                                                        <td>
+                                                            {% include "oscar/dashboard/partials/form_field.html" %}
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </table>
+                                    {% endblock product_attributes_content %}
+                                </div>
+                            {% endif %}
                         {% endblock product_attributes %}
 
                         {% block product_images %}
-                            <div class="tab-pane" id="product_images">
-                                {% block product_images_content %}
-                                    
-                                    {{ image_formset.management_form }}
-                                    {{ image_formset.non_form_errors }}
-                                                 
-                                    <div class="mobile-table">
-                                    <table class="table table-striped table-bordered">
-                                        <caption>Загрузить, изменить или удалить изображения</caption>
-                                        <thead style="text-align:center;">
-                                             <tr>
-                                                 <th></th>
-                                                 <th>Изображение</th>
-                                                 <th>Описание</th>
-                                                 <th class="text-danger">Удалить</th>
-                                             </tr>
-                                        </thead>
-                                        <tbody class='upload-image'>
-                                            {% for image_form in image_formset %}
-                                                {% include "oscar/dashboard/partials/product_images.html" with form=image_form %}
-                                            {% endfor %}
-                                        </tbody>
-                                        <tfoot>
-                                            <tr>
-                                                <td colspan="4">
-                                                <p class="form-text">
-                                                    Перетащите изображения, чтобы изменить их порядок. Место для дополнительных изображений появится при добавлении изображений.
-                                                </p>
-                                                Первое изображение в списке используется, как основное изображение.
-                                                </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                    </div>
-                                {% endblock product_images_content %}
-                            </div>
+                            {% if image_formset %}
+                                <div class="tab-pane" id="product_images">
+                                    {% block product_images_content %}
+                                        
+                                        {{ image_formset.management_form }}
+                                        {{ image_formset.non_form_errors }}
+                                                    
+                                        <div class="mobile-table">
+                                        <table class="table table-striped table-bordered">
+                                            <caption>Загрузить, изменить или удалить изображения</caption>
+                                            <thead style="text-align:center;">
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Изображение</th>
+                                                    <th>Описание</th>
+                                                    <th class="text-danger">Удалить</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class='upload-image'>
+                                                {% for image_form in image_formset %}
+                                                    {% include "oscar/dashboard/partials/product_images.html" with form=image_form %}
+                                                {% endfor %}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="4">
+                                                    <p class="form-text">
+                                                        Перетащите изображения, чтобы изменить их порядок. Место для дополнительных изображений появится при добавлении изображений.
+                                                    </p>
+                                                    Первое изображение в списке используется, как основное изображение.
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        </div>
+                                    {% endblock product_images_content %}
+                                </div>
+                            {% endif %}
                         {% endblock product_images %}
 
                         {% block stockrecords %}
-                            <div class="tab-pane" id="product_stock">
+                            <div class="tab-pane {% if not full_access %}active{% endif %}" id="product_stock">
                                 {% block stockrecords_content %}
                                     <div class="mobile-table mobile-table-xl">
                                         {{ stockrecord_formset.management_form }}
@@ -249,19 +263,18 @@
                                             <caption>Наличие и цена</caption>
                                             <thead>
                                                 <tr>
-                                                    <th>Точка продажи</th>
-                                                    <th>SKU</th>
+                                                    <th class="name">Точка продажи</th>
                                                     {% if product_class.track_stock %}
-                                                        <th>В наличии</th>
-                                                        <th>Граница запасов</th>
-                                                        <th>Заказано</th>
+                                                        <th>Запасы</th>
                                                     {% endif %}
-                                                    <th>Цена до скидки</th>
                                                     <th>Цена</th>
-                                                    <th>Валюта</th>
+                                                    {% if full_access %}
+                                                        <th>Налог</th>
+                                                    {% endif %}
                                                     <th>Доступен</th>
-                                                    <th>Удалить</th>
-                                                    {% comment %} <th class="actions"></th> {% endcomment %}
+                                                    {% if full_access %}
+                                                        <th>Удалить</th>
+                                                    {% endif %}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -276,21 +289,63 @@
                                                     </tr>
                                                     {% endif %}
                                                     <tr>
-                                                        <td class="name">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner nolabel=True %}</td>
-                                                        <td data-label="SKU">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner_sku nolabel=True %}</td>
-                                                        {% if product_class.track_stock %}
-                                                            <td data-label="В наличии">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.num_in_stock nolabel=True %}</td>
-                                                            <td data-label="Граница малых запасов">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.low_stock_threshold nolabel=True %}</td>
-                                                            <td data-label="Заказано">{{ stockrecord_form.instance.num_allocated|default:"-" }}</td>
-                                                        {% endif %}
-                                                        <td data-label="Цена до скидки">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.old_price nolabel=True %}</td>
-                                                        <td data-label="Цена">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price nolabel=True %}</td>
-                                                        <td data-label="Валюта">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price_currency nolabel=True %}</td>
-                                                        <td data-label="Доступен">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.is_public nolabel=True %}</td>
-                                                        <td data-label="Удалить">
+                                                        <td class="name">
+                                                            {% if stockrecord_form.instance.partner_sku %}
+                                                                <span class="text-success">
+                                                                    <i class="fa-solid fa-circle-check"></i>&nbsp; 
+                                                                </span>
+                                                            {% endif %}
+                                                            {% if full_access %}
+                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner nolabel=True %}                                           
+                                                            {% else %}
+                                                                {{ stockrecord_form.instance.partner|default:"" }}
+                                                            {% endif %}
+                                                            <br>   
+                                                            <span class="text-muted">
+                                                                {{ stockrecord_form.instance.partner_sku|default:"" }}
+                                                            </span>
                                                             {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.id nolabel=True %}
-                                                            {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.DELETE nolabel=True %}
                                                         </td>
+                                                        {% if product_class.track_stock %}
+                                                            <td data-label="Запасы">
+                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.num_in_stock nolabel=True %}
+                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.low_stock_threshold nolabel=True %}
+                                                                <input type="number" readonly value="{{ stockrecord_form.instance.low_stock_threshold|default:"-" }}" class="form-control">
+                                                                <small class="form-text text-muted mb-3">
+                                                                    Граница малых запасов
+                                                                </small>
+                                                                <input type="number" readonly value="{{ stockrecord_form.instance.num_allocated|default:"0" }}" class="form-control">
+                                                                <small class="form-text text-muted">
+                                                                    Заказано
+                                                                </small>
+                                                            </td>
+                                                        {% endif %}
+                                                        <td data-label="Цена">
+                                                            {% if full_access %}
+                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price nolabel=True %}
+                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.old_price nolabel=True %}
+                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.cost_price nolabel=True %}
+                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price_currency nolabel=True %}
+                                                            {% else %}
+                                                                {{ stockrecord_form.instance.price|currency:stockrecord_form.instance.price_currency|default:"" }}
+                                                                <small class="form-text text-muted mb-3">
+                                                                    Цена продажи
+                                                                </small>
+                                                                {{ stockrecord_form.instance.old_price|currency:stockrecord_form.instance.price_currency|default:"-" }}
+                                                                <small class="form-text text-muted">
+                                                                    Цена до скидки
+                                                                </small>
+                                                            {% endif %}
+                                                        </td>
+                                                        {% if full_access %}
+                                                            <td data-label="Налог">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.tax nolabel=True %}</td>
+                                                        {% endif %}
+                                                        <td data-label="Доступен">{% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.is_public nolabel=True %}</td>
+                                                        {% if full_access %}
+                                                            <td data-label="Удалить">
+                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.DELETE nolabel=True %}
+                                                            </td>
+                                                        {% endif %}
                                                         <td class="toggle-row">
                                                             <button class="btn btn-secondary" type="button">
                                                                 <i class="fa-solid fa-chevron-up"></i>
@@ -307,135 +362,143 @@
                         {% endblock stockrecords %}
 
                         {% block child_products %}
-                            {% with children=product.children.all %}
-                                <div class="tab-pane" id="child_products">
-                                    {% block child_products_content %}
-                                        <table class='table table-striped table-bordered'>
-                                            <caption>
-                                                <div class="d-flex justify-space-between">
-                                                    Варианты
-                                                    <button class="btn btn-primary ml-3" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
-                                                        <i class="fas fa-plus"></i> 
-                                                        <span class="caption-button"> Добавить вариант</span>
-                                                    </button>
-                                                </div>
-                                            </caption>
-                                            {% if children %}
-                                                <tr>
-                                                    <th>Имя</th>
-                                                    <th>Атрибуты</th>
-                                                    <th>Товарные записи</th>
-                                                    <th>Доступен?</th>
-                                                    <th>&nbsp;</th>
-                                                </tr>
-                                                {% for child in children %}
+                            {% if full_access %}
+                                {% with children=product.children.all %}
+                                    <div class="tab-pane" id="child_products">
+                                        {% block child_products_content %}
+                                            <table class='table table-striped table-bordered'>
+                                                <caption>
+                                                    <div class="d-flex justify-space-between">
+                                                        Варианты
+                                                        <button class="btn btn-primary ml-3" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
+                                                            <i class="fas fa-plus"></i> 
+                                                            <span class="caption-button"> Добавить вариант</span>
+                                                        </button>
+                                                    </div>
+                                                </caption>
+                                                {% if children %}
                                                     <tr>
-                                                        <td>{{ child.get_title }}</td>
-                                                        <td>{{ child.attribute_summary }}</td>
-                                                        <td>{{ child.stockrecords.count }}</td>
-                                                        <td>{% if child.is_public %}<span class="true">✔️</span>{% else %}<span class="false">❌</span>{% endif %}</td>
-                                                        <td>
-                                                            <a href="{% url 'dashboard:catalogue-product' pk=child.id %}" class="btn btn-primary">
-                                                                Редактировать
-                                                            </a>
-                                                            <a href="{% url 'dashboard:catalogue-product-delete' pk=child.id %}" class="btn btn-danger">
-                                                                Удалить
-                                                            </a>
+                                                        <th>Имя</th>
+                                                        <th>Атрибуты</th>
+                                                        <th>Товарные записи</th>
+                                                        <th>Доступен?</th>
+                                                        <th>&nbsp;</th>
+                                                    </tr>
+                                                    {% for child in children %}
+                                                        <tr>
+                                                            <td>{{ child.get_title }}</td>
+                                                            <td>{{ child.attribute_summary }}</td>
+                                                            <td>{{ child.stockrecords.count }}</td>
+                                                            <td>{% if child.is_public %}<span class="true">✔️</span>{% else %}<span class="false">❌</span>{% endif %}</td>
+                                                            <td>
+                                                                <a href="{% url 'dashboard:catalogue-product' pk=child.id %}" class="btn btn-primary">
+                                                                    Редактировать
+                                                                </a>
+                                                                <a href="{% url 'dashboard:catalogue-product-delete' pk=child.id %}" class="btn btn-danger">
+                                                                    Удалить
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <tr>
+                                                        <td colspan="5">
+                                                            {% if product.can_be_parent %}
+                                                                У этого товара нет созданых варианий
+                                                            {% else %}
+                                                                    На данный момент нельзя добавлять варианты к этому товару.
+                                                                    <br><br>
+                                                                {% if product.pk is None %}
+                                                                    Пожалуйста, сохраните товар, прежде чем пытаться добавить варианты.
+                                                                {% elif product.has_stockrecords %}
+                                                                    Вероятно, это связано с тем, что для этого продукта все еще имеются товарные записи.
+                                                                    <br>
+                                                                    Удалите товарные записи для создания вариативного товара.
+                                                                {% endif %}
+                                                            {% endif %}
                                                         </td>
                                                     </tr>
-                                                {% endfor %}
-                                            {% else %}
-                                                <tr>
-                                                    <td colspan="5">
-                                                        {% if product.can_be_parent %}
-                                                            У этого товара нет созданых варианий
-                                                        {% else %}
-                                                                На данный момент нельзя добавлять варианты к этому товару.
-                                                                <br><br>
-                                                            {% if product.pk is None %}
-                                                                Пожалуйста, сохраните товар, прежде чем пытаться добавить варианты.
-                                                            {% elif product.has_stockrecords %}
-                                                                Вероятно, это связано с тем, что для этого продукта все еще имеются товарные записи.
-                                                                <br>
-                                                                Удалите товарные записи для создания вариативного товара.
-                                                            {% endif %}
-                                                        {% endif %}
-                                                    </td>
-                                                </tr>
-                                            {% endif %}
-                                        </table>
-                                    {% endblock child_products_content %}
-                                </div>
-                            {% endwith %}
+                                                {% endif %}
+                                            </table>
+                                        {% endblock child_products_content %}
+                                    </div>
+                                {% endwith %}
+                            {% endif %}
                         {% endblock child_products %}
 
                         {% block recommended_products %}
-                            <div class="tab-pane" id="product_recommended">
-                                {% block recommended_products_content %}
-                                    {{ recommended_formset.management_form }}
-                                    {{ recommended_formset.non_form_errors }}
-                                    <table class="table table-striped table-bordered">
-                                        <caption>Рекомендации</caption>
-                                        {% for recommended_form in recommended_formset %}
-                                            <tr class="form-inline justify-space-between">
-                                                <td class="d-flex flex-wrap fill-width">
-                                                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=recommended_form %}
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </table>
-                                {% endblock recommended_products_content %}
-                            </div>
+                            {% if recommended_formset %}
+                                <div class="tab-pane" id="product_recommended">
+                                    {% block recommended_products_content %}
+                                        {{ recommended_formset.management_form }}
+                                        {{ recommended_formset.non_form_errors }}
+                                        <table class="table table-striped table-bordered">
+                                            <caption>Рекомендации</caption>
+                                            {% for recommended_form in recommended_formset %}
+                                                <tr class="form-inline justify-space-between">
+                                                    <td class="d-flex flex-wrap fill-width">
+                                                        {% include "oscar/dashboard/partials/form_fields_inline.html" with form=recommended_form %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
+                                    {% endblock recommended_products_content %}
+                                </div>
+                            {% endif %}
                         {% endblock recommended_products %}
 
                         {% block additional_products %}
-                            <div class="tab-pane" id="product_additional">
+                            {% if additional_formset %}
+                                <div class="tab-pane" id="product_additional">
 
-                                <div class="tab-pane active mb-3">
-                                    <div class="table-header">
-                                        <h3>Дополнительные товары типа продукта '{{ product_class }}'</h3>
+                                    <div class="tab-pane active mb-3">
+                                        <div class="table-header">
+                                            <h3>Дополнительные товары типа продукта '{{ product_class }}'</h3>
+                                        </div>
+                                        <div class="card card-body product-details">
+                                            {% if class_additionals %}
+                                                {% for addit in class_additionals %}
+                                                    {{ addit }}
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
                                     </div>
-                                    <div class="card card-body product-details">
-                                        {% if class_additionals %}
-                                            {% for addit in class_additionals %}
-                                                {{ addit }}
+
+                                    {% block additional_products_content %}
+                                        {{ additional_formset.management_form }}
+                                        {{ additional_formset.non_form_errors }}
+                                        <table class="table table-striped table-bordered">
+                                            <caption>Дополнительные товары</caption>
+                                            {% for additional_form in additional_formset %}
+                                                <tr>
+                                                    <td class="form-inline">
+                                                        {% include "oscar/dashboard/partials/form_fields_inline.html" with form=additional_form %}
+                                                    </td>
+                                                </tr>
                                             {% endfor %}
-                                        {% endif %}
-                                    </div>
+                                        </table>
+                                    {% endblock additional_products_content %}
                                 </div>
-
-                                {% block additional_products_content %}
-                                    {{ additional_formset.management_form }}
-                                    {{ additional_formset.non_form_errors }}
-                                    <table class="table table-striped table-bordered">
-                                        <caption>Дополнительные товары</caption>
-                                        {% for additional_form in additional_formset %}
-                                            <tr>
-                                                <td class="form-inline">
-                                                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=additional_form %}
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </table>
-                                {% endblock additional_products_content %}
-                            </div>
+                            {% endif %}
                         {% endblock additional_products %}
 
                         {% block seo %}
-                            <div class="tab-pane" id="seo">
-                                <div class="table-header">
-                                    <h3>Поисковая оптимизация</h3>
+                            {% if full_access %}
+                                <div class="tab-pane" id="seo">
+                                    <div class="table-header">
+                                        <h3>Поисковая оптимизация</h3>
+                                    </div>
+                                    <div class="card card-body">
+                                        {% block seo_content %}
+                                            {% for field in form.seo_form_fields %}
+                                                {% if 'attr' not in field.id_for_label %}
+                                                    {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endblock seo_content %}
+                                    </div>
                                 </div>
-                                <div class="card card-body">
-                                    {% block seo_content %}
-                                        {% for field in form.seo_form_fields %}
-                                            {% if 'attr' not in field.id_for_label %}
-                                                {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
-                                            {% endif %}
-                                        {% endfor %}
-                                    {% endblock seo_content %}
-                                </div>
-                            </div>
+                            {% endif %}
                         {% endblock seo %}
                     {% endblock tab_content %}
                 </div>
@@ -444,26 +507,46 @@
 
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        {% if product %}
-                            <a class="btn btn-success" href="{{ product.get_absolute_url }}">
-                                <i class="fa-solid fa-share"></i>
+                <div class="container container-fluid">
+                    <div class="d-flex justify-content-between flex-wrap align-items-end">
+                        <div class="">
+                            {% with evotor_field=form.evotor_update %}
+                                <label for="{{ evotor_field.auto_id }}" class="checkbox-ios">
+                                    {% render_field evotor_field class+="form-control" %}
+                                    <span class="checkbox-ios-switch"></span>
+                                </label>
+                                {% for error in evotor_field.errors %}
+                                    <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                                {% endfor %}
+                                {% if evotor_field.help_text %}
+                                    <small class="form-text text-muted">
+                                        {{ evotor_field.help_text|safe }}
+                                    </small>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            {% if product %}
+                                <a class="btn btn-success mr-2" href="{{ product.get_absolute_url }}">
+                                    <i class="fa-solid fa-share"></i>
+                                    <span>
+                                        Смотреть на сайте
+                                    </span>
+                                </a>
+                            {% endif %}
+                            <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
+                                <i class="fa-regular fa-circle-xmark"></i> 
                                 <span>
-                                    Смотреть на сайте
+                                    Отменить
                                 </span>
-                            </a>
-                        {% endif %}
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
-                            <i class="fa-regular fa-circle-xmark"></i> 
-                            Отменить
-                        </a>             
-                        <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
-                            <i class="fa-regular fa-floppy-disk"></i>
-                            Сохранить
-                        </button>
+                            </a>             
+                            <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+                                <i class="fa-regular fa-floppy-disk"></i>
+                                <span>
+                                    Сохранить
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

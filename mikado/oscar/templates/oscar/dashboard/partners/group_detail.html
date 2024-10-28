@@ -28,7 +28,6 @@
 {% block dashboard_content %}
     <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors">
         {% csrf_token %}
-
         <div class="row">
             <div class="col-md-12">
                 <div class="tab-content">
@@ -38,7 +37,6 @@
                                 <h3>Описание группы персонала</h3>
                             </div>
                             <div class="card card-body bg-light option-details">
-
                                 {% if form.non_field_errors %}
                                     {% for error in form.non_field_errors %}
                                         <div class="alert alert-danger">
@@ -46,28 +44,40 @@
                                         </div>
                                     {% endfor %}
                                 {% endif %}
-
-                                {% comment %} {% for field in form %} {% endcomment %}
-                                {% comment %} {% endfor %} {% endcomment %}
-                                
                                 {% include 'oscar/dashboard/partials/form_field.html' with field=form.name %}
-                                
-                                {% for app_label, permissions in form.permissions.field.choices %}
-                                <fieldset>
-                                  <legend>{{ app_label }}</legend>
-                                  {% for permission_id, permission_name in permissions %}
-                                    <div>
-                                      <label>
-                                        <input type="checkbox" name="permissions" value="{{ permission_id }}" 
-                                        {% if permission_id in form.permissions.value %}checked{% endif %}>
-                                        {{ permission_name }}
-                                      </label>
+                                <ul class="nav nav-tabs mb-3 mb-lg-4 p-0 fill-width" role="tablist">
+                                    <div class="half-wrapper">
+                                        <div class="nav tabs-button d-flex fill">
+                                            <div class="tabs-button__active-block" style="width: 140px; left: 0px;"><div class="fill-width fill-height"></div></div>
+                                            {% for app_label, permissions in form.permissions.field.choices %}
+                                                <button role="button" class="tabs-button__button tabs-button__icon {% if forloop.first %}active{% endif %}" href="#app_label_{{ forloop.counter }}" data-toggle="tab">
+                                                    <div class="no-wrap">
+                                                        {% comment %} <i class="fa-regular fa-diamond"></i> {% endcomment %}
+                                                        <i class="fa-regular fa-circle-check"></i>
+                                                        <span>
+                                                            {{ app_label }}
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            {% endfor %}
+                                        </div>
                                     </div>
-                                  {% endfor %}
-                                </fieldset>
-                              {% endfor %}
-
-
+                                </ul>
+                                <div class="tab-content">
+                                    {% for app_label, permissions in form.permissions.field.choices %}
+                                        <div class="tab-pane fade {% if forloop.first %}show active{% endif %} mt-2" id="app_label_{{ forloop.counter }}" role="tabpanel">
+                                            {% for permission_id, permission_name in permissions %}
+                                                <div>
+                                                    <label>
+                                                        <input type="checkbox" name="permissions" value="{{ permission_id }}" 
+                                                        {% if permission_id in form.permissions.value %}checked{% endif %}>
+                                                        {{ permission_name }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
                             </div>
                         </div>
                     {% endblock %}
@@ -75,20 +85,25 @@
             </div>
         </div>
         {% block fixed_actions_group %}
-            <div class="fixed-actions-group">
-                <div class="d-flex justify-content-end">  
-                    <a class="btn btn-danger mr-2"  href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
-                        <i class="fa-regular fa-circle-xmark"></i> 
-                        Отменить
-                    </a>             
-                    <button type="submit" class="btn btn-primary" data-loading-text="Сохранение...">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        Сохранить
-                    </button>
+            <div class="fixed-actions-group">  
+                <div class="container container-fluid">
+                    <div class="d-flex justify-content-end">  
+                        <a class="btn btn-danger mr-2"  href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
+                            <i class="fa-regular fa-circle-xmark"></i> 
+                            <span>
+                                Отменить
+                            </span>
+                        </a>             
+                        <button type="submit" class="btn btn-primary" data-loading-text="Сохранение...">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>
+                                Сохранить
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </div>
         {% endblock fixed_actions_group %}
-        
     </form>
-
 {% endblock dashboard_content %}
+

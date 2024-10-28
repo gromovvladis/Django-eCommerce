@@ -115,6 +115,11 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
 
     'config.settings.config.Shop',
+
+    #vlad
+    'smsaero',
+    'apps.sms_auth.apps.SmsConfig',
+    'apps.user.apps.UserConfig',
     
     'oscar.apps.home.apps.HomeConfig',
     'oscar.apps.analytics.apps.AnalyticsConfig',
@@ -156,10 +161,6 @@ INSTALLED_APPS = [
     'oscar.apps.dashboard.delivery.apps.DeliveryDashboardConfig',
     'oscar.apps.dashboard.telegram.apps.TelegramDashboardConfig',
 
-    #vlad
-    'smsaero',
-    'apps.sms_auth.apps.SmsConfig',
-    'apps.user.apps.UserConfig',
 
     # 3rd-party apps that Oscar depends on
     'widget_tweaks',
@@ -169,10 +170,10 @@ INSTALLED_APPS = [
     'django_tables2',
     'compressor',
     'rest_framework',
-    # 'rest_framework.authtoken',
     'celery',
     'django_celery_beat',
     'django_celery_results',
+    # 'rest_framework.authtoken',
 
     # Django apps that the sandbox depends on
     'django.contrib.sitemaps',

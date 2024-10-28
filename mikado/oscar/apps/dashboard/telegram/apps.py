@@ -10,13 +10,8 @@ class TelegramDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управления - Telegram bot"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
     ]
-    permissions_map = {
-        "telegram-admin": (["is_staff"], ["partner.dashboard_access"]),
-        "telegram-errors": (["is_staff"], ["partner.dashboard_access"]),
-        "telegram-couriers": (["is_staff"], ["partner.dashboard_access"]),
-    }
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

@@ -29,7 +29,7 @@
             <p>{{ description }}</p>
         <div class="form-actions">
             <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">Удалить</button>
-        или <a href="{% if parent %}{% url 'dashboard:catalogue-category-detail-list' pk=parent.pk %}{% else %}{% url 'dashboard:catalogue-category-list' %}{% endif %}">Отмена</a>
-    </div>
-</form>
+            <a class="btn btn-secondary ml-2"href="{% url 'dashboard:staff-list' %}">Отмена</a>
+        </div>
+    </form>
 {% endblock %}

@@ -157,6 +157,7 @@ var oscar = (function(o, $) {
             // $selects.filter('.form-inline select').css('width', '250px');
             // $selects.not('.related-widget-wrapper select').select2({width: 'resolve'});
             // $selects.not('.related-widget-wrapper select').select2();
+            $selects.not('.related-widget-wrapper select').select2({width: '100%'});
             $selects.filter('.related-widget-wrapper.single select').select2({
                 // Keep updated labels after editing related obj
                 templateResult: function (data) {

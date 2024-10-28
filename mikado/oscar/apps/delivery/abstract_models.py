@@ -34,9 +34,9 @@ class AbstractDeliveryZona(models.Model):
     class Meta:
         abstract = True
         permissions = (
-            ("full_access", "Полный доступ"),
+            ("full_access", "Полный доступ к доставке"),
             ("read", "Просматривать доставки"),
-            ("change_delivery", "Изменять доставки"),    
+            ("update_delivery", "Изменять доставки"),    
         )
         verbose_name = "Зона доставки"
         verbose_name_plural = "Зоны доставки"

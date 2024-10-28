@@ -404,11 +404,11 @@ class AbstractOrderNote(models.Model):
         app_label = "order"
         ordering = ["-date_updated"]
         permissions = (
-            ("full_access", "Полный доступ"),
+            ("full_access", "Полный доступ к заказам"),
             ("read", "Просматривать заказы"),
-            ("change_order", "Изменять состав заказа"),
-            ("change_order_status", "Изменять статус заказа"),
-            ("change_order_payment", "Изменять оплату заказа"),    
+            ("update_order", "Изменять состав заказа"),
+            ("update_order_status", "Изменять статус заказа"),
+            ("update_order_payment", "Изменять оплату заказа"),    
         )
         verbose_name = "Примечание к заказу"
         verbose_name_plural = "Примечания к заказам"

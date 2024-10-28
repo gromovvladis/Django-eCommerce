@@ -188,11 +188,11 @@ class AbstractStockRecord(models.Model):
     #: which we store here.  This will sometimes be the same the product's UPC
     #: but not always.  It should be unique per partner.
     #: See also http://en.wikipedia.org/wiki/Stock-keeping_unit
-    partner_sku = models.CharField("Артикул в точке продажи", max_length=128)
+    partner_sku = models.CharField("Артикул в точке продажи", max_length=128, help_text="Эвотор ID")
 
     # Price info:
     price_currency = models.CharField(
-        "Валюта", max_length=12, default=get_default_currency
+        "Валюта", max_length=12, default=get_default_currency, help_text="Валюта. Рубли = RUB",
     )
 
     bar_codes = models.ManyToManyField(
@@ -248,19 +248,19 @@ class AbstractStockRecord(models.Model):
 
     #: Number of items in stock
     num_in_stock = models.PositiveIntegerField(
-        "Количество в наличии", blank=True, null=True
+        "Количество в наличии", blank=True, null=True, help_text="В наличии",
     )
 
     #: The amount of stock allocated to orders but not fed back to the master
     #: stock system.  A typical stock update process will set the
     #: :py:attr:`.num_in_stock` variable to a new value and reset
     #: :py:attr:`.num_allocated` to zero.
-    num_allocated = models.IntegerField("Количество заказано", blank=True, null=True)
+    num_allocated = models.IntegerField("Количество заказано", blank=True, null=True, help_text="Заказано",)
 
     #: Threshold for low-stock alerts.  When stock goes beneath this threshold,
     #: an alert is triggered so warehouse managers can order more.
     low_stock_threshold = models.PositiveIntegerField(
-        "Граница малых запасов", blank=True, null=True
+        "Граница малых запасов", blank=True, null=True, help_text="Граница малых запасов",
     )
 
     is_public = models.BooleanField(

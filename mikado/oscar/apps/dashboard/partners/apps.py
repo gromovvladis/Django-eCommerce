@@ -10,7 +10,7 @@ class PartnersDashboardConfig(OscarDashboardConfig):
     verbose_name = "Панель управления - Точки продажи"
 
     default_permissions = [
-        "is_staff",
+        "user.full_access",
     ]
 
     # pylint: disable=attribute-defined-outside-init
@@ -25,7 +25,7 @@ class PartnersDashboardConfig(OscarDashboardConfig):
         self.partner_staff_link_view = get_class("dashboard.partners.views", "PartnerStaffLinkView")
         self.partner_staff_unlink_view = get_class("dashboard.partners.views", "PartnerStaffUnlinkView")
 
-        self.user_update_view = get_class("dashboard.partners.views", "PartnerUserUpdateView")
+        # self.user_update_view = get_class("dashboard.partners.views", "PartnerUserUpdateView")
 
         self.group_list_view = get_class("dashboard.partners.views", "GroupListView")
         self.group_detail_view = get_class("dashboard.partners.views", "GroupDetailView")
@@ -64,12 +64,6 @@ class PartnersDashboardConfig(OscarDashboardConfig):
                 "all/<int:partner_pk>/users/<int:user_pk>/unlink/",
                 self.partner_staff_unlink_view.as_view(),
                 name="partner-user-unlink",
-            ),
-
-            path(
-                "all/<int:partner_pk>/users/<int:user_pk>/update/",
-                self.user_update_view.as_view(),
-                name="partner-user-update",
             ),
 
             path("groups/", self.group_list_view.as_view(), name="group-list"),

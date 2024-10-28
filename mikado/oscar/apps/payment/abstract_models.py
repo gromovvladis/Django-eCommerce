@@ -131,7 +131,7 @@ class AbstractSource(models.Model):
         app_label = "payment"
         ordering = ["pk"]
         permissions = (
-            ("full_access", "Полный доступ"),
+            ("full_access", "Полный доступ к источникам оплаты"),
             ("read", "Просматривать платежи и возвраты"),
             ("make_refund", "Остуществлять возвраты"),    
         )
