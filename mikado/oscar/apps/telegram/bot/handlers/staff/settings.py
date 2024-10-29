@@ -46,7 +46,7 @@ async def notif_cancel2(message: Message, state: FSMContext):
 
 @settings_router.callback_query(StaffNotif.status_edit, F.data == 'new-order')
 async def notif_new(callback: CallbackQuery, state: FSMContext):
-    msg = await change_notif(callback.message.from_user.id, 'new-order')
+    msg = await change_notif(str(callback.message.from_user.id), 'new-order')
     await callback.answer()
     await callback.message.edit_reply_markup()
     await callback.message.answer(msg, reply_markup=staff_buttons)
@@ -55,7 +55,7 @@ async def notif_new(callback: CallbackQuery, state: FSMContext):
 
 @settings_router.callback_query(StaffNotif.status_edit, F.data == 'status-order')
 async def notif_status(callback: CallbackQuery, state: FSMContext):
-    msg = await change_notif(callback.message.from_user.id, 'status-order')
+    msg = await change_notif(str(callback.message.from_user.id), 'status-order')
     await callback.answer()
     await callback.message.edit_reply_markup()
     await callback.message.answer(msg, reply_markup=staff_buttons)
@@ -64,7 +64,7 @@ async def notif_status(callback: CallbackQuery, state: FSMContext):
 
 @settings_router.callback_query(StaffNotif.status_edit, F.data == 'technical')
 async def notif_technical(callback: CallbackQuery, state: FSMContext):
-    msg = await change_notif(callback.message.from_user.id, 'technical')
+    msg = await change_notif(str(callback.message.from_user.id), 'technical')
     await callback.answer()
     await callback.message.edit_reply_markup()
     await callback.message.answer(msg, reply_markup=staff_buttons)
@@ -73,7 +73,7 @@ async def notif_technical(callback: CallbackQuery, state: FSMContext):
 
 @settings_router.callback_query(StaffNotif.status_edit, F.data == 'off')
 async def notif_off(callback: CallbackQuery, state: FSMContext):
-    msg = await change_notif(callback.message.from_user.id, 'off')
+    msg = await change_notif(str(callback.message.from_user.id), 'off')
     await callback.answer()
     await callback.message.edit_reply_markup()
     await callback.message.answer(msg, reply_markup=staff_buttons)

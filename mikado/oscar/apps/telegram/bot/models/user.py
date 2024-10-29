@@ -80,14 +80,14 @@ async def get_current_notif(telegram_id: int):
 
 
 @sync_to_async
-def change_notif(telegram_id: int, new_status: str):
+def change_notif(telegram_id: str, new_status: str):
     try:
         staff = Staff.objects.get(telegram_id=telegram_id)
         staff.notif = new_status
         staff.save()
         return "Настройки уведомлений обновлены"
     except Staff.DoesNotExist:
-        return "Настройки не примены. Телеграм не свзяан с профилем персонала"
+        return "Настройки не примены. Телеграм не связан с профилем персонала"
 
 
 @sync_to_async
