@@ -143,7 +143,7 @@ class EvotorPartnerClient(EvotorAPICloud):
                 }
             }
         """
-        endpoint = "stores"
+        endpoint = "stores/"
         return self.send_request(endpoint)
  
     def get_terminals(self):
@@ -181,7 +181,7 @@ class EvotorPartnerClient(EvotorAPICloud):
                 }
             }
         """
-        endpoint = "devices"
+        endpoint = "devices/"
         return self.send_request(endpoint)
     
     def get_and_update_partners(self):
@@ -293,7 +293,7 @@ class EvotorStaffClient(EvotorAPICloud):
                 }
             }
         """
-        endpoint = "employees"
+        endpoint = "employees/"
         return self.send_request(endpoint)
 
     def get_staff_by_id(self, staff_id):
@@ -319,7 +319,7 @@ class EvotorStaffClient(EvotorAPICloud):
                 "updated_at": "2018-07-16T16:00:10.663+0000"
             }
         """
-        endpoint = f"employees/{staff_id}"
+        endpoint = f"employees/{staff_id}/"
         return self.send_request(endpoint)
     
     def get_staffs_role(self):
@@ -346,7 +346,7 @@ class EvotorStaffClient(EvotorAPICloud):
                 "paging": {}
             }
         """
-        endpoint = "employees/roles"
+        endpoint = "employees/roles/"
         return self.send_request(endpoint)
  
     def get_and_update_staffs(self):
@@ -385,7 +385,7 @@ class EvotorStaffClient(EvotorAPICloud):
 
         serializer = StaffSerializer(staff)
         staff_json = JSONRenderer().render(serializer.data).decode('utf-8')
-        endpoint = "employees"
+        endpoint = "employees/"
 
         return self.send_request(endpoint, "POST", staff_json)
   
@@ -497,7 +497,7 @@ class EvotorProductClient(EvotorAPICloud):
                 }
             }
         """
-        endpoint = f"stores/{store_id}/products"
+        endpoint = f"stores/{store_id}/products/"
         return self.send_request(endpoint)
     
     def get_product_by_id(self, store_id, product_id):
@@ -532,7 +532,7 @@ class EvotorProductClient(EvotorAPICloud):
                 "updated_at": "2018-09-11T16:18:35.397+0000"
             }
         """
-        endpoint = f"stores/{store_id}/products/{product_id}"
+        endpoint = f"stores/{store_id}/products/{product_id}/"
         return self.send_request(endpoint)
     
     def create_product(self, store_id, products):
@@ -598,7 +598,7 @@ class EvotorProductClient(EvotorAPICloud):
             bulk = True
             products_data = {"items": products}
 
-        endpoint = f"stores/{store_id}/products"
+        endpoint = f"stores/{store_id}/products/"
         return self.send_request(endpoint, "POST", products_data, bulk)
  
     def update_or_create_products(self, store_id, products):
@@ -649,7 +649,7 @@ class EvotorProductClient(EvotorAPICloud):
             bulk = True
             products_data = {"items": products}
 
-        endpoint = f"stores/{store_id}/products"
+        endpoint = f"stores/{store_id}/products/"
         return self.send_request(endpoint, "PUT", products_data, bulk)
 
     def update_or_create_product(self, store_id, product_id, product):
@@ -696,7 +696,7 @@ class EvotorProductClient(EvotorAPICloud):
         # здесть будет преобразование обекта Product в json
         products_data = product
 
-        endpoint = f"stores/{store_id}/products/{product_id}"
+        endpoint = f"stores/{store_id}/products/{product_id}/"
         return self.send_request(endpoint, "PUT", products_data)
 
     def update_product(self, store_id, product_id, product):
@@ -748,7 +748,7 @@ class EvotorProductClient(EvotorAPICloud):
         # здесть будет преобразование обекта Product в json
         products_data = product
 
-        endpoint = f"stores/{store_id}/products/{product_id}"
+        endpoint = f"stores/{store_id}/products/{product_id}/"
         return self.send_request(endpoint, "PATCH", products_data)
 
     def delete_products(self, store_id, products_id):
@@ -771,7 +771,7 @@ class EvotorProductClient(EvotorAPICloud):
         # здесть будет преобразование обекта списка в json
         products_data = json.dump(products_id)
 
-        endpoint = f"stores/{store_id}/products"
+        endpoint = f"stores/{store_id}/products/"
         return self.send_request(endpoint, "DELETE", products_data, bulk)
 
     def delete_product(self, store_id, product_id):
@@ -787,7 +787,7 @@ class EvotorProductClient(EvotorAPICloud):
         # здесть будет преобразование обекта списка в json
         products_data = json.dump(product_id)
 
-        endpoint = f"stores/{store_id}/products/{product_id}"
+        endpoint = f"stores/{store_id}/products/{product_id}/"
         return self.send_request(endpoint, "DELETE", products_data)
 
     def create_variants(self, store_id, parent_id, variants):
@@ -833,7 +833,7 @@ class EvotorDocClient(EvotorAPICloud):
                 }
             }
         """
-        endpoint = f"stores/{store_id}/documents"
+        endpoint = f"stores/{store_id}/documents/"
         return self.send_request(endpoint)
     
     def get_doc_by_id(self, store_id, doc_id):
@@ -898,7 +898,7 @@ class EvotorDocClient(EvotorAPICloud):
                 }
             }
         """
-        endpoint = f"stores/{store_id}/devices/{terminal_id}/documents"
+        endpoint = f"stores/{store_id}/devices/{terminal_id}/documents/"
         return self.send_request(endpoint)
  
 
@@ -931,7 +931,7 @@ class EvotorPushNotifClient(EvotorAPICloud):
                 "status": "ACCEPTED"
             }
         """
-        endpoint = f"api/apps/{application_id}/push-notifications/{push_id}"
+        endpoint = f"api/apps/{application_id}/push-notifications/{push_id}/"
         return self.send_request(endpoint)
  
     def send_notif(self, application_id, device_uuid, msg):
@@ -965,7 +965,7 @@ class EvotorPushNotifClient(EvotorAPICloud):
         # здесь будет преобразование обекта msg и application_id в json
         msg_data = 1
 
-        endpoint = f"api/apps/{application_id}/devices/{device_uuid}/push-notifications"
+        endpoint = f"api/apps/{application_id}/devices/{device_uuid}/push-notifications/"
         return self.send_request(endpoint, "POST", msg_data)
  
     def send_notifs(self, application_id, msg):
@@ -1007,7 +1007,7 @@ class EvotorPushNotifClient(EvotorAPICloud):
         # здесь будет преобразование обекта msg и application_id в json
         msg_data = 1
 
-        endpoint = f"api/apps/{application_id}/push-notifications"
+        endpoint = f"api/apps/{application_id}/push-notifications/"
         return self.send_request(endpoint, "POST", msg_data)
  
 
