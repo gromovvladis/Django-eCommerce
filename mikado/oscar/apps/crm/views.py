@@ -106,7 +106,8 @@ class CRMPartnerEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
 
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -135,7 +136,8 @@ class CRMTerminalEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
 
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -164,7 +166,8 @@ class CRMStaffEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
 
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -195,7 +198,8 @@ class CRMRoleEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
 
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -230,7 +234,8 @@ class CRMProductEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
         
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -261,7 +266,8 @@ class CRMReceiptEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
         
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -292,7 +298,8 @@ class CRMDocsEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
         
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -323,7 +330,8 @@ class CRMInstallationEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
         
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -358,7 +366,8 @@ class CRMLoginEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
 
         not_allowed = is_valid_site_and_user_tokens(request)
         if not_allowed:
@@ -388,6 +397,6 @@ class CRMLoginEndpointView(APIView):
 #             "query_params": request.query_params.dict(),
 #         }
 #         logging.info(f"CRMRegisterEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
-#         send_message_to_staffs(f"CRMRegisterEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+#         send_message_to_staffs(f"CRMRegisterEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.NEW)
 
 #         return Response({"error": "Регистрация возможна только на ресурсе сайта. Свяжитесь с администрацией сайта"}, status=status.HTTP_409_CONFLICT)
