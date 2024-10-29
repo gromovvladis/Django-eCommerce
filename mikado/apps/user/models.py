@@ -10,9 +10,6 @@ from django.contrib.auth.models import Group
 
 
 class Staff(models.Model):
-    """
-    Dummy profile model used for testing
-    """
     user = models.OneToOneField(compat.AUTH_USER_MODEL, related_name="profile",
                                 on_delete=models.CASCADE)
 

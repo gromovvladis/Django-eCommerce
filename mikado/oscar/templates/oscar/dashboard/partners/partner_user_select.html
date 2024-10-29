@@ -11,7 +11,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
             <li class="breadcrumb-item"><a href="{% url 'dashboard:partner-list' %}">Точки продажи</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:partner-manage' pk=partner.id %}">{{ partner.name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:partner-manage' pk=partner.id %}">{{ partner.name|default:"Точка продажи" }}</a></li>
             <li class="breadcrumb-item active" aria-current="page">Добавить персонал</li>
         </ol>
     </nav>

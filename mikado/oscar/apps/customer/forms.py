@@ -203,32 +203,6 @@ class PhoneUserCreationForm(forms.Form):
         return user
     
 
-class PasswordResetForm(auth_forms.PasswordResetForm):
-    """
-    This form takes the same structure as its parent from :py:mod:`django.contrib.auth`
-    """
-
-    def save(self, *args, domain_override=None, request=None, **kwargs):
-        """
-        Generates a one-use only link for resetting password and sends to the
-        user.
-        """
-        site = get_current_site(request)
-        if domain_override is not None:
-            site.domain = site.name = domain_override
-        for user in self.get_users(self.cleaned_data["email"]):
-            self.send_password_reset_email(site, user, request)
-
-    def send_password_reset_email(self, site, user, request=None):
-        extra_context = {
-            "user": user,
-            "site": site,
-            "reset_url": get_password_reset_url(user),
-            "request": request,
-        }
-        CustomerDispatcher().send_password_reset_email_for_user(user, extra_context)
-
-
 class OrderSearchForm(forms.Form):
 
     date_range = forms.CharField(
@@ -333,6 +307,32 @@ class OrderSearchForm(forms.Form):
 
 
 
+
+
+# class PasswordResetForm(auth_forms.PasswordResetForm):
+#     """
+#     This form takes the same structure as its parent from :py:mod:`django.contrib.auth`
+#     """
+
+#     def save(self, *args, domain_override=None, request=None, **kwargs):
+#         """
+#         Generates a one-use only link for resetting password and sends to the
+#         user.
+#         """
+#         site = get_current_site(request)
+#         if domain_override is not None:
+#             site.domain = site.name = domain_override
+#         for user in self.get_users(self.cleaned_data["email"]):
+#             self.send_password_reset_email(site, user, request)
+
+#     def send_password_reset_email(self, site, user, request=None):
+#         extra_context = {
+#             "user": user,
+#             "site": site,
+#             "reset_url": get_password_reset_url(user),
+#             "request": request,
+#         }
+#         CustomerDispatcher().send_password_reset_email_for_user(user, extra_context)
 
 
 

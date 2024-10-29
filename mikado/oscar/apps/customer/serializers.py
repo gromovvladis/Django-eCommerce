@@ -1,7 +1,10 @@
+import logging
 from rest_framework import serializers   
 from django.contrib.auth.models import Group
 from oscar.apps.customer.models import GroupEvotor
 from oscar.core.loading import get_model
+
+logger = logging.getLogger("oscar.customer")
 
 User = get_model("user", "User")
 Staff = get_model("user", "Staff")
@@ -60,6 +63,11 @@ class StaffSerializer(serializers.ModelSerializer):
     role = serializers.CharField(write_only=True)
     role_id = serializers.CharField(write_only=True)
 
+    # phone = serializers.CharField(source='user.username', write_only=True)
+    # stores = serializers.ListField(child=serializers.CharField(), write_only=True)
+    # role = serializers.CharField(source='role.name', write_only=True)
+    # role_id = serializers.CharField(source='role.id', write_only=True)
+
     class Meta:
         model = Staff
         fields = ['id', 'name', 'last_name', 'patronymic_name', 'role', 'phone', 'stores', 'role_id']
@@ -71,9 +79,22 @@ class StaffSerializer(serializers.ModelSerializer):
         role_data = validated_data.pop('role', None)
         role_id_data = validated_data.pop('role_id', None)
 
-        user, _ = User.objects.get_or_create(username=phone_data, is_staff=True, name=validated_data.get('first_name', ""))
+        # Получаем или создаем пользователя, проверяя на существование по username
+        user, created = User.objects.get_or_create(
+            username=phone_data, 
+            defaults={'is_staff': True, 'name': validated_data.get('first_name', "")}
+            )
+        
+        # Если пользователь уже существовал, обновляем его данные, если они отличаются
+        if not created:
+            user.is_staff = True
+            user.name = validated_data.get('first_name', "")
+            user.save()
 
-        staff = Staff.objects.create(user=user, **validated_data)
+        staff, _ = Staff.objects.get_or_create(user=user)
+        
+        for attr, value in validated_data.items():
+            setattr(staff, attr, value)
 
         if partners_data:
             partners = Partner.objects.filter(evotor_id__in=partners_data)
@@ -84,7 +105,8 @@ class StaffSerializer(serializers.ModelSerializer):
             group, _ = Group.objects.get_or_create(name=role_data)
             GroupEvotor.objects.get_or_create(group=group, evotor_id=role_id_data)
             staff.role = group
-            staff.save()
+        
+        staff.save()
 
         return staff
 
@@ -97,10 +119,17 @@ class StaffSerializer(serializers.ModelSerializer):
 
         # Обновляем данные пользователя
         if phone_data:
-            user = instance.user
-            user.username = phone_data
-            user.name = validated_data.get('first_name', user.name)
-            user.save()
+            user, created = User.objects.get_or_create(
+            username=phone_data, 
+            defaults={'is_staff': True, 'name': validated_data.get('first_name', "")}
+            )
+            # Если пользователь уже существовал, обновляем его данные, если они отличаются
+            if not created:
+                user.is_staff = True
+                user.name = validated_data.get('first_name', "")
+                user.save()
+
+            instance.user = user
 
         # Обновляем информацию о сотруднике
         instance.first_name = validated_data.get('first_name', instance.first_name)
@@ -128,70 +157,15 @@ class StaffSerializer(serializers.ModelSerializer):
 
         return instance
 
-
-
-# class TerminalSerializer(serializers.ModelSerializer):
-#     id = serializers.CharField(source='evotor_id')
-#     name = serializers.CharField()
-#     device_model = serializers.CharField()
-#     serial_number = serializers.CharField()
-#     imei = serializers.CharField()
-
-#     store_id = serializers.CharField(write_only=True) 
-#     location = serializers.JSONField(write_only=True)  
-
-#     class Meta:
-#         model = Partner
-#         fields = ['id', 'name', 'device_model', 'serial_number', 'imei', 'store_id', 'location']
-
-#     def create(self, validated_data):
-
-#         store_id = validated_data.pop('store_id')
-#         location = validated_data.pop('location', {})
-
-#         coords_long = location.get('lng')
-#         coords_lat = location.get('lat')
-
-#         terminal = Terminal.objects.create(
-#             coords_long=coords_long,
-#             coords_lat=coords_lat,
-#             **validated_data
-#         )
-
-#         partner, created = Partner.objects.get_or_create(evotor_id=store_id)
-
-#         partner.terminals.add(terminal)
-
-#         return partner
-    
-#     def update(self, instance, validated_data):
-#         store_id = validated_data.pop('store_id')
-#         location = validated_data.pop('location', {})
-
-#         coords_long = location.get('lng')
-#         coords_lat = location.get('lat')
-
-#         # Обновляем терминал
-#         instance.coords_long = coords_long
-#         instance.coords_lat = coords_lat
-#         instance.device_model = validated_data.get('device_model', instance.device_model)
-#         instance.serial_number = validated_data.get('serial_number', instance.serial_number)
-#         instance.imei = validated_data.get('imei', instance.imei)
-#         instance.name = validated_data.get('name', instance.name)
-        
-#         instance.save()
-
-#         # Получаем или создаем партнера
-#         partner, created = Partner.objects.get_or_create(evotor_id=store_id)
-
-#         # Удаляем терминал у других партнеров
-#         other_partners = Partner.objects.all()
-#         for other_partner in other_partners:
-#             terminals_to_remove = other_partner.terminals.filter(id=instance.id)
-#             if terminals_to_remove.exists():
-#                 other_partner.terminals.remove(*terminals_to_remove)  # Удаляем терминалы
-
-#         # Добавляем обновленный терминал к партнеру
-#         partner.terminals.add(instance)
-
-#         return partner
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        try:
+            representation['stores'] = [partner.evotor_id for partner in instance.user.partners.all()]
+            representation['phone'] = str(instance.user.username)
+            representation['role_id'] = instance.role.evotor.evotor_id
+        except Exception as e:
+            logger.error("Ошибка определения списка магазинов сотрудника", e)
+            representation['stores'] = []
+            representation['phone'] = ""
+            representation['role_id'] = ""
+        return representation

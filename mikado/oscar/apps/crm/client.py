@@ -4,6 +4,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth.models import Group
 
+from rest_framework.renderers import JSONRenderer
 from oscar.apps.customer.serializers import GroupSerializer, StaffSerializer
 from oscar.apps.partner.serializers import PartnerSerializer, TerminalSerializer
 from oscar.core.loading import get_model
@@ -114,6 +115,8 @@ class EvotorAPICloud:
 
 class EvotorPartnerClient(EvotorAPICloud):
 
+# ========= ПОЛУЧЕНИЕ ДАННЫХ
+
     def get_partners(self):
         """
         Получить список магазинов   
@@ -181,19 +184,21 @@ class EvotorPartnerClient(EvotorAPICloud):
         endpoint = "devices"
         return self.send_request(endpoint)
     
-    def update_partners(self):
+    def get_and_update_partners(self):
         """
         Обновить информацию о магазинах
         """
         cloud_partners = self.get_partners()
         self.create_or_update_partners(cloud_partners.get('items'))
 
-    def update_terminals(self):
+    def get_and_update_terminals(self):
         """
         Обновить информацию о магазинах
         """
         cloud_terminals = self.get_terminals()
         self.create_or_update_terminals(cloud_terminals.get('items'))
+
+# ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
 
     def create_or_update_partners(self, partners_json):
         try:
@@ -252,6 +257,8 @@ class EvotorPartnerClient(EvotorAPICloud):
 
 
 class EvotorStaffClient(EvotorAPICloud):
+
+# ========= ПОЛУЧЕНИЕ ДАННЫХ
 
     def get_staffs(self):
         """
@@ -342,9 +349,21 @@ class EvotorStaffClient(EvotorAPICloud):
         endpoint = "employees/roles"
         return self.send_request(endpoint)
  
+    def get_and_update_staffs(self):
+        """
+        Обновить информацию о сотрудниках
+        """
+        cloud_roles = self.get_staffs_role()
+        cloud_staffs = self.get_staffs()
+        self.create_or_update_roles(cloud_roles.get('items'))
+        self.create_or_update_staffs(cloud_staffs.get('items'))
+
+# ========= ОТПРАВКА ДАННЫХ
+
     def create_staff(self, staff):
         """
-        Создаёт нового сотрудника с указанной ролью. Список ролей возвращает метод /employees/roles
+        Создаёт нового сотрудника с указанной ролью в Эвотор системе. 
+        Список ролей возвращает метод /employees/roles
         GET /employees
 
         staff - объект Staff
@@ -363,20 +382,14 @@ class EvotorStaffClient(EvotorAPICloud):
                 ]
             }
         """
-        # здесть будет преобразование обекта Staff в json
-        staff_data = staff
 
+        serializer = StaffSerializer(staff)
+        staff_json = JSONRenderer().render(serializer.data).decode('utf-8')
         endpoint = "employees"
-        return self.send_request(endpoint, "POST", staff_data)
+
+        return self.send_request(endpoint, "POST", staff_json)
   
-    def update_staffs(self):
-        """
-        Обновить информацию о сотрудниках
-        """
-        cloud_roles = self.get_staffs_role()
-        cloud_staffs = self.get_staffs()
-        self.create_or_update_roles(cloud_roles.get('items'))
-        self.create_or_update_staffs(cloud_staffs.get('items'))
+# ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
 
     def create_or_update_roles(self, roles_json):
         try:

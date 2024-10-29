@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group
 
 DashboardTable = get_class("dashboard.tables", "DashboardTable")
 Partner = get_model("partner", "Partner")
+Terminal = get_model("partner", "Terminal")
 Staff = get_model("user", "Staff")
 
 
@@ -63,6 +64,77 @@ class PartnerListTable(DashboardTable):
             'class': 'table table-striped table-bordered table-hover',
         }
         empty_text = "Нет созданых точек продажи"
+
+
+class TerminalListTable(DashboardTable):
+
+    name = TemplateColumn(
+        verbose_name="Название",
+        template_name="oscar/dashboard/partners/terminal_row_name.html",
+        order_by="name",
+        attrs = {'th': {'class': 'name'},}
+    )
+    partner = TemplateColumn(
+        verbose_name="Точки продаж",
+        template_name="oscar/dashboard/partners/terminal_row_partner.html",
+        order_by="partner",
+        attrs = {'th': {'class': 'partner'},}
+    )
+    device_model = Column(
+        verbose_name="Модель",
+        order_by="device_model",
+        attrs = {'th': {'class': 'model'},}
+    )
+    imei = Column(
+        verbose_name="IMEI",
+        order_by="imei",
+        attrs = {'th': {'class': 'imei'},}
+    )
+    date_created = TemplateColumn(
+        verbose_name="Создан",
+        template_name="oscar/dashboard/partners/terminal_row_date_created.html",
+        order_by="date_created",
+        attrs = {'th': {'class': 'date_created'},}
+    )
+    date_updated = TemplateColumn(
+        verbose_name="Изменен",
+        template_name="oscar/dashboard/partners/terminal_row_date_updated.html",
+        order_by="date_updated",
+        attrs = {'th': {'class': 'date_created'},}
+    )
+    actions = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/partners/terminal_row_actions.html",
+        orderable=False,
+        attrs = {'th': {'class': 'actions'},}
+    )
+
+    icon = "fas fa-tablet-screen-button"
+    caption = ngettext_lazy("%s Терминал", "%s Терминалов")
+
+    class Meta(DashboardTable.Meta):
+        model = Terminal
+        fields = (
+            "name",
+            "device_model",
+            "imei",
+            "date_created",
+            "date_updated",
+        )
+        sequence = (
+            "name",
+            "partner",
+            "device_model",
+            "imei",
+            "date_created",
+            "date_updated",
+            "actions",
+        )
+        
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
+        empty_text = "Нет созданых терминалов"
 
 
 class GroupListTable(DashboardTable):

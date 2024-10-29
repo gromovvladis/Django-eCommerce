@@ -156,6 +156,10 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:partner-list",
             },
             {
+                "label": "Терминалы",
+                "url_name": "dashboard:terminal-list",
+            },
+            {
                 "label": "Группы персонала",
                 "url_name": "dashboard:group-list",
             },

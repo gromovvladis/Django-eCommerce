@@ -1,3 +1,4 @@
+import logging
 import phonenumbers
 
 from django import forms
@@ -8,11 +9,14 @@ from django.apps import apps
 
 from phonenumber_field.phonenumber import PhoneNumber
 
+from oscar.apps.crm.client import EvatorCloud
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_model
 
 User = get_user_model()
 Staff = get_model("user", "Staff")
+
+logger = logging.getLogger("oscar.user")
 
 
 class UserSearchForm(forms.Form):
@@ -117,14 +121,13 @@ class StaffForm(forms.ModelForm):
                 raise forms.ValidationError("Выбранная роль не существует.")
         return None
     
-    def clean_evotor_update(self):
-        evotor_update = self.cleaned_data.get('evotor_update')
-        if evotor_update:
-            fff = 1
+    # def clean_evotor_update(self):
+    #     evotor_update = self.cleaned_data.get('evotor_update')
+    #     if evotor_update:
+    #         fff = 1
     
     def clean_username(self):
         number = self.cleaned_data.get("username")
-
         try:
             username = PhoneNumber.from_string(number, region='RU')
             if not username.is_valid():
@@ -186,6 +189,14 @@ class StaffForm(forms.ModelForm):
                 user.groups.add(group)
 
         user.save()
+
+
+        evotor_update = self.cleaned_data.get('evotor_update')
+        if evotor_update:
+            try:
+                EvatorCloud().create_staff(staff)
+            except Exception as e:
+                logger.error("Ошибка при отправке созданного / измененного пользователя в Эвотор. Ошибка %s", e)
 
         return staff
 

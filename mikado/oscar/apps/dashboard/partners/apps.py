@@ -15,17 +15,18 @@ class PartnersDashboardConfig(OscarDashboardConfig):
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
-        self.list_view = get_class("dashboard.partners.views", "PartnerListView")
-        self.create_view = get_class("dashboard.partners.views", "PartnerCreateView")
-        self.manage_view = get_class("dashboard.partners.views", "PartnerManageView")
-        self.delete_view = get_class("dashboard.partners.views", "PartnerDeleteView")
+        self.partner_list_view = get_class("dashboard.partners.views", "PartnerListView")
+        self.partner_create_view = get_class("dashboard.partners.views", "PartnerCreateView")
+        self.partner_manage_view = get_class("dashboard.partners.views", "PartnerManageView")
+        self.partner_delete_view = get_class("dashboard.partners.views", "PartnerDeleteView")
+
+        self.terminal_list_view = get_class("dashboard.partners.views", "TerminalListView")
+        self.terminal_detail_view = get_class("dashboard.partners.views", "TerminalDetailView")
 
         self.partner_staff_create_view = get_class("dashboard.partners.views", "PartnerStaffCreateView")
         self.partner_staff_select_view = get_class("dashboard.partners.views", "PartnerStaffSelectView")
         self.partner_staff_link_view = get_class("dashboard.partners.views", "PartnerStaffLinkView")
         self.partner_staff_unlink_view = get_class("dashboard.partners.views", "PartnerStaffUnlinkView")
-
-        # self.user_update_view = get_class("dashboard.partners.views", "PartnerUserUpdateView")
 
         self.group_list_view = get_class("dashboard.partners.views", "GroupListView")
         self.group_detail_view = get_class("dashboard.partners.views", "GroupDetailView")
@@ -40,10 +41,10 @@ class PartnersDashboardConfig(OscarDashboardConfig):
 
     def get_urls(self):
         urls = [
-            path("all/", self.list_view.as_view(), name="partner-list"),
-            path("all/create/", self.create_view.as_view(), name="partner-create"),
-            path("all/<int:pk>/", self.manage_view.as_view(), name="partner-manage"),
-            path("all/<int:pk>/delete/", self.delete_view.as_view(), name="partner-delete"),
+            path("all/", self.partner_list_view.as_view(), name="partner-list"),
+            path("all/create/", self.partner_create_view.as_view(), name="partner-create"),
+            path("all/<int:pk>/", self.partner_manage_view.as_view(), name="partner-manage"),
+            path("all/<int:pk>/delete/", self.partner_delete_view.as_view(), name="partner-delete"),
             
             path(
                 "all/<int:partner_pk>/users/add/",
@@ -65,6 +66,9 @@ class PartnersDashboardConfig(OscarDashboardConfig):
                 self.partner_staff_unlink_view.as_view(),
                 name="partner-user-unlink",
             ),
+
+            path("terminals/", self.terminal_list_view.as_view(), name="terminal-list"),
+            path("terminals/<int:pk>", self.terminal_detail_view.as_view(), name="terminal-detail"),
 
             path("groups/", self.group_list_view.as_view(), name="group-list"),
             path("groups/<int:pk>/", self.group_detail_view.as_view(), name="group-detail"),
