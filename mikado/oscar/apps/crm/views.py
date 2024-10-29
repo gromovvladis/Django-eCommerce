@@ -46,10 +46,12 @@ def is_valid_user_token(request):
     # Проверка токена сайта
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith("Bearer "):
+        logger.error(f"Ошибка авторизации {auth_header}")
         return Response({"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED)
     
     auth_token = auth_header.split(" ")[1]
     if not auth_header or auth_token != user_token:
+        logger.error(f"Ошибка авторизации 2 {auth_header}")
         return Response({"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED)
     
     return None  # Если все проверки прошли, возвращаем None
@@ -196,6 +198,9 @@ class CRMProductEndpointView(APIView):
 
     """ https://mikado-sushi.ru/crm/api/products """
 
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
                 
         test_function(request)
@@ -223,9 +228,6 @@ class CRMReceiptEndpointView(APIView):
 
     def post(self, request, *args, **kwargs):
 
-        logger.info("чек создан")
-        send_message_to_staffs("Чек создан", TelegramMessage.TECHNICAL)
-
         test_function(request)
         
         not_allowed = is_valid_site_token(request)
@@ -245,6 +247,9 @@ class CRMDocsEndpointView(APIView):
     permission_classes = [AllowAny]
 
     """ https://mikado-sushi.ru/crm/api/docs """
+
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
                 
@@ -267,6 +272,9 @@ class CRMInstallationEndpointView(APIView):
     permission_classes = [AllowAny]
 
     """ https://mikado-sushi.ru/crm/api/subscription/setup """
+
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
                 
@@ -293,6 +301,9 @@ class CRMLoginEndpointView(APIView):
       
     authentication_classes = []
     permission_classes = [AllowAny]
+
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
     
     def post(self, request):
         
