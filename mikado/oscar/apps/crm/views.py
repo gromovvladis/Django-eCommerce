@@ -1,20 +1,13 @@
 import json
 from django.conf import settings
-from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, Q, Sum, fields
 from django.http import JsonResponse
-from django.utils import timezone
 
 from oscar.apps.crm.client import EvatorCloud
-from oscar.apps.partner.serializers import PartnerSerializer
-from oscar.apps.partner.models import PartnerAddress
 from oscar.apps.telegram.models import TelegramMessage
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_model
 from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs
 
 
-from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -224,9 +217,15 @@ class CRMReceiptEndpointView(APIView):
     permission_classes = [AllowAny]
 
     """ https://mikado-sushi.ru/crm/api/receipts """
+    
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-                
+
+        logger.info("чек создан")
+        send_message_to_staffs("Чек создан", TelegramMessage.TECHNICAL)
+
         test_function(request)
         
         not_allowed = is_valid_site_token(request)

@@ -162,7 +162,9 @@ class StaffSerializer(serializers.ModelSerializer):
         try:
             representation['stores'] = [partner.evotor_id for partner in instance.user.partners.all()]
             representation['phone'] = str(instance.user.username)
-            representation['role_id'] = instance.role.evotor.evotor_id
+            role = instance.role.evotor
+            if role:
+                representation['role_id'] = role.evotor_id
         except Exception as e:
             logger.error("Ошибка определения списка магазинов сотрудника", e)
             representation['stores'] = []
