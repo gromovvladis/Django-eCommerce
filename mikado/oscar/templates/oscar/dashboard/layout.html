@@ -153,7 +153,6 @@
             <script src="{% static "js/thirdpaty/tinymce/jquery.tinymce.min.js" %}"></script>
             <script src="{% static "js/thirdpaty/datetimepicker/air-datepicker.js" %}"></script>
 
-            {% comment %} <script src="{% static "js/dashboard/oscar/ui.js" %}"></script> {% endcomment %}
             <script src="{% static "js/dashboard/oscar/RelatedObjectLookups.js" %}"></script>
             <script src="{% static "js/dashboard/oscar/dashboard.js" %}"></script>
 
@@ -173,13 +172,11 @@
 {% block onbodyload %}
     {{ block.super }}
 
-    // Javascript to enable link to tab
     var url = document.location.toString();
     if (url.match('#')) {
         $('.bs-docs-sidenav a[href="#' + url.split('#')[1] + '"]').tab('show');
     }
 
-    // Change hash for page-reload
     $('.nav-list a').on('shown.bs.tab', function (e) {
         window.location.hash = e.target.hash;
     });
@@ -187,5 +184,6 @@
     options = {
       'languageCode': 'ru'
     };
+    
     oscar.dashboard.init(options);
 {% endblock %}
