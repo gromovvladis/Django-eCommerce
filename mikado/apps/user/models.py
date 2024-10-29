@@ -34,7 +34,7 @@ class Staff(models.Model):
     age = models.PositiveIntegerField(verbose_name='Возраст', null=True, blank=True)
 
     telegram_id = models.CharField("ID Телеграм чата", max_length=128, null=True, blank=True)
-    evotor_id = models.CharField("ID Телеграм чата", max_length=128, null=True, blank=True)
+    evotor_id = models.CharField("ID Эвотор", max_length=128, null=True, blank=True)
 
     is_active = models.BooleanField(
         "Активен",
