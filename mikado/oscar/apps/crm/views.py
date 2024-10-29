@@ -76,7 +76,6 @@ def is_valid_site_and_user_tokens(request):
     return is_valid_site_token(request) or is_valid_user_login_and_pass(request)
 
 
-
 def test_function(request):
     request_info = {
         "method": request.method,
@@ -190,6 +189,8 @@ class CRMRoleEndpointView(APIView):
         EvatorCloud().create_or_update_roles(roles_json)
 
         return JsonResponse({"status": "ok"}, status = 200) 
+
+
 
 
 

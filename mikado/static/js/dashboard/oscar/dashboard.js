@@ -127,6 +127,12 @@ var oscar = (function(o, $) {
                 $('.tab-nav a[href="#' + productErrorListener + '"]').append('<i class="fas fa-info-circle float-right"></i>');
             });
 
+            document.querySelectorAll('.tab-nav .nav-link').forEach(function(tab) {
+                tab.addEventListener("click", function(event) {
+                    window.location.hash = this.getAttribute("href");
+                });
+            });
+
             o.dashboard.filereader.init();
         },
         initWidgets: function(el) {

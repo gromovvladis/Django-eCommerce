@@ -1,0 +1,59 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load widget_tweaks %}
+
+{% block body_class %}{{ block.super }} create-page{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard:terminal-list' %}">
+                    Терминалы
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ terminal.name }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block navtext %}{{ terminal.name|default:"Терминал оплаты" }}{% endblock %}
+
+{% block dashboard_content %}
+    <div class="table-header">
+        <h2>Информация о Терминале</h2>
+    </div>
+    <table class="table table-striped table-bordered">
+        <tr>
+            <th>Название</th>
+            <td>
+                {{ terminal.name|default:"-" }}
+            </td>
+        </tr>
+        <tr>
+            <th>Модель</th><td>{{ terminal.device_model|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th>Эвотор ID</th><td>{{ terminal.evotor_id|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th>Серийный номер</th><td>{{ terminal.serial_number|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th>IMEI</th><td>{{ terminal.imei|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th>Дата создания</th><td>{{ terminal.date_created|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th>Дата изменения</th><td>{{ terminal.date_updated|default:"-" }}</td>
+        </tr>
+        <tr>
+            <th>Координаты</th>
+            <td>
+                {% if terminal.coords_lat and terminal.coords_long %}{% endif %}
+                {{ terminal.coords_lat }} - {{ terminal.coords_long }}
+            </td>
+        </tr>
+    </table>
+{% endblock %}

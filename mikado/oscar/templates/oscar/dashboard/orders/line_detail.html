@@ -1,38 +1,35 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load i18n %}
 
 {% block title %}
-    {% blocktrans with number=line.order.number id=line.id%}
-        Order {{ number }} - Line #{{ id }}
-    {% endblocktrans %} | {{ block.super }}
+    Заказ {{ line.order.number }} - Позиция №{{ line.id }} | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">{% trans "Orders" %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">Заказы</a></li>
             <li class="breadcrumb-item"><a href="{% url 'dashboard:order-detail' number=line.order.number %}">
                 #{{ line.order.number }}
             </a></li>
-            <li class="breadcrumb-item active" aria-current="page">{% blocktrans with id=line.id %}Line #{{ id }}{% endblocktrans %}</li>
+            <li class="breadcrumb-item active" aria-current="page">Позиция №{{ line.id }}</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block navtext %}
-    {% blocktrans with number=line.order.number id=line.id %}Order #{{ number }} - Line #{{ id }}{% endblocktrans %}
+    Заказ №{{ line.order.number }} - Позиция №{{ line.id }}
 {% endblock %}
 
 {% block dashboard_content %}
     <div class="row">
         <div class="col-md-4">
             <div class="table-header">
-                <h3>{% trans "Product details" %}</h3>
+                <h3>Описание продукта</h3>
             </div>
             <table class="table table-striped table-bordered">
                 <tr>
-                    <th>{% trans "Title" context "Product title" %}</th>
+                    <th>Название</th>
                     <td>
                         {% if line.product %}
                             <a href="{{ line.product.get_absolute_url }}">{{ line.title }}</a>
@@ -42,17 +39,17 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>{% trans "Product Type" %}</th><td>{{ line.product.get_product_class }}</td>
+                    <th>Тип продукта</th><td>{{ line.product.get_product_class }}</td>
                 </tr>
                 <tr>
-                    <th>{% trans "UPC" %}</th><td>{{ line.upc|default:"-" }}</td>
+                    <th>UPC</th><td>{{ line.upc|default:"-" }}</td>
                 </tr>
                 <tr>
-                    <th>{% trans "Quantity" %}</th><td>{{ line.quantity }}</td>
+                    <th>Количество</th><td>{{ line.quantity }}</td>
                 </tr>
                 {% if line.attributes.exists %}
                     <tr>
-                        <th colspan="2">{% trans "Product Options" %}</th>
+                        <th colspan="2">Опции</th>
                     </tr>
                     {% for attribute in line.attributes.all %}
                         <tr>
@@ -65,30 +62,30 @@
         </div>
         <div class="col-md-4">
             <div class="table-header">
-                <h3>{% trans "Partner details" %}</h3>
+                <h3>Точка продажи</h3>
             </div>
             <table class="table table-striped table-bordered">
                 <tr>
-                    <th>{% trans "Status" %}</th><td>{{ line.status|default:"-" }}</td>
+                    <th>Статус</th><td>{{ line.status|default:"-" }}</td>
                 </tr>
                 <tr>
-                    <th>{% trans "Partner" %}</th><td>{{ line.partner_name }}</td>
+                    <th>Название точки продажи</th><td>{{ line.partner_name }}</td>
                 </tr>
                 <tr>
-                    <th>{% trans "Partner SKU" %}</th><td>{{ line.partner_sku }}</td>
+                    <th>SKU</th><td>{{ line.partner_sku }}</td>
                 </tr>
             </table>
         </div>
         <div class="col-md-4">
             <div class="table-header">
-                <h3>{% trans "Shipping details" %}</h3>
+                <h3>Информация о доставке</h3>
             </div>
             <table class="table table-striped table-bordered">
                 <tr>
-                    <th>{% trans "Partner reference number" %}</th><td>{{ line.partner_line_reference|default:"-" }}</td>
+                    <th>Номер точки продажи</th><td>{{ line.partner_line_reference|default:"-" }}</td>
                 </tr>
                 <tr>
-                    <th>{% trans "Partner notes" %}</th><td>{{ line.partner_line_notes|default:"-" }}</td>
+                    <th>Заметки точки продажи</th><td>{{ line.partner_line_notes|default:"-" }}</td>
                 </tr>
             </table>
         </div>
@@ -97,13 +94,13 @@
     <div class="row">
         <div class="col-md-4">
             <div class="table-header">
-                <h3>{% trans "Shipping status" %}</h3>
+                <h3>Статус доставки</h3>
             </div>
             <table class="table table-striped table-bordered">
                 <thead>
                     <tr>
-                        <th>{% trans "State" %}</th>
-                        <th>{% trans "Quantity" %}</th>
+                        <th>State</th>
+                        <th>Количество</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -114,7 +111,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="2">{% trans "No shipping events have occurred." %}</td>
+                            <td colspan="2">Нет созданых событий доставки</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -122,15 +119,15 @@
         </div>
         <div class="col-md-4">
             <div class="table-header">
-                <h3>{% trans "Shipping events" %}</h3>
+                <h3>События доставки</h3>
             </div>
             <table class="table table-striped table-bordered">
                 <thead>
                     <tr>
-                        <th>{% trans "Event" %}</th>
-                        <th>{% trans "Quantity" %}</th>
-                        <th>{% trans "Reference" %}</th>
-                        <th>{% trans "Date" %}</th>
+                        <th>Событие</th>
+                        <th>Количество</th>
+                        <th>Ссылка / Референс</th>
+                        <th>Дата</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -145,7 +142,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="4">{% trans "No shipping events have occurred." %}</td>
+                            <td colspan="4">Нет созданых событий доставки</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -153,14 +150,14 @@
         </div>
         <div class="col-md-4">
             <div class="table-header">
-                <h3>{% trans "Payment events" %}</h3>
+                <h3>Оплата</h3>
             </div>
             <table class="table table-striped table-bordered">
                 <thead>
                     <tr>
-                        <th>{% trans "Event" %}</th>
-                        <th>{% trans "Quantity" %}</th>
-                        <th>{% trans "Date" %}</th>
+                        <th>Событие</th>
+                        <th>Количество</th>
+                        <th>Дата</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -174,7 +171,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="3">{% trans "No payment events have occurred." %}</td>
+                            <td colspan="3">Нет созданых событий оплаты</td>
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -2,27 +2,30 @@
 import re
 from django.conf import settings
 from django.contrib import messages
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django_tables2 import SingleTableView
 
-from django.db.models import Q
+from django.db.models import Q, F
 
 from django.contrib.auth.models import Group
 
+from oscar.apps.communication.notifications.views import DetailView
 from oscar.apps.customer.utils import normalise_email
 from oscar.apps.dashboard.users.views import CustomerListView
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 
-from django.views.generic import CreateView, UpdateView, DeleteView, ListView, View
+from django.views.generic import CreateView, UpdateView, DeleteView, View
 from django_tables2 import SingleTableView
 from django.db.models import Exists, OuterRef, BooleanField
 
 User = get_user_model()
 Staff = get_model("user", "Staff")
 Partner = get_model("partner", "Partner")
+Terminal = get_model("partner", "Terminal")
 (
     PartnerSearchForm,
     PartnerCreateForm,
@@ -40,6 +43,7 @@ GroupForm = get_class("dashboard.users.forms","GroupForm")
 PartnerListTable = get_class("dashboard.partners.tables", "PartnerListTable")
 GroupListTable = get_class("dashboard.partners.tables", "GroupListTable")
 StaffListTable = get_class("dashboard.partners.tables", "StaffListTable")
+TerminalListTable = get_class("dashboard.partners.tables", "TerminalListTable")
 PartnerStaffListTable = get_class("dashboard.partners.tables", "PartnerStaffListTable")
 
 
@@ -162,6 +166,7 @@ class PartnerManageView(UpdateView):
         ctx["partner"] = self.partner
         ctx["title"] = self.partner.name
         ctx["users"] = self.partner.users.all()
+        ctx["terminals"] = self.partner.terminals.all()
         if self.object.line1:
             ctx['line1'] = self.object.line1
         return ctx
@@ -191,31 +196,54 @@ class PartnerDeleteView(DeleteView):
 
 
 # =====
-# Users
+# Terminals
 # =====
 
 
-# class PartnerUserUpdateView(UpdateView):
-#     template_name = "oscar/dashboard/partners/partner_user_form.html"
-#     form_class = ExistingUserForm
+class TerminalListView(SingleTableView):
+    context_table_name = "terminals"
+    template_name = "oscar/dashboard/partners/terminal_list.html"
+    table_class = TerminalListTable
+    
+    def get_table_pagination(self, table):
+        return dict(per_page=settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE)
 
-#     def get_object(self, queryset=None):
-#         self.partner = get_object_or_404(Partner, pk=self.kwargs["partner_pk"])
-#         return get_object_or_404(
-#             User, pk=self.kwargs["user_pk"], partners__pk=self.kwargs["partner_pk"]
-#         )
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["queryset_description"] = self.description
+        return ctx  
 
-#     def get_context_data(self, **kwargs):
-#         ctx = super().get_context_data(**kwargs)
-#         name = self.object.get_full_name() or self.object.email
-#         ctx["partner"] = self.partner
-#         ctx["title"] = "Редактировать пользователя '%s'" % name
-#         return ctx
+    def get_queryset(self):
+        qs = Terminal._default_manager.prefetch_related("partners").annotate(partner=F("partners"),).all()
+        self.description = "Все платежные терминалы"
+        return qs
 
-#     def get_success_url(self):
-#         name = self.object.get_full_name() or self.object.email
-#         messages.success(self.request, "Пользователь '%s' был успешно обновлен." % name)
-#         return reverse("dashboard:partner-list")
+
+class TerminalDetailView(DetailView):
+    context_object_name = "terminal"
+    model = Terminal
+    template_name = "oscar/dashboard/partners/terminal_detail.html"
+
+    def get(self, request, *args, **kwargs):
+        """
+        Ensures that the correct URL is used before rendering a response
+        """
+        # pylint: disable=attribute-defined-outside-init
+        self.object = self.get_object()
+        response = super().get(request, *args, **kwargs)
+        return response
+
+    def get_object(self, queryset=None):
+        # Check if self.object is already set to prevent unnecessary DB calls
+        if hasattr(self, "object"):
+            return self.object
+        else:
+            return self._get_object(self.kwargs.get("pk"))
+
+
+    def _get_object(self, terminal_id):
+        return self.model.objects.get(id=terminal_id)
+
 
 
 # =====

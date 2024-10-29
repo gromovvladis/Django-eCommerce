@@ -82,9 +82,9 @@
                                         </li>
                                     {% endif %}
                                     <li class="nav-item">
-                                    <a class="nav-link" href="#product_images" data-toggle="tab">
-                                        Изображения
-                                    </a>
+                                        <a class="nav-link" href="#product_images" data-toggle="tab">
+                                            Изображения
+                                        </a>
                                     </li>
                                 {% endif %}
                                 {% if not product.is_parent %}
@@ -290,17 +290,17 @@
                                                     {% endif %}
                                                     <tr>
                                                         <td class="name">
-                                                            {% if stockrecord_form.instance.partner_sku %}
-                                                                <span class="text-success">
-                                                                    <i class="fa-solid fa-circle-check"></i>&nbsp; 
-                                                                </span>
-                                                            {% endif %}
                                                             {% if full_access %}
                                                                 {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner nolabel=True %}                                           
                                                             {% else %}
                                                                 {{ stockrecord_form.instance.partner|default:"" }}
                                                             {% endif %}
-                                                            <br>   
+                                                            <br>  
+                                                            {% if stockrecord_form.instance.partner_sku %}
+                                                                <span class="text-success">
+                                                                    <i class="fa-solid fa-circle-check"></i>&nbsp; 
+                                                                </span>
+                                                            {% endif %} 
                                                             <span class="text-muted">
                                                                 {{ stockrecord_form.instance.partner_sku|default:"" }}
                                                             </span>
@@ -309,11 +309,11 @@
                                                         {% if product_class.track_stock %}
                                                             <td data-label="Запасы">
                                                                 {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.num_in_stock nolabel=True %}
-                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.low_stock_threshold nolabel=True %}
-                                                                <input type="number" readonly value="{{ stockrecord_form.instance.low_stock_threshold|default:"-" }}" class="form-control">
-                                                                <small class="form-text text-muted mb-3">
-                                                                    Граница малых запасов
-                                                                </small>
+                                                                <br>
+                                                                {% if full_access %}
+                                                                    {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.low_stock_threshold nolabel=True %}
+                                                                    <br>
+                                                                {% endif %}
                                                                 <input type="number" readonly value="{{ stockrecord_form.instance.num_allocated|default:"0" }}" class="form-control">
                                                                 <small class="form-text text-muted">
                                                                     Заказано
@@ -323,8 +323,11 @@
                                                         <td data-label="Цена">
                                                             {% if full_access %}
                                                                 {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price nolabel=True %}
+                                                                <br>
                                                                 {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.old_price nolabel=True %}
+                                                                <br>
                                                                 {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.cost_price nolabel=True %}
+                                                                <br>
                                                                 {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.price_currency nolabel=True %}
                                                             {% else %}
                                                                 {{ stockrecord_form.instance.price|currency:stockrecord_form.instance.price_currency|default:"" }}
@@ -551,6 +554,5 @@
                 </div>
             </div>
         {% endblock fixed_actions_group %}
-
     </form>
 {% endblock dashboard_content %}

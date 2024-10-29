@@ -12,8 +12,8 @@ from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class
 from oscar.views.generic import BulkEditMixin
 
+# PasswordResetForm = get_class("customer.forms", "PasswordResetForm")
 UserSearchForm = get_class("dashboard.users.forms","UserSearchForm")
-PasswordResetForm = get_class("customer.forms", "PasswordResetForm")
 UserTable = get_class("dashboard.users.tables", "UserTable")
 User = get_user_model()
 
