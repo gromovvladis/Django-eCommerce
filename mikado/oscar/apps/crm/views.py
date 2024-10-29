@@ -46,12 +46,10 @@ def is_valid_user_token(request):
     # Проверка токена сайта
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith("Bearer "):
-        logger.error(f"Ошибка авторизации {auth_header}")
         return Response({"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED)
     
     auth_token = auth_header.split(" ")[1]
     if not auth_header or auth_token != user_token:
-        logger.error(f"Ошибка авторизации 2 {auth_header}")
         return Response({"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED)
     
     return None  # Если все проверки прошли, возвращаем None
@@ -205,7 +203,7 @@ class CRMProductEndpointView(APIView):
                 
         test_function(request)
         
-        not_allowed = is_valid_site_token(request)
+        not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed
         
@@ -230,7 +228,7 @@ class CRMReceiptEndpointView(APIView):
 
         test_function(request)
         
-        not_allowed = is_valid_site_token(request)
+        not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed
         
@@ -255,7 +253,7 @@ class CRMDocsEndpointView(APIView):
                 
         test_function(request)
         
-        not_allowed = is_valid_site_token(request)
+        not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed
         
@@ -280,7 +278,7 @@ class CRMInstallationEndpointView(APIView):
                 
         test_function(request)
         
-        not_allowed = is_valid_site_token(request)
+        not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed
         
