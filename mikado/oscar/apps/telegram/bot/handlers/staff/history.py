@@ -17,7 +17,7 @@ async def orders(message: Message, state: FSMContext):
         user_id = await get_user_by_telegram_id(telegram_id)
         masseges = await get_messages(user_id)
         msg_list = await get_telegram_messages_message(masseges)
-        await message.answer("История уделомлений. Показываются последние 30 сообщений")
+        await message.answer("История уведомлений. Показываются последние 30 уведомлений")
         limited_msg_list = msg_list[:30]
         for i in range(0, len(limited_msg_list), 10):
             msg = "\n\n".join(msg_list[i:i + 10])
