@@ -80,14 +80,14 @@ async def get_current_notif(telegram_id: int):
 
 
 @sync_to_async
-def change_nofit(telegram_id: int, new_status: str):
+def change_notif(telegram_id: int, new_status: str):
     try:
         staff = Staff.objects.get(telegram_id=telegram_id)
         staff.notif = new_status
         staff.save()
         return "Настройки уведомлений обновлены"
     except Staff.DoesNotExist:
-        return "Настройки не примены. Профиль персонала не создан"
+        return "Настройки не примены. Телеграм не свзяан с профилем персонала"
 
 
 @sync_to_async
@@ -112,9 +112,12 @@ def link_telegram_to_staff(phone_number: str, user_id: str):
     Привязывает Telegram ID к пользователю и создает/обновляет запись в Staff.
     """
     # Ищем пользователя с правами staff или группами
-    user = User.objects.filter(
+    user, created = User.objects.filter(
         Q(is_staff=True) | Q(groups__isnull=False)
-    ).get(username=phone_number)
+    ).get_or_create(
+        username=phone_number,
+        defaults={'telegram_id': user_id}
+    )
     user.telegram_id = user_id
     user.save()
     
@@ -122,11 +125,8 @@ def link_telegram_to_staff(phone_number: str, user_id: str):
         user=user,
         defaults={'is_active': user.is_active, 'telegram_id': user_id, 'notif': Staff.NEW}
     )
-
-    # Если запись не была создана, обновляем необходимые поля
-    if not created:
-        staff.telegram_id = user_id
-        staff.save()
+    staff.telegram_id = user_id
+    staff.save()
 
     return staff, created
 
