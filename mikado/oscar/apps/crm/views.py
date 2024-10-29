@@ -69,16 +69,6 @@ def is_valid_site_and_user_tokens(request):
     return is_valid_site_token(request) or is_valid_user_login_and_pass(request)
 
 
-def test_function(request):
-    request_info = {
-        "method": request.method,
-        "path": request.path,
-        "headers": dict(request.headers),
-        "data": request.data,
-    }
-    send_message_to_staffs(f"CRMStaffEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
-    
-
 
 # ========= API Endpoints (Уведомления) =========
 
@@ -109,7 +99,15 @@ class CRMPartnerEndpointView(APIView):
         return self.post(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs): 
-        test_function(request)  
+
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+
         not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed  
@@ -130,7 +128,15 @@ class CRMTerminalEndpointView(APIView):
         return self.post(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs): 
-        test_function(request)  
+        
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+
         not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed  
@@ -151,7 +157,15 @@ class CRMStaffEndpointView(APIView):
         return self.post(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs): 
-        test_function(request)  
+        
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+
         not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed  
@@ -173,7 +187,16 @@ class CRMRoleEndpointView(APIView):
         return self.post(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs): 
-        test_function(request)  
+        
+
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+
         not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed  
@@ -201,7 +224,13 @@ class CRMProductEndpointView(APIView):
 
     def post(self, request, *args, **kwargs):
                 
-        test_function(request)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -226,7 +255,13 @@ class CRMReceiptEndpointView(APIView):
 
     def post(self, request, *args, **kwargs):
 
-        test_function(request)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -251,7 +286,13 @@ class CRMDocsEndpointView(APIView):
 
     def post(self, request, *args, **kwargs):
                 
-        test_function(request)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -276,7 +317,13 @@ class CRMInstallationEndpointView(APIView):
 
     def post(self, request, *args, **kwargs):
                 
-        test_function(request)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
         
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -305,7 +352,13 @@ class CRMLoginEndpointView(APIView):
     
     def post(self, request):
         
-        test_function(request)
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
 
         not_allowed = is_valid_site_and_user_tokens(request)
         if not_allowed:
