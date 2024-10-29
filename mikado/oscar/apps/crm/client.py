@@ -53,14 +53,14 @@ class EvotorAPICloud:
     def __init__(
             self, 
             cloud_token: str = evator_cloud_token,   # Токен приложения для авторизации в кассе. Получается у разработчика Эвотор Облако.
-            base_url: str = "https://api.evotor.ru/api/", 
+            base_url: str = "https://api.evotor.ru/", 
         ):
         """
         Инициализация клиента для работы с API Эвотор Облако.
 
         :param api_token: Токен приложения для авторизации в API.
-        :param base_url: Базовый URL для API. По умолчанию 'https://api.evotor.ru/api/'. Для запросов к облаку
-        :param cashier_url: Базовый URL для API. По умолчанию 'https://api.evotor.ru/api/'. Для запросов к кассе
+        :param base_url: Базовый URL для API. По умолчанию 'https://api.evotor.ru/'. Для запросов к облаку
+        :param cashier_url: Базовый URL для API. По умолчанию 'https://mobilecashier.ru/api/v2/authorize/'. Для запросов к кассе
         """
         self.cloud_token = cloud_token
         self.base_url = base_url
