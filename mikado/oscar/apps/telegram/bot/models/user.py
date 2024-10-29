@@ -82,6 +82,10 @@ async def get_current_notif(telegram_id: int):
 @sync_to_async
 def change_notif(telegram_id: str, new_status: str):
     try:
+        import logging
+        logger = logging.getLogger("oscar.crm")
+        logger.info(f"change_notif: {telegram_id}, {new_status}")
+
         staff = Staff.objects.get(telegram_id=telegram_id)
         staff.notif = new_status
         staff.save()
