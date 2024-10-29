@@ -102,6 +102,17 @@ class EvotorAPICloud:
                 logger.error(f"Ошибка HTTP запроса. Неизвестный http метод: {method}")
                 raise ValueError(f"Unsupported HTTP method: {method}")
 
+            request_info = {
+                "method": "GET",
+                "url": response.url,
+                "headers": dict(response.request.headers),
+                "status_code": response.status_code,
+                "response_headers": dict(response.headers),
+                "response_data": response.json() if response.headers.get("Content-Type") == "application/json" else response.text,
+            }
+            logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+
+
             response.raise_for_status()  # Проверка на успешный статус запроса (2xx)
             return response.json()       # Возврат данных в формате JSON
 
