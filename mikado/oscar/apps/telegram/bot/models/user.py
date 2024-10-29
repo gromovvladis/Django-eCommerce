@@ -112,7 +112,7 @@ def link_telegram_to_staff(phone_number: str, user_id: str):
     Привязывает Telegram ID к пользователю и создает/обновляет запись в Staff.
     """
     # Ищем пользователя с правами staff или группами
-    user, created = User.objects.filter(
+    user, _ = User.objects.filter(
         Q(is_staff=True) | Q(groups__isnull=False)
     ).get_or_create(
         username=phone_number,
