@@ -223,7 +223,6 @@ class AbstractUserAddress(AbstractShippingAddress):
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        
         try:
             self.__class__._default_manager.get(user=self.user).delete()
         except Exception:

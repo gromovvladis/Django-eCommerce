@@ -45,7 +45,7 @@ class PartnerListTable(DashboardTable):
     )
 
     icon = "fas fa-house"
-    caption = ngettext_lazy("%s Точка продажи", "%s Точек продаж")
+    caption = ngettext_lazy("%s Точка продажи", "%s Точки продаж")
 
     class Meta(DashboardTable.Meta):
         model = Partner

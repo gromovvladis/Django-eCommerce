@@ -3,6 +3,7 @@ from .models import Partner, PartnerAddress, Terminal
 
 class PartnerAddressSerializer(serializers.ModelSerializer):
     address = serializers.CharField(source='line1') 
+    
     class Meta:
         model = PartnerAddress
         fields = ['address']
@@ -12,7 +13,7 @@ class PartnerSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='evotor_id')
     name = serializers.CharField()
     # Поле адреса для записи, но оно не связано напрямую с моделью Partner
-    address = serializers.CharField(write_only=True) 
+    address = serializers.CharField(write_only=True, required=False) 
 
     class Meta:
         model = Partner
@@ -51,6 +52,35 @@ class PartnerSerializer(serializers.ModelSerializer):
                 PartnerAddress.objects.create(partner=instance, line1=address_data)
 
         return instance
+
+
+class PartnersSerializer(serializers.ModelSerializer):
+    items = PartnerSerializer(many=True)
+
+    class Meta:
+        model = Partner
+        fields = ['items']
+
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        partners = []
+
+        for item_data in items_data:
+            partner = PartnerSerializer().create(item_data)
+            partners.append(partner)
+
+        return partners
+
+    def update(self, validated_data):
+        items_data = validated_data.pop('items')
+        partners = []
+
+        for item_data in items_data:
+            partner = PartnerSerializer().update(item_data)
+            partners.append(partner)
+
+        return partners
 
 
 class TerminalSerializer(serializers.ModelSerializer):

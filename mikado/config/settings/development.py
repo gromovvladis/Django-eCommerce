@@ -119,7 +119,7 @@ TELEGRAM_ADMINS_LIST = ("6560722014",)
 # EVATOR
 # =============
 
-EVOTOR_CLOUD_TOKEN = "1aa13792-abcf-40aa-8221-a78cfd702ea4"
+EVOTOR_CLOUD_TOKEN = "1aa13792-abcf-40aa-8221-a78cfd702ea4-0"
 
 EVOTOR_SITE_LOGIN = "evotor"
 EVOTOR_SITE_PASS = "Evotormikadopassword25"

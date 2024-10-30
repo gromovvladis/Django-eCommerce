@@ -120,7 +120,7 @@
 {% endblock table.tbody %}
 
 {% block pagination %}
-    {% with page_obj=table.page paginator=table.paginator %}
+    {% with page_obj=table.page paginator=table.paginator prefix=table.prefixed_page_field %}
         {% include "oscar/dashboard/partials/pagination.html" %}
     {% endwith %}
 {% endblock pagination %}
