@@ -56,27 +56,6 @@ class CRMPartnerListView(CRMTablesMixin):
     table_evotor = CRMPartnerEvotorTable
     table_site = CRMPartnerSiteTable
     url_redirect = reverse_lazy("dashboard:crm-partners")
-
-    def post(self, request, *args, **kwargs):
-        delete_selected = request.POST.get("delete_selected", 'False')
-        if delete_selected == 'True':    
-            return self.delete_models(request)
-        
-        update_all = request.POST.get("update_all", 'False')
-        if update_all == 'True':
-            return self.update_models(request, self.queryset)
-        
-        ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
-        ids = list(map(str, ids))
-        if not ids:
-            messages.error(
-                self.request,
-                ("Вам нужно выбрать несколько точек продажи"),
-            )
-            return redirect(self.url_redirect)
-
-        partners = self.get_filtered_queryset(ids)
-        return self.update_models(request, partners)
     
     def get_queryset(self):
         
@@ -85,14 +64,14 @@ class CRMPartnerListView(CRMTablesMixin):
             'items': [
                 {
                     'id': '20240713-96AB-40D1-80FA-D455E402869E',
-                    'name': 'Мой магаз',
+                    'name': 'Мой мага',
                     'user_id': '01-000000010409029',
                     'created_at': '2024-07-13T03:44:04.000+0000',
                     'updated_at': '2024-07-13T05:53:32.000+0000'
                 },
                 {
                     'id': '20240713-774A-4038-8037-E66BF3AA7552',
-                    'address': '9 Мая 45',
+                    'address': '9 Мая 451',
                     'name': 'Провансик',
                     'user_id': '01-000000010409029',
                     'created_at': '2024-07-13T05:53:31.000+0000',
@@ -270,30 +249,11 @@ class CRMPartnerListView(CRMTablesMixin):
         else:
             return serializer.errors
 
-    def update_models(self, request, data_items):
-        EvatorCloud().create_or_update_partners(data_items)
-
+    def update_models(self, data_items, is_filtered):
+        EvatorCloud().create_or_update_partners(data_items, is_filtered)
         messages.success(
             self.request,
-            ("Точки продажи были успешно обновлены"),
-        )
-        return redirect(self.url_redirect)
-    
-    def delete_models(self, request):
-        try:
-            ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
-            self.model.objects.filter(id__in=ids).delete()
-        except Exception as e:
-            logger.error("Ошибка при удалении моделей из бд на странице CRM - %s" % str(e))
-            messages.error(
-                self.request,
-                ("Точки продажи не были удалены"),
-            )
-            return redirect(self.url_redirect) 
-               
-        messages.success(
-            self.request,
-            ("Точки продажи были успешно удалены"),
+            ("Точки продаж были успешно обновлены"),
         )
         return redirect(self.url_redirect)
 
@@ -308,27 +268,6 @@ class CRMTerminalListView(CRMTablesMixin):
     table_site = CRMTerminalSiteTable
     url_redirect = reverse_lazy("dashboard:crm-terminals")
 
-    def post(self, request, *args, **kwargs):
-        delete_selected = request.POST.get("delete_selected", 'False')
-        if delete_selected == 'True':    
-            return self.delete_models(request)
-        
-        update_all = request.POST.get("update_all", 'False')
-        if update_all == 'True':
-            return self.update_models(request, self.queryset)
-        
-        ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
-        ids = list(map(str, ids))
-        if not ids:
-            messages.error(
-                self.request,
-                ("Вам нужно выбрать несколько терминалов"),
-            )
-            return redirect(self.url_redirect)
-
-        partners = self.get_filtered_queryset(ids)
-        return self.update_models(request, partners)
-    
     def get_queryset(self):     
         # data_json = EvatorCloud().get_terminals() 
         data_json = {
@@ -383,33 +322,14 @@ class CRMTerminalListView(CRMTablesMixin):
         else:
             return serializer.errors
 
-    def update_models(self, request, data_items):
-        EvatorCloud().create_or_update_terminals(data_items)
-
+    def update_models(self, data_items, is_filtered):
+        EvatorCloud().create_or_update_terminals(data_items, is_filtered)
         messages.success(
             self.request,
             ("Терминалы были успешно обновлены"),
         )
         return redirect(self.url_redirect)
     
-    def delete_models(self, request):
-        try:
-            ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
-            self.model.objects.filter(id__in=ids).delete()
-        except Exception as e:
-            logger.error("Ошибка при удалении моделей из бд на странице CRM - %s" % str(e))
-            messages.error(
-                self.request,
-                ("Терминалы не были удалены"),
-            )
-            return redirect(self.url_redirect) 
-               
-        messages.success(
-            self.request,
-            ("Терминалы были успешно удалены"),
-        )
-        return redirect(self.url_redirect)
-
 
 class CRMStaffListView(CRMTablesMixin):
     template_name = 'oscar/dashboard/crm/partners/staff_list.html'
@@ -421,27 +341,6 @@ class CRMStaffListView(CRMTablesMixin):
     table_site = CRMStaffSiteTable
     url_redirect = reverse_lazy("dashboard:crm-staffs")
 
-    def post(self, request, *args, **kwargs):
-        delete_selected = request.POST.get("delete_selected", 'False')
-        if delete_selected == 'True':    
-            return self.delete_models(request)
-        
-        update_all = request.POST.get("update_all", 'False')
-        if update_all == 'True':
-            return self.update_models(request, self.queryset)
-        
-        ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
-        ids = list(map(str, ids))
-        if not ids:
-            messages.error(
-                self.request,
-                ("Вам нужно выбрать несколько сотрудников"),
-            )
-            return redirect(self.url_redirect)
-
-        partners = self.get_filtered_queryset(ids)
-        return self.update_models(request, partners)
-    
     def get_queryset(self):     
         # data_json = EvatorCloud().get_staffs() 
         data_json = {'items': [{'id': '20240713-4403-40BB-80DA-F84959820434', 'role': 'ADMIN', 'role_id': '20240713-79CF-400A-80A9-EDDBE8702C75', 'name': 'Администратор', 'stores': ['20240713-96AB-40D1-80FA-D455E402869E', '20240713-774A-4038-8037-E66BF3AA7552'], 'user_id': '01-000000010409029', 'created_at': '2024-07-13T03:44:04.000+0000', 'updated_at': '2024-07-13T05:53:32.000+0000'}, {'id': '20240713-9483-4077-809A-8C9EC995166C', 'role': 'CASHIER', 'role_id': '20240713-6E2E-400C-80F0-5E5F0A5A1042', 'name': 'Юлия', 'last_name': 'Кудрявцева', 'stores': ['20240713-96AB-40D1-80FA-D455E402869E', '20240713-774A-4038-8037-E66BF3AA7552'], 'user_id': '01-000000010409029', 'created_at': '2024-07-13T03:44:04.000+0000', 'updated_at': '2024-07-13T05:53:32.000+0000'}, {'id': '20241016-4AD4-408E-80B2-53702AD317D6', 'phone': 79950750095, 'role': 'ADMIN', 'role_id': '20240713-79CF-400A-80A9-EDDBE8702C75', 'name': 'Владислав', 'last_name': 'Громов', 'stores': ['20240713-774A-4038-8037-E66BF3AA7552'], 'user_id': '01-000000010409029', 'created_at': '2024-10-16T11:30:53.000+0000', 'updated_at': '2024-10-16T11:32:13.000+0000'}], 'paging': {}}
@@ -473,33 +372,14 @@ class CRMStaffListView(CRMTablesMixin):
         else:
             return serializer.errors
 
-    def update_models(self, request, data_items):
-        EvatorCloud().create_or_update_terminals(data_items)
-
+    def update_models(self, data_items, is_filtered):
+        EvatorCloud().create_or_update_staffs(data_items, is_filtered)
         messages.success(
             self.request,
             ("Сотрудники были успешно обновлены"),
         )
         return redirect(self.url_redirect)
     
-    def delete_models(self, request):
-        try:
-            ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
-            self.model.objects.filter(id__in=ids).delete()
-        except Exception as e:
-            logger.error("Ошибка при удалении моделей из бд на странице CRM - %s" % str(e))
-            messages.error(
-                self.request,
-                ("Сотрудники не были удалены"),
-            )
-            return redirect(self.url_redirect) 
-               
-        messages.success(
-            self.request,
-            ("Сотрудники были успешно удалены"),
-        )
-        return redirect(self.url_redirect)
-
 
 
 

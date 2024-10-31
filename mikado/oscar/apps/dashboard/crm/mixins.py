@@ -3,7 +3,10 @@ from django_tables2 import MultiTableMixin
 from django.db.models import Case, When, BooleanField, Q
 from django.views.generic import TemplateView
 from django.utils.encoding import smart_str
-
+from django.contrib import messages
+from django.shortcuts import redirect
+import logging
+logger = logging.getLogger("oscar.dashboard")
 
 class CRMTablesMixin(MultiTableMixin, TemplateView):
 
@@ -11,6 +14,54 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         self.queryset = self.get_queryset()
         return super().dispatch(request, *args, **kwargs)
     
+    def post(self, request, *args, **kwargs):
+        delete_invalid = request.POST.get("delete_invalid", 'False')
+        if delete_invalid == 'True':    
+            return self.delete_models(True)
+
+        delete_selected = request.POST.get("delete_all", 'False')
+        if delete_selected == 'True':    
+            return self.delete_models(False)
+        
+        update_all = request.POST.get("update_all", 'False')
+        if update_all == 'True':
+            return self.update_models(self.queryset, False)
+        
+        ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
+        ids = [id for id in map(str, ids) if id.strip()]
+        if not ids:
+            messages.error(
+                self.request,
+                ("Вам нужно выбрать хотя бы одну позицую для обновления"),
+            )
+            return redirect(self.url_redirect)
+
+        qs = self.get_filtered_queryset(ids)
+        return self.update_models(qs, True)
+
+
+    def delete_models(self, delete_invalid):
+        try:
+            if delete_invalid:
+                correct_ids = [partner['evotor_id'] for partner in self.queryset if partner['is_valid'] == True]
+                self.model.objects.exclude(evotor_id__in=correct_ids).delete()
+            else:
+                ids = self.request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
+                self.model.objects.filter(id__in=ids).delete()
+        except Exception as e:
+            logger.error("Ошибка при удалении моделей из бд на странице CRM - %s" % str(e))
+            messages.error(
+                self.request,
+                ("Записи на сайте не были удалены!"),
+            )
+            return redirect(self.url_redirect) 
+               
+        messages.success(
+            self.request,
+            ("Записи на сайте были успешно удалены"),
+        )
+        return redirect(self.url_redirect)
+
     def get_filtered_queryset(self, ids):
         data_list = self.get_queryset()
         return [data_item for data_item in data_list if data_item['evotor_id'] in ids]
@@ -76,4 +127,3 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         )
             
         return self.table_site(site_models)
-

@@ -466,9 +466,14 @@ var oscar = (function(o, $) {
                         var checkboxes = $(this).find('input[type="checkbox"]');
                         var actionsLinesDiv = $(this).find('[data-id="actions-lines"]');
                         var input = $('<input type="checkbox"/>');
+                        $(input).change(function(){
+                            $('tr', table).each(function() {
+                                $('td:first input', this).prop("checked", $(input).is(':checked'));
+                            });
+                            toggleActionsDiv();
+                        });
                         $('th:first', table).prepend(input);
                         function toggleActionsDiv() {
-                            console.log(actionsLinesDiv)
                             if ($(actionsLinesDiv).length > 0){
                                 const isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
                                 if (isChecked) {

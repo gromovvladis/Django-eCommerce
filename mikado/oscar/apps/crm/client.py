@@ -200,7 +200,7 @@ class EvotorPartnerClient(EvotorAPICloud):
 
 # ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
 
-    def create_or_update_partners(self, partners_json):
+    def create_or_update_partners(self, partners_json, is_filtered=False):
         try:
             evotor_ids = []
             for partner_json in partners_json:
@@ -208,7 +208,7 @@ class EvotorPartnerClient(EvotorAPICloud):
                 if not evotor_id:
                     evotor_id = partner_json.get('evotor_id')
                     partner_json['id'] = evotor_id
-                    
+
                 evotor_ids.append(evotor_id)
                 partner, created = Partner.objects.get_or_create(evotor_id=evotor_id)
                 serializer = PartnerSerializer(partner, data=partner_json)
@@ -224,15 +224,16 @@ class EvotorPartnerClient(EvotorAPICloud):
                 else: 
                     logger.error(f"Ошибка сериализации точки продажи: {serializer.errors}")
             
-            for partner in Partner.objects.all():
-                if partner.evotor_id not in evotor_ids:
-                    partner.evotor_id = None
-                    partner.save()
+            if not is_filtered:
+                for partner in Partner.objects.all():
+                    if partner.evotor_id not in evotor_ids:
+                        partner.evotor_id = None
+                        partner.save()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении точки продажи: {e}", exc_info=True)
 
-    def create_or_update_terminals(self, terminals_json):
+    def create_or_update_terminals(self, terminals_json, is_filtered=False):
         try:
             evotor_ids = []
             for terminal_json in terminals_json:
@@ -251,10 +252,10 @@ class EvotorPartnerClient(EvotorAPICloud):
                     )
                 else: 
                     logger.error(f"Ошибка сериализации терминала: {serializer.errors}")
-
-            for terminal in Terminal.objects.all():
-                if terminal.evotor_id not in evotor_ids:
-                    partner.delete()
+            if not is_filtered:
+                for terminal in Terminal.objects.all():
+                    if terminal.evotor_id not in evotor_ids:
+                        partner.delete()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении терминалов: {e}", exc_info=True)

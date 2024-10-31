@@ -17,10 +17,9 @@
                 {% endif %}
             {% endwith %}
             {% if not record.is_valid %}
-                <a class="dropdown-item" href="#">
-                {% comment %} <a class="dropdown-item" href="{% url 'dashboard:partner-manage' pk=record.id %}{% querystring %}"> {% endcomment %}
+                <button class="dropdown-item" type="submit" name="selected_partner" value="{{ record.evotor_id }}">
                     Обновить на сайте
-                </a>
+                </button>
             {% else %}
                 <span class="dropdown-item text-muted">
                     Точка продажи обновлена
