@@ -1,105 +1,70 @@
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, Q, Sum, fields
-from django.http import JsonResponse
 from django.template.response import TemplateResponse
-from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponse
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
-from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView, CreateView, View
-from django_tables2 import MultiTableMixin, RequestConfig, SingleTableView
-from django.views.generic.edit import FormMixin
-from django.utils import timezone
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import View
+from django_tables2 import MultiTableMixin
+from django.db.models import Case, When, BooleanField, Q
 
 from django.views.generic import TemplateView
-from oscar.apps.partner.models import PartnerAddress
-from oscar.views.generic import BulkEditMixin
 from oscar.apps.crm.client import EvatorCloud
-from oscar.apps.partner.serializers import PartnersSerializer
-from oscar.core.loading import get_class, get_classes, get_model
-from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs
+from oscar.apps.customer.serializers import StaffsSerializer
+from oscar.apps.dashboard.crm.mixins import CRMTablesMixin
+from oscar.apps.partner.serializers import PartnersSerializer, TerminalsSerializer
+from oscar.core.loading import get_classes, get_model
 
 from django.contrib import messages
-from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.encoding import smart_str
 from django.views.generic.base import View
-
-from oscar.core.utils import safe_referrer
 
 import logging
 logger = logging.getLogger("oscar.dashboard")
 
 Partner = get_model("partner", "Partner")
+Staff = get_model("user", "Staff")
+Terminal = get_model("partner", "Terminal")
 Order = get_model("order", "Order")
 Line = get_model("order", "Line")
 
-
 (
-    CRMPartnerListTable,
-    # CRMPartnerTable,
+    CRMPartnerEvotorTable,
+    CRMPartnerSiteTable,
+    CRMTerminalEvotorTable,
+    CRMTerminalSiteTable,
+    CRMStaffEvotorTable,
+    CRMStaffSiteTable,
 ) = get_classes(
     "dashboard.crm.tables",
     (
-        "CRMPartnerListTable",
-        # "ProductClassSelectForm",
+        "CRMPartnerEvotorTable",
+        "CRMPartnerSiteTable",
+        "CRMTerminalEvotorTable",
+        "CRMTerminalSiteTable",
+        "CRMStaffEvotorTable",
+        "CRMStaffSiteTable",
     ),
 )
 
-(
-    PartnerListTable,
-    # CRMPartnerTable,
-) = get_classes(
-    "dashboard.partners.tables",
-    (
-        "PartnerListTable",
-        # "ProductClassSelectForm",
-    ),
-)
-
-class CRMOrderListView(View):
-    # template_name = 'oscar/dashboard/crm/crm_orders_list.html'
-    # table_class = CRMOrderTable
-    # context_table_name = "orders"
-    # paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
-    
-    template_name = 'oscar/dashboard/crm/test_list.html'
-    context_object_name = "test"
-    
-    # def get_queryset(self):
-    def get_context_data(self):
-        try:
-            res = EvatorCloud().get_terminals()
-        except Exception as e:
-            res = []
-            logger.error("Error CRMOrderListView - %s" % str(e))
-
-        return res
-    
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
-        return TemplateResponse(request, self.template_name, {self.context_object_name: context})
-
-
-class CRMPartnerListView(MultiTableMixin, TemplateView):
+class CRMPartnerListView(CRMTablesMixin):
     template_name = 'oscar/dashboard/crm/partners/partner_list.html'
     model = Partner
+    serializer = PartnersSerializer
     context_table_name = "tables"
-    paginate_by = settings.OSCAR_EVOTOR_ITEMS_PER_PAGE
- 
     table_prefix = "partner_{}-"
-
-
-    def dispatch(self, request, *args, **kwargs):
-        self.queryset = self.get_queryset()
-        return super().dispatch(request, *args, **kwargs)
+    table_evotor = CRMPartnerEvotorTable
+    table_site = CRMPartnerSiteTable
+    url_redirect = reverse_lazy("dashboard:crm-partners")
 
     def post(self, request, *args, **kwargs):
+        delete_selected = request.POST.get("delete_selected", 'False')
+        if delete_selected == 'True':    
+            return self.delete_models(request)
+        
         update_all = request.POST.get("update_all", 'False')
         if update_all == 'True':
-            partners = self.get_queryset()
-            return self.update_partners(request, partners)
+            return self.update_models(request, self.queryset)
         
         ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
         ids = list(map(str, ids))
@@ -108,33 +73,33 @@ class CRMPartnerListView(MultiTableMixin, TemplateView):
                 self.request,
                 ("Вам нужно выбрать несколько точек продажи"),
             )
-            return redirect("dashboard:crm-partners")
+            return redirect(self.url_redirect)
 
-        partners = self.get_objects(ids)
-        return self.update_partners(request, partners)
+        partners = self.get_filtered_queryset(ids)
+        return self.update_models(request, partners)
     
     def get_queryset(self):
         
-        # partners_json = EvatorCloud().get_partners() 
-        partners_json = {
+        # data_json = EvatorCloud().get_partners() 
+        data_json = {
             'items': [
                 {
                     'id': '20240713-96AB-40D1-80FA-D455E402869E',
-                    'name': 'Мой магазин',
+                    'name': 'Мой магаз',
                     'user_id': '01-000000010409029',
                     'created_at': '2024-07-13T03:44:04.000+0000',
                     'updated_at': '2024-07-13T05:53:32.000+0000'
                 },
                 {
                     'id': '20240713-774A-4038-8037-E66BF3AA7552',
-                    'address': '9 Мая 77',
-                    'name': 'Прованс',
+                    'address': '9 Мая 45',
+                    'name': 'Провансик',
                     'user_id': '01-000000010409029',
                     'created_at': '2024-07-13T05:53:31.000+0000',
                     'updated_at': '2024-10-16T11:32:13.000+0000'
                 },
                 {
-                    'id': '20240713-774A-4038-8037-E66BF3AA7442',
+                    'id': '20240713-774A-4038-8037-E66BF3AA754',
                     'name': 'Микадо',
                     'user_id': '01-000000010409029',
                     'created_at': '2024-07-13T05:53:31.000+0000',
@@ -142,7 +107,7 @@ class CRMPartnerListView(MultiTableMixin, TemplateView):
                 },
                                 {
                     'id': '20240713-774A-4038-8037-E66BF3AA7444',
-                    'name': 'Микадо2',
+                    'name': 'Микадо 2',
                     'user_id': '01-000000010409029',
                     'created_at': '2024-07-13T05:53:31.000+0000',
                     'updated_at': '2024-10-16T11:32:13.000+0000'
@@ -277,128 +242,284 @@ class CRMPartnerListView(MultiTableMixin, TemplateView):
             ],
             'paging': {}
         }
-        serializer = PartnersSerializer(data=partners_json)
+        serializer = self.serializer(data=data_json)
 
         if serializer.is_valid():
             deserialized_data = serializer.validated_data
-            partners = deserialized_data['items']
+            data_items = deserialized_data['items']
             
-            for partner_data in partners:
-                evotor_id = partner_data['evotor_id']  # Идентификатор партнера
-                name = partner_data['name']
-                address = partner_data.get('address')  # Может отсутствовать
+            for data_item in data_items:
+                evotor_id = data_item['evotor_id']
+                name = data_item['name']
+                address = data_item.get('address')
+                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
                 
-                # Проверяем, существует ли партнер с данным evotor_id в базе
-                partner_instance = Partner.objects.filter(evotor_id=evotor_id).first()
-                
-                if partner_instance:
+                if model_instance:
                     # Партнер существует: проверяем совпадение полей
-                    partner_data['is_created'] = True
+                    data_item['is_created'] = True
                     # Проверка совпадения полей
-                    address_matches = (address == (partner_instance.primary_address.line1 if partner_instance.primary_address else None))
-                    partner_data['is_valid'] = partner_instance.name == name and address_matches
+                    address_matches = (address == (model_instance.primary_address.line1 if model_instance.primary_address else None))
+                    data_item['is_valid'] = model_instance.name == name and address_matches
                 else:
                     # Партнер не существует
-                    partner_data['is_created'] = False
-                    partner_data['is_valid'] = False
+                    data_item['is_created'] = False
+                    data_item['is_valid'] = False
 
-            self.queryset = partners
-            return partners
+            self.queryset = sorted(data_items, key=lambda x: (x['is_created'], x['is_valid']))
+            return self.queryset
         else:
             return serializer.errors
-    
-    def get_objects(self, ids):
-        partner_list = self.get_queryset()
-        filtered_list = [partner for partner in partner_list if partner['evotor_id'] in ids]
-        return filtered_list
 
-    def update_partners(self, request, partners_data):
-        partners = []
-        for partner_data in partners_data:
-            # Получаем данные партнера
-            evotor_id = partner_data['evotor_id']
-            name = partner_data['name']
-            address = partner_data.get('address')  # Может отсутствовать
-
-            # Ищем партнера по evotor_id
-            partner, created = Partner.objects.update_or_create(
-                evotor_id=evotor_id,
-                defaults={
-                    'name': name,
-                    'date_updated': timezone.now()  # Обновляем поле изменения
-                }
-            )
-            partners.append(partner)
-
-            # Обновляем или создаем адрес, если он указан
-            if address:
-                partner_address, address_created = PartnerAddress.objects.update_or_create(
-                    partner=partner,
-                    defaults={'line1': address}
-                )
-            elif partner.primary_address:
-                partner.addresses.first().delete()
+    def update_models(self, request, data_items):
+        EvatorCloud().create_or_update_partners(data_items)
 
         messages.success(
             self.request,
             ("Точки продажи были успешно обновлены"),
         )
-        return redirect("dashboard:crm-partners")
+        return redirect(self.url_redirect)
     
-    def get_checkbox_object_name(self):
-        return smart_str(self.model._meta.object_name.lower())
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        stauses = self.get_evotor_statuses()
-        ctx['is_valid'] = stauses['is_valid']
-        ctx['not_is_valid'] = stauses['not_is_valid'] 
-        ctx['wrong_evotor_id'] = stauses['wrong_evotor_id']
-        return ctx
-    
-    def get_evotor_statuses(self):
-        stauses = {}
-        evotor_pertners = self.queryset
-        stauses['is_valid'] = is_valid = sum(1 for item in evotor_pertners if item.get('is_valid') is True)
-        stauses['not_is_valid'] = len(evotor_pertners) - is_valid
-        evotor_ids = [partner['evotor_id'] for partner in evotor_pertners]
-        stauses['wrong_evotor_id'] = Partner.objects.filter(evotor_id__isnull=False).exclude(evotor_id__in=evotor_ids).count()
-        return stauses
-    
-    def get_tables(self):
-        return [
-            self.get_evotor_partners_table(),
-            self.get_site_partners_table(),
-        ]
-    
-    def get_table_pagination(self, table):
-        return dict(per_page=settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE)
-
-    def get_evotor_partners_table(self):
-        return CRMPartnerListTable(self.queryset)
-
-    def get_site_partners_table(self):
-        evotor_ids = [partner['evotor_id'] for partner in self.queryset]
-        return PartnerListTable(
-            Partner.objects.filter(evotor_id__isnull=False).exclude(evotor_id__in=evotor_ids)
+    def delete_models(self, request):
+        try:
+            ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
+            self.model.objects.filter(id__in=ids).delete()
+        except Exception as e:
+            logger.error("Ошибка при удалении моделей из бд на странице CRM - %s" % str(e))
+            messages.error(
+                self.request,
+                ("Точки продажи не были удалены"),
+            )
+            return redirect(self.url_redirect) 
+               
+        messages.success(
+            self.request,
+            ("Точки продажи были успешно удалены"),
         )
+        return redirect(self.url_redirect)
 
 
-class CRMStaffListView(View):
-    # template_name = 'oscar/dashboard/crm/crm_staffs_list.html'
-    # table_class = CRMStaffTable
-    # context_table_name = "staffs"
+class CRMTerminalListView(CRMTablesMixin):
+    template_name = 'oscar/dashboard/crm/terminals/terminal_list.html'
+    model = Terminal
+    serializer = TerminalsSerializer
+    context_table_name = "tables"
+    table_prefix = "terminal_{}-"
+    table_evotor = CRMTerminalEvotorTable
+    table_site = CRMTerminalSiteTable
+    url_redirect = reverse_lazy("dashboard:crm-terminals")
+
+    def post(self, request, *args, **kwargs):
+        delete_selected = request.POST.get("delete_selected", 'False')
+        if delete_selected == 'True':    
+            return self.delete_models(request)
+        
+        update_all = request.POST.get("update_all", 'False')
+        if update_all == 'True':
+            return self.update_models(request, self.queryset)
+        
+        ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
+        ids = list(map(str, ids))
+        if not ids:
+            messages.error(
+                self.request,
+                ("Вам нужно выбрать несколько терминалов"),
+            )
+            return redirect(self.url_redirect)
+
+        partners = self.get_filtered_queryset(ids)
+        return self.update_models(request, partners)
+    
+    def get_queryset(self):     
+        # data_json = EvatorCloud().get_terminals() 
+        data_json = {
+            "items": [
+                {
+                "id": "20170222-D58C-40E0-8051-B53ADFF38860",
+                "name": "Моя касса №1",
+                "store_id": "20170228-F4F1-401B-80FA-9ECCA8451FFB",
+                "timezone_offset": 10800000,
+                "imei": "123456789012345",
+                "firmware_version": "1.2.3",
+                "location": {
+                    "lng": 12.34,
+                    "lat": 12.34
+                },
+                "user_id": "00-000000000000000",
+                "serial_number":"00307401000000",
+                "device_model": "POWER",
+                "created_at": "2018-04-17T10:11:49.393+0000",
+                "updated_at": "2018-07-16T16:00:10.663+0000"
+                }
+            ],
+            "paging": {
+                "next_cursor": "string"
+            }
+        }
+        serializer = self.serializer(data=data_json)
+
+        if serializer.is_valid():
+            deserialized_data = serializer.validated_data
+            data_items = deserialized_data['items']
+            
+            for data_item in data_items:
+                evotor_id = data_item['evotor_id']
+                name = data_item['name']
+                partner_id = data_item.get('store_id')
+                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
+                
+                if model_instance:
+                    # Партнер существует: проверяем совпадение полей
+                    data_item['is_created'] = True
+                    # Проверка совпадения полей
+                    partner_matches = (partner_id == (model_instance.partner.evotor_id if model_instance.partner else None))
+                    data_item['is_valid'] = model_instance.name == name and partner_matches
+                else:
+                    # Партнер не существует
+                    data_item['is_created'] = False
+                    data_item['is_valid'] = False
+
+            self.queryset = sorted(data_items, key=lambda x: (x['is_created'], x['is_valid']))
+            return self.queryset
+        else:
+            return serializer.errors
+
+    def update_models(self, request, data_items):
+        EvatorCloud().create_or_update_terminals(data_items)
+
+        messages.success(
+            self.request,
+            ("Терминалы были успешно обновлены"),
+        )
+        return redirect(self.url_redirect)
+    
+    def delete_models(self, request):
+        try:
+            ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
+            self.model.objects.filter(id__in=ids).delete()
+        except Exception as e:
+            logger.error("Ошибка при удалении моделей из бд на странице CRM - %s" % str(e))
+            messages.error(
+                self.request,
+                ("Терминалы не были удалены"),
+            )
+            return redirect(self.url_redirect) 
+               
+        messages.success(
+            self.request,
+            ("Терминалы были успешно удалены"),
+        )
+        return redirect(self.url_redirect)
+
+
+class CRMStaffListView(CRMTablesMixin):
+    template_name = 'oscar/dashboard/crm/partners/staff_list.html'
+    model = Staff
+    serializer = StaffsSerializer
+    context_table_name = "tables"
+    table_prefix = "staff_{}-"
+    table_evotor = CRMStaffEvotorTable
+    table_site = CRMStaffSiteTable
+    url_redirect = reverse_lazy("dashboard:crm-staffs")
+
+    def post(self, request, *args, **kwargs):
+        delete_selected = request.POST.get("delete_selected", 'False')
+        if delete_selected == 'True':    
+            return self.delete_models(request)
+        
+        update_all = request.POST.get("update_all", 'False')
+        if update_all == 'True':
+            return self.update_models(request, self.queryset)
+        
+        ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
+        ids = list(map(str, ids))
+        if not ids:
+            messages.error(
+                self.request,
+                ("Вам нужно выбрать несколько сотрудников"),
+            )
+            return redirect(self.url_redirect)
+
+        partners = self.get_filtered_queryset(ids)
+        return self.update_models(request, partners)
+    
+    def get_queryset(self):     
+        # data_json = EvatorCloud().get_staffs() 
+        data_json = {'items': [{'id': '20240713-4403-40BB-80DA-F84959820434', 'role': 'ADMIN', 'role_id': '20240713-79CF-400A-80A9-EDDBE8702C75', 'name': 'Администратор', 'stores': ['20240713-96AB-40D1-80FA-D455E402869E', '20240713-774A-4038-8037-E66BF3AA7552'], 'user_id': '01-000000010409029', 'created_at': '2024-07-13T03:44:04.000+0000', 'updated_at': '2024-07-13T05:53:32.000+0000'}, {'id': '20240713-9483-4077-809A-8C9EC995166C', 'role': 'CASHIER', 'role_id': '20240713-6E2E-400C-80F0-5E5F0A5A1042', 'name': 'Юлия', 'last_name': 'Кудрявцева', 'stores': ['20240713-96AB-40D1-80FA-D455E402869E', '20240713-774A-4038-8037-E66BF3AA7552'], 'user_id': '01-000000010409029', 'created_at': '2024-07-13T03:44:04.000+0000', 'updated_at': '2024-07-13T05:53:32.000+0000'}, {'id': '20241016-4AD4-408E-80B2-53702AD317D6', 'phone': 79950750095, 'role': 'ADMIN', 'role_id': '20240713-79CF-400A-80A9-EDDBE8702C75', 'name': 'Владислав', 'last_name': 'Громов', 'stores': ['20240713-774A-4038-8037-E66BF3AA7552'], 'user_id': '01-000000010409029', 'created_at': '2024-10-16T11:30:53.000+0000', 'updated_at': '2024-10-16T11:32:13.000+0000'}], 'paging': {}}
+        serializer = self.serializer(data=data_json)
+
+        if serializer.is_valid():
+            deserialized_data = serializer.validated_data
+            data_items = deserialized_data['items']
+            
+            for data_item in data_items:
+                evotor_id = data_item['evotor_id']
+                name = data_item['name']
+                partner_id = data_item.get('store_id')
+                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
+                
+                if model_instance:
+                    # Партнер существует: проверяем совпадение полей
+                    data_item['is_created'] = True
+                    # Проверка совпадения полей
+                    partner_matches = (partner_id == (model_instance.partner.evotor_id if model_instance.partner else None))
+                    data_item['is_valid'] = model_instance.name == name and partner_matches
+                else:
+                    # Партнер не существует
+                    data_item['is_created'] = False
+                    data_item['is_valid'] = False
+
+            self.queryset = sorted(data_items, key=lambda x: (x['is_created'], x['is_valid']))
+            return self.queryset
+        else:
+            return serializer.errors
+
+    def update_models(self, request, data_items):
+        EvatorCloud().create_or_update_terminals(data_items)
+
+        messages.success(
+            self.request,
+            ("Сотрудники были успешно обновлены"),
+        )
+        return redirect(self.url_redirect)
+    
+    def delete_models(self, request):
+        try:
+            ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
+            self.model.objects.filter(id__in=ids).delete()
+        except Exception as e:
+            logger.error("Ошибка при удалении моделей из бд на странице CRM - %s" % str(e))
+            messages.error(
+                self.request,
+                ("Сотрудники не были удалены"),
+            )
+            return redirect(self.url_redirect) 
+               
+        messages.success(
+            self.request,
+            ("Сотрудники были успешно удалены"),
+        )
+        return redirect(self.url_redirect)
+
+
+
+
+
+class CRMOrderListView(View):
+    # template_name = 'oscar/dashboard/crm/crm_orders_list.html'
+    # table_class = CRMOrderTable
+    # context_table_name = "orders"
     # paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
     
     template_name = 'oscar/dashboard/crm/test_list.html'
     context_object_name = "test"
     
+    # def get_queryset(self):
     def get_context_data(self):
         try:
-            res = EvatorCloud().get_staffs()
+            res = EvatorCloud().get_terminals()
         except Exception as e:
             res = []
-            logger.error("Error CRMStaffListView - %s" % str(e))
+            logger.error("Error CRMOrderListView - %s" % str(e))
 
         return res
     

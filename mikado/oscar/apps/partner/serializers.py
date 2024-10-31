@@ -22,7 +22,6 @@ class PartnerSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Извлекаем адрес из данных, если передан
         address_data = validated_data.pop('address', None)
-
         # Создаем объект партнера
         partner = Partner.objects.create(**validated_data)
 
@@ -53,7 +52,7 @@ class PartnerSerializer(serializers.ModelSerializer):
 
         return instance
 
-
+        
 class PartnersSerializer(serializers.ModelSerializer):
     items = PartnerSerializer(many=True)
 
@@ -148,3 +147,31 @@ class TerminalSerializer(serializers.ModelSerializer):
         partner.terminals.add(instance)
 
         return partner
+
+     
+class TerminalsSerializer(serializers.ModelSerializer):
+    items = PartnerSerializer(many=True)
+
+    class Meta:
+        model = Terminal
+        fields = ['items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        terminals = []
+
+        for item_data in items_data:
+            terminal = TerminalSerializer().create(item_data)
+            terminals.append(terminal)
+
+        return terminals
+
+    def update(self, validated_data):
+        items_data = validated_data.pop('items')
+        terminals = []
+
+        for item_data in items_data:
+            terminal = TerminalSerializer().update(item_data)
+            terminals.append(terminal)
+
+        return terminals

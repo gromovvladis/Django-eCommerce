@@ -171,3 +171,31 @@ class StaffSerializer(serializers.ModelSerializer):
             representation['phone'] = ""
             representation['role_id'] = ""
         return representation
+
+     
+class StaffsSerializer(serializers.ModelSerializer):
+    items = StaffSerializer(many=True)
+
+    class Meta:
+        model = Staff
+        fields = ['items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        staffs = []
+
+        for item_data in items_data:
+            staff = StaffSerializer().create(item_data)
+            staffs.append(staff)
+
+        return staffs
+
+    def update(self, validated_data):
+        items_data = validated_data.pop('items')
+        staffs = []
+
+        for item_data in items_data:
+            staff = StaffSerializer().update(item_data)
+            staffs.append(staff)
+
+        return staffs

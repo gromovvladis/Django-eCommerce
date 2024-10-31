@@ -51,6 +51,7 @@ class PartnerListTable(DashboardTable):
         model = Partner
         fields = (
             "name",
+            "work_time",
         )
         sequence = (
             "name",

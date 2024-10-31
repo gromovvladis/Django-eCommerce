@@ -47,7 +47,7 @@ OSCAR_EMAILS_PER_PAGE = 20
 OSCAR_ORDERS_PER_PAGE = 20
 OSCAR_ADDRESSES_PER_PAGE = 20
 OSCAR_STOCK_ALERTS_PER_PAGE = 20
-OSCAR_EVOTOR_ITEMS_PER_PAGE = 3
+OSCAR_EVOTOR_ITEMS_PER_PAGE = 10
 OSCAR_DASHBOARD_ITEMS_PER_PAGE = 40
 OSCAR_DASHBOARD_PAYMENTS_PER_PAGE = 40
 
@@ -149,7 +149,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
-        "label": "Точки продажи",
+        "label": "Точки продаж",
         "icon": "fas fa-store",
         "children": [
             {
@@ -260,20 +260,24 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
-        "label": "CRM Сиситема",
+        "label": "Эвотор",
         "icon": "fas fa-crm",
         "children": [
-            {
-                "label": "Заказы",
-                "url_name": "dashboard:crm-orders",
-            },
             {
                 "label": "Точки продаж",
                 "url_name": "dashboard:crm-partners",
             },
             {
+                "label": "Терминалы",
+                "url_name": "dashboard:crm-terminals",
+            },
+            {
                 "label": "Персонал",
                 "url_name": "dashboard:crm-staffs",
+            },
+            {
+                "label": "Заказы",
+                "url_name": "dashboard:crm-orders",
             },
             {
                 "label": "Продукты",

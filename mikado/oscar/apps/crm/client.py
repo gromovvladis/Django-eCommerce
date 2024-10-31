@@ -205,6 +205,10 @@ class EvotorPartnerClient(EvotorAPICloud):
             evotor_ids = []
             for partner_json in partners_json:
                 evotor_id = partner_json.get('id')
+                if not evotor_id:
+                    evotor_id = partner_json.get('evotor_id')
+                    partner_json['id'] = evotor_id
+                    
                 evotor_ids.append(evotor_id)
                 partner, created = Partner.objects.get_or_create(evotor_id=evotor_id)
                 serializer = PartnerSerializer(partner, data=partner_json)

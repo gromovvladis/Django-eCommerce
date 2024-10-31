@@ -17,6 +17,7 @@ class CRMDashboardConfig(OscarDashboardConfig):
     def ready(self):
         self.crm_orders_list_view = get_class("dashboard.crm.views", "CRMOrderListView")
         self.crm_partners_list_view = get_class("dashboard.crm.views", "CRMPartnerListView")
+        self.crm_terminals_list_view = get_class("dashboard.crm.views", "CRMTerminalListView")
         self.crm_staffs_list_view = get_class("dashboard.crm.views", "CRMStaffListView")
         self.crm_products_list_view = get_class("dashboard.crm.views", "CRMProductListView")
         self.crm_receipts_list_view = get_class("dashboard.crm.views", "CRMReceiptListView")
@@ -24,9 +25,10 @@ class CRMDashboardConfig(OscarDashboardConfig):
 
     def get_urls(self):
         urls = [
-            path("orders/", self.crm_orders_list_view.as_view(), name="crm-orders"),
             path("partners/", self.crm_partners_list_view.as_view(), name="crm-partners"),
+            path("terminals/", self.crm_terminals_list_view.as_view(), name="crm-terminals"),
             path("staffs/", self.crm_staffs_list_view.as_view(), name="crm-staffs"),
+            path("orders/", self.crm_orders_list_view.as_view(), name="crm-orders"),
             path("products/", self.crm_products_list_view.as_view(), name="crm-products"),
             path("receipts/", self.crm_receipts_list_view.as_view(), name="crm-receipts"),
             path("docs/", self.crm_docs_list_view.as_view(), name="crm-docs"),
