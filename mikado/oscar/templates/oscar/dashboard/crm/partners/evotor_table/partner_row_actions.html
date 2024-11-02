@@ -17,7 +17,7 @@
                 {% endif %}
             {% endwith %}
             {% if not record.is_valid %}
-                <button class="dropdown-item" type="submit" name="selected_partner" value="{{ record.evotor_id }}">
+                <button class="dropdown-item" type="submit" name="selected_partner" value="{{ record.id }}">
                     Обновить на сайте
                 </button>
             {% else %}

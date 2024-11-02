@@ -22,10 +22,10 @@ class CRMPartnerEvotorTable(DashboardTable):
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
-    evotor_id = Column(
+    id = Column(
         verbose_name="Эвотор ID",
-        order_by="evotor_id",
-        attrs = {'th': {'class': 'evotor_id'},}
+        order_by="id",
+        attrs = {'th': {'class': 'id'},}
     )
     address = TemplateColumn(
         verbose_name="Адрес",
@@ -36,7 +36,7 @@ class CRMPartnerEvotorTable(DashboardTable):
     date = TemplateColumn(
         verbose_name="Дата",
         template_name="oscar/dashboard/crm/partners/evotor_table/partner_row_date.html",
-        order_by="date_updated",
+        order_by="updated_at",
         attrs = {'th': {'class': 'date'},}
     )
     actions = TemplateColumn(
@@ -53,12 +53,12 @@ class CRMPartnerEvotorTable(DashboardTable):
         model = Partner
         fields = (
             "name",
-            "evotor_id",
+            "id",
         )
         sequence = (
             "check",
             "name",
-            "evotor_id",
+            "id",
             "address",
             "date",
             "actions",
@@ -146,10 +146,10 @@ class CRMTerminalEvotorTable(DashboardTable):
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
-    evotor_id = Column(
+    id = Column(
         verbose_name="Эвотор ID",
-        order_by="evotor_id",
-        attrs = {'th': {'class': 'evotor_id'},}
+        order_by="id",
+        attrs = {'th': {'class': 'id'},}
     )
     partners = TemplateColumn(
         verbose_name="Магазин",
@@ -168,9 +168,9 @@ class CRMTerminalEvotorTable(DashboardTable):
         attrs = {'th': {'class': 'imei'},}
     )
     date = TemplateColumn(
-        verbose_name="Дата",
+        verbose_name="Обновлен",
         template_name="oscar/dashboard/crm/terminals/evotor_table/terminal_row_date.html",
-        order_by="date_updated",
+        order_by="updated_at",
         attrs = {'th': {'class': 'date'},}
     )
     actions = TemplateColumn(
@@ -187,7 +187,7 @@ class CRMTerminalEvotorTable(DashboardTable):
         model = Terminal
         fields = (
             "name",
-            "evotor_id",
+            "id",
             "model",
             "imei",
             "date",
@@ -195,7 +195,7 @@ class CRMTerminalEvotorTable(DashboardTable):
         sequence = (
             "check",
             "name",
-            "evotor_id",
+            "id",
             "partners",
             "model",
             "imei",
@@ -301,10 +301,10 @@ class CRMStaffEvotorTable(DashboardTable):
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
-    evotor_id = Column(
+    id = Column(
         verbose_name="Эвотор ID",
-        order_by="evotor_id",
-        attrs = {'th': {'class': 'evotor_id'},}
+        order_by="id",
+        attrs = {'th': {'class': 'id'},}
     )
     role = Column(
         verbose_name="Должность",
@@ -325,7 +325,7 @@ class CRMStaffEvotorTable(DashboardTable):
     date = TemplateColumn(
         verbose_name="Дата",
         template_name="oscar/dashboard/crm/staffs/evotor_table/staff_row_date.html",
-        order_by="date_updated",
+        order_by="updated_at",
         attrs = {'th': {'class': 'date'},}
     )
     actions = TemplateColumn(
@@ -342,12 +342,12 @@ class CRMStaffEvotorTable(DashboardTable):
         model = Partner
         fields = (
             "name",
-            "evotor_id",
+            "id",
         )
         sequence = (
             "check",
             "name",
-            "evotor_id",
+            "id",
             "role",
             "phone",
             "partners",

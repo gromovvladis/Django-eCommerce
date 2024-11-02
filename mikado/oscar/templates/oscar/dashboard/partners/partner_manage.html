@@ -80,10 +80,10 @@
                                         </a>
                                     </td>
                                     <td data-label="Модель">
-                                        {{ terminal.device_model }}
+                                        {{ terminal.model|default:"-" }}
                                     </td>
-                                    <td data-label="IMEI">{{ terminal.imei }}</td>
-                                    <td data-label="Серийный номер">{{ terminal.serial_number }}</td>
+                                    <td data-label="IMEI">{{ terminal.imei|default:"-" }}</td>
+                                    <td data-label="Серийный номер">{{ terminal.serial_number|default:"-" }}</td>
                                     <td data-label="Создан">{{ terminal.date_created }}</td>
                                     <td data-label="Изменен">{{ terminal.date_updated }}</td>
                                     <td class="toggle-row">

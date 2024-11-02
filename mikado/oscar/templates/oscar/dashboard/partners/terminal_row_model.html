@@ -1,5 +1,5 @@
 {% if record.model %}
-    {{ record.device_model }}
+    {{ record.model|default:"-" }}
 {% else %}
     -
 {% endif %}

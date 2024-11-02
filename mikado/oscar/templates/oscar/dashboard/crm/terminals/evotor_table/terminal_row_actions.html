@@ -6,21 +6,10 @@
             <i class="fas fa-edit"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-            {% with adr=record.address %}
-                {% if adr %}
-                    <button class="dropdown-item" onclick="openMap('{{ adr }}')">
-                        Точка на карте
-                    </button>
-                    <button class="dropdown-item" onclick="createRote('{{ adr }}')">
-                        Маршрут до точки
-                    </button>
-                {% endif %}
-            {% endwith %}
             {% if not record.is_valid %}
-                <a class="dropdown-item" href="#">
-                {% comment %} <a class="dropdown-item" href="{% url 'dashboard:partner-manage' pk=record.id %}{% querystring %}"> {% endcomment %}
+                <button class="dropdown-item" type="submit" name="selected_terminal" value="{{ record.id }}">
                     Обновить на сайте
-                </a>
+                </button>
             {% else %}
                 <span class="dropdown-item text-muted">
                     Точка продажи обновлена

@@ -13,6 +13,7 @@ from oscar.core.loading import get_classes, get_model
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.views.generic.base import View
+from datetime import datetime
 
 import logging
 logger = logging.getLogger("oscar.dashboard")
@@ -58,11 +59,11 @@ class CRMPartnerListView(CRMTablesMixin):
         serializer = self.serializer(data=data_json)
 
         if serializer.is_valid():
-            deserialized_data = serializer.validated_data
-            data_items = deserialized_data['items']
+            data_items = serializer.initial_data['items']
             
             for data_item in data_items:
-                evotor_id = data_item['evotor_id']
+                evotor_id = data_item['id']
+                data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
                 name = data_item['name']
                 address = data_item.get('address')
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
@@ -119,11 +120,11 @@ class CRMTerminalListView(CRMTablesMixin):
         serializer = self.serializer(data=data_json)
 
         if serializer.is_valid():
-            deserialized_data = serializer.validated_data
-            data_items = deserialized_data['items']
+            data_items = serializer.initial_data['items']
             
             for data_item in data_items:
-                evotor_id = data_item['evotor_id']
+                evotor_id = data_item['id']
+                data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
                 name = data_item['name']
                 partner_id = data_item.get('store_id')
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
@@ -182,15 +183,14 @@ class CRMStaffListView(CRMTablesMixin):
         serializer = self.serializer(data=data_json)
 
         if serializer.is_valid():
-            deserialized_data = serializer.validated_data
-            data_items = deserialized_data['items']
+            data_items = serializer.initial_data['items']
             
             for data_item in data_items:
-                evotor_id = data_item['evotor_id']
-
-                first_name = data_item.get('first_name', '')
+                evotor_id = data_item['id']
+                data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
+                first_name = data_item.get('name', '')
                 last_name = data_item.get('last_name', '')
-                middle_name = data_item.get('middle_name', '')
+                middle_name = data_item.get('patronymic_name', '')
                 stores_ids = data_item.get('stores', None)
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
                 
