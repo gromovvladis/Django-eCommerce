@@ -95,11 +95,9 @@
                                 </div>
                                 
                                 {% if order.status == "Завершен" %}
-                                    {% iffeature "reviews" %}
-                                        {% if product|is_review_permitted:user %}
-                                            <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}#addreview">Оценить</a>
-                                        {% endif %}
-                                    {% endiffeature %}
+                                    {% if product|is_review_permitted:user %}
+                                        <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}#addreview">Оценить</a>
+                                    {% endif %}
                                 {% endif %}
                             
                                 <div role="separator" class="v-spacer"></div>

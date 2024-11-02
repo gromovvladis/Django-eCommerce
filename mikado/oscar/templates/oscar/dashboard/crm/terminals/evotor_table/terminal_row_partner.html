@@ -1,0 +1,9 @@
+{% if record.partners %}
+    {% for partner in record.partners %}
+        <a href="{% url 'dashboard:partner-manage' pk=partner.id %}">
+            {{ partner.name|default:"Точка продажи" }}
+        </a>
+    {% endfor %}
+{% else %}
+    -
+{% endif %}

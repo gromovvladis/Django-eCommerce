@@ -102,7 +102,7 @@ class StaffForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['role'].choices = Staff.get_role_choices()
         staff = kwargs['instance']
-        if staff:
+        if staff and staff.user:
             self.fields['username'].initial = staff.user.username
 
     def clean_redirect_url(self):

@@ -3,6 +3,7 @@ from .models import Partner, PartnerAddress, Terminal
 
 class PartnerAddressSerializer(serializers.ModelSerializer):
     address = serializers.CharField(source='line1') 
+    
     class Meta:
         model = PartnerAddress
         fields = ['address']
@@ -11,17 +12,16 @@ class PartnerAddressSerializer(serializers.ModelSerializer):
 class PartnerSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='evotor_id')
     name = serializers.CharField()
-    # Поле адреса для записи, но оно не связано напрямую с моделью Partner
-    address = serializers.CharField(write_only=True) 
+    address = serializers.CharField(write_only=True, required=False) 
+    updated_at = serializers.DateTimeField(write_only=True) 
 
     class Meta:
         model = Partner
-        fields = ['id', 'name', 'address']
+        fields = ['id', 'name', 'address', 'updated_at']
 
     def create(self, validated_data):
         # Извлекаем адрес из данных, если передан
         address_data = validated_data.pop('address', None)
-
         # Создаем объект партнера
         partner = Partner.objects.create(**validated_data)
 
@@ -52,6 +52,34 @@ class PartnerSerializer(serializers.ModelSerializer):
 
         return instance
 
+        
+class PartnersSerializer(serializers.ModelSerializer):
+    items = PartnerSerializer(many=True)
+
+    class Meta:
+        model = Partner
+        fields = ['items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        partners = []
+
+        for item_data in items_data:
+            partner = PartnerSerializer().create(item_data)
+            partners.append(partner)
+
+        return partners
+
+    def update(self, validated_data):
+        items_data = validated_data.pop('items')
+        partners = []
+
+        for item_data in items_data:
+            partner = PartnerSerializer().update(item_data)
+            partners.append(partner)
+
+        return partners
+
 
 class TerminalSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='evotor_id')
@@ -61,11 +89,12 @@ class TerminalSerializer(serializers.ModelSerializer):
     imei = serializers.CharField()
 
     store_id = serializers.CharField(write_only=True) 
-    location = serializers.JSONField(write_only=True)  
+    location = serializers.JSONField(write_only=True)
+    updated_at = serializers.DateTimeField(write_only=True)   
 
     class Meta:
-        model = Partner
-        fields = ['id', 'name', 'device_model', 'serial_number', 'imei', 'store_id', 'location']
+        model = Terminal
+        fields = ['id', 'name', 'device_model', 'serial_number', 'imei', 'store_id', 'location', 'updated_at']
 
     def create(self, validated_data):
 
@@ -82,10 +111,9 @@ class TerminalSerializer(serializers.ModelSerializer):
         )
 
         partner, created = Partner.objects.get_or_create(evotor_id=store_id)
-
         partner.terminals.add(terminal)
 
-        return partner
+        return terminal
     
     def update(self, instance, validated_data):
         store_id = validated_data.pop('store_id')
@@ -117,4 +145,32 @@ class TerminalSerializer(serializers.ModelSerializer):
         # Добавляем обновленный терминал к партнеру
         partner.terminals.add(instance)
 
-        return partner
+        return instance
+
+     
+class TerminalsSerializer(serializers.ModelSerializer):
+    items = TerminalSerializer(many=True)
+
+    class Meta:
+        model = Terminal
+        fields = ['items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        terminals = []
+
+        for item_data in items_data:
+            terminal = TerminalSerializer().create(item_data)
+            terminals.append(terminal)
+
+        return terminals
+
+    def update(self, validated_data):
+        items_data = validated_data.pop('items')
+        terminals = []
+
+        for item_data in items_data:
+            terminal = TerminalSerializer().update(item_data)
+            terminals.append(terminal)
+
+        return terminals

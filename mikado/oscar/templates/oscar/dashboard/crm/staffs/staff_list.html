@@ -1,0 +1,18 @@
+{% extends 'oscar\dashboard\crm\crm_list.html' %} 
+
+{% block title %}
+    Персонал Эвотор | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Персонал Эвотор</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block crm_header %}
+    Персонал Эвотор
+{% endblock crm_header %}

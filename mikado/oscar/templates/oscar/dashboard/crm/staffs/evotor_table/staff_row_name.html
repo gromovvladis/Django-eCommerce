@@ -1,0 +1,24 @@
+{% load django_tables2 %}
+
+<span>
+    {% if not record.is_created %}
+        <span class="text-danger">
+            <i class="fa-solid fa-circle-xmark"></i>&nbsp; 
+        </span>
+    {% elif not record.is_valid %}
+        <span class="text-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>&nbsp; 
+        </span>
+    {% else %}
+        <span class="text-success">
+            <i class="fa-solid fa-circle-check"></i>&nbsp; 
+        </span>
+    {% endif %}
+    {% if record.first_name and record.last_name %}
+        {{ record.first_name }} {{ record.last_name }}
+    {% elif record.first_name %}
+        {{ record.first_name }}
+    {% else %}
+        -
+    {% endif %}
+</span>

@@ -200,14 +200,20 @@ class EvotorPartnerClient(EvotorAPICloud):
 
 # ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
 
-    def create_or_update_partners(self, partners_json):
+    def create_or_update_partners(self, partners_json, is_filtered=False):
+        error_msgs = []
         try:
             evotor_ids = []
+            json_valid = True
             for partner_json in partners_json:
                 evotor_id = partner_json.get('id')
+                if not evotor_id:
+                    evotor_id = partner_json.get('evotor_id')
+                    partner_json['id'] = evotor_id
+
                 evotor_ids.append(evotor_id)
-                partner, created = Partner.objects.get_or_create(evotor_id=evotor_id)
-                serializer = PartnerSerializer(partner, data=partner_json)
+                prt, created = Partner.objects.get_or_create(evotor_id=evotor_id)
+                serializer = PartnerSerializer(prt, data=partner_json)
                 
                 if serializer.is_valid():
                     serializer.save() 
@@ -218,24 +224,39 @@ class EvotorPartnerClient(EvotorAPICloud):
                         type=event_type,
                     )
                 else: 
+                    json_valid = False
                     logger.error(f"Ошибка сериализации точки продажи: {serializer.errors}")
+                    error_msgs.append(f"Ошибка сериализации точки продажи: {serializer.errors}")
+
+            if not json_valid:
+                return  ', '.join(error_msgs), False
             
-            for partner in Partner.objects.all():
-                if partner.evotor_id not in evotor_ids:
-                    partner.evotor_id = None
-                    partner.save()
+            if not is_filtered:
+                for partner in Partner.objects.all():
+                    if partner.evotor_id not in evotor_ids:
+                        partner.evotor_id = None
+                        partner.save()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении точки продажи: {e}", exc_info=True)
+            return f"Ошибка при обновлении точки продажи: {e}", False
 
-    def create_or_update_terminals(self, terminals_json):
+        return "Точки продаж были успешно обновлены", True 
+
+    def create_or_update_terminals(self, terminals_json, is_filtered=False):
+        error_msgs = []
         try:
             evotor_ids = []
+            json_valid = True
             for terminal_json in terminals_json:
                 evotor_id = terminal_json.get('id')
+                if not evotor_id:
+                    evotor_id = terminal_json.get('evotor_id')
+                    terminal_json['id'] = evotor_id
+
                 evotor_ids.append(evotor_id)
-                partner, created = Terminal.objects.get_or_create(evotor_id=evotor_id)
-                serializer = TerminalSerializer(partner, data=terminal_json)
+                trm, created = Terminal.objects.get_or_create(evotor_id=evotor_id)
+                serializer = TerminalSerializer(trm, data=terminal_json)
                 
                 if serializer.is_valid():
                     serializer.save() 
@@ -246,14 +267,23 @@ class EvotorPartnerClient(EvotorAPICloud):
                         type=event_type,
                     )
                 else: 
+                    json_valid = False
                     logger.error(f"Ошибка сериализации терминала: {serializer.errors}")
+                    error_msgs.append(f"Ошибка сериализации терминалов: {serializer.errors}")
+            
+            if not json_valid:
+                return  ', '.join(error_msgs), False
 
-            for terminal in Terminal.objects.all():
-                if terminal.evotor_id not in evotor_ids:
-                    partner.delete()
+            if not is_filtered:
+                for terminal in Terminal.objects.all():
+                    if terminal.evotor_id not in evotor_ids:
+                        terminal.delete()
 
         except Exception as e:
-            logger.error(f"Ошибка при обновлении терминалов: {e}", exc_info=True)
+            logger.error(f"Ошибка при обновлении терминалов: {e}", exc_info=True)            
+            return f"Ошибка при обновлении терминалов: {e}", False
+
+        return "Терминалы были успешно обновлены", True 
 
 
 class EvotorStaffClient(EvotorAPICloud):
@@ -391,9 +421,11 @@ class EvotorStaffClient(EvotorAPICloud):
   
 # ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
 
-    def create_or_update_roles(self, roles_json):
+    def create_or_update_roles(self, roles_json, is_filtered=False):
+        error_msgs = []
         try:
             evotor_ids = []
+            json_valid = True
             for role_json in roles_json:
                 name = role_json.get('name')
                 role, created = Group.objects.get_or_create(name=name)
@@ -411,21 +443,38 @@ class EvotorStaffClient(EvotorAPICloud):
                         type=event_type,
                     )
                 else: 
+                    json_valid = False
                     logger.error(f"Ошибка сериализации роли сотрудника: {serializer.errors}")
-
-            for group_evotor in GroupEvotor.objects.all():
-                if (group_evotor.evotor_id, group_evotor.group_id) not in evotor_ids:
-                    group_evotor.delete()
+                    error_msgs.append(f"Ошибка сериализации роли сотрудника: {serializer.errors}")
+            
+            if not json_valid:
+                return  ', '.join(error_msgs), False
+            
+            if not is_filtered:
+                for group_evotor in GroupEvotor.objects.all():
+                    if (group_evotor.evotor_id, group_evotor.group_id) not in evotor_ids:
+                        group_evotor.delete()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении ролей персонала: {e}")
+            return f"Ошибка при обновлении ролей персонала: {e}", False
 
-    def create_or_update_staffs(self, staffs_json):
+        return "Роли сотрудников были успешно обновлены", True 
+
+    def create_or_update_staffs(self, staffs_json, is_filtered=False):
+        error_msgs = []
         try:
             evotor_ids = []
+            json_valid = True
             created = False
             for staff_json in staffs_json:
                 evotor_id = staff_json.get('id')
+                if not evotor_id:
+                    evotor_id = staff_json.get('evotor_id')
+                    staff_json['id'] = evotor_id
+                    staff_json['name'] = staff_json.get('first_name')
+                    staff_json['patronymic_name'] = staff_json.get('middle_name')
+
                 evotor_ids.append(evotor_id)
                 try:
                     staff = Staff.objects.get(evotor_id=evotor_id)
@@ -443,17 +492,26 @@ class EvotorStaffClient(EvotorAPICloud):
                         type=event_type,
                     )
                 else: 
+                    json_valid = False
                     logger.error(f"Ошибка сериализации сотрудника: {serializer.errors}")
+                    error_msgs.append(f"Ошибка сериализации сотрудника: {serializer.errors}")
+            
+            if not json_valid:
+                return  ', '.join(error_msgs), False
 
-            for staff in Staff.objects.all():
-                if staff.evotor_id not in evotor_ids:
-                    staff.evotor_id = None
-                    staff.save()
+            if not is_filtered:
+                for staff in Staff.objects.all():
+                    if staff.evotor_id not in evotor_ids:
+                        staff.evotor_id = None
+                        staff.save()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении списка сотрудников: {e}")
+            return f"Ошибка при обновлении списка сотрудников: {e}", False
 
+        return "Сотрудники были успешно обновлены", True 
  
+
 class EvotorProductClient(EvotorAPICloud):
     """" 
     Работа с вариативными товарами

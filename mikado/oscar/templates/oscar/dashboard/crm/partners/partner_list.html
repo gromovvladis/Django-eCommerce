@@ -1,0 +1,18 @@
+{% extends 'oscar\dashboard\crm\crm_list.html' %} 
+
+{% block title %}
+    Точки продаж Эвотор | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Точки продаж Эвотор</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block crm_header %}
+    Точки продаж Эвотор
+{% endblock crm_header %}

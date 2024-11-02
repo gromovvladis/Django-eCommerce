@@ -11,11 +11,11 @@ from django.contrib.auth.models import Group
 
 class Staff(models.Model):
     user = models.OneToOneField(compat.AUTH_USER_MODEL, related_name="profile",
-                                on_delete=models.CASCADE)
+                                on_delete=models.CASCADE, null=True)
 
-    last_name = models.CharField("Фамилия", blank=False, null=False, max_length=255)
-    first_name = models.CharField("Имя", blank=False, null=False, max_length=255)
-    middle_name = models.CharField("Отчество", blank=True, null=False, max_length=255)
+    first_name = models.CharField("Имя", blank=False, null=True, max_length=255)
+    last_name = models.CharField("Фамилия", blank=True, null=True, max_length=255)
+    middle_name = models.CharField("Отчество", blank=True, null=True, max_length=255)
 
     role = models.ForeignKey(
         Group,
@@ -77,7 +77,8 @@ class Staff(models.Model):
     
     @property
     def get_full_name(self):
-        name = f"{self.last_name} {self.first_name} {self.middle_name}".strip()
+        name_parts = filter(None, [self.last_name, self.first_name, self.middle_name])
+        name = " ".join(name_parts).strip()
         return name if name else "ФИО не указаны"
     
     class Meta:

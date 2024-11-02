@@ -457,6 +457,89 @@ var oscar = (function(o, $) {
                 }
             }
         },
+        crm: {
+            initTable: function() {
+                var forms = $('form')
+                forms.each(function() {
+                    var table = $(this).find('table');
+                    if ($(table).length > 0) {
+                        var checkboxes = $(this).find('input[type="checkbox"]');
+                        var actionsLinesDiv = $(this).find('[data-id="actions-lines"]');
+                        var input = $('<input type="checkbox"/>');
+                        $(input).change(function(){
+                            $('tr', table).each(function() {
+                                $('td:first input', this).prop("checked", $(input).is(':checked'));
+                            });
+                            toggleActionsDiv();
+                        });
+                        $('th:first', table).prepend(input);
+                        function toggleActionsDiv() {
+                            if ($(actionsLinesDiv).length > 0){
+                                const isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+                                if (isChecked) {
+                                    actionsLinesDiv.removeClass('d-none');
+                                } else {
+                                    actionsLinesDiv.addClass('d-none');
+                                }
+                            }
+                        };
+                        checkboxes.each(function() {
+                            var checkbox = $(this);
+                            checkbox.change(function() {
+                                var inputContainer = checkbox.closest('td').find('[data-id="selected-line-input"]'); 
+                                if (inputContainer.length) {
+                                    if (checkbox.is(':checked')) {
+                                        inputContainer.removeClass('d-none');
+                                        var input_field = inputContainer.find('input');
+                                        input_field.val(input_field.attr('max'));
+                                        inputContainer.find('[data-id="order-button-plus"]').prop('disabled', true);
+                                        inputContainer.find('[data-id="order-button-minus"]').prop('disabled', false);
+                                        checkbox.addClass('d-none');
+                                    } else {
+                                        inputContainer.addClass('d-none');
+                                        checkbox.removeClass('d-none');
+                                    }
+                                }
+                                toggleActionsDiv();
+                            });
+                        });
+                        var lines_input = $('[data-id="selected-line-container"]');
+                        if ($(lines_input).length > 0){
+                            $(lines_input).each(function(){
+                                var input_container = $(this).find('[data-id="selected-line-input"]');
+                                var input_checkbox = $(this).find('input[type="checkbox"]');
+                                var input_field = $(input_container).find('input');
+                                var more = $(this).find('[data-id="order-button-plus"]');
+                                var less = $(this).find('[data-id="order-button-minus"]');
+                                more.on('click', function(){
+                                    if ($(input_field).val() < $(input_field).attr('max')){
+                                        $(input_field).val(parseInt($(input_field).val()) + 1);
+                                        $(less).prop('disabled', false);
+                                    }
+                                    if ($(input_field).val() == $(input_field).attr('max')) {
+                                        $(this).prop('disabled', true);
+                                    }
+                                });
+
+                                less.on('click', function(){
+                                    if ($(input_field).val() > 0){
+                                        $(input_field).val(parseInt($(input_field).val()) - 1);
+                                        $(more).prop('disabled', false);
+                                    }
+                                    if ($(input_field).val() == 0) {
+                                        $(this).prop('disabled', true);
+                                        $(input_container).addClass('d-none');
+                                        $(input_checkbox).removeClass('d-none');
+                                        $(input_checkbox).prop("checked", false);
+                                    }
+                                });
+                            })
+                        }
+                        toggleActionsDiv();
+                    }
+                });
+            }
+        },
         reordering: (function() {
             var options = {
                     handle: '.btn-handle',

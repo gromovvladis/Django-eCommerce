@@ -74,7 +74,7 @@ class PartnerListView(SingleTableView):
     def get_queryset(self):
         qs = Partner._default_manager.prefetch_related("addresses", "users", "users__profile").all()
 
-        self.description = "Все точки продажи"
+        self.description = "Все точки продаж"
 
         # We track whether the queryset is filtered to determine whether we
         # show the search form 'reset' button.

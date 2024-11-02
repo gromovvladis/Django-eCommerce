@@ -45,12 +45,13 @@ class PartnerListTable(DashboardTable):
     )
 
     icon = "fas fa-house"
-    caption = ngettext_lazy("%s Точка продажи", "%s Точек продаж")
+    caption = ngettext_lazy("%s Точка продажи", "%s Точки продаж")
 
     class Meta(DashboardTable.Meta):
         model = Partner
         fields = (
             "name",
+            "work_time",
         )
         sequence = (
             "name",
@@ -234,6 +235,15 @@ class StaffListTable(DashboardTable):
     class Meta(DashboardTable.Meta):
         model = Staff
         fields = (
+            "name",
+            "role",
+            "user",
+            "partners",
+            "notif",
+            "age",
+            "is_active",
+        )
+        sequence = (
             "check",
             "name",
             "role",
