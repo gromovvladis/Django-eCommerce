@@ -81,9 +81,9 @@ class TerminalListTable(DashboardTable):
         order_by="partner",
         attrs = {'th': {'class': 'partner'},}
     )
-    device_model = Column(
+    model = Column(
         verbose_name="Модель",
-        order_by="device_model",
+        order_by="model",
         attrs = {'th': {'class': 'model'},}
     )
     imei = Column(
@@ -117,7 +117,7 @@ class TerminalListTable(DashboardTable):
         model = Terminal
         fields = (
             "name",
-            "device_model",
+            "model",
             "imei",
             "date_created",
             "date_updated",
@@ -125,7 +125,7 @@ class TerminalListTable(DashboardTable):
         sequence = (
             "name",
             "partner",
-            "device_model",
+            "model",
             "imei",
             "date_created",
             "date_updated",

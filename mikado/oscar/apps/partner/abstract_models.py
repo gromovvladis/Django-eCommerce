@@ -117,11 +117,11 @@ class AbstractTerminal(models.Model):
         max_length=128,
         blank=True,
     )
-    device_model = models.CharField(
+    model = models.CharField(
         "Модель терминала", max_length=128, blank=True, null=True
     )
     imei = models.CharField(
-        "Код imei", max_length=128, unique=True,
+        "Код imei", max_length=128, unique=True, blank=True, null=True
     )
     serial_number = models.CharField(
         "Серийный номер", max_length=128, unique=True,

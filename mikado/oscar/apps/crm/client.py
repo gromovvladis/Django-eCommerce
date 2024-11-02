@@ -171,7 +171,7 @@ class EvotorPartnerClient(EvotorAPICloud):
                     },
                     "user_id": "00-000000000000000",
                     "serial_number":"00307401000000",
-                    "device_model": "POWER",
+                    "model": "POWER",
                     "created_at": "2018-04-17T10:11:49.393+0000",
                     "updated_at": "2018-07-16T16:00:10.663+0000"
                     }
@@ -472,8 +472,8 @@ class EvotorStaffClient(EvotorAPICloud):
                 if not evotor_id:
                     evotor_id = staff_json.get('evotor_id')
                     staff_json['id'] = evotor_id
-                    staff_json['name'] = staff_json.get('first_name')
-                    staff_json['patronymic_name'] = staff_json.get('middle_name')
+                    staff_json['name'] = staff_json.get('first_name', '')
+                    staff_json['patronymic_name'] = staff_json.get('middle_name', '')
 
                 evotor_ids.append(evotor_id)
                 try:

@@ -151,15 +151,15 @@ class CRMTerminalEvotorTable(DashboardTable):
         order_by="evotor_id",
         attrs = {'th': {'class': 'evotor_id'},}
     )
-    partner = TemplateColumn(
+    partners = TemplateColumn(
         verbose_name="Магазин",
         template_name="oscar/dashboard/crm/terminals/evotor_table/terminal_row_partner.html",
         order_by="store_id",
-        attrs = {'th': {'class': 'partner'},}
+        attrs = {'th': {'class': 'partners'},}
     )
-    device_model = Column(
+    model = Column(
         verbose_name="Модель",
-        order_by="device_model",
+        order_by="model",
         attrs = {'th': {'class': 'model'},}
     )
     imei = Column(
@@ -188,7 +188,7 @@ class CRMTerminalEvotorTable(DashboardTable):
         fields = (
             "name",
             "evotor_id",
-            "device_model",
+            "model",
             "imei",
             "date",
         )
@@ -196,8 +196,8 @@ class CRMTerminalEvotorTable(DashboardTable):
             "check",
             "name",
             "evotor_id",
-            "partner",
-            "device_model",
+            "partners",
+            "model",
             "imei",
             "date",
             "actions",
@@ -222,16 +222,15 @@ class CRMTerminalSiteTable(DashboardTable):
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
-    partner = TemplateColumn(
-    # partner = ManyToManyColumn(
+    partners = TemplateColumn(
         verbose_name="Точки продаж",
         template_name="oscar/dashboard/partners/terminal_row_partner.html",
         order_by="partner",
-        attrs = {'th': {'class': 'partner'},}
+        attrs = {'th': {'class': 'partners'},}
     )
-    device_model = Column(
+    model = Column(
         verbose_name="Модель",
-        order_by="device_model",
+        order_by="model",
         attrs = {'th': {'class': 'model'},}
     )
     imei = Column(
@@ -265,8 +264,8 @@ class CRMTerminalSiteTable(DashboardTable):
         model = Terminal
         fields = (
             "name",
-            "partner",
-            "device_model",
+            "partners",
+            "model",
             "imei",
             "date_created",
             "date_updated",
@@ -274,8 +273,8 @@ class CRMTerminalSiteTable(DashboardTable):
         sequence = (
             "check",
             "name",
-            "partner",
-            "device_model",
+            "partners",
+            "model",
             "imei",
             "date_created",
             "date_updated",

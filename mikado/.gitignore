@@ -15,6 +15,10 @@ logs/*
 /pyvenv.cfg
 /pip-selfcheck.json
 
+# migrations
+*/migrations/*.py
+!*/migrations/__init__.py
+
 # Vagrant 
 .vagrant
 
@@ -31,8 +35,6 @@ db.sqlite
 /public/media/*
 /whoosh_index/*
 
-# migrations
-/migrations/*
 
 # IDE files
 .project
