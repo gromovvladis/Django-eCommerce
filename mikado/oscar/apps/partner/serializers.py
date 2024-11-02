@@ -21,6 +21,7 @@ class PartnerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Извлекаем адрес из данных, если передан
+        updated_at = validated_data.pop('updated_at', None)
         address_data = validated_data.pop('address', None)
         # Создаем объект партнера
         partner = Partner.objects.create(**validated_data)
@@ -84,25 +85,26 @@ class PartnersSerializer(serializers.ModelSerializer):
 class TerminalSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='evotor_id')
     name = serializers.CharField()
-    device_model = serializers.CharField()
+    model = serializers.CharField(required=False)
     serial_number = serializers.CharField()
-    imei = serializers.CharField()
+    imei = serializers.CharField(required=False)
 
     store_id = serializers.CharField(write_only=True) 
-    location = serializers.JSONField(write_only=True)
+    location = serializers.JSONField(write_only=True, required=False)
     updated_at = serializers.DateTimeField(write_only=True)   
 
     class Meta:
         model = Terminal
-        fields = ['id', 'name', 'device_model', 'serial_number', 'imei', 'store_id', 'location', 'updated_at']
+        fields = ['id', 'name', 'model', 'serial_number', 'imei', 'store_id', 'location', 'updated_at']
 
     def create(self, validated_data):
 
+        updated_at = validated_data.pop('updated_at', None)
         store_id = validated_data.pop('store_id')
+        
         location = validated_data.pop('location', {})
-
-        coords_long = location.get('lng')
-        coords_lat = location.get('lat')
+        coords_long = location.get('lng', None)
+        coords_lat = location.get('lat', None)
 
         terminal = Terminal.objects.create(
             coords_long=coords_long,
@@ -125,7 +127,7 @@ class TerminalSerializer(serializers.ModelSerializer):
         # Обновляем терминал
         instance.coords_long = coords_long
         instance.coords_lat = coords_lat
-        instance.device_model = validated_data.get('device_model', instance.device_model)
+        instance.model = validated_data.get('model', instance.model)
         instance.serial_number = validated_data.get('serial_number', instance.serial_number)
         instance.imei = validated_data.get('imei', instance.imei)
         instance.name = validated_data.get('name', instance.name)

@@ -137,6 +137,7 @@ class CRMTerminalListView(CRMTablesMixin):
                     data_item['is_valid'] = model_instance.name == name and partner_matches
                 else:
                     # Партнер не существует
+                    data_item['partners'] = [partner_id]
                     data_item['is_created'] = False
                     data_item['is_valid'] = False
 

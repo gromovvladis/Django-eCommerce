@@ -56,7 +56,7 @@ class StaffSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='evotor_id')
     name = serializers.CharField(source='first_name')
     last_name = serializers.CharField(required=False)
-    patronymic_name = serializers.CharField(source='middle_name', required=False)
+    patronymic_name = serializers.CharField(source='middle_name', required=False, allow_blank=True)
 
     phone = serializers.CharField(write_only=True, required=False)
     stores = serializers.ListField(write_only=True, required=False)
@@ -114,7 +114,6 @@ class StaffSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # Извлекаем данные
-        updated_at = validated_data.pop('updated_at', None)
         phone_data = validated_data.pop('phone', None)
         partners_data = validated_data.pop('stores', None)
         role_data = validated_data.pop('role', None)
