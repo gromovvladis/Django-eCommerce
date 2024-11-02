@@ -19,7 +19,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         if delete_invalid == 'True':    
             return self.delete_models(True)
 
-        delete_selected = request.POST.get("delete_all", 'False')
+        delete_selected = request.POST.get("delete_selected", 'False')
         if delete_selected == 'True':    
             return self.delete_models(False)
         
@@ -102,8 +102,8 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         return self.table_evotor(self.queryset)
 
     def get_site_table(self):
-        evotor_ids = [partner['evotor_id'] for partner in self.queryset]
-        correct_ids = [partner['evotor_id'] for partner in self.queryset if partner['is_valid'] == True]
+        evotor_ids = [model['evotor_id'] for model in self.queryset]
+        correct_ids = [model['evotor_id'] for model in self.queryset if model['is_valid'] == True]
 
         site_models = self.model.objects.annotate(
             is_valid=Case(

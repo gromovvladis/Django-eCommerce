@@ -55,55 +55,57 @@ class GroupSerializer(serializers.ModelSerializer):
 class StaffSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='evotor_id')
     name = serializers.CharField(source='first_name')
-    last_name = serializers.CharField()
-    patronymic_name = serializers.CharField(source='middle_name')
+    last_name = serializers.CharField(required=False)
+    patronymic_name = serializers.CharField(source='middle_name', required=False)
 
-    phone = serializers.CharField(write_only=True)
-    stores = serializers.ListField(write_only=True)
-    role = serializers.CharField(write_only=True)
-    role_id = serializers.CharField(write_only=True)
+    phone = serializers.CharField(write_only=True, required=False)
+    stores = serializers.ListField(write_only=True, required=False)
+    role = serializers.CharField(write_only=True, required=False)
+    role_id = serializers.CharField(write_only=True, required=False)
 
-    # phone = serializers.CharField(source='user.username', write_only=True)
-    # stores = serializers.ListField(child=serializers.CharField(), write_only=True)
-    # role = serializers.CharField(source='role.name', write_only=True)
-    # role_id = serializers.CharField(source='role.id', write_only=True)
+    updated_at = serializers.DateTimeField(write_only=True) 
 
     class Meta:
         model = Staff
-        fields = ['id', 'name', 'last_name', 'patronymic_name', 'role', 'phone', 'stores', 'role_id']
+        fields = ['id', 'name', 'last_name', 'patronymic_name', 'phone', 'stores', 'role', 'role_id', 'updated_at']
 
     def create(self, validated_data):
         # Извлекаем адрес из данных, если передан
+        updated_at = validated_data.pop('updated_at', None)
         phone_data = validated_data.pop('phone', None)
         partners_data = validated_data.pop('stores', None)
         role_data = validated_data.pop('role', None)
         role_id_data = validated_data.pop('role_id', None)
 
         # Получаем или создаем пользователя, проверяя на существование по username
-        user, created = User.objects.get_or_create(
-            username=phone_data, 
-            defaults={'is_staff': True, 'name': validated_data.get('first_name', "")}
-            )
-        
-        # Если пользователь уже существовал, обновляем его данные, если они отличаются
-        if not created:
-            user.is_staff = True
-            user.name = validated_data.get('first_name', "")
-            user.save()
+        if phone_data:
+            user, created = User.objects.get_or_create(
+                username=phone_data, 
+                defaults={'is_staff': True, 'name': validated_data.get('first_name', "")}
+                )        
+            # Если пользователь уже существовал, обновляем его данные, если они отличаются
+            if not created:
+                user.is_staff = True
+                user.name = validated_data.get('first_name', "")
+                user.save()
 
-        staff, _ = Staff.objects.get_or_create(user=user)
+            if partners_data:
+                partners = Partner.objects.filter(evotor_id__in=partners_data)
+                for partner in partners:
+                    partner.users.add(user)
+
+            staff, _ = Staff.objects.get_or_create(user=user)
+        else: 
+            staff = Staff.objects.create(**validated_data)
         
         for attr, value in validated_data.items():
             setattr(staff, attr, value)
-
-        if partners_data:
-            partners = Partner.objects.filter(evotor_id__in=partners_data)
-            for partner in partners:
-                partner.users.add(staff)
         
         if role_data:
-            group, _ = Group.objects.get_or_create(name=role_data)
-            GroupEvotor.objects.get_or_create(group=group, evotor_id=role_id_data)
+            group, _ = Group.objects.get_or_create(name=role_data)            
+            group_evotor, _ = GroupEvotor.objects.get_or_create(group=group)
+            group_evotor.evotor_id = role_id_data
+            group_evotor.save()
             staff.role = group
         
         staff.save()
@@ -112,6 +114,7 @@ class StaffSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # Извлекаем данные
+        updated_at = validated_data.pop('updated_at', None)
         phone_data = validated_data.pop('phone', None)
         partners_data = validated_data.pop('stores', None)
         role_data = validated_data.pop('role', None)
@@ -142,7 +145,7 @@ class StaffSerializer(serializers.ModelSerializer):
             partner.users.remove(instance.user)
 
         # Добавляем новые привязки
-        if partners_data:
+        if partners_data and instance.user:
             new_partners = Partner.objects.filter(evotor_id__in=partners_data)
             for new_partner in new_partners:
                 new_partner.users.add(instance.user)
@@ -150,7 +153,9 @@ class StaffSerializer(serializers.ModelSerializer):
         # Обновляем роль
         if role_data:
             group, _ = Group.objects.get_or_create(name=role_data)
-            GroupEvotor.objects.get_or_create(group=group, evotor_id=role_id_data)
+            group_evotor, _ = GroupEvotor.objects.get_or_create(group=group)
+            group_evotor.evotor_id = role_id_data
+            group_evotor.save()
             instance.role = group
 
         instance.save()

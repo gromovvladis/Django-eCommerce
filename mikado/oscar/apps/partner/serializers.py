@@ -12,12 +12,12 @@ class PartnerAddressSerializer(serializers.ModelSerializer):
 class PartnerSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='evotor_id')
     name = serializers.CharField()
-    # Поле адреса для записи, но оно не связано напрямую с моделью Partner
     address = serializers.CharField(write_only=True, required=False) 
+    updated_at = serializers.DateTimeField(write_only=True) 
 
     class Meta:
         model = Partner
-        fields = ['id', 'name', 'address']
+        fields = ['id', 'name', 'address', 'updated_at']
 
     def create(self, validated_data):
         # Извлекаем адрес из данных, если передан
@@ -60,7 +60,6 @@ class PartnersSerializer(serializers.ModelSerializer):
         model = Partner
         fields = ['items']
 
-
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         partners = []
@@ -90,11 +89,12 @@ class TerminalSerializer(serializers.ModelSerializer):
     imei = serializers.CharField()
 
     store_id = serializers.CharField(write_only=True) 
-    location = serializers.JSONField(write_only=True)  
+    location = serializers.JSONField(write_only=True)
+    updated_at = serializers.DateTimeField(write_only=True)   
 
     class Meta:
-        model = Partner
-        fields = ['id', 'name', 'device_model', 'serial_number', 'imei', 'store_id', 'location']
+        model = Terminal
+        fields = ['id', 'name', 'device_model', 'serial_number', 'imei', 'store_id', 'location', 'updated_at']
 
     def create(self, validated_data):
 
@@ -111,10 +111,9 @@ class TerminalSerializer(serializers.ModelSerializer):
         )
 
         partner, created = Partner.objects.get_or_create(evotor_id=store_id)
-
         partner.terminals.add(terminal)
 
-        return partner
+        return terminal
     
     def update(self, instance, validated_data):
         store_id = validated_data.pop('store_id')
@@ -146,11 +145,11 @@ class TerminalSerializer(serializers.ModelSerializer):
         # Добавляем обновленный терминал к партнеру
         partner.terminals.add(instance)
 
-        return partner
+        return instance
 
      
 class TerminalsSerializer(serializers.ModelSerializer):
-    items = PartnerSerializer(many=True)
+    items = TerminalSerializer(many=True)
 
     class Meta:
         model = Terminal

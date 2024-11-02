@@ -18,11 +18,7 @@
             <i class="fa-solid fa-triangle-exclamation"></i>&nbsp; 
         </span>
     {% endif %}
-    <a href="{% url 'dashboard:partner-manage' pk=record.id %}">
-        {% if record.name %}
-            {{ record.name }}
-        {% else %}
-            Точка продажи (Имя не задано)
-        {% endif %}
+    <a href="{% url 'dashboard:staff-detail' pk=record.id %}">
+        {{ record.get_full_name }}
     </a>
 </span>

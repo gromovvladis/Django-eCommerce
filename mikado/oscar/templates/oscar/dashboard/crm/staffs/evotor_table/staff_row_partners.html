@@ -1,0 +1,17 @@
+{% load django_tables2 %}
+
+{% if record.partners %}
+    {% for partner in record.partners %}
+    {% if partner.id %}
+        <a href="{% url 'dashboard:partner-manage' pk=partner.id %}">
+            {{ partner.name|default:"Точка продажи" }}
+        </a>
+    {% else %}
+        <span>
+            {{ partner }}{% if not forloop.last %},{% endif %}<br>
+        </span>
+    {% endif %}
+    {% endfor %}
+{% else %}
+    -
+{% endif %}

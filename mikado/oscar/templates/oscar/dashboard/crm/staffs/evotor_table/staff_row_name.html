@@ -14,8 +14,10 @@
             <i class="fa-solid fa-circle-check"></i>&nbsp; 
         </span>
     {% endif %}
-    {% if record.name %}
-        {{ record.name }}
+    {% if record.first_name and record.last_name %}
+        {{ record.first_name }} {{ record.last_name }}
+    {% elif record.first_name %}
+        {{ record.first_name }}
     {% else %}
         -
     {% endif %}
