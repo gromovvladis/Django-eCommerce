@@ -43,7 +43,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
     def delete_models(self, delete_invalid):
         try:
             if delete_invalid:
-                correct_ids = [partner['evotor_id'] for partner in self.queryset if partner['is_valid'] == True]
+                correct_ids = [model_qs['id'] for model_qs in self.queryset if model_qs['is_valid'] == True]
                 self.model.objects.exclude(evotor_id__in=correct_ids).delete()
             else:
                 ids = self.request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
@@ -64,7 +64,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
 
     def get_filtered_queryset(self, ids):
         data_list = self.get_queryset()
-        return [data_item for data_item in data_list if data_item['evotor_id'] in ids]
+        return [data_item for data_item in data_list if data_item['id'] in ids]
 
     def get_checkbox_object_name(self):
         return smart_str(self.model._meta.object_name.lower())
@@ -83,7 +83,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         evotor_data = self.queryset
         stauses['is_valid'] = sum(1 for item in evotor_data if item.get('is_valid') is True)
         stauses['not_is_valid'] = sum(1 for item in evotor_data if item.get('is_valid') is False and item.get('is_created'))
-        evotor_ids = [partner['evotor_id'] for partner in evotor_data]
+        evotor_ids = [model_evator['id'] for model_evator in evotor_data]
         models = self.model.objects.all()
         stauses['not_evotor_id'] = models.filter(evotor_id__isnull=True).count()
         stauses['wrong_evotor_id'] = models.filter(evotor_id__isnull=False).exclude(evotor_id__in=evotor_ids).count()
@@ -102,8 +102,8 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         return self.table_evotor(self.queryset)
 
     def get_site_table(self):
-        evotor_ids = [model['evotor_id'] for model in self.queryset]
-        correct_ids = [model['evotor_id'] for model in self.queryset if model['is_valid'] == True]
+        evotor_ids = [model_qs['id'] for model_qs in self.queryset]
+        correct_ids = [model_qs['id'] for model_qs in self.queryset if model_qs['is_valid'] == True]
 
         site_models = self.model.objects.annotate(
             is_valid=Case(

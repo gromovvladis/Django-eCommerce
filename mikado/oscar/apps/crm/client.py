@@ -207,9 +207,9 @@ class EvotorPartnerClient(EvotorAPICloud):
             json_valid = True
             for partner_json in partners_json:
                 evotor_id = partner_json.get('id')
-                if not evotor_id:
-                    evotor_id = partner_json.get('evotor_id')
-                    partner_json['id'] = evotor_id
+                # if not evotor_id:
+                #     evotor_id = partner_json.get('evotor_id')
+                #     partner_json['id'] = evotor_id
 
                 evotor_ids.append(evotor_id)
                 prt, created = Partner.objects.get_or_create(evotor_id=evotor_id)
@@ -250,9 +250,9 @@ class EvotorPartnerClient(EvotorAPICloud):
             json_valid = True
             for terminal_json in terminals_json:
                 evotor_id = terminal_json.get('id')
-                if not evotor_id:
-                    evotor_id = terminal_json.get('evotor_id')
-                    terminal_json['id'] = evotor_id
+                # if not evotor_id:
+                #     evotor_id = terminal_json.get('evotor_id')
+                #     terminal_json['id'] = evotor_id
 
                 evotor_ids.append(evotor_id)
                 trm, created = Terminal.objects.get_or_create(evotor_id=evotor_id)
@@ -469,11 +469,11 @@ class EvotorStaffClient(EvotorAPICloud):
             created = False
             for staff_json in staffs_json:
                 evotor_id = staff_json.get('id')
-                if not evotor_id:
-                    evotor_id = staff_json.get('evotor_id')
-                    staff_json['id'] = evotor_id
-                    staff_json['name'] = staff_json.get('first_name', '')
-                    staff_json['patronymic_name'] = staff_json.get('middle_name', '')
+                # if not evotor_id:
+                #     evotor_id = staff_json.get('evotor_id')
+                #     staff_json['id'] = evotor_id
+                #     staff_json['name'] = staff_json.get('first_name', '')
+                #     staff_json['patronymic_name'] = staff_json.get('middle_name', '')
 
                 evotor_ids.append(evotor_id)
                 try:
