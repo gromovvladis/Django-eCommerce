@@ -65,7 +65,7 @@ class PaymentListTable(DashboardTable):
         attrs = {'th': {'class': 'actions'},}
     )
 
-    icon = "sitemap"
+    icon = "far fa-credit-card"
     caption = ngettext_lazy("%s Платеж", "%s Платежей")
 
     class Meta(DashboardTable.Meta):
@@ -123,7 +123,7 @@ class RefundListTable(DashboardTable):
         attrs = {'th': {'class': 'actions'},}
     )
 
-    icon = "sitemap"
+    icon = "fas fa-credit-card"
     caption = ngettext_lazy("%s Возврат", "%s Возвратов")
 
     class Meta(DashboardTable.Meta):

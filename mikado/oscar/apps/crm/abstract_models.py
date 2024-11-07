@@ -35,4 +35,3 @@ class AbstractCRMEvent(models.Model):
         ordering = ("-date_created",)
         verbose_name = "Событие СRM"
         verbose_name_plural = "События СRM"
-

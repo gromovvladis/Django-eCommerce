@@ -37,6 +37,12 @@ class PartnerListTable(DashboardTable):
         order_by="addresses",
         attrs = {'th': {'class': 'address'},}
     )
+    is_active = TemplateColumn(
+        verbose_name="Активен",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by="is_active",
+        attrs = {'th': {'class': 'active'},}
+    )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/partners/partner_row_actions.html",
@@ -52,12 +58,14 @@ class PartnerListTable(DashboardTable):
         fields = (
             "name",
             "work_time",
+            "is_active",
         )
         sequence = (
             "name",
             "work_time",
             "staff",
             "address",
+            "is_active",
             "actions",
         )
         

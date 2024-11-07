@@ -31,10 +31,10 @@ class PaymentManager:
         self.payment_method = payment_method
 
     def get_method(self):
-        if self.payment_method in ['SBP', 'CARD']:
+        if self.payment_method in ['PAY_SBP', 'PAY_ONLINECARD']:
             return Yoomoney(self.payment_method)
-        if self.payment_method == 'COURIER-CARD':
-            return CourierCard(self.payment_method)
+        if self.payment_method == 'PAY_CARD':
+            return Card(self.payment_method)
         else:
             return Cash(self.payment_method)
     
@@ -516,7 +516,7 @@ class Cash(AbstractPaymentMethod):
         pass
     
  
-class CourierCard(AbstractPaymentMethod):
+class Card(AbstractPaymentMethod):
     def pay(self, order, amount=None):
         pass
 

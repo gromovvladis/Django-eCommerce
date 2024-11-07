@@ -211,10 +211,36 @@ class CRMRoleEndpointView(APIView):
         return JsonResponse({"status": "ok"}, status = 200) 
 
 
+class CRMDocsEndpointView(APIView):
 
+    permission_classes = [AllowAny]
 
+    """ https://mikado-sushi.ru/crm/api/docs """
 
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
+    def post(self, request, *args, **kwargs):
+                
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        
+        not_allowed = is_valid_user_token(request)
+        if not_allowed:
+            return not_allowed
+        
+        CRMEvent.objects.create(
+            body=f"Terminals recived {request.data}", 
+            sender=CRMEvent.DOC,
+            type=CRMEvent.INFO, 
+        )
+        return JsonResponse({"ok": "ok"}, status = 200)
 
 
 class CRMProductEndpointView(APIView):
@@ -244,70 +270,6 @@ class CRMProductEndpointView(APIView):
         CRMEvent.objects.create(
             body=f"Terminals recived {request.data}", 
             sender=CRMEvent.PRODUCT,
-            type=CRMEvent.INFO, 
-        )
-        return JsonResponse({"ok": "ok"}, status = 200)
-
-
-class CRMReceiptEndpointView(APIView):
-
-    permission_classes = [AllowAny]
-
-    """ https://mikado-sushi.ru/crm/api/receipts """
-    
-    def put(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-
-        request_info = {
-            "method": request.method,
-            "path": request.path,
-            "headers": dict(request.headers),
-            "data": request.data,
-        }
-        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
-        
-        not_allowed = is_valid_user_token(request)
-        if not_allowed:
-            return not_allowed
-        
-        CRMEvent.objects.create(
-            body=f"Terminals recived {request.data}", 
-            sender=CRMEvent.RECEIPT,
-            type=CRMEvent.INFO, 
-        )
-        return JsonResponse({"ok": "ok"}, status = 200)
-
-
-class CRMDocsEndpointView(APIView):
-
-    permission_classes = [AllowAny]
-
-    """ https://mikado-sushi.ru/crm/api/docs """
-
-    def put(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-                
-        request_info = {
-            "method": request.method,
-            "path": request.path,
-            "headers": dict(request.headers),
-            "data": request.data,
-        }
-        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
-        
-        not_allowed = is_valid_user_token(request)
-        if not_allowed:
-            return not_allowed
-        
-        CRMEvent.objects.create(
-            body=f"Terminals recived {request.data}", 
-            sender=CRMEvent.DOC,
             type=CRMEvent.INFO, 
         )
         return JsonResponse({"ok": "ok"}, status = 200)
@@ -377,26 +339,33 @@ class CRMLoginEndpointView(APIView):
         
 
 
-# class CRMRegisterEndpointView(APIView):
-#     """ https://mikado-sushi.ru/crm/api/user/register """
+# мусор
 
-#     authentication_classes = []
+# class CRMReceiptEndpointView(APIView):
+
 #     permission_classes = [AllowAny]
 
-      
-#     def post(self, request, *args, **kwargs):
-#         send_message_to_staffs("CRMRegisterEndpointView POST", TelegramMessage.TECHNICAL)
+#     """ https://mikado-sushi.ru/crm/api/receipts """
 
-#         content_type = request.headers.get('Content-Type', '')
-#         logging.info(f"Received POST request with Content-Type: {content_type}")
+#     def put(self, request, *args, **kwargs):
+#         return self.post(request, *args, **kwargs)
+    
+#     def post(self, request, *args, **kwargs): 
 
 #         request_info = {
 #             "method": request.method,
 #             "path": request.path,
 #             "headers": dict(request.headers),
-#             "query_params": request.query_params.dict(),
+#             "data": request.data,
 #         }
-#         logging.info(f"CRMRegisterEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}")
-#         send_message_to_staffs(f"CRMRegisterEndpointView post request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+#         logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+#         send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
 
-#         return Response({"error": "Регистрация возможна только на ресурсе сайта. Свяжитесь с администрацией сайта"}, status=status.HTTP_409_CONFLICT)
+#         not_allowed = is_valid_user_token(request)
+#         if not_allowed:
+#             return not_allowed  
+        
+#         # receipts_json = request.data
+#         # EvatorCloud().create_receipts(receipts_json)
+
+#         return JsonResponse({"status": "ok"}, status = 200) 

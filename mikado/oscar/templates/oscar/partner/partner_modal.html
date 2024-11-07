@@ -34,7 +34,7 @@
                             {{ radio.choice_label }}
                         </label>
                         {% for partner in partner_form.partners %}
-                            {% if partner.id == radio.data.value %}
+                            {% if partner.id == radio.data.value and partner.primary_address %}
                                 <span class="header_address">{{ partner.primary_address }}</span>
                             {% endif %}
                         {% endfor %}

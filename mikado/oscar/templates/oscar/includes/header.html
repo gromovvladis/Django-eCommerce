@@ -13,7 +13,9 @@
             {% selected_partner request as partner %}
             {% if partner %}
                 <span class="header_partner">{{ partner }}</span>
-                <span class="header_address">{{ partner.primary_address }}</span>
+                {% if partner.primary_address %}
+                    <span class="header_address">{{ partner.primary_address }}</span>
+                {% endif %}
             {% endif %}
         </button>
     {% endif %}

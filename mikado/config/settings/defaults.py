@@ -276,20 +276,44 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:crm-staffs",
             },
             {
-                "label": "Заказы",
-                "url_name": "dashboard:crm-orders",
-            },
-            {
-                "label": "Продукты",
+                "label": "Товары",
                 "url_name": "dashboard:crm-products",
-            },
-            {
-                "label": "Чеки",
-                "url_name": "dashboard:crm-receipts",
             },
             {
                 "label": "Документы",
                 "url_name": "dashboard:crm-docs",
+            },
+            {
+                "label": "Приёмка товаров",
+                "url_name": "dashboard:crm-accept",
+            },
+            {
+                "label": "Переоценка товаров",
+                "url_name": "dashboard:crm-revaluation",
+            },
+            {
+                "label": "Списание товара",
+                "url_name": "dashboard:crm-write-off",
+            },
+            {
+                "label": "Инвентаризация",
+                "url_name": "dashboard:crm-inventory",
+            },
+            {
+                "label": "Смены",
+                "url_name": "dashboard:crm-sessions",
+            },
+            {
+                "label": "Внесение и изъятие наличных",
+                "url_name": "dashboard:crm-cash",
+            },
+            {
+                "label": "Z-отчёт",
+                "url_name": "dashboard:crm-report",
+            },
+            {
+                "label": "История уведомлений",
+                "url_name": "dashboard:crm-events",
             },
         ],
     },
@@ -298,16 +322,20 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "icon": "fas fa-telegram",
         "children": [
             {
-                "label": "Aдмин",
+                "label": "Персонал",
                 "url_name": "dashboard:telegram-admin",
             },
             {
-                "label": "Oшибки",
+                "label": "Клиенты",
+                "url_name": "dashboard:telegram-admin",
+            },
+            {
+                "label": "Сообщения",
                 "url_name": "dashboard:telegram-errors",
             },
             {
-                "label": "Курьеры",
-                "url_name": "dashboard:telegram-couriers",
+                "label": "Статистика",
+                "url_name": "dashboard:telegram-errors",
             },
         ],
     },
@@ -339,6 +367,36 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "url_name": "dashboard:reports-index",
     },
 ]
+
+
+# ======= продажи / возвраты - важно!!!
+# Документ продажи товара - SELL 
+# Документ возврата - PAYBACK 
+
+# ======= товароучетная система
+# Информация о приёмке товаров - ACCEPT
+# Описание документа инвентаризации - INVENTORY  
+# Информация о переоценке товаров - REVALUATION 
+# Документ списания товара - WRITE_OFF
+
+# ======= доки
+# Данные о открытии смены -= OPEN_SESSION
+# Данные о закрытии смены = CLOSE_SESSION 
+# Документ внесения наличных = CASH_INCOME
+# Документ выплаты наличных = CASH_OUTCOME
+# Z-отчёт = Z_REPORT
+
+
+# ======= потом или не надо
+# Документ возврата товара поставщику - RETURN
+# Документ возврата товара поставщику - RETURN
+# Документ выкупа товара магазином - BUY
+# Документ выкупа товара клиентом - BUYBACK
+# Документ вскрытия тары - OPEN_TARE
+# Данные об открытии смены в ККТ = POS_OPEN_SESSION
+# X-отчёт = X_REPORT
+# Документ коррекции = CORRECTION
+  
 
 OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION = "oscar.apps.dashboard.nav.default_access_fn"
 
@@ -422,24 +480,24 @@ ORDER_ACTIVE_STATUSES = (
 
 # Payment choices
 WEBSHOP_PAYMENT_CHOICES = (
-    ('SBP', 'СБП Онлайн'),
-    ('CARD', 'Карта Онлайн'),
-    ('CASH', 'Наличные'),
+    ('PAY_SBP', 'СБП Онлайн'),
+    ('PAY_ONLINECARD', 'Карта Онлайн'),
+    ('PAY_CASH', 'Наличные'),
     # ('COURIER-CARD', 'Картой курьеру при получении'),
 )
 
 ONLINE_PAYMENTS = (
-    'CARD',
-    'SBP',
+    'PAY_ONLINECARD',
+    'PAY_SBP',
 )
 
 OFFLINE_PAYMENTS = (
-    'CASH',
-    # 'COURIER-CARD',
+    'PAY_CASH',
+    'PAY_CARD',
 )
 
 CASH_PAYMENTS = (
-    'CASH',
+    'PAY_CASH',
 )
 
 PAYMENT_STATUS = {

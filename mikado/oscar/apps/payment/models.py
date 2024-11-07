@@ -29,6 +29,22 @@ if not is_model_registered("payment", "SourceType"):
     __all__.append("SourceType")
 
 
+# if not is_model_registered("payment", "Receipt"):
+
+#     class Receipt(abstract_models.AbstractReceipt):
+#         pass
+
+#     __all__.append("Receipt")
+
+
+# if not is_model_registered("payment", "ReceiptExtra"):
+
+#     class ReceiptExtra(abstract_models.AbstractReceiptExtra):
+#         pass
+
+#     __all__.append("ReceiptExtra")
+
+
 if not is_model_registered("payment", "Bankcard"):
 
     class Bankcard(abstract_models.AbstractBankcard):

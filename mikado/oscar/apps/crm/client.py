@@ -512,6 +512,50 @@ class EvotorStaffClient(EvotorAPICloud):
         return "Сотрудники были успешно обновлены", True 
  
 
+# class EvotorReceiptClient(EvotorAPICloud):
+
+#     def create_receipts(self, receipts_json, is_filtered=False):
+#         error_msgs = []
+#         try:
+#             if isinstance(receipts_json, dict):
+#                 receipts_json = [receipts_json]
+                
+#             for receipt_json in receipts_json:
+#                 receipt_json = receipt_json.get('data')
+#                 evotor_id = receipt_json.get('id')
+#                 try:
+#                     receipt = Receipt.objects.get(evotor_id=evotor_id)
+#                     serializer = ReceiptSerializer(receipt, data=receipt_json)
+#                 except Receipt.DoesNotExist:
+#                     created = True
+#                     serializer = ReceiptSerializer(data=receipt_json)
+                
+#                 if serializer.is_valid():
+#                     serializer.save() 
+#                     event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+#                     CRMEvent.objects.create(
+#                         body="Receipt created / or updated",
+#                         sender=CRMEvent.RECEIPT,
+#                         type=event_type,
+#                     )
+#                 else: 
+#                     json_valid = False
+#                     logger.error(f"Ошибка сериализации чека: {serializer.errors}")
+#                     error_msgs.append(f"Ошибка сериализации чека: {serializer.errors}")
+            
+#             if not json_valid:
+#                 return  ', '.join(error_msgs), False
+
+#         except Exception as e:
+#             logger.error(f"Ошибка при обновлении чека: {e}")
+#             return f"Ошибка при обновлении чека: {e}", False
+
+#         return "Чеки были успешно обновлены", True 
+ 
+
+
+
+
 class EvotorProductClient(EvotorAPICloud):
     """" 
     Работа с вариативными товарами
@@ -1069,6 +1113,7 @@ class EvotorPushNotifClient(EvotorAPICloud):
         return self.send_request(endpoint, "POST", msg_data)
  
 
+# class EvatorCloud(EvotorProductClient, EvotorDocClient, EvotorStaffClient, EvotorPartnerClient, EvotorPushNotifClient, EvotorReceiptClient):
 class EvatorCloud(EvotorProductClient, EvotorDocClient, EvotorStaffClient, EvotorPartnerClient, EvotorPushNotifClient):
     pass
 

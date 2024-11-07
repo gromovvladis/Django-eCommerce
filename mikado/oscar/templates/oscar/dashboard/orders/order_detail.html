@@ -20,7 +20,10 @@
 {% endblock %}
 
 {% block navtext %}
- {{ order.basket.partner|default:"-" }} | Заказ №{{ order.number }}
+    {% if not record.is_online %}
+        <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
+    {% endif %} 
+    {{ order.basket.partner|default:"-" }} | Заказ №{{ order.number }}
 {% endblock  %}
 
 {% block dashboard_content %}
@@ -110,6 +113,12 @@
                         {% else %}
                             {{ order.basket.partner|default:"-" }}
                         {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Источник</th>
+                    <td>
+                        {{ order.site|default:"Сайт" }}</td>
                     </td>
                 </tr>
                 <tr>

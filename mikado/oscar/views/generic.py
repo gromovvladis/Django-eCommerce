@@ -107,7 +107,7 @@ class BulkEditMixin:
         # whitelist to avoid security issues.
         action = request.POST.get(self.action_param, "").lower()
         if not self.actions or action not in self.actions:
-            messages.error(self.request, _("Invalid action"))
+            messages.error(self.request, "Неверное действие")
             return redirect(self.get_error_url(request))
 
         ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())

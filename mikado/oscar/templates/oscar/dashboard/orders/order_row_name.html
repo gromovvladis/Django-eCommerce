@@ -1,11 +1,11 @@
 {% load django_tables2 %}
 <a href="{% url 'dashboard:order-detail' number=record.number %}" class="d-flex flex-column">
     <span>
+        {% if not record.is_online %}
+            <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
+        {% endif %}
         {% if not record.is_open %}
-        {% comment %} <i class="fa-regular fa-circle" style="color:var(--danger)"></i> {% endcomment %}
-        <i class="fa-solid fa-bolt" style="color:var(--danger)"></i>
-        {% comment %} <i class="fa-solid fa-star" style="color:var(--danger)"></i> {% endcomment %}
-            {% comment %} <i class="fa-solid fa-exclamation" style="color:var(--danger)"></i> {% endcomment %}
+            <i class="fa-solid fa-bolt" style="color:var(--danger)"></i>
         {% endif %}
         {% for line in record.basket.all_lines %}
             {{ line.product }}{% if not forloop.last %}, {% endif %}

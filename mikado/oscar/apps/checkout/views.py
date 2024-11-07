@@ -351,7 +351,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         payment_method = self.checkout_session.payment_method()
 
         if payment_method is None:
-             payment_method = 'CASH'
+             payment_method = 'PAY_CASH'
 
         payment_kwargs['payment_method'] =  payment_method
         

@@ -2,7 +2,6 @@
 import re
 from django.conf import settings
 from django.contrib import messages
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
@@ -13,7 +12,6 @@ from django.db.models import Q, F
 from django.contrib.auth.models import Group
 
 from oscar.apps.communication.notifications.views import DetailView
-from oscar.apps.customer.utils import normalise_email
 from oscar.apps.dashboard.users.views import CustomerListView
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
@@ -28,14 +26,12 @@ Partner = get_model("partner", "Partner")
 Terminal = get_model("partner", "Terminal")
 (
     PartnerSearchForm,
-    PartnerCreateForm,
-    PartnerAddressForm,
+    PartnerForm,
 ) = get_classes(
     "dashboard.partners.forms",
     [
         "PartnerSearchForm",
-        "PartnerCreateForm",
-        "PartnerAddressForm",
+        "PartnerForm",
     ],
 )
 StaffForm = get_class("dashboard.users.forms","StaffForm")
@@ -112,7 +108,7 @@ class PartnerListView(SingleTableView):
 class PartnerCreateView(CreateView):
     model = Partner
     template_name = "oscar/dashboard/partners/partner_form.html"
-    form_class = PartnerCreateForm
+    form_class = PartnerForm
     success_url = reverse_lazy("dashboard:partner-list")
 
     def get_context_data(self, **kwargs):
@@ -142,24 +138,17 @@ class PartnerManageView(UpdateView):
     This multi-purpose view renders out a form to edit the partner's details,
     the associated address and a list of all associated users.
     """
-
+    model = Partner
     template_name = "oscar/dashboard/partners/partner_manage.html"
-    form_class = PartnerAddressForm
+    form_class = PartnerForm
     success_url = reverse_lazy("dashboard:partner-list")
 
     def get_object(self, queryset=None):
         self.partner = get_object_or_404(Partner, pk=self.kwargs["pk"])
-        address = self.partner.primary_address
-        if address is None:
-            address = self.partner.addresses.model(partner=self.partner)
-        return address
-
-    def get_initial(self):
-        return {
-            "name": self.partner.name,
-            "start_worktime": self.partner.start_worktime,
-            "end_worktime": self.partner.end_worktime,
-        }
+        self.address = self.partner.primary_address
+        if self.address is None:
+            self.address = self.partner.addresses.model(partner=self.partner)
+        return self.partner
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -167,18 +156,20 @@ class PartnerManageView(UpdateView):
         ctx["title"] = self.partner.name
         ctx["users"] = self.partner.users.all()
         ctx["terminals"] = self.partner.terminals.all()
-        if self.object.line1:
-            ctx['line1'] = self.object.line1
+        if self.address.line1:
+            ctx['line1'] = self.address.line1
         return ctx
 
     def form_valid(self, form):
-        self.partner.name = form.cleaned_data["name"]
-        self.partner.start_worktime = form.cleaned_data["start_worktime"]
-        self.partner.end_worktime = form.cleaned_data["end_worktime"]
-        self.partner.save()
+        self.object = form.save()
+        self.object.address = self.address
+        self.object.address.line1 = form.cleaned_data["line1"]
+        self.object.address.coords_long = form.cleaned_data["coords_long"]
+        self.object.address.coords_lat = form.cleaned_data["coords_lat"]
+        self.object.address.save()
         messages.success(
             self.request,
-            "Точка продажи '%s' успешно обновлена." % self.partner.name,
+            "Точка продажи '%s' успешно обновлена." % self.object.name,
         )
         return super().form_valid(form)
 

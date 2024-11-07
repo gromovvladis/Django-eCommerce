@@ -96,8 +96,6 @@ class AbstractOrder(models.Model):
 
     is_open = models.BooleanField("Заказ просмотрен", default=False, db_index=True)
     
-    is_online = models.BooleanField("Заказ сделан онлайн", default=True, db_index=True)
-
     #: Order status pipeline.  This should be a dict where each (key, value) #:
     #: corresponds to a status and a list of possible statuses that can follow
     #: that one.
@@ -186,6 +184,13 @@ class AbstractOrder(models.Model):
         """
         result = self.lines.aggregate(total=Sum("line_price_before_discounts"))
         return result["total"]
+    
+    @property
+    def is_online(self):
+        """
+        Check if order offline
+        """
+        return self.site in ('offline', 'evotor')
 
     @property
     def basket_total(self):

@@ -20,7 +20,6 @@ class CRMConfig(OscarConfig):
         self.crm_api_terminal_view = get_class("crm.views", "CRMTerminalEndpointView")
         self.crm_api_partner_view = get_class("crm.views", "CRMPartnerEndpointView")
         self.crm_api_product_view = get_class("crm.views", "CRMProductEndpointView")
-        self.crm_api_receipt_view = get_class("crm.views", "CRMReceiptEndpointView")
         self.crm_api_docs_view = get_class("crm.views", "CRMDocsEndpointView")
         self.crm_api_installation_view = get_class("crm.views", "CRMInstallationEndpointView")
 
@@ -34,7 +33,6 @@ class CRMConfig(OscarConfig):
             path("api/terminals/", self.crm_api_terminal_view.as_view(), name="api-terminals"),
             path("api/partners/", self.crm_api_partner_view.as_view(), name="api-partners"),
             path("api/products/", self.crm_api_product_view.as_view(), name="api-products"),
-            path("api/receipts/", self.crm_api_receipt_view.as_view(), name="api-receipts"),
             path("api/docs/", self.crm_api_docs_view.as_view(), name="api-docs"),
 
             path("api/installation/event/", self.crm_api_installation_view.as_view(), name="api-installation"),

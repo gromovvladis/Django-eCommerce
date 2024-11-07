@@ -18,7 +18,14 @@ def get_nodes(user):
     """
     Return the visible navigation nodes for the passed user
     """
-    all_nodes = create_menu(settings.OSCAR_DASHBOARD_NAVIGATION)
+    models = {
+        "stock_alert": StockAlert.objects.filter(status=StockAlert.OPEN),
+        "orders": Order.objects.filter(date_finish__isnull=True),
+        "delivery": DeliveryOrder.objects.filter(pickup_time__gt=timezone.now()),
+        "product_review": ProductReview.objects.filter(is_open=False),
+        "order_review": OrderReview.objects.filter(is_open=False),
+    }
+    all_nodes = create_menu(settings.OSCAR_DASHBOARD_NAVIGATION, models)
     visible_nodes = []
     for node in all_nodes:
         filtered_node = node.filter(user)
@@ -30,18 +37,11 @@ def get_nodes(user):
     return visible_nodes
 
 
-def create_menu(menu_items, parent=None):
+def create_menu(menu_items, models, parent=None):
     """
     Create the navigation nodes based on a passed list of dicts
     """
     nodes = []
-    models = {
-        "stock_alert": StockAlert.objects.filter(status=StockAlert.OPEN),
-        "orders": Order.objects.filter(date_finish__isnull=True),
-        "delivery": DeliveryOrder.objects.filter(pickup_time__gt=timezone.now()),
-        "product_review": ProductReview.objects.filter(is_open=False),
-        "order_review": OrderReview.objects.filter(is_open=False),
-    }
     default_fn = import_string(settings.OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION)
     for menu_dict in menu_items:
         try:
@@ -57,7 +57,7 @@ def create_menu(menu_items, parent=None):
                 notif=get_parent_notif(children, models),
                 access_fn=menu_dict.get("access_fn", default_fn),
             )
-            create_menu(children, parent=node)
+            create_menu(children, models, parent=node)
         else:
             node = Node(
                 label=label,
@@ -68,7 +68,7 @@ def create_menu(menu_items, parent=None):
                 url_args=menu_dict.get("url_args", None),
                 access_fn=menu_dict.get("access_fn", default_fn),
             )
-        if parent is None:
+        if parent is None or children:
             nodes.append(node)
         else:
             parent.add_path(node.url)
