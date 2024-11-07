@@ -49,6 +49,13 @@ class AbstractPartner(models.Model):
     )
 
     terminals = models.ManyToManyField("partner.Terminal", related_name="partners", verbose_name="Терминал", blank=True)
+    
+    is_active = models.BooleanField(
+        "Активен",
+        default=True,
+        db_index=True,
+        help_text="Активена точка продажи или нет",
+    )
 
     date_created = models.DateTimeField("Дата создания", auto_now_add=True, db_index=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)

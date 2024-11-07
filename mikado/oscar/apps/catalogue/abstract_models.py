@@ -434,26 +434,22 @@ class AbstractProduct(models.Model):
         choices=STRUCTURE_CHOICES,
         default=STANDALONE,
     )
-
     is_public = models.BooleanField(
         "Является общедоступным",
         default=True,
         db_index=True,
         help_text="Показывать этот продукт в результатах поиска и каталогах.",
     )
-
-    evotor_code = models.CharField(
-        "Code Эвотор (По умолчанию = ID)",
-        max_length=128,
-        blank=True,
-    )
-
     evotor_id = models.CharField(
         "ID Эвотор",
         max_length=128,
         blank=True,
     )
-
+    evotor_code = models.CharField(
+        "Code Эвотор",
+        max_length=128,
+        blank=True,
+    )
     upc = NullCharField(
         "Товарный код продукта UPC (Артикул)",
         max_length=64,

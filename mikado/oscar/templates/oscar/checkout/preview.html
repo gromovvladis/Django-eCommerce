@@ -101,14 +101,14 @@
                         <div class="v-checkout__detail-text mr-2">
                             <span>Способ оплаты: </span>
                             <span>
-                                {% if payment_method == "CASH" %}
+                                {% if payment_method == "PAY_CASH" %}
                                 Наличные
-                                {% elif payment_method == "SBP" %}
+                                {% elif payment_method == "PAY_SBP" %}
                                 СБП (Система быстрых платежей)
-                                {% elif payment_method == "CARD" %}
-                                Картой
+                                {% elif payment_method == "PAY_ONLINECARD" %}
+                                Картой Онлайн
                                 {% else %}
-                                Курьеру картой при получении
+                                Картой при получении
                                 {% endif %}
                             </span>
                         </div>    

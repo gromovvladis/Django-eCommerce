@@ -67,7 +67,18 @@ class OrderStatsForm(forms.Form):
         label="Способ оплаты", required=False, choices=()
     )
 
-    _filters = _description = _search_filters = None
+    is_online = forms.BooleanField(
+        label="Онлайн заказы",
+        required=False,
+        initial=True,
+    )
+    is_offine = forms.BooleanField(
+        label="Евотор заказы",
+        required=False,
+        initial=True,
+    )
+
+    _filters = _excludes = _description = _search_filters = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -75,6 +86,7 @@ class OrderStatsForm(forms.Form):
 
     def _determine_filter_metadata(self):
         self._filters = {}
+        self._excludes = {}
         self._search_filters = []
         self._description = "Все заказы"
         
@@ -94,6 +106,8 @@ class OrderStatsForm(forms.Form):
         voucher = data.get("voucher")
         payment_method = data.get("payment_method")
         status = data.get("status")
+        is_online = data.get("is_online")
+        is_offine = data.get("is_offine")
 
         if date_from and date_to:
             # self._filters["date_placed__range"] = [date_from, date_to + datetime.timedelta(days=1)]
@@ -176,13 +190,27 @@ class OrderStatsForm(forms.Form):
                 ("Статус заказа {sts}").format(sts=status), (("status", status),)
             ))
 
+        if is_online and not is_offine:
+            self._excludes["site__in"] = ['offline', 'evotor']
+            self._search_filters.append((
+                ('Онлайн заказы')
+                , (("is_online", True),)
+            ))
+
+        if not is_online and is_offine:
+            self._filters["site__in"] = ['offline', 'evotor']
+            self._search_filters.append((
+                ('Эвотор заказы')
+                , (("is_offline", True),)
+            ))
+
         if self._filters:
             self._description = "Результаты поиска"
 
     def get_filters(self):
-        if self._filters is None:
+        if self._filters is None or self._excludes is None:
             self._determine_filter_metadata()
-        return self._filters
+        return self._filters, self._excludes
 
     def get_search_filters(self):
         if self._search_filters is None:
@@ -278,6 +306,16 @@ class OrderSearchForm(forms.Form):
 
     payment_method = forms.ChoiceField(
         label="Способ оплаты", required=False, choices=()
+    )
+    is_online = forms.BooleanField(
+        label="Онлайн заказы",
+        required=False,
+        initial=True,
+    )
+    is_offine = forms.BooleanField(
+        label="Евотор заказы",
+        required=False,
+        initial=True,
     )
 
     format_choices = (

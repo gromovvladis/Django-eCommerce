@@ -14,7 +14,7 @@ def selected_partner(request):
         partners_select = cache.get('partners_select')
 
         if not partners_select:
-            partners_select = Partner.objects.prefetch_related("addresses").all()
+            partners_select = Partner.objects.prefetch_related("addresses").filter(is_active=True)
             cache.set("partners_select", partners_select, 21600)  # Кэш на 6 часов
 
         if partners_select:

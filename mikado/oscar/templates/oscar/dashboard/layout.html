@@ -51,8 +51,7 @@
                             {% if item.has_children %}
                                 <button class="nav-link position-relative" data-target="#navbar_{{ forloop.counter }}"
                                     data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" type="button"
-                                    aria-expanded="{% if request.path|tab:item.paths %}true{% else %}false{% endif %}"
-                                >
+                                    aria-expanded="{% if request.path|tab:item.paths %}true{% else %}false{% endif %}">
                                     <span>
                                         {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
                                         <span class="item_text arrow-dropdown ml-sm-2">{{ item.label }}</span>

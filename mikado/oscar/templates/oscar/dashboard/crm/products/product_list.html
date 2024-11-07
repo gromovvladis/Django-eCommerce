@@ -1,0 +1,33 @@
+{% extends 'oscar/dashboard/crm/crm_list.html' %}
+
+{% load widget_tweaks %}
+
+{% block title %}
+    Продукты Эвотор | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Продукты Эвотор</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block crm_header %}
+<div class="d-flex justify-content-start">
+    <h1>Продукты Эвотор</h1>
+    <form method="get" class="d-flex align-items-end no-widget-init ml-2" id="partner_form">
+        {% comment %} {% include "oscar/partials/form_fields.html" with form=form %} {% endcomment %}
+        {% for field in form %}
+            {% render_field field class+='partner-point' %}
+            {% for error in field.errors %}
+                <ul class="error-block">
+                    <li>{{ error }}</li>
+                </ul>
+            {% endfor %}
+        {% endfor %}
+    </form>
+</div>
+{% endblock crm_header %}

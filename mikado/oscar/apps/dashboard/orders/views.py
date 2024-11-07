@@ -101,7 +101,8 @@ class OrderStatsView(FormView):
         return self.post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        ctx = self.get_context_data(form=form, filters=form.get_filters())
+        filters, excludes = form.get_filters()
+        ctx = self.get_context_data(form=form, filters=filters, excludes=excludes)
         return self.render_to_response(ctx)
 
     def get_form_kwargs(self):
@@ -111,15 +112,13 @@ class OrderStatsView(FormView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
         ctx["form"] = kwargs.get("form", self.form_class)
         filters = kwargs.get("filters", {})
-
-        ctx.update(self.get_stats(filters))
+        excludes = kwargs.get("excludes", {})
+        ctx.update(self.get_stats(filters, excludes))
         ctx["title"] = kwargs["form"].get_filter_description()
         ctx["search_filters"] = kwargs["form"].get_search_filters()
         ctx["active_tab"] = "day"
-
         return ctx
 
     def get_report(self, orders, start, end, range_type, segments=10):
@@ -200,9 +199,9 @@ class OrderStatsView(FormView):
         
         return order_data, sum(order_count) > 0
 
-    def get_data(self, filters):
+    def get_data(self, filters, excludes):
         
-        orders = queryset_orders_for_user(self.request.user).filter(**filters)
+        orders = queryset_orders_for_user(self.request.user).filter(**filters).exclude(**excludes)
         
         if filters.get('date_placed__range') is not None:
             start_date, end_date = filters['date_placed__range']
@@ -244,7 +243,7 @@ class OrderStatsView(FormView):
 
         return data
     
-    def get_stats(self, filters):
+    def get_stats(self, filters, excludes):
         # Установка начальной и конечной даты
         start_date, end_date = None, now()
 
@@ -257,7 +256,7 @@ class OrderStatsView(FormView):
             end_date = filters['date_placed__lte']
 
         # Получение данных
-        data = self.get_data(filters)
+        data = self.get_data(filters, excludes)
         orders = data['orders']
         alerts = data['alerts']
         baskets = data['baskets']
@@ -330,7 +329,7 @@ class OrderStatsView(FormView):
             stats[f"lines_{period}"] = lines_period.count()
             stats[f"products_{period}"] = products.filter(date_created__range=(start_date, end_date)).count()
             
-            report,  stats[f"report_exist_{period}"] = self.get_report(orders, start, end_date, period)
+            report, stats[f"report_exist_{period}"] = self.get_report(orders, start, end_date, period)
             stats["report_datas"].append(report)
 
             stats[f"top_products_{period}"] = top_products
@@ -421,27 +420,22 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         data = self.form.cleaned_data
 
         if data["partner_point"]:
-            queryset = self.base_queryset.filter(
+            queryset = queryset.filter(
                 basket__partner__code=data["partner_point"]
             )
 
+        if data["is_online"] and not data["is_offine"]:
+            queryset = queryset.exclude(site__in=['offline', 'evotor'])
+        
+        if not data["is_online"] and data["is_offine"]:
+            queryset = queryset.filter(site__in=['offline', 'evotor'])
+
         if data["order_number"]:
-            queryset = self.base_queryset.filter(
+            queryset = queryset.filter(
                 number__istartswith=data["order_number"]
             )
 
         if data["username"]:
-            # If the value is two words, then assume they are first name and
-            # last name
-            # parts = data["username"].split()
-
-            # if len(parts) == 1:
-            #     parts = [data["name"], data["name"]]
-            # else:
-            #     parts = [parts[0], parts[1:]]
-
-            # query = Q(user__name__istartswith=parts[0])
-            # queryset = queryset.filter(user__username__istartswith=parts[0]).distinct()
             queryset = queryset.filter(user__username__istartswith=data["username"]).distinct()
 
         if data["product_title"]:
@@ -596,6 +590,16 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
                 ('Использованный промокод "{voucher_code}"').format(
                     voucher_code=data["voucher"]
                 ), (("voucher", data["voucher"]),)
+            ))
+
+        if data.get("is_online") and not data.get("is_offine"):
+            descriptions.append((
+                ('Онлайн заказы'), (("is_online", True),)
+            ))
+
+        if not data.get("is_online") and data.get("is_offine"):
+            descriptions.append((
+                ('Эвотор заказы'), (("is_offline", True),)
             ))
 
         if data.get("payment_method"):

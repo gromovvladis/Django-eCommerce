@@ -31,8 +31,8 @@ var line4 = document.querySelector('#id_line4');
 var emailBlock = document.querySelector('[data-field="v-email-field"]');
 var emailField = emailBlock.querySelector('#email_field_label');
 
-const OFFLINE_PAYMENT = ['CASH'];
-const ONLINE_PAYMENT = ['SBP', 'CARD'];
+const OFFLINE_PAYMENT = ['PAY_CASH', 'PAY_CARD'];
+const ONLINE_PAYMENT = ['PAY_SBP', 'PAY_ONLINECARD'];
 const baseURL = window.location.origin;
 
 // Инициализация адреса
