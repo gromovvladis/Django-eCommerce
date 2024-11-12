@@ -19,26 +19,26 @@ AttributeOption = get_model("catalogue", "AttributeOption")
 (
     StockRecordForm,
     StockRecordStockForm,
-    StockRecordStockAndPriceForm,
     ProductCategoryForm,
     ProductImageForm,
     ProductRecommendationForm,
     ProductAdditionalForm,
     ProductClassAdditionalForm,
     ProductAttributesForm,
+    ProductClassAttributesForm,
     AttributeOptionForm,
 ) = get_classes(
     "dashboard.catalogue.forms",
     (
         "StockRecordForm",
         "StockRecordStockForm",
-        "StockRecordStockAndPriceForm",
         "ProductCategoryForm",
         "ProductImageForm",
         "ProductRecommendationForm",
         "ProductAdditionalForm",
         "ProductClassAdditionalForm",
         "ProductAttributesForm",
+        "ProductClassAttributesForm",
         "AttributeOptionForm",
     ),
 )
@@ -98,7 +98,6 @@ class StockRecordFormSet(BaseStockRecordFormSet):
             user_partners = set(self.user.partners.all())
             if not user_partners & stockrecord_partners:
                 raise exceptions.ValidationError("По крайней мере одна товарная запись должна быть установлена точке продажи, которая связана с вами.")
-
 
 
 BaseStockRecordStockFormSet = inlineformset_factory(
@@ -214,7 +213,7 @@ class ProductRecommendationFormSet(BaseProductRecommendationFormSet):
     def __init__(self, product_class, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        
+
 BaseProductAdditionalFormSet = inlineformset_factory(
     Product,
     ProductAdditional,
@@ -241,9 +240,35 @@ class ProductClassAdditionalFormSet(BaseProductClassAdditionalFormSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-ProductAttributesFormSet = inlineformset_factory(
-    ProductClass, ProductAttribute, form=ProductAttributesForm, extra=3
+
+BaseProductAttributeFormSet = inlineformset_factory(
+    Product, 
+    ProductAttribute, 
+    form=ProductAttributesForm, 
+    extra=3,
+    fk_name="product",
 )
+
+
+class ProductAttributeFormSet(BaseProductAttributeFormSet):
+    # pylint: disable=unused-argument
+    def __init__(self, product_class, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+BaseProductClassAttributeFormSet = inlineformset_factory(
+    ProductClass, 
+    ProductAttribute, 
+    form=ProductClassAttributesForm, 
+    extra=3,
+    fk_name="product_class",
+)
+
+
+class ProductClassAttributeFormSet(BaseProductClassAttributeFormSet):
+    # pylint: disable=unused-argument
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 AttributeOptionFormSet = inlineformset_factory(

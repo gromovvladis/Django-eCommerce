@@ -8,6 +8,8 @@ from oscar.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
 
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
+Attribute = get_model("catalogue", "Attribute")
+AttributeSelect = get_class("dashboard.catalogue.widgets", "AttributeSelect")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
 StockRecord = get_model("partner", "StockRecord")
@@ -33,6 +35,7 @@ BaseCategoryForm = movenodeform_factory(
         "name",
         "slug",
         "description",
+        "order",
         "image",
         "is_public",
         "is_promo",
@@ -187,31 +190,8 @@ class StockRecordStockForm(forms.ModelForm):
         ]
 
 
-class StockRecordStockAndPriceForm(forms.ModelForm):
-    def __init__(self, product_class, user, *args, **kwargs):
-        # The user kwarg is not used by stock StockRecordForm. We pass it
-        # anyway in case one wishes to customise the partner queryset
-        self.user = user
-        super().__init__(*args, **kwargs)
-
-        # If not tracking stock, we hide the fields
-        if not product_class.track_stock:
-            for field_name in ["num_in_stock"]:
-                if field_name in self.fields:
-                    del self.fields[field_name]
-        else:
-            for field_name in ["price", "old_price", "num_in_stock"]:
-                if field_name in self.fields:
-                    self.fields[field_name].required = True
-
-    class Meta:
-        model = StockRecord
-        fields = [
-            "price",
-            "old_price",
-            "num_in_stock",
-            "is_public",
-        ]
+class StockAlertSearchForm(forms.Form):
+    status = forms.CharField(label="Статус")
 
 
 def _attr_text_field(attribute):
@@ -287,6 +267,21 @@ def _attr_image_field(attribute):
     return forms.ImageField(label=attribute.name, required=attribute.required)
 
 
+class ProductClassForm(forms.ModelForm):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # pylint: disable=no-member
+        remote_field = self._meta.model._meta.get_field("options").remote_field
+        self.fields["options"].widget = RelatedMultipleFieldWidgetWrapper(
+            self.fields["options"].widget, remote_field
+        )
+
+    class Meta:
+        model = ProductClass
+        fields = ["name", "requires_shipping", "track_stock", "options"]
+
+
 class ProductForm(SEOFormMixin, forms.ModelForm):
     FIELD_FACTORIES = {
         "text": _attr_text_field,
@@ -314,7 +309,6 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         model = Product
         fields = [
             "title",
-            "variant",
             "upc",
             "short_description",
             "description",
@@ -348,7 +342,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         else:
             # Only set product class for non-child products
             self.instance.product_class = product_class
-            del self.fields["variant"]
+            # del self.fields["variant"]
         self.add_attribute_fields(product_class, self.instance.is_parent)
 
         if "slug" in self.fields:
@@ -379,7 +373,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         instance = kwargs.get("instance")
         if instance is None:
             return
-        for attribute in product_class.attributes.all():
+        for attribute in product_class.class_attributes.all():
             try:
                 value = instance.attribute_values.get(attribute=attribute).value
             except exceptions.ObjectDoesNotExist:
@@ -392,7 +386,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         For each attribute specified by the product class, this method
         dynamically adds form fields to the product form.
         """
-        for attribute in product_class.attributes.all():
+        for attribute in product_class.class_attributes.all():
             field = self.get_attribute_field(attribute)
             if field:
                 self.fields["attr_%s" % attribute.code] = field
@@ -432,12 +426,6 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
                 value = self.cleaned_data[field_name]
                 setattr(self.instance.attr, attribute.code, value)
         super()._post_clean()
-
-
-
-
-class StockAlertSearchForm(forms.Form):
-    status = forms.CharField(label="Статус")
 
 
 class ProductCategoryForm(forms.ModelForm):
@@ -480,17 +468,16 @@ class ProductRecommendationForm(forms.ModelForm):
         }
 
 
+class AdditionalForm(forms.ModelForm):
+    class Meta:
+        model = Additional
+        fields = ["name", "upc", "order", "description", "price_currency", "price", "old_price", "weight", "max_amount", "image"]
+        widgets = {
+            "image": ThumbnailInput(),
+        }
+
+
 class ProductAdditionalForm(forms.ModelForm):
-    # def __init__(self, *args, data=None, **kwargs):
-    #     product_class = kwargs.pop('product_class')
-    #     class_addit = product_class.class_additionals.all()
-    #     id_list = []
-    #     for add in class_addit:
-    #         id_list.append(add.id)
-    #     super().__init__(*args, **kwargs)
-    #     if id_list:
-    #         self.fields['additional_product'].queryset = self.fields['additional_product'].queryset.exclude(id__in=class_addit)
-    
     class Meta:
         model = ProductAdditional
         fields = ["primary_product", "additional_product", "ranking"]
@@ -508,22 +495,7 @@ class ProductClassAdditionalForm(forms.ModelForm):
         }
 
 
-class ProductClassForm(forms.ModelForm):
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # pylint: disable=no-member
-        remote_field = self._meta.model._meta.get_field("options").remote_field
-        self.fields["options"].widget = RelatedMultipleFieldWidgetWrapper(
-            self.fields["options"].widget, remote_field
-        )
-
-    class Meta:
-        model = ProductClass
-        fields = ["name", "requires_shipping", "track_stock", "options"]
-
-
-class ProductAttributesForm(forms.ModelForm):
+class AttributeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -552,14 +524,32 @@ class ProductAttributesForm(forms.ModelForm):
         attr_type = self.cleaned_data.get("type")
         option_group = self.cleaned_data.get("option_group")
         if (
-            attr_type in [ProductAttribute.OPTION, ProductAttribute.MULTI_OPTION]
+            attr_type in [Attribute.OPTION, Attribute.MULTI_OPTION]
             and not option_group
         ):
             self.add_error("option_group", "Требуется группа опций.")
 
     class Meta:
-        model = ProductAttribute
+        model = Attribute
         fields = ["name", "code", "type", "option_group", "required"]
+
+
+class ProductAttributesForm(forms.ModelForm):
+    class Meta:
+        model = ProductAttribute
+        fields = ["product", "attribute", "is_variant"]
+        widgets = {
+            "attribute": AttributeSelect,
+        }
+
+
+class ProductClassAttributesForm(forms.ModelForm):
+    class Meta:
+        model = ProductAttribute
+        fields = ["product_class", "attribute", "is_variant"]
+        widgets = {
+            "attribute": AttributeSelect,
+        }
 
 
 class AttributeOptionGroupForm(forms.ModelForm):
@@ -578,12 +568,3 @@ class OptionForm(forms.ModelForm):
     class Meta:
         model = Option
         fields = ["name", "type", "required", "order", "help_text", "option_group"]
-
-
-class AdditionalForm(forms.ModelForm):
-    class Meta:
-        model = Additional
-        fields = ["name", "upc", "order", "description", "price_currency", "price", "old_price", "weight", "max_amount", "image"]
-        widgets = {
-            "image": ThumbnailInput(),
-        }

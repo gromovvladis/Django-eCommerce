@@ -26,12 +26,14 @@
                 <div class="{% if style|default:"stacked" != 'stacked' %}col-sm-8{% endif %}{% if field.widget_type == 'checkbox' or field.widget_type == 'radioselect' %} form-check{% endif %}">
                     {% block widget %}
                         {% if field.widget_type == 'checkbox' %}
-                            {% render_field field class+="form-check-input" %}
-                            {% if not nolabel %}
-                                <label for="{{ field.auto_id }}" class="form-check-label{% if field.field.required %} required{% endif %}">
-                                    {{ field.label|safe }}
-                                </label>
-                            {% endif %}
+                            <div class="d-flex align-items-center">
+                                {% render_field field class+="form-check-input" %}
+                                {% if not nolabel %}
+                                    <label for="{{ field.auto_id }}" class="form-check-label{% if field.field.required %} required{% endif %}">
+                                        {{ field.label|safe }}
+                                    </label>
+                                {% endif %}
+                            </div>
                         {% elif field.widget_type == 'radioselect' %}
                             {% render_field field class+="form-check-input position-static controls mt-2" %}
                         {% else %}

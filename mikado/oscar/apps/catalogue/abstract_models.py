@@ -27,8 +27,8 @@ from oscar.models.fields import AutoSlugField, NullCharField
 from oscar.models.fields.slugfield import SlugField
 from oscar.utils.models import get_image_upload_path
 
-CategoryQuerySet, ProductQuerySet, AdditionalQuerySet = get_classes(
-    "catalogue.managers", ["CategoryQuerySet", "ProductQuerySet", "AdditionalQuerySet"]
+CategoryQuerySet, ProductQuerySet, AdditionalQuerySet, AttributeQuerySet = get_classes(
+    "catalogue.managers", ["CategoryQuerySet", "ProductQuerySet", "AdditionalQuerySet", "AttributeQuerySet"]
 )
 ProductAttributesContainer = get_class(
     "catalogue.product_attributes", "ProductAttributesContainer"
@@ -78,7 +78,6 @@ class AbstractProductClass(models.Model):
 
     Not necessarily equivalent to top-level categories but usually will be.
     """
-
     name = models.CharField("Имя", max_length=128)
     slug = AutoSlugField("Ярлык", max_length=128, unique=True, populate_from="name")
     EMPTY, PCS, KG, LITR, MLITR, METR, COMPLECT, UPAC, ED = "", "шт", "кг", "л", "мл", "м", "компл", "упак", "ед"
@@ -116,7 +115,6 @@ class AbstractProductClass(models.Model):
     options = models.ManyToManyField(
         "catalogue.Option", blank=True, verbose_name="Опция"
     )
-
     class_additionals = models.ManyToManyField(
         "catalogue.Additional",
         through="ProductAdditional",
@@ -124,6 +122,15 @@ class AbstractProductClass(models.Model):
         verbose_name="Дополнительные товары класса",
         help_text=(
             "Дополнительные товары для всех продуктов этого класса"
+        ),
+    )
+    class_attributes = models.ManyToManyField(
+        "catalogue.Attribute",
+        through="ProductAttribute",
+        blank=True,
+        verbose_name="Атрибуты класса",
+        help_text=(
+            "Атрибуты для всех продуктов этого класса"
         ),
     )
 
@@ -144,7 +151,7 @@ class AbstractProductClass(models.Model):
 
     @property
     def has_attributes(self):
-        return self.attributes.exists()
+        return self.class_attributes.exists()
 
     @property
     def get_options(self):
@@ -162,7 +169,6 @@ class AbstractCategory(MP_Node):
 
     Uses :py:mod:`django-treebeard`.
     """
-
     #: Allow comparison of categories on a limited number of fields by ranges.
     #: When the Category model is overwritten to provide CMS content, defining
     #: this avoids fetching a lot of unneeded extra data from the database.
@@ -200,6 +206,12 @@ class AbstractCategory(MP_Node):
         default=False,
         help_text="Показывать эту категорию в списке категорий, как промокатегорию ('Хиты' или 'Новинки')",
     )
+    
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+    )
 
     ancestors_are_public = models.BooleanField(
         "Категории предков являются общедоступными",
@@ -218,7 +230,6 @@ class AbstractCategory(MP_Node):
     
     
     # Images
-    
     @cached_property
     def primary_image(self):
         """
@@ -374,7 +385,7 @@ class AbstractCategory(MP_Node):
     class Meta:
         abstract = True
         app_label = "catalogue"
-        ordering = ["order","path"]
+        ordering = ["path", "order"]
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
@@ -482,13 +493,6 @@ class AbstractProduct(models.Model):
     # Title is mandatory for canonical products but optional for child products
     title = models.CharField("Название", max_length=255, blank=True)
 
-    variant = models.CharField(
-        "Вариант", 
-        max_length=255, 
-        blank=True,
-        help_text="Отображается в поле выбора вариации родительского товара. К примеру, для пиццы: 25см, 30см",
-    )
-
     slug = SlugField("Ярлык", max_length=255, unique=True)
     description = models.TextField("Описание", blank=True)
     short_description = models.CharField("Краткое описание", max_length=255, null=True, blank=True)
@@ -510,8 +514,8 @@ class AbstractProduct(models.Model):
         help_text="Выберите, что это за продукт",
     )
     attributes = models.ManyToManyField(
-        "catalogue.ProductAttribute",
-        through="ProductAttributeValue",
+        "catalogue.Attribute",
+        through="ProductAttribute",
         verbose_name="Атрибуты",
         help_text=(
             "Атрибут продукта — это то, что этот продукт может"
@@ -529,7 +533,6 @@ class AbstractProduct(models.Model):
             "что-то вроде персонализированного сообщения для печати на футболке"
         ),
     )
-
     product_additionals = models.ManyToManyField(
         "catalogue.Additional",
         through="ProductAdditional",
@@ -539,7 +542,6 @@ class AbstractProduct(models.Model):
             "Дополнительные товары для данного продукта"
         ),
     )
-
     recommended_products = models.ManyToManyField(
         "catalogue.Product",
         through="ProductRecommendation",
@@ -703,7 +705,7 @@ class AbstractProduct(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             if self.is_child and not self.title:
-                self.slug = slugify(self.get_title() + self.variant)
+                self.slug = slugify(self.get_variant_title())
             else:
                 self.slug = slugify(self.get_title())
 
@@ -786,29 +788,17 @@ class AbstractProduct(models.Model):
             return True
         return False
     
-    # @cached_property
-    # def has_compound(self):
-    #     compound = self.attributes.filter(code='compound')
-    #     if compound:
-    #         return True
-    #     return False
-    
-    # @property
-    # def compound(self):
-        # return self.attribute_values.filter(attribute__code='compound').first().value_as_text
-
     @cached_property
     def has_weight(self):
         if self.attributes.filter(code='weight'):
             return True
         return False
     
-
-    @property
+    @cached_property
     def weight(self):
-        return self.attribute_values.get(attribute__code='weight').value
+        return self.attribute_values.get(productattribute__code='weight').value
     
-    @property
+    @cached_property
     def short_desc(self):
         return self.short_description
     
@@ -874,16 +864,20 @@ class AbstractProduct(models.Model):
             title = self.parent.title
         return title
     
-    def get_variant(self):
+    def get_variant_title(self):
         """
         Return a product's title or it's parent's title if it has no title
         """
-        variant = self.variant
-        if not variant and self.parent_id:
-            if self.title:
-                return self.title
-            return self.parent.title
-        return variant
+        patent_title = self.get_title()
+        variants = "-".join(self.get_variants())
+        return "%s-%s" % (patent_title, variants)
+    
+    def get_variants(self):
+        """
+        Return a product's varian
+        """
+        attribute_values = self.get_attribute_values().filter(is_variant=True)
+        return attribute_values
 
     get_title.short_description = ("Название продукта", "Название")
 
@@ -931,15 +925,17 @@ class AbstractProduct(models.Model):
     def get_attribute_values(self):
         if not self.pk:
             return self.attribute_values.model.objects.none()
+        
+        class_attribute_values = self.product_class.attribute_values.all()
 
         attribute_values = self.attribute_values.all()
         if self.is_child:
             parent_attribute_values = self.parent.attribute_values.exclude(
                 attribute__code__in=attribute_values.values("attribute__code")
             )
-            return attribute_values | parent_attribute_values
+            return attribute_values | parent_attribute_values | class_attribute_values
 
-        return attribute_values
+        return attribute_values | class_attribute_values
     
     # Images
 
@@ -1072,20 +1068,11 @@ class AbstractProductRecommendation(models.Model):
         verbose_name_plural = "Рекомендации продукта"
 
 
-class AbstractProductAttribute(models.Model):
+class AbstractAttribute(models.Model):
     """
     Defines an attribute for a product class. (For example, number_of_pages for
     a 'book' class)
     """
-
-    product_class = models.ForeignKey(
-        "catalogue.ProductClass",
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name="attributes",
-        null=True,
-        verbose_name="Тип продукта",
-    )
     name = models.CharField("Имя", max_length=128)
     code = models.SlugField(
         "Код",
@@ -1130,15 +1117,16 @@ class AbstractProductAttribute(models.Model):
         verbose_name="Группа опций",
         help_text='Выберите группу параметров, если используете тип «Опция» или «Множество опций».',
     )
-    required = models.BooleanField("Необходимый", default=False)
+    required = models.BooleanField("Обязательно", default=False)
+
+    objects = AttributeQuerySet.as_manager()
 
     class Meta:
         abstract = True
         app_label = "catalogue"
         ordering = ["code"]
-        verbose_name = "Атрибут продукта"
-        verbose_name_plural = "Атрибуты продукта"
-        unique_together = ("code", "product_class")
+        verbose_name = "Атрибут"
+        verbose_name_plural = "Атрибуты"
 
     @property
     def is_option(self):
@@ -1286,7 +1274,7 @@ class AbstractProductAttribute(models.Model):
     _validate_image = _validate_file
 
 
-class AbstractProductAttributeValue(models.Model):
+class AbstractProductAttribute(models.Model):
     """
     The "through" model for the m2m relationship between :py:class:`Product <.AbstractProduct>` and
     :py:class:`ProductAttribute <.AbstractProductAttribute>`  This specifies the value of the attribute for
@@ -1296,7 +1284,7 @@ class AbstractProductAttributeValue(models.Model):
     """
 
     attribute = models.ForeignKey(
-        "catalogue.ProductAttribute",
+        "catalogue.Attribute",
         on_delete=models.CASCADE,
         verbose_name="Атрибут",
     )
@@ -1304,8 +1292,20 @@ class AbstractProductAttributeValue(models.Model):
         "catalogue.Product",
         on_delete=models.CASCADE,
         related_name="attribute_values",
+        blank=True,
+        null=True,
         verbose_name="Продукт",
     )
+    product_class = models.ForeignKey(
+        "catalogue.ProductClass",
+        on_delete=models.CASCADE,
+        related_name="attribute_values",
+        blank=True,
+        null=True,
+        verbose_name="Класс продукта",
+    )
+
+    is_variant = models.BooleanField("Используется для вариаций?", default=False)
 
     value_text = models.TextField("Текст", blank=True, null=True)
     value_integer = models.IntegerField(
@@ -1382,7 +1382,7 @@ class AbstractProductAttributeValue(models.Model):
     class Meta:
         abstract = True
         app_label = "catalogue"
-        unique_together = ("attribute", "product")
+        unique_together = ("attribute", "product", "product_class")
         verbose_name = "Значение атрибута продукта"
         verbose_name_plural = "Значения атрибутов продукта"
 
@@ -1474,8 +1474,8 @@ class AbstractAttributeOptionGroup(models.Model):
     class Meta:
         abstract = True
         app_label = "catalogue"
-        verbose_name = "Группа параметров атрибута"
-        verbose_name_plural = "Группы параметров атрибутов"
+        verbose_name = "Группа атрибутов"
+        verbose_name_plural = "Группы атрибутов"
 
     @property
     def option_summary(self):

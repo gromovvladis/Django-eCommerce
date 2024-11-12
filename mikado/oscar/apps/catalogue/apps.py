@@ -27,7 +27,9 @@ class CatalogueOnlyConfig(OscarConfig):
         urls = super().get_urls()
         urls += [
             re_path(
-                r"^(?P<category_slug>[\w-]+(/[\w-]+)*)/(?P<product_slug>[\w-]*)/$",
+                # r"^category/(?P<category_slug>[\w-]+(/[\w-]+)*)/(?P<product_slug>[\w-]*)/$",
+                # r"^(?P<category_slug>[\w-]+(/[\w-]+)*)/(?P<product_slug>[\w-]*)/$",
+                r"^(?P<category_slug>[\w-]+(/[\w-]+)*)/(?P<product_slug>[\w-]+)$",
                 self.detail_view.as_view(),
                 name="detail",
             ),

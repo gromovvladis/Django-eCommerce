@@ -18,6 +18,7 @@ class CRMDashboardConfig(OscarDashboardConfig):
         self.crm_partners_list_view = get_class("dashboard.crm.views", "CRMPartnerListView")
         self.crm_terminals_list_view = get_class("dashboard.crm.views", "CRMTerminalListView")
         self.crm_staffs_list_view = get_class("dashboard.crm.views", "CRMStaffListView")
+        self.crm_groups_list_view = get_class("dashboard.crm.views", "CRMGroupsListView")
         self.crm_products_list_view = get_class("dashboard.crm.views", "CRMProductListView")
         self.crm_docs_list_view = get_class("dashboard.crm.views", "CRMDocsListView")
 
@@ -36,6 +37,7 @@ class CRMDashboardConfig(OscarDashboardConfig):
             path("partners/", self.crm_partners_list_view.as_view(), name="crm-partners"),
             path("terminals/", self.crm_terminals_list_view.as_view(), name="crm-terminals"),
             path("staffs/", self.crm_staffs_list_view.as_view(), name="crm-staffs"),
+            path("groups/", self.crm_groups_list_view.as_view(), name="crm-groups"),
             path("products/", self.crm_products_list_view.as_view(), name="crm-products"),
             path("docs/", self.crm_docs_list_view.as_view(), name="crm-docs"),
             

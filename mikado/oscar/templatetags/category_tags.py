@@ -141,3 +141,61 @@ def get_annotated_list(depth=None, parent=None):
         categories = annotated_categories
 
     return categories
+
+
+@register.simple_tag(name="root_categories")
+def get_categories_list():
+    """
+    Gets only root categories.
+    """
+    categories = cache.get("root_categories")
+
+    if not categories:
+        # Получаем корневые категории (только те, у которых глубина равна 1)
+        categories = Category.objects.filter(depth=1).browsable()
+        
+        annotated_categories = []
+        
+        for node in categories:
+            info = CheapCategoryInfo(
+                node,
+                url=node._get_absolute_url(),
+                num_to_close=[],
+                level=0,
+                primary_image=node.primary_image,
+            )
+            annotated_categories.append(info)
+
+        cache.set("root_categories", annotated_categories, 3600)
+        categories = annotated_categories
+
+    return categories
+
+
+@register.simple_tag(name="subcategory_tree")
+def get_child_categories(parent):
+    """
+    Gets only child categories of a specified parent category.
+    """
+    cache_key = f"child_categories_{parent.pk}"
+    categories = cache.get(cache_key)
+
+    if not categories:
+        categories = parent.get_children().browsable()
+        
+        annotated_categories = []
+
+        for node in categories:
+            info = CheapCategoryInfo(
+                node,
+                url=node._get_absolute_url(),
+                num_to_close=[],
+                level=1,
+                primary_image=node.primary_image,
+            )
+            annotated_categories.append(info)
+
+        cache.set(cache_key, annotated_categories, 3600)
+        categories = annotated_categories
+
+    return categories

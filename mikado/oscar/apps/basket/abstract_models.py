@@ -1110,11 +1110,11 @@ class AbstractLine(models.Model):
     
     @property 
     def variants(self):
-        slug = ""
-        if self.product.variant:
-            slug = self.product.variant
+        variants = self.product.get_variants()
+        if variants:
+            return ", ".join(variants)
 
-        return slug
+        return variants
     
     @property 
     def old_price(self):

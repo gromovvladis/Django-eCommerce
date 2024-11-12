@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import View
 
-from oscar.apps.catalogue.serializers import ProductsSerializer
+from oscar.apps.catalogue.serializers import GroupsSerializer, ProductsSerializer
 from oscar.apps.crm.client import EvatorCloud
 from oscar.apps.customer.serializers import StaffsSerializer
 from oscar.apps.dashboard.crm.mixins import CRMTablesMixin
@@ -26,8 +26,9 @@ Terminal = get_model("partner", "Terminal")
 Order = get_model("order", "Order")
 Line = get_model("order", "Line")
 Product = get_model('catalogue', 'Product')
+Category = get_model("catalogue", "Category")
 
-CRMProductForm = get_class("dashboard.crm.forms", "CRMProductForm")
+CRMPartnerForm = get_class("dashboard.crm.forms", "CRMPartnerForm")
 
 (
     CRMPartnerEvotorTable,
@@ -38,6 +39,8 @@ CRMProductForm = get_class("dashboard.crm.forms", "CRMProductForm")
     CRMStaffSiteTable,
     CRMProductEvotorTable,
     CRMProductSiteTable,
+    CRMGroupEvotorTable,
+    CRMGroupSiteTable,
 ) = get_classes(
     "dashboard.crm.tables",
     (
@@ -49,6 +52,8 @@ CRMProductForm = get_class("dashboard.crm.forms", "CRMProductForm")
         "CRMStaffSiteTable",
         "CRMProductEvotorTable",
         "CRMProductSiteTable",
+        "CRMGroupEvotorTable",
+        "CRMGroupSiteTable",
     ),
 )
 
@@ -247,10 +252,112 @@ class CRMStaffListView(CRMTablesMixin):
         return redirect(self.url_redirect)
    
 
+class CRMGroupsListView(CRMTablesMixin):
+    template_name = 'oscar/dashboard/crm/groups/group_list.html'
+    model = Category
+    form_class = CRMPartnerForm
+    serializer = GroupsSerializer
+    context_table_name = "tables"
+    table_prefix = "group_{}-"
+    table_evotor = CRMGroupEvotorTable
+    table_site = CRMGroupSiteTable
+    url_redirect = reverse_lazy("dashboard:crm-groups")
+
+    def get_queryset(self):     
+
+        self.form = self.form_class(self.request.GET)
+        if not self.form.is_valid():
+            messages.error(
+                self.request,
+                "Ошибка при формировании запроса к Эвотор. Неверные данные формы",
+            )
+            return []
+
+        data = self.form.cleaned_data
+        partner_evotor_id = data.get("partner") or self.form.fields.get("partner").initial
+
+        if not partner_evotor_id:
+            messages.error(
+                self.request,
+                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID точки продаж. Обновите список точек продаж",
+            )
+            return []
+        
+        data_json = EvatorCloud().get_groups(partner_evotor_id) 
+        serializer = self.serializer(data=data_json)
+
+        if serializer.is_valid():
+            data_items = serializer.initial_data['items']
+            
+            for data_item in data_items:
+                evotor_id = data_item['id']
+                data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
+                # first_name = data_item.get('name', '')
+                # last_name = data_item.get('last_name', '')
+                # middle_name = data_item.get('patronymic_name', '')
+                # stores_ids = data_item.get('stores', None)
+                # try:
+                #     store_id = data_item['store_id']
+                #     data_item['partner'] = Partner.objects.get(evotor_id=store_id)
+                # except Exception:
+                #     pass
+
+                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
+                
+                if model_instance:
+                    data_item['is_created'] = True
+                    
+                    # partner_evotor_ids = set(model_instance.user.partners.values_list('evotor_id', flat=True)) if model_instance.user else set()
+                    # partner_matches = bool(partner_evotor_ids.intersection(stores_ids))
+                    # data_item['is_valid'] = (
+                    #     model_instance.first_name == first_name
+                    #     and model_instance.last_name == last_name
+                    #     and model_instance.middle_name == middle_name
+                    #     and partner_matches
+                    # )
+                else:
+                    data_item.update({
+                        # 'partners': stores_ids,
+                        'is_created': False,
+                        'is_valid': False
+                    })
+
+            self.queryset = sorted(data_items, key=lambda x: (x['is_created'], x['is_valid']))
+            return self.queryset
+        else:
+            self.queryset = []
+            logger.error(f"Ошибка при сериализации данных {serializer.errors}")
+            messages.error(
+                self.request,
+                (f"Ошибка при сериализации данных {serializer.errors}"),
+            )
+            return self.queryset
+
+    def update_models(self, data_items, is_filtered):
+        msg, success = EvatorCloud().create_or_update_products(data_items, is_filtered)
+        if success:
+            messages.success(
+                self.request,
+                msg,
+            )
+        else: 
+            messages.error(
+                self.request,
+                msg,
+            )
+        return redirect(self.url_redirect)
+    
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["form"] = self.form
+        return ctx
+
+
 class CRMProductListView(CRMTablesMixin):
     template_name = 'oscar/dashboard/crm/products/product_list.html'
     model = Product
-    form_class = CRMProductForm
+    form_class = CRMPartnerForm
     serializer = ProductsSerializer
     context_table_name = "tables"
     table_prefix = "product_{}-"
@@ -349,6 +456,10 @@ class CRMProductListView(CRMTablesMixin):
         return ctx
 
  
+
+
+
+
 
 
 

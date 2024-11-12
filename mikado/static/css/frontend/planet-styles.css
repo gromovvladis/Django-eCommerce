@@ -14444,7 +14444,11 @@ ymaps[class*="search__suggest-item_selected"] {
     transition: box-shadow 150ms;
     user-select: none;
     scrollbar-width: 10px;
-    /* padding-top: 5px; */
+}
+
+.child-cats{
+    overflow-x: auto;
+    padding: .25rem 0;
 }
 
 .cats_header::-webkit-scrollbar {
@@ -14473,6 +14477,12 @@ ymaps[class*="search__suggest-item_selected"] {
     border-radius: 16px;
     flex: 0 0 auto;
     text-wrap: nowrap;
+}
+
+.cat_item--child{
+    background: var(--color-background-green);
+    color: #004528;
+    /* color: var(--color-primary); */
 }
 
 .cat_item--active {

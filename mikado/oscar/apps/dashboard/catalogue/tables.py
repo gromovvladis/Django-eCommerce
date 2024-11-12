@@ -10,6 +10,7 @@ DashboardTable = get_class("dashboard.tables", "DashboardTable")
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 Category = get_model("catalogue", "Category")
+Attribute = get_model("catalogue", "Attribute")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
@@ -30,6 +31,12 @@ class ProductClassTable(DashboardTable):
         accessor=A("get_options"),
         attrs = {'th': {'class': 'class_options'},}
     )
+    class_attributes = ManyToManyColumn(
+        verbose_name="Атрибуты",
+        orderable=True,
+        order_by="num_attributes",
+        attrs = {'th': {'class': 'class_attributes'},}
+    )
     class_additionals = ManyToManyColumn(
         verbose_name="Доп. товары",
         orderable=True,
@@ -49,7 +56,7 @@ class ProductClassTable(DashboardTable):
         attrs = {'th': {'class': 'delivery'},}
     )
     track_stock = TemplateColumn(
-        verbose_name="Доступен",
+        verbose_name="Запасы",
         template_name="oscar/dashboard/table/boolean.html",
         order_by=("track_stock"),
         attrs = {'th': {'class': 'stock'},}
@@ -69,6 +76,7 @@ class ProductClassTable(DashboardTable):
         fields = (
             "name",
             "class_options",
+            "class_attributes",
             "class_additionals",
             "num_products",
             "requires_shipping",
@@ -77,6 +85,7 @@ class ProductClassTable(DashboardTable):
         sequence = (
             "name",
             "class_options",
+            "class_attributes",
             "class_additionals",
             "num_products",
             "requires_shipping",
@@ -272,7 +281,7 @@ class AttributeOptionGroupTable(DashboardTable):
         attrs = {'th': {'class': 'name'},}
     )
     option_summary = TemplateColumn(
-        verbose_name="Значения пераметра",
+        verbose_name="Атрибуты",
         template_name="oscar/dashboard/catalogue/attribute_option_group_row_option_summary.html",
         orderable=False,
         attrs = {'th': {'class': 'option_summary'},}
@@ -285,7 +294,7 @@ class AttributeOptionGroupTable(DashboardTable):
     )
 
     icon = "fas fa-paperclip"
-    caption = ngettext_lazy("%s Группа параметров атрибута", "%s Групп параметров атрибутов")
+    caption = ngettext_lazy("%s Группа атрибутов", "%s Групп атрибутов")
 
     class Meta(DashboardTable.Meta):
         model = AttributeOptionGroup
@@ -295,7 +304,50 @@ class AttributeOptionGroupTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Нет созданых групп параметров атрибута"
+        empty_text = "Нет созданых групп атрибутов"
+
+
+class AttributeTable(DashboardTable):
+    name = TemplateColumn(
+        verbose_name="Имя",
+        template_name="oscar/dashboard/catalogue/attribute_row_name.html",
+        order_by="name",
+        attrs = {'th': {'class': 'name'},}
+    )
+    type = Column(
+        verbose_name="Тип",
+        order_by="max_amount",
+        attrs = {'th': {'class': 'type'},},
+    )
+    option_group = Column(
+        verbose_name="Опции",
+        order_by="option_group",
+        attrs = {'th': {'class': 'option_group'},},
+    )
+    required = TemplateColumn(
+        verbose_name="Обязательно",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by=("required"),
+        attrs = {'th': {'class': 'required'},}
+    )
+    actions = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/catalogue/attribute_row_actions.html",
+        orderable=False,
+        attrs = {'th': {'class': 'actions'},}
+    )
+    icon = "fas fa-chart-bar" 
+    caption = ngettext_lazy("%s Атрибут","%s Атрибутов")
+
+    class Meta(DashboardTable.Meta):
+        model = Attribute
+        fields = ("name", "type", "option_group", "required")
+        sequence = ("name", "type", "option_group", "required", "actions")
+        per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
+        empty_text = "Нет созданых атрибутов"
 
 
 class OptionTable(DashboardTable):

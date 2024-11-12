@@ -31,7 +31,7 @@ class AttributesQuerysetCache:
 
     @cached_property
     def attributes(self):
-        return QuerysetCache(self.product.get_product_class().attributes.all())
+        return QuerysetCache(self.product.get_product_class().class_attributes.all())
 
     @cached_property
     def attribute_values(self):
@@ -227,7 +227,7 @@ class ProductAttributesContainer:
             # no need to save untouched attr lists
             return (to_be_updated, to_be_created, to_be_deleted, update_fields)
 
-        ProductAttributeValue = self.product.attribute_values.model
+        ProductAttribute = self.product.attribute_values.model
 
         for attribute in self.get_all_attributes():
             if hasattr(self, attribute.code):
@@ -256,7 +256,8 @@ class ProductAttributesContainer:
                     if (
                         value_obj is None or value_obj.product != self.product
                     ):  # it doesn't exist yet so should be created
-                        new_value_obj = ProductAttributeValue(
+                        # new_value_obj = ProductAttributeValue(
+                        new_value_obj = ProductAttribute(
                             attribute=attribute, product=self.product
                         )
 
