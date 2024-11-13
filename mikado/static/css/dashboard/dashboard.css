@@ -18539,10 +18539,11 @@ h3.app-ico:before {
 }
 
 .bs-docs-sidenav .nav-link.active {
-  font-weight: bold;
   position: relative;
   background: #f3f3f3;
   z-index: 2;
+  color: var(--purple);
+  /* font-weight: bold; */
   /* padding: 9px 15px; */
 }
 
@@ -18605,7 +18606,7 @@ h3.app-ico:before {
   left: 170px;
   right: 0;
   width: calc(100% - 170px);
-  padding: 1.25rem 0;
+  padding: 1.1rem 0;
   /* padding: 1.5rem; */
   /* margin-top: 1rem; */
   /* margin-top: 1rem; */
@@ -20064,6 +20065,10 @@ caption {
 .table .statistic span{
   display: none;
 } 
+
+input:focus-visible {
+    outline: #ececec auto 4px;
+}
 
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {

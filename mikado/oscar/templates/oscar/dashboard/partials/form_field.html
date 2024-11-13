@@ -4,10 +4,9 @@
     {{ field }}
 {% else %}
     {% block control_group %}
-        <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width">
+        <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width" id="form-group_{{ field.auto_id }}">
             {% block label %}
                 {% if field.name == "line1" %}
-                
                 <div class="d-flex align-items-center justify-content-between">
                     <label for="{{ field.auto_id }}" class="{% if style|default:"stacked" != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">
                         {{ field.label|safe }}
@@ -26,14 +25,14 @@
                 <div class="{% if style|default:"stacked" != 'stacked' %}col-sm-8{% endif %}{% if field.widget_type == 'checkbox' or field.widget_type == 'radioselect' %} form-check{% endif %}">
                     {% block widget %}
                         {% if field.widget_type == 'checkbox' %}
-                            <div class="d-flex align-items-center">
+                            {% comment %} <div class="d-flex align-items-center"> {% endcomment %}
                                 {% render_field field class+="form-check-input" %}
                                 {% if not nolabel %}
                                     <label for="{{ field.auto_id }}" class="form-check-label{% if field.field.required %} required{% endif %}">
                                         {{ field.label|safe }}
                                     </label>
                                 {% endif %}
-                            </div>
+                            {% comment %} </div> {% endcomment %}
                         {% elif field.widget_type == 'radioselect' %}
                             {% render_field field class+="form-check-input position-static controls mt-2" %}
                         {% else %}

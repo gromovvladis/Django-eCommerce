@@ -1,4 +1,6 @@
 {% extends 'oscar/dashboard/layout.html' %}
+{% load compress %}
+{% load static %}
 
 {% block title %}
     {{ title }} | {{ block.super }}
@@ -105,5 +107,11 @@
             </div>
         </div>
     </div>
-
 {% endblock dashboard_content %}
+
+{% block extrascripts %}
+    {% comment %} {% compress js %} {% endcomment %}
+        <script src="{% static "js/dashboard/catalogue/attribute_form.js" %}" async></script>
+    {% comment %} {% endcompress %} {% endcomment %}
+{% endblock %}
+

@@ -187,6 +187,8 @@ var oscar = (function(o, $) {
                             data: function(params) {
                                 return {
                                     q: params.term,
+                                    product_id: $(this).data('product-id'),
+                                    class_id: $(this).data('class-id'),
                                     page: params.page || 1
                                 };
                             }

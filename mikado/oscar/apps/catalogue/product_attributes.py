@@ -31,7 +31,10 @@ class AttributesQuerysetCache:
 
     @cached_property
     def attributes(self):
-        return QuerysetCache(self.product.get_product_class().class_attributes.all())
+        if self.product.id:
+            return QuerysetCache(self.product.attributes.all() | self.product.get_product_class().class_attributes.all())
+        else:
+            return QuerysetCache(self.product.get_product_class().class_attributes.all())
 
     @cached_property
     def attribute_values(self):

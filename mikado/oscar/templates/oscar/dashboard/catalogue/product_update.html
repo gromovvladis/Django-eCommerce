@@ -189,18 +189,15 @@
                             {% if full_access %}
                                 <div class="tab-pane" id="product_attributes">
                                     {% block attributes %}
-                                        {% if product_class.has_attributes %}
+                                        {% if product.has_attributes or product_class.has_attributes %}
                                             <table class="table table-striped table-bordered">
                                                 <caption>
-                                                    Атрибуты товара
+                                                    Значения атрибутов
                                                 </caption>
                                                 {% for field in form %}
                                                     {% if 'attr' in field.id_for_label %}
                                                         <tr >
                                                             <td>
-                                                                <span class="badge badge-success ml-1">
-                                                                    Тип продукта: {{ product_class }}
-                                                                </span>
                                                                 {% include "oscar/dashboard/partials/form_field.html" %}
                                                             </td>
                                                         </tr>
@@ -215,12 +212,11 @@
                                             {{ attribute_formset.management_form }}  
                                             <table class="table table-striped table-bordered">
                                                 <caption>
-                                                    Добавить атрибуты
+                                                    Атрибуты
                                                 </caption>
                                                 <thead>
                                                     <tr style="text-align:center;">
                                                         <th>Атрибут</th>
-                                                        <th>Вариация</th>
                                                         <th class="text-danger">Удалить</th>
                                                     </tr>
                                                 </thead>
@@ -482,22 +478,24 @@
                             {% if additional_formset %}
                                 <div class="tab-pane" id="product_additional">
 
-                                    <div class="tab-pane active mb-3">
-                                        <div class="table-header">
-                                            <h3>Дополнительные товары 
-                                                <span class="badge badge-success ml-1">
-                                                    {{ product_class }}
-                                                </span>
-                                            </h3>
+                                    {% if has_additionals %}
+                                        <div class="tab-pane active mb-3">
+                                            <div class="table-header">
+                                                <h3>Дополнительные товары 
+                                                    <span class="badge badge-success ml-1">
+                                                        {{ product_class }}
+                                                    </span>
+                                                </h3>
+                                            </div>
+                                            <div class="card card-body product-details">
+                                                {% if class_additionals %}
+                                                    {% for addit in class_additionals %}
+                                                        {{ addit }}{% if not forloop.last %}, {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
                                         </div>
-                                        <div class="card card-body product-details">
-                                            {% if class_additionals %}
-                                                {% for addit in class_additionals %}
-                                                    {{ addit }}{% if not forloop.last %}, {% endif %}
-                                                {% endfor %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
+                                    {% endif %}
 
                                     {% block additional_products_content %}
                                         {{ additional_formset.management_form }}

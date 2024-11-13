@@ -1415,6 +1415,9 @@ class AdditionalLookupView(ObjectLookupView):
 
     def lookup_filter(self, qs, term):
         return qs.filter(name__icontains=term) 
+
+    def product_filter(self, qs, product_id, class_id):
+        return qs.exclude(Q(product__id=product_id) | Q(productclass__id=class_id))
     
 
 class AttributeLookupView(ObjectLookupView):
@@ -1425,4 +1428,6 @@ class AttributeLookupView(ObjectLookupView):
 
     def lookup_filter(self, qs, term):
         return qs.filter(name__icontains=term) 
-    
+
+    def product_filter(self, qs, product_id, class_id):
+        return qs.exclude(Q(productclass__id=class_id) | Q(product__id=product_id))

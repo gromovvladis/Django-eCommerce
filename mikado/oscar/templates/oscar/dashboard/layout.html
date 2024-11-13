@@ -143,7 +143,7 @@
 
 {% block scripts %}
         <script src="{% static "js/thirdpaty/tinymce-6/tinymce.min.js" %}"></script>
-        {% compress js %}
+        {% comment %} {% compress js %} {% endcomment %}
             <script src="{% static "js/thirdpaty/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/thirdpaty/mousewheel/jquery.mousewheel.js" %}"></script>
             <script src="{% static "js/thirdpaty/inputmask/jquery.inputmask.min.js" %}"></script>
@@ -156,7 +156,7 @@
             <script src="{% static "js/dashboard/oscar/dashboard.js" %}"></script>
             <script src="{% static "js/dashboard/oscar/RelatedObjectLookups.js" %}"></script>
 
-            <script src="{% static "js/dashboard/statictic/dashboard-sliders.js" %}"></script>
+            <script src="{% static "js/dashboard/index/dashboard-sliders.js" %}"></script>
             <script src="{% static "js/dashboard/utils/navi.js" %}"></script>
             <script src="{% static "js/dashboard/utils/table.js" %}"></script>
             <script src="{% static "js/dashboard/utils/photo.js" %}"></script>
@@ -164,7 +164,10 @@
             <script src="{% static "js/dashboard/utils/datepicker.js" %}"></script>
             <script src="{% static "js/dashboard/utils/phone-mask.js" %}"></script>
             <script src="{% static "js/dashboard/utils/map.js" %}"></script>
-        {% endcompress %}
+
+            
+
+        {% comment %} {% endcompress %} {% endcomment %}
         {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script> {% endcomment %}
 {% endblock %}
 
@@ -189,10 +192,5 @@
     });
 
     oscar.dashboard.init({'languageCode': 'ru'});
-
-    document.querySelector("form").addEventListener("submit", function () {
-        console.log("11213");
-        tinymce.triggerSave(); // Синхронизирует содержимое
-    });
     
 {% endblock %}

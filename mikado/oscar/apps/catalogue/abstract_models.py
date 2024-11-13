@@ -154,6 +154,10 @@ class AbstractProductClass(models.Model):
         return self.class_attributes.exists()
 
     @property
+    def has_additionals(self):
+        return self.class_additionals.exists()
+
+    @property
     def get_options(self):
         return self.options.all()
     
@@ -519,7 +523,7 @@ class AbstractProduct(models.Model):
         verbose_name="Атрибуты",
         help_text=(
             "Атрибут продукта — это то, что этот продукт может"
-            "иметь, например, размер, указанный его классом"
+            "иметь, например, размер, указанный его классом или в самом продукте"
         ),
     )
     #: It's possible to have options product class-wide, and per product.
@@ -789,6 +793,20 @@ class AbstractProduct(models.Model):
         return False
     
     @cached_property
+    def has_attributes(self):
+        # Extracting annotated value with number of product class options
+        # from product list queryset.
+        # has_product_class_additionals = getattr(self, "has_product_class_additionals", None)
+        # has_product_additionals = getattr(self, "has_product_additionals", None)
+        # if has_product_class_additionals is not None and has_product_additionals is not None:
+        #     return has_product_class_additionals or has_product_additionals
+        
+        additionals = self.attributes.all()
+        if additionals:
+            return True
+        return False
+    
+    @cached_property
     def has_weight(self):
         if self.attributes.filter(code='weight'):
             return True
@@ -796,7 +814,7 @@ class AbstractProduct(models.Model):
     
     @cached_property
     def weight(self):
-        return self.attribute_values.get(productattribute__code='weight').value
+        return self.attribute_values.get(attribute__code='weight').value
     
     @cached_property
     def short_desc(self):
@@ -1096,10 +1114,10 @@ class AbstractAttribute(models.Model):
         (BOOLEAN, "Да / Нет"),
         (FLOAT, "Дробное число"),
         (RICHTEXT, "Текстовое поле"),
-        (OPTION, "Опция"),
-        (MULTI_OPTION, "Мульти-опция"),
         (FILE, "Файл"),
         (IMAGE, "Изображение"),
+        (OPTION, "Один атрибут из группы"),
+        (MULTI_OPTION, "Множество атрибутов из группы"),
     )
     type = models.CharField(
         choices=TYPE_CHOICES,
@@ -1107,17 +1125,16 @@ class AbstractAttribute(models.Model):
         max_length=20,
         verbose_name="Тип",
     )
-
     option_group = models.ForeignKey(
         "catalogue.AttributeOptionGroup",
         blank=True,
         null=True,
         on_delete=models.CASCADE,
         related_name="product_attributes",
-        verbose_name="Группа опций",
-        help_text='Выберите группу параметров, если используете тип «Опция» или «Множество опций».',
+        verbose_name="Группа атрибутов",
+        help_text='Выберите группу параметров, если используете тип «Атрибут группы» или «Множество атрибутов группы».',
     )
-    required = models.BooleanField("Обязательно", default=False)
+    required = models.BooleanField("Обязательный атрибут", default=False)
 
     objects = AttributeQuerySet.as_manager()
 
@@ -1146,6 +1163,8 @@ class AbstractAttribute(models.Model):
     def clean(self):
         if self.type == self.BOOLEAN and self.required:
             raise ValidationError("Логический атрибут не должен быть обязательным.")
+        if self.type == self.RICHTEXT and self.required:
+            raise ValidationError("Текстовое поле не должено быть обязательным атрибутом.")
 
     def _get_value_obj(self, product, value):
         try:
@@ -1320,14 +1339,14 @@ class AbstractProductAttribute(models.Model):
         "catalogue.AttributeOption",
         blank=True,
         related_name="multi_valued_attribute_values",
-        verbose_name="Значение нескольких вариантов Мульти-Опции",
+        verbose_name="Значения группы атрибутов",
     )
     value_option = models.ForeignKey(
         "catalogue.AttributeOption",
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        verbose_name="Вариант значения Опции",
+        verbose_name="Одно значение из группы атрибутов",
     )
     value_file = models.FileField(
         upload_to=get_image_upload_path, max_length=255, blank=True, null=True
@@ -1382,7 +1401,7 @@ class AbstractProductAttribute(models.Model):
     class Meta:
         abstract = True
         app_label = "catalogue"
-        unique_together = ("attribute", "product", "product_class")
+        unique_together = ("attribute", "product")
         verbose_name = "Значение атрибута продукта"
         verbose_name_plural = "Значения атрибутов продукта"
 
@@ -1692,8 +1711,8 @@ class AbstractProductAdditional(models.Model):
     class Meta:
         abstract = True
         app_label = "catalogue"
-        ordering = ["primary_class", "primary_product", "-ranking"]
-        unique_together = ("primary_class", "primary_product", "additional_product")
+        ordering = ["primary_product", "-ranking"]
+        unique_together = ("primary_product", "additional_product")
         verbose_name = "Дополнительный товар"
         verbose_name_plural = "Дополнительные товары"
 

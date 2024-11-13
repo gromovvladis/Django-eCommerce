@@ -60,6 +60,7 @@ class SEOFormMixin:
             if not field.is_hidden and not self.is_seo_field(field)
         ]
 
+
     def seo_form_fields(self):
         return [field for field in self if self.is_seo_field(field)]
 
@@ -304,6 +305,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         initial=True,
         help_text="Синхронизировать с Эвотор", 
     )
+    class_id = {}
 
     class Meta:
         model = Product
@@ -373,9 +375,10 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         instance = kwargs.get("instance")
         if instance is None:
             return
-        for attribute in product_class.class_attributes.all():
+        for attribute in (product_class.class_attributes.all() | instance.attributes.all()):
             try:
-                value = instance.attribute_values.get(attribute=attribute).value
+                attr = instance.attribute_values.get(attribute=attribute)
+                value = attr.value
             except exceptions.ObjectDoesNotExist:
                 pass
             else:
@@ -386,13 +389,19 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         For each attribute specified by the product class, this method
         dynamically adds form fields to the product form.
         """
-        for attribute in product_class.class_attributes.all():
+        if self.instance.id:
+            attributes = product_class.class_attributes.all() | self.instance.attributes.all()
+        else:
+            attributes = product_class.class_attributes.all()
+
+        for attribute in attributes:
             field = self.get_attribute_field(attribute)
             if field:
-                self.fields["attr_%s" % attribute.code] = field
-                # Attributes are not required for a parent product
                 if is_parent:
-                    self.fields["attr_%s" % attribute.code].required = False
+                    field.required = False
+
+                self.fields["attr_%s" % attribute.code] = field
+
 
     def get_attribute_field(self, attribute):
         """
@@ -503,7 +512,7 @@ class AttributeForm(forms.ModelForm):
         # codes so that we can generate them.
         self.fields["code"].required = False
 
-        self.fields["option_group"].help_text = "Выберите группу опций"
+        # self.fields["option_group"].help_text = "Выберите группу опций"
 
         # pylint: disable=no-member
         remote_field = self._meta.model._meta.get_field("option_group").remote_field
@@ -537,7 +546,7 @@ class AttributeForm(forms.ModelForm):
 class ProductAttributesForm(forms.ModelForm):
     class Meta:
         model = ProductAttribute
-        fields = ["product", "attribute", "is_variant"]
+        fields = ["product", "attribute"]
         widgets = {
             "attribute": AttributeSelect,
         }
@@ -546,7 +555,7 @@ class ProductAttributesForm(forms.ModelForm):
 class ProductClassAttributesForm(forms.ModelForm):
     class Meta:
         model = ProductAttribute
-        fields = ["product_class", "attribute", "is_variant"]
+        fields = ["product_class", "attribute"]
         widgets = {
             "attribute": AttributeSelect,
         }

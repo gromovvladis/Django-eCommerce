@@ -32,15 +32,6 @@ class AttributeSelect(RemoteSelect):
         super().__init__(*args, **kwargs)
         self.attrs["class"] = "select2 product-select"
 
-    
-    def build_attrs(self, *args, **kwargs):
-        attrs = super().build_attrs(*args, **kwargs)
-        return attrs
-
-    def optgroups(self, name, value, attrs=None):
-        groups = super().optgroups(name, value, attrs)
-        return groups
-
 
 class ProductSelectMultiple(MultipleRemoteSelect):
     # Implemented as separate class instead of just calling

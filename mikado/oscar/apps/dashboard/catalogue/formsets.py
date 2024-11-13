@@ -226,6 +226,14 @@ class ProductAdditionalFormSet(BaseProductAdditionalFormSet):
     # pylint: disable=unused-argument
     def __init__(self, product_class, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        try:
+            product_id = kwargs.get("instance").id 
+            for form in self.forms:
+                form.fields["additional_product"].widget.attrs["data-product-id"] = product_id 
+                form.fields["additional_product"].widget.attrs["data-class-id"] = product_class.id 
+        except AttributeError:
+            pass
+
 
 BaseProductClassAdditionalFormSet = inlineformset_factory(
     ProductClass,
@@ -234,6 +242,7 @@ BaseProductClassAdditionalFormSet = inlineformset_factory(
     extra=3,
     fk_name="primary_class",
 )
+
 
 class ProductClassAdditionalFormSet(BaseProductClassAdditionalFormSet):
     # pylint: disable=unused-argument
@@ -247,13 +256,20 @@ BaseProductAttributeFormSet = inlineformset_factory(
     form=ProductAttributesForm, 
     extra=3,
     fk_name="product",
+    # can_delete=False,
 )
 
 
 class ProductAttributeFormSet(BaseProductAttributeFormSet):
-    # pylint: disable=unused-argument
     def __init__(self, product_class, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        try:
+            product_id = kwargs.get("instance").id 
+            for form in self.forms:
+                form.fields["attribute"].widget.attrs["data-product-id"] = product_id 
+                form.fields["attribute"].widget.attrs["data-class-id"] = product_class.id 
+        except AttributeError:
+            pass
 
 
 BaseProductClassAttributeFormSet = inlineformset_factory(
