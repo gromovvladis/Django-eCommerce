@@ -33,6 +33,8 @@ class AttributesQuerysetCache:
     def attributes(self):
         if self.product.id:
             return QuerysetCache(self.product.attributes.all() | self.product.get_product_class().class_attributes.all())
+        elif self.product.is_child:
+            return QuerysetCache(self.product.parent.attributes.filter(productattribute__is_variant=True))
         else:
             return QuerysetCache(self.product.get_product_class().class_attributes.all())
 
@@ -207,6 +209,14 @@ class ProductAttributesContainer:
 
     def get_values(self):
         return self.cache.attribute_values.queryset()
+
+    def get_attribute_values(self):
+        values = []
+        for attribute in self.get_all_attributes():
+            value = getattr(self, attribute.code, None)
+            values.append(value)
+
+        return values   
 
     def get_value_by_attribute(self, attribute):
         return self.cache.attribute_values.get(attribute.code)

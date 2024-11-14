@@ -2,6 +2,8 @@ from django import forms
 from django.core import exceptions
 from treebeard.forms import movenodeform_factory
 
+from django.db.models.query import QuerySet
+from oscar.apps.offer import queryset
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import slugify
 from oscar.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
@@ -147,7 +149,7 @@ class StockRecordForm(forms.ModelForm):
                 if field_name in self.fields:
                     del self.fields[field_name]
         else:
-            for field_name in ["price", "old_price", "cost_price", "tax", "num_in_stock"]:
+            for field_name in ["price", "num_in_stock"]:
                 if field_name in self.fields:
                     self.fields[field_name].required = True
 
@@ -238,12 +240,20 @@ def _attr_option_field(attribute):
         queryset=attribute.option_group.options.all(),
     )
 
+def _attr_variant_field(attribute):
+    return forms.ModelChoiceField(
+        label=attribute.name,
+        required=attribute.required,
+        queryset=attribute.option_group.options.all(),
+        empty_label=None,
+    )
+
 
 def _attr_multi_option_field(attribute):
     return forms.ModelMultipleChoiceField(
         label=attribute.name,
         required=attribute.required,
-        queryset=attribute.option_group.options.all(),
+        queryset=attribute.option_group.options.all(),   
     )
 
 
@@ -305,7 +315,6 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         initial=True,
         help_text="Синхронизировать с Эвотор", 
     )
-    class_id = {}
 
     class Meta:
         model = Product
@@ -341,11 +350,11 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
             self.instance.parent.structure = Product.PARENT
 
             self.delete_non_child_fields()
+            self.add_variant_fields()
         else:
             # Only set product class for non-child products
             self.instance.product_class = product_class
-            # del self.fields["variant"]
-        self.add_attribute_fields(product_class, self.instance.is_parent)
+            self.add_attribute_fields(product_class, self.instance.is_parent)
 
         if "slug" in self.fields:
             self.fields["slug"].required = False
@@ -379,10 +388,28 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
             try:
                 attr = instance.attribute_values.get(attribute=attribute)
                 value = attr.value
+                is_variant = attr.is_variant
             except exceptions.ObjectDoesNotExist:
                 pass
             else:
+                if instance.is_child:
+                    value = value.first()
+
                 kwargs["initial"]["attr_%s" % attribute.code] = value
+                kwargs["initial"]["attr_is_variant_%s" % attribute.code] = is_variant
+
+    def add_variant_fields(self):
+        """
+        For each attribute specified by the product class, this method
+        dynamically adds form fields to the product form.
+        """
+        attribute_values = self.instance.parent.get_variant_attributes()
+
+        for attribute_value in attribute_values:
+            field = _attr_option_field(attribute_value.attribute)
+            if field:
+                field.required = True
+                self.fields["attr_%s" % attribute_value.attribute.code] = field
 
     def add_attribute_fields(self, product_class, is_parent=False):
         """
@@ -401,7 +428,13 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
                     field.required = False
 
                 self.fields["attr_%s" % attribute.code] = field
+                if attribute.type == "multi_option":
+                    self.fields["attr_is_variant_%s" % attribute.code] = forms.BooleanField(
+                        required=False,
+                        label="Используется для вариаций?",
+                        help_text="Данный атрибут можно использовать при создании вариативного продукта.",
 
+                    )
 
     def get_attribute_field(self, attribute):
         """
@@ -414,7 +447,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         Deletes any fields not needed for child products. Override this if
         you want to e.g. keep the description field.
         """
-        for field_name in ["description", "short_description", "is_discountable"]:
+        for field_name in ["description", "short_description", "is_discountable", "order", "meta_title", "meta_description"]:
             if field_name in self.fields:
                 del self.fields[field_name]     
 
@@ -430,10 +463,22 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         """
         for attribute in self.instance.attr.get_all_attributes():
             field_name = "attr_%s" % attribute.code
+            is_variant_name = "attr_is_variant_%s" % attribute.code
             # An empty text field won't show up in cleaned_data.
             if field_name in self.cleaned_data:
                 value = self.cleaned_data[field_name]
+                if attribute.type == 'multi_option' and not isinstance(value, QuerySet):
+                    value = [value] 
+
                 setattr(self.instance.attr, attribute.code, value)
+            
+            if is_variant_name in self.cleaned_data:
+                value = self.cleaned_data[is_variant_name]
+                attribute_obj = self.instance.attribute_values.filter(attribute=attribute).first()
+                if attribute_obj:
+                    attribute_obj.is_variant = value
+                    attribute_obj.save()
+
         super()._post_clean()
 
 

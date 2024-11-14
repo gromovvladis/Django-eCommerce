@@ -196,7 +196,7 @@
                                                 </caption>
                                                 {% for field in form %}
                                                     {% if 'attr' in field.id_for_label %}
-                                                        <tr >
+                                                        <tr>
                                                             <td>
                                                                 {% include "oscar/dashboard/partials/form_field.html" %}
                                                             </td>
@@ -207,10 +207,10 @@
                                         {% endif %}
                                     {% endblock attributes %}
                                     {% block add_attributes %}
+                                        {{ attribute_formset.non_form_errors }}
+                                        {{ attribute_formset.management_form }}  
                                         {% if attribute_formset %}
-                                            {{ attribute_formset.non_form_errors }}
-                                            {{ attribute_formset.management_form }}  
-                                            <table class="table table-striped table-bordered">
+                                            <table class="table table-striped table-bordered{% if parent %} d-none{% endif %}">
                                                 <caption>
                                                     Атрибуты
                                                 </caption>
@@ -255,7 +255,7 @@
                                                     <th class="text-danger">Удалить</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class='upload-image'>
+                                            <tbody class="upload-image">
                                                 {% for image_form in image_formset %}
                                                     {% include "oscar/dashboard/partials/product_images.html" with form=image_form %}
                                                 {% endfor %}
@@ -397,10 +397,18 @@
                                                 <caption>
                                                     <div class="d-flex justify-space-between">
                                                         Варианты
-                                                        <button class="btn btn-primary ml-3" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
-                                                            <i class="fas fa-plus"></i> 
-                                                            <span class="caption-button"> Добавить вариант</span>
-                                                        </button>
+                                                        <div class="ml-3">
+                                                            {% if product.can_be_parent %}
+                                                                <button class="btn btn-success" name="action" type="submit" value="create-all-child" data-loading-text="Добавление...">
+                                                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                                                    <span class="caption-button"> Создать все вариации</span>
+                                                                </button>
+                                                            {% endif %}
+                                                            <button class="btn btn-primary ml-2" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
+                                                                <i class="fas fa-plus"></i> 
+                                                                <span class="caption-button"> Добавить вариант</span>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </caption>
                                                 {% if children %}
@@ -414,9 +422,9 @@
                                                     {% for child in children %}
                                                         <tr>
                                                             <td>{{ child.get_title }}</td>
-                                                            <td>{{ child.attribute_summary }}</td>
+                                                            <td>{{ child.attributes_variants }}</td>
                                                             <td>{{ child.stockrecords.count }}</td>
-                                                            <td>{% if child.is_public %}<span class="true">✔️</span>{% else %}<span class="false">❌</span>{% endif %}</td>
+                                                            <td>{{ child.is_public|yesno:"✔️,❌" }}</td>
                                                             <td>
                                                                 <a href="{% url 'dashboard:catalogue-product' pk=child.id %}" class="btn btn-primary">
                                                                     Редактировать
@@ -441,6 +449,8 @@
                                                                     Вероятно, это связано с тем, что для этого продукта все еще имеются товарные записи.
                                                                     <br>
                                                                     Удалите товарные записи для создания вариативного товара.
+                                                                {% else %}
+                                                                    Нет подходящих атрибутов для создания вариаций 
                                                                 {% endif %}
                                                             {% endif %}
                                                         </td>

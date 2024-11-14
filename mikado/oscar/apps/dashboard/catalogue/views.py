@@ -388,11 +388,11 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
     def get_page_title(self):
         if self.creating:
             if self.parent is None:
-                return ("Создать новый продукт типа '%(product_class)s'") % {
+                return ("Создать продукт типа '%(product_class)s'") % {
                     "product_class": self.product_class.name
                 }
             else:
-                return ("Создать новый вариант продукта %(parent_product)s") % {
+                return ("Создать вариант продукта %(parent_product)s") % {
                     "parent_product": self.parent.title
                 }
         else:
@@ -433,6 +433,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             )
 
         if any(self.request.user.has_perm(perm) for perm in full_access):
+
             is_valid = form.is_valid() and all(
                 [formset.is_valid() for formset in formsets.values()]
             )
@@ -490,7 +491,14 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             image.display_order = idx
             image.save()
 
-        return HttpResponseRedirect(self.get_success_url())
+        action = self.request.POST.get("action")
+        if action == "create-all-child":
+            self.create_all_child()
+
+        return HttpResponseRedirect(self.get_success_url(action))
+
+    def create_all_child(self):
+        pass
 
     def handle_adding_child(self, parent):
         """
@@ -525,7 +533,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             url_parts += [self.request.GET.urlencode()]
         return "?".join(url_parts)
 
-    def get_success_url(self):
+    def get_success_url(self, action):
         """
         Renders a success message and redirects depending on the button:
         - Standard case is pressing "Save"; redirects to the product list
@@ -543,7 +551,6 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         )
         messages.success(self.request, msg, extra_tags="safe noicon")
 
-        action = self.request.POST.get("action")
         if action == "continue":
             url = reverse("dashboard:catalogue-product", kwargs={"pk": self.object.id})
         elif action == "create-another-child" and self.parent:

@@ -708,8 +708,11 @@ class AbstractProduct(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            if self.is_child and not self.title:
-                self.slug = slugify(self.get_variant_title())
+            if self.is_child:
+                if not self.title:
+                    self.slug = slugify(self.get_variant_title())
+                else:
+                    self.slug = slugify("%s-%s" % (self.parent.get_title(), self.get_title()))
             else:
                 self.slug = slugify(self.get_title())
 
@@ -743,6 +746,9 @@ class AbstractProduct(models.Model):
             reason = "Указанный родительский продукт является дочерним продуктом."
         if self.has_stockrecords:
             reason = "Невозможно добавить дочерний продукт к продукту с учетными записями на складе."
+        if not self.get_variants():
+            reason = "Нет подходящих атрибутов для создания вариаций"
+
         is_valid = reason is None
         if give_reason:
             return is_valid, reason
@@ -846,6 +852,15 @@ class AbstractProduct(models.Model):
         pairs = [attribute.summary() for attribute in attributes]
         return ", ".join(pairs)
 
+    @property
+    def attributes_variants(self):
+        """
+        Return a string of all of a product's attributes
+        """
+        attributes = self.attribute_values.all()
+        pairs = [attribute.summary() for attribute in attributes]
+        return ", ".join(pairs)
+
     def get_prices(self):
         """
         Get list of stockrecord prices
@@ -887,7 +902,7 @@ class AbstractProduct(models.Model):
         Return a product's title or it's parent's title if it has no title
         """
         patent_title = self.get_title()
-        variants = "-".join(self.get_variants())
+        variants = "-".join(str(attr[0].option) for attr in self.attr.get_attribute_values())
         return "%s-%s" % (patent_title, variants)
     
     def get_variants(self):
@@ -895,6 +910,13 @@ class AbstractProduct(models.Model):
         Return a product's varian
         """
         attribute_values = self.get_attribute_values().filter(is_variant=True)
+        return attribute_values
+    
+    def get_variant_attributes(self):
+        """
+        Return a product's varian
+        """
+        attribute_values = self.attribute_values.filter(is_variant=True)
         return attribute_values
 
     get_title.short_description = ("Название продукта", "Название")
@@ -944,16 +966,14 @@ class AbstractProduct(models.Model):
         if not self.pk:
             return self.attribute_values.model.objects.none()
         
-        class_attribute_values = self.product_class.attribute_values.all()
-
         attribute_values = self.attribute_values.all()
         if self.is_child:
             parent_attribute_values = self.parent.attribute_values.exclude(
                 attribute__code__in=attribute_values.values("attribute__code")
             )
-            return attribute_values | parent_attribute_values | class_attribute_values
+            return attribute_values | parent_attribute_values
 
-        return attribute_values | class_attribute_values
+        return attribute_values
     
     # Images
 
@@ -1242,7 +1262,7 @@ class AbstractAttribute(models.Model):
 
     def _validate_text(self, value):
         if not isinstance(value, str):
-            raise ValidationError("Должно быть строка")
+            raise ValidationError("Должна быть строка")
 
     _validate_richtext = _validate_text
 
@@ -1266,7 +1286,7 @@ class AbstractAttribute(models.Model):
         try:
             values = iter(value)
         except TypeError:
-            raise ValidationError("Должен быть списком или набором запросов AttributeOption.")
+            raise ValidationError("Должен быть списком или группой атрибутов.")
         # Validate each value as if it were an option
         # Pass in valid_values so that the DB isn't hit multiple times per iteration
         valid_values = self.option_group.options.values_list("option", flat=True)

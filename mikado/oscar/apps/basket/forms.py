@@ -220,7 +220,7 @@ class AddToBasketForm(forms.Form):
             # Build a description of the child, including any pertinent
             # attributes
             stc = child.stockrecords.all()[0]
-            summary = {'name':child.get_variant(), 'price':stc.price, 'old_price':stc.old_price}
+            summary = {'name':child.get_variants(), 'price':stc.price, 'old_price':stc.old_price}
             # Check if it is available to buy
             info = self.basket.strategy.fetch_for_product(child)
             if not info.availability.is_available_to_buy:
