@@ -139,10 +139,6 @@ class StockRecordForm(forms.ModelForm):
         self.user = user
         super().__init__(*args, **kwargs)
 
-        # Restrict accessible partners for non-staff users
-        # if not self.user.is_staff:
-        #     self.fields["partner"].queryset = self.user.partners.all()
-
         # If not tracking stock, we hide the fields
         if not product_class.track_stock:
             for field_name in ["num_in_stock", "low_stock_threshold"]:
@@ -240,11 +236,11 @@ def _attr_option_field(attribute):
         queryset=attribute.option_group.options.all(),
     )
 
-def _attr_variant_field(attribute):
+def _attr_variant_field(attribute, value):
     return forms.ModelChoiceField(
         label=attribute.name,
         required=attribute.required,
-        queryset=attribute.option_group.options.all(),
+        queryset=value,
         empty_label=None,
     )
 
@@ -406,7 +402,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         attribute_values = self.instance.parent.get_variant_attributes()
 
         for attribute_value in attribute_values:
-            field = _attr_option_field(attribute_value.attribute)
+            field = _attr_variant_field(attribute_value.attribute, attribute_value.value)
             if field:
                 field.required = True
                 self.fields["attr_%s" % attribute_value.attribute.code] = field
@@ -472,12 +468,13 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
                 setattr(self.instance.attr, attribute.code, value)
             
-            if is_variant_name in self.cleaned_data:
-                value = self.cleaned_data[is_variant_name]
-                attribute_obj = self.instance.attribute_values.filter(attribute=attribute).first()
-                if attribute_obj:
-                    attribute_obj.is_variant = value
-                    attribute_obj.save()
+            if self.instance.id:
+                if is_variant_name in self.cleaned_data:
+                    value = self.cleaned_data[is_variant_name]
+                    attribute_obj = self.instance.attribute_values.filter(attribute=attribute).first()
+                    if attribute_obj:
+                        attribute_obj.is_variant = value
+                        attribute_obj.save()
 
         super()._post_clean()
 

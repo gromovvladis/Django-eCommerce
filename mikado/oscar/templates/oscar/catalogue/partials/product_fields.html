@@ -3,7 +3,7 @@
 {% for field in form %}
     {% if field.is_hidden %}
         {{ field }}
-    {% elif not field.field.widget.attrs.good and not field.field.widget.attrs.variant%}
+    {% elif not field.field.widget.attrs.good and not field.field.widget.attrs.variant %}
         {% block control_group %}
             <div class="form-group{% if style == "horizontal" %} row{% endif %}">
 

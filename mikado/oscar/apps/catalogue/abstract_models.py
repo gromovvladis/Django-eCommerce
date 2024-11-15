@@ -1543,6 +1543,18 @@ class AbstractAttributeOption(models.Model):
         unique=True,
     )
 
+    # def save(self, *args, **kwargs):
+    #     """
+    #     Oscar traditionally auto-generated slugs from names. As that is
+    #     often convenient, we still do so if a slug is not supplied through
+    #     other means. If you want to control slug creation, just create
+    #     instances with a slug already set, or expose a field on the
+    #     appropriate forms.
+    #     """
+    #     if not self.code:
+    #         self.code = slugify(self.option)
+    #     super().save(*args, **kwargs)
+
     def __str__(self):
         return self.option
 

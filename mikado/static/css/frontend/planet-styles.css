@@ -16237,7 +16237,8 @@ ymaps[class*="search__suggest-item_selected"] {
     overflow: hidden;
     border-radius: 15px;
     background: #f3f3f7;
-    position: relative
+    position: relative;
+    max-width: 680px;
 }
 
 .v-tabs-button__active-block {

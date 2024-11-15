@@ -150,7 +150,7 @@ class ObjectLookupView(View):
     def lookup_filter(self, qs, term):
         return qs
     
-    def product_filter(self, qs, term):
+    def product_filter(self, qs, product_id, class_id):
         return qs
 
     def paginate(self, qs, page, page_limit):

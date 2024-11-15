@@ -421,23 +421,34 @@
                                                     </tr>
                                                     {% for child in children %}
                                                         <tr>
-                                                            <td>{{ child.get_title }}</td>
+                                                            <td>
+                                                                <a href="{% url 'dashboard:catalogue-product' pk=child.id %}">
+                                                                    {{ child.get_title }}
+                                                                </a>
+                                                            </td>
                                                             <td>{{ child.attributes_variants }}</td>
                                                             <td>{{ child.stockrecords.count }}</td>
                                                             <td>{{ child.is_public|yesno:"✔️,❌" }}</td>
                                                             <td>
-                                                                <a href="{% url 'dashboard:catalogue-product' pk=child.id %}" class="btn btn-primary">
-                                                                    Редактировать
-                                                                </a>
-                                                                <a href="{% url 'dashboard:catalogue-product-delete' pk=child.id %}" class="btn btn-danger">
-                                                                    Удалить
-                                                                </a>
+                                                                <div class="actions">
+                                                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </button>
+                                                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                                        <a class="dropdown-item" href="{% url 'dashboard:catalogue-product' pk=child.id %}">
+                                                                            Изменить
+                                                                        </a>
+                                                                        <a class="dropdown-item" href="{% url 'dashboard:catalogue-product-delete' pk=child.id %}">
+                                                                            Удалить
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     {% endfor %}
                                                 {% else %}
                                                     <tr>
-                                                        <td colspan="5">
+                                                        <td class="p-3" colspan="5">
                                                             {% if product.can_be_parent %}
                                                                 У этого товара нет созданых варианий
                                                             {% else %}

@@ -6,7 +6,7 @@ if (addBasketForm) {
     var priceElement = addBasketBtn.querySelector('[data-id="dish-price-button"]');
     var addBasketErrors = document.getElementById('add_to_cart_btn_errors');
     
-    var variantsLabels = addBasketForm.querySelectorAll('[data-id="tab-button-label"]');
+    var variants = addBasketForm.querySelectorAll('[data-id="tab-variants"]');
 
     var dishPrice = document.querySelector('[data-id="dish-price-main"]');
     var dishOldPrice = document.querySelector('[data-id="dish-old-price-main"]');
@@ -45,41 +45,50 @@ if (addBasketForm) {
         xhr.send(new URLSearchParams(new FormData(addBasketForm)).toString());
     });
     
-    if (variantsLabels) {
-        var variantsBlock = document.getElementById('variant_active_block');
-        variantsLabels.forEach(function (label) {
-            label.addEventListener('click', function () {
-                var dataPrice = parseInt(label.querySelector('input').getAttribute('data-price'));
-                var dataOldPrice = label.querySelector('input').getAttribute('data-old-price');
-                
-                priceElement.innerHTML = (dataPrice + additPrice);
-                dishPrice.textContent = dataPrice;
-                
-                var dishPriceParent = dishPrice.parentNode;
-                var dishOldPriceParent = dishOldPrice.parentNode;
+    if (variants) {
+        variants.forEach(function (variant) {
+            var variantBlock = variant.querySelector('[data-id="variant-active-block"]');
+            var variantLabels = variant.querySelectorAll('[data-id="variant-label"]');
+            variantLabels.forEach(function (label) {
     
-                if (dataOldPrice) {
-                    dishOldPrice.textContent = dataOldPrice;
-                    dishOldPriceParent.classList.remove('d-none');
-                    dishPriceParent.classList.add('new-price');
-                } else {
-                    dishOldPriceParent.classList.add('d-none');
-                    dishPriceParent.classList.remove('new-price');
+                label.addEventListener('click', function () {
+                    // var dataPrice = parseInt(label.querySelector('input').getAttribute('data-price'));
+                    // var dataOldPrice = label.querySelector('input').getAttribute('data-old-price');
+                    
+                    // priceElement.innerHTML = (dataPrice + additPrice);
+                    // dishPrice.textContent = dataPrice;
+                    
+                    // var dishPriceParent = dishPrice.parentNode;
+                    // var dishOldPriceParent = dishOldPrice.parentNode;
+                    
+                    // if (dataOldPrice) {
+                        //     dishOldPrice.textContent = dataOldPrice;
+                        //     dishOldPriceParent.classList.remove('d-none');
+                        //     dishPriceParent.classList.add('new-price');
+                        // } else {
+                            //     dishOldPriceParent.classList.add('d-none');
+                            //     dishPriceParent.classList.remove('new-price');
+                            // }
+
+
+                    let leftPosition = label.getBoundingClientRect().left - label.parentElement.getBoundingClientRect().left;
+                    variantBlock.style.left = `${leftPosition}px`;
+                    variantLabels.forEach(function (lbl) { lbl.classList.remove('active'); });
+                    label.classList.add('active');
+                });
+
+            });
+            
+            window.addEventListener('resize', function () {
+                var activeLabel = Array.from(variantLabels).find(function (lbl) {
+                    return lbl.classList.contains('active');
+                });
+                if (activeLabel) {
+                    variantBlock.style.left = (activeLabel.getBoundingClientRect().left - activeLabel.parentElement.getBoundingClientRect().left) + 'px';
+                    console.log(variantBlock.style.left)
                 }
-                let leftPosition = label.getBoundingClientRect().left - label.parentElement.getBoundingClientRect().left;
-                variantsBlock.style.left = `${leftPosition}px`;
-                variantsLabels.forEach(function (lbl) { lbl.classList.remove('active'); });
-                label.classList.add('active');
             });
-        });
-    
-        window.addEventListener('resize', function () {
-            var activeLabel = Array.from(variantsLabels).find(function (lbl) {
-                return lbl.classList.contains('active');
-            });
-            if (activeLabel) {
-                variantsBlock.style.left = activeLabel.getBoundingClientRect().left + 'px';
-            }
+            
         });
     }
     

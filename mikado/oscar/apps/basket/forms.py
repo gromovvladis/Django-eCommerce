@@ -214,26 +214,80 @@ class AddToBasketForm(forms.Form):
 
         Currently requires that a stock record exists for the children
         """
-        choices = []
-        disabled_values = []
-        for child in product.children.order_by('order').public():
-            # Build a description of the child, including any pertinent
-            # attributes
-            stc = child.stockrecords.all()[0]
-            summary = {'name':child.get_variants(), 'price':stc.price, 'old_price':stc.old_price}
-            # Check if it is available to buy
-            info = self.basket.strategy.fetch_for_product(child)
-            if not info.availability.is_available_to_buy:
-                disabled_values.append(child.id)
+        attributes = {}
 
-            if child.id not in disabled_values:
-                choices.append((child.id, summary))
+        # for child in product.children.public():
+        # child = product.children.public().first()
 
-        self.fields["child_id"] = forms.ChoiceField(
-            choices=tuple(choices),
-            label="Вариант",
-            widget=forms.widgets.RadioSelect(),
-        )
+        product_attributes = product.attribute_values.filter(is_variant=True)
+        
+        for product_attribute in product_attributes:
+            # attributes[product_attribute.attribute.code] = (product_attribute.attribute.name, product_attribute.value)
+            attributes[product_attribute.attribute.code] = (
+                product_attribute.attribute.name,
+                [(value.id, value.option) for value in product_attribute.value],
+            )
+
+        for attribute_code, attribute in attributes.items():
+            self.fields[attribute_code] = forms.ChoiceField(
+                choices=tuple(attribute[1]),
+                label=attribute[0],
+                widget=forms.widgets.RadioSelect(attrs={
+                    'variant': True,
+                }),
+            )
+
+        # info = self.basket.strategy.fetch_for_product(child)
+
+        #     summary = {
+        #         'name':child.get_variants(),
+        #         'price':info.stockrecord.price if info.stockrecord else None,
+        #         'old_price':info.stockrecord.old_price if info.stockrecord else None,
+        #     }
+        #     # Check if it is available to buy
+        #     if not info.availability.is_available_to_buy:
+        #         disabled_values.append(child.id)
+
+        #     if child.id not in disabled_values:
+        #         choices.append((child.id, summary))
+
+
+
+            # for child_attribute in child_attributes:
+            #     for option in child_attribute.option_group.options:
+            #         summary = {
+            #             'name':child.get_variants(),
+            #             'price':info.stockrecord.price if info.stockrecord else None,
+            #             'old_price':info.stockrecord.old_price if info.stockrecord else None,
+            #         }
+            #     attributes[child_attribute.code] = summary
+
+            # info = self.basket.strategy.fetch_for_product(child)
+
+        # for child in product.children.order_by('order').public():
+        #     # Build a description of the child, including any pertinent
+        #     # attributes
+        #     # stc = child.strategy.all()[0]
+        #     info = self.basket.strategy.fetch_for_product(child)
+        #     summary = {
+        #         'name':child.get_variants(),
+        #         'price':info.stockrecord.price if info.stockrecord else None,
+        #         'old_price':info.stockrecord.old_price if info.stockrecord else None,
+        #     }
+        #     # Check if it is available to buy
+        #     if not info.availability.is_available_to_buy:
+        #         disabled_values.append(child.id)
+
+        #     if child.id not in disabled_values:
+        #         choices.append((child.id, summary))
+
+
+
+        # self.fields["child_id"] = forms.ChoiceField(
+        #     choices=tuple(choices),
+        #     label="Вариант",
+        #     widget=forms.widgets.RadioSelect(),
+        # )
 
 
     def _create_product_fields(self, product):

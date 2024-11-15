@@ -12,6 +12,9 @@ from django_tables2 import SingleTableMixin, SingleTableView
 from django.db.models import Count, Max, Min, Case, When, DecimalField, F
 from django.utils.timezone import now
 
+from itertools import product as attr_iterator
+
+from oscar.apps.catalogue.models import ProductAttribute
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import ObjectLookupView
 
@@ -419,6 +422,20 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         
         full_access = ["user.full_access", "catalogue.full_access"]
 
+        is_valid, reason = self.is_valid_form_attributes(form)
+
+        if not is_valid:
+            if self.creating and self.object and self.object.pk is not None:
+                self.object.delete()
+                self.object = None
+            
+            messages.error(self.request, reason)
+            
+            self.object = self.get_object()
+            self.get_formsets(self.request)
+            ctx = self.get_context_data(form=form)
+            return self.render_to_response(ctx)
+
         if self.creating and form.is_valid() and any(self.request.user.has_perm(perm) for perm in full_access):
             self.object = form.save()
 
@@ -452,6 +469,47 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
                 return self.forms_valid(formsets)
             else:
                 return self.forms_invalid(formsets, form)
+
+    def is_valid_form_attributes(self, form):
+        form_attrs = {
+            key.split("attr_")[1]: value
+            for key, value in form.cleaned_data.items()
+            if key.startswith("attr_") and (not self.object or not key.startswith("attr_is_variant"))
+        }
+
+        return self.is_valid_child(form_attrs)
+    
+    def is_valid_child(self, parent_attrs):
+
+        def is_valid_child_attrs(dict1, dict2):
+            for key, value in dict1.items():
+                if key not in dict2:
+                    return False
+                
+                if hasattr(dict2[key], 'filter'):
+                    if not dict2[key].filter(pk=value.pk).exists():
+                        return False
+                else:
+                    if dict2[key] != value:
+                        return False
+
+            return True
+    
+        product = self.parent if self.parent else self.object
+        
+        if product and (self.parent or self.object.is_parent):
+            for child in product.children.all():
+                child_attrs = {
+                    attr.attribute.code: attr.value.first()
+                    for attr in child.attribute_values.all()
+                }
+                if not is_valid_child_attrs(child_attrs, parent_attrs) if not self.parent else child_attrs == parent_attrs and self.object.id != child.id:
+                    reason = "Вариация с таким набором атрибутов уже создана." if self.parent else \
+                            "Невозможно удалить значение атрибута, так как оно используется для вариации. Сначала удалите вариацию."
+                    return False, reason
+
+        return True, ""
+    
 
     # form_valid and form_invalid are called depending on the validation result
     # of just the product form and redisplay the form respectively return a
@@ -498,8 +556,52 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         return HttpResponseRedirect(self.get_success_url(action))
 
     def create_all_child(self):
-        pass
 
+        created = False
+        product = self.parent = self.object
+        product_attributes = product.attribute_values.filter(is_variant=True)
+
+        attribute_values = {}
+
+        for attr in product_attributes:
+            attribute_values[attr.attribute.code] = list(attr.value.all())
+
+        all_combinations = []
+
+        def create_combinations(keys, values, current_combination=[]):
+            if not keys:
+                all_combinations.append(current_combination)
+                return
+            
+            key = keys[0]
+            for value in values[key]:
+                create_combinations(keys[1:], values, current_combination + [(key, value)])
+
+        create_combinations(list(attribute_values.keys()), attribute_values)
+
+        for combination in all_combinations:
+            attributes = [
+                ProductAttribute(attribute=Attribute.objects.get(code=key), value_option=value)
+                for key, value in combination
+            ]
+            
+            new_product = Product(
+                structure=Product.CHILD,
+                parent=product, 
+            )
+
+            for attribute in attributes:
+                setattr(new_product.attr, attribute.attribute.code, [attribute.value_option])
+
+            is_valid, _ = self.is_valid_child(dict(combination))
+
+            if is_valid:
+                created = True
+                new_product.save()
+        
+        if created:
+            self.handle_adding_child(product)
+    
     def handle_adding_child(self, parent):
         """
         When creating the first child product, the parent product needs
@@ -551,7 +653,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         )
         messages.success(self.request, msg, extra_tags="safe noicon")
 
-        if action == "continue":
+        if action == "continue" or action == "create-all-child":
             url = reverse("dashboard:catalogue-product", kwargs={"pk": self.object.id})
         elif action == "create-another-child" and self.parent:
             url = reverse(
