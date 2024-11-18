@@ -143,7 +143,7 @@
 
 {% block scripts %}
         <script src="{% static "js/thirdpaty/tinymce-6/tinymce.min.js" %}"></script>
-        {% comment %} {% compress js %} {% endcomment %}
+        {% compress js %}
             <script src="{% static "js/thirdpaty/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/thirdpaty/mousewheel/jquery.mousewheel.js" %}"></script>
             <script src="{% static "js/thirdpaty/inputmask/jquery.inputmask.min.js" %}"></script>
@@ -165,9 +165,7 @@
             <script src="{% static "js/dashboard/utils/phone-mask.js" %}"></script>
             <script src="{% static "js/dashboard/utils/map.js" %}"></script>
 
-            
-
-        {% comment %} {% endcompress %} {% endcomment %}
+        {% endcompress %}
         {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script> {% endcomment %}
 {% endblock %}
 
