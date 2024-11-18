@@ -18623,6 +18623,11 @@ h3.app-ico:before {
     left: 55px;
     width: calc(100% - 55px);
   }
+  .popup-page .fixed-actions-group {
+    left: 0;
+    width: 100%;
+  }
+
   .fixed-actions {
     margin-bottom: 5.5rem;
   }
@@ -19238,6 +19243,10 @@ caption {
 
   .dashboard-content{
     margin-left: 55px;
+  }
+      
+  .popup-page .dashboard-content{
+    margin-left:0
   }
 
   .table .name,

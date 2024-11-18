@@ -746,7 +746,7 @@ class AbstractProduct(models.Model):
             reason = "Указанный родительский продукт является дочерним продуктом."
         if self.has_stockrecords:
             reason = "Невозможно добавить дочерний продукт к продукту с учетными записями на складе."
-        if not self.get_variants():
+        if not self.get_variant_attributes():
             reason = "Нет подходящих атрибутов для создания вариаций"
 
         is_valid = reason is None
