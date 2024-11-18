@@ -1107,14 +1107,14 @@ class AbstractLine(models.Model):
                     total += attribute.value * attribute.additional.price 
 
         return total
-    
+
     @property 
     def variants(self):
         variants = self.product.get_variants()
         if variants:
-            return ", ".join(variants)
+            return variants
 
-        return variants
+        return ""
     
     @property 
     def old_price(self):

@@ -1,122 +1,3 @@
-/* @import url("https://fonts.googleapis.com/css2?family=Galada&family=Onest:wght@100..900&display=swap"); */
-
-/* .v-progressbar {
-    position: fixed;
-    z-index: 9999;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--color-primary);
-    opacity: 0;
-    width: 0;
-    -webkit-transition: opacity .2s, width .1s;
-    transition: opacity .2s, width .1s;
-    pointer-events: none
-
-
-@media screen and (min-width:1024px) {
-    .v-progressbar {
-        background: var(--color-primary)
-    }
-} */
-/* 
-@-webkit-keyframes addToCart {
-    0% {
-        -webkit-transform: translate(var(--x), var(--y)) scale(1);
-        transform: translate(var(--x), var(--y)) scale(1);
-        opacity: .6
-    }
-
-    75% {
-        -webkit-transform: translate(0) scale(.1);
-        transform: translate(0) scale(.1);
-        opacity: .2
-    }
-
-    to {
-        -webkit-transform: translate(0) scale(0);
-        transform: translate(0) scale(0);
-        opacity: 0
-    }
-}
-
-@keyframes addToCart {
-    0% {
-        -webkit-transform: translate(var(--x), var(--y)) scale(1);
-        transform: translate(var(--x), var(--y)) scale(1);
-        opacity: .6
-    }
-
-    75% {
-        -webkit-transform: translate(0) scale(.1);
-        transform: translate(0) scale(.1);
-        opacity: .2
-    }
-
-    to {
-        -webkit-transform: translate(0) scale(0);
-        transform: translate(0) scale(0);
-        opacity: 0
-    }
-}
-
-@-webkit-keyframes addToCartScale {
-    0% {
-        -webkit-transform: translate(var(--x), var(--y)) scale(1);
-        transform: translate(var(--x), var(--y)) scale(1);
-        opacity: .7
-    }
-
-    10% {
-        -webkit-transform: translate(var(--x), var(--y)) scale(1.05);
-        transform: translate(var(--x), var(--y)) scale(1.05);
-        opacity: .6
-    }
-
-    85% {
-        -webkit-transform: translate(0) scale(.2);
-        transform: translate(0) scale(.2);
-        opacity: .2
-    }
-
-    to {
-        -webkit-transform: translate(0) scale(0);
-        transform: translate(0) scale(0);
-        opacity: 0
-    }
-}
-
-@keyframes addToCartScale {
-    0% {
-        -webkit-transform: translate(var(--x), var(--y)) scale(1);
-        transform: translate(var(--x), var(--y)) scale(1);
-        opacity: .7
-    }
-
-    10% {
-        -webkit-transform: translate(var(--x), var(--y)) scale(1.05);
-        transform: translate(var(--x), var(--y)) scale(1.05);
-        opacity: .6
-    }
-
-    85% {
-        -webkit-transform: translate(0) scale(.2);
-        transform: translate(0) scale(.2);
-        opacity: .2
-    }
-
-    to {
-        -webkit-transform: translate(0) scale(0);
-        transform: translate(0) scale(0);
-        opacity: 0
-    }
-}
- */
-
-
-
-
 .add-to-wishlist {
     right: 1rem;
     top: 1rem;
@@ -9023,72 +8904,6 @@ html.drawer .v-app__side {
     justify-content: center
 }
 
-/* 
-.v-button__burger {
-    display: block;
-    width: 26px;
-    height: 26px;
-    position: relative
-}
-
-.v-button__burger span {
-    display: block;
-    background: #fff;
-    border-radius: 12px;
-    width: 18px;
-    height: 2px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    opacity: 1
-}
-
-.v-button__burger span:first-child {
-    top: calc(50% + 5px)
-}
-
-.v-button__burger span:first-child,
-.v-button__burger span:nth-child(3) {
-    -webkit-transition: top .3s .1s, -webkit-transform .1s;
-    transition: top .3s .1s, -webkit-transform .1s;
-    transition: top .3s .1s, transform .1s;
-    transition: top .3s .1s, transform .1s, -webkit-transform .1s
-}
-
-.v-button__burger span:nth-child(3) {
-    top: calc(50% - 5px)
-}
-
-.v-button__burger--active span {
-    background: #000
-}
-
-.v-button__burger--active span:first-child {
-    top: 50%;
-    -webkit-transform: translate(-50%, -50%) rotate(45deg);
-    transform: translate(-50%, -50%) rotate(45deg);
-    -webkit-transition: top .1s, -webkit-transform .1s ease-in-out .3s;
-    transition: top .1s, -webkit-transform .1s ease-in-out .3s;
-    transition: top .1s, transform .1s ease-in-out .3s;
-    transition: top .1s, transform .1s ease-in-out .3s, -webkit-transform .1s ease-in-out .3s
-}
-
-.v-button__burger--active span:nth-child(2) {
-    opacity: 0
-}
-
-.v-button__burger--active span:nth-child(3) {
-    top: 50%;
-    -webkit-transform: translate(-50%, -50%) rotate(-45deg);
-    transform: translate(-50%, -50%) rotate(-45deg);
-    -webkit-transition: top .1s, -webkit-transform .1s ease-in-out .3s;
-    transition: top .1s, -webkit-transform .1s ease-in-out .3s;
-    transition: top .1s, transform .1s ease-in-out .3s;
-    transition: top .1s, transform .1s ease-in-out .3s, -webkit-transform .1s ease-in-out .3s
-} */
-
 .v-button__continue {
     -webkit-transform: rotate(180deg);
     transform: rotate(180deg)
@@ -12447,12 +12262,29 @@ input[type="number"]:focus {
 } */
 
 
+.error-badge{
+    /* padding: 1rem; */
+    font-size: .75rem;
+    font-weight: 400;
+    font-style: normal;
+    background-color: var(--color-secondary);
+    color: #fff;
+    padding: .75rem .5rem;
+    line-height: 1rem;
+
+}
+
+.border-r15{
+    border-radius: 15px;
+}
+
 .add-to-cart-error {
-    color: var(--color-secondary);
+    /* color: var(--color-secondary); */
     width: 100%;
-    line-height: 2rem;
-    padding-right: 1rem;
-    padding-left: 1rem;
+    /* line-height: 1.2rem; */
+    /* font-size: .9rem; */
+    /* padding-right: 1rem; */
+    /* padding-left: 1rem; */
     text-align: center;
 }
 

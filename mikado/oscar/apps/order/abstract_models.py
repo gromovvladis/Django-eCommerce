@@ -696,21 +696,13 @@ class AbstractLine(models.Model):
                 d = "%s" % (", ".join(addit))
         return d
     
-    # @property 
-    # def variants(self):
-    #     slug = ""
-    #     if self.product.variant:
-    #         slug = self.product.variant
-
-    #     return slug
-    
     @property 
     def variants(self):
         variants = self.product.get_variants()
         if variants:
-            return ", ".join(variants)
+            return variants
 
-        return variants
+        return ""
 
     @property
     def discount(self):

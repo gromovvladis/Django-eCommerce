@@ -614,12 +614,12 @@ class AbstractProduct(models.Model):
         self.attr = ProductAttributesContainer(product=self)
 
     def __str__(self):
-        if self.title:
-            return self.title
-        if self.attribute_summary:
-            return "%s (%s)" % (self.get_title(), self.attribute_summary)
-        else:
-            return self.get_title()
+        # if self.title:
+        #     return self.title
+        # if self.attribute_summary:
+        #     return "%s (%s)" % (self.get_title(), self.attribute_summary)
+        # else:
+        return self.get_title()
 
     def get_absolute_url(self):
         """
@@ -909,8 +909,13 @@ class AbstractProduct(models.Model):
         """
         Return a product's varian
         """
-        attribute_values = self.get_attribute_values().filter(is_variant=True)
-        return attribute_values
+        if self.is_child:
+            attributes = self.attribute_values.all()
+            pairs = [attribute.summary() for attribute in attributes]
+            return ", ".join(pairs)
+    
+        return []
+    
     
     def get_variant_attributes(self):
         """
