@@ -41,13 +41,13 @@
                         </div>
 
                         <ul class="d-flex align-center fill-height">
-                            {% category_tree as tree_categories %}
-                            {% if tree_categories %}
-                                {% for tree_category in tree_categories %}
+                            {% root_categories as root_categories %}
+                            {% if root_categories %}
+                                {% for root_category in root_categories %}
                                 {% comment %}------------- категория item ---------------{% endcomment %} 
                                 <li>
-                                    <a class="cat_item {% if tree_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ tree_category.url }}" data-id="categories-tabs-item-hits">
-                                    {{ tree_category.name }}
+                                    <a class="cat_item {% if root_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ root_category.url }}" data-id="categories-tabs-item-hits">
+                                    {{ root_category.name }}
                                     </a>
                                 </li>
                                 {% endfor %}
@@ -145,7 +145,7 @@
 {% endblock %}
 
 {% block scripts %}
-    {% compress js %}
+    {% comment %} {% compress js %} {% endcomment %}
         <script src="{% static "js/thirdpaty/slider/slider.js" %}" defer></script>
 
         <script src="{% static "js/frontend/cookie/cookie-main.js" %}" defer></script>
@@ -160,7 +160,7 @@
         <script src="{% static "js/frontend/auth/auth.js" %}" defer></script>
         <script src="{% static "js/frontend/partner/partner.js" %}" defer></script>
         <script src="{% static "js/frontend/footer/footer.js" %}" defer></script>
-    {% endcompress %}
+    {% comment %} {% endcompress %} {% endcomment %}
 {% endblock %}
 
 {% block onbodyload %}

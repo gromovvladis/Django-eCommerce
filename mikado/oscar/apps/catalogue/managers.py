@@ -153,3 +153,11 @@ class AdditionalQuerySet(MP_NodeQuerySet):
         Excludes non-public categories
         """
         return self.filter(is_public=True)
+    
+
+class AttributeQuerySet(MP_NodeQuerySet):
+    def browsable(self):
+        """
+        Excludes non-public categories
+        """
+        return self.all()

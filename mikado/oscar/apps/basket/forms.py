@@ -1,4 +1,6 @@
 # pylint: disable=unused-argument
+import json
+
 from django import forms
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
@@ -189,8 +191,6 @@ class AddToBasketForm(forms.Form):
         Option.CHECKBOX: _option_checkbox_field,
     }
 
-    quantity = forms.IntegerField(initial=1, min_value=1, label="Количество", required=False)
-
     def __init__(self, basket, product, *args, **kwargs):
         # Note, the product passed in here isn't necessarily the product being
         # added to the basket. For child products, it is the *parent* product
@@ -214,27 +214,58 @@ class AddToBasketForm(forms.Form):
 
         Currently requires that a stock record exists for the children
         """
-        choices = []
-        disabled_values = []
-        for child in product.children.order_by('order').public():
-            # Build a description of the child, including any pertinent
-            # attributes
-            stc = child.stockrecords.all()[0]
-            summary = {'name':child.get_variant(), 'price':stc.price, 'old_price':stc.old_price}
-            # Check if it is available to buy
+        attributes = {}
+        childs_data = []
+
+        # Собираем данные о дочерних продуктах
+        children = product.children.public()
+        for child in children:
             info = self.basket.strategy.fetch_for_product(child)
-            if not info.availability.is_available_to_buy:
-                disabled_values.append(child.id)
+            child_attributes = {
+                attr.attribute.code: attr.value.first().id if attr.value.exists() else None
+                for attr in child.attribute_values.all()
+            }
+            childs_data.append({
+                child.id: {
+                    "attr": child_attributes,
+                    "price": int(getattr(info.stockrecord, "price", 0)) if getattr(info.stockrecord, "price", None) else None,
+                    "old_price": int(getattr(info.stockrecord, "old_price", 0)) if getattr(info.stockrecord, "old_price", None) else None,
+                }
+            })
 
-            if child.id not in disabled_values:
-                choices.append((child.id, summary))
-
-        self.fields["child_id"] = forms.ChoiceField(
-            choices=tuple(choices),
-            label="Вариант",
-            widget=forms.widgets.RadioSelect(),
+        # Поле для child_id
+        self.fields["child_id"] = forms.CharField(
+            initial=list(childs_data[0].keys())[0],
+            widget=forms.HiddenInput(attrs={
+                "data-childs": json.dumps(childs_data),
+                "variant": True,
+            }),
         )
 
+        default_attr = childs_data[0][next(iter(childs_data[0]))]['attr']
+
+        # Собираем данные об атрибутах продукта
+        product_attributes = product.attribute_values.filter(is_variant=True).select_related('attribute')
+
+        for product_attribute in product_attributes:
+            attribute_code = product_attribute.attribute.code
+            attribute_name = product_attribute.attribute.name
+            values = [(value.id, value.option) for value in product_attribute.value]
+            attributes[attribute_code] = (attribute_name, values)
+
+        # Создаём поля формы для атрибутов
+        for attribute_code, (label, choices) in attributes.items():
+            initial_value = default_attr.get(attribute_code, None)
+            self.fields[attribute_code] = forms.ChoiceField(
+                choices=tuple(choices),
+                label=label,
+                initial=initial_value,
+                required=False,
+                widget=forms.widgets.RadioSelect(attrs={
+                    'variant': True,
+                    'left': f"{100 - 100 / next((i + 1 for i, (val, _) in enumerate(choices) if val == initial_value), None)}%"
+                }),
+            )
 
     def _create_product_fields(self, product):
         """
@@ -275,7 +306,7 @@ class AddToBasketForm(forms.Form):
         try:
             child = self.parent_product.children.get(id=self.cleaned_data["child_id"])
         except Product.DoesNotExist:
-            raise forms.ValidationError("Пожалуйста, выберите корректный продукт")
+            raise forms.ValidationError("Данный вариант временно недоступен.")
 
         # To avoid duplicate SQL queries, we cache a copy of the loaded child
         # product as we're going to need it later.
@@ -285,9 +316,9 @@ class AddToBasketForm(forms.Form):
 
     def clean_quantity(self):
         # Check that the proposed new line quantity is sensible
-        qty = self.cleaned_data["quantity"]
-        if not qty:
-            qty = 1
+        # qty = self.cleaned_data["quantity"]
+        # if not qty:
+        qty = 1
             
         basket_threshold = settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD
         if basket_threshold:
@@ -318,17 +349,13 @@ class AddToBasketForm(forms.Form):
         # Check that a price was found by the strategy
         if not info.price.exists:
             raise forms.ValidationError(
-                (
-                "Этот товар нельзя добавить в корзину, поскольку для него не удалось определить цену."
-                )
+                "Этот товар нельзя добавить в корзину."
             )
 
         # Check currencies are sensible
         if self.basket.currency and info.price.currency != self.basket.currency:
             raise forms.ValidationError(
-                (
-                    "Этот товар нельзя добавить в корзину, поскольку его валюта не совпадает с валютой других товаров в вашей корзине."
-                )
+                "Этот товар нельзя добавить в корзину, поскольку его валюта не совпадает с валютой других товаров в вашей корзине."
             )
 
         # Check user has permission to add the desired quantity to their

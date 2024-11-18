@@ -118,7 +118,11 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:catalogue-option-list",
             },
             {
-                "label": "Группы параметров атрибутов",
+                "label": "Атрибуты",
+                "url_name": "dashboard:catalogue-attribute-list",
+            },
+            {
+                "label": "Группы атрибутов",
                 "url_name": "dashboard:catalogue-attribute-option-group-list",
             },
             {
@@ -260,7 +264,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
-        "label": "Эвотор",
+        "label": "Эвотор данные",
         "icon": "fas fa-crm",
         "children": [
             {
@@ -276,6 +280,10 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:crm-staffs",
             },
             {
+                "label": "Группы",
+                "url_name": "dashboard:crm-groups",
+            },
+            {
                 "label": "Товары",
                 "url_name": "dashboard:crm-products",
             },
@@ -283,6 +291,13 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Документы",
                 "url_name": "dashboard:crm-docs",
             },
+            
+        ],
+    },
+    {
+        "label": "Эвотор история",
+        "icon": "fas fa-server",
+        "children": [
             {
                 "label": "Приёмка товаров",
                 "url_name": "dashboard:crm-accept",

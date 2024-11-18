@@ -12,6 +12,9 @@ from django_tables2 import SingleTableMixin, SingleTableView
 from django.db.models import Count, Max, Min, Case, When, DecimalField, F
 from django.utils.timezone import now
 
+from itertools import product as attr_iterator
+
+from oscar.apps.catalogue.models import ProductAttribute
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import ObjectLookupView
 
@@ -24,7 +27,8 @@ from oscar.views.generic import ObjectLookupView
     StockAlertSearchForm,
     AttributeOptionGroupForm,
     OptionForm,
-    AdditionalForm
+    AdditionalForm,
+    AttributeForm,
 ) = get_classes(
     "dashboard.catalogue.forms",
     (
@@ -37,6 +41,7 @@ from oscar.views.generic import ObjectLookupView
         "AttributeOptionGroupForm",
         "OptionForm",
         "AdditionalForm",
+        "AttributeForm",
     ),
 )
 (
@@ -47,7 +52,8 @@ from oscar.views.generic import ObjectLookupView
     ProductRecommendationFormSet,
     ProductAdditionalFormSet,
     ProductClassAdditionalFormSet,
-    ProductAttributesFormSet,
+    ProductAttributeFormSet,
+    ProductClassAttributeFormSet,
     AttributeOptionFormSet,
 ) = get_classes(
     "dashboard.catalogue.formsets",
@@ -59,13 +65,14 @@ from oscar.views.generic import ObjectLookupView
         "ProductRecommendationFormSet",
         "ProductAdditionalFormSet",
         "ProductClassAdditionalFormSet",
-        "ProductAttributesFormSet",
+        "ProductAttributeFormSet",
+        "ProductClassAttributeFormSet",
         "AttributeOptionFormSet",
     ),
 )
-ProductTable, ProductClassTable, CategoryTable, AttributeOptionGroupTable, OptionTable, AdditionalTable, StockAlertTable = get_classes(
+ProductTable, ProductClassTable, CategoryTable, AttributeOptionGroupTable, OptionTable, AdditionalTable, AttributeTable, StockAlertTable = get_classes(
     "dashboard.catalogue.tables",
-    ("ProductTable", "ProductClassTable", "CategoryTable", "AttributeOptionGroupTable", "OptionTable", "AdditionalTable", "StockAlertTable"),
+    ("ProductTable", "ProductClassTable", "CategoryTable", "AttributeOptionGroupTable", "OptionTable", "AdditionalTable", "AttributeTable", "StockAlertTable"),
 )
 (PopUpWindowCreateMixin, PopUpWindowUpdateMixin, PopUpWindowDeleteMixin) = get_classes(
     "dashboard.views",
@@ -74,6 +81,7 @@ ProductTable, ProductClassTable, CategoryTable, AttributeOptionGroupTable, Optio
 PartnerProductFilterMixin = get_class(
     "dashboard.catalogue.mixins", "PartnerProductFilterMixin"
 )
+Attribute = get_model("catalogue", "Attribute")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 ProductImage = get_model("catalogue", "ProductImage")
@@ -201,7 +209,7 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         title = data.get("title")        
         if title:
             queryset = queryset.filter(
-                Q(title__icontains=title) | Q(children__title__icontains=title) | Q(variant__icontains=title)
+                Q(title__icontains=title) | Q(children__title__icontains=title) | Q(attribute__icontains=title)
             )
         
         categories = data.get("categories")
@@ -276,9 +284,9 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
     image_formset = ProductImageFormSet
     recommendations_formset = ProductRecommendationFormSet
     additional_formset = ProductAdditionalFormSet
+    attribute_formset = ProductAttributeFormSet
     stockrecord_formset = StockRecordFormSet
     stockrecordstock_formset = StockRecordStockFormSet
-    # stockrecordstockandprice_formset = StockRecordStockAndPriceFormSet
 
     creating = False
     parent = None
@@ -303,6 +311,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
                 "image_formset": self.image_formset,
                 "recommended_formset": self.recommendations_formset,
                 "additional_formset": self.additional_formset,
+                "attribute_formset": self.attribute_formset,
                 "stockrecord_formset": self.stockrecord_formset,
             }
             self.full_access = True
@@ -382,11 +391,11 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
     def get_page_title(self):
         if self.creating:
             if self.parent is None:
-                return ("Создать новый продукт типа '%(product_class)s'") % {
+                return ("Создать продукт типа '%(product_class)s'") % {
                     "product_class": self.product_class.name
                 }
             else:
-                return ("Создать новый вариант продукта %(parent_product)s") % {
+                return ("Создать вариант продукта %(parent_product)s") % {
                     "parent_product": self.parent.title
                 }
         else:
@@ -413,6 +422,20 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         
         full_access = ["user.full_access", "catalogue.full_access"]
 
+        is_valid, reason = self.is_valid_form_attributes(form)
+
+        if not is_valid:
+            if self.creating and self.object and self.object.pk is not None:
+                self.object.delete()
+                self.object = None
+            
+            messages.error(self.request, reason)
+            
+            self.object = self.get_object()
+            self.get_formsets(self.request)
+            ctx = self.get_context_data(form=form)
+            return self.render_to_response(ctx)
+
         if self.creating and form.is_valid() and any(self.request.user.has_perm(perm) for perm in full_access):
             self.object = form.save()
 
@@ -427,6 +450,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             )
 
         if any(self.request.user.has_perm(perm) for perm in full_access):
+
             is_valid = form.is_valid() and all(
                 [formset.is_valid() for formset in formsets.values()]
             )
@@ -445,6 +469,47 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
                 return self.forms_valid(formsets)
             else:
                 return self.forms_invalid(formsets, form)
+
+    def is_valid_form_attributes(self, form):
+        form_attrs = {
+            key.split("attr_")[1]: value
+            for key, value in form.cleaned_data.items()
+            if key.startswith("attr_") and (not self.object or not key.startswith("attr_is_variant"))
+        }
+
+        return self.is_valid_child(form_attrs)
+    
+    def is_valid_child(self, parent_attrs):
+
+        def is_valid_child_attrs(dict1, dict2):
+            for key, value in dict1.items():
+                if key not in dict2:
+                    return False
+                
+                if hasattr(dict2[key], 'filter'):
+                    if not dict2[key].filter(pk=value.pk).exists():
+                        return False
+                else:
+                    if dict2[key] != value:
+                        return False
+
+            return True
+    
+        product = self.parent if self.parent else self.object
+        
+        if product and (self.parent or self.object.is_parent):
+            for child in product.children.all():
+                child_attrs = {
+                    attr.attribute.code: attr.value.first()
+                    for attr in child.attribute_values.all()
+                }
+                if not is_valid_child_attrs(child_attrs, parent_attrs) if not self.parent else child_attrs == parent_attrs and self.object.id != child.id:
+                    reason = "Вариация с таким набором атрибутов уже создана." if self.parent else \
+                            "Невозможно удалить значение атрибута, так как оно используется для вариации. Сначала удалите вариацию."
+                    return False, reason
+
+        return True, ""
+    
 
     # form_valid and form_invalid are called depending on the validation result
     # of just the product form and redisplay the form respectively return a
@@ -484,8 +549,59 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             image.display_order = idx
             image.save()
 
-        return HttpResponseRedirect(self.get_success_url())
+        action = self.request.POST.get("action")
+        if action == "create-all-child":
+            self.create_all_child()
 
+        return HttpResponseRedirect(self.get_success_url(action))
+
+    def create_all_child(self):
+
+        created = False
+        product = self.parent = self.object
+        product_attributes = product.attribute_values.filter(is_variant=True)
+
+        attribute_values = {}
+
+        for attr in product_attributes:
+            attribute_values[attr.attribute.code] = list(attr.value.all())
+
+        all_combinations = []
+
+        def create_combinations(keys, values, current_combination=[]):
+            if not keys:
+                all_combinations.append(current_combination)
+                return
+            
+            key = keys[0]
+            for value in values[key]:
+                create_combinations(keys[1:], values, current_combination + [(key, value)])
+
+        create_combinations(list(attribute_values.keys()), attribute_values)
+
+        for combination in all_combinations:
+            attributes = [
+                ProductAttribute(attribute=Attribute.objects.get(code=key), value_option=value)
+                for key, value in combination
+            ]
+            
+            new_product = Product(
+                structure=Product.CHILD,
+                parent=product, 
+            )
+
+            for attribute in attributes:
+                setattr(new_product.attr, attribute.attribute.code, [attribute.value_option])
+
+            is_valid, _ = self.is_valid_child(dict(combination))
+
+            if is_valid:
+                created = True
+                new_product.save()
+        
+        if created:
+            self.handle_adding_child(product)
+    
     def handle_adding_child(self, parent):
         """
         When creating the first child product, the parent product needs
@@ -519,7 +635,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             url_parts += [self.request.GET.urlencode()]
         return "?".join(url_parts)
 
-    def get_success_url(self):
+    def get_success_url(self, action):
         """
         Renders a success message and redirects depending on the button:
         - Standard case is pressing "Save"; redirects to the product list
@@ -537,8 +653,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         )
         messages.success(self.request, msg, extra_tags="safe noicon")
 
-        action = self.request.POST.get("action")
-        if action == "continue":
+        if action == "continue" or action == "create-all-child":
             url = reverse("dashboard:catalogue-product", kwargs={"pk": self.object.id})
         elif action == "create-another-child" and self.parent:
             url = reverse(
@@ -805,40 +920,12 @@ class CategoryDeleteView(CategoryListMixin, generic.DeleteView):
         return super().get_success_url()
 
 
-class ProductLookupView(ObjectLookupView):
-    model = Product
-
-    def get_queryset(self):
-        return self.model.objects.browsable().all()
-
-    def lookup_filter(self, qs, term):
-        return qs.filter(Q(title__icontains=term) | Q(parent__title__icontains=term))
-
-
-class AdditionalLookupView(ObjectLookupView):
-    model = Additional
-
-    def get_queryset(self):
-        return self.model.objects.browsable().all()
-
-    def lookup_filter(self, qs, term):
-        return qs.filter(name__icontains=term) 
-    
-    # def custom_filter(self, qs):
-    #     class_addit = product_class.class_additionals.all()
-    #     id_list = []
-    #     for add in class_addit:
-    #         id_list.append(add.id)
-
-    #     return qs.filter(pk__notin=id_list)
-
-
 class ProductClassCreateUpdateView(generic.UpdateView):
     template_name = "oscar/dashboard/catalogue/product_class_form.html"
     model = ProductClass
     form_class = ProductClassForm
     additional_class_formset = ProductClassAdditionalFormSet
-    product_attributes_formset = ProductAttributesFormSet
+    attribute_class_formset = ProductClassAttributeFormSet
 
     def process_all_forms(self, form):
         """
@@ -854,28 +941,28 @@ class ProductClassCreateUpdateView(generic.UpdateView):
         additional_formset = self.additional_class_formset(
             self.request.POST, self.request.FILES, instance=self.object
         )
-
-        attributes_formset = self.product_attributes_formset(
+        
+        attribute_formset = self.attribute_class_formset(
             self.request.POST, self.request.FILES, instance=self.object
         )
 
-        is_valid = form.is_valid() and attributes_formset.is_valid() and additional_formset.is_valid()
+        is_valid = form.is_valid() and additional_formset.is_valid() and attribute_formset.is_valid()
 
         if is_valid:
-            return self.forms_valid(form, attributes_formset, additional_formset)
+            return self.forms_valid(form, additional_formset, attribute_formset)
         else:
-            return self.forms_invalid(form, attributes_formset, additional_formset)
+            return self.forms_invalid(form, additional_formset, attribute_formset)
 
-    def forms_valid(self, form, attributes_formset, additional_formset):
+    def forms_valid(self, form, additional_formset, attribute_formset):
         form.save()
-        attributes_formset.save()
         additional_formset.save()
+        attribute_formset.save()
 
         return HttpResponseRedirect(self.get_success_url())
 
-    def forms_invalid(self, form, attributes_formset, additional_formset):
+    def forms_invalid(self, form, additional_formset, attribute_formset):
         messages.error(self.request, "Отправленные вами данные недействительны. Исправьте ошибки ниже.")
-        ctx = self.get_context_data(form=form, attributes_formset=attributes_formset, additional_formset=additional_formset)
+        ctx = self.get_context_data(form=form, additional_formset=additional_formset, attribute_formset=attribute_formset)
         return self.render_to_response(ctx)
 
     # form_valid and form_invalid are called depending on the validation result
@@ -889,13 +976,13 @@ class ProductClassCreateUpdateView(generic.UpdateView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
-        if "attributes_formset" not in ctx:
-            ctx["attributes_formset"] = self.product_attributes_formset(
+        if "additional_formset" not in ctx:
+            ctx["additional_formset"] = self.additional_class_formset(
                 instance=self.object
             )
 
-        if "additional_formset" not in ctx:
-            ctx["additional_formset"] = self.additional_class_formset(
+        if "attribute_formset" not in ctx:
+            ctx["attribute_formset"] = self.attribute_class_formset(
                 instance=self.object
             )
 
@@ -951,6 +1038,7 @@ class ProductClassListView(SingleTableView):
         queryset = ProductClass.objects.prefetch_related("options", "class_additionals").all()
         queryset = queryset.annotate(
             num_products=Count("products", distinct=True),
+            num_attributes=Count('class_attributes'),
             num_additionals=Count('class_additionals'),
         )
 
@@ -1055,10 +1143,10 @@ class AttributeOptionGroupCreateView(
         return None
 
     def get_title(self):
-        return "Создать группу параметров атрибута"
+        return "Создать группу атрибутов"
 
     def get_success_url(self):
-        self.add_success_message("Группа параметров атрибута успешно создана")
+        self.add_success_message("Группа атрибутов успешно создана")
         url = reverse("dashboard:catalogue-attribute-option-group-list")
         return self.get_url_with_querystring(url)
 
@@ -1075,10 +1163,10 @@ class AttributeOptionGroupUpdateView(
         return attribute_option_group
 
     def get_title(self):
-        return "Обновить группу параметров атрибута '%s'" % self.object.name
+        return "Обновить группу атрибутов '%s'" % self.object.name
 
     def get_success_url(self):
-        self.add_success_message("Группа параметров атрибута успешно обновлена.")
+        self.add_success_message("Группа атрибутов успешно обновлена.")
         url = reverse("dashboard:catalogue-attribute-option-group-list")
         return self.get_url_with_querystring(url)
 
@@ -1103,14 +1191,14 @@ class AttributeOptionGroupDeleteView(PopUpWindowDeleteMixin, generic.DeleteView)
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
 
-        ctx["title"] = "Удалить группу параметров атрибута '%s'" % self.object.name
+        ctx["title"] = "Удалить группу атрибутов '%s'" % self.object.name
 
         product_attribute_count = self.object.product_attributes.count()
         if product_attribute_count > 0:
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             messages.error(
-                self.request, "%i Атрибуты продукта по-прежнему назначены этой группе параметров атрибутов."
+                self.request, "%i Атрибуты продукта по-прежнему назначены этой группе атрибутов."
                 % product_attribute_count,
             )
 
@@ -1130,7 +1218,7 @@ class AttributeOptionGroupDeleteView(PopUpWindowDeleteMixin, generic.DeleteView)
         return "?".join(url_parts)
 
     def get_success_url(self):
-        self.add_success_message("Группа параметров атрибута успешно удалена")
+        self.add_success_message("Группа атрибутов успешно удалена")
         url = reverse("dashboard:catalogue-attribute-option-group-list")
         return self.get_url_with_querystring(url)
 
@@ -1224,12 +1312,17 @@ class OptionDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
         return reverse("dashboard:catalogue-option-list")
 
 
-
 class AdditionalListView(SingleTableView):
     template_name = "oscar/dashboard/catalogue/additional_list.html"
     model = Additional
     table_class = AdditionalTable
-    context_table_name = "additional"
+    context_table_name = "additionals"   
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        access = ["user.full_access", "catalogue.full_access"]
+        ctx["product_access"] = any(self.request.user.has_perm(perm) for perm in access)
+        return ctx
 
 
 class AdditionalCreateUpdateView(generic.UpdateView):
@@ -1314,3 +1407,136 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
     def get_success_url(self):
         self.add_success_message("Дополнительный товар успешно удален")
         return reverse("dashboard:catalogue-additional-list")
+
+
+class AttributeListView(SingleTableView):
+    template_name = "oscar/dashboard/catalogue/attribute_list.html"
+    model = Attribute
+    table_class = AttributeTable
+    context_table_name = "attributes"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        access = ["user.full_access", "catalogue.full_access"]
+        ctx["product_access"] = any(self.request.user.has_perm(perm) for perm in access)
+        return ctx
+
+
+class AttributeCreateUpdateView(generic.UpdateView):
+    template_name = "oscar/dashboard/catalogue/attribute_form.html"
+    model = Attribute
+    form_class = AttributeForm
+
+    # pylint: disable=no-member
+    def form_valid(self, form):
+        self.object = form.save()
+        if self.is_popup:
+            return self.popup_response(form.instance)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # pylint: disable=no-member
+        ctx["title"] = self.get_title()
+        access = ["user.full_access", "catalogue.full_access"]
+        ctx["product_access"] = any(self.request.user.has_perm(perm) for perm in access)
+        return ctx
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Отправленные вами данные недействительны. Исправьте ошибки ниже.")
+        return super().form_invalid(form)
+
+
+class AttributeCreateView(PopUpWindowCreateMixin, AttributeCreateUpdateView):
+    creating = True
+
+    def get_object(self, queryset=None):
+        return None
+
+    def get_title(self):
+        return "Добавить новый атрибут"
+
+    def get_success_url(self):
+        self.add_success_message("Атрибут успешно создан")
+        return reverse("dashboard:catalogue-attribute-list")
+
+
+class AttributeUpdateView(PopUpWindowUpdateMixin, AttributeCreateUpdateView):
+    creating = False
+
+    def get_object(self, queryset=None):
+        attribute_additional_group = get_object_or_404(Attribute, pk=self.kwargs["pk"])
+        return attribute_additional_group
+
+    def get_title(self):
+        return "Обновить атрибут '%s'" % self.object.name
+
+    def get_success_url(self):
+        self.add_success_message("Атрибут успешно обновлен")
+        return reverse("dashboard:catalogue-attribute-list")
+
+
+class AttributeDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
+    template_name = "oscar/dashboard/catalogue/attribute_delete.html"
+    model = Attribute
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+
+        ctx["title"] = "Удалить атрибут '%s'" % self.object.name
+
+        products = self.object.product_set
+        products_count = products.count()
+        product_classes = self.object.productclass_set
+        product_classes_count = product_classes.count()
+
+        if any([products_count, product_classes_count]):
+            ctx["disallow"] = True
+            ctx["title"] = "Невозможно удалить '%s'" % self.object.name
+            if products_count:
+                messages.error(self.request, "%i продукт(а/ы) по-прежнему содержит этот атрибут. Список продуктов с этим доп. атрибутом: %s. Удалите атрибут у основного продукта(ов), прежде чем удалять атрибут" % (products_count, list(products.values_list('title', flat=True))))
+            if product_classes_count:
+                messages.error(self.request, "%i класс(а/ы) по-прежнему содержит этот атрибут. Список класснов с этим атрибутом: %s. Удалите атрибут у класса(ов), прежде чем удалять атрибут" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
+
+        return ctx
+
+    def get_success_url(self):
+        self.add_success_message("Атрибут успешно удален")
+        return reverse("dashboard:catalogue-attribute-list")
+
+
+class ProductLookupView(ObjectLookupView):
+    model = Product
+
+    def get_queryset(self):
+        return self.model.objects.browsable().all()
+
+    def lookup_filter(self, qs, term):
+        return qs.filter(Q(title__icontains=term) | Q(parent__title__icontains=term))
+
+
+class AdditionalLookupView(ObjectLookupView):
+    model = Additional
+
+    def get_queryset(self):
+        return self.model.objects.browsable().all()
+
+    def lookup_filter(self, qs, term):
+        return qs.filter(name__icontains=term) 
+
+    def product_filter(self, qs, product_id, class_id):
+        return qs.exclude(Q(product__id=product_id) | Q(productclass__id=class_id))
+    
+
+class AttributeLookupView(ObjectLookupView):
+    model = Attribute
+
+    def get_queryset(self):
+        return self.model.objects.browsable().all()
+
+    def lookup_filter(self, qs, term):
+        return qs.filter(name__icontains=term) 
+
+    def product_filter(self, qs, product_id, class_id):
+        return qs.exclude(Q(productclass__id=class_id) | Q(product__id=product_id))

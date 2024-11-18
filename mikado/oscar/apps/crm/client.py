@@ -561,6 +561,7 @@ class EvotorProductClient(EvotorAPICloud):
     Работа с вариативными товарами
     https://developer.evotor.ru/docs/rest_product_modifications_guide.html 
     """
+    # продукты ========================
 
     def get_products(self, store_id):
         """
@@ -894,6 +895,51 @@ class EvotorProductClient(EvotorAPICloud):
 
     def create_variants(self, store_id, parent_id, variants):
         pass
+
+    # продукты ========================
+
+    def get_groups(self, store_id):
+        """
+        Получить все группы товаров или модификаций
+
+        Возвращает все группы товаров из магазина.
+        GET /stores/{store-id}/product-groups
+
+        ОТВЕТ: 
+            {
+                "items": [
+                    {
+                    "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
+                    "name": "Группа",
+                    "store_id": "20180820-7052-4047-807D-E82C50000000",
+                    "user_id": "00-000000000000000",
+                    "created_at": "2018-09-11T16:18:35.397+0000",
+                    "updated_at": "2018-09-11T16:18:35.397+0000",
+                    "barcodes": [
+                        "2000000000060"
+                    ],
+                    "attributes": [
+                        {
+                        "id": "36755a25-8f56-11e8-96a6-85f64fd5f8e3",
+                        "name": "Цвет",
+                        "choices": [
+                            {
+                            "id": "36755a27-8f56-11e8-96a6-85f64fd5f8e3",
+                            "name": "Зелёный"
+                            }
+                        ]
+                        }
+                    ]
+                    }
+                ],
+                "paging": {
+                    "next_cursor": "string"
+                }
+            }
+        """
+        endpoint = f"stores/{store_id}/product-groups"
+        return self.send_request(endpoint)
+    
 
 
 class EvotorDocClient(EvotorAPICloud):

@@ -2,18 +2,18 @@
 {% load category_tags %}
 {% load image_tags %}
 
-{% category_tree as tree_categories %}
-{% if tree_categories %}
+{% root_categories as root_categories %}
+{% if root_categories %}
     <div class="v-categories d-flex flex-wrap pd-sm-3{% if not is_mobile %} d-sm-none{% endif %}">
-        {% for tree_category in tree_categories %} 
+        {% for root_category in root_categories %} 
             <div class="v-categories__tab-wrapper d-flex align-center">
-                <a href="{{ tree_category.url }}" class="v-categories__tab fill-width pos-relative" data-id="dish-item-image-link">
-                    <p class="v-categories__tab-name">{{ tree_category.name }}</p>
+                <a href="{{ root_category.url }}" class="v-categories__tab fill-width pos-relative" data-id="dish-item-image-link">
+                    <p class="v-categories__tab-name">{{ root_category.name }}</p>
                     <div class="v-categories__icon v-dish-image fill-width fill-height pos-relative none-select">
                         <div class="v-image__inner v-image__inner--category">
-                            {% with image=tree_category.primary_image %}
+                            {% with image=root_category.primary_image %}
                                 {% oscar_thumbnail image.original "x320" upscale=False as thumb %}
-                                <img src="{{ thumb.url }}" alt="Изображение {{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                                <img src="{{ thumb.url }}" alt="Изображение {{ root_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                             {% endwith %}
                         </div>
                     </div>

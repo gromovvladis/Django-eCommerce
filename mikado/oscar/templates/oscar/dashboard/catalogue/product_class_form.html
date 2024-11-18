@@ -80,47 +80,18 @@
 
                         {% block product_attributes %}
                             <div class="tab-pane" id="product_attributes">
-                                <div class="table-header">
-                                    <h3>Атрибуты</h3>
-                                </div>
-                                <div class="product-attributes mobile-table">
-                                    <table class="table table-striped table-bordered">
-                                        {{ attributes_formset.management_form }}
-                                        {{ attributes_formset.non_form_errors }}
-                                        <thead>
-                                            <tr>
-                                                <th>Имя</th>
-                                                <th>Код</th>
-                                                <th>Тип</th>
-                                                <th>Обязательно?</th>
-                                                <th>Удалить?</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for attribute_form in attributes_formset %}
-                                                <tr>
-                                                    {% for hidden_field in attribute_form.hidden_fields %}
-                                                     {{ hidden_field }}
-                                                    {% endfor %}
-                                                    <td class="name">{% include 'oscar/dashboard/partials/form_field.html' with field=attribute_form.name nolabel=True %}</td>
-                                                    <td data-label="Код">{% include 'oscar/dashboard/partials/form_field.html' with field=attribute_form.code nolabel=True %}</td>
-                                                    <td data-label="Тип">
-                                                        {% include 'oscar/dashboard/partials/form_field.html' with field=attribute_form.type nolabel=True %}
-                                                        {% include 'oscar/dashboard/partials/form_field.html' with field=attribute_form.option_group nolabel=True %}
-                                                    </td>
-                                                    <td data-label="Обязательно?">{% include 'oscar/dashboard/partials/form_field.html' with field=attribute_form.required nolabel=True %}{{ attribute_form.non_field_errors }}</td>
-                                                    <td data-label="Удалить?">{% include 'oscar/dashboard/partials/form_field.html' with field=attribute_form.DELETE nolabel=True %}</td>
-                                                    <td class="toggle-row">
-                                                        <button class="btn btn-secondary" type="button">
-                                                            <i class="fa-solid fa-chevron-up"></i>
-                                                            <i class="fa-solid fa-chevron-down"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <table class="table table-striped table-bordered">
+                                    <caption>Атрибуты</caption>
+                                    {{ attribute_formset.management_form }}
+                                    {{ attribute_formset.non_form_errors }}
+                                    {% for attribute_form in attribute_formset %}
+                                        <tr>
+                                            <td class="form-inline">
+                                                {% include "oscar/dashboard/partials/form_fields_inline.html" with form=attribute_form %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
                             </div>
                         {% endblock %}
 

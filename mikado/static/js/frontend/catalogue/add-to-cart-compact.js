@@ -25,15 +25,15 @@ function findNewForms() {
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 xhr.onload = function () {
+                    var response = JSON.parse(xhr.responseText);
                     if (xhr.status >= 200 && xhr.status < 300) {
-                        var response = JSON.parse(xhr.responseText);
                         cartNums.forEach(function(element) {
                             element.innerHTML = response.cart_nums; // Вставляем HTML в каждый элемент
                         });
                         cartAdded();
                     } else if (xhr.status >= 400 && xhr.status < 500) {
                         var errorElement = btn.closest('.product-description').querySelector('[data-id="add-to-cart-error-compact"]');
-                        errorElement.innerHTML = response.errors;
+                        errorElement.innerHTML = '<div class="error-badge">' + response.errors + "</div>";
                     }
                 };
                 xhr.onerror = function () {

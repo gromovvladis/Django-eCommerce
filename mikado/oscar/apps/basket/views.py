@@ -232,7 +232,6 @@ class BasketAddView(FormView):
     parts of the site. The add-to-basket form is loaded into templates using
     a templatetag from :py:mod:`oscar.templatetags.basket_tags`.
     """
-
     form_class = AddToBasketForm
     product_model = Product
     add_signal = basket_addition
@@ -263,12 +262,12 @@ class BasketAddView(FormView):
         self.request.session["add_to_basket_form_post_data_%s" % self.product.pk] = (
             serialized_data.decode("latin-1")
         )
-        return http.JsonResponse({"errors":",".join(clean_msgs), "status": 404}, status=404)
+        return http.JsonResponse({"errors":" ".join(clean_msgs), "status": 404}, status=404)
 
     def form_valid(self, form):
 
         self.request.basket.add_product(
-            form.product, form.cleaned_data["quantity"], form.cleaned_options(), form.cleaned_additionals()
+            form.product, 1, form.cleaned_options(), form.cleaned_additionals()
         )
         
         # Send signal for basket addition
@@ -285,12 +284,6 @@ class BasketAddView(FormView):
             "cart_nums": form.basket.num_items,
             "status": 200
             }, status=200)
-
-    def get_success_message(self, form):
-        return render_to_string(
-            "oscar/basket/messages/addition.html",
-            {"product": form.product, "quantity": form.cleaned_data["quantity"]},
-        )
 
     def get_success_url(self):
         post_url = self.request.POST.get("next")

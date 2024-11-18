@@ -7,7 +7,7 @@ from oscar.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
 Partner = get_model("partner", "Partner")
 
 
-class CRMProductForm(forms.Form):
+class CRMPartnerForm(forms.Form):
     partner = forms.ChoiceField(
         label="Точка продажи", required=False, choices=()
     )

@@ -698,11 +698,11 @@ class AbstractLine(models.Model):
     
     @property 
     def variants(self):
-        slug = ""
-        if self.product.variant:
-            slug = self.product.variant
+        variants = self.product.get_variants()
+        if variants:
+            return variants
 
-        return slug
+        return ""
 
     @property
     def discount(self):

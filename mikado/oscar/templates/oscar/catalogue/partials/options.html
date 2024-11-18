@@ -1,9 +1,9 @@
 {% load widget_tweaks %}
 
-
 <div class="d-flex flex-column mt-2">
     {% for field in form %}
-        {% if not field.field.widget.attrs.variant and not field.field.widget.attrs.good %}
+        {% if not field.field.widget.attrs.variant and not field.field.widget.attrs.additional %}
+
             <div class="d-flex">
                 <div class="v-tabs-button d-flex fill">
 

@@ -72,6 +72,14 @@ if not is_model_registered("catalogue", "ProductRecommendation"):
     __all__.append("ProductRecommendation")
 
 
+if not is_model_registered("catalogue", "Attribute"):
+
+    class Attribute(AbstractAttribute):
+        pass
+
+    __all__.append("Attribute")
+
+
 if not is_model_registered("catalogue", "ProductAttribute"):
 
     class ProductAttribute(AbstractProductAttribute):
@@ -80,12 +88,12 @@ if not is_model_registered("catalogue", "ProductAttribute"):
     __all__.append("ProductAttribute")
 
 
-if not is_model_registered("catalogue", "ProductAttributeValue"):
+# if not is_model_registered("catalogue", "ProductAttributeValue"):
 
-    class ProductAttributeValue(AbstractProductAttributeValue):
-        pass
+#     class ProductAttributeValue(AbstractProductAttributeValue):
+#         pass
 
-    __all__.append("ProductAttributeValue")
+#     __all__.append("ProductAttributeValue")
 
 
 if not is_model_registered("catalogue", "AttributeOptionGroup"):

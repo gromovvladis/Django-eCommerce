@@ -128,3 +128,9 @@ EVOTOR_SITE_USER_TOKEN = "9179d780-56a4-49ea-b042-435e3257eaf8"
 
 MOBILE_CASHIER_LOGIN = ""
 MOBILE_CASHIER_PASSWORD = ""
+
+# =============
+# CAMS
+# =============
+
+# CAMS_PASSWORD = "Mastersup25"

@@ -81,7 +81,10 @@ class ProductCategoryView(BaseSearchView):
         category = cache.get("category_%s" % self.kwargs["category_slug"])
 
         if not category:
-            category = get_object_or_404(Category, slug=self.kwargs["category_slug"])
+            # category = get_object_or_404(Category, slug=self.kwargs["category_slug"])
+            # slug = self.kwargs["category_slug"].split(Category._slug_separator)
+            slug = self.kwargs["category_slug"].split(Category._slug_separator)[-1]
+            category = get_object_or_404(Category, slug=slug)
             cache.set("category_%s" % self.kwargs["category_slug"], category, 3600)
 
         return category

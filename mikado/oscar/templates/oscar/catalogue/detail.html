@@ -86,7 +86,7 @@
                             </header>
 
                             {% if not session.availability.is_available_to_buy %}
-                                <div class="mt-1">
+                                <div class="my-2">
                                     <span class="error-mark">Временно не доставляем</span>
                                 </div>
                             {% endif %}
@@ -102,6 +102,9 @@
                                         <span data-id="dish-old-price-main">{{ session.price.old_price|formate_price }}</span>
                                         <span> {{ currency_symbol }}</span>
                                     </div>
+                                    <span class="text--red d-none" data-id="dish-price-unavailable">
+                                        Временно недоступно
+                                    </span>
                                 </div>
                             {% elif session.stockrecords %}
                                 <div class="mt-2 mb-1">
@@ -143,7 +146,7 @@
                                 <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/Offer" class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
                                     <button id="add_to_cart_btn" type="submit" form="add_to_basket_form" data-id="dish-submit-button" class="v-button fill-width v-button--main justify-center shrink">
                                         <span class="v-button__wrapper">
-                                            <span class="v-button__value">В корзину за 
+                                            <span class="v-button__value" data-id="dish-price-value">В корзину за 
                                                 <span data-id="dish-price-button">
                                                     {% if session.price.exists %}
                                                         {{ session.price.money|formate_price }}
@@ -151,13 +154,16 @@
                                                 </span>
                                                 <span>{{ currency_symbol }}</span>
                                             </span>
+                                            <span class="d-none" data-id="dish-price-unavailable">
+                                                Временно недоступно
+                                            </span>
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="add_to_cart_line_mark mr-1">
                                                 <path class="add_to_cart_line" d="M4 12.6111L8.92308 17.5L20 6.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                             </svg>      
                                             <span class="v-button__loading">Добавлено</span>
                                         </span>
                                     </button>
-                                    <span id="add_to_cart_btn_errors" class="add-to-cart-error" ></span>
+                                    <span data-id="add-to-cart-errors" class="add-to-cart-error"></span>
                                 </div>    
                             {% endif %}
                         {% endcache %}

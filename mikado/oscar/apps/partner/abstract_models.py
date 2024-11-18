@@ -195,7 +195,15 @@ class AbstractStockRecord(models.Model):
     #: which we store here.  This will sometimes be the same the product's UPC
     #: but not always.  It should be unique per partner.
     #: See also http://en.wikipedia.org/wiki/Stock-keeping_unit
-    partner_sku = models.CharField("Артикул в точке продажи", max_length=128, help_text="Эвотор ID")
+    partner_sku = models.CharField("Артикул в точке продажи", max_length=128, help_text="Артикул")
+    
+    evotor_id = models.CharField(
+        "Эвотор ID",
+        max_length=128,
+        null=True,
+        blank=True,
+        help_text="Эвотор ID"
+    )
 
     # Price info:
     price_currency = models.CharField(
@@ -293,7 +301,7 @@ class AbstractStockRecord(models.Model):
     class Meta:
         abstract = True
         app_label = "partner"
-        unique_together = ("partner", "partner_sku")
+        unique_together = ("partner", "product")
         verbose_name = "Товарная запись"
         verbose_name_plural = "Товарные записи"
 

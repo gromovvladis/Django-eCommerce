@@ -46,12 +46,12 @@
                 <div class="col-md-3">
                     <div class="tab-nav sticky-top">
                         <div class="table-header">
-                            <h3>редактирование</h3>
+                            <h3>Редактирование</h3>
                         </div>
                         <ul class="nav flex-column bs-docs-sidenav" id="attribute_option_group_update_tabs">
                             {% block tabs %}
-                                <li class="nav-item"><a class="nav-link active" href="#attribute_option_group_details" data-toggle="tab">Описание</a></li>
-                                <li class="nav-item"><a class="nav-link" href="#attribute_options" data-toggle="tab">Параметры атрибута</a></li>
+                                <li class="nav-item"><a class="nav-link active" href="#attribute_option_group_details" data-toggle="tab">Название атрибута</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#attribute_options" data-toggle="tab">Значения группы атрибутов</a></li>
                             {% endblock tabs %}
                         </ul>
                     </div>
@@ -64,7 +64,7 @@
                         {% block attribute_option_group_details %}
                             <div class="tab-pane active" id="attribute_option_group_details">
                                 <div class="table-header">
-                                    <h3>Описание атрибута</h3>
+                                    <h3>Название атрибута</h3>
                                 </div>
                                 <div class="card card-body attribute-option-group-details">
 
@@ -95,7 +95,7 @@
                         {% block attribute_options %}
                             <div class="tab-pane" id="attribute_options">
                                 <div class="table-header">
-                                    <h3>Параметры атрибута</h3>
+                                    <h3>Значения группы атрибутов</h3>
                                 </div>
                                 <div class="attribute-options">
                                     <table class="table table-striped table-bordered">
@@ -105,7 +105,7 @@
                                         <col width="15%">
                                         <thead>
                                             <tr>
-                                                <th>Опиция</th>
+                                                <th>Атрибут</th>
                                                 <th class="text-center">Удалить?</th>
                                             </tr>
                                         </thead>

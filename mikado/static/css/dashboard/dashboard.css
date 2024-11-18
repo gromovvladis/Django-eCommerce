@@ -2172,17 +2172,19 @@ textarea.form-control {
   padding-left: 5px;
 }
 
-/* .form-check {
-  position: relative;
-  display: block;
-  padding-left: 1.25rem;
-} */
+.form-check {
+  /* align-items: center; */
+  /* display: flex; */
+  margin: .5rem;
 
-/* .form-check-input {
-  position: absolute;
-  margin-top: 0.3rem;
-  margin-left: -1.25rem;
-} */
+  /* position: relative;
+  display: block;
+  padding-left: 1.25rem; */
+}
+
+.form-check-label {
+  margin-left: .5rem;
+}
 
 
 .form-check-input[disabled] ~ .form-check-label, .form-check-input:disabled ~ .form-check-label {
@@ -2473,6 +2475,8 @@ textarea.form-control {
   }
 }
 
+.change-related,
+.delete-related,
 .add-related,
 .btn {
   display: inline-block;
@@ -2493,6 +2497,7 @@ textarea.form-control {
   font-size: 0.8rem;
   line-height: 1.5;
   /* border-radius: 0.5rem; */
+  /* box-shadow: 0 0px 7px rgba(0, 0, 0, 0.07); */
   border-radius: 10px;
   transition: color 0.1s ease-in-out, background-color 0.1s ease-in-out, border-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
 }
@@ -2556,7 +2561,12 @@ fieldset:disabled a.btn {
   box-shadow: 0 0 0 0.1rem rgba(38, 143, 255, 0.3);
 }
 
-.add-related,
+.change-related,
+.delete-related,
+.add-related{  
+  box-shadow: 0 0px 8px rgba(0, 0, 0, 0.08);
+}
+
 .btn-secondary {
   color: #000000;
   background-color: #f3f3f7;
@@ -18529,10 +18539,11 @@ h3.app-ico:before {
 }
 
 .bs-docs-sidenav .nav-link.active {
-  font-weight: bold;
   position: relative;
   background: #f3f3f3;
   z-index: 2;
+  color: var(--purple);
+  /* font-weight: bold; */
   /* padding: 9px 15px; */
 }
 
@@ -18595,7 +18606,7 @@ h3.app-ico:before {
   left: 170px;
   right: 0;
   width: calc(100% - 170px);
-  padding: 1.25rem 0;
+  padding: 1.1rem 0;
   /* padding: 1.5rem; */
   /* margin-top: 1rem; */
   /* margin-top: 1rem; */
@@ -19124,7 +19135,7 @@ caption,
   background: #ffffff;
   -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .07);
   box-shadow: 0 0 10px rgba(0, 0, 0, .07);
-  font-size: .8rem;
+  font-size: .9rem;
   line-height: 1.2;
 }
 caption h2, caption h3,
@@ -19233,12 +19244,11 @@ caption {
   .table .title,
   .table .description,
   .table .help_text,
-  .table .class_options,
-  .table .class_additionals,
+  /* .table .class_options, */
+  /* .table .class_additionals, */
   .table .type,
   .table .partner,
   .table .additionals,
-  .table .class_options,
   .table .date_updated,
   .table .date_created,
   .table .categories{
@@ -20056,6 +20066,10 @@ caption {
   display: none;
 } 
 
+input:focus-visible {
+    outline: #ececec auto 4px;
+}
+
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -20067,7 +20081,7 @@ input[type="number"]:focus {
     -moz-appearance: textfield;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1600px) {
   .mobile-table-xl th, 
   .mobile-table-xl td,
   .mobile-table th,
@@ -20136,6 +20150,11 @@ input[type="number"]:focus {
     color: var(--purple);
     font-size: 1rem;
     font-weight: 500;
+  }
+
+  
+  .mobile-table-xl tbody td div{
+    justify-content: end !important;
   }
 
   .mobile-table-xl table .actions,
@@ -20549,6 +20568,14 @@ input[type="number"]:focus {
   margin-right: 5px !important;
 }
 
+.select2-container .select2-selection--single .select2-selection__rendered {
+  white-space:wrap;
+}
+
+.select2-container .select2-selection--single{
+  overflow: hidden;
+}
+
 .form-flex-inline{
   margin-right: 1rem;
 }
@@ -20663,7 +20690,7 @@ input[type="number"]:focus {
 	box-shadow: inset 0 0 2px rgba(0, 0, 0, .3);
 }
 .checkbox-ios input[type=checkbox]:checked + .checkbox-ios-switch {
-	background: limegreen;
+	background: #28a745;
 }
 .checkbox-ios input[type=checkbox]:checked + .checkbox-ios-switch:before {
 	transform:translateX(28px);
@@ -20672,7 +20699,8 @@ input[type="number"]:focus {
 /* Hover */
 .checkbox-ios input[type="checkbox"]:not(:disabled) + .checkbox-ios-switch {
 	cursor: pointer;
-	border-color: rgba(0, 0, 0, .3);
+	/* border-color: rgb(16 100 0 / 30%); */
+	border-color: #fff;
 }
  
 /* Disabled */

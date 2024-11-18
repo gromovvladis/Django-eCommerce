@@ -142,20 +142,21 @@
 {% endblock %}
 
 {% block scripts %}
-        {% compress js %}
+        <script src="{% static "js/thirdpaty/tinymce-6/tinymce.min.js" %}"></script>
+        {% comment %} {% compress js %} {% endcomment %}
             <script src="{% static "js/thirdpaty/bootstrap4/bootstrap.bundle.min.js" %}"></script>
             <script src="{% static "js/thirdpaty/mousewheel/jquery.mousewheel.js" %}"></script>
             <script src="{% static "js/thirdpaty/inputmask/jquery.inputmask.min.js" %}"></script>
             <script src="{% static "js/thirdpaty/select2/select2.min.js" %}"></script>
             <script src="{% static "js/thirdpaty/jquery-draggable/jquery-draggable-min.js" %}"></script>
             <script src="{% static "js/thirdpaty/slider/slider.js" %}"></script>
-            <script src="{% static "js/thirdpaty/tinymce/jquery.tinymce.min.js" %}"></script>
             <script src="{% static "js/thirdpaty/datetimepicker/air-datepicker.js" %}"></script>
+            <script src="{% static "js/thirdpaty/tinymce-6/jquery.tinymce.min.js" %}"></script>
 
-            <script src="{% static "js/dashboard/oscar/RelatedObjectLookups.js" %}"></script>
             <script src="{% static "js/dashboard/oscar/dashboard.js" %}"></script>
+            <script src="{% static "js/dashboard/oscar/RelatedObjectLookups.js" %}"></script>
 
-            <script src="{% static "js/dashboard/statictic/dashboard-sliders.js" %}"></script>
+            <script src="{% static "js/dashboard/index/dashboard-sliders.js" %}"></script>
             <script src="{% static "js/dashboard/utils/navi.js" %}"></script>
             <script src="{% static "js/dashboard/utils/table.js" %}"></script>
             <script src="{% static "js/dashboard/utils/photo.js" %}"></script>
@@ -163,9 +164,11 @@
             <script src="{% static "js/dashboard/utils/datepicker.js" %}"></script>
             <script src="{% static "js/dashboard/utils/phone-mask.js" %}"></script>
             <script src="{% static "js/dashboard/utils/map.js" %}"></script>
-        {% endcompress %}
-        <script src="{% static "js/thirdpaty/tinymce/tinymce.min.js" %}"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+
+            
+
+        {% comment %} {% endcompress %} {% endcomment %}
+        {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script> {% endcomment %}
 {% endblock %}
 
 {% block onbodyload %}
