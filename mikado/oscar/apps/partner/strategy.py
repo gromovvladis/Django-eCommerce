@@ -156,7 +156,7 @@ class Structured(Base):
         Select appropriate stock record for all children of a product
         """
         records = []
-        for child in product.children.order_by('order').public():
+        for child in product.children.order_by('-order').public():
             # Use tuples of (child product, stockrecord)
             records.append((child, self.select_stockrecord(child)))
         return records
@@ -229,7 +229,7 @@ class UsePartnerSelectStockRecord:
                 elif partner_cookies is not None:
                     partner_id = partner_cookies
 
-            return product.stockrecords.filter(partner_id=partner_id)[0]
+            return product.stockrecords.filter(partner_id=partner_id, is_public=True)[0]
         
         except IndexError:
             pass
@@ -281,28 +281,33 @@ class NoTax(object):
 
     #vlad
     def parent_pricing_policy(self, product, children_stock):
-        stockrecords = [x[1] for x in children_stock if x[1] is not None]
+        # stockrecords = [x[1] for x in children_stock if x[1] is not None]
+        stockrecords = [x[1] for x in children_stock]
         if not stockrecords:
             return UnavailablePrice()
+        
         # We take price from first record
         stockrecord = stockrecords[0]
 
         variations_price = dict()
-        # prices = namedtuple("prices", ["price", "old_price",])
 
         if product.is_parent:
             for stc in stockrecords:
-                variations_price[stc.id] = {
-                    'price':stc.price,
-                    'old_price':stc.old_price
-                }
+                if stc is not None:
+                    variations_price[stc.id] = {
+                        'price':stc.price,
+                        'old_price':stc.old_price
+                    }
 
-        return FixedPrice(
-            currency=stockrecord.price_currency,
-            money=stockrecord.price,
-            old_price=stockrecord.old_price,
-            variations_price=variations_price,
-        )
+        if stockrecord is not None:
+            return FixedPrice(
+                currency=stockrecord.price_currency,
+                money=stockrecord.price,
+                old_price=stockrecord.old_price,
+                variations_price=variations_price,
+            )
+        
+        return UnavailablePrice()
 
 
 class FixedRateTax(object):

@@ -3,7 +3,8 @@
 {% load cache %}
 
 {% purchase_info_for_product request product as session %}
-{% if session.availability.is_available_to_buy and session.price.exists %}
+{% comment %} {% if session.availability.is_available_to_buy and session.price.exists %} {% endcomment %}
+{% if session.availability.is_available_to_buy  %}
     {% comment %}------------- вариации + доп опции ---------------{% endcomment %}
     <form id="add_to_basket_form" action="{% url 'basket:add' slug=product.slug  %}" method="post">
         {% csrf_token %}
