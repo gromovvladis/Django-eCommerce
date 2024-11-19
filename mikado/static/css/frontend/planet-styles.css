@@ -16454,7 +16454,8 @@ ymaps[class*="search__suggest-item_selected"] {
 .dish-page__price {
     color: #3f3f3f;
     font-weight: 500;
-    font-size: 1.25rem;
+    /* font-size: 1.25rem; */
+    font-size: 1rem;
 
 }
 

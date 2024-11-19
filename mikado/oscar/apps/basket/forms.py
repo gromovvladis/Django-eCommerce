@@ -263,7 +263,7 @@ class AddToBasketForm(forms.Form):
                 required=False,
                 widget=forms.widgets.RadioSelect(attrs={
                     'variant': True,
-                    'left': f"{100 - 100 / next((i + 1 for i, (val, _) in enumerate(choices) if val == initial_value), None)}%"
+                    'left': f"{100 / len(choices) * (next((i + 1 for i, (val, _) in enumerate(choices) if val == initial_value), 0) - 1):.2f}%"
                 }),
             )
 
@@ -345,7 +345,6 @@ class AddToBasketForm(forms.Form):
 
     def clean(self):
         info = self.basket.strategy.fetch_for_product(self.product)
-
         # Check that a price was found by the strategy
         if not info.price.exists:
             raise forms.ValidationError(
@@ -361,7 +360,7 @@ class AddToBasketForm(forms.Form):
         # Check user has permission to add the desired quantity to their
         # basket.
         current_qty = self.basket.product_quantity(self.product)
-        desired_qty = current_qty + self.cleaned_data.get("quantity", 1)
+        desired_qty = current_qty + 1
         is_permitted, reason = info.availability.is_purchase_permitted(desired_qty)
         if not is_permitted:
             raise forms.ValidationError(reason)
