@@ -25,63 +25,57 @@
         </div>
 
 
-        <div class="v-auth flex flex-column text-center">
+        <div class="v-auth flex flex-column text-start">
             <form id="auth_form" action="{{ request.get_full_path }}" method="post" class="card card-body bg-light">
-                {% csrf_token %}
 
                 {% comment %} поля {% endcomment %}
                 {% include "oscar/partials/form_auth.html" with form=auth_form %}
 
                 <div class="d-flex flex-column fill-height mt-3 mt-sm-2">
-                    <div>
+                    {% comment %} кнопки {% endcomment %}
+                    <div class="v-modal__submit flex-column align-center px-2 px-sm-0 py-2 py-sm-0">
 
-                        {% comment %} кнопки {% endcomment %}
-                        <div class="v-modal__submit flex-column align-center px-2 px-sm-0 py-2 py-sm-0">
-
-                            <button id="sms_form_btn" type="submit" name="sms"
-                                disabled="disabled" data-id="auth-submit-btn"
-                                class="v-button fill-width v-button--main justify-center shrink">
-                                <span class="v-button__wrapper">
-                                    <span class="v-button__value"> 
-                                        Отправить код 
-                                    </span>
+                        <button id="sms_form_btn" type="submit" name="sms"
+                            disabled="disabled" data-id="auth-submit-btn"
+                            class="v-button fill-width v-button--main justify-center shrink">
+                            <span class="v-button__wrapper">
+                                <span class="v-button__value"> 
+                                    Отправить код 
                                 </span>
-                            </button>
+                            </span>
+                        </button>
 
-                            <button id="auth_form_btn" type="submit" name="auth"
-                                disabled="disabled" data-id="auth-submit-btn"
-                                class="fill-width d-none justify-center shrink mt-2">
-                                <span class="v-button__wrapper">
-                                    <span class="v-button__value"> 
-                                        Подтвердить и войти 
-                                    </span>
+                        <button id="auth_form_btn" type="submit" name="auth"
+                            disabled="disabled" data-id="auth-submit-btn"
+                            class="fill-width d-none justify-center shrink mt-2">
+                            <span class="v-button__wrapper">
+                                <span class="v-button__value"> 
+                                    Подтвердить и войти 
                                 </span>
-                            </button>
-                        
-                        </div>
+                            </span>
+                        </button>
+                    
+                    </div>
 
-                        {% comment %} согласие на обработку данных {% endcomment %}
-                        <div class="d-flex justify-center mt-sm-2">
-                            <div class="v-auth-agreement d-flex flex-column fill-width">
-                                <p class="v-auth-agreement__title filll-width">
-                                    Нажимая на кнопку «Отправить код» вы даете своё согласие: 
-                                </p>
-                                <ul class="d-flex flex-column align-center fill-width mt-1">
-                                    <li class="fill-width">
-                                        <span data-id="auth-privacy-btn" class="v-checkbox v-checkbox--active">
-                                            <span
-                                                class="v-auth-agreement__item-title v-checkbox__name"> с 
-                                                <a href="#" class="v-auth-agreement__link">политикой конфиденциальности</a>, 
-                                                <a href="#" class="v-auth-agreement__link">согласием на обработку ПД</a> 
-                                                и 
-                                                <a href="#" class="v-auth-agreement__link">публичной офертой</a>
-                                            </span>
+                    {% comment %} согласие на обработку данных {% endcomment %}
+                    <div class="d-flex justify-start mt-sm-3">
+                        <div class="v-auth-agreement d-flex flex-column fill-width">
+                            <p class="v-auth-agreement__title fill-width">
+                                Нажимая на кнопку «Отправить код» вы даете своё согласие: 
+                            </p>
+                            <ul class="d-flex flex-column align-center fill-width mt-1">
+                                <li class="fill-width">
+                                    <span data-id="auth-privacy-btn" class="v-checkbox v-checkbox--active">
+                                        <span class="v-auth-agreement__item-title v-checkbox__name"> с 
+                                            <a href="#" class="v-auth-agreement__link">политикой конфиденциальности</a>, 
+                                            <a href="#" class="v-auth-agreement__link">согласием на обработку ПД</a> 
+                                            и 
+                                            <a href="#" class="v-auth-agreement__link">публичной офертой</a>
                                         </span>
-                                    </li>
-                                </ul>
-                            </div>
+                                    </span>
+                                </li>
+                            </ul>
                         </div>
-
                     </div>
                 </div>
 

@@ -44,7 +44,6 @@
 
     {% if notifications %}
         <form action="{% url 'customer:notifications-update' %}" method="post" class="fill-width mb-2" data-id="profile-notifications-form">
-            {% csrf_token %}
             <div class="cabinet-orders fill-width grow-1">
                 <div class="cabinet__promo-wrapper fill-width d-flex flex-column">
                     <ul class="v-orders-list d-flex flex-column fill-width fill-width">

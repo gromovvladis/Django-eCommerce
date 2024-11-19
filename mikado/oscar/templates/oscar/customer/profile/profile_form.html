@@ -34,7 +34,6 @@
             <div class="mb-1">
                 <span class="info-message" data-id="profile-message"></span>
             </div>
-            {% csrf_token %}
             {% block errors %}
                 {% for error in field.errors %}
                     <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>

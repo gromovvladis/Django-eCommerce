@@ -18,19 +18,17 @@
     {% if field.is_hidden %}
         {{ field }}
     {% else %}
-        <div>
-            <div id="auth_{{ field.auto_id}}" class="d-flex align-center input input--phone {% if field.auto_id == "id_password" %} d-none mt-2{% else %}v-input v-input__label-active{% endif %}">
-                <div class="v-input__wrapper">
-                    <div class="v-input__control d-flex align-center">
-                        {% block widget %}
-                            {% render_field field class+="form-control" %}
-                        {% endblock %}
-                    </div>
+        <div id="auth_{{ field.auto_id}}" class="align-center {% if field.auto_id == "id_password" %}d-none mt-2 {% else %}v-input v-input__label-active{% endif %}">
+            <div class="v-input__wrapper">
+                <div class="v-input__control d-flex align-center">
+                    {% block widget %}
+                        {% render_field field class+="form-control" %}
+                    {% endblock %}
                 </div>
             </div>
-            <div class="v-auth-agreement__title filll-width mt-1 text-center" >
-                <span class="text--red" id="error_{{ field.auto_id}}"></span>
-            </div>
+        </div>
+        <div class="v-auth-agreement__title filll-width mt-1 text-center" >
+            <span class="text--red" id="error_{{ field.auto_id}}"></span>
         </div>
     {% endif %}
 {% endfor %}

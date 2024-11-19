@@ -16,7 +16,7 @@
 {% block breadcrumbs %}{% endblock %}
 
 {% block auth %}
-    <div id="modal">
+    <div id="modal" class="v-app">
         <div class="v-modal pos-fixed d-flex align-center justify-center" data-id="modal-close">
             <div class="v-modal__content scrollbar px-2 pt-6 pd-sm-4 no-scroll">
         
@@ -43,8 +43,7 @@
         
                 <div class="v-auth flex flex-column text-center">
                     <form id="auth_form" action="{{ request.get_full_path }}" method="post" class="card card-body bg-light">
-                        {% csrf_token %}
-        
+
                         {% comment %} поля {% endcomment %}
                         {% include "oscar/partials/form_auth.html" with form=auth_form %}
         
@@ -77,7 +76,7 @@
                                 </div>
         
                                 {% comment %} согласие на обработку данных {% endcomment %}
-                                <div class="d-flex justify-center mt-sm-2">
+                                <div class="d-flex justify-center mt-sm-3">
                                     <div class="v-auth-agreement d-flex flex-column fill-width">
                                         <p class="v-auth-agreement__title filll-width">
                                             Нажимая на кнопку «Отправить код» вы даете своё согласие: 

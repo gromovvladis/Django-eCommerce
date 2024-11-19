@@ -6,7 +6,6 @@ function loadPartnerModal() {
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrf_token,
         }
     })
     .then(response => response.json())

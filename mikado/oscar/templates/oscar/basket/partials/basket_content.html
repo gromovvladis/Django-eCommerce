@@ -22,7 +22,6 @@
                 {% block basket_form_main %}
                     <form data-id="basket-formset" method="post" class="v-cart-form d-flex flex-column fill-width">
                         <div class="v-cart-items d-flex flex-column fill-width shrink">
-                            {% csrf_token %}
                             {{ formset.management_form }}
                             {% for form in formset %}
                                 {% with line=form.instance product=form.instance.product %}

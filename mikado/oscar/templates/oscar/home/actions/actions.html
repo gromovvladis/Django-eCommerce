@@ -10,19 +10,22 @@
 {% block nav_class %}v-app__nav--action{% endblock %}
 {% block nav_title_center %}{{ summary }}{% endblock %}
 
+
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 ">
-        <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">
-            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
-        </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
-        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <span class="v-bread__link" aria-current="page">{{ summary }}</span>
-    </div>
+    {% cache 7200 actions_breadcrumbs %}
+        <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 ">
+            <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">
+                {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+            </button>
+            <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+            {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
+            <span class="v-bread__link" aria-current="page">{{ summary }}</span>
+        </div>
+    {% endcache %}
 {% endblock %}
 
 {% block content %}
-    {% cache 1800 actions %}
+    {% cache 7200 actions_content %}
         <div class="action__wrapper d-flex flex-column">
             <div class="v-actions__actions">
 
@@ -92,3 +95,4 @@
         </div>
     {% endcache %}
 {% endblock content %}
+    
