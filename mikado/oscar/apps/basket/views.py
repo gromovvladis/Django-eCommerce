@@ -262,7 +262,7 @@ class BasketAddView(FormView):
         self.request.session["add_to_basket_form_post_data_%s" % self.product.pk] = (
             serialized_data.decode("latin-1")
         )
-        return http.JsonResponse({"errors":" ".join(clean_msgs), "status": 404}, status=404)
+        return http.JsonResponse({"errors": " ".join(clean_msgs), "status": 404}, status=404)
 
     def form_valid(self, form):
 

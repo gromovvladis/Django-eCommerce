@@ -12,7 +12,7 @@ FixedPrice = get_class("partner.prices", "FixedPrice")
 TaxInclusiveFixedPrice = get_class("partner.prices", "TaxInclusiveFixedPrice")
 
 # A container for policies
-PurchaseInfo = namedtuple("PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords"])
+PurchaseInfo = namedtuple("PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords", "partner_id"])
 default_partner = settings.PARTNER_DEFAULT
 
 class Selector(object):
@@ -131,6 +131,7 @@ class Structured(Base):
             availability=self.availability_policy(product, stockrecord),
             stockrecord=stockrecord,
             stockrecords=product.stockrecords.all(),
+            partner_id=self.get_partner_id(),
         )
 
     def fetch_for_parent(self, product):
@@ -141,6 +142,7 @@ class Structured(Base):
             availability=self.parent_availability_policy(product, children_stock),
             stockrecord=None,
             stockrecords=None,
+            partner_id=self.get_partner_id(),
         )
 
     def select_stockrecord(self, product):
@@ -188,6 +190,9 @@ class Structured(Base):
             "A structured strategy class must define a "
             "'parent_availability_policy' method"
         )
+    
+    def get_partner_id(self):
+        return
 
 
 # Mixins - these can be used to construct the appropriate strategy class
@@ -218,22 +223,23 @@ class UsePartnerSelectStockRecord:
         # We deliberately fetch by index here, to ensure that no additional database queries are made
         # when stockrecords have already been prefetched in a queryset annotated using ProductQuerySet.base_queryset
         try:
-            partner_id = default_partner
-            
-            if self.request:
-                partner_basket = self.request.basket.partner_id
-                partner_cookies = self.request.COOKIES.get("partner", None)
-
-                if partner_basket is not None:
-                    partner_id = partner_basket
-                elif partner_cookies is not None:
-                    partner_id = partner_cookies
-
+            partner_id = self.get_partner_id()
             return product.stockrecords.filter(partner_id=partner_id, is_public=True)[0]
-        
         except IndexError:
             pass
 
+    def get_partner_id(self):
+        partner_id = default_partner
+        if self.request:
+            partner_basket = self.request.basket.partner_id
+            partner_cookies = self.request.COOKIES.get("partner", None)
+
+            if partner_basket is not None:
+                partner_id = partner_basket
+            elif partner_cookies is not None:
+                partner_id = partner_cookies
+
+        return partner_id
 
 class StockRequired(object):
     """
@@ -279,35 +285,45 @@ class NoTax(object):
             old_price=stockrecord.old_price,
         )
 
-    #vlad
     def parent_pricing_policy(self, product, children_stock):
-        # stockrecords = [x[1] for x in children_stock if x[1] is not None]
         stockrecords = [x[1] for x in children_stock]
         if not stockrecords:
             return UnavailablePrice()
         
-        # We take price from first record
-        stockrecord = stockrecords[0]
+        sorted_stockrecords = sorted(
+            (stc for stc in stockrecords if stc is not None),
+            key=lambda stc: stc.price
+        )
 
-        variations_price = dict()
-
-        if product.is_parent:
-            for stc in stockrecords:
-                if stc is not None:
-                    variations_price[stc.id] = {
-                        'price':stc.price,
-                        'old_price':stc.old_price
-                    }
-
-        if stockrecord is not None:
+        if sorted_stockrecords:
             return FixedPrice(
-                currency=stockrecord.price_currency,
-                money=stockrecord.price,
-                old_price=stockrecord.old_price,
-                variations_price=variations_price,
+                currency=sorted_stockrecords[0].price_currency,
+                money=stockrecords[0].price if stockrecords[0] is not None else None,
+                old_price=stockrecords[0].old_price if stockrecords[0] is not None else None,
+                min_price=sorted_stockrecords[0].price,
             )
         
         return UnavailablePrice()
+
+    # def parent_min_pricing_policy(self, product, children_stock):
+    #     stockrecords = [x[1] for x in children_stock if x[1] is not None]
+    #     if not stockrecords:
+    #         return UnavailablePrice()
+        
+    #     # We take price from first record
+    #     stockrecord = stockrecords[0]
+
+    #     variations_price = dict()
+
+    #     if stockrecord is not None:
+    #         return FixedPrice(
+    #             currency=stockrecord.price_currency,
+    #             money=stockrecord.price,
+    #             old_price=stockrecord.old_price,
+    #             # variations_price=variations_price,
+    #         )
+        
+    #     return UnavailablePrice()
 
 
 class FixedRateTax(object):

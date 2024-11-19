@@ -55,7 +55,6 @@
                                     <div class="v-input__label">Введите промокод</div>
                                     <div id="voucher_form_container" class="v-input__control d-flex align-center">
                                         {% if voucher_form %}
-                                            {% csrf_token %}
                                             {% include "oscar/partials/render_field.html" with field=voucher_form.code data_id="voucher-input-code" %}
                                         {% endif %}
                                     </div>

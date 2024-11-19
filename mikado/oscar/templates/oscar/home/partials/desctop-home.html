@@ -1,11 +1,7 @@
-{% load cache %}
-
 <div class="home-desc__wrapper d-none mt-2">
     {% for promo_cat in promo_cats %}
         {% if promo_cat.type == "RECOMEND" %}
-            {% cache 3600 promocat_recomend promo_cat.id %}
-                {% include "oscar/home/partials/promocat_recomend.html" with promo_cat=promo_cat %}
-            {% endcache %}
+            {% include "oscar/home/partials/promocat_recomend.html" with promo_cat=promo_cat %}
         {% elif promo_cat.type == "ACTION" %}
             {% include "oscar/home/partials/promocat_action.html" with promo_cat=promo_cat %}
         {% else %}        

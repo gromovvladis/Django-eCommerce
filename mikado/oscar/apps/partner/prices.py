@@ -55,12 +55,12 @@ class FixedPrice(Base):
     exists = True
 
     #vlad
-    def __init__(self, currency, money, old_price=None, variations_price=None, tax_code=None):
+    def __init__(self, currency, money, old_price=None, min_price=None, tax_code=None):
         super().__init__()
         self.currency = currency
         self.money = money
         self.old_price = old_price
-        self.variations_price = variations_price
+        self.min_price = min_price
         self.tax_code = tax_code
 
 

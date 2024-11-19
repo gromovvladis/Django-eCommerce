@@ -39,7 +39,6 @@
 
                 {% comment %} сохранине в бд или куки{% endcomment %}
                 <form action="{% url 'address:delivery-address' %}" method="post" id="set_address">
-                    {% csrf_token %}
                     <div class="delivery__address-input fill-width pos-relative">
                         <div class="v-address-info d-flex flex-column flex-sm-row">
                             <div class="v-input-search d-flex fill-width justify-space-between align-center">

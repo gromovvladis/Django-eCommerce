@@ -3,13 +3,12 @@
 {% load cache %}
 
 {% block product %}
-    {% comment %}------------- категории item ---------------{% endcomment %}
     {% purchase_info_for_product request product as session %}
-    
-    <div class="dish d-flex flex-column v-card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
-        <div class="dish-wrapper grow-1">            
-            
-            {% cache 1800 product_compact_image product.id %}
+    {% cache 1800 product_compact product.id session.partner_id %}
+        {% comment %}------------- категории item ---------------{% endcomment %}
+        <div class="dish d-flex flex-column v-card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
+            <div class="dish-wrapper grow-1">            
+                
                 {% comment %}------------- картинка товара ---------------{% endcomment %}
                 {% block product_image %}
                     {% with image=product.primary_image %}
@@ -23,11 +22,9 @@
                         </a>
                     {% endwith %}
                 {% endblock %}
-            {% endcache %}
-
-            <div class="pos-relative product-description d-flex flex-column">
                 
-                {% cache 1800 product_compact_info product.id %}
+                <div class="pos-relative product-description d-flex flex-column">
+                
                     {% comment %} ------------- название категории --------------- {% endcomment %}
                     <div class="grow-1 pd-0 v-card__text mt-2">
                         <div class="d-flex fill-height fill-width">
@@ -51,34 +48,34 @@
                             </a>
                         </div>
                     </div>
-                {% endcache %}
 
-                {% comment %} ------------- цена --------------- {% endcomment %}
-                
-                <div class="align-center fill-width px-sm-2 pb-sm-2 v-card__actions d-flex align-end">
-                    {% if session.availability.is_available_to_buy and session.price.exists %}
-                        {% include "oscar/catalogue/partials/product_price.html" %}
-                        <div role="separator" class="v-spacer"></div>
-                        {% comment %} ------------- кнопка добавить --------------- {% endcomment %}
-                        {% if not product.is_parent and not product.has_options %}
-                            {% include "oscar/catalogue/partials/add_to_basket_form_compact.html" %}
+                    {% comment %} ------------- цена --------------- {% endcomment %}
+                    
+                    <div class="align-center fill-width px-sm-2 pb-sm-2 v-card__actions d-flex align-end">
+                        {% if session.availability.is_available_to_buy and session.price.exists %}
+                            {% include "oscar/catalogue/partials/product_price.html" %}
+                            <div role="separator" class="v-spacer"></div>
+                            {% comment %} ------------- кнопка добавить --------------- {% endcomment %}
+                            {% if not product.is_parent and not product.has_options %}
+                                {% include "oscar/catalogue/partials/add_to_basket_form_compact.html" %}
+                            {% else %}
+                                <a href="{{ product.get_absolute_url }}" data-id="dish-item-submit-button-0" class="v-button v-button--dish justify-center" aria-label="Выбрать вариант">
+                                    <span class="v-button__wrapper">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="d-sm-none">
+                                            <path d="M6 12H18M12 6V18" stroke="#d32225" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span class="v-button__value d-none d-sm-inline">Выбрать</span>
+                                    </span>
+                                </a>
+                            {% endif %}
                         {% else %}
-                            <a href="{{ product.get_absolute_url }}" data-id="dish-item-submit-button-0" class="v-button v-button--dish justify-center" aria-label="Выбрать вариант">
-                                <span class="v-button__wrapper">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="d-sm-none">
-                                        <path d="M6 12H18M12 6V18" stroke="#d32225" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                    <span class="v-button__value d-none d-sm-inline">Выбрать</span>
-                                </span>
-                            </a>
+                            <div role="separator" class="v-spacer"></div>
+                            <span class="error-mark">Временно недоступно</span>
                         {% endif %}
-                    {% else %}
-                        <div role="separator" class="v-spacer"></div>
-                        <span class="error-mark">Временно недоступно</span>
-                    {% endif %}
+                    </div>
+                    <span class="add-to-cart-error" data-id="add-to-cart-error-compact"></span>
                 </div>
-                <span class="add-to-cart-error" data-id="add-to-cart-error-compact"></span>
             </div>
         </div>
-    </div>
+    {% endcache %}
 {% endblock %}

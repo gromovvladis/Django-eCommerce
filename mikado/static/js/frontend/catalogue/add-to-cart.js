@@ -17,33 +17,41 @@ if (addBasketForm) {
     
         addBasketForm.addEventListener('submit', function (event) {
             event.preventDefault();
-    
+
             addBasketBtn.disabled = true;
             addBasketBtn.classList.add('loading');
-    
-            var xhr = new XMLHttpRequest();
-            xhr.open(addBasketForm.method, addBasketForm.action, true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    
-            xhr.onload = function () {
-                var response = JSON.parse(xhr.responseText);
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    cartNums.forEach(function(element) {
-                        element.innerHTML = response.cart_nums; // Вставляем HTML в каждый элемент
+            
+            const formData = new FormData(addBasketForm);
+            const formParams = new URLSearchParams(formData).toString();
+
+            fetch(addBasketForm.action, {
+                method: addBasketForm.method,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrf_token,
+                },
+                body: formParams
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.cart_nums) { // Проверяем успешный ответ
+                    cartNums.forEach(element => {
+                        element.innerHTML = data.cart_nums; // Вставляем HTML в каждый элемент
                     });
                     cartAdded();
-                } else {
-                    addBasketErrors.innerHTML = '<div class="error-badge mt-1 border-r15">' + response.errors + "</div>";
+                } else if (data.errors) {
+                    addBasketErrors.innerHTML = `<div class="error-badge mt-1 border-r15">${data.errors}</div>`;
                 }
-            };
-            
-            xhr.onloadend = function () {
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                addBasketErrors.innerHTML = '<div class="error-badge mt-1 border-r15">Произошла ошибка. Попробуйте снова.</div>';
+            })
+            .finally(() => {
                 addBasketBtn.disabled = false;
                 addBasketBtn.classList.remove('loading');
-            };
-    
-            xhr.send(new URLSearchParams(new FormData(addBasketForm)).toString());
+            });
         });
         
         if (variants) {

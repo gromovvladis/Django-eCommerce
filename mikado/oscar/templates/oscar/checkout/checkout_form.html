@@ -73,7 +73,6 @@
 
                 {% comment %} основная форма {% endcomment %}
                 <form action="{% url 'checkout:checkoutview' %}" method="post" id="place_order_form" novalidate>
-                    {% csrf_token %}
                     
                     {% include "oscar/partials/render_field.html" with field=form.method_code %}
 

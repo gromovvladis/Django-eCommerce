@@ -26,7 +26,6 @@
 
         <div class="v-auth flex flex-column text-start">
             <form id="partner_form" action="{{ request.get_full_path }}" method="post" class="card card-body bg-light d-flex flex-column">
-                {% csrf_token %}
                 {% for radio in partner_form.partner_id %}
                     <div class="partner_select mb-2 d-flex flex-column {% if radio.data.selected %}checked{% endif %}">
                         <div class="d-none">{{ radio.tag }}</div>

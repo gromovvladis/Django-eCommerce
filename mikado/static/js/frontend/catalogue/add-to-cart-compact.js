@@ -11,40 +11,45 @@ function findNewForms() {
     if (addBasketCompactForms.length > 0) {
         addBasketCompactForms.forEach(function (form) {
             form.addEventListener('submit', function (event) {
-                event.preventDefault(); // Предотвращаем стандартное действие формы
+                event.preventDefault();
                 
-                var btn = form.querySelector('[data-id="add-to-cart-btn-compact"]');
-                var span = btn.querySelector('[data-id="add-to-cart-btn-span"]');
+                const btn = form.querySelector('[data-id="add-to-cart-btn-compact"]');
+                const span = btn.querySelector('[data-id="add-to-cart-btn-span"]');
                 btn.disabled = true;
                 btn.classList.add('clicked');
-                var btnText = span.innerHTML;
+                const btnText = span.innerHTML;
                 span.innerHTML = 'Добавлено';
 
-                var xhr = new XMLHttpRequest();
-                xhr.open(form.method, form.action, true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-                xhr.onload = function () {
-                    var response = JSON.parse(xhr.responseText);
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        cartNums.forEach(function(element) {
-                            element.innerHTML = response.cart_nums; // Вставляем HTML в каждый элемент
+                fetch(form.action, {
+                    method: form.method,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrf_token,
+                    },
+                    body: new URLSearchParams(new FormData(form))
+                })
+                .then(response => response.json().then(data => ({ status: response.status, data })))
+                .then(({ status, data }) => {
+                    if (status >= 200 && status < 300) {
+                        cartNums.forEach(element => {
+                            element.innerHTML = data.cart_nums; // Вставляем HTML в каждый элемент
                         });
                         cartAdded();
-                    } else if (xhr.status >= 400 && xhr.status < 500) {
-                        var errorElement = btn.closest('.product-description').querySelector('[data-id="add-to-cart-error-compact"]');
-                        errorElement.innerHTML = '<div class="error-badge">' + response.errors + "</div>";
+                    } else if (status >= 400 && status < 500) {
+                        const errorElement = btn.closest('.product-description').querySelector('[data-id="add-to-cart-error-compact"]');
+                        errorElement.innerHTML = '<div class="error-badge">' + data.errors + "</div>";
                     }
-                };
-                xhr.onerror = function () {
-                    console.error('Error occurred during the request');
-                };
-                xhr.onloadend = function () {
+                })
+                .catch(error => {
+                    console.error('Error occurred during the request', error);
+                })
+                .finally(() => {
                     btn.disabled = false;
                     btn.classList.remove('clicked');
                     span.innerHTML = btnText;
-                };
-                xhr.send(new URLSearchParams(new FormData(form)).toString());
+                });
+
             });
         });
     }

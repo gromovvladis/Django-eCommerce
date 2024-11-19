@@ -7,29 +7,36 @@ if (wishlistForm) {
 
     wishlistForm.addEventListener('submit', function (event) {
         event.preventDefault();
-
+        
         wishlistBtn.disabled = true;
         wishlistBtn.classList.add('loading');
 
-        var xhr = new XMLHttpRequest();
-        xhr.open(wishlistForm.method, url, true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                var response = JSON.parse(xhr.responseText);
-                url = response.url;
-                wishlistBtn.innerHTML = response.html;
+        fetch(url, {
+            method: wishlistForm.method,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrf_token,
+            },
+            body: new URLSearchParams(new FormData(wishlistForm)).toString()
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+            return response.json();
+        })
+        .then(data => {
+            url = data.url;
+            wishlistBtn.innerHTML = data.html;
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        })
+        .finally(() => {
             wishlistBtn.disabled = false;
             wishlistBtn.classList.remove('loading');
-        };
+        });
 
-        xhr.onerror = function () {
-            wishlistBtn.disabled = false;
-            wishlistBtn.classList.remove('loading');
-            console.log('error');
-        };
-
-        xhr.send(new URLSearchParams(new FormData(wishlistForm)).toString());
     });
 }
