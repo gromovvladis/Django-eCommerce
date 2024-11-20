@@ -1127,7 +1127,7 @@ class AbstractLine(models.Model):
 
     @cached_property
     def has_topping(self):
-        return self.product.variant or self.attributes.all()
+        return self.product.get_variants() or self.attributes.all()
 
 
 class AbstractLineAttribute(models.Model):

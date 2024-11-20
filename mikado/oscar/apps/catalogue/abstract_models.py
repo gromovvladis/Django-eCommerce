@@ -768,7 +768,7 @@ class AbstractProduct(models.Model):
         """
         Returns a set of all additionals for this product.
         """
-        return self.get_product_class().class_additionals.all() | self.product_additionals.all()
+        return self.get_product_class().class_additionals.all() | self.get_product_additionals()
 
     @cached_property
     def has_options(self):
@@ -955,6 +955,11 @@ class AbstractProduct(models.Model):
 
     get_product_class.short_description = "Класс товара"
 
+    def get_product_additionals(self):
+        if self.is_child:
+            return self.parent.product_additionals.all()    
+        return self.product_additionals.all()
+    
     # pylint: disable=no-member
     def get_categories(self):
         """

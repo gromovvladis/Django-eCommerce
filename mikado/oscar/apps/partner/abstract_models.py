@@ -65,6 +65,10 @@ class AbstractPartner(models.Model):
         return self.name or self.code
 
     @property
+    def work_time(self):
+        return f"{self.start_worktime.strftime('%H:%M')}-{self.end_worktime.strftime('%H:%M')}"
+
+    @property
     def primary_address(self):
         """
         Returns a partners primary address. Usually that will be the

@@ -3,33 +3,26 @@
 
 <footer class="v-app__footer">
     <div class="v-app-footer">
-
       {% comment %}------------- до footer текст ---------------{% endcomment %}
       <div class="v-app-footer__head">
         <div class="v-app-footer__pickup d-flex flex-md-row justify-center container ">
-
           <div class="v-app-footer__pickup_desktop align-center">
             {% comment %} {% icon file_name='footer/pick-up' size=34 fill="#fff" class_str="mr-1" %} {% endcomment %}
             <p class="mt-md-0 mr-3">Самовывоз доступен по адресу 9 Мая 77, ТРЦ Планета</p>
           </div>
-
           <a href="{% url 'address:pickup-address' %}" class="v-app-footer__pickup_mobile d-flex align-center">
             <p class="mt-md-0">Адрес самовывоза</p>
             {% icon file_name='interface/arrow-left' size=24 stroke="#fff"%}
           </a>
-
           <button onclick="window.location.href='{% url 'address:pickup-address' %}'" class="v-button v-button--main mt-md-0" aria-label="Адрес самовывоза">
             <span class="v-app-footer__pickup_desktop ml-1">Смотреть на карте</span>
             {% icon file_name='map/location-pin' size=32 fill="#fff" %}
           </button>
-          
         </div>
       </div>
       
-
       {% comment %}------------- контент в футере (2 блока) ---------------{% endcomment %}
       <div class="d-flex flex-column flex-md-row align-center align-md-start py-1 pt-3 pr-md-3 pt-md-5 container"> 
-        
         <div class="v-app-footer__main-block d-flex align-center align-md-start mr-md-2">
           <div class="v-app-footer__main-block_section d-flex flex-column align-start align-start" data-id="footer-block">
             <div class="d-flex" data-id="footer-title">
@@ -48,7 +41,7 @@
               {% icon file_name='interface/arrow-left' size=25 stroke="#fff"%}
             </div>
             <div class="v-app-footer__link-block d-flex flex-column justify-center align-start shrink my-1" data-id="footer-links">
-              <a class="v-app-footer__link" href="/oferta">Публичная оферта</a>
+              <a class="v-app-footer__link" href="#">Публичная оферта</a>
               <a class="v-app-footer__link" href="#">Политика конфиденциальности</a>
               <a class="v-app-footer__link" href="#">Согласие на обработку ПД</a>
             </div>
@@ -63,17 +56,13 @@
             </div>
           </div>
         </div>
-  
         <div role="separator" class="d-none d-md-flex v-spacer"></div>
-
         <div class="v-app-footer__work-time d-flex flex-column shrink">
           <h2 class="v-app-footer__name-block d-md-block">Время работы</h2>
-  
           <div class="d-flex flex-md-column flex-wrap shrink mt-md-1">
-            <span data-id="footer-actions-link" class="working-hours__content mt-1">Ежедневно с 8:00-23:00</span>
+            <span data-id="footer-actions-link" class="working-hours__content mt-1">Ежедневно {{ partner.work_time|default:"9:00-23:00" }}</span>
           </div>
         </div>
-
       </div>
 
       {% comment %}------------- после footer ---------------{% endcomment %}

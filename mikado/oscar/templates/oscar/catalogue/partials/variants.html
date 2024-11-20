@@ -24,7 +24,7 @@
                         {% endif %}
 
                         {% for value in field.field.choices %}
-                            <label data-id="variant-label" data-variant="{{ field.name }}" for="child_id_{{ value.0 }}" class="v-label v-tabs-button__button{% if forloop.first %} active{% endif %}">
+                            <label data-id="variant-label" data-variant="{{ field.name }}" for="child_id_{{ value.0 }}" class="v-label v-tabs-button__button{% if field.field.initial == value.0 %} active{% endif %}">
                                 {{ value.1 }}
                                 <input value="{{ value.0 }}" {% if field.field.initial == value.0 %}checked{% endif %} style="display: none;" id="child_id_{{ value.0 }}" 
                                 type="radio" name="child_id_{{ value.0 }}" value="{{ value.0 }}">

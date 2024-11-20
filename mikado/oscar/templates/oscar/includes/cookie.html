@@ -1,32 +1,35 @@
-{% load static %}
 {% load svg_tags %}
+{% load static %}
+{% load cache %}
 
+{% cache 3600 cookies %}
 {% comment %} ------------- мы используем куки --------------- {% endcomment %}
-<div class="v-app__cookies" style="width: 100%">
-  <div class="v-app__cookies--inner">
-      <div class="v-app-cookies d-flex flex-column flex-sm-row align-center justify-space-between fill-width pd-3">
-          
-          {% comment %} ------------- текст + картинка --------------- {% endcomment %}
-          <div class="d-flex align-center justify-space-between fill-width mb-2 mb-sm-0 mr-sm-4">
+    <div class="v-app__cookies" style="width: 100%">
+    <div class="v-app__cookies--inner">
+        <div class="v-app-cookies d-flex flex-column flex-sm-row align-center justify-space-between fill-width pd-3">
             
-            {% comment %} ------------- картинка --------------- {% endcomment %}
-            {% icon 'cookies/cookie' 'v-app-cookies__picture mr-2 mr-sm-3' 32 %}
-            
-            {% comment %} ------------- текст --------------- {% endcomment %} 
-            <p class="v-app-cookies__text fill-width">
-                На этом сайте используются файлы cookies
-            </p>
-          </div>
+            {% comment %} ------------- текст + картинка --------------- {% endcomment %}
+            <div class="d-flex align-center justify-space-between fill-width mb-2 mb-sm-0 mr-sm-4">
+                
+                {% comment %} ------------- картинка --------------- {% endcomment %}
+                {% icon 'cookies/cookie' 'v-app-cookies__picture mr-2 mr-sm-3' 32 %}
+                
+                {% comment %} ------------- текст --------------- {% endcomment %} 
+                <p class="v-app-cookies__text fill-width">
+                    На этом сайте используются файлы cookies
+                </p>
+            </div>
 
-          {% comment %} -------------кнопка ок --------------- {% endcomment %}
-          <button type="button" onclick="agree_cookie()"
-              class="v-button v-button--main justify-center shrink"><span class="v-button__wrapper">
-                  <span class="v-button__value">
-                      Оk
-                  </span>
-              </span>
-          </button>
-          
-      </div>
-  </div>
-</div>
+            {% comment %} -------------кнопка ок --------------- {% endcomment %}
+            <button type="button" onclick="agree_cookie()"
+                class="v-button v-button--main justify-center shrink"><span class="v-button__wrapper">
+                    <span class="v-button__value">
+                        Оk
+                    </span>
+                </span>
+            </button>
+            
+        </div>
+    </div>
+    </div>
+{% endcache %}
