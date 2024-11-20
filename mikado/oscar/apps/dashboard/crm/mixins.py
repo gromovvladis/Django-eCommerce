@@ -6,10 +6,18 @@ from django.utils.encoding import smart_str
 from django.contrib import messages
 from django.shortcuts import redirect
 import logging
+
 logger = logging.getLogger("oscar.dashboard")
 
 class CRMTablesMixin(MultiTableMixin, TemplateView):
 
+    def redirect_with_get_params(self, url, request):
+        """
+        Перенаправляет на указанный URL, сохраняя GET-параметры из запроса.
+        """
+        url += "?" + request.GET.urlencode()
+        return redirect(url)
+        
     def dispatch(self, request, *args, **kwargs):
         self.queryset = self.get_queryset()
         return super().dispatch(request, *args, **kwargs)
@@ -34,7 +42,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
                 self.request,
                 ("Вам нужно выбрать хотя бы одну позицую для обновления"),
             )
-            return redirect(self.url_redirect)
+            return self.redirect_with_get_params(self.url_redirect, request)
 
         qs = self.get_filtered_queryset(ids)
         return self.update_models(qs, True)
@@ -53,13 +61,15 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
                 self.request,
                 ("Записи на сайте не были удалены!"),
             )
-            return redirect(self.url_redirect) 
+            self.redirect_with_get_params(self.url_redirect, self.request)
+            # return redirect(self.url_redirect) 
                
         messages.success(
             self.request,
             ("Записи на сайте были успешно удалены"),
         )
-        return redirect(self.url_redirect)
+        return self.redirect_with_get_params(self.url_redirect, self.request)
+        # return redirect(self.url_redirect)
 
     def get_filtered_queryset(self, ids):
         data_list = self.get_queryset()
@@ -150,7 +160,8 @@ class CRMTableMixin(SingleTableView):
                 self.request,
                 ("Вам нужно выбрать хотя бы одну позицую для обновления"),
             )
-            return redirect(self.url_redirect)
+            return self.redirect_with_get_params(self.url_redirect, request)
+            # return redirect(self.url_redirect)
 
         qs = self.get_filtered_queryset(ids)
         return self.update_models(qs, True)

@@ -436,6 +436,16 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
             ctx = self.get_context_data(form=form)
             return self.render_to_response(ctx)
 
+        if self.creating:
+            product_class = form.cleaned_data.get("product_class")
+            if product_class != self.product_class:
+                return HttpResponseRedirect(
+                    reverse(
+                        "dashboard:catalogue-product-create",
+                        kwargs={"product_class_slug": product_class.slug},
+                    )
+                )
+            
         if self.creating and form.is_valid() and any(self.request.user.has_perm(perm) for perm in full_access):
             self.object = form.save()
 
@@ -527,6 +537,13 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         and return False. If everything is valid, return True. This method will
         be called regardless of whether the individual forms are valid.
         """
+        # forma = form.is_valid()
+        # new_product_class = form.cleaned_data.get('product_class')
+        # if new_product_class != form.instance.product_class:
+        #     form.instance.product_class = new_product_class
+        #     self.product_class
+        #     return False
+        
         return True
 
     def forms_valid(self, formsets, form=None):

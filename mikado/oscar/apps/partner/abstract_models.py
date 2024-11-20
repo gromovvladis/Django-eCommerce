@@ -199,16 +199,12 @@ class AbstractStockRecord(models.Model):
     #: which we store here.  This will sometimes be the same the product's UPC
     #: but not always.  It should be unique per partner.
     #: See also http://en.wikipedia.org/wiki/Stock-keeping_unit
-    partner_sku = models.CharField("Артикул в точке продажи", max_length=128, help_text="Артикул")
-    
-    evotor_id = models.CharField(
-        "Эвотор ID",
-        max_length=128,
-        null=True,
-        blank=True,
-        help_text="Эвотор ID"
+    partner_sku = models.CharField(
+        "Эвотор Code", 
+        max_length=128, 
+        help_text="Эвотор код, для связи продукта и товарной записи"
     )
-
+    
     # Price info:
     price_currency = models.CharField(
         "Валюта", max_length=12, default=get_default_currency, help_text="Валюта. Рубли = RUB",
@@ -233,7 +229,6 @@ class AbstractStockRecord(models.Model):
         null=True,
         help_text="Цена продажи",
     )
-
     old_price = models.DecimalField(
         "Цена до скидки",
         decimal_places=2,
@@ -242,7 +237,6 @@ class AbstractStockRecord(models.Model):
         null=True,
         help_text="Цена до скидки. Оставить пустым, если скидки нет",
     )
-
     cost_price = models.DecimalField(
         "Цена закупки",
         decimal_places=2,
@@ -251,7 +245,6 @@ class AbstractStockRecord(models.Model):
         null=True,
         help_text="Цена закупки продукта",
     )
-
     NO_VAT, VAT_10, VAT_18, VAT_0, VAT_18_118, VAT_10_110 = "NO_VAT", "VAT_10", "VAT_18", "VAT_0", "VAT_18_118", "VAT_10_110"
     VAT_CHOICES = (
         (NO_VAT, "Без НДС."),

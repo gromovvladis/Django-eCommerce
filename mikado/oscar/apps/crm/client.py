@@ -5,7 +5,8 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 
 from rest_framework.renderers import JSONRenderer
-from oscar.apps.customer.serializers import GroupSerializer, StaffSerializer
+from oscar.apps.catalogue.serializers import ProductGroupSerializer, ProductSerializer
+from oscar.apps.customer.serializers import UserGroupSerializer, StaffSerializer
 from oscar.apps.partner.serializers import PartnerSerializer, TerminalSerializer
 from oscar.core.loading import get_model
 
@@ -16,6 +17,8 @@ Partner = get_model("partner", "Partner")
 Terminal = get_model("partner", "Terminal")
 Staff = get_model("user", "Staff")
 GroupEvotor = get_model("auth", "GroupEvotor")
+Product = get_model('catalogue', 'Product')
+Category = get_model('catalogue', 'Category')
 
 evator_cloud_token = settings.EVOTOR_CLOUD_TOKEN
 
@@ -106,8 +109,22 @@ class EvotorAPICloud:
             return response.json()       # Возврат данных в формате JSON
 
         except requests.exceptions.HTTPError as http_err:
+            error = ''
+            if response.status_code == 401:
+                error = 'Ошибка авторизации приложения.'
+            elif response.status_code == 402:
+                error = 'Приложение не установлено на одно или несколько устройств.'
+            elif response.status_code == 403:
+                error = 'Нет доступа. Ошибка возникает когда у приложения нет разрешения на запрашиваемое действие или пользователь не установил приложение в Личном кабинете.'
+            elif response.status_code == 404:
+                error = 'Запрашиваемый ресурс не найден.'
+            elif response.status_code == 406:
+                error = 'Тип содержимого, которое возвращает ресурс не соответствует типу содержимого, которое указанно в заголовке Accept.'
+            elif response.status_code == 429:
+                error = 'Превышено максимальное количество запросов в текущем периоде.'
+            
             logger.error(f"Ошибка HTTP запроса при отправке Эвотор запроса: {http_err}")
-            return {"error": f"HTTP error occurred: {http_err}"}
+            return {"error": error}
         except Exception as err:
             logger.error(f"Неизвестная ошибка при отправке Эвотор запроса: {err}")
             return {"error": f"Other error occurred: {err}"}
@@ -429,7 +446,7 @@ class EvotorStaffClient(EvotorAPICloud):
             for role_json in roles_json:
                 name = role_json.get('name')
                 role, created = Group.objects.get_or_create(name=name)
-                serializer = GroupSerializer(role, data=role_json)
+                serializer = UserGroupSerializer(role, data=role_json)
 
                 evotor_id = role_json.get('id')
                 evotor_ids.append((evotor_id, role.id))
@@ -893,10 +910,10 @@ class EvotorProductClient(EvotorAPICloud):
         endpoint = f"stores/{store_id}/products/{product_id}"
         return self.send_request(endpoint, "DELETE", products_data)
 
-    def create_variants(self, store_id, parent_id, variants):
-        pass
+    # def create_variants(self, store_id, parent_id, variants):
+    #     pass
 
-    # продукты ========================
+    # категории (группы) ========================
 
     def get_groups(self, store_id):
         """
@@ -940,6 +957,90 @@ class EvotorProductClient(EvotorAPICloud):
         endpoint = f"stores/{store_id}/product-groups"
         return self.send_request(endpoint)
     
+    # ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
+
+    def create_or_update_products(self, products_json, is_filtered=False):
+        error_msgs = []
+        try:
+            evotor_ids = []
+            json_valid = True
+            created = False
+            for product_json in products_json:
+                evotor_id = product_json.get('id')
+                evotor_ids.append(evotor_id)
+                try:
+                    prd = Product.objects.get(evotor_id=evotor_id)
+                    serializer = ProductSerializer(prd, data=product_json)
+                except Product.DoesNotExist:
+                    created = True
+                    serializer = ProductSerializer(data=product_json)
+                
+                if serializer.is_valid():
+                    serializer.save() 
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body="Product created / or updated",
+                        sender=CRMEvent.PRODUCT,
+                        type=event_type,
+                    )
+                else: 
+                    json_valid = False
+                    logger.error(f"Ошибка сериализации продукта: {serializer.errors}")
+                    error_msgs.append(f"Ошибка сериализации продукта: {serializer.errors}")
+
+            if not json_valid:
+                return  ', '.join(error_msgs), False
+            
+            if not is_filtered:
+                for product in Product.objects.all():
+                    if product.evotor_id not in evotor_ids:
+                        product.evotor_id = None
+                        product.save()
+
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении продукта: {e}", exc_info=True)
+            return f"Ошибка при обновлении продукта: {e}", False
+
+        return "Точки продаж были успешно обновлены", True 
+
+    def create_or_update_groups(self, groups_json, is_filtered=False):
+        error_msgs = []
+        try:
+            evotor_ids = []
+            json_valid = True
+            for group_json in groups_json:
+                evotor_id = group_json.get('id')
+                evotor_ids.append(evotor_id)
+                trm, created = Terminal.objects.get_or_create(evotor_id=evotor_id)
+                serializer = ProductGroupSerializer(trm, data=group_json)
+                
+                if serializer.is_valid():
+                    serializer.save() 
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body="Partner created / or updated",
+                        sender=CRMEvent.TERMINAL,
+                        type=event_type,
+                    )
+                else: 
+                    json_valid = False
+                    logger.error(f"Ошибка сериализации терминала: {serializer.errors}")
+                    error_msgs.append(f"Ошибка сериализации терминалов: {serializer.errors}")
+            
+            if not json_valid:
+                return  ', '.join(error_msgs), False
+
+            if not is_filtered:
+                for terminal in Terminal.objects.all():
+                    if terminal.evotor_id not in evotor_ids:
+                        terminal.delete()
+
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении терминалов: {e}", exc_info=True)            
+            return f"Ошибка при обновлении терминалов: {e}", False
+
+        return "Терминалы были успешно обновлены", True 
+
 
 
 class EvotorDocClient(EvotorAPICloud):

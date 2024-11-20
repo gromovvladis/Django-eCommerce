@@ -1,12 +1,10 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load widget_tweaks %}
 {% load currency_filters %}
+{% load widget_tweaks %}
 
 {% block body_class %}{{ block.super }} create-page catalogue{% endblock %}
 
-{% block title %}
-    {{ title }} | Продукты | {{ block.super }}
-{% endblock %}
+{% block title %}{{ title }} | Продукты | {{ block.super }}{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
@@ -34,7 +32,6 @@
 {% block dashboard_content %}
     <form action="{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" method="post" class="form-stacked wysiwyg fixed-actions" enctype="multipart/form-data" data-behaviour="tab-nav-errors" autocomplete="off">
         {% csrf_token %}
-
         {% if parent %}
             <div class="alert alert-info">
                 {% url 'dashboard:catalogue-product' pk=parent.id as parent_url %}
@@ -42,16 +39,13 @@
                 <a href="{{ parent_url }}">{{ parent.title }}</a>.
             </div>
         {% endif %}
-
         <div class="row">
-
             {% block tab_nav %}
                 <div class="col-md-3">
                     <div class="tab-nav sticky-top">
                         <div class="table-header">
                             <h3>Редактирование</h3>
                         </div>
-                        {% comment %} <div class="dropdown-divider"></div> {% endcomment %}
                         <ul class="nav flex-column bs-docs-sidenav" id="product_update_tabs">
                             {% comment %}
                                 The navigation below is filtered heavily on the product structure.
@@ -125,7 +119,6 @@
                     </div>
                 </div>
             {% endblock tab_nav %}
-
             <div class="col-md-9">
                 <div class="tab-content">
                     {% block tab_content %}
@@ -553,12 +546,10 @@
                                 </div>
                             {% endif %}
                         {% endblock seo %}
-
                     {% endblock tab_content %}
                 </div>
             </div>
         </div>
-
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
                 <div class="container container-fluid">
@@ -607,3 +598,9 @@
         {% endblock fixed_actions_group %}
     </form>
 {% endblock dashboard_content %}
+
+{% block onbodyload %}
+    {{ block.super }}
+    oscar.dashboard.product.initProductClass();
+{% endblock onbodyload %}
+
