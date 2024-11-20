@@ -1,6 +1,6 @@
 {% extends "oscar/layout.html" %}
 
-{% load partner_tags %}
+{% comment %} {% load partner_tags %} {% endcomment %}
 {% load svg_tags %}
 {% load static %}
 {% load cache %}
@@ -13,7 +13,7 @@
 {% block breadcrumbs %}{% endblock %}
 
 {% block nav_title %}
-    {% cache 3600 homepage_title %}
+    {% cache 3600 homepage_title partner.id %}
         <a href="{{ homepage_url }}" data-id="header-logo"
             class="logo_nav d-sm-flex shrink router-link-exact-active router-link-active"
             aria-current="page" aria-label="Домашняя страница">
@@ -21,7 +21,6 @@
         </a>
         {% if partners_select %}
             <button onclick="openPartnerModal()" class="partner_select checked text-left d-flex flex-column ml-2 pd-0">
-                {% selected_partner request as partner %}
                 <span class="header_partner">{{ partner }}</span>
                 {% if partner.primary_address %}
                     <span class="header_address">{{ partner.primary_address }}</span>

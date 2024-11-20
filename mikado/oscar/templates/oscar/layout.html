@@ -1,9 +1,11 @@
 {% extends "oscar/base.html" %}
 
+{% load partner_tags %}
 {% load svg_tags %}
 {% load category_tags %}
 {% load compress %}
 {% load static %}
+{% load cache %}
 
 {% block styles %}
     {{ block.super }}
@@ -13,17 +15,16 @@
 {% endblock %}
 
 {% block layout %}
+    {% selected_partner request as partner %}
     {% comment %}------------- header + контент + footer (начало) ---------------{% endcomment %}
     <div id="app" class="v-app {% block app_class %}{% endblock %}"> 
         {% comment %}------------- начало хедера ---------------{% endcomment %}
         {% block main_header %}
-            
             <header class="v-app__header container py-3">
                 <div class="v-app__header-wrapper d-flex align-center py-0 fill-height justify-space-between">
                     {% include 'oscar/includes/header.html' %}
                 </div>
             </header>
-
             <nav class="v-app__nav {% block nav_class %}{% endblock %}"> 
                 <div class="v-app-nav d-flex align-center py-0 fill-height">
                                         
@@ -35,35 +36,32 @@
                     </button>
 
                     <div class="cats_header fill-height fill-width">
-       
                         <div class="v-app-nav__title d-flex d-sm-none text-center d-flex">
                             {% block nav_title %}{% endblock %}
                         </div>
-
-                        <ul class="d-flex align-center fill-height">
-                            {% root_categories as root_categories %}
-                            {% if root_categories %}
-                                {% for root_category in root_categories %}
-                                {% comment %}------------- категория item ---------------{% endcomment %} 
-                                <li>
-                                    <a class="cat_item {% if root_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ root_category.url }}" data-id="categories-tabs-item-hits">
-                                    {{ root_category.name }}
-                                    </a>
-                                </li>
-                                {% endfor %}
-                            {% endif %}
-                        </ul>
-                        
-                        {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
-                        <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
-                            class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-0 mr-2 shrink" aria-label="Поиск">
-                            <span class="v-button__wrapper d-flex">
-                                {% icon file_name='header/search' size=20 fill='#111'%}
-                            </span>
-                        </a>
-
+                        {% cache 3600 root_category category.pk %}
+                            <ul class="d-flex align-center fill-height">
+                                {% root_categories as root_categories %}
+                                {% if root_categories %}
+                                    {% for root_category in root_categories %}
+                                    {% comment %}------------- категория item ---------------{% endcomment %} 
+                                    <li>
+                                        <a class="cat_item {% if root_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ root_category.url }}" data-id="categories-tabs-item-hits">
+                                        {{ root_category.name }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                            {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
+                            <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
+                                class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-0 mr-2 shrink" aria-label="Поиск">
+                                <span class="v-button__wrapper d-flex">
+                                    {% icon file_name='header/search' size=20 fill='#111'%}
+                                </span>
+                            </a>
+                        {% endcache %}
                     </div>
-
                     {% comment %} ------------- кнопка корзина --------------- {% endcomment %}
                     <a data-id="nav-basket-btn" class="v-app-nav__button d-none d-sm-flex ml-3" href='{% url 'basket:summary' %}'>
                         <div class="d-flex aling-center mr-1">
@@ -72,22 +70,17 @@
                         Корзина
                         <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
                     </a>
-
                     <div class="v-app-nav__title v-app-nav__title--center d-flex d-sm-none text-center">
                         {% block nav_title_center %}{% endblock %}
                     </div>
-
                     <div role="separator" class="v-spacer"></div>
-
                     <button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2" aria-label="Очистить корзину">
                         <span class="v-button__wrapper d-flex">
                             {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
                         </span>
                     </button>
-
                 </div> 
             </nav>
-
         {% endblock main_header %}
 
         {% comment %}------------- мобильная версия нижняя полоска с иконками меню, корзина и тд. ---------------{% endcomment %}
@@ -119,15 +112,16 @@
             </main>
 
             {% comment %}------------- footer ---------------{% endcomment %}
-            {% block main_footer %}
-                {% include 'oscar/includes/footer.html' %}
-            {% endblock %}
-
+            {% cache 3600 footer partner.id %}
+                {% block main_footer %}
+                    {% include 'oscar/includes/footer.html' %}
+                {% endblock %}
+            {% endcache %}
         </div>
     </div>
 
     {% block auth %}
-        <div id="modal" class="v-app d-none"></div>
+        <div id="modal" class="d-none"></div>
     {% endblock %}
 
     {% block cookie %}

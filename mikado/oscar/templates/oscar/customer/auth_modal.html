@@ -1,6 +1,8 @@
 {% load svg_tags %}
+{% load cache %}
 
-<div class="v-modal pos-fixed d-flex align-center justify-center" data-id="modal-close">
+{% cache 3600 auth_modal %}
+    <div class="v-app v-modal pos-fixed d-flex align-center justify-center" data-id="modal-close">
     <div class="v-modal__content scrollbar px-2 pt-6 pd-sm-4 no-scroll">
 
         <button onclick="openAuthModal()" data-id="close-auth-modal" class="v-button v-app-header__back v-button--small justify-center shrink d-block d-sm-none" style="top: -38px;">
@@ -82,4 +84,5 @@
             </form>    
         </div>
     </div>
-</div>
+    </div>
+{% endcache %}

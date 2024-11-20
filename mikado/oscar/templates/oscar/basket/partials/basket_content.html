@@ -18,7 +18,6 @@
                 <div class="upsell-messages" id="upsell_messages">
                     {% include 'oscar/basket/partials/upsell_messages.html' with editable=1 %}
                 </div>
-                
                 {% block basket_form_main %}
                     <form data-id="basket-formset" method="post" class="v-cart-form d-flex flex-column fill-width">
                         <div class="v-cart-items d-flex flex-column fill-width shrink">
@@ -58,7 +57,7 @@
                                                     </button>
                                                 </div>
 
-                                                <div class="v-dish-order__toppings d-flex fill-width flex-wrap {% if not line.has_topping %}d-none{% endif %}" data-id="dish-order-toppings">
+                                                <div class="v-dish-order__toppings d-flex flex-column {% if not line.has_topping %}d-none{% endif %}" data-id="dish-order-toppings">
                                                     <span class="d-flex">{{ line.variants }}</span>
                                                     <span class="d-flex">{{ line.options }}</span>
                                                     <span class="d-flex">{{ line.additions }}</span>
@@ -74,28 +73,24 @@
                                                         <div class="v-order-button pos-relative" data-id="order-buttons">
                                                             <button type="button" data-id="order-button-minus" class="v-order-button--elem" aria-label="Уменьшить">
                                                                 <svg viewBox="0 0 24 24" fill="none">
-                                                                    <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                    <path d="M6 12L18 12" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                                                 </svg>
                                                             </button>
                                                             {% render_field form.quantity class="v-order-button--elem v-order-button--value" readonly="true" data-id="quantity-input" %}
                                                             <button type="button" data-id="order-button-plus" class="v-order-button--elem" aria-label="Увеличить">
                                                                 <svg viewBox="0 0 24 24" fill="none">
-                                                                    <path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                    <path d="M6 12H18M12 6V18" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                                                 </svg>
                                                             </button>
                                                         </div>
-
                                                         <div role="separator" class="v-spacer"></div>
-                                                        
                                                         <span class="v-prices d-flex flex-column align-start">
                                                             <span class="v-prices__price no-wrap">
                                                                 {{ line.unit_price|currency:line.price_currency }}
                                                             </span>
                                                         </span>
-
                                                     </div>
                                                 {% endif %}
-
                                             </div>
                                         </div>
                                     </div>  

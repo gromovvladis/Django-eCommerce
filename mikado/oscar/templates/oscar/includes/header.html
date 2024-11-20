@@ -1,51 +1,50 @@
 {% load svg_tags %}
-{% load partner_tags %}
+{% load cache %}
 
 <div class="v-app__header-left d-flex mr-sm-2 mr-md-3">
-    {% comment %} ------------- лого --------------- {% endcomment %}
-    <a href="{{ homepage_url }}" data-id="header-logo"
-        class="header__logo d-sm-flex shrink router-link-exact-active router-link-active mr-1"
-        aria-current="page">
-        {% icon file_name='header/logo' size=45%}        
-    </a>
-    {% if partners_select %}
-        <button onclick="openPartnerModal()" class="partner_select text-left d-flex flex-column checked">
-            {% selected_partner request as partner %}
-            {% if partner %}
-                <span class="header_partner">{{ partner }}</span>
-                {% if partner.primary_address %}
-                    <span class="header_address">{{ partner.primary_address }}</span>
+    {% cache 3600 header_logo partner.id %}
+        {% comment %} ------------- лого --------------- {% endcomment %}
+        <a href="{{ homepage_url }}" data-id="header-logo"
+            class="header__logo d-sm-flex shrink router-link-exact-active router-link-active mr-1"
+            aria-current="page" aria-label="Домашняя страница">
+            {% icon file_name='header/logo' size=45%}        
+        </a>
+        {% if partners_select %}
+            <button onclick="openPartnerModal()" class="partner_select text-left d-flex flex-column checked">
+                {% if partner %}
+                    <span class="header_partner">{{ partner }}</span>
+                    {% if partner.primary_address %}
+                        <span class="header_address">{{ partner.primary_address }}</span>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-        </button>
-    {% endif %}
+            </button>
+        {% endif %}
+    {% endcache %}
 </div>
-
 <div class="v-app__header-right d-flex">
-  
-    {% comment %} ------------- Поиск --------------- {% endcomment %}
-    <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button" class="v-app-header__button d-flex flex-column mr-4 align-center">
-        <span class="v-app-header__button-picture">  
-            {% icon file_name='header/search' size=26 fill='#111'%}
-        </span>
-        Поиск
-    </a>
-
-    {% comment %} ------------- Доставка --------------- {% endcomment %}
-    <a href="{% url 'address:delivery-address' %}" data-id="address-button" class="v-app-header__button d-flex flex-column mr-4 align-center">
-        <span class="v-app-header__button-picture">  
-            {% icon file_name='map/delivery' size=26 stroke='#111'%}
-        </span>
-        Доставка
-    </a>
-
-    {% comment %} ------------- акции --------------- {% endcomment %}
-    <a href="{% url 'home:actions' %}" data-id="header-actions-button" class="v-app-header__button d-flex flex-column mr-4 align-center">
-        <span class="v-app-header__button-picture">
-            {% icon file_name='app_mobile_sticker/actions' size=26 stroke='#111'%}
-        </span>
-        Акции
-    </a>
+    {% cache 3600 header_right %}
+        {% comment %} ------------- Поиск --------------- {% endcomment %}
+        <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button" class="v-app-header__button d-flex flex-column mr-4 align-center">
+            <span class="v-app-header__button-picture">  
+                {% icon file_name='header/search' size=26 fill='#111'%}
+            </span>
+            Поиск
+        </a>
+        {% comment %} ------------- Доставка --------------- {% endcomment %}
+        <a href="{% url 'address:delivery-address' %}" data-id="address-button" class="v-app-header__button d-flex flex-column mr-4 align-center">
+            <span class="v-app-header__button-picture">  
+                {% icon file_name='map/delivery' size=26 stroke='#111'%}
+            </span>
+            Доставка
+        </a>
+        {% comment %} ------------- акции --------------- {% endcomment %}
+        <a href="{% url 'home:actions' %}" data-id="header-actions-button" class="v-app-header__button d-flex flex-column mr-4 align-center">
+            <span class="v-app-header__button-picture">
+                {% icon file_name='app_mobile_sticker/actions' size=26 stroke='#111'%}
+            </span>
+            Акции
+        </a>
+    {% endcache %}
 
     {% comment %} ------------- профиль --------------- {% endcomment %}
     {% if user.is_authenticated %}
@@ -64,5 +63,4 @@
             Войти
         </button>
     {% endif %}
-
 </div>
