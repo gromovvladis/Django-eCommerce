@@ -169,7 +169,6 @@ class ProductSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Извлечение данных из validated_data
         parent_id = validated_data.pop("parent_id", None)
-        type = validated_data.pop("type", None)
         measure_name = validated_data.pop("measure_name", None)
         store_id = validated_data.pop("store_id", None)
         price = validated_data.pop("price", None)
@@ -177,10 +176,12 @@ class ProductSerializer(serializers.ModelSerializer):
         quantity = validated_data.pop("quantity", None)
         tax = validated_data.pop("tax", None)
         allow_to_sell = validated_data.pop("allow_to_sell", None)
+        code = validated_data.pop("code")
+
+        type = validated_data.pop("type", None)
         updated_at = validated_data.pop("updated_at", None)
 
         evotor_id = validated_data.get("evotor_id")
-        evotor_code = validated_data.get("evotor_code")
 
         # Инициализация переменных
         parent_product = category = None
@@ -214,8 +215,8 @@ class ProductSerializer(serializers.ModelSerializer):
         partner = self._get_or_create_partner(store_id)
 
         # Обработка товарной записи
-        if evotor_code:
-            self._create_or_update_stock_record(product, partner, evotor_code, price, cost_price, quantity, tax, allow_to_sell)
+        if code:
+            self._create_or_update_stock_record(product, partner, code, price, cost_price, quantity, tax, allow_to_sell)
 
         return product
 
@@ -228,8 +229,7 @@ class ProductSerializer(serializers.ModelSerializer):
         quantity = validated_data.pop("quantity", None)
         tax = validated_data.pop("tax", None)
         allow_to_sell = validated_data.pop("allow_to_sell", None)
-
-        evotor_code = validated_data.get("evotor_code")
+        code = validated_data.pop("code")
 
         # Инициализация переменных
         parent_product = category = None
@@ -258,8 +258,8 @@ class ProductSerializer(serializers.ModelSerializer):
         partner = self._get_or_create_partner(store_id)
 
         # Обработка товарной записи
-        if evotor_code:
-            self._create_or_update_stock_record(product, partner, evotor_code, price, cost_price, quantity, tax, allow_to_sell)
+        if code:
+            self._create_or_update_stock_record(product, partner, code, price, cost_price, quantity, tax, allow_to_sell)
 
         return product
 
@@ -329,10 +329,10 @@ class ProductSerializer(serializers.ModelSerializer):
         """Создание или извлечение партнера"""
         return Partner.objects.get_or_create(evotor_id=store_id)[0]
 
-    def _create_or_update_stock_record(self, product, partner, evotor_code, price, cost_price, quantity, tax, allow_to_sell):
+    def _create_or_update_stock_record(self, product, partner, code, price, cost_price, quantity, tax, allow_to_sell):
         """Создание или обновление товарной записи"""
         stockrecord, created = StockRecord.objects.get_or_create(
-            partner_sku=evotor_code,
+            partner_sku=code,
             defaults={
                 "product": product,
                 "partner": partner,
