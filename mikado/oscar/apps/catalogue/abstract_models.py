@@ -195,22 +195,19 @@ class AbstractCategory(MP_Node):
         "Изображение", upload_to="categories", blank=True, null=True
     )
     slug = SlugField("Ярлык", max_length=255, db_index=True, unique=True)
-
     order = models.IntegerField("Порядок", default=0, null=False, blank=False)
-
     is_public = models.BooleanField(
         "Является общедоступным",
         default=True,
         db_index=True,
         help_text="Показывать эту категорию в результатах поиска и каталогах.",
     )
-    
     evotor_id = models.CharField(
         "ID Эвотор",
         max_length=128,
         blank=True,
+        null=True,
     )
-
     ancestors_are_public = models.BooleanField(
         "Категории предков являются общедоступными",
         default=True,
@@ -225,7 +222,6 @@ class AbstractCategory(MP_Node):
 
     def __str__(self):
         return self.full_name
-    
     
     # Images
     @cached_property

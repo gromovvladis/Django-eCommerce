@@ -176,7 +176,7 @@ class ProductSerializer(serializers.ModelSerializer):
         quantity = validated_data.pop("quantity", None)
         tax = validated_data.pop("tax", None)
         allow_to_sell = validated_data.pop("allow_to_sell", None)
-        code = validated_data.pop("code")
+        code = validated_data.pop("code", None)
 
         type = validated_data.pop("type", None)
         updated_at = validated_data.pop("updated_at", None)
@@ -229,7 +229,7 @@ class ProductSerializer(serializers.ModelSerializer):
         quantity = validated_data.pop("quantity", None)
         tax = validated_data.pop("tax", None)
         allow_to_sell = validated_data.pop("allow_to_sell", None)
-        code = validated_data.pop("code")
+        code = validated_data.pop("code", None)
 
         # Инициализация переменных
         parent_product = category = None
