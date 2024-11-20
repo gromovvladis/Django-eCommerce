@@ -10,7 +10,7 @@ User = get_model("user", "User")
 Staff = get_model("user", "Staff")
 Partner = get_model("partner", "Partner")
 
-class GroupSerializer(serializers.ModelSerializer):
+class UserGroupSerializer(serializers.ModelSerializer):
     name = serializers.CharField() 
     id = serializers.CharField(write_only=True) 
     class Meta:

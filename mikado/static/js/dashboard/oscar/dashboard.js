@@ -367,6 +367,34 @@ var oscar = (function(o, $) {
                 });
             }
         },
+        product: {
+            initProductClass: function() {
+
+                const selectElement = document.getElementById('id_product_class');
+                
+                $(selectElement).on("select2:select", function () {
+                    const form = selectElement.closest('form');
+                    form.submit();
+                });
+                
+                // const currentUrl = window.location.pathname;
+
+                // Проверяем, есть ли ID продукта в URL
+                // const isEditPage = /\/products\/\d+\/\?$/.test(currentUrl);
+
+                // if (isEditPage) {
+                //     selectElement.addEventListener('change', () => {
+                //         // Найти форму, к которой относится select
+                //         const form = selectElement.closest('form');
+                //         if (form) {
+                //             form.submit(); // Отправить форму
+                //         } else {
+                //             console.error("Форма не найдена для отправки.");
+                //         }
+                //     });
+                // }
+            }
+        },
         orders: {
             initTabs: function() {
                 if (location.hash) {
@@ -540,6 +568,14 @@ var oscar = (function(o, $) {
                         toggleActionsDiv();
                     }
                 });
+
+                var partnerForm = document.getElementById('partner_form');
+                if (partnerForm) {
+                    var selectInput = partnerForm.querySelector('select');
+                    selectInput.addEventListener('change', function() {
+                        partnerForm.submit();
+                    });
+                }
             }
         },
         reordering: (function() {

@@ -204,12 +204,6 @@ class AbstractCategory(MP_Node):
         db_index=True,
         help_text="Показывать эту категорию в результатах поиска и каталогах.",
     )
-
-    is_promo = models.BooleanField(
-        "Является промо-категорией в списке категорий",
-        default=False,
-        help_text="Показывать эту категорию в списке категорий, как промокатегорию ('Хиты' или 'Новинки')",
-    )
     
     evotor_id = models.CharField(
         "ID Эвотор",
@@ -460,11 +454,6 @@ class AbstractProduct(models.Model):
         max_length=128,
         blank=True,
     )
-    evotor_code = models.CharField(
-        "Code Эвотор",
-        max_length=128,
-        blank=True,
-    )
     upc = NullCharField(
         "Товарный код продукта UPC (Артикул)",
         max_length=64,
@@ -477,7 +466,6 @@ class AbstractProduct(models.Model):
             "Например, ISBN книги"
         ),
     )
-
     parent = models.ForeignKey(
         "self",
         blank=True,
@@ -706,18 +694,41 @@ class AbstractProduct(models.Model):
         if self.has_stockrecords:
             raise ValidationError("Родительский продукт не может иметь складские записи.")
 
+
     def save(self, *args, **kwargs):
         if not self.slug:
             if self.is_child:
                 if not self.title:
                     self.slug = slugify(self.get_variant_title())
                 else:
-                    self.slug = slugify("%s-%s" % (self.parent.get_title(), self.get_title()))
+                    self.slug = slugify(f"{self.parent.get_title()}-{self.get_title()}")
             else:
                 self.slug = slugify(self.get_title())
 
+        # Добавляем проверку уникальности slug
+        original_slug = self.slug
+        counter = 1
+
+        # Проверка на уникальность slug
+        while self.__class__.objects.filter(slug=self.slug).exists():
+            self.slug = f"{original_slug}-{counter}"
+            counter += 1
+
         super().save(*args, **kwargs)
         self.attr.save()
+
+    # def save(self, *args, **kwargs):
+    #     if not self.slug:
+    #         if self.is_child:
+    #             if not self.title:
+    #                 self.slug = slugify(self.get_variant_title())
+    #             else:
+    #                 self.slug = slugify("%s-%s" % (self.parent.get_title(), self.get_title()))
+    #         else:
+    #             self.slug = slugify(self.get_title())
+
+    #     super().save(*args, **kwargs)
+    #     self.attr.save()
 
     def refresh_from_db(self, using=None, fields=None):
         super().refresh_from_db(using, fields)
@@ -915,7 +926,6 @@ class AbstractProduct(models.Model):
             return ", ".join(pairs)
     
         return []
-    
     
     def get_variant_attributes(self):
         """

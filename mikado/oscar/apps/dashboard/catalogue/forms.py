@@ -40,7 +40,7 @@ BaseCategoryForm = movenodeform_factory(
         "order",
         "image",
         "is_public",
-        "is_promo",
+        # "is_promo",
         "meta_title",
         "meta_description",
     ],
@@ -316,6 +316,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         model = Product
         fields = [
             "title",
+            "product_class",
             "upc",
             "short_description",
             "description",
@@ -349,6 +350,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
             self.add_variant_fields()
         else:
             # Only set product class for non-child products
+            self.fields['product_class'].empty_label = None
             self.instance.product_class = product_class
             self.add_attribute_fields(product_class, self.instance.is_parent)
 
@@ -366,6 +368,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         and fetches initial values for the dynamically constructed attribute
         fields.
         """
+        kwargs["initial"]["product_class"] = product_class
         if "initial" not in kwargs:
             kwargs["initial"] = {}
         self.set_initial_attribute_values(product_class, kwargs)
@@ -443,7 +446,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         Deletes any fields not needed for child products. Override this if
         you want to e.g. keep the description field.
         """
-        for field_name in ["description", "short_description", "is_discountable", "meta_title", "meta_description"]:
+        for field_name in ["description", "short_description", "product_class", "is_discountable", "meta_title", "meta_description"]:
             if field_name in self.fields:
                 del self.fields[field_name]     
 
@@ -451,7 +454,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         evotor_update = self.cleaned_data.get('evotor_update')
         if evotor_update:
             fff = 1           
-
+   
     def _post_clean(self):
         """
         Set attributes before ModelForm calls the product's clean method

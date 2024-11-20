@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import View
 
-from oscar.apps.catalogue.serializers import GroupsSerializer, ProductsSerializer
+from oscar.apps.catalogue.serializers import ProductsGroupSerializer, ProductsSerializer
 from oscar.apps.crm.client import EvatorCloud
 from oscar.apps.customer.serializers import StaffsSerializer
 from oscar.apps.dashboard.crm.mixins import CRMTablesMixin
@@ -70,6 +70,17 @@ class CRMPartnerListView(CRMTablesMixin):
     def get_queryset(self):
         
         data_json = EvatorCloud().get_partners() 
+
+        error = data_json.get('error')
+        if error:
+            self.queryset = []
+            logger.error(f"Ошибка {error}")
+            messages.error(
+                self.request,
+                error,
+            )
+            return self.queryset
+        
         serializer = self.serializer(data=data_json)
 
         if serializer.is_valid():
@@ -130,7 +141,18 @@ class CRMTerminalListView(CRMTablesMixin):
     url_redirect = reverse_lazy("dashboard:crm-terminals")
 
     def get_queryset(self):     
-        data_json = EvatorCloud().get_terminals() 
+        data_json = EvatorCloud().get_terminals()  
+
+        error = data_json.get('error')
+        if error:
+            self.queryset = []
+            logger.error(f"Ошибка {error}")
+            messages.error(
+                self.request,
+                error,
+            )
+            return self.queryset
+        
         serializer = self.serializer(data=data_json)
 
         if serializer.is_valid():
@@ -194,6 +216,17 @@ class CRMStaffListView(CRMTablesMixin):
 
     def get_queryset(self):     
         data_json = EvatorCloud().get_staffs() 
+        
+        error = data_json.get('error')
+        if error:
+            self.queryset = []
+            logger.error(f"Ошибка {error}")
+            messages.error(
+                self.request,
+                error,
+            )
+            return self.queryset
+        
         serializer = self.serializer(data=data_json)
 
         if serializer.is_valid():
@@ -202,9 +235,9 @@ class CRMStaffListView(CRMTablesMixin):
             for data_item in data_items:
                 evotor_id = data_item['id']
                 data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
-                first_name = data_item.get('name', '')
-                last_name = data_item.get('last_name', '')
-                middle_name = data_item.get('patronymic_name', '')
+                first_name = data_item.get('name', None)
+                last_name = data_item.get('last_name', None)
+                middle_name = data_item.get('patronymic_name', None)
                 stores_ids = data_item.get('stores', None)
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
                 
@@ -256,7 +289,7 @@ class CRMGroupsListView(CRMTablesMixin):
     template_name = 'oscar/dashboard/crm/groups/group_list.html'
     model = Category
     form_class = CRMPartnerForm
-    serializer = GroupsSerializer
+    serializer = ProductsGroupSerializer
     context_table_name = "tables"
     table_prefix = "group_{}-"
     table_evotor = CRMGroupEvotorTable
@@ -284,6 +317,17 @@ class CRMGroupsListView(CRMTablesMixin):
             return []
         
         data_json = EvatorCloud().get_groups(partner_evotor_id) 
+                
+        error = data_json.get('error')
+        if error:
+            self.queryset = []
+            logger.error(f"Ошибка {error}")
+            messages.error(
+                self.request,
+                error,
+            )
+            return self.queryset
+        
         serializer = self.serializer(data=data_json)
 
         if serializer.is_valid():
@@ -386,6 +430,17 @@ class CRMProductListView(CRMTablesMixin):
             return []
         
         data_json = EvatorCloud().get_products(partner_evotor_id) 
+
+        error = data_json.get('error')
+        if error:
+            self.queryset = []
+            logger.error(f"Ошибка {error}")
+            messages.error(
+                self.request,
+                error,
+            )
+            return self.queryset
+        
         serializer = self.serializer(data=data_json)
 
         if serializer.is_valid():
@@ -395,21 +450,19 @@ class CRMProductListView(CRMTablesMixin):
                 evotor_id = data_item['id']
                 data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
                 # first_name = data_item.get('name', '')
-                # last_name = data_item.get('last_name', '')
-                # middle_name = data_item.get('patronymic_name', '')
-                # stores_ids = data_item.get('stores', None)
                 try:
                     store_id = data_item['store_id']
                     data_item['partner'] = Partner.objects.get(evotor_id=store_id)
-                except Exception:
-                    pass
-
+                except Partner.DoesNotExist:
+                    data_item['partner'] = None
+                    
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
                 
                 if model_instance:
                     data_item['is_created'] = True
+                    data_item['is_valid'] = True
                     
-                    partner_evotor_ids = set(model_instance.user.partners.values_list('evotor_id', flat=True)) if model_instance.user else set()
+                    # partner_evotor_ids = set(model_instance.user.partners.values_list('evotor_id', flat=True)) if model_instance.user else set()
                     # partner_matches = bool(partner_evotor_ids.intersection(stores_ids))
                     # data_item['is_valid'] = (
                     #     model_instance.first_name == first_name
@@ -447,7 +500,7 @@ class CRMProductListView(CRMTablesMixin):
                 self.request,
                 msg,
             )
-        return redirect(self.url_redirect)
+        return self.redirect_with_get_params(self.url_redirect, self.request)
     
 
     def get_context_data(self, **kwargs):
