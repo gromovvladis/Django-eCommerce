@@ -2,6 +2,8 @@ import logging
 from rest_framework import serializers
 from django.contrib.auth.models import Group
 from oscar.apps.customer.models import GroupEvotor
+from oscar.apps.search.search_indexes import ProductIndex
+from decimal import Decimal as D
 from oscar.core.loading import get_model
 from haystack import connections
 
@@ -161,7 +163,7 @@ class ProductSerializer(serializers.ModelSerializer):
     def _save(self, product):
         product.save()
         search_backend = connections['default'].get_backend()
-        search_backend.update(product)
+        search_backend.update(ProductIndex(), [product])
 
     def _get_parent_product(self, parent_id):
         """Обработка родительского продукта или категории"""
@@ -236,10 +238,10 @@ class ProductSerializer(serializers.ModelSerializer):
             defaults={
                 "product": product,
                 "partner": partner,
-                "price": price,
-                "cost_price": cost_price,
+                "price": D(price),
+                "cost_price": D(cost_price),
                 "is_public": allow_to_sell,
-                "num_in_stock": quantity,
+                "num_in_stock": int(quantity),
                 "tax": tax,
             },
         )
@@ -247,10 +249,10 @@ class ProductSerializer(serializers.ModelSerializer):
         if created:
             stockrecord.save()
         else:
-            stockrecord.price = price
-            stockrecord.cost_price = cost_price
+            stockrecord.price = D(price)
+            stockrecord.cost_price = D(cost_price)
             stockrecord.is_public = allow_to_sell
-            stockrecord.num_in_stock = quantity
+            stockrecord.num_in_stock = int(quantity)
             stockrecord.tax = tax
             stockrecord.save()
 
