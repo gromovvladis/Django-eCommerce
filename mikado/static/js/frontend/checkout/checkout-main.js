@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Смена метода доставки
-if (shippingMethodButtons){
+if (shippingMethodButtons.length > 0){
     shippingMethodButtons.forEach(function(button) {
         button.addEventListener('click', function() {
             shippingMethod = this.value;

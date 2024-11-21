@@ -33,7 +33,7 @@ if (mainSlider) {
 
 var actions = document.querySelectorAll('[data-id="slider-action"]');
 
-if (actions) {
+if (actions.length > 0) {
   actions.forEach(function(action) {
       var swiperContainer = action.querySelector('[data-id="slider-swiper"]');
       var swiperNext = action.querySelector('[data-id="swiper-next"]');

@@ -1,6 +1,5 @@
 {% extends "oscar/layout.html" %}
 
-{% comment %} {% load partner_tags %} {% endcomment %}
 {% load svg_tags %}
 {% load static %}
 {% load cache %}
@@ -21,9 +20,11 @@
         </a>
         {% if partners_select %}
             <button onclick="openPartnerModal()" class="partner_select checked text-left d-flex flex-column ml-2 pd-0">
-                <span class="header_partner">{{ partner }}</span>
-                {% if partner.primary_address %}
-                    <span class="header_address">{{ partner.primary_address }}</span>
+                {% if partner %}
+                    <span class="header_partner">{{ partner }}</span>
+                    {% if partner.primary_address %}
+                        <span class="header_address">{{ partner.primary_address }}</span>
+                    {% endif %}
                 {% endif %}
             </button>
         {% endif %}
@@ -53,17 +54,18 @@
 {% endblock %}
 
 {% block content %}
-    {% cache 3600 homepage_content %}
-        <div class="home__wrapper d-flex flex-column">
+    <div class="home__wrapper d-flex flex-column">
+        {% cache 3600 homepage_mobile_categories %}
             {% block mobile_categories %}
                 {% include "oscar/home/partials/mobile-categories.html" %}
             {% endblock %}
-            
-            {% if not is_mobile %}
+        {% endcache %}
+        {% if not is_mobile %}
+            {% cache 600 homepage_desctop_home %}
                 {% block desctop_home %}
                     {% include "oscar/home/partials/desctop-home.html" with promo_cats=promo_cats %}
                 {% endblock %}
-            {% endif %}
-        </div>
-    {% endcache %}
+            {% endcache %}
+        {% endif %}
+    </div>
 {% endblock content %}

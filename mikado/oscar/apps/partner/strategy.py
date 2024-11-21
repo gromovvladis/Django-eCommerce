@@ -12,7 +12,7 @@ FixedPrice = get_class("partner.prices", "FixedPrice")
 TaxInclusiveFixedPrice = get_class("partner.prices", "TaxInclusiveFixedPrice")
 
 # A container for policies
-PurchaseInfo = namedtuple("PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords", "partner_id"])
+PurchaseInfo = namedtuple("PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords", "uid"])
 default_partner = settings.PARTNER_DEFAULT
 
 class Selector(object):
@@ -130,8 +130,8 @@ class Structured(Base):
             price=self.pricing_policy(product, stockrecord),
             availability=self.availability_policy(product, stockrecord),
             stockrecord=stockrecord,
-            stockrecords=product.stockrecords.all(),
-            partner_id=self.get_partner_id(),
+            stockrecords=self.available_stockrecords(product),
+            uid=self.get_uid(product),
         )
 
     def fetch_for_parent(self, product):
@@ -142,7 +142,7 @@ class Structured(Base):
             availability=self.parent_availability_policy(product, children_stock),
             stockrecord=None,
             stockrecords=None,
-            partner_id=self.get_partner_id(),
+            uid=self.get_uid(),
         )
 
     def select_stockrecord(self, product):
@@ -192,7 +192,22 @@ class Structured(Base):
         )
     
     def get_partner_id(self):
-        return
+        raise NotImplementedError(
+            "A structured strategy class must define a "
+            "'get_partner_id' method"
+        )
+    
+    def get_uid(self, product):
+        raise NotImplementedError(
+            "A structured strategy class must define a "
+            "'get_uid' method"
+        )
+    
+    def available_stockrecords(self, product):
+        raise NotImplementedError(
+            "A structured strategy class must define a "
+            "'available_stockrecords' method"
+        )
 
 
 # Mixins - these can be used to construct the appropriate strategy class
@@ -240,6 +255,24 @@ class UsePartnerSelectStockRecord:
                 partner_id = partner_cookies
 
         return partner_id
+
+    def get_uid(self, product):
+        product_id = product.id
+        partner_id = self.get_partner_id()
+        stockrecords_ids = self.available_stockrecords(product).values_list('id', flat=True)
+
+        data = f"{product_id}-{partner_id}-{'-'.join(map(str, stockrecords_ids))}"
+
+        return data
+
+    def available_stockrecords(self, product):
+        if product.get_product_class().track_stock:
+            stockrecords_ids = product.stockrecords.filter(is_public=True, num_in_stock__gt=0)
+        else:
+            stockrecords_ids = product.stockrecords.filter(is_public=True)
+
+        return stockrecords_ids
+
 
 class StockRequired(object):
     """

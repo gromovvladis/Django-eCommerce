@@ -1,7 +1,7 @@
 {% load basket_tags %}
 {% load purchase_info_tags %}
 
-{% purchase_info_for_product request product as session. %}
+{% purchase_info_for_product request product as session %}
 
 {% if session.availability.is_available_to_buy and session.price.exists %}
     {% comment %}------------- вариации + доп опции ---------------{% endcomment %}

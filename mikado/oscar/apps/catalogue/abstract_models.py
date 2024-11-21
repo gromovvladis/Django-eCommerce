@@ -551,7 +551,6 @@ class AbstractProduct(models.Model):
         default=0,
         help_text="Определяет порядок отображения в списке.",
     )
-    
     cooking_time = models.IntegerField(
         "Время приготовления", 
         null=False, 
@@ -559,7 +558,6 @@ class AbstractProduct(models.Model):
         default=20,
         help_text="Приблизительное время, которое уйдет у повара на приготовление и сборку заказа на кухне. Указывается в минутах.",
     )
-
     date_created = models.DateTimeField(
         "Дата создания", auto_now_add=True, db_index=True
     )
@@ -706,25 +704,13 @@ class AbstractProduct(models.Model):
         counter = 1
 
         # Проверка на уникальность slug
-        while self.__class__.objects.filter(slug=self.slug).exists():
+        while self.__class__.objects.filter(slug=self.slug).exclude(id=self.id).exists():
             self.slug = f"{original_slug}-{counter}"
             counter += 1
 
         super().save(*args, **kwargs)
         self.attr.save()
 
-    # def save(self, *args, **kwargs):
-    #     if not self.slug:
-    #         if self.is_child:
-    #             if not self.title:
-    #                 self.slug = slugify(self.get_variant_title())
-    #             else:
-    #                 self.slug = slugify("%s-%s" % (self.parent.get_title(), self.get_title()))
-    #         else:
-    #             self.slug = slugify(self.get_title())
-
-    #     super().save(*args, **kwargs)
-    #     self.attr.save()
 
     def refresh_from_db(self, using=None, fields=None):
         super().refresh_from_db(using, fields)

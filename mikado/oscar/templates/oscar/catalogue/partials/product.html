@@ -4,7 +4,7 @@
 
 {% block product %}
     {% purchase_info_for_product request product as session %}
-    {% cache 1800 product_compact product.id session.partner_id %}
+    {% cache 1800 product_compact session.uid %}
         {% comment %}------------- категории item ---------------{% endcomment %}
         <div class="dish d-flex flex-column v-card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
             <div class="dish-wrapper grow-1">            
