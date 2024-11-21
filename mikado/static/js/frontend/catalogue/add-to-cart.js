@@ -54,8 +54,8 @@ if (addBasketForm) {
             });
         });
         
-        if (variants) {
-    
+        if (variants.length > 0) {
+
             var childInput = addBasketForm.querySelector('#id_child_id');
             const childData = JSON.parse(childInput.dataset.childs);
             var selectedValues = {};
@@ -140,7 +140,7 @@ if (addBasketForm) {
             });
         }
         
-        if (additionals) {
+        if (additionals.length > 0) {
             additionals.forEach(function (additional) {
                 var inputField = additional.querySelector('input');
                 var addPrice = parseInt(additional.querySelector('[data-id="additional-product-price"]').textContent);

@@ -24,7 +24,6 @@
 {% endblock header %}
 
 {% block dashboard_content %}
-
     {% block search_products %}
         <div class="table-wrapper mb-4">
             <div class="table-header d-flex justify-space-between" data-target="#card-body" 
@@ -70,16 +69,13 @@
             </div>
         </div>
     {% endblock %}
-
     {% if products %}
         {% block product_list %}
-
             <form class="mobile-table" method="post">
                 {% csrf_token %}
                 {% render_table products %}
             </form>
-
-            <div class="modal fade" id="product-image-modal" tabindex="-1" role="dialog">
+            {% comment %} <div class="modal fade" id="product-image-modal" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -91,16 +87,14 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
+            </div> {% endcomment %}
         {% endblock product_list %}
     {% else %}
         <p class="py-2">Ничего не найдено</p>
     {% endif %}
-
 {% endblock dashboard_content %}
-
+{% comment %} 
 {% block onbodyload %}
     {{ block.super }}
     oscar.dashboard.thumbnails.init();
-{% endblock onbodyload %}
+{% endblock onbodyload %} {% endcomment %}

@@ -4,7 +4,6 @@
 {% load purchase_info_tags %}
 
 <div class="d-flex flex-column fill-width mb-5 mb-md-8">
-
     <div class="home__subtitle mb-2 mb-md-2 d-flex align-center">
         <h2>{{ promo_cat.get_title }}</h2>
         <div role="separator" class="v-spacer"></div>
@@ -12,14 +11,11 @@
             Смотреть все 
         </a>
     </div>
-
     <div class="v-dish-slider fill-width v-dish-slider--dish-small">
         <div class="v-h-nav--wrapper" data-id="slider-action" data-per-page="3">
-
             <button type="button" class="v-h-nav--button" data-id="swiper-prev">
                 {% icon file_name='interface/arrow-home' stroke="#000" %}
             </button>
-
             <div class="v-h-nav" data-id="slider-swiper">
                 <div class="v-h-nav--inner swiper-wrapper">                                   
                     {% if promo_cat.has_products %}
@@ -59,11 +55,9 @@
                     {% endif %}
                 </div>
             </div>
-            
             <button type="button" class="v-h-nav--button right"data-id="swiper-next"> 
                 {% icon file_name='interface/arrow-home' stroke="#000" %}
             </button>
-
         </div>
     </div>
 </div>

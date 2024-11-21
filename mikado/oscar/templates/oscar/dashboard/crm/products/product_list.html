@@ -16,10 +16,9 @@
 {% endblock %}
 
 {% block crm_header %}
-<div class="d-flex justify-content-start">
-    <h1>Продукты Эвотор</h1>
-    <form method="get" class="d-flex align-items-end no-widget-init ml-2" id="partner_form">
-        {% comment %} {% include "oscar/partials/form_fields.html" with form=form %} {% endcomment %}
+<div class="d-flex flex-wrap justify-content-start">
+    <h1 class="mr-2">Продукты Эвотор</h1>
+    <form method="get" class="d-flex align-items-end no-widget-init" id="partner_form">
         {% for field in form %}
             {% render_field field class+='partner-point' %}
             {% for error in field.errors %}
@@ -30,4 +29,22 @@
         {% endfor %}
     </form>
 </div>
+<div class="modal fade" id="product-image-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body text-center">
+                <img class="img-fluid mx-auto" loading="lazy">
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock crm_header %}
+
+{% block onbodyload %}
+    {{ block.super }}
+    oscar.dashboard.thumbnails.init();
+{% endblock onbodyload %}
