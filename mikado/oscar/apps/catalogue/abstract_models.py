@@ -549,7 +549,7 @@ class AbstractProduct(models.Model):
         null=False, 
         blank=False, 
         default=0,
-        help_text="Определяет порядок отображения в списке.",
+        help_text="Определяет порядок отображения в списке. (Чем меньше, тем выше в списке)",
     )
     cooking_time = models.IntegerField(
         "Время приготовления", 
@@ -853,33 +853,6 @@ class AbstractProduct(models.Model):
         attributes = self.attribute_values.all()
         pairs = [attribute.summary() for attribute in attributes]
         return ", ".join(pairs)
-
-    def get_prices(self):
-        """
-        Get list of stockrecord prices
-        """
-        prices = []
-        stockrecords = []
-
-        if self.id:
-
-            if self.is_parent:
-                childs = self.children.all()
-                for child in childs:
-                    stockrecords += child.stockrecords.values_list('price')
-            else: 
-                stockrecords += self.stockrecords.values_list('price')
-
-            if stockrecords:
-                for stc in stockrecords:
-                    prices.append(stc[0])
-
-                prices = set([min(prices), max(prices)])
-
-        return prices
-    
-    def get_low_price(self):
-        return self.get_prices().pop() if self.get_prices().pop() else None
 
     def get_title(self):
         """

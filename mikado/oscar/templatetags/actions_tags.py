@@ -12,7 +12,7 @@ def get_actions():
     Gets all actions for slider
     """
     actions = []
-    actions_list = Action.objects.filter(is_active=True).order_by('order')
+    actions_list = Action.objects.filter(is_active=True).order_by('-order')
 
     for action_item in actions_list:
         actions.append({

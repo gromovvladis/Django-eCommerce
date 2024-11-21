@@ -1,3 +1,4 @@
-{{ object.upc|default:"" }}
 {{ object.title }}
+{{ object.category|default:"" }}
+{{ object.short_description|default:"" }}
 {{ object.description|default:"" }}

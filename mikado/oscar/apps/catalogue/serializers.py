@@ -3,6 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import Group
 from oscar.apps.customer.models import GroupEvotor
 from oscar.core.loading import get_model
+from haystack import connections
 
 logger = logging.getLogger("oscar.customer")
 
@@ -60,112 +61,6 @@ class ProductSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
-    # def create(self, validated_data):
-    #     parent_id = validated_data.pop("parent_id", None)
-    #     # класс продукта
-    #     type = validated_data.pop("type", None)
-    #     measure_name = validated_data.pop("measure_name", None)
-    #     # товарная запись
-    #     store_id = validated_data.pop("store_id", None)
-    #     price = validated_data.pop("price", None)
-    #     cost_price = validated_data.pop("cost_price", None)
-    #     quantity = validated_data.pop("quantity", None)
-    #     tax = validated_data.pop("tax", None)
-    #     allow_to_sell = validated_data.pop("allow_to_sell", None)
-
-    #     updated_at = validated_data.pop("updated_at", None)
-
-    #     evotor_id = validated_data.get("evotor_id")
-    #     evotor_code = validated_data.get("evotor_code")
-
-    #     parent_product = category = None
-        
-    #     if parent_id:
-    #         try:
-    #             parent_product = Product.objects.get(
-    #                 evotor_id=parent_id
-    #             )
-    #             parent_product.structure = Product.PARENT
-    #             parent_product.save()
-    #         except Product.DoesNotExist:
-    #             category, _ = Category.objects.get_or_create(
-    #                 evotor_id=parent_id,
-    #                 defaults={
-    #                     "is_public": False,
-    #                     "depth": 1,
-    #                     "numchild": 0,
-    #                     "name": "Категория Эвотор",
-    #                 },
-    #             )
-
-    #     product_class, _ = ProductClass.objects.get_or_create(
-    #         name="Тип продукта Эвотор",
-    #         defaults={
-    #             "track_stock": True if quantity else False,
-    #             "requires_shipping": False,
-    #             "measure_name": measure_name,
-    #         },
-    #     )
-
-    #     product, created = Product.objects.get_or_create(
-    #         evotor_id=evotor_id,
-    #         defaults={
-    #             "structure": Product.STANDALONE if not parent_product else Product.CHILD,
-    #             "product_class": product_class,
-    #             "is_public": False,
-    #             "parent": parent_product,
-    #             **validated_data
-    #         },
-    #     )
-
-    #     if created:
-    #         if category is None:
-    #             category, _ = Category.objects.get_or_create(
-    #                 name="Категория Эвотор",
-    #                 defaults={
-    #                     "is_public": False,
-    #                     "depth": 1,
-    #                     "numchild": 0,
-    #                 },
-    #             )
-    #         product.categories.add(category)
-    #     else:
-    #         if category is not None:
-    #             product.categories.add(category)
-
-    #     if not created and parent_product:
-    #         product.parent_product = parent_product
-    #         product.structure = Product.CHILD
-        
-    #     product.save()
-
-    #     partner, _ = Partner.objects.get_or_create(evotor_id=store_id)
-
-    #     if evotor_code:
-    #         stockrecord, created = StockRecord.objects.get_or_create(
-    #             partner_sku=evotor_code,
-    #             defaults={
-    #                 "product": product,
-    #                 "partner": partner,
-    #                 "price": price,
-    #                 "cost_price": cost_price,
-    #                 "is_public": allow_to_sell,
-    #                 "num_in_stock": quantity,
-    #                 "tax": tax,
-    #             },
-    #         )
-
-    #         if created:
-    #             stockrecord.price = price
-    #             stockrecord.cost_price = cost_price
-    #             stockrecord.is_public = allow_to_sell
-    #             stockrecord.num_in_stock = quantity
-    #             stockrecord.tax = tax
-    #             stockrecord.save()
-
-    #     return product
-
-
     def create(self, validated_data):
         # Извлечение данных из validated_data
         parent_id = validated_data.pop("parent_id", None)
@@ -209,7 +104,7 @@ class ProductSerializer(serializers.ModelSerializer):
             self._update_parent_product(product, parent_product)
 
         # Сохранение продукта
-        product.save()
+        self._save(product)
 
         # Создание или извлечение партнера
         partner = self._get_or_create_partner(store_id)
@@ -252,7 +147,7 @@ class ProductSerializer(serializers.ModelSerializer):
             self._update_parent_product(product, parent_product)
 
         # Сохранение продукта
-        product.save()
+        self._save(product)
 
         # Создание или извлечение партнера
         partner = self._get_or_create_partner(store_id)
@@ -262,6 +157,11 @@ class ProductSerializer(serializers.ModelSerializer):
             self._create_or_update_stock_record(product, partner, code, price, cost_price, quantity, tax, allow_to_sell)
 
         return product
+    
+    def _save(self, product):
+        product.save()
+        search_backend = connections['default'].get_backend()
+        search_backend.update(product)
 
     def _get_parent_product(self, parent_id):
         """Обработка родительского продукта или категории"""

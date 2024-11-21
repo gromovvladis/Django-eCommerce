@@ -2,7 +2,7 @@
 {% load svg_tags %}
 
 {% if paginator.num_pages > 1 %}
-    <nav class="d-flex fill-width justify-center mt-2 mb-1">
+    <nav class="d-flex fill-width justify-center mt-3 mb-1">
         <div class="d-flex align-center pr-1">
             {% if page_obj.has_previous %}
                 <a class="d-flex align-center" href="?{% get_parameters 'page' %}page={{ page_obj.previous_page_number }}" tabindex="-1">

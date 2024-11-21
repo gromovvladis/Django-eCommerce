@@ -208,6 +208,12 @@ class Structured(Base):
             "A structured strategy class must define a "
             "'available_stockrecords' method"
         )
+    
+    def is_available(self, product):
+        raise NotImplementedError(
+            "A structured strategy class must define a "
+            "'is_available' method"
+        )
 
 
 # Mixins - these can be used to construct the appropriate strategy class
@@ -260,10 +266,8 @@ class UsePartnerSelectStockRecord:
         product_id = product.id
         partner_id = self.get_partner_id()
         stockrecords_ids = self.available_stockrecords(product).values_list('id', flat=True)
+        return f"{product_id}-{partner_id}-{'-'.join(map(str, stockrecords_ids))}"
 
-        data = f"{product_id}-{partner_id}-{'-'.join(map(str, stockrecords_ids))}"
-
-        return data
 
     def available_stockrecords(self, product):
         if product.get_product_class().track_stock:
@@ -272,7 +276,10 @@ class UsePartnerSelectStockRecord:
             stockrecords_ids = product.stockrecords.filter(is_public=True)
 
         return stockrecords_ids
-
+    
+    def is_available(self, product):
+        return self.available_stockrecords(product).exists()
+            
 
 class StockRequired(object):
     """
@@ -305,7 +312,6 @@ class NoTax(object):
     stockrecord.
     """
 
-    
     def pricing_policy(self, product, stockrecord):
         # Check stockrecord has the appropriate data
         if not stockrecord or stockrecord.price is None:
@@ -337,27 +343,7 @@ class NoTax(object):
             )
         
         return UnavailablePrice()
-
-    # def parent_min_pricing_policy(self, product, children_stock):
-    #     stockrecords = [x[1] for x in children_stock if x[1] is not None]
-    #     if not stockrecords:
-    #         return UnavailablePrice()
-        
-    #     # We take price from first record
-    #     stockrecord = stockrecords[0]
-
-    #     variations_price = dict()
-
-    #     if stockrecord is not None:
-    #         return FixedPrice(
-    #             currency=stockrecord.price_currency,
-    #             money=stockrecord.price,
-    #             old_price=stockrecord.old_price,
-    #             # variations_price=variations_price,
-    #         )
-        
-    #     return UnavailablePrice()
-
+    
 
 class FixedRateTax(object):
     """
