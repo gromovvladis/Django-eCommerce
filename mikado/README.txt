@@ -111,6 +111,7 @@
         python manage.py createsuperuser
 
     если были сделаны изменения непосредственно в базе данных, то запускаем Команду
+        python manage.py rebuild_index
         python manage.py update_index
 
 

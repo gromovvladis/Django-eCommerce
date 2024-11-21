@@ -15,16 +15,13 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
         template_name="oscar/search/indexes/product/item_text.txt",
     )
 
-    # upc = indexes.CharField(model_attr="upc", null=True)
+    upc = indexes.CharField(model_attr="upc", null=True)
     title = indexes.EdgeNgramField(model_attr="title", null=True)
     title_exact = indexes.CharField(model_attr="title", null=True, indexed=False)
 
     # Fields for faceting
     product_class = indexes.CharField(null=True, faceted=False)
     category = indexes.MultiValueField(null=True, faceted=True)
-    attributes = indexes.MultiValueField(null=True, faceted=True)
-
-    # price = indexes.FloatField(null=True, faceted=True)
 
     is_available = indexes.BooleanField(null=True, faceted=True)
     order = indexes.IntegerField(model_attr="order", null=True, faceted=False) 
@@ -58,9 +55,6 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_category(self, obj):
         return list(obj.get_categories().values_list("pk", flat=True)) or []
 
-    def prepare_attributes(self, obj):
-        return list(obj.attributes.values_list("pk", flat=True)) or []
-
     # Pricing and stock is tricky as it can vary per customer.  However, the
     # most common case is for customers to see the same prices and stock levels
     # and so we implement that case here.
@@ -69,16 +63,6 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
         if not self._strategy:
             self._strategy = Selector().strategy()
         return self._strategy
-
-    # def prepare_price(self, obj):
-    #     strategy = self.get_strategy()
-    #     result = None
-    #     if obj.is_parent:
-    #         result = strategy.fetch_for_parent(obj)
-    #     elif obj.has_stockrecords:
-    #         result = strategy.fetch_for_product(obj)
-    #         if result.price:
-    #             return result.price.money
 
     def prepare_is_available(self, obj):
         strategy = self.get_strategy()

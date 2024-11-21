@@ -338,7 +338,11 @@ class StaffDetailView(UpdateView):
     form_class = StaffForm
     template_name = "oscar/dashboard/partners/staff_detail.html"
     success_url = reverse_lazy('dashboard:staff-list')
-    # permission_required = 'auth.add_group'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request  # Добавляем request в kwargs
+        return kwargs
 
     def form_valid(self, form):
         messages.success(self.request, 'Сотрудник успешно изменен!')
@@ -354,7 +358,10 @@ class StaffCreateView(CreateView):
     form_class = StaffForm
     template_name = "oscar/dashboard/partners/staff_create.html"
     success_url = reverse_lazy('dashboard:staff-list')
-    # permission_required = 'auth.add_group'
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request  # Добавляем request в kwargs
+        return kwargs
 
     def form_valid(self, form):
         messages.success(self.request, 'Сотрудник успешно создан!')

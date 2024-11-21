@@ -163,6 +163,7 @@ class StaffSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        representation.pop('id', None)
         try:
             representation['stores'] = [partner.evotor_id for partner in instance.user.partners.all()]
             representation['phone'] = str(instance.user.username)

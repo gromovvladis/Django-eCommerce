@@ -116,7 +116,7 @@ class CRMPartnerListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_partners(data_items, is_filtered)
+        msg, success = EvatorCloud().create_or_update_site_partners(data_items, is_filtered)
         if success:
             messages.success(
                 self.request,
@@ -190,7 +190,7 @@ class CRMTerminalListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_terminals(data_items, is_filtered)
+        msg, success = EvatorCloud().create_or_update_site_terminals(data_items, is_filtered)
         if success:
             messages.success(
                 self.request,
@@ -271,7 +271,7 @@ class CRMStaffListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_staffs(data_items, is_filtered)
+        msg, success = EvatorCloud().create_or_update_site_staffs(data_items, is_filtered)
         if success:
             messages.success(
                 self.request,
@@ -297,7 +297,6 @@ class CRMGroupsListView(CRMTablesMixin):
     url_redirect = reverse_lazy("dashboard:crm-groups")
 
     def get_queryset(self):     
-
         self.form = self.form_class(self.request.GET)
         if not self.form.is_valid():
             messages.error(
@@ -336,32 +335,14 @@ class CRMGroupsListView(CRMTablesMixin):
             for data_item in data_items:
                 evotor_id = data_item['id']
                 data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
-                # first_name = data_item.get('name', '')
-                # last_name = data_item.get('last_name', '')
-                # middle_name = data_item.get('patronymic_name', '')
-                # stores_ids = data_item.get('stores', None)
-                # try:
-                #     store_id = data_item['store_id']
-                #     data_item['partner'] = Partner.objects.get(evotor_id=store_id)
-                # except Exception:
-                #     pass
 
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
                 
                 if model_instance:
                     data_item['is_created'] = True
                     
-                    # partner_evotor_ids = set(model_instance.user.partners.values_list('evotor_id', flat=True)) if model_instance.user else set()
-                    # partner_matches = bool(partner_evotor_ids.intersection(stores_ids))
-                    # data_item['is_valid'] = (
-                    #     model_instance.first_name == first_name
-                    #     and model_instance.last_name == last_name
-                    #     and model_instance.middle_name == middle_name
-                    #     and partner_matches
-                    # )
                 else:
                     data_item.update({
-                        # 'partners': stores_ids,
                         'is_created': False,
                         'is_valid': False
                     })
@@ -378,7 +359,7 @@ class CRMGroupsListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_products(data_items, is_filtered)
+        msg, success = EvatorCloud().create_or_update_site_groups(data_items, is_filtered)
         if success:
             messages.success(
                 self.request,
@@ -489,7 +470,7 @@ class CRMProductListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_products(data_items, is_filtered)
+        msg, success = EvatorCloud().create_or_update_site_products(data_items, is_filtered)
         if success:
             messages.success(
                 self.request,

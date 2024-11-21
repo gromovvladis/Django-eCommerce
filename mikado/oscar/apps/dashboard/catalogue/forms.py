@@ -1,12 +1,18 @@
+import logging
 from django import forms
 from django.core import exceptions
 from treebeard.forms import movenodeform_factory
 
 from django.db.models.query import QuerySet
-from oscar.apps.offer import queryset
+
+from django.contrib import messages
+from oscar.apps.crm.client import EvatorCloud
+
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import slugify
 from oscar.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
+
+logger = logging.getLogger("oscar.catalogue")
 
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
@@ -40,7 +46,6 @@ BaseCategoryForm = movenodeform_factory(
         "order",
         "image",
         "is_public",
-        # "is_promo",
         "meta_title",
         "meta_description",
     ],
@@ -337,6 +342,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
     def __init__(self, product_class, *args, data=None, parent=None, **kwargs):
         self.set_initial(product_class, parent, kwargs)
+        self.request = kwargs.pop('request', None)
         super().__init__(data, *args, **kwargs)
         if parent:
             self.instance.parent = parent
@@ -448,12 +454,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         """
         for field_name in ["description", "short_description", "product_class", "is_discountable", "meta_title", "meta_description"]:
             if field_name in self.fields:
-                del self.fields[field_name]     
-
-    def clean_evotor_update(self):
-        evotor_update = self.cleaned_data.get('evotor_update')
-        if evotor_update:
-            fff = 1           
+                del self.fields[field_name]            
    
     def _post_clean(self):
         """
@@ -481,6 +482,17 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
         super()._post_clean()
 
+
+    def save(self, commit=True):
+        product = super().save(commit=commit)
+        evotor_update = self.cleaned_data.get('evotor_update')
+        if evotor_update:
+            try:
+                product, error = EvatorCloud().update_or_create_product(product)
+                if error:
+                    messages.warning(self.request, error)
+            except Exception as e:
+                logger.error("Ошибка при отправке созданного / измененного пользователя в Эвотор. Ошибка %s", e)
 
 class ProductCategoryForm(forms.ModelForm):
     class Meta:

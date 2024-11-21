@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.apps import apps
+from django.contrib import messages
 
 from phonenumber_field.phonenumber import PhoneNumber
 
@@ -99,6 +100,7 @@ class StaffForm(forms.ModelForm):
 
     def __init__(self, partner=None, *args, **kwargs):
         self.partner = partner
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['role'].choices = Staff.get_role_choices()
         staff = kwargs['instance']
@@ -120,11 +122,6 @@ class StaffForm(forms.ModelForm):
             except Group.DoesNotExist:
                 raise forms.ValidationError("Выбранная роль не существует.")
         return None
-    
-    # def clean_evotor_update(self):
-    #     evotor_update = self.cleaned_data.get('evotor_update')
-    #     if evotor_update:
-    #         fff = 1
     
     def clean_username(self):
         number = self.cleaned_data.get("username")
@@ -190,11 +187,13 @@ class StaffForm(forms.ModelForm):
 
         user.save()
 
-
         evotor_update = self.cleaned_data.get('evotor_update')
         if evotor_update:
             try:
-                EvatorCloud().create_staff(staff)
+                if created or not staff.evotor_id:
+                    staff, error = EvatorCloud().create_evotor_staff(staff)
+                    if error:
+                        messages.warning(self.request, error)
             except Exception as e:
                 logger.error("Ошибка при отправке созданного / измененного пользователя в Эвотор. Ошибка %s", e)
 

@@ -206,7 +206,7 @@ class CRMRoleEndpointView(APIView):
             return not_allowed  
         
         roles_json = request.data.get('items')
-        EvatorCloud().create_or_update_roles(roles_json)
+        EvatorCloud().create_or_update_site_roles(roles_json)
 
         return JsonResponse({"status": "ok"}, status = 200) 
 

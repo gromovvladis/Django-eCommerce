@@ -408,6 +408,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
         kwargs["product_class"] = self.product_class
         kwargs["parent"] = self.parent
         return kwargs

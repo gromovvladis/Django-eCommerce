@@ -12,7 +12,6 @@ from django.contrib.auth.models import Group
 class Staff(models.Model):
     user = models.OneToOneField(compat.AUTH_USER_MODEL, related_name="profile",
                                 on_delete=models.CASCADE, null=True)
-
     first_name = models.CharField("Имя", blank=False, null=True, max_length=255)
     last_name = models.CharField("Фамилия", blank=True, null=True, max_length=255)
     middle_name = models.CharField("Отчество", blank=True, null=True, max_length=255)
@@ -24,7 +23,6 @@ class Staff(models.Model):
         verbose_name="Должность",
         null=True,
     )
-
     MALE, FEMALE = 'М', 'Ж'
     gender_choices = (
         (MALE, 'Мужчина'), 
@@ -32,17 +30,14 @@ class Staff(models.Model):
     gender = models.CharField(max_length=1, choices=gender_choices,
                               verbose_name='Пол', null=True, blank=True)
     age = models.PositiveIntegerField(verbose_name='Возраст', null=True, blank=True)
-
     telegram_id = models.CharField("ID Телеграм чата", max_length=128, null=True, blank=True)
     evotor_id = models.CharField("ID Эвотор", max_length=128, null=True, blank=True)
-
     is_active = models.BooleanField(
         "Активен",
         default=True,
         db_index=True,
         help_text="Активен сотрудник или нет",
     )
-
     NEW, STATUS, TECHNICAL, OFF = 'new-order', 'status-order', 'technical', 'off'
     NOTIF_CHOICES = (
         ('new-order', 'Только уведомления о новых заказах'),
@@ -50,7 +45,6 @@ class Staff(models.Model):
         ('technical', 'Технические уведомления'),
         ('off', 'Отключить уведомления'),
     )
-
     notif = models.CharField("Уведомления", choices=NOTIF_CHOICES, max_length=128, default=NEW, db_index=True)
 
     @staticmethod
@@ -145,33 +139,26 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_index=True,
         help_text="Формат телефона: '+7 (900) 000-0000",
     )
-
     email = models.EmailField("Email", blank=True)
-
     name = models.CharField("Имя", max_length=255, blank=True)
-
     telegram_id = models.CharField("Телеграм ID", max_length=255, blank=True)
-
     is_staff = models.BooleanField(
         "Это сотрудник?",
         default=False,
         db_index=True,
         help_text="Повар, Курьер, Менеджер и т.д.",
     )
-
     is_active = models.BooleanField(
         "Активен",
         default=True,
         db_index=True,
         help_text="Активен пользователь или нет",
     )
-
     is_email_verified = models.BooleanField(
         "Email verified",
         default=False,
         help_text="Email подтвержден или нет",
     )
-    
     ORDER, OFFER, OFF = 'order', 'offer', 'off'
     NOTIF_CHOICES = (
         ('order', 'Только уведомления о заказах'),
@@ -261,22 +248,3 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         pass
 
-    # def _migrate_alerts_to_user(self):
-    #     """
-    #     Transfer any active alerts linked to a user's email address to the
-    #     newly registered user.
-    #     """
-    #     # pylint: disable=no-member
-    #     ProductAlert = self.alerts.model
-    #     alerts = ProductAlert.objects.filter(
-    #         email=self.email, status=ProductAlert.ACTIVE
-    #     )
-    #     alerts.update(user=self, key="", email="")
-
-    # def save(self, *args, **kwargs):
-    #     super().save(*args, **kwargs)
-        # Migrate any "anonymous" product alerts to the registered user
-        # Ideally, this would be done via a post-save signal. But we can't
-        # use get_user_model to wire up signals to custom user models
-        # see Oscar ticket #1127, Django ticket #19218
-        # self._migrate_alerts_to_user()
