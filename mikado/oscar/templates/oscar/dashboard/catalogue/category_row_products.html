@@ -1,3 +1,6 @@
 {% load django_tables2 %}
-
-{{ record.num_products }}
+{% if record.num_products %}
+    {{ record.num_products }}
+{% else %}
+    -
+{% endif %}

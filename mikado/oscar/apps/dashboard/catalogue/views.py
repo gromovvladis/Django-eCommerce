@@ -209,7 +209,7 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         title = data.get("title")        
         if title:
             queryset = queryset.filter(
-                Q(title__icontains=title) | Q(children__title__icontains=title) | Q(attribute__icontains=title)
+                Q(title__icontains=title) | Q(children__title__icontains=title) | Q(attribute_values__attribute__name__icontains=title)
             )
         
         categories = data.get("categories")
@@ -538,13 +538,6 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         and return False. If everything is valid, return True. This method will
         be called regardless of whether the individual forms are valid.
         """
-        # forma = form.is_valid()
-        # new_product_class = form.cleaned_data.get('product_class')
-        # if new_product_class != form.instance.product_class:
-        #     form.instance.product_class = new_product_class
-        #     self.product_class
-        #     return False
-        
         return True
 
     def forms_valid(self, formsets, form=None):
@@ -555,7 +548,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         """
         if self.creating:
             self.handle_adding_child(self.parent)
-        elif form:
+        elif form is not None:
             # a just created product was already saved in process_all_forms()
             self.object = form.save()
 

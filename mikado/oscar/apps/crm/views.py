@@ -307,7 +307,6 @@ class CRMInstallationEndpointView(APIView):
         return JsonResponse({"ok": "ok"}, status = 200)
 
 
-
 # === login / register
 
 
@@ -340,7 +339,6 @@ class CRMLoginEndpointView(APIView):
 
 
 # мусор
-
 # class CRMReceiptEndpointView(APIView):
 
 #     permission_classes = [AllowAny]

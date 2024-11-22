@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.template.response import TemplateResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import View
@@ -27,6 +26,7 @@ Order = get_model("order", "Order")
 Line = get_model("order", "Line")
 Product = get_model('catalogue', 'Product')
 Category = get_model("catalogue", "Category")
+AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 
 CRMPartnerForm = get_class("dashboard.crm.forms", "CRMPartnerForm")
 
@@ -235,9 +235,9 @@ class CRMStaffListView(CRMTablesMixin):
             for data_item in data_items:
                 evotor_id = data_item['id']
                 data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
-                first_name = data_item.get('name', None)
-                last_name = data_item.get('last_name', None)
-                middle_name = data_item.get('patronymic_name', None)
+                first_name = data_item.get('name', '')
+                last_name = data_item.get('last_name', '')
+                middle_name = data_item.get('patronymic_name', '')
                 stores_ids = data_item.get('stores', None)
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
                 
@@ -340,7 +340,6 @@ class CRMGroupsListView(CRMTablesMixin):
                 
                 if model_instance:
                     data_item['is_created'] = True
-                    
                 else:
                     data_item.update({
                         'is_created': False,
@@ -372,7 +371,6 @@ class CRMGroupsListView(CRMTablesMixin):
             )
         return redirect(self.url_redirect)
     
-
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form

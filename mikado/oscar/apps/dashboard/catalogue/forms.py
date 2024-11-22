@@ -482,13 +482,15 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
         super()._post_clean()
 
-
     def save(self, commit=True):
         product = super().save(commit=commit)
         evotor_update = self.cleaned_data.get('evotor_update')
         if evotor_update:
             try:
-                product, error = EvatorCloud().update_or_create_product(product)
+                if product.is_parent:
+                    product, error = EvatorCloud().update_or_create_evotor_group(product)
+                else:
+                    product, error = EvatorCloud().update_or_create_evotor_product(product)
                 if error:
                     messages.warning(self.request, error)
             except Exception as e:
@@ -568,8 +570,6 @@ class AttributeForm(forms.ModelForm):
         # because we'll allow submission of the form with blank
         # codes so that we can generate them.
         self.fields["code"].required = False
-
-        # self.fields["option_group"].help_text = "Выберите группу опций"
 
         # pylint: disable=no-member
         remote_field = self._meta.model._meta.get_field("option_group").remote_field

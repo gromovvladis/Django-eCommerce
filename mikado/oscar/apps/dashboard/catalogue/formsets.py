@@ -288,5 +288,5 @@ class ProductClassAttributeFormSet(BaseProductClassAttributeFormSet):
 
 
 AttributeOptionFormSet = inlineformset_factory(
-    AttributeOptionGroup, AttributeOption, form=AttributeOptionForm, extra=3
+    AttributeOptionGroup, AttributeOption, form=AttributeOptionForm, extra=6
 )

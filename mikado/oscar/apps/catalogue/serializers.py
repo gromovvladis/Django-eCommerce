@@ -259,18 +259,34 @@ class ProductSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         try:
-            representation["stores"] = [
-                partner.evotor_id for partner in instance.user.partners.all()
-            ]
-            representation["phone"] = str(instance.user.username)
-            role = instance.role.evotor
-            if role:
-                representation["role_id"] = role.evotor_id
+            if instance.parent:
+                representation["parent_id"] = instance.parent.evotor_id
+                 
+            representation["measure_name"] = instance.get_product_class().measure_name
+
+            store_id = self.context.get("store_id", None)
+            
+            stc = StockRecord.objects.filter(product=instance, store_id=store_id).first()
+
+            if stc:
+                representation["code"] = stc.code
+                representation["price"] = stc.price
+                representation["cost_price"] = stc.cost_price
+                representation["quantity"] = stc.num_in_stock
+                representation["tax"] = stc.tax
+                representation["allow_to_sell"] = stc.is_public
+
         except Exception as e:
-            logger.error("Ошибка определения списка магазинов сотрудника", e)
-            representation["stores"] = []
-            representation["phone"] = ""
-            representation["role_id"] = ""
+            logger.error("Ошибка определения продукта", e)
+            representation["measure_name"] = "шт"
+            representation["tax"] = "NO_VAT"
+            representation["allow_to_sell"] = False
+            representation["price"] = 0
+            representation["cost_price"] = 0
+            representation["quantity"] = 0
+
+        representation["type"] = "NORMAL"
+
         return representation
 
 
