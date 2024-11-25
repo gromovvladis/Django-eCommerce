@@ -65,7 +65,7 @@
         </a>
     </li>
 
-    {% if user.is_staff or perms.partner.dashboard_access %}
+    {% if user.is_staff or perms.store.dashboard_access %}
         <li class="profile__menu-list d-sm-flex">
             <a class="profile__menu-button"
                 data-id="profile-tab-admin" href="{% url 'dashboard:index' %}">

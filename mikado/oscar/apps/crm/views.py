@@ -18,7 +18,7 @@ import logging
 logger = logging.getLogger("oscar.crm")
 
 CRMEvent = get_model("crm", "CRMEvent")
-Partner = get_model("partner", "Partner")
+Store = get_model("store", "Store")
 
 site_token = settings.EVOTOR_SITE_TOKEN
 user_token = settings.EVOTOR_SITE_USER_TOKEN
@@ -73,11 +73,11 @@ def is_valid_site_and_user_tokens(request):
 # ========= API Endpoints (Уведомления) =========
 
 # сериализаторы
-#  1. точка продажи и терминалы +
+#  1. Магазин и терминалы +
 #  2. персонал +
 
-#  3. продукт
-#  3.1 категории и варианты продуктов (схемы и модификации)
+#  3. товар
+#  3.1 категории и варианты товаров (схемы и модификации)
 
 #  4. заказ
 
@@ -89,11 +89,11 @@ def is_valid_site_and_user_tokens(request):
 
 # добавь испльзование курсора, если объектов много
 
-class CRMPartnerEndpointView(APIView):
+class CRMStoreEndpointView(APIView):
 
     permission_classes = [AllowAny]
 
-    """ https://mikado-sushi.ru/crm/api/partners """
+    """ https://mikado-sushi.ru/crm/api/stores """
 
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
@@ -113,8 +113,8 @@ class CRMPartnerEndpointView(APIView):
         if not_allowed:
             return not_allowed  
         
-        partners_json = request.data.get('items')
-        EvatorCloud().create_or_update_partners(partners_json)
+        stores_json = request.data.get('items')
+        EvatorCloud().create_or_update_site_stores(stores_json)
 
         return JsonResponse({"status": "ok"}, status = 200) 
 
@@ -144,7 +144,7 @@ class CRMTerminalEndpointView(APIView):
             return not_allowed  
         
         terminals_json = request.data.get('items')
-        EvatorCloud().create_or_update_terminals(terminals_json)
+        EvatorCloud().create_or_update_site_terminals(terminals_json)
 
         return JsonResponse({"status": "ok"}, status = 200) 
 
@@ -174,7 +174,7 @@ class CRMStaffEndpointView(APIView):
             return not_allowed  
         
         staffs_json = request.data.get('items')
-        EvatorCloud().create_or_update_staffs(staffs_json)
+        EvatorCloud().create_or_update_site_staffs(staffs_json)
 
         return JsonResponse({"status": "ok"}, status = 200) 
 
@@ -190,8 +190,6 @@ class CRMRoleEndpointView(APIView):
         return self.post(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs): 
-        
-
         request_info = {
             "method": request.method,
             "path": request.path,
@@ -206,41 +204,9 @@ class CRMRoleEndpointView(APIView):
             return not_allowed  
         
         roles_json = request.data.get('items')
-        EvatorCloud().create_or_update_roles(roles_json)
+        EvatorCloud().create_or_update_site_roles(roles_json)
 
         return JsonResponse({"status": "ok"}, status = 200) 
-
-
-class CRMDocsEndpointView(APIView):
-
-    permission_classes = [AllowAny]
-
-    """ https://mikado-sushi.ru/crm/api/docs """
-
-    def put(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-                
-        request_info = {
-            "method": request.method,
-            "path": request.path,
-            "headers": dict(request.headers),
-            "data": request.data,
-        }
-        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
-        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
-        
-        not_allowed = is_valid_user_token(request)
-        if not_allowed:
-            return not_allowed
-        
-        CRMEvent.objects.create(
-            body=f"Terminals recived {request.data}", 
-            sender=CRMEvent.DOC,
-            type=CRMEvent.INFO, 
-        )
-        return JsonResponse({"ok": "ok"}, status = 200)
 
 
 class CRMProductEndpointView(APIView):
@@ -270,6 +236,42 @@ class CRMProductEndpointView(APIView):
         CRMEvent.objects.create(
             body=f"Terminals recived {request.data}", 
             sender=CRMEvent.PRODUCT,
+            type=CRMEvent.INFO, 
+        )
+
+        products_json = request.data.get('items')
+        EvatorCloud().create_or_update_site_products(products_json)
+
+        return JsonResponse({"ok": "ok"}, status = 200)
+
+
+class CRMDocsEndpointView(APIView):
+
+    permission_classes = [AllowAny]
+
+    """ https://mikado-sushi.ru/crm/api/docs """
+
+    def put(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+                
+        request_info = {
+            "method": request.method,
+            "path": request.path,
+            "headers": dict(request.headers),
+            "data": request.data,
+        }
+        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        send_message_to_staffs(f"request: {json.dumps(request_info, ensure_ascii=False)}", TelegramMessage.TECHNICAL)
+        
+        not_allowed = is_valid_user_token(request)
+        if not_allowed:
+            return not_allowed
+        
+        CRMEvent.objects.create(
+            body=f"Terminals recived {request.data}", 
+            sender=CRMEvent.DOC,
             type=CRMEvent.INFO, 
         )
         return JsonResponse({"ok": "ok"}, status = 200)
@@ -307,7 +309,6 @@ class CRMInstallationEndpointView(APIView):
         return JsonResponse({"ok": "ok"}, status = 200)
 
 
-
 # === login / register
 
 
@@ -340,7 +341,6 @@ class CRMLoginEndpointView(APIView):
 
 
 # мусор
-
 # class CRMReceiptEndpointView(APIView):
 
 #     permission_classes = [AllowAny]

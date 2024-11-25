@@ -23,7 +23,7 @@
     {% if not record.is_online %}
         <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
     {% endif %} 
-    {{ order.basket.partner|default:"-" }} | Заказ №{{ order.number }}
+    {{ order.basket.store|default:"-" }} | Заказ №{{ order.number }}
 {% endblock  %}
 
 {% block dashboard_content %}
@@ -108,10 +108,10 @@
                 <tr>
                     <th>Точка продажи</th>
                     <td>
-                        {% if order.basket.partner %}
-                            <a href="{% url 'dashboard:partner-manage' pk=order.basket.partner.id %}">{{ order.basket.partner|default:"-" }}</a>
+                        {% if order.basket.store %}
+                            <a href="{% url 'dashboard:store-manage' pk=order.basket.store.id %}">{{ order.basket.store|default:"-" }}</a>
                         {% else %}
-                            {{ order.basket.partner|default:"-" }}
+                            {{ order.basket.store|default:"-" }}
                         {% endif %}
                     </td>
                 </tr>
@@ -226,7 +226,7 @@
                                     <th class="image"></th>
                                     <th class="title">Продукт</th>
                                     <th class="quantity">Кол-во</th>
-                                    <th class="title">Доп. продукты</th>
+                                    <th class="title">Доп. товары</th>
                                     <th class="actions"></th>
                                     <th class="text-right">Цена</th>
                                 </tr>
@@ -278,7 +278,7 @@
                                             </span>
                                         </td>
                                         <td data-label="Количество" class="quantity">{{ line.quantity }}</td>
-                                        <td data-label="Доп. продукты" class="title">{{ line.additions|default:"-" }}</td>
+                                        <td data-label="Доп. товары" class="title">{{ line.additions|default:"-" }}</td>
                                         <td class="actions">
                                             <a class="btn btn-secondary" href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}">
                                                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -324,7 +324,7 @@
                                     {% else %}
                                         <tr>
                                             <td colspan="5"></td>
-                                            <th>Продукты</th>
+                                            <th>Товары</th>
                                             <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
                                         </tr>
                                     {% endif %}

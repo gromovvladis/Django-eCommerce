@@ -8,7 +8,6 @@
         {% comment %}------------- категории item ---------------{% endcomment %}
         <div class="dish d-flex flex-column v-card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
             <div class="dish-wrapper grow-1">            
-                
                 {% comment %}------------- картинка товара ---------------{% endcomment %}
                 {% block product_image %}
                     {% with image=product.primary_image %}
@@ -22,14 +21,11 @@
                         </a>
                     {% endwith %}
                 {% endblock %}
-                
                 <div class="pos-relative product-description d-flex flex-column">
-                
                     {% comment %} ------------- название категории --------------- {% endcomment %}
                     <div class="grow-1 pd-0 v-card__text mt-2">
                         <div class="d-flex fill-height fill-width">
                             <a href="{{ product.get_absolute_url }}" title="{{ product.get_title }}" class="d-flex flex-column fill-height fill-width px-2 py-0 px-sm-2" data-id="dish-item-link">
-                                
                                 <div class="dish_name-wrapper d-flex align-start">
                                     <h3 class="dish__name">{{ product.get_title|truncatewords:4 }}</h3>
                                     <div role="separator" class="v-spacer"></div>
@@ -37,20 +33,16 @@
                                         <div class="v-weight">{{ product.weight }} г</div>
                                     {% endif %}
                                 </div>
-
                                 {% if product.short_desc %}
                                     <div class="d-flex align-center mt-1">
                                         <span class="short-description">{{ product.short_desc }}</span>
                                     </div>
                                 {% endif %}
-                                    
                                 <div role="separator" class="v-spacer"></div>
                             </a>
                         </div>
                     </div>
-
                     {% comment %} ------------- цена --------------- {% endcomment %}
-                    
                     <div class="align-center fill-width px-sm-2 pb-sm-2 v-card__actions d-flex align-end">
                         {% if session.availability.is_available_to_buy and session.price.exists %}
                             {% include "oscar/catalogue/partials/product_price.html" %}

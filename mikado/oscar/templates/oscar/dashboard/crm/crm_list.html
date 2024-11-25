@@ -1,18 +1,7 @@
 {% extends 'oscar/dashboard/layout.html' %}
 {% load render_table from django_tables2 %}
 
-{% block header %}
-    <div class="page-header d-flex justify-content-between align-items-end">
-        {% block crm_header %}{% endblock crm_header %}
-        <div class="d-flex">
-            <button type="submit" form="evotor_form" name="update_all" value="True" data-loading-text="Обновление..." class="btn btn-success ml-3"><i class="fa-solid fa-arrows-rotate"></i>
-                <span>
-                    Обновить
-                </span>
-            </button>
-        </div>
-    </div>
-{% endblock header %}
+{% block header %}{% endblock header %}
 
 {% block dashboard_content %}
     <ul class="nav nav-tabs mb-3 mb-lg-4 p-0 fill-width" role="tablist">
@@ -81,7 +70,7 @@
                     <div class="table-wrapper mb-4 d-none" data-id="actions-lines">
                         <div class="table-header d-flex justify-space-between" data-target="#status-body" 
                         data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
-                            <h3><i class="fa-solid fa-list-check"></i>Обновить данные</h3>
+                            <h3><i class="fa-solid fa-list-check"></i>Обновить на сайте</h3>
                             <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
                             <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
                         </div>
@@ -90,7 +79,7 @@
                             <p class="mb-3">Данные позиции будут скопированы из системы Эвотор в базу данных сайта</p>
                             <div class="form-inline fill-width justify-space-between">
                                 <div class="btn-form d-flex">
-                                    <button type="submit" name="update_all" value="False" class="btn btn-primary" data-loading-text="Обновление...">
+                                    <button type="submit" name="update_site" value="False" class="btn btn-primary" data-loading-text="Обновление...">
                                         Обновить
                                     </button>
                                 </div>
@@ -156,7 +145,7 @@
                     <div class="table-wrapper mb-4 d-none" data-id="actions-lines">
                         <div class="table-header d-flex justify-space-between" data-target="#status-body" 
                         data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
-                            <h3><i class="fa-solid fa-list-check"></i>Удалить записи</h3>
+                            <h3><i class="fa-solid fa-list-check"></i>Действия с выбранными</h3>
                             <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
                             <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
                         </div>
@@ -173,6 +162,8 @@
                                     </button>
                                 </div>
                             </div>
+                            {% block update_evotor %}
+                            {% endblock update_evotor %}
                         </div>
                     </div>
                 </form>

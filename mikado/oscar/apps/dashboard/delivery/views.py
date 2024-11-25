@@ -200,7 +200,7 @@ class DeliveryListView(View):
 class DeliveryStatsView(View):
     pass
 
-class DeliveryPartnerView(View):
+class DeliveryStoreView(View):
     pass
 
 class DeliveryCouriersView(View):

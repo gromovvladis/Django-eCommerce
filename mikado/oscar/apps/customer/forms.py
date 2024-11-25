@@ -532,7 +532,7 @@ class OrderSearchForm(forms.Form):
 #                 email__iexact=email, status=ProductAlert.UNCONFIRMED
 #             ).count():
 #                 raise forms.ValidationError(
-#                         "%s было отправлено электронное письмо с подтверждением для другого продукта"
+#                         "%s было отправлено электронное письмо с подтверждением для другого товара"
 #                         "предупреждение на этом сайте. Пожалуйста, подтвердите или отмените этот запрос"
 #                         "прежде чем подписаться на дополнительные оповещения." % email
 #                 )
@@ -544,7 +544,7 @@ class OrderSearchForm(forms.Form):
 #             except ProductAlert.DoesNotExist:
 #                 pass
 #             else:
-#                 raise forms.ValidationError("У вас уже есть активное оповещение для этого продукта.")
+#                 raise forms.ValidationError("У вас уже есть активное оповещение для этого товара.")
 #         return cleaned_data
 
 #     class Meta:

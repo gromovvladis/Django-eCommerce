@@ -6,7 +6,7 @@ from oscar.core.loading import get_class, get_model
 
 Applicator = get_class("offer.applicator", "Applicator")
 Basket = get_model("basket", "basket")
-Selector = get_class("partner.strategy", "Selector")
+Selector = get_class("store.strategy", "Selector")
 
 selector = Selector()
 

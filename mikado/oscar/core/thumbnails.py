@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.module_loading import import_string
 
 
-class AbstractThumbnailer(object):
+class Thumbnailer(object):
     def generate_thumbnail(self, source, **opts):
         raise NotImplementedError
 
@@ -11,7 +11,7 @@ class AbstractThumbnailer(object):
         raise NotImplementedError
 
 
-class SorlThumbnail(AbstractThumbnailer):
+class SorlThumbnail(Thumbnailer):
     def __init__(self):
         if not apps.is_installed("sorl.thumbnail"):
             raise ValueError('"sorl.thumbnail" is not listed in "INSTALLED_APPS".')
@@ -36,26 +36,6 @@ class SorlThumbnail(AbstractThumbnailer):
             delete(source)
         except ThumbnailError:
             pass
-
-
-# class EasyThumbnails(AbstractThumbnailer):
-#     def __init__(self):
-#         if not apps.is_installed("easy_thumbnails"):
-#             raise ValueError('"easy_thumbnails" is not listed in "INSTALLED_APPS".')
-
-#     def generate_thumbnail(self, source, **opts):
-#         from easy_thumbnails.files import get_thumbnailer as get_easy_thumbnailer
-
-#         width, height = opts["size"].split("x")
-#         width = width or 0
-#         height = height or 0
-#         opts["size"] = (width, height)
-#         return get_easy_thumbnailer(source).get_thumbnail(opts)
-
-#     def delete_thumbnails(self, source):
-#         from easy_thumbnails.files import get_thumbnailer as get_easy_thumbnailer
-
-#         get_easy_thumbnailer(source).delete(save=False)
 
 
 def get_thumbnailer():

@@ -88,8 +88,8 @@ def _send_telegram_message_new_order_to_staff(ctx: dict):
     send_message_to_staffs(msg, TelegramMessage.NEW)
 
 @shared_task
-def _send_telegram_message_to_staffs(msg: str, type: str = TelegramMessage.MISC, partner_id: str = None):
-    send_message_to_staffs(msg, type, partner_id)
+def _send_telegram_message_to_staffs(msg: str, type: str = TelegramMessage.MISC, store_id: str = None):
+    send_message_to_staffs(msg, type, store_id)
 
 @shared_task
 def _send_telegram_message_to_user(telegram_id: int, msg: str, type: str):

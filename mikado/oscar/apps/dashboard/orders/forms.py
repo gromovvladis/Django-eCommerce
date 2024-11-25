@@ -9,7 +9,7 @@ from oscar.core.loading import get_class, get_model
 from oscar.forms.mixins import PhoneNumberMixin
 from oscar.forms.widgets import DatePickerInput, DateRangeInput
 
-Partner = get_model("partner", "Partner")
+Store = get_model("store", "Store")
 Order = get_model("order", "Order")
 OrderNote = get_model("order", "OrderNote")
 ShippingAddress = get_model("order", "ShippingAddress")
@@ -44,8 +44,8 @@ class OrderStatsForm(forms.Form):
         }),
     )
     product_title = forms.CharField(required=False, label="Наименование товара")
-    upc = forms.CharField(required=False, label="Товарный код продукта UPC")
-    partner_sku = forms.CharField(required=False, label="Артикул в точке продажи")
+    upc = forms.CharField(required=False, label="Товарный код товара UPC")
+    evotor_code = forms.CharField(required=False, label="Артикул в магазине")
 
     status_choices = (("", "---------"),) + tuple(
         [(v, v) for v in Order.all_statuses()]
@@ -102,7 +102,7 @@ class OrderStatsForm(forms.Form):
         product_title = data.get("title")
         username = data.get("username")
         upc = data.get("upc")
-        partner_sku = data.get("partner_sku")
+        evotor_code = data.get("evotor_code")
         voucher = data.get("voucher")
         payment_method = data.get("payment_method")
         status = data.get("status")
@@ -141,7 +141,7 @@ class OrderStatsForm(forms.Form):
         if product_title:
             self._filters["lines__title__istartswith"] = product_title
             self._search_filters.append((
-                ('Название продукта соответствует "{title}"').format(
+                ('Название товара соответствует "{title}"').format(
                     title=product_title
                 ), (("product_title", product_title),)
             ))
@@ -160,12 +160,12 @@ class OrderStatsForm(forms.Form):
                 ('Включает предмет с UPC "{prod_upc}"').format(prod_upc=upc), (("upc", upc),)
             ))
 
-        if partner_sku:
-            self._filters["lines__partner_sku"] = partner_sku
+        if evotor_code:
+            self._filters["lines__evotor_code"] = evotor_code
             self._search_filters.append((
                 ('Включает товар с артикулом партнера. "{sku}"').format(
-                    sku=partner_sku
-                ), (("partner_sku", partner_sku),)
+                    sku=evotor_code
+                ), (("evotor_code", evotor_code),)
             ))
 
         if voucher:
@@ -274,8 +274,8 @@ class OrderSearchForm(forms.Form):
             'placeholder': '100000',
         }),
     )
-    partner_point = forms.ChoiceField(
-        label="Точка продажи", required=False, choices=()
+    store_point = forms.ChoiceField(
+        label="Магазин", required=False, choices=()
     )
     username = forms.CharField(
         required=False, 
@@ -285,8 +285,8 @@ class OrderSearchForm(forms.Form):
         }),
     )
     product_title = forms.CharField(required=False, label="Наименование товара")
-    upc = forms.CharField(required=False, label="Товарный код продукта UPC")
-    partner_sku = forms.CharField(required=False, label="Артикул в точке продажи")
+    upc = forms.CharField(required=False, label="Товарный код товара UPC")
+    evotor_code = forms.CharField(required=False, label="Артикул в магазине")
 
     status_choices = (("", "---------"),) + tuple(
         [(v, v) for v in Order.all_statuses()]
@@ -350,7 +350,7 @@ class OrderSearchForm(forms.Form):
 
         super().__init__(data, *args, **kwargs)
         self.fields["payment_method"].choices = self.payment_method_choices()
-        self.fields["partner_point"].choices = self.partner_choices()
+        self.fields["store_point"].choices = self.store_choices()
         
         usesrname = kwargs.pop('usesrname', None)
         if usesrname:
@@ -385,15 +385,15 @@ class OrderSearchForm(forms.Form):
             [(src.code, src.name) for src in SourceType.objects.all()]
         )
 
-    def partner_choices(self):
-        return (("", "Все точки продаж"),) + tuple(
-            [(src.code, src.name) for src in Partner.objects.all()]
+    def store_choices(self):
+        return (("", "Все магазины"),) + tuple(
+            [(src.code, src.name) for src in Store.objects.all()]
         )
 
 
 class ActiveOrderSearchForm(forms.Form):
-    partner_point = forms.ChoiceField(
-        label="Точка продажи", required=False, choices=()
+    store_point = forms.ChoiceField(
+        label="Магазин", required=False, choices=()
     )
     def __init__(self, *args, **kwargs):
         # Ensure that 'response_format' is always set
@@ -407,7 +407,7 @@ class ActiveOrderSearchForm(forms.Form):
             data = None
 
         super().__init__(data, *args, **kwargs)
-        self.fields["partner_point"].choices = self.partner_choices()
+        self.fields["store_point"].choices = self.store_choices()
 
 
     def format_phone_number(self, phone_number):
@@ -437,9 +437,9 @@ class ActiveOrderSearchForm(forms.Form):
             [(src.code, src.name) for src in SourceType.objects.all()]
         )
 
-    def partner_choices(self):
-        return (("", "Все точки продаж"),) + tuple(
-            [(src.code, src.name) for src in Partner.objects.all()]
+    def store_choices(self):
+        return (("", "Все магазин"),) + tuple(
+            [(src.code, src.name) for src in Store.objects.all()]
         )
 
 

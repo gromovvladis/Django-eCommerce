@@ -65,7 +65,7 @@ def send_message(chat_id: int, text: str, type: str = TelegramMessage.MISC, user
         raise Exception(f"An error occurred: {err}")
     
 
-def send_message_to_staffs(text: str, type: str = TelegramMessage.MISC, partner_id: str = None, bot_token: str = STAFF_BOT, **kwargs):
+def send_message_to_staffs(text: str, type: str = TelegramMessage.MISC, store_id: str = None, bot_token: str = STAFF_BOT, **kwargs):
     if type == TelegramMessage.TECHNICAL:
         staffs = Staff.objects.filter(is_active=True, notif=Staff.TECHNICAL).select_related("user")
     elif type == TelegramMessage.STATUS: 
@@ -73,9 +73,9 @@ def send_message_to_staffs(text: str, type: str = TelegramMessage.MISC, partner_
     else:
         staffs = Staff.objects.filter(is_active=True).exclude(notif=Staff.OFF).select_related("user")
     
-    if partner_id:
+    if store_id:
         staffs = staffs.filter(
-            Q(user__partners__id=partner_id) | Q(user__is_superuser=True)
+            Q(user__stores__id=store_id) | Q(user__is_superuser=True)
         )
 
     for staff in staffs:

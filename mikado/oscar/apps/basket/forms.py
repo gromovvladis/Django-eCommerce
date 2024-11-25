@@ -11,7 +11,7 @@ Line = get_model("basket", "line")
 Basket = get_model("basket", "basket")
 Option = get_model("catalogue", "option")
 Product = get_model("catalogue", "product")
-Unavailable = get_class("partner.availability", "Unavailable")
+Unavailable = get_class("store.availability", "Unavailable")
 
 def _option_text_field(form, product, option):
     return forms.CharField(
@@ -217,7 +217,7 @@ class AddToBasketForm(forms.Form):
         attributes = {}
         childs_data = []
 
-        # Собираем данные о дочерних продуктах
+        # Собираем данные о дочерних товарах
         children = product.children.public()
         for child in children:
             info = self.basket.strategy.fetch_for_product(child)
@@ -244,7 +244,7 @@ class AddToBasketForm(forms.Form):
 
         default_attr = childs_data[0][next(iter(childs_data[0]))]['attr']
 
-        # Собираем данные об атрибутах продукта
+        # Собираем данные об атрибутах товарах
         product_attributes = product.attribute_values.filter(is_variant=True).select_related('attribute')
 
         for product_attribute in product_attributes:

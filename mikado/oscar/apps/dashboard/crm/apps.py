@@ -15,7 +15,7 @@ class CRMDashboardConfig(OscarDashboardConfig):
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
-        self.crm_partners_list_view = get_class("dashboard.crm.views", "CRMPartnerListView")
+        self.crm_stores_list_view = get_class("dashboard.crm.views", "CRMStoreListView")
         self.crm_terminals_list_view = get_class("dashboard.crm.views", "CRMTerminalListView")
         self.crm_staffs_list_view = get_class("dashboard.crm.views", "CRMStaffListView")
         self.crm_groups_list_view = get_class("dashboard.crm.views", "CRMGroupsListView")
@@ -34,7 +34,7 @@ class CRMDashboardConfig(OscarDashboardConfig):
 
     def get_urls(self):
         urls = [
-            path("partners/", self.crm_partners_list_view.as_view(), name="crm-partners"),
+            path("stores/", self.crm_stores_list_view.as_view(), name="crm-stores"),
             path("terminals/", self.crm_terminals_list_view.as_view(), name="crm-terminals"),
             path("staffs/", self.crm_staffs_list_view.as_view(), name="crm-staffs"),
             path("groups/", self.crm_groups_list_view.as_view(), name="crm-groups"),

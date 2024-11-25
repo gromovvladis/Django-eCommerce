@@ -27,7 +27,7 @@ class RangeForm(forms.ModelForm):
 class RangeProductForm(forms.Form):
     query = forms.CharField(
         max_length=1024,
-        label="Артикулы продукта или UPC",
+        label="Артикулы товара или UPC",
         widget=forms.Textarea,
         required=False,
         help_text="Вы можете вставить выбранные SKU или UPC",
@@ -55,7 +55,7 @@ class RangeProductForm(forms.Form):
             products = self.product_range.all_products()
             action = "добавлено в этот диапазон"
         existing_skus = set(
-            products.values_list("stockrecords__partner_sku", flat=True)
+            products.values_list("stockrecords__evotor_code", flat=True)
         )
         existing_upcs = set(products.values_list("upc", flat=True))
         existing_ids = existing_skus.union(existing_upcs)
@@ -64,23 +64,23 @@ class RangeProductForm(forms.Form):
             self.add_error(
                 "query",
                 (
-                    "К продуктам с номерами SKU или UPC, соответствующими %(skus)s, "
+                    "К товарам с номерами SKU или UPC, соответствующими %(skus)s, "
                     "уже было применено %(action)s"
                 )
                 % {"skus": ", ".join(ids), "action": action},
             )
         else:
             self.products = Product._default_manager.filter(
-                Q(stockrecords__partner_sku__in=new_ids) | Q(upc__in=new_ids)
+                Q(stockrecords__evotor_code__in=new_ids) | Q(upc__in=new_ids)
             )
             if len(self.products) == 0:
                 self.add_error(
                     "query",
-                    "Нет продуктов, соответствующих SKU или UPC %s"
+                    "Нет товаров, соответствующих SKU или UPC %s"
                     % ", ".join(ids),
                 )
             found_skus = set(
-                self.products.values_list("stockrecords__partner_sku", flat=True)
+                self.products.values_list("stockrecords__evotor_code", flat=True)
             )
             found_upcs = set(self.products.values_list("upc", flat=True))
             found_ids = found_skus.union(found_upcs)
@@ -122,7 +122,7 @@ class RangeExcludedProductForm(RangeProductForm):
         ids = set(UPC_SET_REGEX.findall(raw))
         products = self.product_range.excluded_products.all()
         existing_skus = set(
-            products.values_list("stockrecords__partner_sku", flat=True)
+            products.values_list("stockrecords__evotor_code", flat=True)
         )
         existing_upcs = set(products.values_list("upc", flat=True))
         existing_ids = existing_skus.union(existing_upcs)
@@ -135,13 +135,13 @@ class RangeExcludedProductForm(RangeProductForm):
             )
 
         self.products = Product._default_manager.filter(
-            Q(stockrecords__partner_sku__in=new_ids) | Q(upc__in=new_ids)
+            Q(stockrecords__evotor_code__in=new_ids) | Q(upc__in=new_ids)
         )
         if len(self.products) == 0:
-            raise forms.ValidationError("Нет продуктов, соответствующих SKU или UPC %s") % ", ".join(ids)
+            raise forms.ValidationError("Нет товаров, соответствующих SKU или UPC %s") % ", ".join(ids)
 
         found_skus = set(
-            self.products.values_list("stockrecords__partner_sku", flat=True)
+            self.products.values_list("stockrecords__evotor_code", flat=True)
         )
         found_upcs = set(self.products.values_list("upc", flat=True))
         found_ids = found_skus.union(found_upcs)

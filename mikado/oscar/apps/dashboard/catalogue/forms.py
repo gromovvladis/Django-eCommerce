@@ -1,12 +1,18 @@
+import logging
 from django import forms
 from django.core import exceptions
 from treebeard.forms import movenodeform_factory
 
 from django.db.models.query import QuerySet
-from oscar.apps.offer import queryset
+
+from django.contrib import messages
+from oscar.apps.crm.client import EvatorCloud
+
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import slugify
 from oscar.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
+
+logger = logging.getLogger("oscar.catalogue")
 
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
@@ -14,7 +20,7 @@ Attribute = get_model("catalogue", "Attribute")
 AttributeSelect = get_class("dashboard.catalogue.widgets", "AttributeSelect")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
-StockRecord = get_model("partner", "StockRecord")
+StockRecord = get_model("store", "StockRecord")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductImage = get_model("catalogue", "ProductImage")
 ProductRecommendation = get_model("catalogue", "ProductRecommendation")
@@ -40,7 +46,6 @@ BaseCategoryForm = movenodeform_factory(
         "order",
         "image",
         "is_public",
-        # "is_promo",
         "meta_title",
         "meta_description",
     ],
@@ -86,8 +91,8 @@ class ProductClassSelectForm(forms.Form):
     """
 
     product_class = forms.ModelChoiceField(
-        label="Создать продукт",
-        empty_label="Выберите тип продукта",
+        label="Создать товар",
+        empty_label="Выберите тип товара",
         queryset=ProductClass.objects.all(),
         widget=forms.Select(attrs={
             'class': 'select-field',
@@ -106,14 +111,14 @@ class ProductClassSelectForm(forms.Form):
 
 class ProductSearchForm(forms.Form):
     upc = forms.CharField(max_length=64, required=False, label="Код UPC")
-    title = forms.CharField(max_length=255, required=False, label="Имя продукта")
+    title = forms.CharField(max_length=255, required=False, label="Имя товара")
     categories = forms.ModelMultipleChoiceField(
         label="Категория",
         queryset=Category.objects.all(),
         required=False,
     )
     product_class = forms.ModelMultipleChoiceField(
-        label="Тип продукта",
+        label="Тип товара",
         queryset=ProductClass.objects.all(),
         required=False,
     )
@@ -135,7 +140,7 @@ class ProductSearchForm(forms.Form):
 class StockRecordForm(forms.ModelForm):
     def __init__(self, product_class, user, *args, **kwargs):
         # The user kwarg is not used by stock StockRecordForm. We pass it
-        # anyway in case one wishes to customise the partner queryset
+        # anyway in case one wishes to customise the store queryset
         self.user = user
         super().__init__(*args, **kwargs)
 
@@ -152,7 +157,7 @@ class StockRecordForm(forms.ModelForm):
     class Meta:
         model = StockRecord
         fields = [
-            "partner",
+            "store",
             "cost_price",
             "old_price",
             "price",
@@ -167,7 +172,7 @@ class StockRecordForm(forms.ModelForm):
 class StockRecordStockForm(forms.ModelForm):
     def __init__(self, product_class, user, *args, **kwargs):
         # The user kwarg is not used by stock StockRecordForm. We pass it
-        # anyway in case one wishes to customise the partner queryset
+        # anyway in case one wishes to customise the store queryset
         self.user = user
         super().__init__(*args, **kwargs)
 
@@ -337,6 +342,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
     def __init__(self, product_class, *args, data=None, parent=None, **kwargs):
         self.set_initial(product_class, parent, kwargs)
+        self.request = kwargs.pop('request', None)
         super().__init__(data, *args, **kwargs)
         if parent:
             self.instance.parent = parent
@@ -357,7 +363,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         if "slug" in self.fields:
             self.fields["slug"].required = False
             self.fields["slug"].help_text = (
-                "Оставьте поле пустым, чтобы сгенерировать из названия продукта"
+                "Оставьте поле пустым, чтобы сгенерировать из названия товара"
             )
         if "title" in self.fields:
             self.fields["title"].widget = forms.TextInput(attrs={"autocomplete": "off"})
@@ -431,7 +437,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
                     self.fields["attr_is_variant_%s" % attribute.code] = forms.BooleanField(
                         required=False,
                         label="Используется для вариаций?",
-                        help_text="Данный атрибут можно использовать при создании вариативного продукта.",
+                        help_text="Данный атрибут можно использовать при создании вариативного товара.",
 
                     )
 
@@ -448,12 +454,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         """
         for field_name in ["description", "short_description", "product_class", "is_discountable", "meta_title", "meta_description"]:
             if field_name in self.fields:
-                del self.fields[field_name]     
-
-    def clean_evotor_update(self):
-        evotor_update = self.cleaned_data.get('evotor_update')
-        if evotor_update:
-            fff = 1           
+                del self.fields[field_name]            
    
     def _post_clean(self):
         """
@@ -480,6 +481,16 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
                         attribute_obj.save()
 
         super()._post_clean()
+
+    def evotor_save(self, product):
+        evotor_update = self.cleaned_data.get('evotor_update')
+        if evotor_update:
+            try:
+                product, error = EvatorCloud().update_or_create_evotor_product(product)
+                if error:
+                    messages.warning(self.request, error)
+            except Exception as e:
+                logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
 
 
 class ProductCategoryForm(forms.ModelForm):
@@ -556,8 +567,6 @@ class AttributeForm(forms.ModelForm):
         # because we'll allow submission of the form with blank
         # codes so that we can generate them.
         self.fields["code"].required = False
-
-        # self.fields["option_group"].help_text = "Выберите группу опций"
 
         # pylint: disable=no-member
         remote_field = self._meta.model._meta.get_field("option_group").remote_field

@@ -34,8 +34,8 @@ MEDIA_ROOT = location('public/media')
 # =============
 
 COMPRESS_ROOT = location('public/static/cache')
-COMPRESS_ENABLED = True
-COMPRESS_OFFLINE = False
+COMPRESS_ENABLED = False
+COMPRESS_OFFLINE = True
 
 # =============
 # STATIC

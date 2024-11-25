@@ -328,7 +328,7 @@ class OrderHistoryView(PageTitleMixin, generic.ListView):
 
     def get_queryset(self):
         """
-        Return Queryset of :py:class:`Order <oscar.apps.order.abstract_models.AbstractOrder>`
+        Return Queryset of :py:class:`Order <oscar.apps.order.models.Order>`
         instances for the currently authenticated user.
         """
         qs = self.model._default_manager.filter(user=self.request.user)

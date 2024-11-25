@@ -156,9 +156,9 @@ class DeliveryNowView(APIView):
         # if not rote_time:
         try:
             line = basket.lines.first()
-            partner = line.stockrecord.partner
-            partner_address = partner.addresses.first()
-            start_point = [partner_address.coords_long, partner_address.coords_lat]
+            store = line.stockrecord.store
+            store_address = store.addresses.first()
+            start_point = [store_address.coords_long, store_address.coords_lat]
         except Exception:
             start_point = [56.050918, 92.904378]
             

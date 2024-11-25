@@ -4,7 +4,7 @@
     {{ title }} | Создать группу атрибутов | {{ block.super }}
 {% endblock %}
 
-{% block body_class %}{{ block.super }} popup-page{% endblock %}
+{% block body_class %}{{ block.super }} {% if is_popup %}popup-page{% endif %}{% endblock %}
 
 {% block navbar %}
 {% if not is_popup %}

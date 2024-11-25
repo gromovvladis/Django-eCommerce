@@ -12,7 +12,7 @@ class ProductReportCSVFormatter(ReportCSVFormatter):
 
     def generate_csv(self, response, products):
         writer = self.get_csv_writer(response)
-        header_row = ["Продукт", "Просмотры", "Дополнения корзины", "Покупки"]
+        header_row = ["Товары", "Просмотры", "Дополнения корзины", "Покупки"]
         writer.writerow(header_row)
 
         for record in products:
@@ -31,7 +31,7 @@ class ProductReportHTMLFormatter(ReportHTMLFormatter):
 
 class ProductReportGenerator(ReportGenerator):
     code = "product_analytics"
-    description = "Аналитика продукта"
+    description = "Аналитика товара"
     model_class = ProductRecord
 
     formatters = {

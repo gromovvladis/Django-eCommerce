@@ -14,5 +14,5 @@ from oscar.core.loading import get_class, get_model
 
 
 # if settings.OSCAR_EAGER_ALERTS:
-#     StockRecord = get_model("partner", "StockRecord")
+#     StockRecord = get_model("store", "StockRecord")
 #     post_save.connect(send_product_alerts, sender=StockRecord)

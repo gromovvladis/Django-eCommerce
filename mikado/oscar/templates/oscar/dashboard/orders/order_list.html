@@ -20,10 +20,10 @@
 {% block header %}
     <div class="page-header d-flex justify-content-start">
         <h1>Заказы</h1>
-        <form method="get" class="d-flex align-items-end no-widget-init ml-2" id="partner_form">
+        <form method="get" class="d-flex align-items-end no-widget-init ml-2" id="store_form">
             {% for field in form %}
-                {% if "partner_point" in field.id_for_label %}
-                    {% render_field field class+='partner-point' %}
+                {% if "store_point" in field.id_for_label %}
+                    {% render_field field class+='store-point' %}
                     {% for error in field.errors %}
                         <ul class="error-block">
                             <li>{{ error }}</li>

@@ -6,7 +6,7 @@ def metadata(request):
     """
     return {
         "homepage_url": settings.OSCAR_HOMEPAGE,
-        "partners_select": settings.PARTNER_SELECT,
+        "stores_select": settings.STORE_SELECT,
         # Fallback to old settings name for backwards compatibility
         "google_analytics_id": (
             getattr(settings, "GOOGLE_ANALYTICS_ID", None)

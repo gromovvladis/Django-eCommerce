@@ -188,13 +188,13 @@ class OrderCreator(object):
                 "Basket line #%d has no stockrecord" % basket_line.id
             )
 
-        partner = stockrecord.partner
+        store = stockrecord.store
         line_data = {
             "order": order,
-            # Partner details
-            "partner": partner,
-            "partner_name": partner.name,
-            "partner_sku": stockrecord.partner_sku,
+            # Store details
+            "store": store,
+            "store_name": store.name,
+            "evotor_code": stockrecord.evotor_code,
             "stockrecord": stockrecord,
             # Product details
             "product": product,

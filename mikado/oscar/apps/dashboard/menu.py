@@ -7,7 +7,7 @@ from oscar.core.loading import get_class, get_model
 
 Node = get_class("dashboard.nav", "Node")
 
-StockAlert = get_model("partner", "StockAlert")
+StockAlert = get_model("store", "StockAlert")
 Order = get_model("order", "Order")
 ProductReview = get_model("reviews", "ProductReview")
 OrderReview = get_model("customer", "OrderReview")
@@ -101,7 +101,7 @@ def get_notif(child, models):
             'feedback_product': feedback_product,
             'feedback_order': feedback_order,
             'delivery_active': delivery_active,
-            'delivery_partner': delivery_partner,
+            'delivery_store': delivery_store,
             'delivery_couriers': delivery_couriers,
         }
         function_to_call = function_map.get(child["notification"])
@@ -136,7 +136,7 @@ def delivery_active(models):
     delivery = models['delivery']
     return delivery.count()
 
-def delivery_partner(models):
+def delivery_store(models):
     delivery = models['delivery']
     return delivery.count()
 

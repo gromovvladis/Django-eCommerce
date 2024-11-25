@@ -170,8 +170,8 @@ class RangeProductListView(BulkEditMixin, ListView):
         messages.success(
             request,
             ngettext(
-                "Удален %d продукт из ассортимента",
-                "Удалено %d продуктов из ассортимента",
+                "Удален %d товар из ассортимента",
+                "Удалено %d товаров из ассортимента",
                 num_products,
             )
             % num_products,
@@ -253,8 +253,8 @@ class RangeProductListView(BulkEditMixin, ListView):
         messages.success(
             request,
             (
-                "%(num_products)d продукт был %(action)s",
-                "%(num_products)d продуктов было %(action)s",
+                "%(num_products)d товар был %(action)s",
+                "%(num_products)d товаров было %(action)s",
                 num_products,
             )
             % {"num_products": num_products, "action": action},
@@ -263,7 +263,7 @@ class RangeProductListView(BulkEditMixin, ListView):
         if dupe_skus:
             messages.warning(
                 request,
-                "Продукты с номерами SKU или UPC, соответствующими %(skus)s, уже были %(action)s."
+                "товары с номерами SKU или UPC, соответствующими %(skus)s, уже были %(action)s."
                 % {"skus": ", ".join(dupe_skus), "action": action},
             )
 
@@ -271,7 +271,7 @@ class RangeProductListView(BulkEditMixin, ListView):
         if missing_skus:
             messages.warning(
                 request,
-                "Не найдено ни одного продукта(ов), соответствующего SKU или UPC. %s"
+                "Не найдено ни одного товара(ов), соответствующего SKU или UPC. %s"
                 % ", ".join(missing_skus),
             )
         self.check_imported_products_sku_duplicates(request, products)
@@ -313,16 +313,16 @@ class RangeProductListView(BulkEditMixin, ListView):
 
     def check_imported_products_sku_duplicates(self, request, queryset):
         dupe_sku_products = (
-            queryset.values("stockrecords__partner_sku")
-            .annotate(total=Count("stockrecords__partner_sku"))
+            queryset.values("stockrecords__evotor_code")
+            .annotate(total=Count("stockrecords__evotor_code"))
             .filter(total__gt=1)
-            .order_by("stockrecords__partner_sku")
+            .order_by("stockrecords__evotor_code")
         )
         if dupe_sku_products:
-            dupe_skus = [p["stockrecords__partner_sku"] for p in dupe_sku_products]
+            dupe_skus = [p["stockrecords__evotor_code"] for p in dupe_sku_products]
             messages.warning(
                 request,
-                "Есть более одного продукта с SKU %s" % ", ".join(dupe_skus),
+                "Есть более одного товара с SKU %s" % ", ".join(dupe_skus),
             )
 
 

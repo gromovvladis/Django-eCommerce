@@ -1,8 +1,8 @@
 from django.urls import reverse_lazy
 
 OSCAR_HOMEPAGE = reverse_lazy("home:index")
-PARTNER_SELECT = True
-PARTNER_DEFAULT = 1
+STORE_SELECT = True
+STORE_DEFAULT = 1
 
 # Dynamic class loading
 OSCAR_DYNAMIC_CLASS_LOADER = "oscar.core.loading.default_class_loader"
@@ -95,7 +95,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "icon": "fas fa-list",
         "children": [
             {
-                "label": "Продукты",
+                "label": "Товары",
                 "url_name": "dashboard:catalogue-product-list",
             },
             {
@@ -103,7 +103,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:catalogue-category-list",
             },
             {
-                "label": "Типы продуктов",
+                "label": "Типы товаров",
                 "url_name": "dashboard:catalogue-class-list",
             },
             {
@@ -154,12 +154,12 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
-        "label": "Точки продаж",
+        "label": "Магазины",
         "icon": "fas fa-store",
         "children": [
             {
-                "label": "Точки продаж",
-                "url_name": "dashboard:partner-list",
+                "label": "Магазины",
+                "url_name": "dashboard:store-list",
             },
             {
                 "label": "Терминалы",
@@ -190,8 +190,8 @@ OSCAR_DASHBOARD_NAVIGATION = [
             },
             {
                 "label": "Заказы на кухне",
-                "url_name": "dashboard:delivery-partners",
-                "notification": "delivery_partner",
+                "url_name": "dashboard:delivery-stores",
+                "notification": "delivery_store",
             },
             {
                 "label": "Заказы в доставке",
@@ -269,8 +269,8 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "icon": "fas fa-crm",
         "children": [
             {
-                "label": "Точки продаж",
-                "url_name": "dashboard:crm-partners",
+                "label": "Магазины",
+                "url_name": "dashboard:crm-stores",
             },
             {
                 "label": "Терминалы",

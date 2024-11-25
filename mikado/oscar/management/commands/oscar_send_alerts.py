@@ -13,7 +13,7 @@ class Command(BaseCommand):
     to customers that have registered for an alert.
     """
 
-    help = "Проверяйте наличие продуктов, которые снова есть на складе, и отправляйте оповещения"
+    help = "Проверяйте наличие товаров, которые снова есть на складе, и отправляйте оповещения"
 
     def handle(self, *args, **options):
         """

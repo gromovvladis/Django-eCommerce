@@ -19,7 +19,7 @@ RelatedFieldWidgetWrapper = get_class("dashboard.widgets", "RelatedFieldWidgetWr
 ConditionalOffer = get_model("offer", "ConditionalOffer")
 Voucher = get_model("voucher", "Voucher")
 Basket = get_model("basket", "Basket")
-StockAlert = get_model("partner", "StockAlert")
+StockAlert = get_model("store", "StockAlert")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 Order = get_model("order", "Order")
@@ -171,7 +171,7 @@ class IndexView(TemplateView):
         if prod_slug:
             prod = Product.objects.get(slug=prod_slug)
             data = {
-                "title": "Статистика для продукта '%s'" % prod.get_title(),
+                "title": "Статистика для товара '%s'" % prod.get_title(),
                 "orders": queryset_orders_for_user(self.request.user),
                 # "orders": Order.objects.filter(lines__product_id=prod.id),
                 "alerts": StockAlert.objects.filter(stockrecord__product_id=prod.id),
@@ -233,17 +233,17 @@ class IndexView(TemplateView):
 
         user = self.request.user
         if not user.is_staff:
-            partners_ids = tuple(user.partners.values_list("id", flat=True))
-            orders = orders.filter(lines__partner_id__in=partners_ids).distinct()
-            alerts = alerts.filter(stockrecord__partner_id__in=partners_ids)
+            stores_ids = tuple(user.stores.values_list("id", flat=True))
+            orders = orders.filter(lines__store_id__in=stores_ids).distinct()
+            alerts = alerts.filter(stockrecord__store_id__in=stores_ids)
             baskets = baskets.filter(
-                lines__stockrecord__partner_id__in=partners_ids
+                lines__stockrecord__store_id__in=stores_ids
             ).distinct()
             customers = customers.filter(
-                orders__lines__partner_id__in=partners_ids
+                orders__lines__store_id__in=stores_ids
             ).distinct()
-            lines = lines.filter(partner_id__in=partners_ids)
-            products = products.filter(stockrecords__partner_id__in=partners_ids)
+            lines = lines.filter(store_id__in=stores_ids)
+            products = products.filter(stockrecords__store_id__in=stores_ids)
 
         orders_last_day = orders.filter(date_placed__gt=datetime_24hrs_ago)
         orders_last_week = orders.filter(date_placed__gt=datetime_week_ago)

@@ -7,7 +7,7 @@ from oscar.core.loading import get_classes, get_model
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
-StockRecord = get_model("partner", "StockRecord")
+StockRecord = get_model("store", "StockRecord")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductImage = get_model("catalogue", "ProductImage")
 ProductRecommendation = get_model("catalogue", "ProductRecommendation")
@@ -60,24 +60,24 @@ class StockRecordFormSet(BaseStockRecordFormSet):
 
     def set_initial_data(self):
         """
-        If user has only one partner associated, set the first
-        stock record's partner to it. Can't pre-select for staff users as
+        If user has only one store associated, set the first
+        stock record's store to it. Can't pre-select for staff users as
         they're allowed to save a product without a stock record.
 
         This is intentionally done after calling __init__ as passing initial
         data to __init__ creates a form for each list item. So depending on
-        whether we can pre-select the partner or not, we'd end up with 1 or 2
+        whether we can pre-select the store or not, we'd end up with 1 or 2
         forms for an unbound form.
         """
         if self.require_user_stockrecord:
             try:
-                user_partner = self.user.partners.get()
+                user_store = self.user.stores.get()
             except (exceptions.ObjectDoesNotExist, exceptions.MultipleObjectsReturned):
                 pass
             else:
-                partner_field = self.forms[0].fields.get("partner", None)
-                if partner_field and partner_field.initial is None:
-                    partner_field.initial = user_partner
+                store_field = self.forms[0].fields.get("store", None)
+                if store_field and store_field.initial is None:
+                    store_field.initial = user_store
 
     def _construct_form(self, i, **kwargs):
         kwargs["product_class"] = self.product_class
@@ -87,17 +87,17 @@ class StockRecordFormSet(BaseStockRecordFormSet):
     def clean(self):
         """
         If the user isn't a staff user, this validation ensures that at least
-        one stock record's partner is associated with a users partners.
+        one stock record's store is associated with a users stores.
         """
         if any(self.errors):
             return
         if self.require_user_stockrecord:
-            stockrecord_partners = set(
-                [form.cleaned_data.get("partner", None) for form in self.forms]
+            stockrecord_stores = set(
+                [form.cleaned_data.get("store", None) for form in self.forms]
             )
-            user_partners = set(self.user.partners.all())
-            if not user_partners & stockrecord_partners:
-                raise exceptions.ValidationError("По крайней мере одна товарная запись должна быть установлена точке продажи, которая связана с вами.")
+            user_stores = set(self.user.stores.all())
+            if not user_stores & stockrecord_stores:
+                raise exceptions.ValidationError("По крайней мере одна товарная запись должна быть установлена магазину, который связана с вами.")
 
 
 BaseStockRecordStockFormSet = inlineformset_factory(
@@ -116,24 +116,24 @@ class StockRecordStockFormSet(BaseStockRecordStockFormSet):
 
     def set_initial_data(self):
         """
-        If user has only one partner associated, set the first
-        stock record's partner to it. Can't pre-select for staff users as
+        If user has only one store associated, set the first
+        stock record's store to it. Can't pre-select for staff users as
         they're allowed to save a product without a stock record.
 
         This is intentionally done after calling __init__ as passing initial
         data to __init__ creates a form for each list item. So depending on
-        whether we can pre-select the partner or not, we'd end up with 1 or 2
+        whether we can pre-select the store or not, we'd end up with 1 or 2
         forms for an unbound form.
         """
         if self.require_user_stockrecord:
             try:
-                user_partner = self.user.partners.get()
+                user_store = self.user.stores.get()
             except (exceptions.ObjectDoesNotExist, exceptions.MultipleObjectsReturned):
                 pass
             else:
-                partner_field = self.forms[0].fields.get("partner", None)
-                if partner_field and partner_field.initial is None:
-                    partner_field.initial = user_partner
+                store_field = self.forms[0].fields.get("store", None)
+                if store_field and store_field.initial is None:
+                    store_field.initial = user_store
 
     def _construct_form(self, i, **kwargs):
         kwargs["product_class"] = self.product_class
@@ -143,17 +143,17 @@ class StockRecordStockFormSet(BaseStockRecordStockFormSet):
     def clean(self):
         """
         If the user isn't a staff user, this validation ensures that at least
-        one stock record's partner is associated with a users partners.
+        one stock record's store is associated with a users stores.
         """
         if any(self.errors):
             return
         if self.require_user_stockrecord:
-            stockrecord_partners = set(
-                [form.cleaned_data.get("partner", None) for form in self.forms]
+            stockrecord_stores = set(
+                [form.cleaned_data.get("store", None) for form in self.forms]
             )
-            user_partners = set(self.user.partners.all())
-            if not user_partners & stockrecord_partners:
-                raise exceptions.ValidationError("По крайней мере одна товарная запись должна быть установлена точке продажи, которая связана с вами.")
+            user_stores = set(self.user.stores.all())
+            if not user_stores & stockrecord_stores:
+                raise exceptions.ValidationError("По крайней мере одна товарная запись должна быть установлена магазину, который связана с вами.")
 
 
 BaseProductCategoryFormSet = inlineformset_factory(
@@ -170,7 +170,7 @@ class ProductCategoryFormSet(BaseProductCategoryFormSet):
     def clean(self):
         if not self.instance.is_child and self.get_num_categories() == 0:
             raise forms.ValidationError(
-                "Продукты должны иметь хотя бы одну категорию."
+                "товары должны иметь хотя бы одну категорию."
             )
         if self.instance.is_child and self.get_num_categories() > 0:
             raise forms.ValidationError("Дочерний товар не должен иметь категорий")
@@ -288,5 +288,5 @@ class ProductClassAttributeFormSet(BaseProductClassAttributeFormSet):
 
 
 AttributeOptionFormSet = inlineformset_factory(
-    AttributeOptionGroup, AttributeOption, form=AttributeOptionForm, extra=3
+    AttributeOptionGroup, AttributeOption, form=AttributeOptionForm, extra=6
 )

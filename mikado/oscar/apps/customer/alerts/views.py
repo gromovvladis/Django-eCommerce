@@ -18,7 +18,7 @@ Product = get_model("catalogue", "Product")
 #     model = ProductAlert
 #     template_name = "oscar/customer/alerts/alert_list.html"
 #     context_object_name = "alerts"
-#     page_title = "Оповещения о продуктах"
+#     page_title = "Оповещения о товарах"
 #     active_tab = "alerts"
 
 #     def get_queryset(self):

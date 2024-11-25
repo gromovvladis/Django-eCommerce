@@ -78,8 +78,8 @@ ProductTable, ProductClassTable, CategoryTable, AttributeOptionGroupTable, Optio
     "dashboard.views",
     ("PopUpWindowCreateMixin", "PopUpWindowUpdateMixin", "PopUpWindowDeleteMixin"),
 )
-PartnerProductFilterMixin = get_class(
-    "dashboard.catalogue.mixins", "PartnerProductFilterMixin"
+StoreProductFilterMixin = get_class(
+    "dashboard.catalogue.mixins", "StoreProductFilterMixin"
 )
 Attribute = get_model("catalogue", "Attribute")
 Product = get_model("catalogue", "Product")
@@ -87,15 +87,15 @@ Category = get_model("catalogue", "Category")
 ProductImage = get_model("catalogue", "ProductImage")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductClass = get_model("catalogue", "ProductClass")
-StockRecord = get_model("partner", "StockRecord")
-StockAlert = get_model("partner", "StockAlert")
-Partner = get_model("partner", "Partner")
+StockRecord = get_model("store", "StockRecord")
+StockAlert = get_model("store", "StockAlert")
+Store = get_model("store", "Store")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
 
 
-class ProductListView(PartnerProductFilterMixin, SingleTableView):
+class ProductListView(StoreProductFilterMixin, SingleTableView):
     """
     Dashboard view of the product list.
     Supports the permission-based dashboard.
@@ -209,7 +209,7 @@ class ProductListView(PartnerProductFilterMixin, SingleTableView):
         title = data.get("title")        
         if title:
             queryset = queryset.filter(
-                Q(title__icontains=title) | Q(children__title__icontains=title) | Q(attribute__icontains=title)
+                Q(title__icontains=title) | Q(children__title__icontains=title) | Q(attribute_values__attribute__name__icontains=title)
             )
         
         categories = data.get("categories")
@@ -245,7 +245,7 @@ class ProductCreateRedirectView(generic.RedirectView):
         )
 
     def get_invalid_product_class_url(self):
-        messages.error(self.request, "Пожалуйста, выберите тип продукта")
+        messages.error(self.request, "Пожалуйста, выберите тип товара")
         return reverse("dashboard:catalogue-product-list")
 
     def get_redirect_url(self, *args, **kwargs):
@@ -258,7 +258,7 @@ class ProductCreateRedirectView(generic.RedirectView):
             return self.get_invalid_product_class_url()
 
 
-class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
+class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
     """
     Dashboard view that is can both create and update products of all kinds.
     It can be used in three different ways, each of them with a unique URL
@@ -391,11 +391,11 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
     def get_page_title(self):
         if self.creating:
             if self.parent is None:
-                return ("Создать продукт типа '%(product_class)s'") % {
+                return ("Создать товар типа '%(product_class)s'") % {
                     "product_class": self.product_class.name
                 }
             else:
-                return ("Создать вариант продукта %(parent_product)s") % {
+                return ("Создать вариант товара %(parent_product)s") % {
                     "parent_product": self.parent.title
                 }
         else:
@@ -408,6 +408,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
         kwargs["product_class"] = self.product_class
         kwargs["parent"] = self.parent
         return kwargs
@@ -537,13 +538,6 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         and return False. If everything is valid, return True. This method will
         be called regardless of whether the individual forms are valid.
         """
-        # forma = form.is_valid()
-        # new_product_class = form.cleaned_data.get('product_class')
-        # if new_product_class != form.instance.product_class:
-        #     form.instance.product_class = new_product_class
-        #     self.product_class
-        #     return False
-        
         return True
 
     def forms_valid(self, formsets, form=None):
@@ -554,7 +548,8 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         """
         if self.creating:
             self.handle_adding_child(self.parent)
-        elif form:
+            
+        if form is not None:
             # a just created product was already saved in process_all_forms()
             self.object = form.save()
 
@@ -565,6 +560,9 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         for idx, image in enumerate(self.object.images.all()):
             image.display_order = idx
             image.save()
+
+        if form is not None:
+            form.evotor_save(self.object)
 
         action = self.request.POST.get("action")
         if action == "create-all-child":
@@ -687,7 +685,7 @@ class ProductCreateUpdateView(PartnerProductFilterMixin, generic.UpdateView):
         return self.get_url_with_querystring(url)
 
 
-class ProductDeleteView(PartnerProductFilterMixin, generic.DeleteView):
+class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
     """
     Dashboard view to delete a product. Has special logic for deleting the
     last child product.
@@ -707,9 +705,9 @@ class ProductDeleteView(PartnerProductFilterMixin, generic.DeleteView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         if self.object.is_child:
-            ctx["title"] = "Удалить вариант продукта?"
+            ctx["title"] = "Удалить вариант товара?"
         else:
-            ctx["title"] = "Удалить продукт?"
+            ctx["title"] = "Удалить товар?"
         return ctx
 
     def delete(self, request, *args, **kwargs):
@@ -753,13 +751,13 @@ class ProductDeleteView(PartnerProductFilterMixin, generic.DeleteView):
         product list view.
         """
         if self.object.is_child:
-            msg = "Удаленный вариант продукта '%s'" % self.object.get_title()
+            msg = "Удаленный вариант товара '%s'" % self.object.get_title()
             messages.success(self.request, msg)
             return reverse(
                 "dashboard:catalogue-product", kwargs={"pk": self.object.parent_id}
             )
         else:
-            msg = "Удаленный продукт '%s'" % self.object.title
+            msg = "Удаленный товар '%s'" % self.object.title
             messages.success(self.request, msg)
             return reverse("dashboard:catalogue-product-list")
 
@@ -797,7 +795,7 @@ class StockAlertListView(SingleTableView):
                 status = self.form.cleaned_data["status"]
                 return StockAlert.objects.filter(status=status).select_related("stockrecord").annotate(
                 name=F("stockrecord__product__title"),
-                partner=F("stockrecord__partner__name"),
+                store=F("stockrecord__store__name"),
                 threshold=F("stockrecord__low_stock_threshold"),
                 num_in_stock=F("stockrecord__num_in_stock"),
                 num_allocated=F("stockrecord__num_allocated"),
@@ -805,7 +803,7 @@ class StockAlertListView(SingleTableView):
         else:
             return StockAlert.objects.all().select_related("stockrecord").annotate(
                 name=F("stockrecord__product__title"),
-                partner=F("stockrecord__partner__name"),
+                store=F("stockrecord__store__name"),
                 threshold=F("stockrecord__low_stock_threshold"),
                 num_in_stock=F("stockrecord__num_in_stock"),
                 num_allocated=F("stockrecord__num_allocated"),
@@ -1016,10 +1014,10 @@ class ProductClassCreateView(ProductClassCreateUpdateView):
         return None
 
     def get_title(self):
-        return "Добавить новый тип продукта"
+        return "Добавить новый тип товара"
 
     def get_success_url(self):
-        messages.info(self.request, "Тип продукта успешно создан")
+        messages.info(self.request, "Тип товара успешно создан")
         return reverse("dashboard:catalogue-class-list")
 
 
@@ -1027,10 +1025,10 @@ class ProductClassUpdateView(ProductClassCreateUpdateView):
     creating = False
 
     def get_title(self):
-        return "Обновить тип продукта '%s'" % self.object.name
+        return "Обновить тип товара '%s'" % self.object.name
 
     def get_success_url(self):
-        messages.info(self.request, "Тип продукта успешно обновлен.")
+        messages.info(self.request, "Тип товара успешно обновлен.")
         return reverse("dashboard:catalogue-class-list")
 
     def get_object(self, queryset=None):
@@ -1045,7 +1043,7 @@ class ProductClassListView(SingleTableView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["title"] = "Типы продуктов"
+        ctx["title"] = "Типы товаров"
         return ctx
 
     def get_queryset(self):
@@ -1068,7 +1066,7 @@ class ProductClassDeleteView(generic.DeleteView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["title"] = "Удалить тип продукта '%s'" % self.object.name
+        ctx["title"] = "Удалить тип товара '%s'" % self.object.name
         product_count = self.object.products.count()
 
         if product_count > 0:
@@ -1078,7 +1076,7 @@ class ProductClassDeleteView(generic.DeleteView):
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, "Тип продукта успешно удален")
+        messages.info(self.request, "Тип товара успешно удален")
         return reverse("dashboard:catalogue-class-list")
 
 
@@ -1215,7 +1213,7 @@ class AttributeOptionGroupDeleteView(PopUpWindowDeleteMixin, generic.DeleteView)
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             messages.error(
-                self.request, "%i Атрибуты продукта по-прежнему назначены этой группе атрибутов."
+                self.request, "%i Атрибуты товара по-прежнему назначены этой группе атрибутов."
                 % product_attribute_count,
             )
 
@@ -1318,9 +1316,9 @@ class OptionDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products_count:
-                messages.error(self.request, "%i продукт(ы) по-прежнему относятся к этой опции. Список продуктов: %s. Удалите опцию у продукта(ов), прежде чем удалять опцию" % (products_count, list(products.values_list('title', flat=True))))
+                messages.error(self.request, "%i товар(ы) по-прежнему относятся к этой опции. Список товаров: %s. Удалите опцию у товара(ов), прежде чем удалять опцию" % (products_count, list(products.values_list('title', flat=True))))
             if product_classes_count:
-                messages.error(self.request, "%i класс(ы) продуктa(ов) по-прежнему присвоен(ы) этой опции. Список классов: %s. Удалите опцию у класса(ов), прежде чем удалять опцию" % (product_classes_count, list(product_classes.values_list('title', flat=True))))
+                messages.error(self.request, "%i класс(ы) товар(ов) по-прежнему присвоен(ы) этой опции. Список классов: %s. Удалите опцию у класса(ов), прежде чем удалять опцию" % (product_classes_count, list(product_classes.values_list('title', flat=True))))
 
         return ctx
 
@@ -1415,9 +1413,9 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products_count:
-                messages.error(self.request, "%i продукт(а/ы) по-прежнему содержит этот доп продукт. Список продуктов с этим доп. продуктом: %s. Удалите доп.продукт у основного продукта(ов), прежде чем удалять доп. продукт" % (products_count, list(products.values_list('title', flat=True))))
+                messages.error(self.request, "%i товар(а/ы) по-прежнему содержит этот доп товар. Список товаров с этим доп. товаром: %s. Удалите доп.товар у основного товара(ов), прежде чем удалять доп. товар" % (products_count, list(products.values_list('title', flat=True))))
             if product_classes_count:
-                messages.error(self.request, "%i класс(а/ы) по-прежнему содержит этот доп продукт. Список класснов с этим доп. продуктом: %s. Удалите доп.продукт у класса(ов), прежде чем удалять доп. продукт" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
+                messages.error(self.request, "%i класс(а/ы) по-прежнему содержит этот доп товар. Список класснов с этим доп. товаром: %s. Удалите доп.товар у класса(ов), прежде чем удалять доп. товар" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
 
         return ctx
 
@@ -1512,7 +1510,7 @@ class AttributeDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products_count:
-                messages.error(self.request, "%i продукт(а/ы) по-прежнему содержит этот атрибут. Список продуктов с этим доп. атрибутом: %s. Удалите атрибут у основного продукта(ов), прежде чем удалять атрибут" % (products_count, list(products.values_list('title', flat=True))))
+                messages.error(self.request, "%i товар(а/ы) по-прежнему содержит этот атрибут. Список товаров с этим доп. атрибутом: %s. Удалите атрибут у основного товара(ов), прежде чем удалять атрибут" % (products_count, list(products.values_list('title', flat=True))))
             if product_classes_count:
                 messages.error(self.request, "%i класс(а/ы) по-прежнему содержит этот атрибут. Список класснов с этим атрибутом: %s. Удалите атрибут у класса(ов), прежде чем удалять атрибут" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
 

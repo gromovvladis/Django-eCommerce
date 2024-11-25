@@ -13,6 +13,16 @@
     </nav>
 {% endblock %}
 
-{% block crm_header %}
-    <h1>Терминалы Эвотор</h1>
-{% endblock crm_header %}
+{% block header %}
+    <div class="page-header d-flex justify-content-between align-items-end">
+        <h1>Терминалы Эвотор</h1>
+        <div class="d-flex">
+            <button type="submit" form="evotor_form" name="update_site" value="True" data-loading-text="Обновление..." class="btn btn-success ml-3">
+                <i class="fa-solid fa-download"></i>
+                <span>
+                    Скачать 
+                </span>
+            </button>
+        </div>
+    </div>
+{% endblock header %}

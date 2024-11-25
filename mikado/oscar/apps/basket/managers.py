@@ -18,7 +18,7 @@ class OpenBasketManager(models.Manager):
     #     This method optimizes queries for related fields.
     #     """
     #     try:
-    #         basket = self.get_queryset().select_related('owner', 'partner').get(owner=kwargs['owner'])  # Добавьте сюда нужные поля
+    #         basket = self.get_queryset().select_related('owner', 'store').get(owner=kwargs['owner'])  # Добавьте сюда нужные поля
     #     except self.model.DoesNotExist:
     #         basket = self.model.objects.create(status=self.status_filter, owner=kwargs['owner'])
     #     return basket

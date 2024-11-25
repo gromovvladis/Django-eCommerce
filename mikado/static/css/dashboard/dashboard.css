@@ -19256,7 +19256,7 @@ caption {
   /* .table .class_options, */
   /* .table .class_additionals, */
   .table .type,
-  .table .partner,
+  .table .store,
   .table .additionals,
   .table .date_updated,
   .table .date_created,
@@ -20224,7 +20224,7 @@ input[type="number"]:focus {
 
 
 
-.partner-point{
+.store-point{
     border-style: hidden;
     color: var(--blue);
     font-size: 1.1rem;
@@ -20233,7 +20233,7 @@ input[type="number"]:focus {
     background-color: transparent;
 }
 
-.partner-point:focus-visible{
+.store-point:focus-visible{
   outline: none;
 }
 
