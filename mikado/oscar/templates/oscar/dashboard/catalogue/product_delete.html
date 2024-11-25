@@ -10,7 +10,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-product-list' %}">Продукты</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-product-list' %}">Товары</a></li>
             <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-product' pk=product.pk %}">{{ product.get_title }}</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
         </ol>
@@ -36,7 +36,7 @@
 
         {% if product.is_parent %}
             <p>
-                При этом также будут удалены следующие дочерние продукты:
+                При этом также будут удалены следующие дочерние товары:
                 <ul>
                     {% for child in product.children.all %}
                         <li><strong>{{ child.get_title }}</strong></li>

@@ -32,7 +32,7 @@ from dateutil.relativedelta import relativedelta
 
 logger = logging.getLogger("oscar.dashboard")
 
-Partner = get_model("partner", "Partner")
+Store = get_model("store", "Store")
 Transaction = get_model("payment", "Transaction")
 SourceType = get_model("payment", "SourceType")
 Order = get_model("order", "Order")
@@ -54,7 +54,7 @@ ProductSearchForm = get_class("dashboard.catalogue.forms", "ProductSearchForm")
 
 Voucher = get_model("voucher", "Voucher")
 Basket = get_model("basket", "Basket")
-StockAlert = get_model("partner", "StockAlert")
+StockAlert = get_model("store", "StockAlert")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 Order = get_model("order", "Order")
@@ -67,7 +67,7 @@ def queryset_orders_for_user(user):
     Returns a queryset of all orders that a user is allowed to access.
     A staff user may access all orders.
     To allow access to an order for a non-staff user, at least one line's
-    partner has to have the user in the partner's list.
+    store has to have the user in the store's list.
     """
     queryset = Order._default_manager.select_related(
         "shipping_address",
@@ -77,8 +77,8 @@ def queryset_orders_for_user(user):
     if user.is_staff:
         return queryset
     else:
-        partners = Partner._default_manager.filter(users=user)
-        return queryset.filter(lines__partner__in=partners).distinct()
+        stores = Store._default_manager.filter(users=user)
+        return queryset.filter(lines__store__in=stores).distinct()
 
 
 def get_order_for_user_or_404(user, number):
@@ -284,13 +284,13 @@ class OrderStatsView(FormView):
         # Ограничение данных для пользователей без прав администратора
         user = self.request.user
         if not user.is_staff:
-            partners_ids = tuple(user.partners.values_list("id", flat=True))
-            orders = orders.filter(lines__partner_id__in=partners_ids).distinct()
-            alerts = alerts.filter(stockrecord__partner_id__in=partners_ids)
-            baskets = baskets.filter(lines__stockrecord__partner_id__in=partners_ids).distinct()
-            customers = customers.filter(orders__lines__partner_id__in=partners_ids).distinct()
-            lines = lines.filter(partner_id__in=partners_ids)
-            products = products.filter(stockrecords__partner_id__in=partners_ids)
+            stores_ids = tuple(user.stores.values_list("id", flat=True))
+            orders = orders.filter(lines__store_id__in=stores_ids).distinct()
+            alerts = alerts.filter(stockrecord__store_id__in=stores_ids)
+            baskets = baskets.filter(lines__stockrecord__store_id__in=stores_ids).distinct()
+            customers = customers.filter(orders__lines__store_id__in=stores_ids).distinct()
+            lines = lines.filter(store_id__in=stores_ids)
+            products = products.filter(stockrecords__store_id__in=stores_ids)
 
         # Создание словаря с результатами
         stats = {
@@ -419,9 +419,9 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
         data = self.form.cleaned_data
 
-        if data["partner_point"]:
+        if data["store_point"]:
             queryset = queryset.filter(
-                basket__partner__code=data["partner_point"]
+                basket__store__code=data["store_point"]
             )
 
         if data["is_online"] and not data["is_offine"]:
@@ -446,8 +446,8 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         if data["upc"]:
             queryset = queryset.filter(lines__upc=data["upc"])
 
-        if data["partner_sku"]:
-            queryset = queryset.filter(lines__partner_sku=data["partner_sku"])
+        if data["evotor_code"]:
+            queryset = queryset.filter(lines__evotor_code=data["evotor_code"])
 
         if data["date_from"] and data["date_to"]:
             date_to = datetime_combine(data["date_to"], datetime.time.max)
@@ -532,7 +532,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
         if data.get("product_title"):
             descriptions.append((
-                ('Название продукта соответствует "{product_name}"').format(
+                ('Название товара соответствует "{product_name}"').format(
                     product_name=data["product_title"]
                 ), (("product_title", data["product_title"]),)
             ))
@@ -546,15 +546,15 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
                 ('Включает предмет с UPC "{upc}"').format(upc=data["upc"]), (("upc", data["upc"]),)
             ))
 
-        if data.get("partner_sku"):
+        if data.get("evotor_code"):
             descriptions.append((
                 # Translators: "SKU" means "stock keeping unit" and is used to
                 # identify products that can be shipped from an online store.
-                # A "partner" is a company that ships items to users who
+                # A "store" is a company that ships items to users who
                 # buy things in an online store.
-                ('Включает товар с артикулом партнера. "{partner_sku}"').format(
-                    partner_sku=data["partner_sku"]
-                ), (("partner_sku", data["partner_sku"]),)
+                ('Включает товар с артикулом партнера. "{evotor_code}"').format(
+                    evotor_code=data["evotor_code"]
+                ), (("evotor_code", data["evotor_code"]),)
             ))
 
         if data.get("date_from") and data.get("date_to"):
@@ -743,9 +743,9 @@ class OrderActiveListView(OrderListView):
 
         data = self.form.cleaned_data
 
-        if data["partner_point"]:
+        if data["store_point"]:
             queryset = self.base_queryset.filter(
-                basket__partner__code=data["partner_point"]
+                basket__store__code=data["store_point"]
         )
 
         return queryset.annotate(

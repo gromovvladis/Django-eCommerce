@@ -1,6 +1,6 @@
 {% extends "oscar/base.html" %}
 
-{% load partner_tags %}
+{% load store_tags %}
 {% load svg_tags %}
 {% load category_tags %}
 {% load compress %}
@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block layout %}
-    {% selected_partner request as partner %}
+    {% selected_store request as store %}
     {% comment %}------------- header + контент + footer (начало) ---------------{% endcomment %}
     <div id="app" class="v-app {% block app_class %}{% endblock %}"> 
         {% comment %}------------- начало хедера ---------------{% endcomment %}
@@ -112,7 +112,7 @@
             </main>
 
             {% comment %}------------- footer ---------------{% endcomment %}
-            {% cache 3600 footer partner.id %}
+            {% cache 3600 footer store.id %}
                 {% block main_footer %}
                     {% include 'oscar/includes/footer.html' %}
                 {% endblock %}
@@ -133,7 +133,7 @@
 {% block templatescripts %}
     var csrf_token = "{{ csrf_token }}";
     var url_get_cookie = "{% url 'home:cookies' %}";
-    var url_partner_api = "{% url 'partner:select' %}";
+    var url_store_api = "{% url 'store:select' %}";
     var url_auth_api = "{% url 'customer:api-login' %}";
     var url_auth = "{% url 'customer:login' %}";
 {% endblock %}
@@ -152,11 +152,11 @@
         <script src="{% static "js/frontend/basket/basket.js" %}" defer></script>
 
         <script src="{% static "js/frontend/auth/auth.js" %}" defer></script>
-        <script src="{% static "js/frontend/partner/partner.js" %}" defer></script>
+        <script src="{% static "js/frontend/store/store.js" %}" defer></script>
         <script src="{% static "js/frontend/footer/footer.js" %}" defer></script>
     {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}
-    initPartner({{ request.basket.partner.id }});
+    initStore({{ request.basket.store.id }});
 {% endblock %}

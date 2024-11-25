@@ -24,7 +24,7 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
         self.delivery_active_view = get_class("dashboard.delivery.views", "DeliveryActiveView")
         self.delivery_list_view = get_class("dashboard.delivery.views", "DeliveryListView")
 
-        self.delivery_partner_view = get_class("dashboard.delivery.views", "DeliveryPartnerView")
+        self.delivery_store_view = get_class("dashboard.delivery.views", "DeliveryStoreView")
         self.delivery_couriers_view = get_class("dashboard.delivery.views", "DeliveryCouriersView")
 
         self.delivery_stats_view = get_class("dashboard.delivery.views", "DeliveryStatsView")
@@ -47,7 +47,7 @@ class DeliveryDashboardConfig(OscarDashboardConfig):
             path("active/", self.delivery_active_view.as_view(), name="delivery-active"),
             path("all/", self.delivery_list_view.as_view(), name="delivery-list"),
 
-            path("orders-partner/", self.delivery_partner_view.as_view(), name="delivery-partners"),
+            path("orders-store/", self.delivery_store_view.as_view(), name="delivery-stores"),
             path("orders-courier/", self.delivery_couriers_view.as_view(), name="delivery-couriers"),
             
             path("statistic/", self.delivery_stats_view.as_view(), name="delivery-stats"),

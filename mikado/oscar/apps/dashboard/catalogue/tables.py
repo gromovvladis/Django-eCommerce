@@ -14,7 +14,7 @@ Attribute = get_model("catalogue", "Attribute")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
-StockAlert = get_model("partner", "StockAlert")
+StockAlert = get_model("store", "StockAlert")
 
 
 class ProductClassTable(DashboardTable):
@@ -44,7 +44,7 @@ class ProductClassTable(DashboardTable):
         attrs = {'th': {'class': 'class_additionals'},}
     )
     num_products = Column(
-        verbose_name="Продукты",
+        verbose_name="товары",
         orderable=True,
         order_by="num_products",
         attrs = {'th': {'class': 'num_products'},}
@@ -95,7 +95,7 @@ class ProductClassTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Нет созданых типов продуктов"
+        empty_text = "Нет созданых типов товаров"
 
 
 class ProductTable(DashboardTable):
@@ -178,7 +178,7 @@ class ProductTable(DashboardTable):
     )
 
     icon = "fas fa-chart-bar"
-    caption = ngettext_lazy("%s Продукт", "%s Продуктов")
+    caption = ngettext_lazy("%s товар", "%s товаров")
 
     class Meta(DashboardTable.Meta):
         model = Product
@@ -202,7 +202,7 @@ class ProductTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Нет созданых продуктов"
+        empty_text = "Нет созданых товаров"
 
 
 class CategoryTable(DashboardTable):
@@ -463,16 +463,16 @@ class AdditionalTable(DashboardTable):
 class StockAlertTable(DashboardTable):
 
     name = TemplateColumn( 
-        verbose_name="Продукт",
+        verbose_name="товар",
         template_name="oscar/dashboard/catalogue/stock_alert_row_name.html",
         orderable=True,
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
-    partner = Column(
-        verbose_name="Точка продажи",
+    store = Column(
+        verbose_name="Магазин",
         orderable=True,
-        attrs = {'th': {'class': 'partner'},}
+        attrs = {'th': {'class': 'store'},}
     )
     threshold = Column(
         verbose_name="Граница запасов",
@@ -530,7 +530,7 @@ class StockAlertTable(DashboardTable):
         model = StockAlert
         fields = (
             "name",
-            "partner",
+            "store",
             "threshold",
             "num_in_stock",
             "num_allocated",
@@ -540,7 +540,7 @@ class StockAlertTable(DashboardTable):
         )
         sequence = (
             "name",
-            "partner",
+            "store",
             "threshold",
             "num_in_stock",
             "num_allocated",

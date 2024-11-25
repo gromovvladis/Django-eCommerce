@@ -26,7 +26,7 @@ from oscar.views.generic import BulkEditMixin
 import logging
 logger = logging.getLogger("oscar.dashboard")
 
-Partner = get_model("partner", "Partner")
+Store = get_model("store", "Store")
 Transaction = get_model("payment", "Transaction")
 SourceType = get_model("payment", "SourceType")
 Order = get_model("order", "Order")
@@ -70,7 +70,7 @@ class TelegramCouriersView(View):
 #     Returns a queryset of all orders that a user is allowed to access.
 #     A staff user may access all orders.
 #     To allow access to an order for a non-staff user, at least one line's
-#     partner has to have the user in the partner's list.
+#     store has to have the user in the store's list.
 #     """
 #     queryset = Order._default_manager.select_related(
 #         "shipping_address",
@@ -79,8 +79,8 @@ class TelegramCouriersView(View):
 #     if user.is_staff:
 #         return queryset
 #     else:
-#         partners = Partner._default_manager.filter(users=user)
-#         return queryset.filter(lines__partner__in=partners).distinct()
+#         stores = Store._default_manager.filter(users=user)
+#         return queryset.filter(lines__store__in=stores).distinct()
 
 
 # def get_order_for_user_or_404(user, number):
@@ -217,8 +217,8 @@ class TelegramCouriersView(View):
 #         if data["upc"]:
 #             queryset = queryset.filter(lines__upc=data["upc"])
 
-#         if data["partner_sku"]:
-#             queryset = queryset.filter(lines__partner_sku=data["partner_sku"])
+#         if data["evotor_code"]:
+#             queryset = queryset.filter(lines__evotor_code=data["evotor_code"])
 
 #         if data["date_from"] and data["date_to"]:
 #             date_to = datetime_combine(data["date_to"], datetime.time.max)
@@ -284,7 +284,7 @@ class TelegramCouriersView(View):
 
 #         if data.get("product_title"):
 #             descriptions.append(
-#                 ('Название продукта соответствует "{product_name}"').format(
+#                 ('Название товара соответствует "{product_name}"').format(
 #                     product_name=data["product_title"]
 #                 )
 #             )
@@ -298,14 +298,14 @@ class TelegramCouriersView(View):
 #                 ('Включает предмет с UPC "{upc}"').format(upc=data["upc"])
 #             )
 
-#         if data.get("partner_sku"):
+#         if data.get("evotor_code"):
 #             descriptions.append(
 #                 # Translators: "SKU" means "stock keeping unit" and is used to
 #                 # identify products that can be shipped from an online store.
-#                 # A "partner" is a company that ships items to users who
+#                 # A "store" is a company that ships items to users who
 #                 # buy things in an online store.
-#                 ('Включает товар с артикулом партнера. "{partner_sku}"').format(
-#                     partner_sku=data["partner_sku"]
+#                 ('Включает товар с артикулом партнера. "{evotor_code}"').format(
+#                     evotor_code=data["evotor_code"]
 #                 )
 #             )
 

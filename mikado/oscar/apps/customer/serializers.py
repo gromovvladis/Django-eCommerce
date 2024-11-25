@@ -8,7 +8,7 @@ logger = logging.getLogger("oscar.customer")
 
 User = get_model("user", "User")
 Staff = get_model("user", "Staff")
-Partner = get_model("partner", "Partner")
+Store = get_model("store", "Store")
 
 class UserGroupSerializer(serializers.ModelSerializer):
     name = serializers.CharField() 
@@ -25,7 +25,7 @@ class UserGroupSerializer(serializers.ModelSerializer):
         # Создаем объект партнера
         group = Group.objects.create(**validated_data)
 
-        # Если адрес передан, сохраняем его как отдельную запись в PartnerAddress
+        # Если адрес передан, сохраняем его как отдельную запись в StoreAddress
         if evotor_data:
             GroupEvotor.objects.create(group=group, evotor_id=evotor_data)
 
@@ -73,7 +73,7 @@ class StaffSerializer(serializers.ModelSerializer):
         # Извлекаем адрес из данных, если передан
         updated_at = validated_data.pop('updated_at', None)
         phone_data = validated_data.pop('phone', None)
-        partners_data = validated_data.pop('stores', None)
+        stores_data = validated_data.pop('stores', None)
         role_data = validated_data.pop('role', None)
         role_id_data = validated_data.pop('role_id', None)
 
@@ -89,10 +89,10 @@ class StaffSerializer(serializers.ModelSerializer):
                 user.name = validated_data.get('first_name', "")
                 user.save()
 
-            if partners_data:
-                partners = Partner.objects.filter(evotor_id__in=partners_data)
-                for partner in partners:
-                    partner.users.add(user)
+            if stores_data:
+                stores = Store.objects.filter(evotor_id__in=stores_data)
+                for store in stores:
+                    store.users.add(user)
 
             staff, _ = Staff.objects.get_or_create(user=user)
         else: 
@@ -115,7 +115,7 @@ class StaffSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         # Извлекаем данные
         phone_data = validated_data.pop('phone', None)
-        partners_data = validated_data.pop('stores', None)
+        stores_data = validated_data.pop('stores', None)
         role_data = validated_data.pop('role', None)
         role_id_data = validated_data.pop('role_id', None)
 
@@ -139,15 +139,15 @@ class StaffSerializer(serializers.ModelSerializer):
         instance.middle_name = validated_data.get('middle_name', instance.middle_name)
         
         # Обновляем привязку к партнёрам
-        partners = Partner.objects.filter(users=instance.user)
-        for partner in partners:
-            partner.users.remove(instance.user)
+        stores = Store.objects.filter(users=instance.user)
+        for store in stores:
+            store.users.remove(instance.user)
 
         # Добавляем новые привязки
-        if partners_data and instance.user:
-            new_partners = Partner.objects.filter(evotor_id__in=partners_data)
-            for new_partner in new_partners:
-                new_partner.users.add(instance.user)
+        if stores_data and instance.user:
+            new_stores = Store.objects.filter(evotor_id__in=stores_data)
+            for new_store in new_stores:
+                new_store.users.add(instance.user)
 
         # Обновляем роль
         if role_data:
@@ -165,7 +165,7 @@ class StaffSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation.pop('id', None)
         try:
-            representation['stores'] = [partner.evotor_id for partner in instance.user.partners.all()]
+            representation['stores'] = [store.evotor_id for store in instance.user.stores.all()]
             representation['phone'] = str(instance.user.username)
             role = instance.role.evotor
             if role:
@@ -185,22 +185,21 @@ class StaffsSerializer(serializers.ModelSerializer):
         model = Staff
         fields = ['items']
 
-    def create(self, validated_data):
-        items_data = validated_data.pop('items')
+    def create(self, validated_data):    
+        items_data = validated_data.get("items", [])
+        return [StaffSerializer().create(item_data) for item_data in items_data]
+
+    def update(self, instances, validated_data):
+        items_data = validated_data.get('items', [])
         staffs = []
 
         for item_data in items_data:
-            staff = StaffSerializer().create(item_data)
-            staffs.append(staff)
+            try:
+                staff_instance = instances.get(evotor_id=item_data['id'])  # `instance` — это QuerySet
+                staff = StaffSerializer().update(staff_instance, item_data)
+            except Staff.DoesNotExist:
+                continue  # Пропускаем, если объект не найден
 
-        return staffs
-
-    def update(self, validated_data):
-        items_data = validated_data.pop('items')
-        staffs = []
-
-        for item_data in items_data:
-            staff = StaffSerializer().update(item_data)
             staffs.append(staff)
 
         return staffs

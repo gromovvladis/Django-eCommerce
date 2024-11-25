@@ -4,8 +4,8 @@ from django.core.management.base import BaseCommand, CommandError
 
 from oscar.core.loading import get_class
 
-CatalogueImporter = get_class("partner.importers", "CatalogueImporter")
-ImportingError = get_class("partner.exceptions", "ImportingError")
+CatalogueImporter = get_class("store.importers", "CatalogueImporter")
+ImportingError = get_class("store.exceptions", "ImportingError")
 
 logger = logging.getLogger("oscar.catalogue.import")
 

@@ -1,6 +1,5 @@
 from decimal import Decimal as D
-from oscar.apps.address.models import UserAddress
-from oscar.apps.order.models import ShippingAddress
+from oscar.apps.address.models import UserAddress, ShippingAddress
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 
@@ -217,7 +216,7 @@ class OfferDiscount(Base):
     @property
     def discount_name(self):
         """
-        Returns the :py:attr:`name <oscar.apps.offer.abstract_models.BaseOfferMixin.name>` of the applied Offer.
+        Returns the :py:attr:`name <oscar.apps.offer.models.BaseOfferMixin.name>` of the applied Offer.
         """
         return self.offer.name
 

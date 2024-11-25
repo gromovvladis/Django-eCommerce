@@ -2,7 +2,7 @@
 {% load render_table from django_tables2 %}
 
 {% block body_class %}{{ block.super }} catalogue{% endblock %}
-{% block title %}Продукты | {{ block.super }}{% endblock %}
+{% block title %}Товары | {{ block.super }}{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
@@ -11,7 +11,7 @@
                 <a href="{% url 'dashboard:index' %}">Главная</a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
-                Продукты
+                Товары
             </li>
         </ol>
     </nav>
@@ -19,7 +19,7 @@
 
 {% block header %}
     <div class="page-header d-flex justify-content-between">
-        <h1>Продукты</h1>
+        <h1>Товары</h1>
     </div>
 {% endblock header %}
 

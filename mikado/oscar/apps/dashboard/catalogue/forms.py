@@ -20,7 +20,7 @@ Attribute = get_model("catalogue", "Attribute")
 AttributeSelect = get_class("dashboard.catalogue.widgets", "AttributeSelect")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
-StockRecord = get_model("partner", "StockRecord")
+StockRecord = get_model("store", "StockRecord")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductImage = get_model("catalogue", "ProductImage")
 ProductRecommendation = get_model("catalogue", "ProductRecommendation")
@@ -91,8 +91,8 @@ class ProductClassSelectForm(forms.Form):
     """
 
     product_class = forms.ModelChoiceField(
-        label="Создать продукт",
-        empty_label="Выберите тип продукта",
+        label="Создать товар",
+        empty_label="Выберите тип товара",
         queryset=ProductClass.objects.all(),
         widget=forms.Select(attrs={
             'class': 'select-field',
@@ -111,14 +111,14 @@ class ProductClassSelectForm(forms.Form):
 
 class ProductSearchForm(forms.Form):
     upc = forms.CharField(max_length=64, required=False, label="Код UPC")
-    title = forms.CharField(max_length=255, required=False, label="Имя продукта")
+    title = forms.CharField(max_length=255, required=False, label="Имя товара")
     categories = forms.ModelMultipleChoiceField(
         label="Категория",
         queryset=Category.objects.all(),
         required=False,
     )
     product_class = forms.ModelMultipleChoiceField(
-        label="Тип продукта",
+        label="Тип товара",
         queryset=ProductClass.objects.all(),
         required=False,
     )
@@ -140,7 +140,7 @@ class ProductSearchForm(forms.Form):
 class StockRecordForm(forms.ModelForm):
     def __init__(self, product_class, user, *args, **kwargs):
         # The user kwarg is not used by stock StockRecordForm. We pass it
-        # anyway in case one wishes to customise the partner queryset
+        # anyway in case one wishes to customise the store queryset
         self.user = user
         super().__init__(*args, **kwargs)
 
@@ -157,7 +157,7 @@ class StockRecordForm(forms.ModelForm):
     class Meta:
         model = StockRecord
         fields = [
-            "partner",
+            "store",
             "cost_price",
             "old_price",
             "price",
@@ -172,7 +172,7 @@ class StockRecordForm(forms.ModelForm):
 class StockRecordStockForm(forms.ModelForm):
     def __init__(self, product_class, user, *args, **kwargs):
         # The user kwarg is not used by stock StockRecordForm. We pass it
-        # anyway in case one wishes to customise the partner queryset
+        # anyway in case one wishes to customise the store queryset
         self.user = user
         super().__init__(*args, **kwargs)
 
@@ -363,7 +363,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         if "slug" in self.fields:
             self.fields["slug"].required = False
             self.fields["slug"].help_text = (
-                "Оставьте поле пустым, чтобы сгенерировать из названия продукта"
+                "Оставьте поле пустым, чтобы сгенерировать из названия товара"
             )
         if "title" in self.fields:
             self.fields["title"].widget = forms.TextInput(attrs={"autocomplete": "off"})
@@ -437,7 +437,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
                     self.fields["attr_is_variant_%s" % attribute.code] = forms.BooleanField(
                         required=False,
                         label="Используется для вариаций?",
-                        help_text="Данный атрибут можно использовать при создании вариативного продукта.",
+                        help_text="Данный атрибут можно использовать при создании вариативного товара.",
 
                     )
 
@@ -482,19 +482,16 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
         super()._post_clean()
 
-    def save(self, commit=True):
-        product = super().save(commit=commit)
+    def evotor_save(self, product):
         evotor_update = self.cleaned_data.get('evotor_update')
         if evotor_update:
             try:
-                if product.is_parent:
-                    product, error = EvatorCloud().update_or_create_evotor_group(product)
-                else:
-                    product, error = EvatorCloud().update_or_create_evotor_product(product)
+                product, error = EvatorCloud().update_or_create_evotor_product(product)
                 if error:
                     messages.warning(self.request, error)
             except Exception as e:
-                logger.error("Ошибка при отправке созданного / измененного пользователя в Эвотор. Ошибка %s", e)
+                logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
+
 
 class ProductCategoryForm(forms.ModelForm):
     class Meta:

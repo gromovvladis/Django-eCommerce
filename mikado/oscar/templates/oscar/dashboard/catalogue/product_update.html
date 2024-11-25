@@ -4,7 +4,7 @@
 
 {% block body_class %}{{ block.super }} create-page catalogue{% endblock %}
 
-{% block title %}{{ title }} | Продукты | {{ block.super }}{% endblock %}
+{% block title %}{{ title }} | Товары | {{ block.super }}{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
@@ -13,7 +13,7 @@
                 <a href="{% url 'dashboard:index' %}">Главная</a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:catalogue-product-list' %}">Продукты</a>
+                <a href="{% url 'dashboard:catalogue-product-list' %}">Товары</a>
             </li>
             {% if parent %}
                 <li class="breadcrumb-item">
@@ -307,18 +307,18 @@
                                                     <tr>
                                                         <td class="name">
                                                             {% if full_access %}
-                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.partner nolabel=True %}                                           
+                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.store nolabel=True %}                                           
                                                             {% else %}
-                                                                {{ stockrecord_form.instance.partner|default:"" }}
+                                                                {{ stockrecord_form.instance.store|default:"" }}
                                                             {% endif %}
                                                             <br>  
-                                                            {% if stockrecord_form.instance.partner_sku %}
+                                                            {% if stockrecord_form.instance.store_sku %}
                                                                 <span class="text-success">
                                                                     <i class="fa-solid fa-circle-check"></i>&nbsp; 
                                                                 </span>
                                                             {% endif %} 
                                                             <span class="text-muted">
-                                                                {{ stockrecord_form.instance.partner_sku|default:"" }}
+                                                                {{ stockrecord_form.instance.store_sku|default:"" }}
                                                             </span>
                                                             {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.id nolabel=True %}
                                                         </td>

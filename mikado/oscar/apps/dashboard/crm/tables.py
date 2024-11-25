@@ -5,8 +5,8 @@ from oscar.core.loading import get_class, get_model
 from django.utils.safestring import mark_safe
 
 DashboardTable = get_class("dashboard.tables", "DashboardTable")
-Partner = get_model("partner", "Partner")
-Terminal = get_model("partner", "Terminal")
+Store = get_model("store", "Store")
+Terminal = get_model("store", "Terminal")
 Staff = get_model("user", "Staff")
 Product = get_model('catalogue', 'Product')
 Category = get_model('catalogue', 'Category')
@@ -15,16 +15,16 @@ AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 
 
-class CRMPartnerEvotorTable(DashboardTable):
+class CRMStoreEvotorTable(DashboardTable):
     
     check = TemplateColumn(
-        template_name="oscar/dashboard/crm/partners/evotor_table/partner_row_checkbox.html",
+        template_name="oscar/dashboard/crm/stores/evotor_table/store_row_checkbox.html",
         verbose_name="",
         orderable=False,
     )
     name = TemplateColumn(
         verbose_name="Название",
-        template_name="oscar/dashboard/crm/partners/evotor_table/partner_row_name.html",
+        template_name="oscar/dashboard/crm/stores/evotor_table/store_row_name.html",
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
@@ -35,19 +35,19 @@ class CRMPartnerEvotorTable(DashboardTable):
     )
     address = TemplateColumn(
         verbose_name="Адрес",
-        template_name="oscar/dashboard/crm/partners/evotor_table/partner_row_address.html",
+        template_name="oscar/dashboard/crm/stores/evotor_table/store_row_address.html",
         order_by="address",
         attrs = {'th': {'class': 'address'},}
     )
     date = TemplateColumn(
         verbose_name="Дата",
-        template_name="oscar/dashboard/crm/partners/evotor_table/partner_row_date.html",
+        template_name="oscar/dashboard/crm/stores/evotor_table/store_row_date.html",
         order_by="updated_at",
         attrs = {'th': {'class': 'date'},}
     )
     actions = TemplateColumn(
         verbose_name="",
-        template_name="oscar/dashboard/crm/partners/evotor_table/partner_row_actions.html",
+        template_name="oscar/dashboard/crm/stores/evotor_table/store_row_actions.html",
         orderable=False,
         attrs = {'th': {'class': 'actions'},}
     )
@@ -56,7 +56,7 @@ class CRMPartnerEvotorTable(DashboardTable):
     caption = ngettext_lazy("%s Магазин Эвотор", "%s Магазинов Эвотор")
 
     class Meta(DashboardTable.Meta):
-        model = Partner
+        model = Store
         fields = (
             "name",
             "id",
@@ -76,49 +76,49 @@ class CRMPartnerEvotorTable(DashboardTable):
         empty_text = "Нет созданых точек продажи Эвотор"
 
 
-class CRMPartnerSiteTable(DashboardTable):
+class CRMStoreSiteTable(DashboardTable):
 
     check = TemplateColumn(
-        template_name="oscar/dashboard/crm/partners/site_table/partner_row_checkbox.html",
+        template_name="oscar/dashboard/crm/stores/site_table/store_row_checkbox.html",
         verbose_name="",
         orderable=False,
     )
     name = TemplateColumn(
         verbose_name="Название",
-        template_name="oscar/dashboard/crm/partners/site_table/partner_row_name.html",
+        template_name="oscar/dashboard/crm/stores/site_table/store_row_name.html",
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
     work_time = TemplateColumn(
         verbose_name="Время работы",
-        template_name="oscar/dashboard/partners/partner_row_time.html",
+        template_name="oscar/dashboard/stores/store_row_time.html",
         order_by="start_worktime",
         attrs = {'th': {'class': 'date'},}
     )
     staff = TemplateColumn(
         verbose_name="Персонал",
-        template_name="oscar/dashboard/partners/partner_row_staff.html",
+        template_name="oscar/dashboard/stores/store_row_staff.html",
         order_by="users",
         attrs = {'th': {'class': 'staff'},}
     )
     address = TemplateColumn(
         verbose_name="Адрес",
-        template_name="oscar/dashboard/partners/partner_row_address.html",
+        template_name="oscar/dashboard/stores/store_row_address.html",
         order_by="addresses",
         attrs = {'th': {'class': 'address'},}
     )
     actions = TemplateColumn(
         verbose_name="",
-        template_name="oscar/dashboard/partners/partner_row_actions.html",
+        template_name="oscar/dashboard/stores/store_row_actions.html",
         orderable=False,
         attrs = {'th': {'class': 'actions'},}
     )
 
     icon = "fas fa-house"
-    caption = ngettext_lazy("%s Точка продажи", "%s Точки продаж")
+    caption = ngettext_lazy("%s Магазин", "%s Магазинов")
 
     class Meta(DashboardTable.Meta):
-        model = Partner
+        model = Store
         fields = (
             "name",
             "work_time",
@@ -157,11 +157,11 @@ class CRMTerminalEvotorTable(DashboardTable):
         order_by="id",
         attrs = {'th': {'class': 'id'},}
     )
-    partners = TemplateColumn(
+    stores = TemplateColumn(
         verbose_name="Магазин",
-        template_name="oscar/dashboard/crm/terminals/evotor_table/terminal_row_partner.html",
+        template_name="oscar/dashboard/crm/terminals/evotor_table/terminal_row_store.html",
         order_by="store_id",
-        attrs = {'th': {'class': 'partners'},}
+        attrs = {'th': {'class': 'stores'},}
     )
     model = Column(
         verbose_name="Модель",
@@ -202,7 +202,7 @@ class CRMTerminalEvotorTable(DashboardTable):
             "check",
             "name",
             "id",
-            "partners",
+            "stores",
             "model",
             "imei",
             "date",
@@ -228,11 +228,11 @@ class CRMTerminalSiteTable(DashboardTable):
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
-    partners = TemplateColumn(
-        verbose_name="Точки продаж",
-        template_name="oscar/dashboard/partners/terminal_row_partner.html",
-        order_by="partner",
-        attrs = {'th': {'class': 'partners'},}
+    stores = TemplateColumn(
+        verbose_name="Магазины",
+        template_name="oscar/dashboard/stores/terminal_row_store.html",
+        order_by="store",
+        attrs = {'th': {'class': 'stores'},}
     )
     model = Column(
         verbose_name="Модель",
@@ -246,19 +246,19 @@ class CRMTerminalSiteTable(DashboardTable):
     )
     date_created = TemplateColumn(
         verbose_name="Создан",
-        template_name="oscar/dashboard/partners/terminal_row_date_created.html",
+        template_name="oscar/dashboard/stores/terminal_row_date_created.html",
         order_by="date_created",
         attrs = {'th': {'class': 'date_created'},}
     )
     date_updated = TemplateColumn(
         verbose_name="Изменен",
-        template_name="oscar/dashboard/partners/terminal_row_date_updated.html",
+        template_name="oscar/dashboard/stores/terminal_row_date_updated.html",
         order_by="date_updated",
         attrs = {'th': {'class': 'date_created'},}
     )
     actions = TemplateColumn(
         verbose_name="",
-        template_name="oscar/dashboard/partners/terminal_row_actions.html",
+        template_name="oscar/dashboard/stores/terminal_row_actions.html",
         orderable=False,
         attrs = {'th': {'class': 'actions'},}
     )
@@ -270,7 +270,7 @@ class CRMTerminalSiteTable(DashboardTable):
         model = Terminal
         fields = (
             "name",
-            "partners",
+            "stores",
             "model",
             "imei",
             "date_created",
@@ -279,7 +279,7 @@ class CRMTerminalSiteTable(DashboardTable):
         sequence = (
             "check",
             "name",
-            "partners",
+            "stores",
             "model",
             "imei",
             "date_created",
@@ -322,11 +322,11 @@ class CRMStaffEvotorTable(DashboardTable):
         order_by="phone",
         attrs = {'th': {'class': 'phone'},}
     )
-    partners = TemplateColumn(
-        verbose_name="Точки продаж",
-        template_name="oscar/dashboard/crm/staffs/evotor_table/staff_row_partners.html",
-        order_by="partners",
-        attrs = {'th': {'class': 'partners'},}
+    stores = TemplateColumn(
+        verbose_name="Магазины",
+        template_name="oscar/dashboard/crm/staffs/evotor_table/staff_row_stores.html",
+        order_by="stores",
+        attrs = {'th': {'class': 'stores'},}
     )
     date = TemplateColumn(
         verbose_name="Дата",
@@ -345,7 +345,7 @@ class CRMStaffEvotorTable(DashboardTable):
     caption = ngettext_lazy("%s Сотрудник Эвотор", "%s Сотрудники Эвотор")
 
     class Meta(DashboardTable.Meta):
-        model = Partner
+        model = Store
         fields = (
             "name",
             "id",
@@ -356,7 +356,7 @@ class CRMStaffEvotorTable(DashboardTable):
             "id",
             "role",
             "phone",
-            "partners",
+            "stores",
             "date",
             "actions",
         )
@@ -382,25 +382,25 @@ class CRMStaffSiteTable(DashboardTable):
     )
     role = TemplateColumn(
         verbose_name="Должность",
-        template_name="oscar/dashboard/partners/staff_row_role.html",
+        template_name="oscar/dashboard/stores/staff_row_role.html",
         order_by="role",
         attrs = {'th': {'class': 'role'},}
     )
     user = TemplateColumn(
         verbose_name="Пользователь",
-        template_name="oscar/dashboard/partners/staff_row_user.html",
+        template_name="oscar/dashboard/stores/staff_row_user.html",
         order_by="user",
         attrs = {'th': {'class': 'user'},}
     )
-    partners = TemplateColumn(
-        verbose_name="Точки продаж",
-        template_name="oscar/dashboard/partners/staff_row_partners.html",
-        order_by="partners",
-        attrs = {'th': {'class': 'partners'},}
+    stores = TemplateColumn(
+        verbose_name="Магазины",
+        template_name="oscar/dashboard/stores/staff_row_stores.html",
+        order_by="stores",
+        attrs = {'th': {'class': 'stores'},}
     )
     notif = TemplateColumn(
         verbose_name="Уведопления",
-        template_name="oscar/dashboard/partners/staff_row_notif.html",
+        template_name="oscar/dashboard/stores/staff_row_notif.html",
         order_by="telegram",
         attrs = {'th': {'class': 'notif'},}
     )
@@ -417,7 +417,7 @@ class CRMStaffSiteTable(DashboardTable):
     )
     actions = TemplateColumn(
         verbose_name="",
-        template_name="oscar/dashboard/partners/staff_row_actions.html",
+        template_name="oscar/dashboard/stores/staff_row_actions.html",
         orderable=False,
         attrs = {'th': {'class': 'actions'},}
     )
@@ -432,7 +432,7 @@ class CRMStaffSiteTable(DashboardTable):
             "name",
             "role",
             "user",
-            "partners",
+            "stores",
             "notif",
             "age",
             "is_active",
@@ -469,11 +469,11 @@ class CRMProductEvotorTable(DashboardTable):
         order_by="parent",
         attrs = {'th': {'class': 'parent'},}
     )
-    partners = TemplateColumn(
-        verbose_name="Точка продажи",
-        template_name="oscar/dashboard/crm/products/evotor_table/product_row_partner.html",
-        order_by="partner",
-        attrs = {'th': {'class': 'partners'},}
+    stores = TemplateColumn(
+        verbose_name="Магазин",
+        template_name="oscar/dashboard/crm/products/evotor_table/product_row_store.html",
+        order_by="store",
+        attrs = {'th': {'class': 'stores'},}
     )
     price = TemplateColumn(
         verbose_name="Цена",
@@ -505,7 +505,7 @@ class CRMProductEvotorTable(DashboardTable):
     )
 
     icon = "fas fa-cookie-bite"
-    caption = ngettext_lazy("%s Продукт", "%s Продуктов")
+    caption = ngettext_lazy("%s товар", "%s Продуктов")
 
     class Meta(DashboardTable.Meta):
         model = Staff
@@ -514,7 +514,7 @@ class CRMProductEvotorTable(DashboardTable):
             "name",
             "description",
             "parent",
-            "partners",
+            "stores",
             "price",
             "tax",
             "measure_name",
@@ -524,7 +524,7 @@ class CRMProductEvotorTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Список продуктов пуст"
+        empty_text = "Список товаров пуст"
 
 
 class CRMProductSiteTable(DashboardTable):
@@ -604,7 +604,7 @@ class CRMProductSiteTable(DashboardTable):
     )
 
     icon = "fas fa-chart-bar"
-    caption = ngettext_lazy("%s Продукт", "%s Продуктов")
+    caption = ngettext_lazy("%s товар", "%s Продуктов")
 
     class Meta(DashboardTable.Meta):
         model = Product
@@ -628,7 +628,7 @@ class CRMProductSiteTable(DashboardTable):
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Нет созданых продуктов"
+        empty_text = "Нет созданых товаров"
 
 # ===========================================
 
@@ -652,11 +652,11 @@ class CRMGroupEvotorTable(DashboardTable):
         order_by="parent",
         attrs = {'th': {'class': 'parent'},}
     )
-    partners = TemplateColumn(
-        verbose_name="Точка продажи",
-        template_name="oscar/dashboard/crm/groups/evotor_table/group_row_partner.html",
-        order_by="partner",
-        attrs = {'th': {'class': 'partners'},}
+    stores = TemplateColumn(
+        verbose_name="Магазин",
+        template_name="oscar/dashboard/crm/groups/evotor_table/group_row_store.html",
+        order_by="store",
+        attrs = {'th': {'class': 'stores'},}
     )
     attributes = TemplateColumn(
         verbose_name="Атрибуты",
@@ -681,7 +681,7 @@ class CRMGroupEvotorTable(DashboardTable):
             "name",
             "description",
             "parent",
-            "partners",
+            "stores",
             "price",
             "tax",
             "measure_name",

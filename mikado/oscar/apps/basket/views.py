@@ -67,7 +67,7 @@ class BasketView(ModelFormSetView):
 
     def get_queryset(self):
         """
-        Return list of :py:class:`Line <oscar.apps.basket.abstract_models.AbstractLine>`
+        Return list of :py:class:`Line <oscar.apps.basket.models.Line>`
         instances associated with the current basket.
         """
         return self.request.basket._all_lines()

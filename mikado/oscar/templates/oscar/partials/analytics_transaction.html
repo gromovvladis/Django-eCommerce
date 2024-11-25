@@ -11,7 +11,7 @@
       items: [
           {% for line in order.lines.all %}
           {
-            'id': '{{ line.partner_sku|escapejs }}',
+            'id': '{{ line.store_sku|escapejs }}',
             'name': '{{ line.title|escapejs }}',
             'category': '{{ line.category|default:"Uncategorised"|escapejs }}',
             'price': '{{ line.unit_price|unlocalize|escapejs }}',

@@ -128,7 +128,7 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
             data: {
                 labels: products_title,
                 datasets: [{
-                    label: 'Самые продаваемые продукты',
+                    label: 'Самые продаваемые товары',
                     data: products_quantity,
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.3)',

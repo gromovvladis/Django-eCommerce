@@ -31,7 +31,7 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ListView):
 
     def get_queryset(self):
         """
-        Return Queryset of :py:class:`Order <oscar.apps.order.abstract_models.AbstractOrder>`
+        Return Queryset of :py:class:`Order <oscar.apps.order.models.Order>`
         instances for the currently authenticated user.
         """        
         return self.model.objects.filter(Q(user=self.request.user) & Q(status='Завершен') & Q(has_review=False))
@@ -58,7 +58,7 @@ class OrderFeedbackListView(PageTitleMixin, ListView):
 
     def get_queryset(self):
         """
-        Return Queryset of :py:class:`Order <oscar.apps.order.abstract_models.AbstractOrder>`
+        Return Queryset of :py:class:`Order <oscar.apps.order.models.Order>`
         instances for the currently authenticated user.
         """        
         return self.model.objects.filter(user=self.request.user)

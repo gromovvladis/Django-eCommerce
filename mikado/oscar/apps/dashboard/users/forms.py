@@ -98,8 +98,8 @@ class StaffForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, partner=None, *args, **kwargs):
-        self.partner = partner
+    def __init__(self, store=None, *args, **kwargs):
+        self.store = store
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['role'].choices = Staff.get_role_choices()
@@ -144,8 +144,8 @@ class StaffForm(forms.ModelForm):
         user, created = User.objects.get_or_create(username=username)
         user.is_staff = True
         
-        if self.partner:
-            self.partner.users.add(user)
+        if self.store:
+            self.store.users.add(user)
 
         if self.instance.pk:
             staff = self.instance
@@ -225,7 +225,7 @@ class GroupForm(forms.ModelForm):
        просматривать / payment.read
        изменять платежи / payment.make_refund
 
-    точки продажи / partner +
+    Магазины / store +
        полный доступ / staff.full_access
 
     клиенты /user +
@@ -317,7 +317,7 @@ class GroupForm(forms.ModelForm):
 
 
 #             # Обработка доступа для пользователя с ограниченным доступом
-#             # dashboard_access_perm = [Permission.objects.get(codename="dashboard_access", content_type__app_label="partner")]
+#             # dashboard_access_perm = [Permission.objects.get(codename="dashboard_access", content_type__app_label="store")]
 
 #             # access_permissions = {
 #             #     "product_access": {
@@ -453,7 +453,7 @@ class GroupForm(forms.ModelForm):
     #     role = self.cleaned_data.get("role", "limited")
     #     user.is_staff = role == "staff"
     #     user.save()
-    #     self.partner.users.add(user)
+    #     self.store.users.add(user)
     #     if staff:
     #         # Если это сотрудник, создаем профиль
     #         Profile.objects.create(
@@ -478,7 +478,7 @@ class GroupForm(forms.ModelForm):
 
     #             dashboard_access_perm = []
     #             dashboard_access_perm.append(Permission.objects.get(
-    #                 codename="dashboard_access", content_type__app_label="partner"
+    #                 codename="dashboard_access", content_type__app_label="store"
     #             ))
 
     #             if product_access == "all":

@@ -163,9 +163,9 @@
                     </div>
 
                     <a href="{% url 'address:pickup-address' %}" class="v-checkout__detail-text">
-                        <address> {{ order.basket.partner }}
+                        <address> {{ order.basket.store }}
                             <br>
-                            {{ order.basket.partner.primary_address }}
+                            {{ order.basket.store.primary_address }}
                         </address>
                     </a>
 

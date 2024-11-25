@@ -18,7 +18,7 @@ class CRMConfig(OscarConfig):
         self.crm_api_staff_view = get_class("crm.views", "CRMStaffEndpointView")
         self.crm_api_role_view = get_class("crm.views", "CRMRoleEndpointView")
         self.crm_api_terminal_view = get_class("crm.views", "CRMTerminalEndpointView")
-        self.crm_api_partner_view = get_class("crm.views", "CRMPartnerEndpointView")
+        self.crm_api_store_view = get_class("crm.views", "CRMStoreEndpointView")
         self.crm_api_product_view = get_class("crm.views", "CRMProductEndpointView")
         self.crm_api_docs_view = get_class("crm.views", "CRMDocsEndpointView")
         self.crm_api_installation_view = get_class("crm.views", "CRMInstallationEndpointView")
@@ -31,7 +31,7 @@ class CRMConfig(OscarConfig):
             path("api/staffs/", self.crm_api_staff_view.as_view(), name="api-staffs"),
             path("api/roles/", self.crm_api_role_view.as_view(), name="api-staffs"),
             path("api/terminals/", self.crm_api_terminal_view.as_view(), name="api-terminals"),
-            path("api/partners/", self.crm_api_partner_view.as_view(), name="api-partners"),
+            path("api/stores/", self.crm_api_store_view.as_view(), name="api-stores"),
             path("api/products/", self.crm_api_product_view.as_view(), name="api-products"),
             path("api/docs/", self.crm_api_docs_view.as_view(), name="api-docs"),
 

@@ -19,7 +19,7 @@ def check_permissions(user, permissions):
     Example usage:
     - permissions_required(['is_anonymous', ])
       would replace login_forbidden
-    - permissions_required((['is_staff',], ['partner.dashboard_access']))
+    - permissions_required((['is_staff',], ['store.dashboard_access']))
       allows both staff users and users with the above permission
     """
 

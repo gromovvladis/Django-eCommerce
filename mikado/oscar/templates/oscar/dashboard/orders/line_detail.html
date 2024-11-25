@@ -62,17 +62,17 @@
         </div>
         <div class="col-md-4">
             <div class="table-header">
-                <h3>Точка продажи</h3>
+                <h3>Магазин</h3>
             </div>
             <table class="table table-striped table-bordered">
                 <tr>
                     <th>Статус</th><td>{{ line.status|default:"-" }}</td>
                 </tr>
                 <tr>
-                    <th>Название точки продажи</th><td>{{ line.partner_name }}</td>
+                    <th>Название магазина</th><td>{{ line.store_name }}</td>
                 </tr>
                 <tr>
-                    <th>SKU</th><td>{{ line.partner_sku }}</td>
+                    <th>SKU</th><td>{{ line.store_sku }}</td>
                 </tr>
             </table>
         </div>
@@ -82,10 +82,10 @@
             </div>
             <table class="table table-striped table-bordered">
                 <tr>
-                    <th>Номер точки продажи</th><td>{{ line.partner_line_reference|default:"-" }}</td>
+                    <th>Номер магазина</th><td>{{ line.store_line_reference|default:"-" }}</td>
                 </tr>
                 <tr>
-                    <th>Заметки точки продажи</th><td>{{ line.partner_line_notes|default:"-" }}</td>
+                    <th>Заметки магазина</th><td>{{ line.store_line_notes|default:"-" }}</td>
                 </tr>
             </table>
         </div>

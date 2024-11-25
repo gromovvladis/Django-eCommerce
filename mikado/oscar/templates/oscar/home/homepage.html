@@ -12,18 +12,18 @@
 {% block breadcrumbs %}{% endblock %}
 
 {% block nav_title %}
-    {% cache 3600 homepage_title partner.id %}
+    {% cache 3600 homepage_title store.id %}
         <a href="{{ homepage_url }}" data-id="header-logo"
             class="logo_nav d-sm-flex shrink router-link-exact-active router-link-active"
             aria-current="page" aria-label="Домашняя страница">
             {% icon file_name='header/logo' %}
         </a>
-        {% if partners_select %}
-            <button onclick="openPartnerModal()" class="partner_select checked text-left d-flex flex-column ml-2 pd-0">
-                {% if partner %}
-                    <span class="header_partner">{{ partner }}</span>
-                    {% if partner.primary_address %}
-                        <span class="header_address">{{ partner.primary_address }}</span>
+        {% if stores_select %}
+            <button onclick="openStoreModal()" class="store_select checked text-left d-flex flex-column ml-2 pd-0">
+                {% if store %}
+                    <span class="header_store">{{ store }}</span>
+                    {% if store.primary_address %}
+                        <span class="header_address">{{ store.primary_address }}</span>
                     {% endif %}
                 {% endif %}
             </button>

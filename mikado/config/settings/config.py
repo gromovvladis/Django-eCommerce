@@ -21,7 +21,7 @@ class Shop(OscarConfig):
         self.shipping_app = apps.get_app_config("shipping")
         self.address_app = apps.get_app_config("address")
         self.payment_app = apps.get_app_config("payment")
-        self.partner_app = apps.get_app_config("partner")
+        self.store_app = apps.get_app_config("store")
         self.delivery_app = apps.get_app_config("delivery")
         self.telegram_app = apps.get_app_config("telegram")
         self.crm_app = apps.get_app_config("crm")
@@ -40,7 +40,7 @@ class Shop(OscarConfig):
             path("shipping/", self.shipping_app.urls),
             path("address/", self.address_app.urls),
             path("payment/", self.payment_app.urls),
-            path("partner/", self.partner_app.urls),
+            path("store/", self.store_app.urls),
             path("delivery/", self.delivery_app.urls),
             path("telegram/", self.telegram_app.urls),
             path("crm/", self.crm_app.urls),

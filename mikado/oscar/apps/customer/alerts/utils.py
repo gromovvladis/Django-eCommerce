@@ -8,7 +8,7 @@ from oscar.core.loading import get_class, get_model
 # ProductAlert = get_model("customer", "ProductAlert")
 Product = get_model("catalogue", "Product")
 Dispatcher = get_class("communication.utils", "Dispatcher")
-Selector = get_class("partner.strategy", "Selector")
+Selector = get_class("store.strategy", "Selector")
 
 # alerts_logger = logging.getLogger("oscar.alerts")
 

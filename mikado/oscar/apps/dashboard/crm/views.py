@@ -7,7 +7,7 @@ from oscar.apps.catalogue.serializers import ProductsGroupSerializer, ProductsSe
 from oscar.apps.crm.client import EvatorCloud
 from oscar.apps.customer.serializers import StaffsSerializer
 from oscar.apps.dashboard.crm.mixins import CRMTablesMixin
-from oscar.apps.partner.serializers import PartnersSerializer, TerminalsSerializer
+from oscar.apps.store.serializers import StoresSerializer, TerminalsSerializer
 from oscar.core.loading import get_class, get_classes, get_model
 
 from django.contrib import messages
@@ -19,20 +19,20 @@ import logging
 
 logger = logging.getLogger("oscar.dashboard")
 
-Partner = get_model("partner", "Partner")
+Store = get_model("store", "Store")
 Staff = get_model("user", "Staff")
-Terminal = get_model("partner", "Terminal")
+Terminal = get_model("store", "Terminal")
 Order = get_model("order", "Order")
 Line = get_model("order", "Line")
 Product = get_model('catalogue', 'Product')
 Category = get_model("catalogue", "Category")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 
-CRMPartnerForm = get_class("dashboard.crm.forms", "CRMPartnerForm")
+CRMStoreForm = get_class("dashboard.crm.forms", "CRMStoreForm")
 
 (
-    CRMPartnerEvotorTable,
-    CRMPartnerSiteTable,
+    CRMStoreEvotorTable,
+    CRMStoreSiteTable,
     CRMTerminalEvotorTable,
     CRMTerminalSiteTable,
     CRMStaffEvotorTable,
@@ -44,8 +44,8 @@ CRMPartnerForm = get_class("dashboard.crm.forms", "CRMPartnerForm")
 ) = get_classes(
     "dashboard.crm.tables",
     (
-        "CRMPartnerEvotorTable",
-        "CRMPartnerSiteTable",
+        "CRMStoreEvotorTable",
+        "CRMStoreSiteTable",
         "CRMTerminalEvotorTable",
         "CRMTerminalSiteTable",
         "CRMStaffEvotorTable",
@@ -57,19 +57,19 @@ CRMPartnerForm = get_class("dashboard.crm.forms", "CRMPartnerForm")
     ),
 )
 
-class CRMPartnerListView(CRMTablesMixin):
-    template_name = 'oscar/dashboard/crm/partners/partner_list.html'
-    model = Partner
-    serializer = PartnersSerializer
+class CRMStoreListView(CRMTablesMixin):
+    template_name = 'oscar/dashboard/crm/stores/store_list.html'
+    model = Store
+    serializer = StoresSerializer
     context_table_name = "tables"
-    table_prefix = "partner_{}-"
-    table_evotor = CRMPartnerEvotorTable
-    table_site = CRMPartnerSiteTable
-    url_redirect = reverse_lazy("dashboard:crm-partners")
+    table_prefix = "store_{}-"
+    table_evotor = CRMStoreEvotorTable
+    table_site = CRMStoreSiteTable
+    url_redirect = reverse_lazy("dashboard:crm-stores")
     
     def get_queryset(self):
         
-        data_json = EvatorCloud().get_partners() 
+        data_json = EvatorCloud().get_stores() 
 
         error = data_json.get('error')
         if error:
@@ -116,7 +116,7 @@ class CRMPartnerListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_site_partners(data_items, is_filtered)
+        msg, success = EvatorCloud().create_or_update_site_stores(data_items, is_filtered)
         if success:
             messages.success(
                 self.request,
@@ -162,19 +162,19 @@ class CRMTerminalListView(CRMTablesMixin):
                 evotor_id = data_item['id']
                 data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
                 name = data_item['name']
-                partner_id = data_item.get('store_id')
+                store_id = data_item.get('store_id')
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
                 
                 if model_instance:
                     # Партнер существует: проверяем совпадение полей
                     data_item['is_created'] = True
-                    data_item['partners'] = model_instance.partners.all()
+                    data_item['stores'] = model_instance.stores.all()
                     # Проверка совпадения полей
-                    partner_matches = partner_id in model_instance.partners.values_list('evotor_id', flat=True)
-                    data_item['is_valid'] = model_instance.name == name and partner_matches
+                    store_matches = store_id in model_instance.stores.values_list('evotor_id', flat=True)
+                    data_item['is_valid'] = model_instance.name == name and store_matches
                 else:
                     # Партнер не существует
-                    data_item['partners'] = [partner_id]
+                    data_item['stores'] = [store_id]
                     data_item['is_created'] = False
                     data_item['is_valid'] = False
 
@@ -243,18 +243,18 @@ class CRMStaffListView(CRMTablesMixin):
                 
                 if model_instance:
                     data_item['is_created'] = True
-                    data_item['partners'] = model_instance.user.partners.all() if model_instance.user else []
-                    partner_evotor_ids = set(model_instance.user.partners.values_list('evotor_id', flat=True)) if model_instance.user else set()
-                    partner_matches = bool(partner_evotor_ids.intersection(stores_ids))
+                    data_item['stores'] = model_instance.user.stores.all() if model_instance.user else []
+                    store_evotor_ids = set(model_instance.user.stores.values_list('evotor_id', flat=True)) if model_instance.user else set()
+                    store_matches = bool(store_evotor_ids.intersection(stores_ids))
                     data_item['is_valid'] = (
                         model_instance.first_name == first_name
                         and model_instance.last_name == last_name
                         and model_instance.middle_name == middle_name
-                        and partner_matches
+                        and store_matches
                     )
                 else:
                     data_item.update({
-                        'partners': stores_ids,
+                        'stores': stores_ids,
                         'is_created': False,
                         'is_valid': False
                     })
@@ -288,7 +288,7 @@ class CRMStaffListView(CRMTablesMixin):
 class CRMGroupsListView(CRMTablesMixin):
     template_name = 'oscar/dashboard/crm/groups/group_list.html'
     model = Category
-    form_class = CRMPartnerForm
+    form_class = CRMStoreForm
     serializer = ProductsGroupSerializer
     context_table_name = "tables"
     table_prefix = "group_{}-"
@@ -306,16 +306,16 @@ class CRMGroupsListView(CRMTablesMixin):
             return []
 
         data = self.form.cleaned_data
-        partner_evotor_id = data.get("partner") or self.form.fields.get("partner").initial
+        store_evotor_id = data.get("store") or self.form.fields.get("store").initial
 
-        if not partner_evotor_id:
+        if not store_evotor_id:
             messages.error(
                 self.request,
-                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID точки продаж. Обновите список точек продаж",
+                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список точек продаж",
             )
             return []
         
-        data_json = EvatorCloud().get_groups(partner_evotor_id) 
+        data_json = EvatorCloud().get_groups(store_evotor_id) 
                 
         error = data_json.get('error')
         if error:
@@ -380,7 +380,7 @@ class CRMGroupsListView(CRMTablesMixin):
 class CRMProductListView(CRMTablesMixin):
     template_name = 'oscar/dashboard/crm/products/product_list.html'
     model = Product
-    form_class = CRMPartnerForm
+    form_class = CRMStoreForm
     serializer = ProductsSerializer
     context_table_name = "tables"
     table_prefix = "product_{}-"
@@ -399,16 +399,16 @@ class CRMProductListView(CRMTablesMixin):
             return []
 
         data = self.form.cleaned_data
-        partner_evotor_id = data.get("partner") or self.form.fields.get("partner").initial
+        store_evotor_id = data.get("store") or self.form.fields.get("store").initial
 
-        if not partner_evotor_id:
+        if not store_evotor_id:
             messages.error(
                 self.request,
-                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID точки продаж. Обновите список точек продаж",
+                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список точек продаж",
             )
             return []
         
-        data_json = EvatorCloud().get_products(partner_evotor_id) 
+        data_json = EvatorCloud().get_products(store_evotor_id) 
 
         error = data_json.get('error')
         if error:
@@ -428,12 +428,11 @@ class CRMProductListView(CRMTablesMixin):
             for data_item in data_items:
                 evotor_id = data_item['id']
                 data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
-                # first_name = data_item.get('name', '')
                 try:
                     store_id = data_item['store_id']
-                    data_item['partner'] = Partner.objects.get(evotor_id=store_id)
-                except Partner.DoesNotExist:
-                    data_item['partner'] = None
+                    data_item['store'] = Store.objects.get(evotor_id=store_id)
+                except Store.DoesNotExist:
+                    data_item['store'] = None
                     
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
                 
@@ -441,17 +440,17 @@ class CRMProductListView(CRMTablesMixin):
                     data_item['is_created'] = True
                     data_item['is_valid'] = True
                     
-                    # partner_evotor_ids = set(model_instance.user.partners.values_list('evotor_id', flat=True)) if model_instance.user else set()
-                    # partner_matches = bool(partner_evotor_ids.intersection(stores_ids))
+                    # store_evotor_ids = set(model_instance.user.stores.values_list('evotor_id', flat=True)) if model_instance.user else set()
+                    # store_matches = bool(store_evotor_ids.intersection(stores_ids))
                     # data_item['is_valid'] = (
                     #     model_instance.first_name == first_name
                     #     and model_instance.last_name == last_name
                     #     and model_instance.middle_name == middle_name
-                    #     and partner_matches
+                    #     and store_matches
                     # )
                 else:
                     data_item.update({
-                        # 'partners': stores_ids,
+                        # 'stores': stores_ids,
                         'is_created': False,
                         'is_valid': False
                     })

@@ -5,7 +5,7 @@ from oscar.core.loading import get_model
 
 logger = logging.getLogger("oscar.customer")
 
-Partner = get_model("partner", "Partner")
+Store = get_model("store", "Store")
 Product = get_model("catalogue", "Product")
 Source = get_model("payment", "Source")
 SourceType = get_model("payment", "SourceType")
@@ -28,7 +28,7 @@ SourceType = get_model("payment", "SourceType")
 # class ReceiptSerializer(serializers.ModelSerializer):
 #     evotor_id = serializers.CharField(source="id")  # Переносим id в evotor_id
 #     device_id = serializers.CharField()
-#     partner = serializers.PrimaryKeyRelatedField(queryset=Partner.objects.all())
+#     store = serializers.PrimaryKeyRelatedField(queryset=Store.objects.all())
 #     operation_type = serializers.ChoiceField(
 #         choices=Receipt.RECEIPT_CHOICES, source="type"
 #     )
@@ -59,7 +59,7 @@ SourceType = get_model("payment", "SourceType")
 #         fields = [
 #             "evotor_id",
 #             "device_id",
-#             "partner",
+#             "store",
 #             "operation_type",
 #             "shift_id",
 #             "employee_id",

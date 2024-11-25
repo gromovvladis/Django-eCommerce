@@ -12,7 +12,7 @@ class DashboardConfig(OscarDashboardConfig):
     namespace = "dashboard"
     permissions_map = {
         "index": (["is_staff"]),
-        # "index": (["is_staff"], ["partner.dashboard_access"]),
+        # "index": (["is_staff"], ["store.dashboard_access"]),
     }
 
     # pylint: disable=attribute-defined-outside-init
@@ -25,7 +25,7 @@ class DashboardConfig(OscarDashboardConfig):
         self.orders_app = apps.get_app_config("orders_dashboard")
         self.users_app = apps.get_app_config("users_dashboard")
         self.pages_app = apps.get_app_config("pages_dashboard")
-        self.partners_app = apps.get_app_config("partners_dashboard")
+        self.stores_app = apps.get_app_config("stores_dashboard")
         self.offers_app = apps.get_app_config("offers_dashboard")
         self.ranges_app = apps.get_app_config("ranges_dashboard")
         self.reviews_app = apps.get_app_config("reviews_dashboard")
@@ -48,7 +48,7 @@ class DashboardConfig(OscarDashboardConfig):
             path("orders/", include(self.orders_app.urls[0])),
             path("users/", include(self.users_app.urls[0])),
             path("pages/", include(self.pages_app.urls[0])),
-            path("partners/", include(self.partners_app.urls[0])),
+            path("stores/", include(self.stores_app.urls[0])),
             path("offers/", include(self.offers_app.urls[0])),
             path("ranges/", include(self.ranges_app.urls[0])),
             path("reviews/", include(self.reviews_app.urls[0])),

@@ -478,11 +478,11 @@ var oscar = (function(o, $) {
                 
                 toggleActionsDiv();
 
-                var partnerForm = document.getElementById('partner_form');
-                if (partnerForm) {
-                    var selectInput = partnerForm.querySelector('select');
+                var storeForm = document.getElementById('store_form');
+                if (storeForm) {
+                    var selectInput = storeForm.querySelector('select');
                     selectInput.addEventListener('change', function() {
-                        partnerForm.submit();
+                        storeForm.submit();
                     });
                 }
             }
@@ -569,11 +569,11 @@ var oscar = (function(o, $) {
                     }
                 });
 
-                var partnerForm = document.getElementById('partner_form');
-                if (partnerForm) {
-                    var selectInput = partnerForm.querySelector('select');
+                var storeForm = document.getElementById('store_form');
+                if (storeForm) {
+                    var selectInput = storeForm.querySelector('select');
                     selectInput.addEventListener('change', function() {
-                        partnerForm.submit();
+                        storeForm.submit();
                     });
                 }
             }

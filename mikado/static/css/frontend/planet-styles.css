@@ -14225,32 +14225,32 @@ ymaps[class*="search__suggest-item_selected"] {
 
 
 
-.header_partner{
+.header_store{
     font-weight: 500;
     transition: all .1s linear;
     cursor: pointer;
 }
 
 /* Базовые стили для label */
-.partner_select {
+.store_select {
     cursor: pointer;
     transition: background-color 0.3s, border-color 0.3s;
 }
 
 /* Базовые стили для label */
-/* .v-app-nav .partner_select { */
-/* .v-app__header-left .partner_select {
+/* .v-app-nav .store_select { */
+/* .v-app__header-left .store_select {
     border-radius: 10px;
     background: rgb(243, 243, 247);
     padding: 0.35rem 1rem;
 } */
 
-.partner_select.checked .header_partner{
+.store_select.checked .header_store{
     color: var(--color-secondary);
 }
 
 /* Эффект наведения */
-.partner_select:hover .header_partner {
+.store_select:hover .header_store {
     color: var(--color-primary);
 }
 

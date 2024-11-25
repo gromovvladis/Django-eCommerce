@@ -2,7 +2,7 @@ import uuid
 from django.urls import reverse_lazy
 from django.conf import settings
 import logging
-from oscar.apps.order.abstract_models import PaymentEventQuantity
+from oscar.apps.order.models import PaymentEventQuantity
 from oscar.apps.payment.exceptions import DebitedAmountIsNotEqualsRefunded, UnableToRefund, UnableToTakePayment
 from oscar.apps.payment.models import Source, Transaction
 from oscar.apps.order.models import Order, PaymentEvent, PaymentEventType
@@ -154,7 +154,7 @@ class PaymentMethodHelper(object):
             order.set_status(new_status)
     
 
-class AbstractPaymentMethod(PaymentMethodHelper):
+class PaymentMethod(PaymentMethodHelper):
 
     #override pass
     def pay(self, order, amount=None, email=None):
@@ -364,11 +364,7 @@ class AbstractPaymentMethod(PaymentMethodHelper):
         return self.payment_method
 
 
-    class Meta:
-        abstract = True
-
-
-class Yoomoney(AbstractPaymentMethod):
+class Yoomoney(PaymentMethod):
 
     def pay(self, order, amount=None, email=None):
 
@@ -499,7 +495,7 @@ class Yoomoney(AbstractPaymentMethod):
         return responce
     
 
-class Cash(AbstractPaymentMethod):
+class Cash(PaymentMethod):
     def pay(self, order, amount=None, email=None):
         pass
 
@@ -516,7 +512,7 @@ class Cash(AbstractPaymentMethod):
         pass
     
  
-class Card(AbstractPaymentMethod):
+class Card(PaymentMethod):
     def pay(self, order, amount=None):
         pass
 

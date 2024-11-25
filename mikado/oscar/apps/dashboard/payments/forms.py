@@ -68,8 +68,8 @@ class OrderSearchForm(forms.Form):
     order_number = forms.CharField(required=False, label="Номер заказа")
     username = forms.CharField(required=False, label="Телефон клиента")
     product_title = forms.CharField(required=False, label="Наименование товара")
-    upc = forms.CharField(required=False, label="Товарный код продукта UPC")
-    partner_sku = forms.CharField(required=False, label="Артикул в точке продажи")
+    upc = forms.CharField(required=False, label="Товарный код товара UPC")
+    evotor_code = forms.CharField(required=False, label="Артикул в магазине")
 
     status_choices = (("", "---------"),) + tuple(
         [(v, v) for v in Order.all_statuses()]
