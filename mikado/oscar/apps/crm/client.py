@@ -819,18 +819,7 @@ class EvotorProductClient(EvotorAPICloud):
             }
         """
         return self.update_or_create_evotor_products([product])
-    
-        stockrecords = product.stockrecords.filter(
-            ~Q(evotor_id__isnull=True) & ~Q(evotor_id="")
-        ).distinct("evotor_id")
 
-        if product.evotor_id:
-            for stockrecord in stockrecords:
-                return self.update_evotor_products([product], stockrecord.store.evotor_id)
-        else:
-            for stockrecord in stockrecords:
-                return self.create_evotor_products([product], stockrecord.store.evotor_id)
-            
     def update_or_create_evotor_products(self, products):
         """
         Создаёт или заменяет товары или модификации товаров в магазине. Идентификаторы объектов формирует клиент API.
@@ -890,62 +879,61 @@ class EvotorProductClient(EvotorAPICloud):
 
         return products, errors
 
-    # def update_evotor_stockrecord(self, product, store_id):
-    #     """
-    #     Обновить данные товара
+    def update_evotor_stockrecord(self, product, store_id):
+        """
+        Обновить данные товара
 
-    #     Создаёт или заменяет в магазине один товар или модификацию товара с указанным идентификатором.
-    #     PATCH /stores/{store-id}/products/{product-id}
+        Создаёт или заменяет в магазине один товар или модификацию товара с указанным идентификатором.
+        PATCH /stores/{store-id}/products/{product-id}
 
-    #     Обновляет цену, закупочную цену и остатки товара или модификации товара в магазине.
-    #     Вы можете обновить как один, так и несколько параметров.
-    #     Запрос не может быть пустым.
+        Обновляет цену, закупочную цену и остатки товара или модификации товара в магазине.
+        Вы можете обновить как один, так и несколько параметров.
+        Запрос не может быть пустым.
 
-    #     product - объект Product
+        product - объект Product
 
-    #     ТЕЛО: 
-    #         {
-    #         "quantity": 12,
-    #         "cost_price": 100.123,
-    #         "price": 123.12
-    #         }
+        ТЕЛО: 
+            {
+            "quantity": 12,
+            "cost_price": 100.123,
+            "price": 123.12
+            }
 
-    #     ОТВЕТ: 
-    #         {
-    #             "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-    #             "name": "Сидр",
-    #             "measure_name": "шт",
-    #             "tax": "VAT_18",
-    #             "allow_to_sell": true,
-    #             "price": 123.12,
-    #             "description": "Вкусный яблочный сидр",
-    #             "article_number": "СДР-ЯБЛЧ",
-    #             "code": "42",
-    #             "barcodes": [
-    #                 "2000000000060"
-    #             ],
-    #             "type": "ALCOHOL_NOT_MARKED",
-    #             "id": "01ba18b6-8707-5f47-3d9c-4db058054cb2",
-    #             "quantity": 12,
-    #             "cost_price": 100.123,
-    #             "attributes_choices": {},
-    #             "store_id": "string",
-    #             "user_id": "string",
-    #             "created_at": "string",
-    #             "updated_at": "string"
-    #         }
-    #     """
+        ОТВЕТ: 
+            {
+                "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
+                "name": "Сидр",
+                "measure_name": "шт",
+                "tax": "VAT_18",
+                "allow_to_sell": true,
+                "price": 123.12,
+                "description": "Вкусный яблочный сидр",
+                "article_number": "СДР-ЯБЛЧ",
+                "code": "42",
+                "barcodes": [
+                    "2000000000060"
+                ],
+                "type": "ALCOHOL_NOT_MARKED",
+                "id": "01ba18b6-8707-5f47-3d9c-4db058054cb2",
+                "quantity": 12,
+                "cost_price": 100.123,
+                "attributes_choices": {},
+                "store_id": "string",
+                "user_id": "string",
+                "created_at": "string",
+                "updated_at": "string"
+            }
+        """
 
-    #     serializer = StockrecordSerializer(product)
-    #     product_json = json.loads(JSONRenderer().render(serializer.data).decode('utf-8'))
+        serializer = StockrecordSerializer(product)
+        product_json = json.loads(JSONRenderer().render(serializer.data).decode('utf-8'))
 
-    #     endpoint = f"stores/{store_id}/products/{product.evotor_id}"
-    #     response = self.send_request(endpoint, "PATCH", product_json)
-    #     error = response.get("error", None)
+        endpoint = f"stores/{store_id}/products/{product.evotor_id}"
+        response = self.send_request(endpoint, "PATCH", product_json)
+        error = response.get("error", None)
 
-    #     return product, error
+        return product, error
     
-
     def delete_evotor_product(self, store_id, product_id):
         """
         Удалить товар или модификацию товара

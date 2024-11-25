@@ -341,8 +341,8 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         }
 
     def __init__(self, product_class, *args, data=None, parent=None, **kwargs):
-        self.set_initial(product_class, parent, kwargs)
         self.request = kwargs.pop('request', None)
+        self.set_initial(product_class, parent, kwargs)
         super().__init__(data, *args, **kwargs)
         if parent:
             self.instance.parent = parent
@@ -380,6 +380,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         self.set_initial_attribute_values(product_class, kwargs)
         if parent:
             kwargs["initial"]["structure"] = Product.CHILD
+        kwargs["initial"]["evotor_update"] = self.request.COOKIES.get("evotor_update", True) == "True"
 
     def set_initial_attribute_values(self, product_class, kwargs):
         """
@@ -483,14 +484,12 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         super()._post_clean()
 
     def evotor_save(self, product):
-        evotor_update = self.cleaned_data.get('evotor_update')
-        if evotor_update:
-            try:
-                product, error = EvatorCloud().update_or_create_evotor_product(product)
-                if error:
-                    messages.warning(self.request, error)
-            except Exception as e:
-                logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
+        try:
+            product, error = EvatorCloud().update_or_create_evotor_product(product)
+            if error:
+                messages.warning(self.request, error)
+        except Exception as e:
+            logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
 
 
 class ProductCategoryForm(forms.ModelForm):

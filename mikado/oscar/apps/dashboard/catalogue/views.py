@@ -561,14 +561,20 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
             image.display_order = idx
             image.save()
 
-        if form is not None:
-            form.evotor_save(self.object)
 
         action = self.request.POST.get("action")
         if action == "create-all-child":
             self.create_all_child()
 
-        return HttpResponseRedirect(self.get_success_url(action))
+        response = HttpResponseRedirect(self.get_success_url(action))
+        
+        if form is not None:
+            evotor_update = form.cleaned_data.get('evotor_update')
+            response.set_cookie('evotor_update', evotor_update)
+            if evotor_update:
+                form.evotor_save(self.object)
+
+        return response
 
     def create_all_child(self):
 
