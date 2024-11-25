@@ -1,5 +1,5 @@
 from django.conf import settings
-from django_tables2 import MultiTableMixin, SingleTableView
+from django_tables2 import MultiTableMixin
 from django.db.models import Case, When, BooleanField, Q
 from django.views.generic import TemplateView
 from django.utils.encoding import smart_str

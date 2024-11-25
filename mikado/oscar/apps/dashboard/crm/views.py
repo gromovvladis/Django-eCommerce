@@ -371,6 +371,25 @@ class CRMGroupsListView(CRMTablesMixin):
             )
         return redirect(self.url_redirect)
     
+    def send_models(self, is_filtered):
+        models = super().send_models(is_filtered)
+        try:
+            products, error = EvatorCloud().update_or_create_evotor_products(models)
+        except Exception as e:
+            logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
+
+        if error:
+            messages.error(
+                self.request,
+                error,
+            )
+        else: 
+            messages.success(
+                self.request,
+                "Товары успешно отправлены в Эвотор.",
+            )
+        return redirect(self.url_redirect)
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form
@@ -479,8 +498,26 @@ class CRMProductListView(CRMTablesMixin):
                 msg,
             )
         return self.redirect_with_get_params(self.url_redirect, self.request)
-    
+           
+    def send_models(self, is_filtered):
+        models = super().send_models(is_filtered)
+        try:
+            products, error = EvatorCloud().update_or_create_evotor_products(models)
+        except Exception as e:
+            logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
 
+        if error:
+            messages.error(
+                self.request,
+                error,
+            )
+        else: 
+            messages.success(
+                self.request,
+                "Товары успешно отправлены в Эвотор.",
+            )
+        return redirect(self.url_redirect)
+   
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = self.form

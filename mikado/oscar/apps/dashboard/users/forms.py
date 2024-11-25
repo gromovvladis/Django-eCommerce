@@ -103,6 +103,7 @@ class StaffForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['role'].choices = Staff.get_role_choices()
+        self.fields["evotor_update"].initial = self.request.COOKIES.get("evotor_update", True) == "True"
         staff = kwargs['instance']
         if staff and staff.user:
             self.fields['username'].initial = staff.user.username
