@@ -6,7 +6,7 @@ class TelegramMessage(models.Model):
     Implements the interface declared by shipping.base.Base
     """
     user = models.ForeignKey(
-        AUTH_USER_MODEL, verbose_name="Пользователь Сайта", on_delete=models.CASCADE
+        AUTH_USER_MODEL, verbose_name="Пользователь cайта", on_delete=models.CASCADE
     )
 
     NEW, STATUS, TECHNICAL, OFFER, MISC = 'new-order', 'status-order', 'technical', 'offer', 'misc'
