@@ -23,7 +23,9 @@
     </nav>
 {% endblock %}
 
-{% block navtext %}{{ title }}{% endblock %}
+{% block navtext %}
+    <h1>{{ title }}</h1>
+{% endblock %}
 
 {% block dashboard_content %}
     <form action="{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" method="post" class="form-stacked wysiwyg fixed-actions" enctype="multipart/form-data" data-behaviour="tab-nav-errors" autocomplete="off">
@@ -110,7 +112,7 @@
                             {% endif %}
                         </div>
                         <div class="d-flex justify-content-end">
-                            <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-category-list' %}">
+                            <a class="btn btn-dark mr-2" href="{% url 'dashboard:catalogue-category-list' %}">
                                 <i class="fa-regular fa-circle-xmark"></i> 
                                 <span>
                                     Отменить

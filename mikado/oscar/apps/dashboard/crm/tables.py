@@ -465,7 +465,7 @@ class CRMProductEvotorTable(DashboardTable):
     )
     parent = TemplateColumn(
         verbose_name="Группа",
-        template_name="oscar/dashboard/crm/products/evotor_table/product_row_parent.html",
+        template_name="oscar/dashboard/crm/products/evotor_table/product_row_group.html",
         order_by="parent",
         attrs = {'th': {'class': 'parent'},}
     )

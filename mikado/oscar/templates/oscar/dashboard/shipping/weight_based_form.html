@@ -27,11 +27,13 @@
 {% endblock %}
 
 {% block navtext %}
-    {% if method %}
-        {{ method.name }}
-    {% else %}
-        {% trans "Create a new shipping method" %}
-    {% endif %}
+    <h1>
+        {% if method %}
+            {{ method.name }}
+        {% else %}
+            {% trans "Create a new shipping method" %}
+        {% endif %}
+    </h1>
 {% endblock %}
 
 {% block dashboard_content %}

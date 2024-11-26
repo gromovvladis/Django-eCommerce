@@ -446,6 +446,7 @@ class Product(models.Model):
         "ID Эвотор",
         max_length=128,
         blank=True,
+        null=True,
     )
     upc = NullCharField(
         "Товарный код товара UPC (Артикул)",
@@ -806,10 +807,6 @@ class Product(models.Model):
     def has_weight(self):
         return bool(self.weight)
     
-    @cached_property
-    def short_desc(self):
-        return self.short_description
-    
     @property
     def is_shipping_required(self):
         return self.get_product_class().requires_shipping
@@ -960,6 +957,13 @@ class Product(models.Model):
                 prices = set([min(prices), max(prices)])
         return prices
     
+    def get_evotor_parent(self):
+        if self.is_child:
+            return self.parent.evotor_id
+
+        category = self.categories.first()
+        return category.evotor_id if category else None
+
     # Images
 
     def get_missing_image(self):
@@ -1100,6 +1104,12 @@ class Attribute(models.Model):
         "Код",
         max_length=128,
         unique=True
+    )
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+        null=True,
     )
 
     # Attribute types

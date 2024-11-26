@@ -199,8 +199,7 @@ class StockRecord(models.Model):
     #: See also http://en.wikipedia.org/wiki/Stock-keeping_unit
     evotor_code = models.CharField(
         "Эвотор Code", 
-        max_length=25, 
-        unique=True,
+        max_length=25,
         blank=True,  
         help_text="Эвотор код, для связи товара и товарной записи"
     )

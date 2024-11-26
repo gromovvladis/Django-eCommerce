@@ -20,10 +20,12 @@
 {% endblock %}
 
 {% block navtext %}
-    {% if not record.is_online %}
-        <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
-    {% endif %} 
-    {{ order.basket.store|default:"-" }} | Заказ №{{ order.number }}
+    <h1>
+        {% if not record.is_online %}
+            <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
+        {% endif %} 
+        {{ order.basket.store|default:"-" }} | Заказ №{{ order.number }}
+    </h1>
 {% endblock  %}
 
 {% block dashboard_content %}

@@ -1,14 +1,4 @@
-from django.conf import settings
 from haystack.query import SearchQuerySet
-from haystack.exceptions import MissingDependency
-
-try:
-    from haystack.backends.whoosh_backend import WhooshSearchQuery
-except MissingDependency:
-    WhooshSearchQuery = None
-
-from purl import URL
-
 
 def base_sqs():
     """
@@ -18,6 +8,16 @@ def base_sqs():
     sqs = sqs.filter_and(is_public="true", structure__in=["standalone", "parent"]).order_by("-is_available", "-order")
     return sqs
 
+
+# from django.conf import settings
+# from haystack.exceptions import MissingDependency
+
+# try:
+#     from haystack.backends.whoosh_backend import WhooshSearchQuery
+# except MissingDependency:
+#     WhooshSearchQuery = None
+
+# from purl import URL
 
 # class FacetMunger(object):
 #     def __init__(self, path, selected_multi_facets, facet_counts, query_type=None):

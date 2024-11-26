@@ -15,6 +15,7 @@ from django.utils.timezone import now
 from itertools import product as attr_iterator
 
 from oscar.apps.catalogue.models import ProductAttribute
+from oscar.apps.crm.client import EvatorCloud
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import ObjectLookupView
 
@@ -571,8 +572,15 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         if form is not None:
             evotor_update = form.cleaned_data.get('evotor_update')
             response.set_cookie('evotor_update', evotor_update)
+
+            stockrecord_formset = formsets["stockrecord_formset"]
+            stock_update = not form.changed_data and bool(stockrecord_formset.changed_objects)
+
             if evotor_update:
-                form.evotor_save(self.object)
+                if stock_update:
+                    stockrecord_formset.update_evotor_stockrecord(self.object)
+                else: 
+                    form.update_or_create_evotor_product(self.object)
 
         return response
 
@@ -732,7 +740,13 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
             is_last_child = parent.children.count() == 1
 
         # This also deletes any child products.
-        self.object.delete()
+        if self.object.is_parent:
+            for child in self.object.children.all():
+                product, error = EvatorCloud().delete_evotor_product(child)
+        else:
+            product, error = EvatorCloud().delete_evotor_product(self.object)
+
+        # self.object.delete()
 
         # If the product being deleted is the last child, then pass control
         # to a method than can adjust the parent itself.

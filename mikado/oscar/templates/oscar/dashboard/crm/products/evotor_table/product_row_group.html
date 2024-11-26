@@ -1,0 +1,7 @@
+{% if record.parent %}
+    <a href="{{ record.parent.get_absolute_url }}">
+        {{ record.parent }}
+    </a>
+{% else %}
+    -
+{% endif %}

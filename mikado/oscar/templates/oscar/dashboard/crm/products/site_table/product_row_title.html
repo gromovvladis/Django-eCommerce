@@ -19,14 +19,13 @@
             </span>
         {% endif %}
         {% if product_access %}
-            <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ value }}</a>
+            <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ record.get_title }}</a>
         {% else %}
-            <span>{{ value }}</span>
+            <span>{{ record.get_title }}</span>
         {% endif %}
     </div>
-    {% if record.is_child and record.variant %}
-        <span class="small">{{ record.variant }}</span>
-        <br>
+    {% if record.is_child %}
+        <span class="text-muted small">{{ record.get_variants }}</span>
     {% endif %}
     <span class="text-muted small">Артикул: {{ record.upc|default:"-" }}</span>
 </div>

@@ -484,13 +484,16 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
         super()._post_clean()
 
-    def evotor_save(self, product):
+    def update_or_create_evotor_product(self, product):
         try:
             product, error = EvatorCloud().update_or_create_evotor_product(product)
             if error:
                 messages.warning(self.request, error)
+            return product, error
         except Exception as e:
-            logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
+            error = "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e
+            logger.error(error)
+            return product, error
 
 
 class ProductCategoryForm(forms.ModelForm):

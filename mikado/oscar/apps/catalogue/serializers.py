@@ -112,8 +112,7 @@ class ProductSerializer(serializers.ModelSerializer):
         store = self._get_or_create_store(store_id)
 
         # Обработка товарной записи
-        if code:
-            self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
+        self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
 
         return product
 
@@ -155,8 +154,7 @@ class ProductSerializer(serializers.ModelSerializer):
         store = self._get_or_create_store(store_id)
 
         # Обработка товарной записи
-        if code:
-            self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
+        self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
 
         return product
     
@@ -234,10 +232,12 @@ class ProductSerializer(serializers.ModelSerializer):
     def _create_or_update_stock_record(self, product, store, code, price, cost_price, quantity, tax, allow_to_sell):
         """Создание или обновление товарной записи"""
         stockrecord, created = StockRecord.objects.get_or_create(
-            evotor_code=code,
+            product=product,
+            store_id=store.id,
             defaults={
                 "product": product,
                 "store": store,
+                "evotor_code": code if code else "site-%s" % product.id,
                 "price": D(price),
                 "cost_price": D(cost_price),
                 "is_public": allow_to_sell,
@@ -330,7 +330,6 @@ class ProductGroupSerializer(serializers.ModelSerializer):
     # товар
     id = serializers.CharField(source="evotor_id")
     name = serializers.CharField(source="title")
-    code = serializers.CharField(source="evotor_code", required=False, allow_blank=True)
     article_number = serializers.CharField(source="upc", required=False, allow_blank=True)
     description = serializers.CharField(
         source="middle_name", required=False, allow_blank=True
@@ -341,6 +340,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
     measure_name = serializers.CharField(write_only=True, required=False)
 
     # товарная запись
+    code = serializers.CharField(source="evotor_code", required=False, allow_blank=True)
     store_id = serializers.CharField(write_only=True, required=False)
     price = serializers.CharField(write_only=True, required=False)
     cost_price = serializers.CharField(write_only=True, required=False)

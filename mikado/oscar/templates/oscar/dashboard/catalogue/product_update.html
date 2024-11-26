@@ -27,7 +27,13 @@
      </nav>
 {% endblock %}
 
-{% block navtext %}{{ title }}{% endblock %}
+{% block navtext %}
+        <h1>{{ title }}</h1>
+        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-delete' pk=product.id %}">
+            <i class="fa-solid fa-trash"></i>
+            <span>Удалить</span>
+        </a>
+{% endblock %}
 
 {% block dashboard_content %}
     <form action="{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" method="post" class="form-stacked wysiwyg fixed-actions" enctype="multipart/form-data" data-behaviour="tab-nav-errors" autocomplete="off">
@@ -312,9 +318,12 @@
                                                                 {{ stockrecord_form.instance.store|default:"" }}
                                                             {% endif %}
                                                             <br>  
-                                                            {% if stockrecord_form.instance.store_sku %}
-                                                                <span class="text-success">
-                                                                    <i class="fa-solid fa-circle-check"></i>&nbsp; 
+                                                            {% if stockrecord_form.instance.evotor_code %}
+                                                                <span>
+                                                                    <i class="text-success fa-solid fa-circle-check"></i>
+                                                                    <span class="text-muted small">
+                                                                        Код Эвотор: {{ stockrecord_form.instance.evotor_code }}
+                                                                    </span> 
                                                                 </span>
                                                             {% endif %} 
                                                             <span class="text-muted">
@@ -572,14 +581,14 @@
                         </div>
                         <div class="d-flex justify-content-end mt-3">
                             {% if product %}
-                                <a class="btn btn-success mr-2" href="{{ product.get_absolute_url }}">
+                                <a class="btn btn-outline-info mr-2" href="{{ product.get_absolute_url }}">
                                     <i class="fa-solid fa-share"></i>
                                     <span>
                                         Смотреть на сайте
                                     </span>
                                 </a>
                             {% endif %}
-                            <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
+                            <a class="btn btn-dark mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
                                 <i class="fa-regular fa-circle-xmark"></i> 
                                 <span>
                                     Отменить
