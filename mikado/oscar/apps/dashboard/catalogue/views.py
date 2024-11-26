@@ -716,6 +716,25 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
         """
         return self.filter_queryset(Product.objects.all())
 
+    def form_valid(self, form):
+        self.perform_deletion(form)
+        return super().form_valid(form)
+    
+    def perform_deletion(self, form):
+        """
+        Perform custom deletion logic.
+        """
+        form.is_valid()
+        evotor_update = form.data.get("evotor_update", 'off')
+        if evotor_update == "on":
+            self.object = self.get_object()
+
+            if self.object.is_parent:
+                products = [self.object] + list(self.object.children.all())
+                EvatorCloud().delete_evotor_products(products)
+            else:
+                EvatorCloud().delete_evotor_product(self.object)
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         if self.object.is_child:
@@ -724,7 +743,7 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
             ctx["title"] = "Удалить товар?"
         return ctx
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self):
         # We override the core delete method and don't call super in order to
         # apply more sophisticated logic around handling child products.
         # Calling super makes it difficult to test if the product being deleted
@@ -737,15 +756,9 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
         is_last_child = False
         if self.object.is_child:
             parent = self.object.parent
-            is_last_child = parent.children.count() == 1
-
+            is_last_child = parent.children.count() == 1    
+            
         # This also deletes any child products.
-        if self.object.is_parent:
-            for child in self.object.children.all():
-                product, error = EvatorCloud().delete_evotor_product(child)
-        else:
-            product, error = EvatorCloud().delete_evotor_product(self.object)
-
         # self.object.delete()
 
         # If the product being deleted is the last child, then pass control

@@ -109,8 +109,8 @@ class EvotorAPICloud:
                 logger.error(f"Ошибка HTTP запроса. Неизвестный http метод: {method}")
                 raise ValueError(f"Unsupported HTTP method: {method}")
 
-            response.raise_for_status()  # Проверка на успешный статус запроса (2xx)
-            return response.json()       # Возврат данных в формате JSON
+            response.raise_for_status() # Проверка на успешный статус запроса (2xx) 
+            return response.json() # Возврат данных в формате JSON    
         
         except requests.exceptions.HTTPError as http_err:
             error = ''
@@ -131,6 +131,8 @@ class EvotorAPICloud:
             logger.error(f"Ошибка HTTP запроса при отправке Эвотор запроса: {http_err}")
             return {"error": error}
         except Exception as err:
+            if response.status_code == 204:
+                return {}
             logger.error(f"Ошибка при отправке Эвотор запроса: {err}")
             return {"error": f"Ошибка при отправке Эвотор запроса: {err}"}
 
@@ -864,8 +866,8 @@ class EvotorProductClient(EvotorAPICloud):
         for product in products:
             key = "update" if product.evotor_id else "create"
             for stockrecord in product.stockrecords.all():
-                evotor_id = stockrecord.store.evotor_id
-                grouped_products[key][evotor_id].append(product)
+                store_id = stockrecord.store.evotor_id
+                grouped_products[key][store_id].append(product)
 
         for action, products_by_store in grouped_products.items():
             for store_id, grouped_products in products_by_store.items():
@@ -968,29 +970,36 @@ class EvotorProductClient(EvotorAPICloud):
 
         return product, ", ".join(errors)
 
+    def delete_evotor_products(self, products):
+        """
+        Удалить несколько товаров или модификаций товаров данные товара
+        DELETE /stores/{store-id}/products
 
-    # def delete_evotor_products(self, store_id, products_id):
-    #     """
-    #     Удалить несколько товаров или модификаций товаров данные товара
-    #     DELETE /stores/{store-id}/products
+        Удаляет товары и модификации товаров из магазина.
+        Чтобы удалить несколько товаров, в параметре id, укажите через запятую идентификаторы товаров к удалению.
+        В рамках одного запроса можно удалить до 100 товаров.
 
-    #     Удаляет товары и модификации товаров из магазина.
-    #     Чтобы удалить несколько товаров, в параметре id, укажите через запятую идентификаторы товаров к удалению.
-    #     В рамках одного запроса можно удалить до 100 товаров.
+        products_id - список ID Products
 
-    #     products_id - список ID Products
+        """
+        grouped_products = []
+        errors = []
 
-    #     """
-    #     bulk = False
+        for product in products:
+            for stockrecord in product.stockrecords.all():
+                store_id = stockrecord.store.evotor_id
+                if product.evotor_id:
+                    grouped_products[store_id].append(product.evotor_id)
 
-    #     if len(products_id) > 1:
-    #         bulk = True
+        for store_id, grouped_product_ids in grouped_products.items():
+            endpoint = f"stores/{store_id}/products/{",".join(grouped_product_ids)}"
+            response = ""
+            # response = self.send_request(endpoint, "DELETE")
 
-    #     # здесть будет преобразование обекта списка в json
-    #     products_data = json.dump(products_id)
+            if isinstance(response, dict) and "error" in response:
+                errors.append(response["error"])
 
-    #     endpoint = f"stores/{store_id}/products"
-    #     return self.send_request(endpoint, "DELETE", products_data, bulk)
+        return products, ", ".join(errors)
 
     # groups ============
 
