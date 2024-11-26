@@ -555,6 +555,12 @@ class Product(models.Model):
         default=20,
         help_text="Приблизительное время, которое уйдет у повара на приготовление и сборку заказа на кухне. Указывается в минутах.",
     )
+    weight = models.IntegerField(
+        "Вес", 
+        null=True, 
+        blank=True, 
+        help_text="Вес товара в граммах.",
+    )
     date_created = models.DateTimeField(
         "Дата создания", auto_now_add=True, db_index=True
     )
@@ -798,13 +804,7 @@ class Product(models.Model):
     
     @cached_property
     def has_weight(self):
-        if self.attributes.filter(code='weight'):
-            return True
-        return False
-    
-    @cached_property
-    def weight(self):
-        return self.attribute_values.get(attribute__code='weight').value
+        return bool(self.weight)
     
     @cached_property
     def short_desc(self):
@@ -922,9 +922,9 @@ class Product(models.Model):
         Return a product's public categories or parent's if there is a parent product.
         """
         if self.is_child:
-            return self.parent.categories.browsable()
+            return self.parent.categories.all()
         else:
-            return self.categories.browsable()
+            return self.categories.all()
 
     get_categories.short_description = "Категории"
 
@@ -940,6 +940,25 @@ class Product(models.Model):
             return attribute_values | parent_attribute_values
 
         return attribute_values
+    
+    def get_prices(self):
+        """
+        Get list of stockrecord prices
+        """
+        prices = []
+        stockrecords = []
+        if self.id:
+            if self.is_parent:
+                childs = self.children.all()
+                for child in childs:
+                    stockrecords += child.stockrecords.values_list('price')
+            else: 
+                stockrecords += self.stockrecords.values_list('price')
+            if stockrecords:
+                for stc in stockrecords:
+                    prices.append(stc[0])
+                prices = set([min(prices), max(prices)])
+        return prices
     
     # Images
 

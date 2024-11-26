@@ -235,9 +235,9 @@ class CRMStaffListView(CRMTablesMixin):
             for data_item in data_items:
                 evotor_id = data_item['id']
                 data_item['updated_at'] = datetime.strptime(data_item['updated_at'], '%Y-%m-%dT%H:%M:%S.%f%z') 
-                first_name = data_item.get('name', '')
-                last_name = data_item.get('last_name', '')
-                middle_name = data_item.get('patronymic_name', '')
+                first_name = data_item.get('name', None)
+                last_name = data_item.get('last_name', None)
+                middle_name = data_item.get('patronymic_name', None)
                 stores_ids = data_item.get('stores', None)
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
                 

@@ -399,7 +399,7 @@ class CRMStaffSiteTable(DashboardTable):
         attrs = {'th': {'class': 'stores'},}
     )
     notif = TemplateColumn(
-        verbose_name="Уведопления",
+        verbose_name="Уведомления",
         template_name="oscar/dashboard/stores/staff_row_notif.html",
         order_by="telegram",
         attrs = {'th': {'class': 'notif'},}
@@ -464,7 +464,7 @@ class CRMProductEvotorTable(DashboardTable):
         attrs = {'th': {'class': 'description'},}
     )
     parent = TemplateColumn(
-        verbose_name="Родительский товар",
+        verbose_name="Группа",
         template_name="oscar/dashboard/crm/products/evotor_table/product_row_parent.html",
         order_by="parent",
         attrs = {'th': {'class': 'parent'},}
@@ -647,7 +647,7 @@ class CRMGroupEvotorTable(DashboardTable):
         attrs = {'th': {'class': 'name'},}
     )
     parent = TemplateColumn(
-        verbose_name="Родительский товар",
+        verbose_name="Группа",
         template_name="oscar/dashboard/crm/groups/evotor_table/group_row_parent.html",
         order_by="parent",
         attrs = {'th': {'class': 'parent'},}

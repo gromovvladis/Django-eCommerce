@@ -327,6 +327,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
             "description",
             "order",
             "cooking_time",
+            "weight",
             "is_public",
             "is_discountable",
             "structure",
@@ -453,7 +454,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         Deletes any fields not needed for child products. Override this if
         you want to e.g. keep the description field.
         """
-        for field_name in ["description", "short_description", "product_class", "is_discountable", "meta_title", "meta_description"]:
+        for field_name in ["description", "short_description", "product_class", "weight", "is_discountable", "meta_title", "meta_description"]:
             if field_name in self.fields:
                 del self.fields[field_name]            
    
