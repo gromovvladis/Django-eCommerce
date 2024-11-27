@@ -539,11 +539,10 @@ class CRMProductSiteTable(DashboardTable):
         orderable=False,
         attrs = {'th': {'class': 'image'},}
     )
-    title = TemplateColumn(
+    name = TemplateColumn(
         verbose_name="Имя",
-        template_name="oscar/dashboard/crm/products/site_table/product_row_title.html",
-        order_by="title",
-        accessor=A("title"),
+        template_name="oscar/dashboard/crm/products/site_table/product_row_name.html",
+        order_by="name",
         attrs = {'th': {'class': 'title'},}
     )
     variants = TemplateColumn(
@@ -612,7 +611,7 @@ class CRMProductSiteTable(DashboardTable):
         sequence = (
             "check",
             "image",
-            "title",
+            "name",
             "categories",
             "additionals",
             "options",

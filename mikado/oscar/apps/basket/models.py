@@ -1030,7 +1030,6 @@ class Line(models.Model):
         """
         return self.purchase_info.price.effective_price
     
-    #vlad
     @property
     def unit_price(self):
         price_item =  self.purchase_info.price.money

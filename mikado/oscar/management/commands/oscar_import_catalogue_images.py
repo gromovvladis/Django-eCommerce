@@ -18,7 +18,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--filename",
             dest="filename",
-            default="upc",
+            default="article",
             help="Product field to lookup from image filename",
         )
 

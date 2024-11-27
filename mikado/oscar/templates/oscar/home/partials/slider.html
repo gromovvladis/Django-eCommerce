@@ -10,7 +10,7 @@
                     <div class="v-carousel__inner" data-id="slider-swiper">
                         <div class="swiper-wrapper d-flex">
                             {% for slider_item in action_list %} 
-                                <a class="swiper-slide v-carousel__item" href="{{ slider_item.get_absolute_url }}" aria-label="{{ slider_item.get_title }}">
+                                <a class="swiper-slide v-carousel__item" href="{{ slider_item.get_absolute_url }}" aria-label="{{ slider_item.get_name }}">
                                     <div class="v-image fill-width">
                                         <div class="v-image__inner">
                                             {% with image=slider_item.primary_image %}

@@ -110,8 +110,8 @@ class ProductClassSelectForm(forms.Form):
 
 
 class ProductSearchForm(forms.Form):
-    upc = forms.CharField(max_length=64, required=False, label="Код UPC")
-    title = forms.CharField(max_length=255, required=False, label="Имя товара")
+    article = forms.CharField(max_length=64, required=False, label="Артикул товара")
+    name = forms.CharField(max_length=255, required=False, label="Имя товара")
     categories = forms.ModelMultipleChoiceField(
         label="Категория",
         queryset=Category.objects.all(),
@@ -132,8 +132,8 @@ class ProductSearchForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_data["upc"] = cleaned_data["upc"].strip()
-        cleaned_data["title"] = cleaned_data["title"].strip()
+        cleaned_data["article"] = cleaned_data["article"].strip()
+        cleaned_data["name"] = cleaned_data["name"].strip()
         return cleaned_data
 
 
@@ -320,9 +320,9 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            "title",
+            "name",
             "product_class",
-            "upc",
+            "article",
             "short_description",
             "description",
             "order",
@@ -366,8 +366,8 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
             self.fields["slug"].help_text = (
                 "Оставьте поле пустым, чтобы сгенерировать из названия товара"
             )
-        if "title" in self.fields:
-            self.fields["title"].widget = forms.TextInput(attrs={"autocomplete": "off"})
+        if "name" in self.fields:
+            self.fields["name"].widget = forms.TextInput(attrs={"autocomplete": "off"})
 
     def set_initial(self, product_class, parent, kwargs):
         """
@@ -539,7 +539,7 @@ class ProductRecommendationForm(forms.ModelForm):
 class AdditionalForm(forms.ModelForm):
     class Meta:
         model = Additional
-        fields = ["name", "upc", "order", "description", "price_currency", "price", "old_price", "weight", "max_amount", "image"]
+        fields = ["name", "article", "order", "description", "price_currency", "price", "old_price", "weight", "max_amount", "image"]
         widgets = {
             "image": ThumbnailInput(),
         }
@@ -579,10 +579,10 @@ class AttributeForm(forms.ModelForm):
 
     def clean_code(self):
         code = self.cleaned_data.get("code")
-        title = self.cleaned_data.get("name")
+        name = self.cleaned_data.get("name")
 
-        if not code and title:
-            code = slugify(title)
+        if not code and name:
+            code = slugify(name)
 
         return code
 

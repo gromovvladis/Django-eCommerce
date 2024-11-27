@@ -171,9 +171,8 @@ class IndexView(TemplateView):
         if prod_slug:
             prod = Product.objects.get(slug=prod_slug)
             data = {
-                "title": "Статистика для товара '%s'" % prod.get_title(),
+                "title": "Статистика для товара '%s'" % prod.get_name(),
                 "orders": queryset_orders_for_user(self.request.user),
-                # "orders": Order.objects.filter(lines__product_id=prod.id),
                 "alerts": StockAlert.objects.filter(stockrecord__product_id=prod.id),
                 "baskets": Basket.objects.filter(lines__product_id=prod.id).filter(status=Basket.OPEN),
                 "users": users.filter(baskets__lines__product_id=prod.id).distinct(),
@@ -187,7 +186,6 @@ class IndexView(TemplateView):
             ids = [prod.id for prod in prod_cat]
             data = {
                 "title": "Статистика для категории '%s'" % cat.name,
-                # "orders": Order.objects.filter(lines__product_id__in=ids),
                 "orders": queryset_orders_for_user(self.request.user),
                 "alerts": StockAlert.objects.filter(stockrecord__product_id__in=ids),
                 "baskets": Basket.objects.filter(lines__product_id__in=ids).filter(status=Basket.OPEN),
@@ -199,7 +197,6 @@ class IndexView(TemplateView):
         else:
             data = {
                 "title": "Статистика",
-                # "orders": Order.objects.all(),
                 "orders": queryset_orders_for_user(self.request.user),
                 "alerts": StockAlert.objects.all(),
                 "baskets": Basket.objects.filter(status=Basket.OPEN),

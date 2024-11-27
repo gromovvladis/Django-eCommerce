@@ -53,7 +53,7 @@ class SuggestionsView(APIView, BaseSearchView):
     
     def post(self, request, *args, **kwargs):
         dfuery_string=request.POST.get('q', '')
-        sqs = SearchQuerySet().auto_query(query_string=request.POST.get('q', ''), fieldname='title')[:20]
+        sqs = SearchQuerySet().auto_query(query_string=request.POST.get('q', ''), fieldname='name')[:20]
 
         products = []
         for prd in sqs:

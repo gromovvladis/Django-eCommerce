@@ -448,16 +448,15 @@ class Product(models.Model):
         blank=True,
         null=True,
     )
-    upc = NullCharField(
-        "Товарный код товара UPC (Артикул)",
+    article = NullCharField(
+        "Артикул товара",
         max_length=64,
         blank=True,
         null=True,
         unique=True,
         help_text=(
             "Универсальный код товара (Артикул) является идентификатором для "
-            "товара, который не является специфичным для конкретного товара. "
-            "Например, ISBN книги"
+            "товара, который является специфичным для конкретного товара."
         ),
     )
     parent = models.ForeignKey(
@@ -476,8 +475,8 @@ class Product(models.Model):
         ),
     )
 
-    # Title is mandatory for canonical products but optional for child products
-    title = models.CharField("Название", max_length=255, blank=True)
+    # name is mandatory for canonical products but optional for child products
+    name = models.CharField("Название", max_length=255, blank=True)
 
     slug = SlugField("Ярлык", max_length=255, unique=True)
     description = models.TextField("Описание", blank=True)
@@ -599,7 +598,7 @@ class Product(models.Model):
         self.attr = ProductAttributesContainer(product=self)
 
     def __str__(self):
-        return self.get_title()
+        return self.get_name()
 
     def get_absolute_url(self):
         """
@@ -625,7 +624,7 @@ class Product(models.Model):
         +---------------+-------------+--------------+--------------+
         |               | stand alone | parent       | child        |
         +---------------+-------------+--------------+--------------+
-        | title         | required    | required     | optional     |
+        | name          | required    | required     | optional     |
         +---------------+-------------+--------------+--------------+
         | product class | required    | required     | must be None |
         +---------------+-------------+--------------+--------------+
@@ -653,7 +652,7 @@ class Product(models.Model):
         """
         Validates a stand-alone product
         """
-        if not self.title:
+        if not self.name:
             raise ValidationError("Ваш товар должен иметь название.")
         if not self.product_class:
             raise ValidationError("Ваш товар должен иметь класс товара.")
@@ -690,12 +689,12 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             if self.is_child:
-                if not self.title:
-                    self.slug = slugify(self.get_variant_title())
+                if not self.name:
+                    self.slug = slugify(self.get_variant_name())
                 else:
-                    self.slug = slugify(f"{self.parent.get_title()}-{self.get_title()}")
+                    self.slug = slugify(f"{self.parent.get_name()}-{self.get_name()}")
             else:
-                self.slug = slugify(self.get_title())
+                self.slug = slugify(self.get_name())
 
         # Добавляем проверку уникальности slug
         original_slug = self.slug
@@ -842,22 +841,22 @@ class Product(models.Model):
         pairs = [attribute.summary() for attribute in attributes]
         return ", ".join(pairs)
 
-    def get_title(self):
+    def get_name(self):
         """
-        Return a product's title or it's parent's title if it has no title
+        Return a product's name or it's parent's name if it has no name
         """
-        title = self.title
-        if not title and self.parent_id:
-            title = self.parent.title
-        return title
+        name = self.name
+        if not name and self.parent_id:
+            name = self.parent.name
+        return name
     
-    def get_variant_title(self):
+    def get_variant_name(self):
         """
-        Return a product's title or it's parent's title if it has no title
+        Return a variant name
         """
-        patent_title = self.get_title()
+        patent_name = self.get_name()
         variants = "-".join(str(attr[0].option) for attr in self.attr.get_attribute_values())
-        return "%s-%s" % (patent_title, variants)
+        return "%s-%s" % (patent_name, variants)
     
     def get_variants(self):
         """
@@ -877,13 +876,13 @@ class Product(models.Model):
         attribute_values = self.attribute_values.filter(is_variant=True)
         return attribute_values
 
-    get_title.short_description = ("Название товара", "Название")
+    get_name.short_description = ("Название товара", "Название")
 
     def get_meta_title(self):
         title = self.meta_title
         if not title and self.is_child:
             title = self.parent.meta_title
-        return title or self.get_title()
+        return title or self.get_name()
 
     get_meta_title.short_description = ("Мета-заголовок товара", "Мета-заголовок")
 
@@ -925,6 +924,13 @@ class Product(models.Model):
 
     get_categories.short_description = "Категории"
 
+    def get_evotor_parent_id(self):
+        if self.is_child:
+            return self.parent.evotor_id
+
+        category = self.categories.first()
+        return category.evotor_id if category else None
+
     def get_attribute_values(self):
         if not self.pk:
             return self.attribute_values.model.objects.none()
@@ -956,13 +962,6 @@ class Product(models.Model):
                     prices.append(stc[0])
                 prices = set([min(prices), max(prices)])
         return prices
-    
-    def get_evotor_parent(self):
-        if self.is_child:
-            return self.parent.evotor_id
-
-        category = self.categories.first()
-        return category.evotor_id if category else None
 
     # Images
 
@@ -1733,7 +1732,7 @@ class Additional(models.Model):
 
     name = models.CharField("Имя", max_length=128, db_index=True)
     code = AutoSlugField("Код", max_length=128, unique=True, populate_from="name")
-    upc = models.CharField("Уникальный код товара в базе", max_length=128, unique=True)
+    article = models.CharField("Уникальный код товара в базе", max_length=128, unique=True)
 
     order = models.IntegerField(
         "Порядок",

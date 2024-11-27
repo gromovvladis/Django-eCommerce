@@ -43,8 +43,8 @@ class OrderStatsForm(forms.Form):
             'placeholder': '+7 (900) 000-0000',
         }),
     )
-    product_title = forms.CharField(required=False, label="Наименование товара")
-    upc = forms.CharField(required=False, label="Товарный код товара UPC")
+    product_name = forms.CharField(required=False, label="Наименование товара")
+    article = forms.CharField(required=False, label="Артикул товара")
     evotor_code = forms.CharField(required=False, label="Артикул в магазине")
 
     status_choices = (("", "---------"),) + tuple(
@@ -99,9 +99,9 @@ class OrderStatsForm(forms.Form):
         date_to = data.get("date_to")
         date_range = data.get("date_range")
 
-        product_title = data.get("title")
+        product_name = data.get("name")
         username = data.get("username")
-        upc = data.get("upc")
+        article = data.get("article")
         evotor_code = data.get("evotor_code")
         voucher = data.get("voucher")
         payment_method = data.get("payment_method")
@@ -138,12 +138,12 @@ class OrderStatsForm(forms.Form):
                     ), (("date_range", [date_from, date_to]),)
                 ))
             
-        if product_title:
-            self._filters["lines__title__istartswith"] = product_title
+        if product_name:
+            self._filters["lines__name__istartswith"] = product_name
             self._search_filters.append((
-                ('Название товара соответствует "{title}"').format(
-                    title=product_title
-                ), (("product_title", product_title),)
+                ('Название товара соответствует "{name}"').format(
+                    name=product_name
+                ), (("product_name", product_name),)
             ))
 
         if username:
@@ -154,10 +154,10 @@ class OrderStatsForm(forms.Form):
                 ), (("username", username),)
             ))
 
-        if upc:
-            self._filters["lines__upc"] = upc
+        if article:
+            self._filters["lines__article"] = article
             self._search_filters.append((
-                ('Включает предмет с UPC "{prod_upc}"').format(prod_upc=upc), (("upc", upc),)
+                ('Включает артикул "{prod_article}"').format(prod_article=article), (("article", article),)
             ))
 
         if evotor_code:
@@ -284,8 +284,8 @@ class OrderSearchForm(forms.Form):
             'placeholder': '+7 (900) 000-0000',
         }),
     )
-    product_title = forms.CharField(required=False, label="Наименование товара")
-    upc = forms.CharField(required=False, label="Товарный код товара UPC")
+    product_name = forms.CharField(required=False, label="Наименование товара")
+    article = forms.CharField(required=False, label="Артикул товара")
     evotor_code = forms.CharField(required=False, label="Артикул в магазине")
 
     status_choices = (("", "---------"),) + tuple(

@@ -1008,12 +1008,12 @@ msgstr ""
 #: templates/oscar/dashboard/orders/line_detail.html:48
 #: templates/oscar/dashboard/orders/order_detail.html:128
 #: templates/oscar/dashboard/ranges/range_product_list.html:96
-msgid "UPC"
+msgid "article"
 msgstr ""
 
 #: apps/catalogue/models.py:358
 msgid ""
-"Universal Product Code (UPC) is an identifier for a product which is not "
+"Universal Product Code (article) is an identifier for a product which is not "
 "specific to a particular  supplier. Eg an ISBN for a book."
 msgstr ""
 
@@ -3045,13 +3045,13 @@ msgstr ""
 msgid "Product name matches \"{product_name}\""
 msgstr ""
 
-#. Translators: "UPC" means "universal product code" and it is
+#. Translators: "article" means "universal product code" and it is
 #. used to uniquely identify a product in an online store.
 #. "Item" in this context means an item in an order placed
 #. in an online store.
 #: apps/dashboard/orders/views.py:270
 #, python-brace-format
-msgid "Includes an item with UPC \"{upc}\""
+msgid "Includes an item with article \"{article}\""
 msgstr ""
 
 #. Translators: "SKU" means "stock keeping unit" and is used to
@@ -3375,15 +3375,15 @@ msgid "Ranges dashboard"
 msgstr ""
 
 #: apps/dashboard/ranges/forms.py:27
-msgid "Product SKUs or UPCs"
+msgid "Product SKUs or articles"
 msgstr ""
 
 #: apps/dashboard/ranges/forms.py:29
-msgid "You can paste in a selection of SKUs or UPCs"
+msgid "You can paste in a selection of SKUs or articles"
 msgstr ""
 
 #: apps/dashboard/ranges/forms.py:31
-msgid "File of SKUs or UPCs"
+msgid "File of SKUs or articles"
 msgstr ""
 
 #: apps/dashboard/ranges/forms.py:32
@@ -3391,17 +3391,17 @@ msgid "Either comma-separated, or one identifier per line"
 msgstr ""
 
 #: apps/dashboard/ranges/forms.py:42
-msgid "You must submit either a list of SKU/UPCs or a file"
+msgid "You must submit either a list of SKU/articles or a file"
 msgstr ""
 
 #: apps/dashboard/ranges/forms.py:61 apps/dashboard/ranges/views.py:166
 #, python-format
-msgid "The products with SKUs or UPCs matching %s are already in this range"
+msgid "The products with SKUs or articles matching %s are already in this range"
 msgstr ""
 
 #: apps/dashboard/ranges/forms.py:69
 #, python-format
-msgid "No products exist with a SKU or UPC matching %s"
+msgid "No products exist with a SKU or articles matching %s"
 msgstr ""
 
 #: apps/dashboard/ranges/views.py:52
@@ -3432,7 +3432,7 @@ msgstr[3] ""
 
 #: apps/dashboard/ranges/views.py:173
 #, python-format
-msgid "No product(s) were found with SKU or UPC matching %s"
+msgid "No product(s) were found with SKU or articles matching %s"
 msgstr ""
 
 #: apps/dashboard/ranges/views.py:210

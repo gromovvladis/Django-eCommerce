@@ -7,7 +7,7 @@ from django.contrib.auth.models import Group
 from django.db.models import F, Q
 
 from rest_framework.renderers import JSONRenderer
-from oscar.apps.catalogue.serializers import ProductGroupSerializer, ProductSerializer, ProductsSerializer
+from oscar.apps.catalogue.serializers import ProductGroupSerializer, ProductGroupsSerializer, ProductSerializer, ProductsSerializer
 from oscar.apps.customer.serializers import UserGroupSerializer, StaffSerializer
 from oscar.apps.store.serializers import StoreSerializer, TerminalSerializer
 from oscar.core.loading import get_model
@@ -208,7 +208,6 @@ class EvotorStoreClient(EvotorAPICloud):
         endpoint = "devices"
         return self.send_request(endpoint)
     
-
 # ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
 
     def create_or_update_site_stores(self, stores_json, is_filtered=False):
@@ -382,7 +381,6 @@ class EvotorStaffClient(EvotorAPICloud):
         endpoint = "employees/roles"
         return self.send_request(endpoint)
  
-
 # ========= ОТПРАВКА ДАННЫХ
 
     def create_evotor_staff(self, staff):
@@ -421,8 +419,7 @@ class EvotorStaffClient(EvotorAPICloud):
 
         return staff, error
   
-
-# ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
+# ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
     def create_or_update_site_roles(self, roles_json, is_filtered=False):
         error_msgs = []
@@ -695,6 +692,8 @@ class EvotorProductClient(EvotorAPICloud):
                 "updated_at": "2018-09-11T16:18:35.397+0000"
             }
         """
+        self.create_product_parent(products, store_id)
+
         if len(products) > 1:
             bulk = True
             serializer = ProductsSerializer({"items": products}, context={"store_id": store_id})
@@ -712,7 +711,7 @@ class EvotorProductClient(EvotorAPICloud):
             if bulk:
                 for product_response in response:
                     name = product_response.get("name")
-                    product = next((p for p in products if p.title == name), None)
+                    product = next((p for p in products if p.name == name), None)
                     if product:
                         product.evotor_id = product_response.get("id")
                         product.save()
@@ -767,6 +766,8 @@ class EvotorProductClient(EvotorAPICloud):
                 "updated_at": "string"
             }
         """
+        self.create_product_parent(products, store_id)
+
         serializer = ProductsSerializer({"items": products}, context={"store_id": store_id})
         products_json = json.loads(JSONRenderer().render(serializer.data.get('items')).decode('utf-8'))
 
@@ -776,105 +777,62 @@ class EvotorProductClient(EvotorAPICloud):
     
         return products, error
     
+    def create_product_parent(self, products, store_id):     
+        groups = []
+        for product in products:
+            parent_id = product.get_evotor_parent_id()
+            if not parent_id:
+                if product.is_child:
+                    groups.append(product.parent)
+                else:
+                    groups.append(product.categories.first())
+
+        if groups:
+            return self.create_evotor_groups(groups, store_id)
+
     # === вызываются напрямую
 
     def update_or_create_evotor_product(self, product):
         """
-        Создать/заменить товар
-
-        Создаёт или заменяет в магазине один товар или модификацию товара с указанным идентификатором.
-        PUT /stores/{store-id}/products/{product-id}
-
-        Чтобы передать несколько объектов дополните заголовок Content-Type модификатором +bulk.
-
-        products - список объектов Product
-
-        ТЕЛО: 
-        {
-            "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-            "name": "Сидр",
-            "measure_name": "шт",
-            "tax": "VAT_18",
-            "allow_to_sell": true,
-            "price": 123.12,
-            "description": "Вкусный яблочный сидр",
-            "article_number": "СДР-ЯБЛЧ",
-            "code": "42",
-            "is_age_limited": true,
-            "barcodes": [
-                "2000000000060"
-            ],
-            "type": "ALCOHOL_NOT_MARKED"
-        }
-
-        ОТВЕТ: 
-            {
-                "id": "ca187ddc-8d1b-4d0e-b20d-c509082da528",
-                "modified_at": "2018-01-01T00:00:00.000Z",
-                "status": "COMPLETED",
-                "type": "product",
-                "details": [
-                    { }
-                ]
-            }
+        Создаёт или заменяет в магазине один товар или модификацию товара..
         """
-        return self.update_or_create_evotor_products([product])
+        products, err =  self.update_or_create_evotor_products([product])
+        return products[0], err
 
     def update_or_create_evotor_products(self, products):
         """
-        Создаёт или заменяет товары или модификации товаров в магазине. Идентификаторы объектов формирует клиент API.
-
-        Создает новый товар или модификацию товара в магазине. Идентификаторы объектов формирует Облако.
-        PUT /stores/{store-id}/products
-
-        Чтобы передать несколько объектов дополните заголовок Content-Type модификатором +bulk.
-
-        products - список объектов Product
-
-        ТЕЛО: 
-        {
-            "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-            "name": "Сидр",
-            "measure_name": "шт",
-            "tax": "VAT_18",
-            "allow_to_sell": true,
-            "price": 123.12,
-            "description": "Вкусный яблочный сидр",
-            "article_number": "СДР-ЯБЛЧ",
-            "code": "42",
-            "is_age_limited": true,
-            "barcodes": [
-                "2000000000060"
-            ],
-            "type": "ALCOHOL_NOT_MARKED"
-        }
-
-        ОТВЕТ: 
-            {
-                "id": "ca187ddc-8d1b-4d0e-b20d-c509082da528",
-                "modified_at": "2018-01-01T00:00:00.000Z",
-                "status": "COMPLETED",
-                "type": "product",
-                "details": [
-                    { }
-                ]
-            }
+        Создаёт или заменяет товары или модификации товаров в магазине. 
+        Идентификаторы объектов формирует клиент API.
         """
         errors = []
         grouped_products = {"create": defaultdict(list), "update": defaultdict(list)}
+        groups_to_create = []
 
         for product in products:
-            key = "update" if product.evotor_id else "create"
-            for stockrecord in product.stockrecords.all():
-                store_id = stockrecord.store.evotor_id
-                grouped_products[key][store_id].append(product)
+            if product.is_parent:
+                for child in product.children.all():
+                    key = "update" if child.evotor_id else "create"
+                    for stockrecord in child.stockrecords.all():
+                        store_id = stockrecord.store.evotor_id
+                        grouped_products[key][store_id].append(product)
+                if not product.evotor_id:
+                    groups_to_create.append(product)
+            else:
+                key = "update" if product.evotor_id else "create"
+                for stockrecord in product.stockrecords.all():
+                    store_id = stockrecord.store.evotor_id
+                    grouped_products[key][store_id].append(product)
+
+        groups, err = self.create_evotor_groups(groups_to_create, store_id)
+        if err:
+            errors.append(err)
 
         for action, products_by_store in grouped_products.items():
             for store_id, grouped_products in products_by_store.items():
                 if action == "create":
-                    prds, err = self.create_evotor_products(grouped_products, store_id)
+                    products, err = self.create_evotor_products(grouped_products, store_id)
                 else:
-                    prds, err = self.update_evotor_products(grouped_products, store_id)
+                    products, err = self.update_evotor_products(grouped_products, store_id)
                 if err:
                     errors.append(err)
 
@@ -979,7 +937,7 @@ class EvotorProductClient(EvotorAPICloud):
         Чтобы удалить несколько товаров, в параметре id, укажите через запятую идентификаторы товаров к удалению.
         В рамках одного запроса можно удалить до 100 товаров.
 
-        products_id - список ID Products
+        products - список ID Products
 
         """
         grouped_products = []
@@ -992,7 +950,7 @@ class EvotorProductClient(EvotorAPICloud):
                     grouped_products[store_id].append(product.evotor_id)
 
         for store_id, grouped_product_ids in grouped_products.items():
-            endpoint = f"stores/{store_id}/products/{",".join(grouped_product_ids)}"
+            endpoint = f"stores/{store_id}/products/?{",".join(grouped_product_ids)}"
             response = ""
             # response = self.send_request(endpoint, "DELETE")
 
@@ -1003,239 +961,179 @@ class EvotorProductClient(EvotorAPICloud):
 
     # groups ============
 
-    def create_evotor_groups(self, products, store_id):
+    def create_evotor_groups(self, groups, store_id):
         """
-        Создать товар
+        Создать групп(ы) товаров или модификаций
 
-        Создает новый товар или модификацию товара в магазине. Идентификаторы объектов формирует Облако.
-        POST /stores/{store-id}/products
+        Создаёт новую группу товаров или группу модификаций товаров в магазине. 
+        Идентификаторы объектов формирует Облако Эвотор.
+        POST /stores/{store-id}/product-groups
 
         Чтобы передать несколько объектов дополните заголовок Content-Type модификатором +bulk.
 
-        products - список объектов Product
+        Количество модификаций в группе может быть от 0 до 200, каждая модификация может содержать до 500 атрибутов.
 
         ТЕЛО: 
         {
             "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-            "name": "Сидр",
-            "measure_name": "шт",
-            "tax": "VAT_18",
-            "allow_to_sell": true,
-            "price": 123.12,
-            "description": "Вкусный яблочный сидр",
-            "article_number": "СДР-ЯБЛЧ",
-            "code": "42",
-            "is_age_limited": true,
+            "name": "Группа",
             "barcodes": [
                 "2000000000060"
             ],
-            "type": "ALCOHOL_NOT_MARKED"
+            "attributes": [
+                {
+                "id": "36755a25-8f56-11e8-96a6-85f64fd5f8e3",
+                "name": "Цвет",
+                "choices": [
+                    {
+                    "id": "36755a27-8f56-11e8-96a6-85f64fd5f8e3",
+                    "name": "Зелёный"
+                    }
+                ]
+                }
+            ]
         }
 
         ОТВЕТ: 
-            {
-                "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-                "name": "Сидр",
-                "measure_name": "шт",
-                "tax": "VAT_18",
-                "allow_to_sell": true,
-                "price": 123.12,
-                "description": "Вкусный яблочный сидр",
-                "article_number": "СДР-ЯБЛЧ",
-                "code": "42",
-                "is_age_limited": true,
-                "barcodes": [
-                    "2000000000060"
-                ],
-                "type": "ALCOHOL_NOT_MARKED",
-                "id": "01ba18b6-8707-5f47-3d9c-4db058054cb2",
-                "quantity": 12,
-                "cost_price": 100.123,
-                "attributes_choices": {},
-                "store_id": "20180820-7052-4047-807D-E82C50000000",
-                "user_id": "00-000000000000000",
-                "created_at": "2018-09-11T16:18:35.397+0000",
-                "updated_at": "2018-09-11T16:18:35.397+0000"
-            }
+        {
+            "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
+            "id": "1ddea16b-971b-dee5-3798-1b29a7aa2e23",
+            "name": "Группа",
+            "store_id": "20180820-7052-4047-807D-E82C50000000",
+            "user_id": "00-000000000000000",
+            "created_at": "2018-09-11T16:18:35.397+0000",
+            "updated_at": "2018-09-11T16:18:35.397+0000",
+            "barcodes": [
+                "2000000000060"
+            ],
+            "attributes": [
+                {
+                "id": "36755a25-8f56-11e8-96a6-85f64fd5f8e3",
+                "name": "Цвет",
+                "choices": [
+                    {
+                    "id": "36755a27-8f56-11e8-96a6-85f64fd5f8e3",
+                    "name": "Зелёный"
+                    }
+                ]
+                }
+            ]
+        }
         """
-        bulk = False
-
-        # здесть будет преобразование обекта Product в json
-        serializer = ProductsSerializer(products)
-        products_json = json.loads(JSONRenderer().render(serializer.data).decode('utf-8'))
-        if len(products) > 1:
+        if len(groups) > 1:
             bulk = True
-            
-        endpoint = f"stores/{store_id}/products"
-        response = self.send_request(endpoint, "POST", products_json, bulk)
-        error = response.get("error", None)
+            serializer = ProductGroupsSerializer({"items": groups}, context={"store_id": store_id})
+            groups_json = json.loads(JSONRenderer().render(serializer.data.get('items')).decode('utf-8'))
+        else:
+            bulk = False
+            serializer = ProductGroupSerializer(groups[0], context={"store_id": store_id})
+            groups_json = json.loads(JSONRenderer().render(serializer.data).decode('utf-8'))
+
+        endpoint = f"stores/{store_id}/product-groups"
+        response = self.send_request(endpoint, "POST", groups_json, bulk)
+        error = response.get("error", None) if isinstance(response, dict) else None
     
         if not error:
-            for product_response in response:
-                name = product_response.get("name")
-                product = products.filter(title=name)
-                if product:
-                    product.evotor_id = product_response.get("id")
-                    product.save()
-                    
-        return products, error
+            if bulk:
+                for group_response in response:
+                    name = group_response.get("name")
+                    group = next((p for p in groups if p.name == name), None)
+                    if group:
+                        group.evotor_id = group_response.get("id")
+                        group.save()
+            else:
+                groups[0].evotor_id = response.get("id")
+                groups[0].save()
+
+        return groups, error
     
-    def update_evotor_groups(self, products, store_id):
+    def update_evotor_groups(self, groups, store_id):
         """
-        Обновить данные товара
+        Создать/заменить несколько групп товаров или модификаций
 
-        Создаёт или заменяет в магазине один товар или модификацию товара с указанным идентификатором.
-        PATCH /stores/{store-id}/products/{product-id}
+        Создаёт или заменяет группы товаров или группы модификаций товаров в магазине. 
+        Идентификаторы объектов формирует клиент API.
 
-        Обновляет цену, закупочную цену и остатки товара или модификации товара в магазине.
-        Вы можете обновить как один, так и несколько параметров.
-        Запрос не может быть пустым.
+        PUT /stores/{store-id}/product-groups
 
-        product - объект Product
+        Чтобы передать несколько объектов дополните заголовок Content-Type модификатором +bulk.
+
+        Количество модификаций в группе может быть от 0 до 200, каждая модификация может содержать до 500 атрибутов.
 
         ТЕЛО: 
-            {
-            "quantity": 12,
-            "cost_price": 100.123,
-            "price": 123.12
-            }
-
-        ОТВЕТ: 
+        [
             {
                 "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-                "name": "Сидр",
-                "measure_name": "шт",
-                "tax": "VAT_18",
-                "allow_to_sell": true,
-                "price": 123.12,
-                "description": "Вкусный яблочный сидр",
-                "article_number": "СДР-ЯБЛЧ",
-                "code": "42",
+                "name": "Группа",
                 "barcodes": [
-                    "2000000000060"
+                "2000000000060"
                 ],
-                "type": "ALCOHOL_NOT_MARKED",
-                "id": "01ba18b6-8707-5f47-3d9c-4db058054cb2",
-                "quantity": 12,
-                "cost_price": 100.123,
-                "attributes_choices": {},
-                "store_id": "string",
-                "user_id": "string",
-                "created_at": "string",
-                "updated_at": "string"
-            }
-        """
-        bulk = False
-
-        # здесть будет преобразование обекта Product в json
-        serializer = ProductsSerializer(products)
-        products_json = json.loads(JSONRenderer().render(serializer.data).decode('utf-8'))
-        if len(products) > 1:
-            bulk = True
-            
-        endpoint = f"stores/{store_id}/products"
-        response = self.send_request(endpoint, "PUT", products_json, bulk)
-        error = response.get("error", None)
-    
-        return products, error
-    
-    def update_or_create_evotor_group(self, product, store_id):
-        """
-        Создать/заменить товар
-
-        Создаёт или заменяет в магазине один товар или модификацию товара с указанным идентификатором.
-        PUT /stores/{store-id}/products/{product-id}
-
-        Чтобы передать несколько объектов дополните заголовок Content-Type модификатором +bulk.
-
-        products - список объектов Product
-
-        ТЕЛО: 
-        {
-            "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-            "name": "Сидр",
-            "measure_name": "шт",
-            "tax": "VAT_18",
-            "allow_to_sell": true,
-            "price": 123.12,
-            "description": "Вкусный яблочный сидр",
-            "article_number": "СДР-ЯБЛЧ",
-            "code": "42",
-            "is_age_limited": true,
-            "barcodes": [
-                "2000000000060"
-            ],
-            "type": "ALCOHOL_NOT_MARKED"
-        }
-
-        ОТВЕТ: 
-            {
-                "id": "ca187ddc-8d1b-4d0e-b20d-c509082da528",
-                "modified_at": "2018-01-01T00:00:00.000Z",
-                "status": "COMPLETED",
-                "type": "product",
-                "details": [
-                    { }
+                "attributes": [
+                {
+                    "id": "36755a25-8f56-11e8-96a6-85f64fd5f8e3",
+                    "name": "Цвет",
+                    "choices": [
+                    {
+                        "id": "36755a27-8f56-11e8-96a6-85f64fd5f8e3",
+                        "name": "Зелёный"
+                    }
+                    ]
+                }
                 ]
             }
-        """
-
-        if product.evotor_id:
-            return self.update_evotor_products([product], store_id, product.evotor_id)
-        
-        return self.create_evotor_products([product], store_id)
-
-    def update_or_create_evotor_groups(self, products, store_id):
-        """
-        Создаёт или заменяет товары или модификации товаров в магазине. Идентификаторы объектов формирует клиент API.
-
-        Создает новый товар или модификацию товара в магазине. Идентификаторы объектов формирует Облако.
-        PUT /stores/{store-id}/products
-
-        Чтобы передать несколько объектов дополните заголовок Content-Type модификатором +bulk.
-
-        products - список объектов Product
-
-        ТЕЛО: 
-        {
-            "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-            "name": "Сидр",
-            "measure_name": "шт",
-            "tax": "VAT_18",
-            "allow_to_sell": true,
-            "price": 123.12,
-            "description": "Вкусный яблочный сидр",
-            "article_number": "СДР-ЯБЛЧ",
-            "code": "42",
-            "is_age_limited": true,
-            "barcodes": [
-                "2000000000060"
-            ],
-            "type": "ALCOHOL_NOT_MARKED"
-        }
+        ]
 
         ОТВЕТ: 
-            {
-                "id": "ca187ddc-8d1b-4d0e-b20d-c509082da528",
-                "modified_at": "2018-01-01T00:00:00.000Z",
-                "status": "COMPLETED",
-                "type": "product",
-                "details": [
-                    { }
-                ]
-            }
-        """
-
-        products_to_create = products.filter(evotor_id__isnull=True)
-        products_to_update = products.filter(evotor_id__isnull=False)
-
-        prds_crt, err_crt = self.create_evotor_products(products_to_create, store_id)
-        prds_upd, err_upd = self.update_evotor_products(products_to_update, store_id)
-
-        return {
-            "created": (prds_crt, err_crt),
-            "updated": (prds_upd, err_upd),
+        {
+            "id": "ca187ddc-8d1b-4d0e-b20d-c509082da528",
+            "modified_at": "2018-01-01T00:00:00.000Z",
+            "status": "COMPLETED",
+            "type": "product",
+            "details": [
+                {    }
+            ]
         }
+        """
+        serializer = ProductGroupsSerializer({"items": groups}, context={"store_id": store_id})
+        groups_json = json.loads(JSONRenderer().render(serializer.data.get('items')).decode('utf-8'))
+
+        endpoint = f"stores/{store_id}/product-groups"
+        response = self.send_request(endpoint, "PUT", groups_json, True)
+        error = response.get("error", None) if isinstance(response, dict) else None
+    
+        return groups, error
+    
+    def update_or_create_evotor_group(self, group, store_id):
+        """
+        Создаёт или заменяет в магазине одину группу товаров или модификаций.
+        """
+        groups, err = self.update_or_create_evotor_groups([group], store_id)
+        return groups[0], err
+
+    def update_or_create_evotor_groups(self, groups, store_id):
+        """
+        Создаёт или заменяет товары или модификации товаров в магазине.
+        Идентификаторы объектов формирует клиент API.
+        """
+        errors = []
+        grouped_groups = {"create": defaultdict(list), "update": defaultdict(list)}
+
+        for group in groups:
+            key = "update" if group.evotor_id else "create"
+            grouped_groups[key].append(group)
+
+        for action, grouped_group in grouped_groups.items():
+            if action == "create":
+                groups, err = self.create_evotor_groups(grouped_group, store_id)
+            else:
+                groups, err = self.update_evotor_groups(grouped_group, store_id)
+            if err:
+                errors.append(err)
+
+        return groups, ", ".join(errors)
+
+
+
 
     def delete_evotor_group(self, store_id, product_id):
         """
@@ -1276,7 +1174,9 @@ class EvotorProductClient(EvotorAPICloud):
         endpoint = f"stores/{store_id}/products"
         return self.send_request(endpoint, "DELETE", products_data, bulk)
 
-# ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
+
+
+# ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
     def create_or_update_site_products(self, products_json, is_filtered=False):
         error_msgs = []
@@ -1298,7 +1198,7 @@ class EvotorProductClient(EvotorAPICloud):
                     product = serializer.save() 
                     event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
                     CRMEvent.objects.create(
-                        body=f"Product created / updated - { product.title }",
+                        body=f"Product created / updated - { product.name }",
                         sender=CRMEvent.PRODUCT,
                         type=event_type,
                     )

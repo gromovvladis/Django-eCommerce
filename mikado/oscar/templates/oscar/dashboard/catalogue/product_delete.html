@@ -11,14 +11,14 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
             <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-product-list' %}">Товары</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-product' pk=product.pk %}">{{ product.get_title }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-product' pk=product.pk %}">{{ product.get_name }}</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block navtext %}
-    <h1>{{ product.get_title }} | Удаление</h1>
+    <h1>{{ product.get_name }} | Удаление</h1>
 {% endblock %}
 
 {% block dashboard_content %}
@@ -29,9 +29,9 @@
         {% csrf_token %}
         <p>
             {% if product.is_child %}
-                Удалить вариант продукта - <strong>{{ product.get_title }}</strong> - вы уверены?
+                Удалить вариант продукта - <strong>{{ product.get_name }}</strong> - вы уверены?
             {% else %}
-                Удалить продукт <strong>{{ product.get_title }}</strong> - вы уверены?
+                Удалить продукт <strong>{{ product.get_name }}</strong> - вы уверены?
             {% endif %}
         </p>
         {% if product.is_parent %}
@@ -39,7 +39,7 @@
                 При этом также будут удалены следующие вариации:
                 <ul>
                     {% for child in product.children.all %}
-                        <li><strong>{{ child.get_title }}</strong></li>
+                        <li><strong>{{ child.get_variants }}</strong></li>
                     {% endfor %}
                 </ul>
             </p>

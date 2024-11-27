@@ -198,8 +198,8 @@ class OrderCreator(object):
             "stockrecord": stockrecord,
             # Product details
             "product": product,
-            "title": product.get_title(),
-            "upc": product.upc,
+            "name": product.get_name(),
+            "article": product.article,
             "quantity": basket_line.quantity,
             # Price details
             "line_price": basket_line.line_price_incl_discounts,

@@ -16,9 +16,9 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
         template_name="oscar/search/indexes/product/item_text.txt",
     )
 
-    upc = indexes.CharField(model_attr="upc", null=True)
-    title = indexes.EdgeNgramField(model_attr="title", null=True)
-    title_exact = indexes.CharField(model_attr="title", null=True, indexed=False)
+    article = indexes.CharField(model_attr="article", null=True)
+    name = indexes.EdgeNgramField(model_attr="name", null=True)
+    name_exact = indexes.CharField(model_attr="name", null=True, indexed=False)
 
     # Fields for faceting
     product_class = indexes.CharField(null=True, faceted=False)
@@ -75,10 +75,10 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare(self, obj):
         prepared_data = super().prepare(obj)
-        # Use title for spelling suggestions
-        # prepared_data["suggestions"] = prepared_data["title"]
+        # Use name for spelling suggestions
+        # prepared_data["suggestions"] = prepared_data["name"]
         prepared_data["suggestions"] = (
-            prepared_data.get("title", ""),
+            prepared_data.get("name", ""),
             prepared_data.get("short_description", ""),
             prepared_data.get("category_name", ""),
         )

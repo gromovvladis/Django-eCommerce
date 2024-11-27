@@ -1,21 +1,16 @@
 {% extends "oscar/checkout/checkout.html" %}
 
 {% block chekout_form %}
-
         {% if error %}
             <div class="alert alert-danger">
                 {{ error }}
             </div>
         {% endif %}
-
         <div class="v-order__wrapper d-flex flex-column">
             <div class="v-order__form d-flex flex-column fill-width">
-                    
-                {% comment %} <div class="v-order__title d-none d-sm-block mb-3 mb-sm-4"> {% endcomment %}
                 <div class="v-order__title d-none d-sm-block mb-4">
                     <h1>Оформление заказа</h1>
                 </div>
-                
                 {% if basket.is_shipping_required %}                          
                     {% comment %} коментарий к заказу {% endcomment %}
                     <div data-id="v-input-field" class="v-input v-input-textarea d-flex align-center mb-1 mb-sm-2 v-input__padding{% if form.initial.order_note %} v-input__label-active{% endif %}">
@@ -41,7 +36,6 @@
                             </div>
                         </div>
                     </div>
-            
                     {% comment %} форма с выбором метода доставки должен быть в форме {% endcomment %}
                     <div class="d-flex flex-column fill-width mb-4">
                         <div class="v-deferred--wrapper">
@@ -70,22 +64,16 @@
                         </div>
                     </div>
                 {% endif %}
-
                 {% comment %} основная форма {% endcomment %}
                 <form action="{% url 'checkout:checkoutview' %}" method="post" id="place_order_form" novalidate>
-                    
                     {% include "oscar/partials/render_field.html" with field=form.method_code %}
-
                     {% if basket.is_shipping_required %} 
-                        
                         {% include "oscar/partials/render_field.html" with field=form.coords_long %}
                         {% include "oscar/partials/render_field.html" with field=form.coords_lat %}
-
                         <div class="v-delivery mb-4" id="address_fields">
                             <div class="v-order__subtitle mb-1 mb-sm-2">
                                 <h2>Адрес доставки</h2>
                             </div>
-            
                             {% comment %} line1 {% endcomment %}
                             <div id="line1_container" class="v-delivery__address-wrapper v-input alternative">
                                 <div class="d-flex v-delivery--input">
@@ -94,10 +82,8 @@
                                 <div id="suggest_list" class="search__suggest d-none"></div> {% comment %} 2gis {% endcomment %}
                             </div>
                             <span id="line1_hints" class="v-delivery__address-hint d-inline-block mt-1 mb-2 d-none"></span>
-            
                             {% comment %} line2-line4 {% endcomment %}
                             <div class="mt-0 row">
-            
                                 {% comment %} line2 {% endcomment %}
                                 <div class="col col-4 col-sm-4">
                                     <div data-id="v-input-field" class="v-input d-flex align-center v-input__padding{% if form.initial.line2 %} v-input__label-active{% endif %}">
@@ -109,7 +95,6 @@
                                         </div>
                                     </div>
                                 </div>
-            
                                 {% comment %} line3 {% endcomment %}
                                 <div class="col col-4 col-sm-4">
                                     <div data-id="v-input-field" class="v-input d-flex align-center v-input__padding{% if form.initial.line3 %} v-input__label-active{% endif %}">
@@ -121,7 +106,6 @@
                                         </div>
                                     </div>
                                 </div>
-            
                                 {% comment %} line4 {% endcomment %}
                                 <div class="col col-4 col-sm-4">
                                     <div data-id="v-input-field" class="v-input d-flex align-center v-input__padding{% if form.initial.line4 %} v-input__label-active{% endif %}">
@@ -134,7 +118,6 @@
                                     </div>
                                 </div>
                             </div>
-            
                             {% comment %} notes {% endcomment %}
                             <div data-id="v-input-field" class="v-input v-input-textarea d-flex align-center mt-1 mt-sm-2 v-input__padding{% if form.initial.notes %} v-input__label-active{% endif %}">
                                 <div class="v-input__wrapper">
@@ -153,7 +136,6 @@
                             <h2 data-id="order-time-title">Время самовывоза</h2>
                         </div>
                     {% endif %}
-        
                     {% comment %} время {% endcomment %}      
                     <div class="d-flex flex-column fill-width">
                         <div class="v-deferred--wrapper">
@@ -175,17 +157,14 @@
                         <div id="delivery_time" class="v-order__delivery-time"></div>
                         <input id="delivery_time_later" type="text" class="v-order__delivery-time hidden">
                     </div>
-        
                     <div class="v-order__subtitle mt-4">
                         <h2>Способ оплаты</h2>
                     </div>
-        
                     {% block payment_method %}
                         <div class="v-payment-block fill-width mt-1 mt-sm-2">
                             {% include "oscar/partials/render_field.html" with field=form.payment_method %}
                         </div>
                     {% endblock payment_method %}
-        
                     <div data-id="v-input-field" data-field="v-email-field" class="v-input d-flex align-center mt-1 mt-sm-2 v-input__padding">
                         <div class="v-input__wrapper">
                             <div class="v-input__label" id="email_field_label">E-mail для получения чеков</div>
@@ -194,9 +173,7 @@
                             </div>
                         </div>
                     </div>
-
                 </form>
-
             </div>
         </div>
 {% endblock chekout_form %}

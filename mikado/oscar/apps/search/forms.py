@@ -42,8 +42,8 @@ class SearchForm(FacetedSearchForm):
     NEWEST = "newest"
     PRICE_HIGH_TO_LOW = "price-desc"
     PRICE_LOW_TO_HIGH = "price-asc"
-    TITLE_A_TO_Z = "title-asc"
-    TITLE_Z_TO_A = "title-desc"
+    NAME_A_TO_Z = "name-asc"
+    NAME_Z_TO_A = "name-desc"
 
     SORT_BY_CHOICES = [
         (RELEVANCY, "Релевантность"),
@@ -51,8 +51,8 @@ class SearchForm(FacetedSearchForm):
         (NEWEST, "Наиболее новые"),
         (PRICE_HIGH_TO_LOW, "Цена | От большей к меньшей"),
         (PRICE_LOW_TO_HIGH, "Цена | От меньшей к большей"),
-        (TITLE_A_TO_Z, "Название от А до Я"),
-        (TITLE_Z_TO_A, "Название от Я до А"),
+        (NAME_A_TO_Z, "Название от А до Я"),
+        (NAME_Z_TO_A, "Название от Я до А"),
     ]
 
     # Map query params to sorting fields.  Note relevancy isn't included here
@@ -63,13 +63,13 @@ class SearchForm(FacetedSearchForm):
         NEWEST: "-date_created",
         PRICE_HIGH_TO_LOW: "-price",
         PRICE_LOW_TO_HIGH: "price",
-        TITLE_A_TO_Z: "title_s",
-        TITLE_Z_TO_A: "-title_s",
+        NAME_A_TO_Z: "name_s",
+        NAME_Z_TO_A: "-name_s",
     }
-    # Non Solr backends don't support dynamic fields so we just sort on title
+    # Non Solr backends don't support dynamic fields so we just sort on name
     if not is_solr_supported():
-        SORT_BY_MAP[TITLE_A_TO_Z] = "title_exact"
-        SORT_BY_MAP[TITLE_Z_TO_A] = "-title_exact"
+        SORT_BY_MAP[NAME_A_TO_Z] = "name_exact"
+        SORT_BY_MAP[NAME_Z_TO_A] = "-name_exact"
 
     sort_by = forms.ChoiceField(
         label="Сортировать по",

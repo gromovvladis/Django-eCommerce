@@ -40,7 +40,7 @@ def orders_list(orders):
         msg_list = []
         for order in orders:
             order_lines = [
-                f"{line.product.get_title()} ({line.quantity})"
+                f"{line.product.get_name()} ({line.quantity})"
                 for line in order.basket.lines.all()
             ]
             

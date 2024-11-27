@@ -91,13 +91,13 @@
                         {% endif %}
                       </td>
                       <td class="name">
-                        <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_title }}</a>
+                        <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_name }}</a>
                         {% if product.is_child and product.variant %}
                             <br>
                             <span class="small">{{ product.variant }}</span>
                         {% endif %}
                         <br>
-                        <span class="text-muted small">UPC: {{ product.upc|default:"-" }}</span>
+                        <span class="text-muted small">Артикул: {{ product.article|default:"-" }}</span>
                       </td>
                       <td class="is_public" data-label="Возможна скидка?">{% if product.is_discountable %}✔️{% else %}❌{% endif %}</td>
                       <td class="delete" data-label="Удалить">
@@ -227,13 +227,13 @@
                         {% endif %}
                       </td>
                       <td class="name">
-                        <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_title }}</a>
+                        <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_name }}</a>
                         {% if product.is_child and product.variant %}
                             <br>
                             <span class="small">{{ product.variant }}</span>
                         {% endif %}
                         <br>
-                        <span class="text-muted small">UPC: {{ product.upc|default:"-" }}</span>
+                        <span class="text-muted small">Артикул: {{ product.article|default:"-" }}</span>
                       </td>
                       <td class="is_public" data-label="Возможна скидка?">{% if product.is_discountable %}✔️{% else %}❌{% endif %}</td>
                       <td class="delete" data-label="Удалить">

@@ -553,10 +553,10 @@ class Line(models.Model):
         null=True,
         verbose_name="товар",
     )
-    title = models.CharField(("Название товара", "Название"), max_length=255)
-    # UPC can be null because it's usually set as the product's UPC, and that
+    name = models.CharField("Название товара", max_length=255)
+    # article can be null because it's usually set as the product's article, and that
     # can be null as well
-    upc = models.CharField("Товарный код товара UPC", max_length=128, blank=True, null=True)
+    article = models.CharField("Артикул товара", max_length=128, blank=True, null=True)
 
     quantity = models.PositiveIntegerField("Количество", default=1)
 
@@ -605,11 +605,11 @@ class Line(models.Model):
 
     def __str__(self):
         if self.product:
-            title = self.product.title
+            name = self.product.name
         else:
-            title = ("<Товар не найден>")
+            name = ("<Товар не найден>")
         return ("Товар '%(name)s', количество '%(qty)s'") % {
-            "name": title,
+            "name": name,
             "qty": self.quantity,
         }
 
@@ -829,7 +829,7 @@ class Line(models.Model):
         
         if not self.product:
             return False, (
-                ("'%(title)s' больше недоступно") % {"title": self.title}
+                ("'%(name)s' больше недоступно") % {"name": self.name}
             )
 
         try:

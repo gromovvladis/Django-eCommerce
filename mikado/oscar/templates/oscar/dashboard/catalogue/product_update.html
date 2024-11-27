@@ -17,7 +17,7 @@
             </li>
             {% if parent %}
                 <li class="breadcrumb-item">
-                    <a href="{% url 'dashboard:catalogue-product' parent.id %}">{{ parent.title }}</a>
+                    <a href="{% url 'dashboard:catalogue-product' parent.id %}">{{ parent.name }}</a>
                 </li>
             {% endif %}
             <li class="breadcrumb-item active" aria-current="page">
@@ -42,7 +42,7 @@
             <div class="alert alert-info">
                 {% url 'dashboard:catalogue-product' pk=parent.id as parent_url %}
                 Вы редактируете вариант продукта -
-                <a href="{{ parent_url }}">{{ parent.title }}</a>.
+                <a href="{{ parent_url }}">{{ parent.name }}</a>.
             </div>
         {% endif %}
         <div class="row">
@@ -177,6 +177,13 @@
                                                     </tr>
                                             {% endfor %}
                                         </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th class="text-muted" colspan="2">
+                                                    Первая в списке категория используется в Эвотор. Именно в ней будет располагаться товар.
+                                                </th>
+                                            </tr>
+                                        </tfoot>
                                         </table>
                                     {% endblock product_categories_content %}
                                 </div>
@@ -424,7 +431,7 @@
                                                         <tr>
                                                             <td>
                                                                 <a href="{% url 'dashboard:catalogue-product' pk=child.id %}">
-                                                                    {{ child.get_title }}
+                                                                    {{ child.get_name }}
                                                                 </a>
                                                             </td>
                                                             <td>{{ child.attributes_variants }}</td>

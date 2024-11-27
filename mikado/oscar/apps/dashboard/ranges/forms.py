@@ -8,7 +8,7 @@ Product = get_model("catalogue", "Product")
 Range = get_model("offer", "Range")
 RangeProductFileUpload = get_model("offer", "RangeProductFileUpload")
 
-UPC_SET_REGEX = re.compile(r"[^,\s]+")
+ARTICLE_SET_REGEX = re.compile(r"[^,\s]+")
 
 
 class RangeForm(forms.ModelForm):
@@ -27,13 +27,13 @@ class RangeForm(forms.ModelForm):
 class RangeProductForm(forms.Form):
     query = forms.CharField(
         max_length=1024,
-        label="Артикулы товара или UPC",
+        label="Артикул товара",
         widget=forms.Textarea,
         required=False,
-        help_text="Вы можете вставить выбранные SKU или UPC",
+        help_text="Вы можете вставить выбранные артикулы",
     )
     file_upload = forms.FileField(
-        label="Файл SKU или UPC",
+        label="Файл с артикулами",
         required=False,
         max_length=255,
         help_text="Либо через запятую, либо по одному идентификатору в строке",
@@ -46,7 +46,7 @@ class RangeProductForm(forms.Form):
 
     def clean_query_with_upload_type(self, raw, upload_type):
         # Check that the search matches some products
-        ids = set(UPC_SET_REGEX.findall(raw))
+        ids = set(ARTICLE_SET_REGEX.findall(raw))
         # switch for included or excluded products
         if upload_type == RangeProductFileUpload.EXCLUDED_PRODUCTS_TYPE:
             products = self.product_range.excluded_products.all()
@@ -57,40 +57,40 @@ class RangeProductForm(forms.Form):
         existing_skus = set(
             products.values_list("stockrecords__evotor_code", flat=True)
         )
-        existing_upcs = set(products.values_list("upc", flat=True))
-        existing_ids = existing_skus.union(existing_upcs)
+        existing_articles = set(products.values_list("article", flat=True))
+        existing_ids = existing_skus.union(existing_articles)
         new_ids = ids - existing_ids
         if len(new_ids) == 0:
             self.add_error(
                 "query",
                 (
-                    "К товарам с номерами SKU или UPC, соответствующими %(skus)s, "
+                    "К товарам с артикулами, соответствующими %(skus)s, "
                     "уже было применено %(action)s"
                 )
                 % {"skus": ", ".join(ids), "action": action},
             )
         else:
             self.products = Product._default_manager.filter(
-                Q(stockrecords__evotor_code__in=new_ids) | Q(upc__in=new_ids)
+                Q(stockrecords__evotor_code__in=new_ids) | Q(article__in=new_ids)
             )
             if len(self.products) == 0:
                 self.add_error(
                     "query",
-                    "Нет товаров, соответствующих SKU или UPC %s"
+                    "Нет товаров, соответствующих артикулу %s"
                     % ", ".join(ids),
                 )
             found_skus = set(
                 self.products.values_list("stockrecords__evotor_code", flat=True)
             )
-            found_upcs = set(self.products.values_list("upc", flat=True))
-            found_ids = found_skus.union(found_upcs)
+            found_articles = set(self.products.values_list("article", flat=True))
+            found_ids = found_skus.union(found_articles)
             self.missing_skus = new_ids - found_ids
             self.duplicate_skus = existing_ids.intersection(ids)
 
     def clean(self):
         clean_data = super().clean()
         if not clean_data.get("query") and not clean_data.get("file_upload"):
-            raise forms.ValidationError("Вы должны отправить либо список SKU/UPC, либо файл.")
+            raise forms.ValidationError("Вы должны отправить либо список артикулов, либо файл.")
 
         raw = clean_data["query"]
         if raw:
@@ -119,32 +119,32 @@ class RangeExcludedProductForm(RangeProductForm):
             return raw
 
         # Check that the search matches some products
-        ids = set(UPC_SET_REGEX.findall(raw))
+        ids = set(ARTICLE_SET_REGEX.findall(raw))
         products = self.product_range.excluded_products.all()
         existing_skus = set(
             products.values_list("stockrecords__evotor_code", flat=True)
         )
-        existing_upcs = set(products.values_list("upc", flat=True))
-        existing_ids = existing_skus.union(existing_upcs)
+        existing_articles = set(products.values_list("article", flat=True))
+        existing_ids = existing_skus.union(existing_articles)
         new_ids = ids - existing_ids
 
         if len(new_ids) == 0:
             raise forms.ValidationError(
-                "Товары с номерами SKU или UPC, соответствующими %s, уже находятся в этом ассортименте"
+                "Товары с артикулами, соответствующими %s, уже находятся в этом ассортименте"
                 % (", ".join(ids))
             )
 
         self.products = Product._default_manager.filter(
-            Q(stockrecords__evotor_code__in=new_ids) | Q(upc__in=new_ids)
+            Q(stockrecords__evotor_code__in=new_ids) | Q(article__in=new_ids)
         )
         if len(self.products) == 0:
-            raise forms.ValidationError("Нет товаров, соответствующих SKU или UPC %s") % ", ".join(ids)
+            raise forms.ValidationError("Нет товаров, соответствующих артикулу %s") % ", ".join(ids)
 
         found_skus = set(
             self.products.values_list("stockrecords__evotor_code", flat=True)
         )
-        found_upcs = set(self.products.values_list("upc", flat=True))
-        found_ids = found_skus.union(found_upcs)
+        found_articles = set(self.products.values_list("article", flat=True))
+        found_ids = found_skus.union(found_articles)
         self.missing_skus = new_ids - found_ids
         self.duplicate_skus = existing_ids.intersection(ids)
 

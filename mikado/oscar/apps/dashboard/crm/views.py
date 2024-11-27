@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import View
 
-from oscar.apps.catalogue.serializers import ProductsGroupSerializer, ProductsSerializer
+from oscar.apps.catalogue.serializers import ProductGroupsSerializer, ProductsSerializer
 from oscar.apps.crm.client import EvatorCloud
 from oscar.apps.customer.serializers import StaffsSerializer
 from oscar.apps.dashboard.crm.mixins import CRMTablesMixin
@@ -305,7 +305,7 @@ class CRMGroupsListView(CRMTablesMixin):
     template_name = "oscar/dashboard/crm/groups/group_list.html"
     model = Category
     form_class = CRMStoreForm
-    serializer = ProductsGroupSerializer
+    serializer = ProductGroupsSerializer
     context_table_name = "tables"
     table_prefix = "group_{}-"
     table_evotor = CRMGroupEvotorTable
@@ -492,8 +492,8 @@ class CRMProductListView(CRMTablesMixin):
                             == data_item.get("measure_name")
                         )
                         data_item["is_valid"] = (
-                            model_instance.title == data_item.get("name", "").strip()
-                            and model_instance.upc == data_item.get("article_number", None)
+                            model_instance.name == data_item.get("name", "").strip()
+                            and model_instance.article == data_item.get("article_number", None)
                             and model_instance.short_description == data_item.get("description", "").strip()
                             and model_instance.get_evotor_parent() == data_item.get("parent_id", None)
                             and stockrecord_match

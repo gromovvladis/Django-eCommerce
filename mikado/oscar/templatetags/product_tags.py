@@ -10,7 +10,7 @@ def render_product(context, product):
     """
     Render a product snippet as you would see in a browsing display.
 
-    This templatetag looks for different templates depending on the UPC and
+    This templatetag looks for different templates depending on the article and
     product class of the passed product.  This allows alternative templates to
     be used for different product classes.
     """
@@ -20,7 +20,7 @@ def render_product(context, product):
         return ""
 
     names = [
-        # "oscar/catalogue/partials/product/upc-%s.html" % product.upc,
+        # "oscar/catalogue/partials/product/article-%s.html" % product.article,
         # "oscar/catalogue/partials/product/class-%s.html" % product.get_product_class().slug,
         "oscar/catalogue/partials/product.html",
     ]

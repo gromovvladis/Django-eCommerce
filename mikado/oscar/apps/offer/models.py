@@ -1222,14 +1222,14 @@ class RangeProductFileUpload(models.Model):
             raise ValueError("Unable to process upload type: %s" % self.upload_type)
         existing_skus = products.values_list("stockrecords__evotor_code", flat=True)
         existing_skus = set(filter(bool, existing_skus))
-        existing_upcs = products.values_list("upc", flat=True)
-        existing_upcs = set(filter(bool, existing_upcs))
-        existing_ids = existing_skus.union(existing_upcs)
+        existing_articles = products.values_list("article", flat=True)
+        existing_articles = set(filter(bool, existing_articles))
+        existing_ids = existing_skus.union(existing_articles)
         new_ids = all_ids - existing_ids
 
         Product = get_model("catalogue", "Product")
         products = Product._default_manager.filter(
-            models.Q(stockrecords__evotor_code__in=new_ids) | models.Q(upc__in=new_ids)
+            models.Q(stockrecords__evotor_code__in=new_ids) | models.Q(article__in=new_ids)
         )
         for product in products:
             if self.upload_type == self.INCLUDED_PRODUCTS_TYPE:
@@ -1240,8 +1240,8 @@ class RangeProductFileUpload(models.Model):
         # Processing stats
         found_skus = products.values_list("stockrecords__evotor_code", flat=True)
         found_skus = set(filter(bool, found_skus))
-        found_upcs = set(filter(bool, products.values_list("upc", flat=True)))
-        found_ids = found_skus.union(found_upcs)
+        found_articles = set(filter(bool, products.values_list("article", flat=True)))
+        found_ids = found_skus.union(found_articles)
         missing_ids = new_ids - found_ids
         dupes = set(all_ids).intersection(existing_ids)
 

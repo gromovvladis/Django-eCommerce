@@ -260,7 +260,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.title }}
+                                                {{ prd.get_name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -445,7 +445,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.title }}
+                                                {{ prd.get_name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -629,7 +629,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.title }}
+                                                {{ prd.get_name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -813,7 +813,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.title }}
+                                                {{ prd.get_name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>

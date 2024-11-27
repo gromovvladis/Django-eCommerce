@@ -22,7 +22,7 @@
                         <tbody>
                             {% for line in order.lines.all %}
                                 <tr>
-                                    <td>{{ line.title }} &times; {{ line.quantity }}</td>
+                                    <td>{{ line.name }} &times; {{ line.quantity }}</td>
                                     <td class="alignright">{{ line.line_price|currency:order.currency }}</td>
                                 </tr>
                             {% endfor %}

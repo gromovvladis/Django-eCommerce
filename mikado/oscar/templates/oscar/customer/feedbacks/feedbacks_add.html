@@ -56,10 +56,10 @@
                                                                             {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
                                                                             {% if product.is_public %}
                                                                                 <a href="{{ product.get_absolute_url }}">
-                                                                                    <img class="img-thumbnail" src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy"/>
+                                                                                    <img class="img-thumbnail" src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy"/>
                                                                                 </a>
                                                                             {% else %}
-                                                                                <img class="img-thumbnail" src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy"/>
+                                                                                <img class="img-thumbnail" src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy"/>
                                                                             {% endif %}
                                                                         {% endwith %}
                                                                     {% endif %}
@@ -77,9 +77,9 @@
                                                                 class="v-dish-order__name router-link-exact-active router-link-active"
                                                                 data-id="dish-order-link"> 
                                                                 {% if product and product.is_public %}
-                                                                    <a href="{{ line.product.get_absolute_url }}">{{ product.get_title }}</a>
+                                                                    <a href="{{ line.product.get_absolute_url }}">{{ product.get_name }}</a>
                                                                 {% else %}
-                                                                    <em>{{ product.get_title }} (Временно недоступен)</em>
+                                                                    <em>{{ product.get_name }} (Временно недоступен)</em>
                                                                 {% endif %}
                                                             </a>
                                                         </div>
