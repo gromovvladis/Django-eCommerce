@@ -1446,9 +1446,9 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products_count:
-                messages.error(self.request, "%i товар(а/ы) по-прежнему содержит этот доп товар. Список товаров с этим доп. товаром: %s. Удалите доп.товар у основного товара(ов), прежде чем удалять доп. товар" % (products_count, list(products.values_list('name', flat=True))))
+                messages.error(self.request, "%i товар(ы) по-прежнему содержит этот доп товар. Список товаров с этим доп. товаром: %s. Удалите доп.товар у основного товара(ов), прежде чем удалять доп. товар" % (products_count, list(products.values_list('name', flat=True))))
             if product_classes_count:
-                messages.error(self.request, "%i класс(а/ы) по-прежнему содержит этот доп товар. Список класснов с этим доп. товаром: %s. Удалите доп.товар у класса(ов), прежде чем удалять доп. товар" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
+                messages.error(self.request, "%i класс(ы) по-прежнему содержит этот доп товар. Список класснов с этим доп. товаром: %s. Удалите доп.товар у класса(ов), прежде чем удалять доп. товар" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
 
         return ctx
 
@@ -1543,9 +1543,9 @@ class AttributeDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products_count:
-                messages.error(self.request, "%i товар(а/ы) по-прежнему содержит этот атрибут. Список товаров с этим доп. атрибутом: %s. Удалите атрибут у основного товара(ов), прежде чем удалять атрибут" % (products_count, list(products.values_list('name', flat=True))))
+                messages.error(self.request, "%i товар(ы) по-прежнему содержит этот атрибут. Список товаров с этим доп. атрибутом: %s. Удалите атрибут у основного товара(ов), прежде чем удалять атрибут" % (products_count, list(products.values_list('name', flat=True))))
             if product_classes_count:
-                messages.error(self.request, "%i класс(а/ы) по-прежнему содержит этот атрибут. Список класснов с этим атрибутом: %s. Удалите атрибут у класса(ов), прежде чем удалять атрибут" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
+                messages.error(self.request, "%i класс(ы) по-прежнему содержит этот атрибут. Список класснов с этим атрибутом: %s. Удалите атрибут у класса(ов), прежде чем удалять атрибут" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
 
         return ctx
 

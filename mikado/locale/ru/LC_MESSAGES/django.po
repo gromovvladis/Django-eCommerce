@@ -1028,9 +1028,9 @@ msgstr ""
 #: apps/order/models.py:516 apps/wishlists/models.py:132
 #: templates/oscar/dashboard/orders/line_detail.html:35
 #: templates/oscar/dashboard/ranges/range_product_list.html:97
-msgctxt "Product title"
-msgid "Title"
-msgstr "Заглавие"
+msgctxt "Product name"
+msgid "name"
+msgstr "Название"
 
 #: apps/catalogue/models.py:390 apps/catalogue/models.py:813
 #: apps/dashboard/catalogue/tables.py:26
@@ -1103,7 +1103,7 @@ msgid "Products"
 msgstr ""
 
 #: apps/catalogue/models.py:501
-msgid "Your product must have a title."
+msgid "Your product must have a name."
 msgstr ""
 
 #: apps/catalogue/models.py:503

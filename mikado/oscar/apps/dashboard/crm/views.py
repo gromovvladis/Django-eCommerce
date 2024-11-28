@@ -493,9 +493,9 @@ class CRMProductListView(CRMTablesMixin):
                         )
                         data_item["is_valid"] = (
                             model_instance.name == data_item.get("name", "").strip()
-                            and model_instance.article == data_item.get("article_number", None)
-                            and model_instance.short_description == data_item.get("description", "").strip()
-                            and model_instance.get_evotor_parent() == data_item.get("parent_id", None)
+                            and model_instance.article == data_item.get("article_number", "").strip()
+                            and model_instance.short_description == data_item.get("description", None)
+                            and model_instance.get_evotor_parent_id() == data_item.get("parent_id", None)
                             and stockrecord_match
                             and product_class_match
                         )

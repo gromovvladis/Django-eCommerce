@@ -1057,7 +1057,7 @@ class Line(models.Model):
             return self.quantity * self.unit_price
 
     @property
-    def title(self):
+    def name(self):
         d = smart_str(self.product)
         return d
     
