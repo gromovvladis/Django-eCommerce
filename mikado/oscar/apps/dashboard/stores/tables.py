@@ -214,7 +214,7 @@ class StaffListTable(DashboardTable):
         attrs = {'th': {'class': 'stores'},}
     )
     notif = TemplateColumn(
-        verbose_name="Уведопления",
+        verbose_name="Уведомления",
         template_name="oscar/dashboard/stores/staff_row_notif.html",
         order_by="telegram",
         attrs = {'th': {'class': 'notif'},}

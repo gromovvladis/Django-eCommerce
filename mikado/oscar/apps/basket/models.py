@@ -1030,7 +1030,6 @@ class Line(models.Model):
         """
         return self.purchase_info.price.effective_price
     
-    #vlad
     @property
     def unit_price(self):
         price_item =  self.purchase_info.price.money
@@ -1058,7 +1057,7 @@ class Line(models.Model):
             return self.quantity * self.unit_price
 
     @property
-    def title(self):
+    def name(self):
         d = smart_str(self.product)
         return d
     

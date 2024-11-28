@@ -391,7 +391,7 @@ class Yoomoney(PaymentMethod):
 
             for line in order.lines.all():
                 item = {
-                    'description': line.title,
+                    'description': line.name,
                     'quantity': line.quantity,
                         'amount': {
                             "value": line.line_price,
@@ -450,7 +450,7 @@ class Yoomoney(PaymentMethod):
 
                 for line in order.lines.all():
                     item = {
-                        'description': line.title,
+                        'description': line.name,
                         'quantity': line.quantity,
                             'amount': {
                                 "value": line.line_price,

@@ -15,6 +15,7 @@ from django.utils.timezone import now
 from itertools import product as attr_iterator
 
 from oscar.apps.catalogue.models import ProductAttribute
+from oscar.apps.crm.client import EvatorCloud
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import ObjectLookupView
 
@@ -174,42 +175,42 @@ class ProductListView(StoreProductFilterMixin, SingleTableView):
 
         data = self.form.cleaned_data
 
-        upc = data.get("upc")
-        if upc:
-            # Filter the queryset by upc
+        article = data.get("article")
+        if article:
+            # Filter the queryset by article
             # For usability reasons, we first look at exact matches and only return
             # them if there are any. Otherwise we return all results
-            # that contain the UPC.
+            # that contain the article.
 
             # Look up all matches (child products, products not allowed to access) ...
-            matches_upc = Product.objects.filter(
-                Q(upc__iexact=upc) | Q(children__upc__iexact=upc)
+            matches_article = Product.objects.filter(
+                Q(article__iexact=article) | Q(children__article__iexact=article)
             )
 
             # ... and use that to pick all standalone or parent products that the user is
             # allowed to access.
             qs_match = queryset.filter(
-                Q(id__in=matches_upc.values("id"))
-                | Q(id__in=matches_upc.values("parent_id"))
+                Q(id__in=matches_article.values("id"))
+                | Q(id__in=matches_article.values("parent_id"))
             )
 
             if qs_match.exists():
-                # If there's a direct UPC match, return just that.
+                # If there's a direct article match, return just that.
                 queryset = qs_match
             else:
-                # No direct UPC match. Let's try the same with an icontains search.
-                matches_upc = Product.objects.filter(
-                    Q(upc__icontains=upc) | Q(children__upc__icontains=upc)
+                # No direct article match. Let's try the same with an icontains search.
+                matches_article = Product.objects.filter(
+                    Q(article__icontains=article) | Q(children__article__icontains=article)
                 )
                 queryset = queryset.filter(
-                    Q(id__in=matches_upc.values("id"))
-                    | Q(id__in=matches_upc.values("parent_id"))
+                    Q(id__in=matches_article.values("id"))
+                    | Q(id__in=matches_article.values("parent_id"))
                 )
 
-        title = data.get("title")        
-        if title:
+        name = data.get("name")        
+        if name:
             queryset = queryset.filter(
-                Q(title__icontains=title) | Q(children__title__icontains=title) | Q(attribute_values__attribute__name__icontains=title)
+                Q(name__icontains=name) | Q(children__name__icontains=name) | Q(attribute_values__attribute__name__icontains=name)
             )
         
         categories = data.get("categories")
@@ -396,14 +397,14 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                 }
             else:
                 return ("Создать вариант товара %(parent_product)s") % {
-                    "parent_product": self.parent.title
+                    "parent_product": self.parent.name
                 }
         else:
-            if self.object.title or not self.parent:
-                return self.object.title
+            if self.object.name or not self.parent:
+                return self.object.name
             else:
                 return ("Редактирование вариации товара - %(parent_product)s") % {
-                    "parent_product": self.parent.title
+                    "parent_product": self.parent.name
                 }
 
     def get_form_kwargs(self):
@@ -571,8 +572,15 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         if form is not None:
             evotor_update = form.cleaned_data.get('evotor_update')
             response.set_cookie('evotor_update', evotor_update)
+
+            stockrecord_formset = formsets["stockrecord_formset"]
+            stock_update = not form.changed_data and bool(stockrecord_formset.changed_objects)
+
             if evotor_update:
-                form.evotor_save(self.object)
+                if stock_update:
+                    stockrecord_formset.update_evotor_stockrecord(self.object)
+                else: 
+                    form.update_or_create_evotor_product(self.object)
 
         return response
 
@@ -708,6 +716,25 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
         """
         return self.filter_queryset(Product.objects.all())
 
+    def form_valid(self, form):
+        self.perform_deletion(form)
+        return super().form_valid(form)
+    
+    def perform_deletion(self, form):
+        """
+        Perform custom deletion logic.
+        """
+        form.is_valid()
+        evotor_update = form.data.get("evotor_update", 'off')
+        if evotor_update == "on":
+            self.object = self.get_object()
+
+            if self.object.is_parent:
+                products = [self.object] + list(self.object.children.all())
+                EvatorCloud().delete_evotor_products(products)
+            else:
+                EvatorCloud().delete_evotor_product(self.object)
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         if self.object.is_child:
@@ -716,7 +743,7 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
             ctx["title"] = "Удалить товар?"
         return ctx
 
-    def delete(self, request, *args, **kwargs):
+    def delete(self):
         # We override the core delete method and don't call super in order to
         # apply more sophisticated logic around handling child products.
         # Calling super makes it difficult to test if the product being deleted
@@ -729,10 +756,10 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
         is_last_child = False
         if self.object.is_child:
             parent = self.object.parent
-            is_last_child = parent.children.count() == 1
-
+            is_last_child = parent.children.count() == 1    
+            
         # This also deletes any child products.
-        self.object.delete()
+        # self.object.delete()
 
         # If the product being deleted is the last child, then pass control
         # to a method than can adjust the parent itself.
@@ -757,13 +784,13 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
         product list view.
         """
         if self.object.is_child:
-            msg = "Удаленный вариант товара '%s'" % self.object.get_title()
+            msg = "Удаленный вариант товара '%s'" % self.object.get_name()
             messages.success(self.request, msg)
             return reverse(
                 "dashboard:catalogue-product", kwargs={"pk": self.object.parent_id}
             )
         else:
-            msg = "Удаленный товар '%s'" % self.object.title
+            msg = "Удаленный товар '%s'" % self.object.name
             messages.success(self.request, msg)
             return reverse("dashboard:catalogue-product-list")
 
@@ -800,7 +827,7 @@ class StockAlertListView(SingleTableView):
             if self.form.is_valid():
                 status = self.form.cleaned_data["status"]
                 return StockAlert.objects.filter(status=status).select_related("stockrecord").annotate(
-                name=F("stockrecord__product__title"),
+                name=F("stockrecord__product__name"),
                 store=F("stockrecord__store__name"),
                 threshold=F("stockrecord__low_stock_threshold"),
                 num_in_stock=F("stockrecord__num_in_stock"),
@@ -808,7 +835,7 @@ class StockAlertListView(SingleTableView):
             )       
         else:
             return StockAlert.objects.all().select_related("stockrecord").annotate(
-                name=F("stockrecord__product__title"),
+                name=F("stockrecord__product__name"),
                 store=F("stockrecord__store__name"),
                 threshold=F("stockrecord__low_stock_threshold"),
                 num_in_stock=F("stockrecord__num_in_stock"),
@@ -1322,9 +1349,9 @@ class OptionDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products_count:
-                messages.error(self.request, "%i товар(ы) по-прежнему относятся к этой опции. Список товаров: %s. Удалите опцию у товара(ов), прежде чем удалять опцию" % (products_count, list(products.values_list('title', flat=True))))
+                messages.error(self.request, "%i товар(ы) по-прежнему относятся к этой опции. Список товаров: %s. Удалите опцию у товара(ов), прежде чем удалять опцию" % (products_count, list(products.values_list('name', flat=True))))
             if product_classes_count:
-                messages.error(self.request, "%i класс(ы) товар(ов) по-прежнему присвоен(ы) этой опции. Список классов: %s. Удалите опцию у класса(ов), прежде чем удалять опцию" % (product_classes_count, list(product_classes.values_list('title', flat=True))))
+                messages.error(self.request, "%i класс(ы) товар(ов) по-прежнему присвоен(ы) этой опции. Список классов: %s. Удалите опцию у класса(ов), прежде чем удалять опцию" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
 
         return ctx
 
@@ -1419,9 +1446,9 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products_count:
-                messages.error(self.request, "%i товар(а/ы) по-прежнему содержит этот доп товар. Список товаров с этим доп. товаром: %s. Удалите доп.товар у основного товара(ов), прежде чем удалять доп. товар" % (products_count, list(products.values_list('title', flat=True))))
+                messages.error(self.request, "%i товар(ы) по-прежнему содержит этот доп товар. Список товаров с этим доп. товаром: %s. Удалите доп.товар у основного товара(ов), прежде чем удалять доп. товар" % (products_count, list(products.values_list('name', flat=True))))
             if product_classes_count:
-                messages.error(self.request, "%i класс(а/ы) по-прежнему содержит этот доп товар. Список класснов с этим доп. товаром: %s. Удалите доп.товар у класса(ов), прежде чем удалять доп. товар" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
+                messages.error(self.request, "%i класс(ы) по-прежнему содержит этот доп товар. Список класснов с этим доп. товаром: %s. Удалите доп.товар у класса(ов), прежде чем удалять доп. товар" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
 
         return ctx
 
@@ -1516,9 +1543,9 @@ class AttributeDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             if products_count:
-                messages.error(self.request, "%i товар(а/ы) по-прежнему содержит этот атрибут. Список товаров с этим доп. атрибутом: %s. Удалите атрибут у основного товара(ов), прежде чем удалять атрибут" % (products_count, list(products.values_list('title', flat=True))))
+                messages.error(self.request, "%i товар(ы) по-прежнему содержит этот атрибут. Список товаров с этим доп. атрибутом: %s. Удалите атрибут у основного товара(ов), прежде чем удалять атрибут" % (products_count, list(products.values_list('name', flat=True))))
             if product_classes_count:
-                messages.error(self.request, "%i класс(а/ы) по-прежнему содержит этот атрибут. Список класснов с этим атрибутом: %s. Удалите атрибут у класса(ов), прежде чем удалять атрибут" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
+                messages.error(self.request, "%i класс(ы) по-прежнему содержит этот атрибут. Список класснов с этим атрибутом: %s. Удалите атрибут у класса(ов), прежде чем удалять атрибут" % (product_classes_count, list(product_classes.values_list('name', flat=True))))
 
         return ctx
 
@@ -1534,7 +1561,7 @@ class ProductLookupView(ObjectLookupView):
         return self.model.objects.browsable().all()
 
     def lookup_filter(self, qs, term):
-        return qs.filter(Q(title__icontains=term) | Q(parent__title__icontains=term))
+        return qs.filter(Q(name__icontains=term) | Q(parent__name__icontains=term))
 
 
 class AdditionalLookupView(ObjectLookupView):

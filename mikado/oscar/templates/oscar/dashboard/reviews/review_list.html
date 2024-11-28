@@ -70,7 +70,7 @@
                         </td>
                         <td>
                             {% if review.product %}
-                                <a href='{{ review.product.get_absolute_url }}'>{{ review.product.title }}</a>
+                                <a href='{{ review.product.get_absolute_url }}'>{{ review.product.get_name }}</a>
                             {% else %}
                                 {% trans "[Product deleted]" %}
                             {% endif %}

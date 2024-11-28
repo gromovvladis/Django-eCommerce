@@ -142,7 +142,7 @@ class Structured(Base):
             availability=self.parent_availability_policy(product, children_stock),
             stockrecord=None,
             stockrecords=None,
-            uid=self.get_uid(),
+            uid=self.get_uid(product),
         )
 
     def select_stockrecord(self, product):
@@ -271,11 +271,15 @@ class UseStoreSelectStockRecord:
 
     def available_stockrecords(self, product):
         if product.get_product_class().track_stock:
-            stockrecords_ids = product.stockrecords.filter(is_public=True, num_in_stock__gt=0)
+            stockrecords = product.stockrecords.filter(
+                is_public=True,
+                num_in_stock__isnull=False,
+                num_in_stock__gt=0,
+            )
         else:
-            stockrecords_ids = product.stockrecords.filter(is_public=True)
+            stockrecords = product.stockrecords.filter(is_public=True)
 
-        return stockrecords_ids
+        return stockrecords
     
     def is_available(self, product):
         return self.available_stockrecords(product).exists()

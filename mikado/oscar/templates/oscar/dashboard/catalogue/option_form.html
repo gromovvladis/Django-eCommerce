@@ -32,7 +32,9 @@
 {% endif %}
 {% endblock %}
 
-{% block navtext %}{{ title }}{% endblock %}
+{% block navtext %}
+    <h1>{{ title }}</h1>
+{% endblock %}
 
 {% block dashboard_content %}
     <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors">
@@ -79,7 +81,7 @@
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
                 <div class="d-flex justify-content-end">  
-                    <a class="btn btn-danger mr-2"  href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
+                    <a class="btn btn-dark mr-2"  href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
                         <i class="fa-regular fa-circle-xmark"></i> 
                         Отменить
                     </a>             

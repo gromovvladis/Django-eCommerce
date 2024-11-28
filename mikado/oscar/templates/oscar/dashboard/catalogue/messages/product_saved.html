@@ -1,17 +1,17 @@
 {% load django_tables2 %}
 
 <p>
-{% with name=product.title parent_name=product.parent.title %}
+{% with name=product.name parent_name=product.parent.name %}
     {% if product.is_child %}
 
         {% if creating %}
-            {% if product.title %}
+            {% if product.name %}
                 Создан вариант '{{ name }}'.
             {% else %}
                 Создан вариант продукта '{{ parent_name }}'.
             {% endif %}
         {% else %}
-            {% if product.title %}
+            {% if product.name %}
                 Вариант '{{ name }}' обновлен.
             {% else %}
                 Вариант продукта '{{ parent_name }}' обновлен.

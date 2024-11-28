@@ -25,7 +25,7 @@
 {% endblock %}
 
 {% block navtext %}
-    {{ range.name }}: товары
+  <h1>{{ range.name }}: товары</h1>
 {% endblock %}
 
 {% block dashboard_content %}
@@ -91,13 +91,13 @@
                         {% endif %}
                       </td>
                       <td class="name">
-                        <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_title }}</a>
+                        <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_name }}</a>
                         {% if product.is_child and product.variant %}
                             <br>
                             <span class="small">{{ product.variant }}</span>
                         {% endif %}
                         <br>
-                        <span class="text-muted small">UPC: {{ product.upc|default:"-" }}</span>
+                        <span class="text-muted small">Артикул: {{ product.article|default:"-" }}</span>
                       </td>
                       <td class="is_public" data-label="Возможна скидка?">{% if product.is_discountable %}✔️{% else %}❌{% endif %}</td>
                       <td class="delete" data-label="Удалить">
@@ -227,13 +227,13 @@
                         {% endif %}
                       </td>
                       <td class="name">
-                        <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_title }}</a>
+                        <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_name }}</a>
                         {% if product.is_child and product.variant %}
                             <br>
                             <span class="small">{{ product.variant }}</span>
                         {% endif %}
                         <br>
-                        <span class="text-muted small">UPC: {{ product.upc|default:"-" }}</span>
+                        <span class="text-muted small">Артикул: {{ product.article|default:"-" }}</span>
                       </td>
                       <td class="is_public" data-label="Возможна скидка?">{% if product.is_discountable %}✔️{% else %}❌{% endif %}</td>
                       <td class="delete" data-label="Удалить">
@@ -322,7 +322,7 @@
     <div class="fixed-actions-group">
       <div class="container container-fluid">
         <div class="d-flex justify-content-end">  
-            <a class="btn btn-danger mr-2" href="{% url 'dashboard:range-list' %}">
+            <a class="btn btn-dark mr-2" href="{% url 'dashboard:range-list' %}">
               <i class="fa-regular fa-circle-xmark"></i> 
               <span>
                 Отменить

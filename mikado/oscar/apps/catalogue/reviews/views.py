@@ -106,7 +106,7 @@ class ProductReviewList(ListView):
         )
         context["product"] = _product
         context["form"] = self.form
-        context["page_title"] = "Отзывы товара " + _product.title
+        context["page_title"] = "Отзывы товара " + _product.name
         return context
 
 

@@ -3,7 +3,8 @@ from haystack import indexes
 from oscar.core.loading import get_class, get_model
 
 # Load default strategy (without a user/request)
-is_solr_supported = get_class("search.features", "is_solr_supported")
+# is_solr_supported = get_class("search.features", "is_solr_supported")
+
 Selector = get_class("store.strategy", "Selector")
 
 
@@ -15,13 +16,14 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
         template_name="oscar/search/indexes/product/item_text.txt",
     )
 
-    upc = indexes.CharField(model_attr="upc", null=True)
-    title = indexes.EdgeNgramField(model_attr="title", null=True)
-    title_exact = indexes.CharField(model_attr="title", null=True, indexed=False)
+    article = indexes.CharField(model_attr="article", null=True)
+    name = indexes.EdgeNgramField(model_attr="name", null=True)
+    name_exact = indexes.CharField(model_attr="name", null=True, indexed=False)
 
     # Fields for faceting
     product_class = indexes.CharField(null=True, faceted=False)
     category = indexes.MultiValueField(null=True, faceted=True)
+    category_name = indexes.CharField(null=True, indexed=False)
 
     is_available = indexes.BooleanField(null=True, faceted=True)
     order = indexes.IntegerField(model_attr="order", null=True, faceted=False) 
@@ -55,6 +57,13 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_category(self, obj):
         return list(obj.get_categories().values_list("pk", flat=True)) or []
 
+    def prepare_category_name(self, obj):
+        return " ".join(obj.get_categories().values_list("name", flat=True) or [])
+    
+    def prepare_is_available(self, obj):
+        strategy = self.get_strategy()
+        return strategy.is_available(obj)
+
     # Pricing and stock is tricky as it can vary per customer.  However, the
     # most common case is for customers to see the same prices and stock levels
     # and so we implement that case here.
@@ -64,20 +73,15 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
             self._strategy = Selector().strategy()
         return self._strategy
 
-    def prepare_is_available(self, obj):
-        strategy = self.get_strategy()
-        return strategy.is_available(obj)
-
     def prepare(self, obj):
         prepared_data = super().prepare(obj)
-
-        # We use Haystack's dynamic fields to ensure that the title field used
-        # for sorting is of type "string'.
-        if is_solr_supported():
-            prepared_data["title_s"] = prepared_data["title"]
-
-        # Use title for spelling suggestions
-        prepared_data["suggestions"] = prepared_data["title"]
+        # Use name for spelling suggestions
+        # prepared_data["suggestions"] = prepared_data["name"]
+        prepared_data["suggestions"] = (
+            prepared_data.get("name", ""),
+            prepared_data.get("short_description", ""),
+            prepared_data.get("category_name", ""),
+        )
 
         return prepared_data
 

@@ -13,8 +13,8 @@
 
     <p>
         {% absolute_url site.domain alert.product.get_absolute_url as url %}
-        {% blocktrans with title=alert.product.get_title|safe url=url %}
-            We are happy to inform you that our product '{{ title }}' is back in stock:
+        {% blocktrans with name=alert.product.get_name|safe url=url %}
+            We are happy to inform you that our product '{{ name }}' is back in stock:
             {{ url }}
         {% endblocktrans %}
     </p>

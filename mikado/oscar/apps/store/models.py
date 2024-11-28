@@ -194,13 +194,12 @@ class StockRecord(models.Model):
     )
 
     #: The fulfilment store will often have their own SKU for a product,
-    #: which we store here.  This will sometimes be the same the product's UPC
+    #: which we store here.  This will sometimes be the same the product's article
     #: but not always.  It should be unique per store.
     #: See also http://en.wikipedia.org/wiki/Stock-keeping_unit
     evotor_code = models.CharField(
         "Эвотор Code", 
-        max_length=25, 
-        unique=True,
+        max_length=25,
         blank=True,  
         help_text="Эвотор код, для связи товара и товарной записи"
     )

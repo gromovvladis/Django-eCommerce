@@ -10,7 +10,7 @@
 {% load static %}
 {% load cache %}
 
-{% block title %}{{ product.get_meta_title }} | {{ block.super }}{% endblock %}
+{% block title %}{{ product.get_name }} | {{ block.super }}{% endblock %}
 {% block wrapper_class %}menu fill-width fill-height grow-1 pb-2 px-sm-2 pt-sm-2 pb-sm-4{% endblock %}
 {% block app_class %}v-app---dish{% endblock %}
 {% block nav_class %}v-app__nav--dish{% endblock %}
@@ -28,7 +28,7 @@
                     <a href="{{ c.get_absolute_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">{{ c.name }}</a>
                     {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
                 {% endfor %}
-                <span class="v-bread__link" aria-current="page">{{ product.get_title }}</span>
+                <span class="v-bread__link" aria-current="page">{{ product.get_name }}</span>
             {% endwith %}
         </div>
     {% endcache %}
@@ -68,7 +68,7 @@
                         
                             {% comment %}------------- заголовок + вес ---------------{% endcomment %}
                             <header class="dish-page__header d-flex shrink align-end align-md-end pt-sm-1">
-                                <h1>{{ product.get_title }}</h1>
+                                <h1>{{ product.get_name }}</h1>
                                 <meta itemprop="description" content="{{ product.get_meta_description }}"/>
                                 <div role="separator" class="v-spacer"></div>
                                 {% if user.is_staff %}

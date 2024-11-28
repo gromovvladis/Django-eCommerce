@@ -66,7 +66,7 @@
                                             <div class="v-image__inner" style="padding-bottom: 72.072%;">
                                                 {% with image=product.primary_image %}
                                                     {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
-                                                    <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy"/>
+                                                    <img src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy"/>
                                                 {% endwith %}
                                             </div>
                                         </div>
@@ -81,7 +81,7 @@
                                         <a href="{{ product.get_absolute_url }}" aria-current="page"
                                             class="v-dish-order__name router-link-exact-active router-link-active"
                                             data-id="dish-order-link"> 
-                                            {{ line.title }} ({{ line.quantity }} шт.)
+                                            {{ line.name }} ({{ line.quantity }} шт.)
                                         </a>
                                     </div>
                                 </div>

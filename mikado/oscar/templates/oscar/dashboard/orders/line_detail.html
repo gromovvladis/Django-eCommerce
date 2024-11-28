@@ -18,7 +18,7 @@
 {% endblock %}
 
 {% block navtext %}
-    Заказ №{{ line.order.number }} - Позиция №{{ line.id }}
+    <h1>Заказ №{{ line.order.number }} - Позиция №{{ line.id }}</h1>
 {% endblock %}
 
 {% block dashboard_content %}
@@ -32,9 +32,9 @@
                     <th>Название</th>
                     <td>
                         {% if line.product %}
-                            <a href="{{ line.product.get_absolute_url }}">{{ line.title }}</a>
+                            <a href="{{ line.product.get_absolute_url }}">{{ line.name }}</a>
                         {% else %}
-                            {{ line.title }}
+                            {{ line.name }}
                         {% endif %}
                     </td>
                 </tr>
@@ -42,7 +42,7 @@
                     <th>Тип продукта</th><td>{{ line.product.get_product_class }}</td>
                 </tr>
                 <tr>
-                    <th>UPC</th><td>{{ line.upc|default:"-" }}</td>
+                    <th>Артикул</th><td>{{ line.article|default:"-" }}</td>
                 </tr>
                 <tr>
                     <th>Количество</th><td>{{ line.quantity }}</td>

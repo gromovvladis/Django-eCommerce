@@ -399,7 +399,7 @@ class CRMStaffSiteTable(DashboardTable):
         attrs = {'th': {'class': 'stores'},}
     )
     notif = TemplateColumn(
-        verbose_name="Уведопления",
+        verbose_name="Уведомления",
         template_name="oscar/dashboard/stores/staff_row_notif.html",
         order_by="telegram",
         attrs = {'th': {'class': 'notif'},}
@@ -464,8 +464,8 @@ class CRMProductEvotorTable(DashboardTable):
         attrs = {'th': {'class': 'description'},}
     )
     parent = TemplateColumn(
-        verbose_name="Родительский товар",
-        template_name="oscar/dashboard/crm/products/evotor_table/product_row_parent.html",
+        verbose_name="Группа",
+        template_name="oscar/dashboard/crm/products/evotor_table/product_row_group.html",
         order_by="parent",
         attrs = {'th': {'class': 'parent'},}
     )
@@ -539,11 +539,10 @@ class CRMProductSiteTable(DashboardTable):
         orderable=False,
         attrs = {'th': {'class': 'image'},}
     )
-    title = TemplateColumn(
+    name = TemplateColumn(
         verbose_name="Имя",
-        template_name="oscar/dashboard/crm/products/site_table/product_row_title.html",
-        order_by="title",
-        accessor=A("title"),
+        template_name="oscar/dashboard/crm/products/site_table/product_row_name.html",
+        order_by="name",
         attrs = {'th': {'class': 'title'},}
     )
     variants = TemplateColumn(
@@ -612,7 +611,7 @@ class CRMProductSiteTable(DashboardTable):
         sequence = (
             "check",
             "image",
-            "title",
+            "name",
             "categories",
             "additionals",
             "options",
@@ -647,7 +646,7 @@ class CRMGroupEvotorTable(DashboardTable):
         attrs = {'th': {'class': 'name'},}
     )
     parent = TemplateColumn(
-        verbose_name="Родительский товар",
+        verbose_name="Группа",
         template_name="oscar/dashboard/crm/groups/evotor_table/group_row_parent.html",
         order_by="parent",
         attrs = {'th': {'class': 'parent'},}

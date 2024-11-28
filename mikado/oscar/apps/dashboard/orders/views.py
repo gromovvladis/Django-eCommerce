@@ -301,7 +301,7 @@ class OrderStatsView(FormView):
             "start_date": start_date,
             "end_time": end_date,
             "report_datas": [],
-            "top_products_titles": [],
+            "top_products_names": [],
             "top_products_quantities": [],
             "top_products_sums": [],
         }
@@ -312,7 +312,7 @@ class OrderStatsView(FormView):
             lines_period = lines.filter(order__in=orders_period)
             top_products = (
                 lines_period
-                .values('product', 'title')
+                .values('product', 'name')
                 .annotate(total_quantity=Sum('quantity'), total_sum=Sum('line_price'))
                 .order_by('-total_quantity')
                 [:5]
@@ -333,7 +333,7 @@ class OrderStatsView(FormView):
             stats["report_datas"].append(report)
 
             stats[f"top_products_{period}"] = top_products
-            stats["top_products_titles"].append([product['title'] for product in top_products])
+            stats["top_products_names"].append([product['name'] for product in top_products])
             stats["top_products_quantities"].append([product['total_quantity'] for product in top_products])
             stats["top_products_sums"].append([int(product['total_sum']) for product in top_products])
             
@@ -438,13 +438,13 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         if data["username"]:
             queryset = queryset.filter(user__username__istartswith=data["username"]).distinct()
 
-        if data["product_title"]:
+        if data["product_name"]:
             queryset = queryset.filter(
-                lines__title__istartswith=data["product_title"]
+                lines__name__istartswith=data["product_name"]
             ).distinct()
 
-        if data["upc"]:
-            queryset = queryset.filter(lines__upc=data["upc"])
+        if data["article"]:
+            queryset = queryset.filter(lines__article=data["article"])
 
         if data["evotor_code"]:
             queryset = queryset.filter(lines__evotor_code=data["evotor_code"])
@@ -530,20 +530,20 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
                 ), (("username", data["username"]),)
             ))
 
-        if data.get("product_title"):
+        if data.get("product_name"):
             descriptions.append((
                 ('Название товара соответствует "{product_name}"').format(
-                    product_name=data["product_title"]
-                ), (("product_title", data["product_title"]),)
+                    product_name=data["product_name"]
+                ), (("product_name", data["product_name"]),)
             ))
 
-        if data.get("upc"):
+        if data.get("article"):
             descriptions.append((
-                # Translators: "UPC" means "universal product code" and it is
+                # Translators: "article" means "universal product code" and it is
                 # used to uniquely identify a product in an online store.
                 # "Item" in this context means an item in an order placed
                 # in an online store.
-                ('Включает предмет с UPC "{upc}"').format(upc=data["upc"]), (("upc", data["upc"]),)
+                ('Включает товар с артикулом "{article}"').format(article=data["article"]), (("article", data["article"]),)
             ))
 
         if data.get("evotor_code"):
@@ -647,7 +647,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
     def get_row_values(self, order):
         formatted_items = [
-            f"{item.title}({item.quantity})"
+            f"{item.name}({item.quantity})"
             for item in order.basket.lines.all()
         ]
         row = {

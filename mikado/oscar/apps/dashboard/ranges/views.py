@@ -263,7 +263,7 @@ class RangeProductListView(BulkEditMixin, ListView):
         if dupe_skus:
             messages.warning(
                 request,
-                "товары с номерами SKU или UPC, соответствующими %(skus)s, уже были %(action)s."
+                "товары с артикулами, соответствующими %(skus)s, уже были %(action)s."
                 % {"skus": ", ".join(dupe_skus), "action": action},
             )
 
@@ -271,7 +271,7 @@ class RangeProductListView(BulkEditMixin, ListView):
         if missing_skus:
             messages.warning(
                 request,
-                "Не найдено ни одного товара(ов), соответствующего SKU или UPC. %s"
+                "Не найдено ни одного товара(ов), соответствующего артикулу %s"
                 % ", ".join(missing_skus),
             )
         self.check_imported_products_sku_duplicates(request, products)

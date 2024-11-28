@@ -23,7 +23,7 @@
 {% endblock %}
 
 {% block navtext %}
-    {% if range %}{{ range.name }}{% else %}Создать новый ассортимент{% endif %}
+    <h1>{% if range %}{{ range.name }}{% else %}Создать новый ассортимент{% endif %}</h1>
 {% endblock %}
 
 {% block dashboard_content %}
@@ -38,7 +38,7 @@
         {% block form_actions %}
             <div class="fixed-actions-group">
                 <div class="float-right">  
-                    <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
+                    <a class="btn btn-dark mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
                         <i class="fa-regular fa-circle-xmark"></i> 
                         Отменить
                     </a>      

@@ -16,6 +16,10 @@
     {% endif %}
     {% if record.name %}
         {{ record.name }}
+        <br>
+        <span class="text-muted small">Артикул: {{ record.article_number|default:"-" }}</span>
+        <br>
+        <span class="text-muted small">Код: {{ record.code|default:"-" }}</span>
     {% else %}
         -
     {% endif %}

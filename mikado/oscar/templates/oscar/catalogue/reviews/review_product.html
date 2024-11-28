@@ -6,13 +6,13 @@
             {% with image=product.primary_image %}
                 {% oscar_thumbnail image.original "x155" upscale=False as thumb %}
                 <a href="{{ product.get_absolute_url }}">
-                    <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
+                    <img src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
                 </a>
             {% endwith %}
         </div>
     </div>
     <div class="col-sm-10">
-        <h2><a href="{{ product.get_absolute_url }}">{{ product.get_title }}</a></h2>
+        <h2><a href="{{ product.get_absolute_url }}">{{ product.get_name }}</a></h2>
         {% include "oscar/catalogue/partials/stock_record.html" %}
         {% include "oscar/catalogue/reviews/partials/review_stars.html" %}
     </div>

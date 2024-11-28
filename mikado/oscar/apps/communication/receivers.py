@@ -9,7 +9,7 @@ def notify_about_new_order(sender, view, **kwargs):
     order_list = []
 
     for line in kwargs['order'].basket.lines.all():
-            order_list.append("%s (%s)" % (line.product.get_title(), line.quantity))
+            order_list.append("%s (%s)" % (line.product.get_name(), line.quantity))
     
     order = ", ".join(order_list)
     

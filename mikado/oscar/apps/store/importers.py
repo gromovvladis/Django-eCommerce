@@ -74,7 +74,7 @@ class CatalogueImporter(object):
             # With stock data
             self._create_stockrecord(item, *row[5:9])
 
-    def _create_item(self, product_class, category_str, upc, title, description, stats):
+    def _create_item(self, product_class, category_str, article, name, description, stats):
         # Ignore any entries that are NULL
         if description == "NULL":
             description = ""
@@ -82,13 +82,13 @@ class CatalogueImporter(object):
         # Create item class and item
         product_class, __ = ProductClass.objects.get_or_create(name=product_class)
         try:
-            item = Product.objects.get(upc=upc)
+            item = Product.objects.get(article=article)
             stats["updated_items"] += 1
         except Product.DoesNotExist:
             item = Product()
             stats["new_items"] += 1
-        item.upc = upc
-        item.title = title
+        item.article = article
+        item.name = name
         item.description = description
         item.product_class = product_class
         item.save()

@@ -65,7 +65,7 @@ class ProductReview(models.Model):
         return reverse("catalogue:reviews-detail", kwargs=kwargs)
 
     def __str__(self):
-        return self.title
+        return self.product.name
 
     def clean(self):
         self.body = self.body.strip()

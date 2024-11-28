@@ -105,11 +105,10 @@ class ProductTable(DashboardTable):
         orderable=False,
         attrs = {'th': {'class': 'image'},}
     )
-    title = TemplateColumn(
+    name = TemplateColumn(
         verbose_name="Имя",
-        template_name="oscar/dashboard/catalogue/product_row_title.html",
-        order_by="title",
-        accessor=A("title"),
+        template_name="oscar/dashboard/catalogue/product_row_name.html",
+        order_by="name",
         attrs = {'th': {'class': 'title'},}
     )
     variants = TemplateColumn(
@@ -185,7 +184,7 @@ class ProductTable(DashboardTable):
         fields = ("date_updated", "is_public")
         sequence = (
             "image",
-            "title",
+            "name",
             "categories",
             "additionals",
             "options",

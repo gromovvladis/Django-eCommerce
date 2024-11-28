@@ -100,7 +100,7 @@ class WishList(models.Model):
         """
         lines = self.lines.filter(product=product)
         if len(lines) == 0:
-            self.lines.create(product=product, title=product.get_title())
+            self.lines.create(product=product, name=product.get_name())
         # else:
         #     line = lines[0]
         #     line.quantity += 1
@@ -134,18 +134,18 @@ class Line(models.Model):
         null=True,
     )
     # quantity = models.PositiveIntegerField("Количество", default=1)
-    #: Store the title in case product gets deleted
-    title = models.CharField(("Название товара", "Название"), max_length=255)
+    #: Store the name in case product gets deleted
+    name = models.CharField("Название товара", max_length=255)
 
     def __str__(self):
-        # return "%sx %s on %s" % (self.quantity, self.title, self.wishlist.name)
-        return "%s on %s" % (self.title, self.wishlist)
+        # return "%sx %s on %s" % (self.quantity, self.name, self.wishlist.name)
+        return "%s on %s" % (self.name, self.wishlist)
 
-    def get_title(self):
+    def get_name(self):
         if self.product:
-            return self.product.get_title()
+            return self.product.get_name()
         else:
-            return self.title
+            return self.name
 
     class Meta:
         app_label = "wishlists"

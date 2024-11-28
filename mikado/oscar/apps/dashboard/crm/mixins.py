@@ -33,9 +33,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         
         update_evotor = request.POST.get("update_evotor", None)
         if update_evotor:
-            if update_evotor == 'True':
-                return self.send_models(True)
-            return self.send_models(False)
+            return self.send_models(update_evotor == 'False')
         
         update_site = request.POST.get("update_site", 'False')
         if update_site == 'True':

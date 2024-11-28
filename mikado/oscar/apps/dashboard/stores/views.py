@@ -538,7 +538,6 @@ class GroupDetailView(UpdateView):
     form_class = GroupForm
     template_name = "oscar/dashboard/stores/group_detail.html"
     success_url = reverse_lazy('dashboard:group-list')
-    # permission_required = 'auth.add_group'
 
 
     def get_context_data(self, **kwargs):

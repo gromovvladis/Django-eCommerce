@@ -139,9 +139,9 @@ class CheckoutSessionMixin(object):
             if not is_permitted:
                 # Create a more meaningful message to show on the basket page
                 msg = (
-                    '"%(title)s" больше нельзя купить (%(reason)s).'
+                    '"%(name)s" больше нельзя купить (%(reason)s).'
                     # 'Пожалуйста, скорректируйте корзину, чтобы продолжить'
-                ) % {"title": line.product.get_title(), "reason": reason}
+                ) % {"name": line.product.get_name(), "reason": reason}
                 messages_list.append(msg)
         if messages_list:
             raise exceptions.FailedPreCondition(

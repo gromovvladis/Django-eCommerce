@@ -20,10 +20,12 @@
 {% endblock %}
 
 {% block navtext %}
-    {% if not record.is_online %}
-        <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
-    {% endif %} 
-    {{ order.basket.store|default:"-" }} | Заказ №{{ order.number }}
+    <h1>
+        {% if not record.is_online %}
+            <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
+        {% endif %} 
+        {{ order.basket.store|default:"-" }} | Заказ №{{ order.number }}
+    </h1>
 {% endblock  %}
 
 {% block dashboard_content %}
@@ -253,7 +255,7 @@
                                                 {% with image=line.product.primary_image %}
                                                     {% oscar_thumbnail image.original "80x80" upscale=False as thumb %}
                                                     <a href="#" data-original="{{ image.original.url }}" class="sub-image">
-                                                        <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.product.get_title }}{% endif %}" loading="lazy">
+                                                        <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.product.get_name }}{% endif %}" loading="lazy">
                                                     </a>
                                                 {% endwith %}
                                             {% else %}
@@ -265,16 +267,16 @@
                                                 <span class="spinner-border-sm {% if line.status == "Готовится" %}badge-warning{% elif line.status == "Отменен" %}badge-danger{% else %}badge-success{% endif %} rounded-circle mr-1">&nbsp;</span>
                                                 {% if line.product %}
                                                     <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">
-                                                        {{ line.title }}
+                                                        {{ line.name }}
                                                         {{ line.variants }}
                                                     </a>
                                                 {% else %}
-                                                    {{ line.title }}
+                                                    {{ line.name }}
                                                     {{ line.variants }}
                                                 {% endif %}
                                             </div>
                                             <span class="text-muted">
-                                                UPC: {{ line.upc|default:"-" }}
+                                                Артикул: {{ line.article|default:"-" }}
                                             </span>
                                         </td>
                                         <td data-label="Количество" class="quantity">{{ line.quantity }}</td>
@@ -642,7 +644,7 @@
                                                     <td>
                                                         {% for line_qty in event.line_quantities.all %}
                                                             <a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line_qty.line.id %}">
-                                                                {{ line_qty.line.title }} (quantity {{ line_qty.quantity }}/{{ line_qty.line.quantity }})
+                                                                {{ line_qty.line.name }} (quantity {{ line_qty.quantity }}/{{ line_qty.line.quantity }})
                                                             </a>
                                                         {% endfor %}
                                                     </td>
@@ -895,7 +897,7 @@
                                                         <td data-label="Сумма">{{ event.amount|currency:order.currency }}</td>
                                                         <td data-label="Позиции">
                                                             {% for line_qty in event.line_quantities.all %}
-                                                                {{ line_qty.line.title }} ({{ line_qty.quantity }} шт.)
+                                                                {{ line_qty.line.name }} ({{ line_qty.quantity }} шт.)
                                                                 </br>
                                                             {% endfor %}
                                                         </td>

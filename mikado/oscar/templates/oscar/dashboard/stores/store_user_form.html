@@ -23,7 +23,9 @@
     </nav>
 {% endblock %}
 
-{% block navtext %}{{ title }}{% endblock %}
+{% block navtext %}
+    <h1>{{ title }}</h1>
+{% endblock %}
 
 {% block dashboard_content %}
     <form method="post" class="card card-body form-stacked wysiwyg" enctype="multipart/form-data">

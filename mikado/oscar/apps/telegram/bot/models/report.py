@@ -53,7 +53,7 @@ def get_staffs_message():
                 f"<b>{staff.get_full_name}</b>\n"
                 f"Телефон: {getattr(staff.user, 'username', 'Не указан')}\n"
                 f"Должность: {staff.get_role}\n"
-                f"Активен: {staff.is_active}\n"
+                f"Активен: {'✅' if staff.is_active else '❌'}\n"
                 f"Уведомления: {next((description for key, description in Staff.NOTIF_CHOICES if key == staff.notif), 'Уведомления не настроены')}"
             )
 

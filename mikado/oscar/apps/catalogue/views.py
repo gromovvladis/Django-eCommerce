@@ -82,7 +82,7 @@ class ProductDetailView(DetailView):
         If an overriding class sets a template name, we use that. Otherwise,
         we try 2 options before defaulting to :file:`catalogue/detail.html`:
 
-            1. :file:`detail-for-upc-{upc}.html`
+            1. :file:`detail-for-article-{article}.html`
             2. :file:`detail-for-class-{classname}.html`
 
         This allows alternative templates to be provided for a per-product
@@ -92,7 +92,7 @@ class ProductDetailView(DetailView):
             return [self.template_name]
 
         return [
-            "oscar/%s/detail-for-upc-%s.html" % (self.template_folder, self.object.upc),
+            "oscar/%s/detail-for-article-%s.html" % (self.template_folder, self.object.article),
             "oscar/%s/detail-for-class-%s.html"
             % (self.template_folder, self.object.get_product_class().slug),
             "oscar/%s/detail.html" % self.template_folder,

@@ -50,8 +50,8 @@ class ProductClassAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     date_hierarchy = "date_created"
     list_display = (
-        "get_title",
-        "upc",
+        "get_name",
+        "article",
         "get_product_class",
         "structure",
         "attribute_summary",
@@ -60,8 +60,8 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ["structure", "is_discountable"]
     raw_id_fields = ["parent"]
     inlines = [AttributeInline, CategoryInline, ProductRecommendationInline]
-    prepopulated_fields = {"slug": ("title",)}
-    search_fields = ["upc", "title"]
+    prepopulated_fields = {"slug": ("name",)}
+    search_fields = ["article", "name"]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

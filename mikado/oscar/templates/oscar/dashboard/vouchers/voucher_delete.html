@@ -24,11 +24,13 @@
 {% endblock %}
 
 {% block navtext %}
-    {% if not voucher.voucher_set %}
-    {% blocktrans with name=voucher.name %}Delete voucher '{{ name }}'?{% endblocktrans %}
-    {% else %}
-    {% blocktrans with code=voucher.code %}Delete voucher '{{ code }}' from set?{% endblocktrans %}
-    {% endif %}
+    <h1>
+        {% if not voucher.voucher_set %}
+        {% blocktrans with name=voucher.name %}Delete voucher '{{ name }}'?{% endblocktrans %}
+        {% else %}
+        {% blocktrans with code=voucher.code %}Delete voucher '{{ code }}' from set?{% endblocktrans %}
+        {% endif %}
+    </h1>
 {% endblock %}
 
 {% block dashboard_content %}

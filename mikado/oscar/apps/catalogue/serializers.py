@@ -21,8 +21,8 @@ Category = get_model("catalogue", "Category")
 class ProductSerializer(serializers.ModelSerializer):
     # товар
     id = serializers.CharField(source="evotor_id")
-    name = serializers.CharField(source="title")
-    article_number = serializers.CharField(source="upc", required=False, allow_blank=True)
+    name = serializers.CharField()
+    article_number = serializers.CharField(source="article", required=False, allow_blank=True)
     description = serializers.CharField(
         source="short_description", required=False, allow_blank=True
     )
@@ -112,8 +112,7 @@ class ProductSerializer(serializers.ModelSerializer):
         store = self._get_or_create_store(store_id)
 
         # Обработка товарной записи
-        if code:
-            self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
+        self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
 
         return product
 
@@ -136,8 +135,8 @@ class ProductSerializer(serializers.ModelSerializer):
             parent_product = self._get_parent_product(parent_id)
             category = self._get_category(parent_id)
         
-        product.title = validated_data.get("title")
-        product.upc = validated_data.get("upc")
+        product.name = validated_data.get("name")
+        product.article = validated_data.get("article")
         product.short_description = validated_data.get("short_description")
 
         # Добавление категории к товару
@@ -155,8 +154,7 @@ class ProductSerializer(serializers.ModelSerializer):
         store = self._get_or_create_store(store_id)
 
         # Обработка товарной записи
-        if code:
-            self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
+        self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
 
         return product
     
@@ -234,10 +232,12 @@ class ProductSerializer(serializers.ModelSerializer):
     def _create_or_update_stock_record(self, product, store, code, price, cost_price, quantity, tax, allow_to_sell):
         """Создание или обновление товарной записи"""
         stockrecord, created = StockRecord.objects.get_or_create(
-            evotor_code=code,
+            product=product,
+            store_id=store.id,
             defaults={
                 "product": product,
                 "store": store,
+                "evotor_code": code if code else "site-%s" % product.id,
                 "price": D(price),
                 "cost_price": D(cost_price),
                 "is_public": allow_to_sell,
@@ -258,17 +258,14 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        try:
-            if instance.parent:
-                representation["parent_id"] = instance.parent.evotor_id
-            else:
-                cat_id = instance.categories.first().evotor_id
-                if cat_id:
-                    representation["parent_id"] = cat_id
-                 
+        try:     
+            store_id = self.context.get("store_id", None)
+            
             representation["measure_name"] = instance.get_product_class().measure_name
 
-            store_id = self.context.get("store_id", None)
+            parent_id = instance.get_evotor_parent_id()
+            if parent_id:
+                representation["parent_id"] = parent_id
             
             stc = StockRecord.objects.filter(product=instance, store__evotor_id=store_id).first()
 
@@ -327,26 +324,14 @@ class ProductsSerializer(serializers.ModelSerializer):
 
 
 class ProductGroupSerializer(serializers.ModelSerializer):
-    # товар
+    # категория / товар
     id = serializers.CharField(source="evotor_id")
-    name = serializers.CharField(source="title")
-    code = serializers.CharField(source="evotor_code", required=False, allow_blank=True)
-    article_number = serializers.CharField(source="upc", required=False, allow_blank=True)
-    description = serializers.CharField(
-        source="middle_name", required=False, allow_blank=True
-    )
+    name = serializers.CharField()
+    parent_id = serializers.CharField(source="article", required=False, allow_blank=True)
+    store_id = serializers.CharField(source="middle_name", required=False, allow_blank=True)
 
-    # класс товара
-    type = serializers.CharField(write_only=True, required=False)
-    measure_name = serializers.CharField(write_only=True, required=False)
-
-    # товарная запись
-    store_id = serializers.CharField(write_only=True, required=False)
-    price = serializers.CharField(write_only=True, required=False)
-    cost_price = serializers.CharField(write_only=True, required=False)
-    quantity = serializers.CharField(write_only=True, required=False)
-    tax = serializers.CharField(write_only=True, required=False)
-    allow_to_sell = serializers.BooleanField(write_only=True, required=False)
+    # только у родительского товара
+    attributes = serializers.CharField(write_only=True, required=False)
 
     updated_at = serializers.DateTimeField(write_only=True)
 
@@ -489,12 +474,11 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         return representation
 
 
-class ProductsGroupSerializer(serializers.ModelSerializer):
+class ProductGroupsSerializer(serializers.ModelSerializer):
     items = ProductGroupSerializer(many=True)
 
     class Meta:
         model = Category
-        model_product = Product
         fields = ["items"]
     
     def create(self, validated_data):    

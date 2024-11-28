@@ -120,7 +120,7 @@ class ReviewProductListView(BulkEditMixin, generic.ListView):
     def add_filter_keyword(self, queryset, keyword):
         if keyword:
             queryset = queryset.filter(
-                Q(title__icontains=keyword) | Q(body__icontains=keyword)
+                Q(product__name__icontains=keyword) | Q(body__icontains=keyword)
             ).distinct()
             self.desc_ctx["kw_filter"] = " с ключевым словом соответствующим '%s'" % keyword
         return queryset

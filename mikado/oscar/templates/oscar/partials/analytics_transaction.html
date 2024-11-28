@@ -12,7 +12,7 @@
           {% for line in order.lines.all %}
           {
             'id': '{{ line.store_sku|escapejs }}',
-            'name': '{{ line.title|escapejs }}',
+            'name': '{{ line.name|escapejs }}',
             'category': '{{ line.category|default:"Uncategorised"|escapejs }}',
             'price': '{{ line.unit_price|unlocalize|escapejs }}',
             'quantity': '{{ line.quantity|escapejs }}'

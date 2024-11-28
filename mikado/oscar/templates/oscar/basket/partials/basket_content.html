@@ -28,14 +28,14 @@
                                         {{ form.id }}
                                         <div class="v-dish-order d-flex fill-width">
                                             <div class="v-dish-order__picture">
-                                                <a href="{{ product.get_absolute_url }}" aria-label="{{ product.get_title }}"
+                                                <a href="{{ product.get_absolute_url }}" aria-label="{{ product.get_name }}"
                                                     class="v-dish-image fill-width"
                                                     data-id="dish-order-image-link">
                                                     <div class="v-image {% if line.warning %}v-image--unavailable{% endif %}">
                                                         <div class="v-image__inner" style="padding-bottom: 72.072%;">
                                                             {% with image=product.primary_image %}
                                                                 {% oscar_thumbnail image.original "200x" upscale=False as thumb %}
-                                                                <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy"/>
+                                                                <img src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy"/>
                                                             {% endwith %}
                                                         </div>
                                                     </div>
@@ -49,7 +49,7 @@
                                                         <a href="{{ product.get_absolute_url }}" aria-current="page"
                                                             class="v-dish-order__name router-link-exact-active router-link-active"
                                                             data-id="dish-order-link"> 
-                                                            {{ line.title }}
+                                                            {{ line.name }}
                                                         </a>
                                                     </div>
                                                     <button type="button" data-id="dish-order-delete-link" class="v-dish-order__delete d-flex shrink pd-0">

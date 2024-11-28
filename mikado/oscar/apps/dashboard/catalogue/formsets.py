@@ -1,3 +1,8 @@
+import logging
+
+from oscar.apps.crm.client import EvatorCloud
+logger = logging.getLogger("oscar.catalogue")
+
 from django import forms
 from django.core import exceptions
 from django.forms.models import inlineformset_factory
@@ -54,7 +59,6 @@ class StockRecordFormSet(BaseStockRecordFormSet):
         self.user = user
         self.require_user_stockrecord = not user.is_staff
         self.product_class = product_class
-
         super().__init__(*args, **kwargs)
         self.set_initial_data()
 
@@ -98,6 +102,16 @@ class StockRecordFormSet(BaseStockRecordFormSet):
             user_stores = set(self.user.stores.all())
             if not user_stores & stockrecord_stores:
                 raise exceptions.ValidationError("По крайней мере одна товарная запись должна быть установлена магазину, который связана с вами.")
+
+    def update_evotor_stockrecord(self, product):
+        try:
+            product, error = EvatorCloud().update_evotor_stockrecord(product)
+            return product, error
+        except Exception as e:
+            error = "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s", e
+            logger.error(error)
+            return product, error
+
 
 
 BaseStockRecordStockFormSet = inlineformset_factory(
