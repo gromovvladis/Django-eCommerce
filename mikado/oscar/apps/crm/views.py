@@ -554,7 +554,7 @@ class CRMDocsEndpointView(APIView):
         evotor_id = data.get('id')
 
         CRMEvent.objects.create(
-            body=f"Добавлен офлайн заказ: { data.get("id", "Заказ") }",
+            body=f"Добавлен офлайн заказ: { data.get('id', 'Заказ') }",
             sender=CRMEvent.ORDER,
             type=CRMEvent.UPDATE,
         )
