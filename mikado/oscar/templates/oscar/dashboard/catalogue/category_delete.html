@@ -1,5 +1,9 @@
 {% extends 'oscar/dashboard/layout.html' %}
 
+{% block title %}
+    {{ title }} | {{ block.super }}
+{% endblock %}
+
 {% block body_class %}{{ block.super }} create-page{% endblock %}
 
 {% block breadcrumbs %}
@@ -11,18 +15,19 @@
                     Категории
                 </a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">Удалить категорию</li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-category-update' pk=object.pk %}">{{ object.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block navtext %}
-    <h1>Удалить категорию?</h1>
+    <h1>{{ object.name }} | Удаление</h1>
 {% endblock %}
 
 {% block dashboard_content %}
     <div class="table-header">
-        <h2>Удаление</h2>
+        <h2>{{ title }}</h2>
     </div>
     <form method="post" class="card card-body bg-light">
         {% csrf_token %}
@@ -30,8 +35,17 @@
 
         <p>Удалить категорию <strong>{{ object.name }}</strong> - вы уверены?</p>
 
-        <div class="form-actions fill-width mt-3">
-            <div class="float-right">
+        <div class="form-actions d-flex justify-content-between flex-wrap align-items-end fill-width mt-3">
+            <div>         
+                <label for="id_evotor_update" class="checkbox-ios">
+                    <input type="checkbox" name="evotor_update" class="form-control" id="id_evotor_update" checked>
+                    <span class="checkbox-ios-switch"></span>
+                </label>
+                <small class="form-text text-muted">
+                    Удалить в Эвотор
+                </small>
+            </div>
+            <div class="d-flex justify-content-end mt-3">
                 <a class="btn btn-secondary" href="{% if parent %}{% url 'dashboard:catalogue-category-detail-list' pk=parent.pk %}{% else %}{% url 'dashboard:catalogue-category-list' %}{% endif %}">
                     <i class="fa-solid fa-ban"></i>
                     Отмена

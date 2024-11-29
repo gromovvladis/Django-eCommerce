@@ -105,13 +105,19 @@ class StockRecordFormSet(BaseStockRecordFormSet):
 
     def update_evotor_stockrecord(self, product):
         try:
-            product, error = EvatorCloud().update_evotor_stockrecord(product)
-            return product, error
+            return EvatorCloud().update_evotor_stockrecord(product)
         except Exception as e:
             error = "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s", e
             logger.error(error)
-            return product, error
+            return error
 
+    def delete_evotor_stockrecord(self, product, store_id):
+        try:
+            return EvatorCloud().delete_evotor_product_by_store(product, store_id)
+        except Exception as e:
+            error = "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s", e
+            logger.error(error)
+            return error
 
 
 BaseStockRecordStockFormSet = inlineformset_factory(

@@ -29,10 +29,12 @@
 
 {% block navtext %}
         <h1>{{ title }}</h1>
-        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-delete' pk=product.id %}">
-            <i class="fa-solid fa-trash"></i>
-            <span>Удалить</span>
-        </a>
+        {% if product %}
+            <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-delete' pk=product.id %}">
+                <i class="fa-solid fa-trash"></i>
+                <span>Удалить</span>
+            </a>
+        {% endif %}
 {% endblock %}
 
 {% block dashboard_content %}
@@ -180,7 +182,9 @@
                                         <tfoot>
                                             <tr>
                                                 <th class="text-muted" colspan="2">
-                                                    Первая в списке категория используется в Эвотор. Именно в ней будет располагаться товар.
+                                                    Первая в списке категория основная.
+                                                    <br>
+                                                    Она используется в Эвотор. Именно в ней будет располагаться товар.
                                                 </th>
                                             </tr>
                                         </tfoot>

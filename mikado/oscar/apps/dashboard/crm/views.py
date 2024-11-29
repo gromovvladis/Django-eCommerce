@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import View
+from django.db.models import Count, Max, Min, Case, When, DecimalField, BooleanField, Q
 
 from oscar.apps.catalogue.serializers import ProductGroupsSerializer, ProductsSerializer
 from oscar.apps.crm.client import EvatorCloud
@@ -417,6 +418,53 @@ class CRMProductListView(CRMTablesMixin):
     table_site = CRMProductSiteTable
     url_redirect = reverse_lazy("dashboard:crm-products")
 
+    def get_site_table(self):
+        evotor_ids = [model_qs['id'] for model_qs in self.queryset]
+        correct_ids = [model_qs['id'] for model_qs in self.queryset if model_qs['is_valid'] == True]
+
+        data = self.form.cleaned_data
+        store_id = data.get("store") or self.form.fields.get("store").initial
+
+        site_models = self.model.objects.filter(
+            Q(stockrecords__store__evotor_id=store_id) | Q(children__stockrecords__store__evotor_id=store_id)).annotate(
+            is_valid=Case(
+                When(Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids), then=True),
+                default=False,
+                output_field=BooleanField()
+            ),
+            wrong_evotor_id=Case(
+                When(
+                    Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
+                    then=True
+                ),
+                default=False,
+                output_field=BooleanField()
+            ),
+            min_price=Case(
+                When(structure="parent", then=Min("children__stockrecords__price")),
+                default=Min('stockrecords__price'),
+                output_field=DecimalField()
+            ),
+            max_price=Case(
+                When(structure="parent", then=Max("children__stockrecords__price")),
+                default=Max('stockrecords__price'),
+                output_field=DecimalField()
+            ),
+            old_price=Case(
+                When(structure="parent", then=Max("children__stockrecords__old_price")),
+                default=Max('stockrecords__old_price'),
+                output_field=DecimalField()
+            ),
+            variants=Count("children"),
+        ).order_by(
+            '-wrong_evotor_id',
+            'is_valid',
+            'evotor_id',
+            '-is_valid'
+        )
+            
+        return self.table_site(site_models)
+
     def get_queryset(self):
 
         self.form = self.form_class(self.request.GET)
@@ -486,7 +534,8 @@ class CRMProductListView(CRMTablesMixin):
                             and stockrecord.num_in_stock == data_item.get("quantity", 0)
                             and stockrecord.tax == data_item.get("tax")
                             and stockrecord.is_public == data_item.get("allow_to_sell", False)
-                        )
+                        ) or False
+
                         product_class_match = (
                             model_instance.get_product_class().measure_name
                             == data_item.get("measure_name")
@@ -526,9 +575,10 @@ class CRMProductListView(CRMTablesMixin):
     def send_models(self, is_filtered):
         models = super().send_models(is_filtered)
         try:
-            products, error = EvatorCloud().update_or_create_evotor_products(models)
+            error = EvatorCloud().update_or_create_evotor_products(models)
         except Exception as e:
-            logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
+            error = "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e
+            logger.error(error)
         
         if error:
             messages.error(self.request, error)

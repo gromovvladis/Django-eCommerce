@@ -76,7 +76,10 @@ class EvotorAPICloud:
             "Content-Type": "application/vnd.evotor.v2+json",
             "Accept": "application/vnd.evotor.v2+json",
         }
-    
+        
+    def handle_response_errors(self, response, errors):
+        if isinstance(response, dict) and "error" in response:
+            errors.append(response["error"])
 
     def send_request(self, endpoint: str, method: str = "GET", data: dict = None, bulk: bool = False):
         """
@@ -97,17 +100,20 @@ class EvotorAPICloud:
         try:
             if method == "GET":
                 response = requests.get(url, headers=self.headers)
-            elif method == "POST":
-                response = requests.post(url, headers=self.headers, json=data)
-            elif method == "PUT":
-                response = requests.post(url, headers=self.headers, json=data)
-            elif method == "PATCH":
-                response = requests.patch(url, headers=self.headers, json=data)
-            elif method == "DELETE":
-                response = requests.delete(url, headers=self.headers)
             else:
-                logger.error(f"Ошибка HTTP запроса. Неизвестный http метод: {method}")
-                raise ValueError(f"Unsupported HTTP method: {method}")
+                return {"error": "test"}
+        
+            # elif method == "POST":
+            #     response = requests.post(url, headers=self.headers, json=data)
+            # elif method == "PUT":
+            #     response = requests.post(url, headers=self.headers, json=data)
+            # elif method == "PATCH":
+            #     response = requests.patch(url, headers=self.headers, json=data)
+            # elif method == "DELETE":
+            #     response = requests.delete(url, headers=self.headers)
+            # else:
+            #     logger.error(f"Ошибка HTTP запроса. Неизвестный http метод: {method}")
+            #     raise ValueError(f"Unsupported HTTP method: {method}")
 
             response.raise_for_status() # Проверка на успешный статус запроса (2xx) 
             return response.json() # Возврат данных в формате JSON    
@@ -405,19 +411,19 @@ class EvotorStaffClient(EvotorAPICloud):
                 ]
             }
         """
-
         serializer = StaffSerializer(staff)
         staff_json = json.loads(JSONRenderer().render(serializer.data).decode('utf-8'))
         endpoint = "employees"
         
         response = self.send_request(endpoint, "POST", staff_json)
-        error = response.get("error", None)
+        error = response.get("error", None) if isinstance(response, dict) else None
+
         if not error:
             evotor_id = response.get("id", None)
             staff.evotor_id = evotor_id
             staff.save()
 
-        return staff, error
+        return error
   
 # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
@@ -448,7 +454,7 @@ class EvotorStaffClient(EvotorAPICloud):
                     error_msgs.append(f"Ошибка сериализации роли сотрудника: {serializer.errors}")
             
             if not json_valid:
-                return  ', '.join(error_msgs), False
+                return ', '.join(error_msgs), False
             
             if not is_filtered:
                 for group_evotor in GroupEvotor.objects.all():
@@ -459,7 +465,7 @@ class EvotorStaffClient(EvotorAPICloud):
             logger.error(f"Ошибка при обновлении ролей персонала: {e}")
             return f"Ошибка при обновлении ролей персонала: {e}", False
 
-        return "Роли сотрудников были успешно обновлены", True 
+        return "Роли сотрудников были успешно обновлены", True
 
     def create_or_update_site_staffs(self, staffs_json, is_filtered=False):
         error_msgs = []
@@ -512,10 +518,6 @@ class EvotorProductClient(EvotorAPICloud):
     Работа с вариативными товарами
     https://developer.evotor.ru/docs/rest_product_modifications_guide.html 
     """
-
-    def handle_response_errors(response, errors):
-        if isinstance(response, dict) and "error" in response:
-            errors.append(response["error"])
 
 # ========= ПОЛУЧЕНИЕ ДАННЫХ
 
@@ -725,7 +727,7 @@ class EvotorProductClient(EvotorAPICloud):
                 products[0].evotor_id = response.get("id")
                 products[0].save()
 
-        return products, error
+        return error
     
     def update_evotor_products(self, products, store_id):
         """
@@ -781,20 +783,34 @@ class EvotorProductClient(EvotorAPICloud):
         response = self.send_request(endpoint, "PUT", products_json, True)
         error = response.get("error", None) if isinstance(response, dict) else None
     
-        return products, error
+        return error
     
     def create_products_parent(self, products, store_id):     
-        groups = []
+        groups = set()
+        parents = set()
         for product in products:
             parent_id = product.get_evotor_parent_id()
             if not parent_id:
                 if product.is_child:
-                    groups.append(product.parent)
+                    parent = product.parent
+                    if not parent.evotor_id:
+                        parents.add(parent)
+
+                    parent_parent_id = parent.get_evotor_parent_id()
+                    if not parent_parent_id:
+                        category = parent.categories.first()
+                        if category:
+                            groups.add(category)
                 else:
-                    groups.append(product.categories.first())
+                    category = product.categories.first()
+                    if category:
+                        groups.add(category)
 
         if groups:
-            return self.create_evotor_groups(groups, store_id)
+            return self.create_evotor_groups(list(groups), store_id)
+        
+        if parents:
+            return self.create_evotor_groups(list(parents), store_id)
 
     # === вызываются напрямую
 
@@ -802,8 +818,7 @@ class EvotorProductClient(EvotorAPICloud):
         """
         Создаёт или заменяет в магазине один товар или модификацию товара..
         """
-        products, err =  self.update_or_create_evotor_products([product])
-        return products[0], err
+        return self.update_or_create_evotor_products([product])
 
     def update_or_create_evotor_products(self, products):
         """
@@ -811,38 +826,42 @@ class EvotorProductClient(EvotorAPICloud):
         Идентификаторы объектов формирует клиент API.
         """
         errors = []
-        grouped_products = {"create": defaultdict(list), "update": defaultdict(list)}
-        groups_to_create = []
+        groups_to_create = defaultdict(list)
+        products_filtered = {"create": defaultdict(list), "update": defaultdict(list)}
 
         for product in products:
             if product.is_parent:
+                store_ids = set()
                 for child in product.children.all():
                     key = "update" if child.evotor_id else "create"
                     for stockrecord in child.stockrecords.all():
                         store_id = stockrecord.store.evotor_id
-                        grouped_products[key][store_id].append(product)
+                        if store_id:
+                            store_ids.add(store_id)
                 if not product.evotor_id:
-                    groups_to_create.append(product)
+                    for store_id in store_ids:
+                        groups_to_create[store_id].append(product)
             else:
                 key = "update" if product.evotor_id else "create"
                 for stockrecord in product.stockrecords.all():
                     store_id = stockrecord.store.evotor_id
-                    grouped_products[key][store_id].append(product)
+                    products_filtered[key][store_id].append(product)
 
-        groups, err = self.create_evotor_groups(groups_to_create, store_id)
-        if err:
-            errors.append(err)
+        for store_id, group in groups_to_create.items():
+            error = self.create_evotor_groups(group, store_id)
+            if error:
+                errors.append(error)
 
-        for action, products_by_store in grouped_products.items():
-            for store_id, grouped_products in products_by_store.items():
+        for action, products_by_action in products_filtered.items():
+            for store_id, products_by_store in products_by_action.items():
                 if action == "create":
-                    products, err = self.create_evotor_products(grouped_products, store_id)
+                    error = self.create_evotor_products(products_by_store, store_id)
                 else:
-                    products, err = self.update_evotor_products(grouped_products, store_id)
-                if err:
-                    errors.append(err)
+                    error = self.update_evotor_products(products_by_store, store_id)
+                if error:
+                    errors.append(error)
 
-        return products, ", ".join(errors)
+        return ", ".join(errors)
 
     def update_evotor_stockrecord(self, product):
         """
@@ -890,23 +909,48 @@ class EvotorProductClient(EvotorAPICloud):
             }
         """
         errors = []
+        product_id = product.evotor_id
 
-        for stockrecord in product.stockrecords.all():
-            store_id = stockrecord.store.evotor_id
-            product_id = product.evotor_id
+        if product_id:
+            for stockrecord in product.stockrecords.all():
+                store_id = stockrecord.store.evotor_id
+                if store_id:
+                    stockrecord_json = {
+                        "quantity": stockrecord.num_in_stock or 0,
+                        "cost_price": float(stockrecord.cost_price) if stockrecord.cost_price is not None else 0,
+                        "price": float(stockrecord.price) if stockrecord.price is not None else 0,
+                    }
+                    endpoint = f"stores/{store_id}/products/{product_id}"
+                    response = self.send_request(endpoint, "PATCH", stockrecord_json)
 
-            if store_id and product_id:
-                stockrecord_json = {
-                    "quantity": stockrecord.num_in_stock or 0,
-                    "cost_price": float(stockrecord.cost_price) or 0,
-                    "price": float(stockrecord.price) or 0,
-                }
-                endpoint = f"stores/{store_id}/products/{product_id}"
-                response = self.send_request(endpoint, "PATCH", stockrecord_json)
+                    self.handle_response_errors(response, errors)
+        else:
+            errors.append(f"Товар {product.get_name()} не имеет идентификатора Эвотор")
 
-                self.handle_response_errors(response, errors)
+        return ", ".join(errors)
+    
+    def delete_evotor_product_by_store(self, product, store_id):
+        """
+        Удалить товар или модификацию товара
 
-        return product, ", ".join(errors)
+        Удаляет из магазина товар или модификацию товара с указанным идентификатором.
+        DELETE /stores/{store-id}/products/{product-id}
+
+        product_id - строка ID Products
+
+        """
+        errors = []
+        
+        product_id = product.evotor_id
+        if product_id:
+            endpoint = f"stores/{store_id}/products/{product_id}"
+            response = self.send_request(endpoint, "DELETE")
+
+            self.handle_response_errors(response, errors)
+        else:
+            errors.append(f"Товар {product.get_name()} не имеет идентификатора Эвотор")
+
+        return ", ".join(errors)
     
     def delete_evotor_product(self, product):
         """
@@ -921,19 +965,23 @@ class EvotorProductClient(EvotorAPICloud):
         errors = []
 
         if product.is_parent:
-            self.delete_evotor_group(product)
+            # подразумевается, что удаление модификации влечет удаление дочерних элементов
+            errors = self.delete_evotor_group(product)
+            return product, errors
+        
+        product_id = product.evotor_id
+        if product_id:
+            for stockrecord in product.stockrecords.all():
+                store_id = stockrecord.store.evotor_id
+                if store_id:
+                    endpoint = f"stores/{store_id}/products/{product_id}"
+                    response = self.send_request(endpoint, "DELETE")
 
-        for stockrecord in product.stockrecords.all():
-            store_id = stockrecord.store.evotor_id
-            product_id = product.evotor_id
+                    self.handle_response_errors(response, errors)
+        else:
+            errors.append(f"Товар {product.get_name()} не имеет идентификатора Эвотор")
 
-            if store_id and product_id:
-                endpoint = f"stores/{store_id}/products/{product_id}"
-                response = self.send_request(endpoint, "DELETE")
-
-                self.handle_response_errors(response, errors)
-
-        return product, ", ".join(errors)
+        return ", ".join(errors)
 
     def delete_evotor_products(self, products):
         """
@@ -947,34 +995,31 @@ class EvotorProductClient(EvotorAPICloud):
         products - список ID Products
 
         """
-        grouped_products = []
+        products_to_delete = []
         groups_to_delete = []
         errors = []
 
         for product in products:
             if product.is_parent:
-                # for child in product.children.all():
-                #     for stockrecord in child.stockrecords.all():
-                #         store_id = stockrecord.store.evotor_id
-                #         grouped_products[store_id].append(product.evotor_id)
-                # if not product.evotor_id:
-                #     groups_to_delete.append(product)
                 groups_to_delete.append(product)
-
-            for stockrecord in product.stockrecords.all():
-                store_id = stockrecord.store.evotor_id
-                if product.evotor_id:
-                    grouped_products[store_id].append(product.evotor_id)
+                # подразумевается, что удаление модификации влечет удаление дочерних элементов
+            else:
+                product_id = product.evotor_id
+                if product_id:
+                    for stockrecord in product.stockrecords.all():
+                        store_id = stockrecord.store.evotor_id
+                        if store_id:
+                            products_to_delete[store_id].append(product_id)
 
         self.delete_evotor_groups(groups_to_delete)
 
-        for store_id, grouped_product_ids in grouped_products.items():
-            endpoint = f"stores/{store_id}/products/?{",".join(grouped_product_ids)}"
+        for store_id, product_ids in products_to_delete.items():
+            endpoint = f"stores/{store_id}/products/?{",".join(product_ids)}"
             response = self.send_request(endpoint, "DELETE")
 
             self.handle_response_errors(response, errors)
 
-        return products, ", ".join(errors)
+        return ", ".join(errors)
 
     # groups ============
 
@@ -1060,11 +1105,20 @@ class EvotorProductClient(EvotorAPICloud):
                     if group:
                         group.evotor_id = group_response.get("id")
                         group.save()
-            else:
-                groups[0].evotor_id = response.get("id")
-                groups[0].save()
 
-        return groups, error
+                        attributes_json = group_response.get("attributes", [])
+                        attribute_values = group.attribute_values.filter(is_variant=True)
+                        self._update_attributes(attributes_json, attribute_values)
+            else:
+                group = groups[0]
+                group.evotor_id = response.get("id")
+                group.save()
+
+                attributes_json = response.get("attributes", [])
+                attribute_values = group.attribute_values.filter(is_variant=True)
+                self._update_attributes(attributes_json, attribute_values)
+
+        return error
     
     def update_evotor_groups(self, groups, store_id):
         """
@@ -1119,17 +1173,49 @@ class EvotorProductClient(EvotorAPICloud):
         endpoint = f"stores/{store_id}/product-groups"
         response = self.send_request(endpoint, "PUT", groups_json, True)
         error = response.get("error", None) if isinstance(response, dict) else None
+
+        if not error:
+            for group_response in response:
+                name = group_response.get("name")
+                group = next((p for p in groups if p.name == name), None)
+                if group:
+                    attributes_json = group_response.get("attributes", [])
+                    attribute_values = group.attribute_values.filter(is_variant=True)
+                    self._update_attributes(attributes_json, attribute_values)
+
+        return error
     
-        return groups, error
-    
+    def _update_attribute_choices(self, choices_json, attribute_choices):
+        for choice_json in choices_json:
+            name = choice_json.get("name")
+            if not name:
+                continue
+            attribute_choice = next((p for p in attribute_choices if p.name == name), None)
+            if attribute_choice:
+                attribute_choice.evotor_id = choice_json.get("id")
+                attribute_choice.save()
+
+    def _update_attributes(self, attributes_json, attribute_values):
+        for attribute_json in attributes_json:
+            name = attribute_json.get("name")
+            if not name:
+                continue
+            attribute_value = next((p for p in attribute_values if p.name == name), None)
+            if attribute_value:
+                attribute_value.attribute.evotor_id = attribute_json.get("id")
+                attribute_value.save()
+
+                choices_json = attribute_json.get("choices", [])
+                attribute_choices = attribute_value.value.all()
+                self._update_attribute_choices(choices_json, attribute_choices)
+
     # === вызываются напрямую
 
     def update_or_create_evotor_group(self, group):
         """
         Создаёт или заменяет в магазине одину группу товаров или модификаций.
         """
-        groups, err = self.update_or_create_evotor_groups([group])
-        return groups[0], err
+        return self.update_or_create_evotor_groups([group])
 
     def update_or_create_evotor_groups(self, groups):
         """
@@ -1137,24 +1223,37 @@ class EvotorProductClient(EvotorAPICloud):
         Идентификаторы объектов формирует клиент API.
         """
         errors = []
-        grouped_groups = {"create": defaultdict(list), "update": defaultdict(list)}
-        store_ids = Store.objects.filter(is_active=True).values_list("evotor_id", flat=True)
+        groups_filtered = {"create": defaultdict(list), "update": defaultdict(list)}
+        evotor_store_ids = [] 
 
         for group in groups:
-            key = "update" if group.evotor_id else "create"
-            grouped_groups[key].append(group)
-
-        for action, grouped_group in grouped_groups.items():
-            if action == "create":
-                for store_id in store_ids:
-                    groups, err = self.create_evotor_groups(grouped_group, store_id)
+            if isinstance(group, Product):
+                if group.is_parent:
+                    store_ids = set()
+                    key = "update" if group.evotor_id else "create"
+                    for child in group.children.all():
+                        for stockrecord in child.stockrecords.all():
+                            store_id = stockrecord.store.evotor_id
+                            store_ids.add(store_id)
+                    for store_id in store_ids:
+                        groups_filtered[key][store_id].append(group)
             else:
-                for store_id in store_ids:
-                    groups, err = self.update_evotor_groups(grouped_group, store_id)
-            if err:
-                errors.append(err)
+                key = "update" if group.evotor_id else "create"
+                if not evotor_store_ids:
+                    evotor_store_ids = Store.objects.filter(is_active=True).values_list("evotor_id", flat=True)
+                for store_id in evotor_store_ids:
+                    groups_filtered[key][store_id].append(group)
 
-        return groups, ", ".join(errors)
+        for action, groups_by_action in groups_filtered.items():
+            for store_id, groups_by_store in groups_by_action.items():
+                if action == "create":
+                    error = self.create_evotor_groups(groups_by_store, store_id)
+                else:
+                    error = self.update_evotor_groups(groups_by_store, store_id)
+                if error:
+                    errors.append(error)
+
+        return ", ".join(errors)
 
     def delete_evotor_group(self, group):
         """
@@ -1164,14 +1263,26 @@ class EvotorProductClient(EvotorAPICloud):
         DELETE /stores/{store-id}/product-groups/{product-group-id}
         """
         errors = []
-        store_ids = Store.objects.filter(is_active=True).values_list("evotor_id", flat=True)
-        for store_id in store_ids:
-            endpoint = f"stores/{store_id}/product-groups/{group.evotor_id}"
-            response =  self.send_request(endpoint, "DELETE")
+        if group.evotor_id:
+            if isinstance(group, Product):
+                store_ids = set()
+                if group.is_parent:
+                    for child in group.children.all():
+                        for stockrecord in child.stockrecords.all():
+                            store_id = stockrecord.store.evotor_id
+                            if store_id:
+                                store_ids.add(store_id)
+            else:
+                store_ids = Store.objects.filter(is_active=True).values_list("evotor_id", flat=True)
 
-            self.handle_response_errors(response, errors)
+            for store_id in store_ids:
+                endpoint = f"stores/{store_id}/product-groups/{group.evotor_id}"
+                response = self.send_request(endpoint, "DELETE")
+                self.handle_response_errors(response, errors)
+        else:
+            errors.append(f"Категория или родительский товар - {group.get_name()} не имеет идентификатора Эвотор")
 
-        return group, ", ".join(errors)
+        return ", ".join(errors)
 
     def delete_evotor_groups(self, groups):
         """
@@ -1183,16 +1294,35 @@ class EvotorProductClient(EvotorAPICloud):
 
         """
         errors = []
-        store_ids = Store.objects.filter(is_active=True).values_list("evotor_id", flat=True)
-        for store_id in store_ids:
-            endpoint = f"stores/{store_id}/product-groups/?{",".join(groups.evotor_id)}"
-            response =  self.send_request(endpoint, "DELETE")
+        groups_to_delete = defaultdict(list)
+        evotor_store_ids = [] 
 
+        for group in groups:
+            if group.evotor_id:
+                if isinstance(group, Product):
+                    if group.is_parent:
+                        store_ids = set()
+                        for child in group.children.all():
+                            for stockrecord in child.stockrecords.all():
+                                store_id = stockrecord.store.evotor_id
+                                store_ids.add(store_id)
+                        for store_id in store_ids:
+                            groups_to_delete[store_id].append(group)
+                else:
+                    if not evotor_store_ids:
+                        evotor_store_ids = Store.objects.filter(is_active=True).values_list("evotor_id", flat=True)
+                    for store_id in evotor_store_ids:
+                        groups_to_delete[store_id].append(group)
+            else:
+                errors.append(f"Категория или родительский товар - {group.get_name()} не имеет идентификатора Эвотор")
+
+        for store_id, group_to_delete in groups_to_delete.items():
+            endpoint = f"stores/{store_id}/product-groups/?{",".join(group_to_delete.evotor_id)}"
+            response = self.send_request(endpoint, "DELETE")
             self.handle_response_errors(response, errors)
 
-        return groups, ", ".join(errors)
+        return ", ".join(errors)
     
-
 # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
     def create_or_update_site_products(self, products_json, is_filtered=False):
@@ -1281,6 +1411,8 @@ class EvotorProductClient(EvotorAPICloud):
 
 
 class EvotorDocClient(EvotorAPICloud):
+
+# ========= ПОЛУЧЕНИЕ ДАННЫХ
 
     def get_docs(self, store_id):
         """
@@ -1387,6 +1519,14 @@ class EvotorDocClient(EvotorAPICloud):
         endpoint = f"stores/{store_id}/devices/{terminal_id}/documents"
         return self.send_request(endpoint)
  
+
+# ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
+
+    def create_or_update_site_order(self, products_json, evotor_id):
+        pass
+
+
+
 
 class EvotorPushNotifClient(EvotorAPICloud):
     

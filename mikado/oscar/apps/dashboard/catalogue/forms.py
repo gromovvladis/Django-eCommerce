@@ -76,6 +76,27 @@ class SEOFormMixin:
 
 
 class CategoryForm(SEOFormMixin, BaseCategoryForm):
+    evotor_update = forms.BooleanField(
+        label="Эвотор", 
+        required=False, 
+        initial=True,
+        help_text="Синхронизировать с Эвотор", 
+    )
+
+    class Meta:
+        model = Category
+        fields = [
+            "name",
+            "slug",
+            "description",
+            "order",
+            "image",
+            "is_public",
+            "meta_title",
+            "meta_description",
+            "evotor_update",
+        ]
+        
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "slug" in self.fields:
@@ -83,6 +104,14 @@ class CategoryForm(SEOFormMixin, BaseCategoryForm):
             self.fields["slug"].help_text = (
                 "Оставьте пустым, чтобы сгенерировать на основе названия категории"
             )
+
+    def update_or_create_evotor_group(self, category):
+        try:
+            return EvatorCloud().update_or_create_evotor_group(category)
+        except Exception as e:
+            error = "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e
+            logger.error(error)
+            return error
 
 
 class ProductClassSelectForm(forms.Form):
@@ -486,14 +515,11 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
     def update_or_create_evotor_product(self, product):
         try:
-            product, error = EvatorCloud().update_or_create_evotor_product(product)
-            if error:
-                messages.warning(self.request, error)
-            return product, error
+            return EvatorCloud().update_or_create_evotor_product(product)
         except Exception as e:
             error = "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e
             logger.error(error)
-            return product, error
+            return error
 
 
 class ProductCategoryForm(forms.ModelForm):

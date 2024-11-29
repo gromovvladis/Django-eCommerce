@@ -371,6 +371,9 @@ class Category(MP_Node):
                 "category_slug": self.get_full_slug(parent_slug=parent_slug),
             },
         )
+    
+    def get_name(self):
+        return self.name
 
     def get_absolute_url(self):
         return self._get_absolute_url()
@@ -607,13 +610,21 @@ class Product(models.Model):
 
         if self.is_child:
             slug = self.parent.slug
-            cat = self.parent.categories.first().full_slug
+            cat = self.parent.categories.first()
+            if cat:
+                category = cat.full_slug
+            else:
+                category = "misc-category"
         else:
             slug = self.slug
-            cat = self.categories.first().full_slug
-
+            cat = self.categories.first()
+            if cat:
+                category = cat.full_slug
+            else:
+                category = "misc-category"
+                
         return reverse(
-            "catalogue:detail", kwargs={"product_slug": slug, "category_slug": cat}
+            "catalogue:detail", kwargs={"product_slug": slug, "category_slug": category}
         )
 
 
