@@ -1014,7 +1014,7 @@ class EvotorProductClient(EvotorAPICloud):
         self.delete_evotor_groups(groups_to_delete)
 
         for store_id, product_ids in products_to_delete.items():
-            endpoint = f"stores/{store_id}/products/?{",".join(product_ids)}"
+            endpoint = f"stores/{store_id}/products/?{','.join(product_ids)}"
             response = self.send_request(endpoint, "DELETE")
 
             self.handle_response_errors(response, errors)
