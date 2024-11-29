@@ -355,6 +355,9 @@ class Category(MP_Node):
         # cache_key = "CATEGORY_URL_%s_%s" % (current_locale, self.pk)
         cache_key = "CATEGORY_URL_%s" % (self.pk)
         return cache_key
+    
+    def get_name(self):
+        return self.name
 
     def _get_absolute_url(self, parent_slug=None):
         """
@@ -371,12 +374,18 @@ class Category(MP_Node):
                 "category_slug": self.get_full_slug(parent_slug=parent_slug),
             },
         )
-    
-    def get_name(self):
-        return self.name
 
     def get_absolute_url(self):
         return self._get_absolute_url()
+    
+    def get_staff_url(self):
+        """
+        Return a category's absolute URL
+        """
+        return reverse(
+            "dashboard:catalogue-category-update",
+            kwargs={"pk": self.id}
+        )
 
     class Meta:
         app_label = "catalogue"
@@ -627,6 +636,14 @@ class Product(models.Model):
             "catalogue:detail", kwargs={"product_slug": slug, "category_slug": category}
         )
 
+    def get_staff_url(self):
+        """
+        Return a category's absolute URL
+        """
+        return reverse(
+            "dashboard:catalogue-product",
+            kwargs={"pk": self.id}
+        )
 
     def clean(self):
         """

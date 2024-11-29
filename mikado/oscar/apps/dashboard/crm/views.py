@@ -355,10 +355,41 @@ class CRMGroupsListView(CRMTablesMixin):
                     data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
                 )
 
-                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
+                parent_id = data_item.get("updated_at", None)
+                if parent_id is not None:
+                    try:
+                        data_item["parent"] = Category.objects.get(
+                            evotor_id=parent_id
+                        )
+                    except Category.DoesNotExist:
+                        data_item["parent"] = Product.objects.filter(
+                            evotor_id=parent_id
+                        ).first()
+
+                store_id = data_item.get("store_id", None)
+                if store_id is not None:
+                    data_item["store"] = Store.objects.filter(
+                        evotor_id=store_id
+                    ).first()
+   
+                try:
+                    model_instance = Category.objects.get(evotor_id=evotor_id)
+                except Category.DoesNotExist:
+                    model_instance = Product.objects.filter(evotor_id=evotor_id).first()
 
                 if model_instance:
                     data_item["is_created"] = True
+                    name = data_item.get("name", None)
+                    parent_id = data_item.get("parent_id", None)
+                    parent_match = (
+                        model_instance.get_parent() is None
+                        or parent_id is None
+                        or model_instance.get_parent().evotor_id == parent_id
+                    )
+                    data_item["is_valid"] = (
+                        model_instance.name == name
+                        and parent_match
+                    )
                 else:
                     data_item.update({"is_created": False, "is_valid": False})
 

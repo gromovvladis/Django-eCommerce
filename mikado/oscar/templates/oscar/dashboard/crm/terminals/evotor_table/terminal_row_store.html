@@ -2,7 +2,7 @@
     {% for store in record.stores %}
         {% if store.id %}
             <a href="{% url 'dashboard:store-manage' pk=store.id %}">
-                {{ store.name|default:"Точка продажи" }}
+                {{ store.name|default:"Магазин" }}
             </a>
         {% else %}
             <span>

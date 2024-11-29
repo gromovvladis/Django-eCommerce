@@ -4,7 +4,7 @@
     {% if stores %}
         {% for store in stores %}
             <a href="{% url 'dashboard:store-manage' pk=store.id %}">
-                {{ store.name|default:"Точка продажи" }}{% if not forloop.last %},{% endif %}
+                {{ store.name|default:"Магазин" }}{% if not forloop.last %},{% endif %}
             </a>
             <br>
         {% endfor %}

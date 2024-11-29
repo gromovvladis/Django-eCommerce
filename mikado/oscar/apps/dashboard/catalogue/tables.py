@@ -211,10 +211,10 @@ class CategoryTable(DashboardTable):
         orderable=False,
         attrs = {'th': {'class': 'image'},}
     )
-    name = LinkColumn(
-        "dashboard:catalogue-category-update", 
-        args=[A("pk")], 
-        orderable=True, 
+    name = TemplateColumn(
+        verbose_name="Имя",
+        template_name="oscar/dashboard/catalogue/category_row_name.html",
+        order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
     description = TemplateColumn(

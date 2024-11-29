@@ -7,12 +7,12 @@
         </button>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
             {% if not record.is_valid %}
-                <button class="dropdown-item" type="submit" name="selected_terminal" value="{{ record.id }}">
+                <button class="dropdown-item" type="submit" name="selected_product" value="{{ record.id }}">
                     Обновить на сайте
                 </button>
             {% else %}
                 <span class="dropdown-item text-muted">
-                    Точка продажи обновлена
+                    Товар обновлен
                 </span>
             {% endif %}
         </div>

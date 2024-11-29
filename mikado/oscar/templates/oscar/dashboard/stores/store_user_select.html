@@ -11,7 +11,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
             <li class="breadcrumb-item"><a href="{% url 'dashboard:store-list' %}">Магазины</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:store-manage' pk=store.id %}">{{ store.name|default:"Точка продажи" }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:store-manage' pk=store.id %}">{{ store.name|default:"Магазин" }}</a></li>
             <li class="breadcrumb-item active" aria-current="page">Добавить персонал</li>
         </ol>
     </nav>

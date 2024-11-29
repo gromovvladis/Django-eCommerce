@@ -39,11 +39,11 @@ class CRMStoreEvotorTable(DashboardTable):
         order_by="address",
         attrs = {'th': {'class': 'address'},}
     )
-    date_updated = TemplateColumn(
-        verbose_name="Изменен",
+    date = TemplateColumn(
+        verbose_name="Дата",
         template_name="oscar/dashboard/crm/stores/evotor_table/store_row_date.html",
         order_by="updated_at",
-        attrs = {'th': {'class': 'date_updated'},}
+        attrs = {'th': {'class': 'date'},}
     )
     actions = TemplateColumn(
         verbose_name="",
@@ -66,7 +66,7 @@ class CRMStoreEvotorTable(DashboardTable):
             "name",
             "id",
             "address",
-            "date_updated",
+            "date",
             "actions",
         )
         
@@ -173,11 +173,11 @@ class CRMTerminalEvotorTable(DashboardTable):
         order_by="imei",
         attrs = {'th': {'class': 'imei'},}
     )
-    date_updated = TemplateColumn(
-        verbose_name="Изменен",
+    date = TemplateColumn(
+        verbose_name="Обновлен",
         template_name="oscar/dashboard/crm/terminals/evotor_table/terminal_row_date.html",
         order_by="updated_at",
-        attrs = {'th': {'class': 'date_updated'},}
+        attrs = {'th': {'class': 'date'},}
     )
     actions = TemplateColumn(
         verbose_name="",
@@ -196,7 +196,7 @@ class CRMTerminalEvotorTable(DashboardTable):
             "id",
             "model",
             "imei",
-            "date_updated",
+            "date",
         )
         sequence = (
             "check",
@@ -328,11 +328,11 @@ class CRMStaffEvotorTable(DashboardTable):
         order_by="stores",
         attrs = {'th': {'class': 'stores'},}
     )
-    date_updated = TemplateColumn(
-        verbose_name="Изменен",
+    date = TemplateColumn(
+        verbose_name="Дата",
         template_name="oscar/dashboard/crm/staffs/evotor_table/staff_row_date.html",
         order_by="updated_at",
-        attrs = {'th': {'class': 'date_updated'},}
+        attrs = {'th': {'class': 'date'},}
     )
     actions = TemplateColumn(
         verbose_name="",
@@ -357,7 +357,7 @@ class CRMStaffEvotorTable(DashboardTable):
             "role",
             "phone",
             "stores",
-            "date_updated",
+            "date",
             "actions",
         )
         
@@ -497,12 +497,6 @@ class CRMProductEvotorTable(DashboardTable):
         order_by="allow_to_sell",
         attrs = {'th': {'class': 'allow_to_sell'},}
     )
-    date_updated = TemplateColumn(
-        verbose_name="Изменен",   
-        template_name="oscar/dashboard/crm/products/evotor_table/product_row_date.html",
-        order_by="updated_at",     
-        attrs = {'th': {'class': 'date_updated'},}
-    )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/crm/products/evotor_table/product_row_actions.html",
@@ -525,7 +519,6 @@ class CRMProductEvotorTable(DashboardTable):
             "tax",
             "measure_name",
             "allow_to_sell",
-            "date_updated",
             "actions",
         )
         attrs = {
@@ -598,15 +591,15 @@ class CRMProductSiteTable(DashboardTable):
         order_by=("is_public"),
         attrs = {'th': {'class': 'is_public'},}
     )
-    date_updated = TemplateColumn(
-        template_code='{{ record.date_updated|date:"d.m.y H:i" }}',
-        attrs = {'th': {'class': 'date_updated'}}
-    )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/product_row_actions.html",
         orderable=False,
         attrs = {'th': {'class': 'actions'},}
+    )
+    date_updated = TemplateColumn(
+        template_code='{{ record.date_updated|date:"d.m.y H:i" }}',
+        attrs = {'th': {'class': 'date_updated'}}
     )
 
     icon = "fas fa-chart-bar"
@@ -670,12 +663,6 @@ class CRMGroupEvotorTable(DashboardTable):
         order_by="price",
         attrs = {'th': {'class': 'price'},}
     )
-    date_updated = TemplateColumn(
-        verbose_name="Изменен",   
-        template_name="oscar/dashboard/crm/groups/evotor_table/group_row_date.html",
-        order_by="updated_at",     
-        attrs = {'th': {'class': 'date_updated'},}
-    )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/crm/groups/evotor_table/group_row_actions.html",
@@ -684,23 +671,26 @@ class CRMGroupEvotorTable(DashboardTable):
     )
 
     icon = "fas fa-object-group"
-    caption = ngettext_lazy("%s Категория или модификация товара", "%s Категорий и модификаций товаров")
+    caption = ngettext_lazy("%s Группа", "%s Групп")
 
     class Meta(DashboardTable.Meta):
         model = Staff
         fields = (
             "check",
             "name",
+            "description",
             "parent",
             "stores",
-            "attributes",
-            "date_updated",
+            "price",
+            "tax",
+            "measure_name",
+            "allow_to_sell",
             "actions",
         )
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Список категорий и модификаций товаров"
+        empty_text = "Список групп пуст"
 
 
 class CRMGroupSiteTable(DashboardTable):
@@ -757,23 +747,13 @@ class CRMGroupSiteTable(DashboardTable):
     )
 
     icon = "fas fa-layer-group"
-    caption = ngettext_lazy("%s Категория или модификация товара", "%s Категорий или модификаций товаров")
+    caption = ngettext_lazy("%s Категория", "%s Категорий")
 
     class Meta(DashboardTable.Meta):
         model = Category
         fields = ("image", "name", "description", "is_public")
-        sequence = (
-            "check", 
-            "image",
-            "name",
-            "description",
-            "num_children",
-            "num_products",
-            "is_public",
-            "...",
-            "actions"
-        )
+        sequence = ("check", "image", "name", "description", "num_children", "num_products", "is_public", "...", "actions")
         attrs = {
             'class': 'table table-striped table-bordered table-hover',
         }
-        empty_text = "Нет созданых категорий и модификаций товаров"
+        empty_text = "Нет созданых категорий"

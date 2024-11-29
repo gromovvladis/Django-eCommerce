@@ -322,12 +322,12 @@ class ProductGroupSerializer(serializers.ModelSerializer):
     parent_id = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     # только у родительского товара
-    attributes = serializers.CharField(write_only=True, required=False)
+    attributes = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     updated_at = serializers.DateTimeField(write_only=True)
 
     class Meta:
-        model = None
+        model = Category
         fields = [
             "id",
             "name",
@@ -448,7 +448,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         return instance
 
     def to_representation(self, instance):
-        if isinstance(instance, Product):#
+        if isinstance(instance, Product):
             self.Meta.model = Product
             representation = super().to_representation(instance)
             try:

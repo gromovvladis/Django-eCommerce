@@ -1,6 +1,6 @@
 {% if record.store %}
     <a href="{% url 'dashboard:store-manage' pk=record.store.id %}">
-        {{ record.store.name|default:"Точка продажи" }}
+        {{ record.store.name|default:"Магазин" }}
     </a>
 {% else %}
     -

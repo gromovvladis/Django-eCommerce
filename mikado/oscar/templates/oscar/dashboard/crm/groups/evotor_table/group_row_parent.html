@@ -1,0 +1,13 @@
+{% load django_tables2 %}
+
+{% if record.parent %}
+    <a href="{{ record.get_absolute_url }}">
+        {{ record.parent.name }}
+    </a>
+{% else %}
+    {% if record.parent_id %}
+        {{ record.parent_id }}
+    {% else %}
+        -
+    {% endif %}
+{% endif %}

@@ -3,22 +3,22 @@
 
 {% block body_class %}{{ block.super }} create-page stores{% endblock %}
 {% block title %}
-    {{ store.name|default:"Точка продажи" }} | Точка продажи | {{ block.super }}
+    {{ store.name|default:"Магазин" }} | Магазин | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:store-list' %}">Точка продажи</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ store.name|default:"Точка продажи" }}</li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:store-list' %}">Магазин</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ store.name|default:"Магазин" }}</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block header %}
     <div class="page-header d-flex flex-column justify-content-start">
-        <h1>{{ store.name|default:"Точка продажи" }}</h1>
+        <h1>{{ store.name|default:"Магазин" }}</h1>
         <div class="d-flex align-items-end mt-2 mb-0 text-muted">
             {% if store.evotor_id %}
                 <div class="text-success list-inline-item">
@@ -35,7 +35,7 @@
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="table-header">
-                <h2 class="d-flex"><i class="fa-solid fa-house"></i> Точка продажи на карте</h2>
+                <h2 class="d-flex"><i class="fa-solid fa-house"></i> Магазин на карте</h2>
             </div>
             <div class="delivery__map">
                 <div class="v-map__wrapper">

@@ -108,7 +108,7 @@
             </caption>
             <tbody class="collapse" id="orderinfo-body">
                 <tr>
-                    <th>Точка продажи</th>
+                    <th>Магазин</th>
                     <td>
                         {% if order.basket.store %}
                             <a href="{% url 'dashboard:store-manage' pk=order.basket.store.id %}">{{ order.basket.store|default:"-" }}</a>

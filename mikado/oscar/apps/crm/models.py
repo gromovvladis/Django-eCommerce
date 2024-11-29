@@ -18,8 +18,9 @@ class CRMEvent(models.Model):
     )
     sender = models.CharField(max_length=32, choices=sender_choices, default=MICS)
     
-    DELETE, UPDATE, INFO, ERROR ="DELETE", "UPDATE", "INFO", "ERROR"
-    type_choices = (
+    CREATION, DELETE, UPDATE, INFO, ERROR = "CREATION", "DELETE", "UPDATE", "INFO", "ERROR"
+    type_choices = (   
+        (CREATION, "Создание"),
         (DELETE, "Удаление"),
         (UPDATE, "Обновление"),
         (INFO, "Инфо"),
