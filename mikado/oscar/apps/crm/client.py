@@ -1317,7 +1317,7 @@ class EvotorProductClient(EvotorAPICloud):
                 errors.append(f"Категория или родительский товар - {group.get_name()} не имеет идентификатора Эвотор")
 
         for store_id, group_to_delete in groups_to_delete.items():
-            endpoint = f"stores/{store_id}/product-groups/?{",".join(group_to_delete.evotor_id)}"
+            endpoint = f"stores/{store_id}/product-groups/?{','.join(group_to_delete.evotor_id)}"
             response = self.send_request(endpoint, "DELETE")
             self.handle_response_errors(response, errors)
 
