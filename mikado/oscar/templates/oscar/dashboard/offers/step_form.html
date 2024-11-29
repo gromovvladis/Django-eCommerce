@@ -33,15 +33,13 @@
 {% endblock %}
 
 {% block navtext %}
-    <h1>{{ title }}</h1>
-{% endblock %}
-
-{% block navtext %}
-    {% if not offer.pk %}
-        {% trans "Create new offer" %}
-    {% else %}
-        {{ offer.name }}
-    {% endif %}
+    <h1>
+        {% if not offer.pk %}
+            {% trans "Create new offer" %}
+        {% else %}
+            {{ offer.name }}
+        {% endif %}
+    </h1>
 {% endblock %}
 
 {% block dashboard_content %}
