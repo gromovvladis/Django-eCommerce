@@ -205,7 +205,7 @@ class CRMTerminalEvotorTable(DashboardTable):
             "stores",
             "model",
             "imei",
-            "date",
+            "date_updated",
             "actions",
         )
         
