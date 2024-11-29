@@ -1378,8 +1378,20 @@ class EvotorProductClient(EvotorAPICloud):
             for group_json in groups_json:
                 evotor_id = group_json.get('id')
                 evotor_ids.append(evotor_id)
-                trm, created = Terminal.objects.get_or_create(evotor_id=evotor_id)
-                serializer = ProductGroupSerializer(trm, data=group_json)
+                attributes = group_json.get('attributes')
+                if attributes:
+                    instance, created = Product.objects.get_or_create(evotor_id=evotor_id)
+                else:      
+                    try:
+                        instance = Category.objects.get(
+                            evotor_id=evotor_id,
+                        )
+                        created = False
+                    except Category.DoesNotExist:
+                        instance = Category.add_root(name=f"Категория {evotor_id}", evotor_id=evotor_id)
+                        created = True
+
+                serializer = ProductGroupSerializer(instance, data=group_json)
                 
                 if serializer.is_valid():
                     group = serializer.save() 
