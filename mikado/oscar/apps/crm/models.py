@@ -4,26 +4,26 @@ class CRMEvent(models.Model):
 
     body = models.TextField()
 
-    TERMINAL, STORE, RECEIPT, DOC = "TERMINAL", "STORE", "RECEIPT", "DOC"
+    TERMINAL, STORE, ORDER, DOC = "TERMINAL", "STORE", "ORDER", "DOC"
     INSTALLATION, STAFF, PRODUCT, MICS  = "INSTALLATION", "STAFF", "PRODUCT", "MICS"
     sender_choices = (
         (TERMINAL, "Терминал"),
         (STORE, "Магазин"),
-        (RECEIPT, "Чек"),
+        (ORDER, "Заказ"),
         (DOC, "Документы"),
         (INSTALLATION, "Установка / Удаление"),
         (STAFF, "Персонал"),
-        (PRODUCT, "товары"),
+        (PRODUCT, "Товар"),
         (MICS, "Неизвестно"),
     )
     sender = models.CharField(max_length=32, choices=sender_choices, default=MICS)
     
-    CREATION, DELETE, UPDATE, INFO = "CREATION", "DELETE", "UPDATE", "INFO"
-    type_choices = (   
-        (CREATION, "Создание"),
+    DELETE, UPDATE, INFO, ERROR ="DELETE", "UPDATE", "INFO", "ERROR"
+    type_choices = (
         (DELETE, "Удаление"),
         (UPDATE, "Обновление"),
         (INFO, "Инфо"),
+        (ERROR, "Ошибка"),
     )
     type = models.CharField(max_length=255, choices=type_choices, default=INFO)
 

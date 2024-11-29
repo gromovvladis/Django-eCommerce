@@ -12,8 +12,6 @@ from django_tables2 import SingleTableMixin, SingleTableView
 from django.db.models import Count, Max, Min, Case, When, DecimalField, F
 from django.utils.timezone import now
 
-from itertools import product as attr_iterator
-
 from oscar.apps.catalogue.models import ProductAttribute
 from oscar.apps.crm.client import EvatorCloud
 from oscar.core.loading import get_class, get_classes, get_model
@@ -572,15 +570,40 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         if form is not None:
             evotor_update = form.cleaned_data.get('evotor_update')
             response.set_cookie('evotor_update', evotor_update)
-
-            stockrecord_formset = formsets["stockrecord_formset"]
-            stock_update = not form.changed_data and bool(stockrecord_formset.changed_objects)
-
             if evotor_update:
+                stockrecord_formset = formsets["stockrecord_formset"]
+                stock_update = not form.changed_data and bool(stockrecord_formset.changed_objects)
+                stores_to_delete = [
+                    form.cleaned_data.get("store")
+                    for form in stockrecord_formset.forms
+                    if form.cleaned_data.get("DELETE", False) and form.cleaned_data.get("store")
+                    and form.cleaned_data.get("store").evotor_id
+                ]
+                updated_formsets = [
+                    "category_formset",
+                    "attribute_formset",
+                    "stockrecord_formset",
+                ]
+                product_updated = (
+                    bool(form.changed_data)
+                    or any(
+                        bool(formsets[name].changed_objects) for name in updated_formsets if name in formsets
+                    )
+                )
+                error = None
+                if stores_to_delete:
+                    for store in stores_to_delete:
+                        error = stockrecord_formset.delete_evotor_stockrecord(self.object, store.evotor_id)
+                        if error:
+                            messages.warning(self.request, error)
+
                 if stock_update:
-                    stockrecord_formset.update_evotor_stockrecord(self.object)
-                else: 
-                    form.update_or_create_evotor_product(self.object)
+                    error = stockrecord_formset.update_evotor_stockrecord(self.object)  
+                elif product_updated:
+                    error = form.update_or_create_evotor_product(self.object)
+                
+                if error:
+                    messages.warning(self.request, error)
 
         return response
 
@@ -724,7 +747,6 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
         """
         Perform custom deletion logic.
         """
-        form.is_valid()
         evotor_update = form.data.get("evotor_update", 'off')
         if evotor_update == "on":
             self.object = self.get_object()
@@ -932,6 +954,19 @@ class CategoryCreateView(CategoryListMixin, generic.CreateView):
         if "parent" in self.kwargs:
             initial["_ref_node_id"] = self.kwargs["parent"]
         return initial
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        
+        evotor_update = form.cleaned_data.get('evotor_update')
+        response.set_cookie('evotor_update', evotor_update)
+
+        if evotor_update:
+            error = form.update_or_create_evotor_group(self.object)
+            if error:
+                messages.warning(self.request, error)
+
+        return response
 
 
 class CategoryUpdateView(CategoryListMixin, generic.UpdateView):
@@ -952,7 +987,19 @@ class CategoryUpdateView(CategoryListMixin, generic.UpdateView):
                 "dashboard:catalogue-category-update", kwargs={"pk": self.object.id}
             )
         return super().get_success_url()
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        
+        evotor_update = form.cleaned_data.get('evotor_update')
+        response.set_cookie('evotor_update', evotor_update)
 
+        if evotor_update:
+            error = form.update_or_create_evotor_group(self.object)
+            if error:
+                messages.warning(self.request, error)
+
+        return response
 
 class CategoryDeleteView(CategoryListMixin, generic.DeleteView):
     template_name = "oscar/dashboard/catalogue/category_delete.html"
@@ -961,11 +1008,25 @@ class CategoryDeleteView(CategoryListMixin, generic.DeleteView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["parent"] = self.object.get_parent()
+        ctx["title"] = "Удалить категорию?"
         return ctx
 
     def get_success_url(self):
         messages.info(self.request, "Категория успешно удалена")
         return super().get_success_url()
+    
+    def form_valid(self, form):
+        self.perform_deletion(form)
+        return super().form_valid(form)
+    
+    def perform_deletion(self, form):
+        """
+        Perform custom deletion logic.
+        """
+        evotor_update = form.data.get("evotor_update", 'off')
+        if evotor_update == "on":
+            self.object = self.get_object()
+            EvatorCloud().delete_evotor_group(self.object)
 
 
 class ProductClassCreateUpdateView(generic.UpdateView):

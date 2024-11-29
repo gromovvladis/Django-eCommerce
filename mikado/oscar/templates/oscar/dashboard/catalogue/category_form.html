@@ -1,5 +1,6 @@
 {% extends 'oscar/dashboard/layout.html' %}
 {% load category_tags %}
+{% load widget_tweaks %}
 
 {% block body_class %}{{ block.super }} create-page catalogue{% endblock %}
 
@@ -69,7 +70,7 @@
                                             {{ field }}
                                         {% endfor %}
                                         {% for field in form.primary_form_fields %}
-                                            {% if 'attr' not in field.id_for_label %}
+                                            {% if 'attr' not in field.id_for_label and "evotor_update" not in field.id_for_label %}
                                                 {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
                                             {% endif %}
                                         {% endfor %}
@@ -100,18 +101,34 @@
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
                 <div class="container container-fluid">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between flex-wrap align-items-end">
                         <div>
-                            {% if category %}
-                                <a class="btn btn-success" href="{{ category.get_absolute_url }}">
-                                    <i class="fa-solid fa-share"></i>
-                                    <span>
-                                        Смотреть на сайте
-                                    </span>
-                                </a>
-                            {% endif %}
+                            {% with evotor_field=form.evotor_update %}
+                                <label for="{{ evotor_field.auto_id }}" class="checkbox-ios">
+                                    {% render_field evotor_field class+="form-control" %}
+                                    <span class="checkbox-ios-switch"></span>
+                                </label>
+                                {% for error in evotor_field.errors %}
+                                    <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                                {% endfor %}
+                                {% if evotor_field.help_text %}
+                                    <small class="form-text text-muted">
+                                        {{ evotor_field.help_text|safe }}
+                                    </small>
+                                {% endif %}
+                            {% endwith %}
                         </div>
-                        <div class="d-flex justify-content-end">
+                        <div class="d-flex justify-content-end mt-3">
+                            <div>
+                                {% if category %}
+                                    <a class="btn btn-outline-info mr-2" href="{{ category.get_absolute_url }}">
+                                        <i class="fa-solid fa-share"></i>
+                                        <span>
+                                            Смотреть на сайте
+                                        </span>
+                                    </a>
+                                {% endif %}
+                            </div>
                             <a class="btn btn-dark mr-2" href="{% url 'dashboard:catalogue-category-list' %}">
                                 <i class="fa-regular fa-circle-xmark"></i> 
                                 <span>
@@ -130,8 +147,6 @@
             </div>
         {% endblock fixed_actions_group %}
     </form>
-
-    
     <div class="modal fade" id="product-image-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -145,5 +160,4 @@
             </div>
         </div>
     </div>
-    
 {% endblock dashboard_content %}

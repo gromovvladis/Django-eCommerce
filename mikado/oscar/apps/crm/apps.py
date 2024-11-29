@@ -32,7 +32,7 @@ class CRMConfig(OscarConfig):
             path("api/roles/", self.crm_api_role_view.as_view(), name="api-staffs"),
             path("api/terminals/", self.crm_api_terminal_view.as_view(), name="api-terminals"),
             path("api/stores/", self.crm_api_store_view.as_view(), name="api-stores"),
-            path("api/products/", self.crm_api_product_view.as_view(), name="api-products"),
+            path("api/inventories/stores/<str:store_id>/products/", self.crm_api_product_view.as_view(), name="api-products"),
             path("api/docs/", self.crm_api_docs_view.as_view(), name="api-docs"),
 
             path("api/installation/event/", self.crm_api_installation_view.as_view(), name="api-installation"),
