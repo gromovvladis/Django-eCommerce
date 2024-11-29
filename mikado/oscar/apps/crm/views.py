@@ -186,7 +186,7 @@ class CRMStoreEndpointView(APIView):
             stores.append(store_json.get("id", "Магазин"))
 
         CRMEvent.objects.create(
-            body=f"Добавлены или изменены магазины: {", ".join(stores)}",
+            body=f"Добавлены или изменены магазины: {', '.join(stores)}",
             sender=CRMEvent.STORE,
             type=CRMEvent.UPDATE,
         )
@@ -230,7 +230,7 @@ class CRMTerminalEndpointView(APIView):
             terminals.append(terminal_json.get("id", "Терминал"))
 
         CRMEvent.objects.create(
-            body=f"Добавлены или изменены терминалы: {", ".join(terminals)}",
+            body=f"Добавлены или изменены терминалы: {', '.join(terminals)}",
             sender=CRMEvent.TERMINAL,
             type=CRMEvent.UPDATE,
         )
@@ -262,7 +262,7 @@ class CRMStaffEndpointView(APIView):
             staffs.append(staff_json.get("id", "Сотрудник"))
 
         CRMEvent.objects.create(
-            body=f"Добавлены или изменены сотрудники: {", ".join(staffs)}",
+            body=f"Добавлены или изменены сотрудники: {', '.join(staffs)}",
             sender=CRMEvent.STAFF,
             type=CRMEvent.UPDATE,
         )
@@ -294,7 +294,7 @@ class CRMRoleEndpointView(APIView):
             roles.append(role_json.get("id", "Роль сотрудников"))
 
         CRMEvent.objects.create(
-            body=f"Добавлены или изменены роли сотрудников: {", ".join(roles)}",
+            body=f"Добавлены или изменены роли сотрудников: {', '.join(roles)}",
             sender=CRMEvent.STAFF,
             type=CRMEvent.UPDATE,
         )
@@ -342,7 +342,7 @@ class CRMProductEndpointView(APIView):
             products.append(product_json.get("id", "Продукт"))
 
         CRMEvent.objects.create(
-            body=f"Добавлены или изменены продукты: {", ".join(products)}",
+            body=f"Добавлены или изменены продукты: {', '.join(products)}",
             sender=CRMEvent.PRODUCT,
             type=CRMEvent.UPDATE,
         )
