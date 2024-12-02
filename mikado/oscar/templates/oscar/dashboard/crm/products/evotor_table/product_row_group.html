@@ -2,6 +2,8 @@
     <a href="{{ record.parent.get_staff_url }}">
         {{ record.parent }}
     </a>
+{% elif record.parent_id %}
+    {{ record.parent_id }}
 {% else %}
     -
 {% endif %}
