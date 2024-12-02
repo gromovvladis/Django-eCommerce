@@ -81,7 +81,10 @@ class StaffSerializer(serializers.ModelSerializer):
         if phone_data:
             user, created = User.objects.get_or_create(
                 username=phone_data, 
-                defaults={'is_staff': True, 'name': validated_data.get('first_name', "")}
+                defaults={
+                    'is_staff': True,
+                    'name': validated_data.get('first_name', ""),
+                }
                 )        
             # Если пользователь уже существовал, обновляем его данные, если они отличаются
             if not created:

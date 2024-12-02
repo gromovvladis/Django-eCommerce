@@ -1368,7 +1368,7 @@ class EvotorProductClient(EvotorAPICloud):
             logger.error(f"Ошибка при обновлении товара: {e}", exc_info=True)
             return f"Ошибка при обновлении товара: {e}", False
 
-        return "Магазины были успешно обновлены", True 
+        return "Товары были успешно обновлены", True 
 
     def create_or_update_site_groups(self, groups_json, is_filtered=False):
         error_msgs = []
@@ -1410,15 +1410,16 @@ class EvotorProductClient(EvotorAPICloud):
                 return  ', '.join(error_msgs), False
 
             if not is_filtered:
-                for terminal in Terminal.objects.all():
-                    if terminal.evotor_id not in evotor_ids:
-                        terminal.delete()
+                for category in Category.objects.all():
+                    if category.evotor_id not in evotor_ids:
+                        category.delete()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении группы товаров или модификации товаров: {e}", exc_info=True)            
             return f"Ошибка при обновлении группы товаров или модификации товаров: {e}", False
 
-        return "Группы товаров или модификации товаров были успешно обновлены", True 
+        return "Группы товаров и модификаций были успешно обновлены", True 
+
 
 
 
@@ -1536,8 +1537,6 @@ class EvotorDocClient(EvotorAPICloud):
 
     def create_or_update_site_order(self, products_json, evotor_id):
         pass
-
-
 
 
 class EvotorPushNotifClient(EvotorAPICloud):

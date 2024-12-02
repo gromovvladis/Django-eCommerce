@@ -345,7 +345,7 @@ class CRMStaffEvotorTable(DashboardTable):
     caption = ngettext_lazy("%s Сотрудник Эвотор", "%s Сотрудники Эвотор")
 
     class Meta(DashboardTable.Meta):
-        model = Store
+        model = Staff
         fields = (
             "name",
             "id",
@@ -484,10 +484,10 @@ class CRMProductEvotorTable(DashboardTable):
     tax = Column(
         verbose_name="Налог",
         order_by="tax",
-        attrs = {'th': {'class': 'age'},}
+        attrs = {'th': {'class': 'tax'},}
     )
     measure_name = Column(
-        verbose_name="Ед. измерения",
+        verbose_name="Ед.изм.",
         order_by="measure_name",
         attrs = {'th': {'class': 'measure_name'},}
     )
@@ -514,7 +514,7 @@ class CRMProductEvotorTable(DashboardTable):
     caption = ngettext_lazy("%s товар", "%s Продуктов")
 
     class Meta(DashboardTable.Meta):
-        model = Staff
+        model = Product
         fields = (
             "check",
             "name",
@@ -687,7 +687,7 @@ class CRMGroupEvotorTable(DashboardTable):
     caption = ngettext_lazy("%s Категория или модификация товара", "%s Категорий и модификаций товаров")
 
     class Meta(DashboardTable.Meta):
-        model = Staff
+        model = Category
         fields = (
             "check",
             "name",

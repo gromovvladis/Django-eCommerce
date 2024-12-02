@@ -18,9 +18,10 @@
 {% endblock %}
 
 {% block header %}
-    <div class="page-header d-flex justify-content-start">
-        <h1>Заказы</h1>
-        <form method="get" class="d-flex align-items-end no-widget-init ml-2" id="store_form">
+    <div class="page-header d-flex justify-content-start store-select">
+        <h1 class="mr-2">Заказы</h1>
+        <form method="get" class="btn d-flex align-items-center no-widget-init" id="store_form">
+            <i class="fa-solid fa-store my-1"></i>
             {% for field in form %}
                 {% if "store_point" in field.id_for_label %}
                     {% render_field field class+='store-point' %}
