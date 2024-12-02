@@ -98,21 +98,18 @@ class EvotorAPICloud:
 
         try:
             if method == "GET":
-                response = requests.get(url, headers=self.headers)
+                response = requests.get(url, headers=self.headers)                       
+            elif method == "POST":
+                response = requests.post(url, headers=self.headers, json=data)
+            elif method == "PUT":
+                response = requests.post(url, headers=self.headers, json=data)
+            elif method == "PATCH":
+                response = requests.patch(url, headers=self.headers, json=data)
+            elif method == "DELETE":
+                response = requests.delete(url, headers=self.headers)
             else:
-                return {"error": "test"}
-        
-            # elif method == "POST":
-            #     response = requests.post(url, headers=self.headers, json=data)
-            # elif method == "PUT":
-            #     response = requests.post(url, headers=self.headers, json=data)
-            # elif method == "PATCH":
-            #     response = requests.patch(url, headers=self.headers, json=data)
-            # elif method == "DELETE":
-            #     response = requests.delete(url, headers=self.headers)
-            # else:
-            #     logger.error(f"Ошибка HTTP запроса. Неизвестный http метод: {method}")
-            #     raise ValueError(f"Unsupported HTTP method: {method}")
+                logger.error(f"Ошибка HTTP запроса. Неизвестный http метод: {method}")
+                raise ValueError(f"Unsupported HTTP method: {method}")
 
             response.raise_for_status() # Проверка на успешный статус запроса (2xx) 
             return response.json() # Возврат данных в формате JSON    
@@ -832,19 +829,35 @@ class EvotorProductClient(EvotorAPICloud):
         Идентификаторы объектов формирует клиент API.
         """
         errors = []
+        groups_filtered = {"create": defaultdict(list), "update": defaultdict(list)}
         products_filtered = {"create": defaultdict(list), "update": defaultdict(list)}
 
         for product in products:
             if product.is_parent:
+                store_ids = set()
                 for child in product.children.all():
                     key = "update" if child.evotor_id else "create"
                     for stockrecord in child.stockrecords.all():
                         store_id = stockrecord.store.evotor_id
+                        if store_id:
+                            store_ids.add(store_id)
+                key = "update" if product.evotor_id else "create"
+                for store_id in store_ids:
+                    groups_filtered[key][store_id].append(product)
             else:
                 key = "update" if product.evotor_id else "create"
                 for stockrecord in product.stockrecords.all():
                     store_id = stockrecord.store.evotor_id
                     products_filtered[key][store_id].append(product)
+
+        for action, groups_by_action in groups_filtered.items():
+            for store_id, groups_by_store in groups_by_action.items():
+                if action == "create":
+                    error = self.create_evotor_groups(groups_by_store, store_id)
+                else:
+                    error = self.update_evotor_groups(groups_by_store, store_id)
+                if error:
+                    errors.append(error)
 
         for action, products_by_action in products_filtered.items():
             for store_id, products_by_store in products_by_action.items():
@@ -988,7 +1001,7 @@ class EvotorProductClient(EvotorAPICloud):
         products - список ID Products
 
         """
-        products_to_delete = []
+        products_to_delete = {}
         groups_to_delete = []
         errors = []
 
@@ -1098,18 +1111,10 @@ class EvotorProductClient(EvotorAPICloud):
                     if group:
                         group.evotor_id = group_response.get("id")
                         group.save()
-
-                        attributes_json = group_response.get("attributes", [])
-                        attribute_values = group.attribute_values.filter(is_variant=True)
-                        self._update_attributes(attributes_json, attribute_values)
             else:
                 group = groups[0]
                 group.evotor_id = response.get("id")
                 group.save()
-
-                attributes_json = response.get("attributes", [])
-                attribute_values = group.attribute_values.filter(is_variant=True)
-                self._update_attributes(attributes_json, attribute_values)
 
         return errors
     
@@ -1165,42 +1170,8 @@ class EvotorProductClient(EvotorAPICloud):
 
         endpoint = f"stores/{store_id}/product-groups"
         response = self.send_request(endpoint, "PUT", groups_json, True)
-        errors = response.get("error", None) if isinstance(response, dict) else None
-
-        if not errors:
-            for group_response in response:
-                name = group_response.get("name")
-                group = next((p for p in groups if p.name == name), None)
-                if group:
-                    attributes_json = group_response.get("attributes", [])
-                    attribute_values = group.attribute_values.filter(is_variant=True)
-                    self._update_attributes(attributes_json, attribute_values)
-
-        return errors
+        return response.get("error", None) if isinstance(response, dict) else None
     
-    def _update_attribute_choices(self, choices_json, attribute_choices):
-        for choice_json in choices_json:
-            name = choice_json.get("name")
-            if not name:
-                continue
-            attribute_choice = next((p for p in attribute_choices if p.name == name), None)
-            if attribute_choice:
-                attribute_choice.evotor_id = choice_json.get("id")
-                attribute_choice.save()
-
-    def _update_attributes(self, attributes_json, attribute_values):
-        for attribute_json in attributes_json:
-            name = attribute_json.get("name")
-            if not name:
-                continue
-            attribute_value = next((p for p in attribute_values if p.name == name), None)
-            if attribute_value:
-                attribute_value.attribute.evotor_id = attribute_json.get("id")
-                attribute_value.save()
-
-                choices_json = attribute_json.get("choices", [])
-                attribute_choices = attribute_value.value.all()
-                self._update_attribute_choices(choices_json, attribute_choices)
 
     # === вызываются напрямую
 

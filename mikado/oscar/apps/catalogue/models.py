@@ -1,4 +1,5 @@
 import logging
+import uuid
 import os
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -924,6 +925,9 @@ class Product(models.Model):
         "Мета-описание товара", "Мета-описание"
     )
 
+    def get_parent(self):
+        return self.parent if self.parent else self.categories.first()
+
     def get_product_class(self):
         """
         Return a product's item class. Child products inherit their parent's.
@@ -1131,12 +1135,6 @@ class Attribute(models.Model):
         "Код",
         max_length=128,
         unique=True
-    )
-    evotor_id = models.CharField(
-        "ID Эвотор",
-        max_length=128,
-        blank=True,
-        null=True,
     )
 
     # Attribute types
@@ -1523,11 +1521,16 @@ class AttributeOptionGroup(models.Model):
         max_length=128,
         blank=True,
         null=True,
-          unique=True,
+        unique=True,
     )
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        if not self.evotor_id:
+            self.evotor_id = str(uuid.uuid1())
+        super().save(*args, **kwargs)
 
     class Meta:
         app_label = "catalogue"
@@ -1563,6 +1566,11 @@ class AttributeOption(models.Model):
 
     def __str__(self):
         return self.option
+    
+    def save(self, *args, **kwargs):
+        if not self.evotor_id:
+            self.evotor_id = str(uuid.uuid1())
+        super().save(*args, **kwargs)
 
     class Meta:
         app_label = "catalogue"

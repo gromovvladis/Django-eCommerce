@@ -1,14 +1,16 @@
 {% if record.attributes %}
     {% for attribute in record.attributes %}
-        Название атрибута: {{ attribute.name }}
-        Значения:
+        <strong>{{ attribute.name }}</strong>
+        <br>
         {% if attribute.choices %}
             {% for choise in attribute.choices %}
-                {{ choise }}{% if not forloop.last %},{% endif %}
+                {{ choise.name }}{% if not forloop.last %},{% endif %}
+                <br>
             {% endfor %}
         {% else %}
             -
         {% endif %}
+        <br>
     {% endfor %}
 {% else %}
     -

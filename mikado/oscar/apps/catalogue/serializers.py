@@ -260,7 +260,7 @@ class ProductSerializer(serializers.ModelSerializer):
                 representation["parent_id"] = parent_id
             
             stc = StockRecord.objects.filter(product=instance, store__evotor_id=store_id).first()
-
+            
             if stc:
                 representation["code"] = stc.evotor_code
                 representation["price"] = stc.price
@@ -268,6 +268,16 @@ class ProductSerializer(serializers.ModelSerializer):
                 representation["quantity"] = stc.num_in_stock
                 representation["tax"] = stc.tax
                 representation["allow_to_sell"] = stc.is_public
+
+            if instance.is_child:
+                attribute_values = instance.attribute_values.all()
+                representation["attributes_choices"] = {
+                    attribute_value.attribute.option_group.evotor_id: value.evotor_id
+                    for attribute_value in attribute_values
+                    if (value := attribute_value.value.first())
+                    and attribute_value.attribute.option_group and attribute_value.attribute.option_group.evotor_id
+                    and value.evotor_id
+                }
 
         except Exception as e:
             logger.error(f"Ошибка определения товара: {e}")
@@ -313,7 +323,22 @@ class ProductsSerializer(serializers.ModelSerializer):
             products.append(product)
 
         return products
+    
 
+class AttributeOptionSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+
+    class Meta:
+        model = AttributeOption
+
+class AttributeOptionGroupSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    choices = serializers.ListField(child=AttributeOptionSerializer())
+
+    class Meta:
+        model = AttributeOptionGroup
 
 class ProductGroupSerializer(serializers.ModelSerializer):
     # категория / товар
@@ -322,7 +347,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
     parent_id = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     # только у родительского товара
-    attributes = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    attributes = serializers.ListField(child=AttributeOptionGroupSerializer(), write_only=True, required=False)
 
     updated_at = serializers.DateTimeField(write_only=True)
 
@@ -451,30 +476,31 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         if isinstance(instance, Product):
             self.Meta.model = Product
             representation = super().to_representation(instance)
-            try:
-                attribute_values = instance.attribute_values.filter(is_variant=True)
-                representation["attributes"] = [
-                    {
-                        **({"id": attribute_value.attribute.evotor_id} if attribute_value.attribute.evotor_id else {}),
-                        "name": attribute_value.attribute.name,
-                        "choices": [
-                            {
-                                **({"id": choice.evotor_id} if choice.evotor_id else {}),
-                                "name": choice.option
-                            }
-                            for choice in attribute_value.value.all()
-                        ]
-                        if attribute_value.value else []
-                    }
-                    for attribute_value in attribute_values
-                ]
-
-            except Exception as e:
-                logger.error(f"Ошибка определения списка магазинов сотрудника: {e}")
-                representation["attributes"] = []
+            parent = instance.categories.first()
+            if parent and parent.evotor_id:
+                representation["parent_id"] = parent.evotor_id
+            attribute_values = instance.attribute_values.filter(is_variant=True)
+            representation["attributes"] = [
+                {
+                    "id": attribute_value.attribute.option_group.evotor_id,
+                    "name": attribute_value.attribute.option_group.name,
+                    "choices": [
+                        {
+                            "id": choice.evotor_id,
+                            "name": choice.option
+                        }
+                        for choice in attribute_value.value.all() if choice.evotor_id
+                    ]
+                }
+                for attribute_value in attribute_values
+                if attribute_value.attribute.option_group and attribute_value.attribute.option_group.evotor_id
+            ]
         else:
             self.Meta.model = Category
             representation = super().to_representation(instance)
+            parent = instance.get_parent()
+            if parent and parent.evotor_id:
+                representation["parent_id"] = parent.evotor_id
 
         if not representation.get("id"):
             representation.pop("id", None)
