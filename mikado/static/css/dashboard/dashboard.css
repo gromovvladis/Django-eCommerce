@@ -18497,12 +18497,12 @@ h3.app-ico:before {
 .tabbable.dashboard {
   margin-bottom: 1rem;
 }
-.tabbable.dashboard .tab-content {
+/* .tabbable.dashboard .tab-content { */
   /* border: 1px solid #e9ecef; */
   /* border-top-width: 0; */
   /* padding: 30px; */
   /* background: #fff; */
-}
+/* } */
 
 .card.card-body {
   /* margin-bottom: 1rem; */
@@ -20233,7 +20233,11 @@ input[type="number"]:focus {
   color: #fff;
 }
 
-.store-point{
+.store-point option{
+  color: #000;
+}
+
+  .store-point{
     border-style: hidden;
     color: #fff;
     font-size: .8rem;

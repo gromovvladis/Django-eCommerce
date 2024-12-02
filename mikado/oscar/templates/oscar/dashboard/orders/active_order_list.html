@@ -23,7 +23,6 @@
     <div class="page-header d-flex flex-wrap justify-content-start store-select">
         <h1 class="mr-2">Активные заказы</h1>
         <form method="get" class="btn d-flex align-items-center no-widget-init" id="store_form">
-            <i class="fa-solid fa-store my-1"></i>
             {% for field in form %}
                 {% if "store_point" in field.id_for_label %}
                     {% render_field field class+='store-point' %}

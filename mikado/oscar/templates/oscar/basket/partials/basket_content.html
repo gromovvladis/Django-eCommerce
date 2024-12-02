@@ -41,9 +41,7 @@
                                                     </div>
                                                 </a>
                                             </div>
-
                                             <div class="v-dish-order__content d-flex flex-column fill-width ml-1">
-                                                
                                                 <div class="v-dish-order__title s d-flex align-start fill-width">
                                                     <div class="v-dish-order__name-wrapper d-flex fill-width">
                                                         <a href="{{ product.get_absolute_url }}" aria-current="page"
@@ -56,20 +54,19 @@
                                                         {% icon file_name='interface/close' size=22 stroke='#999'%}
                                                     </button>
                                                 </div>
-
                                                 <div class="v-dish-order__toppings d-flex flex-column {% if not line.has_topping %}d-none{% endif %}" data-id="dish-order-toppings">
                                                     <span class="d-flex">{{ line.variants }}</span>
                                                     <span class="d-flex">{{ line.options }}</span>
                                                     <span class="d-flex">{{ line.additions }}</span>
                                                 </div>
-
                                                 {% if line.warning %}
                                                     <div class="mb-1"><span class="error-mark">{{ line.warning }}</span></div>
+                                                {% endif %}
+                                                {% if line.critical_warning %}
                                                     {% render_field form.quantity readonly="true" type="hidden" data-id="quantity-input" %}
                                                 {% else %}
                                                     <div role="separator" class="v-spacer"></div>
                                                     <div class="d-flex fill-width pos-relative align-center">
-
                                                         <div class="v-order-button pos-relative" data-id="order-buttons">
                                                             <button type="button" data-id="order-button-minus" class="v-order-button--elem" aria-label="Уменьшить">
                                                                 <svg viewBox="0 0 24 24" fill="none">
@@ -102,22 +99,18 @@
             </div>
             <div class="v-cart__info pd-2 pb-sm-0 px-sm-0" data-id="cart-info">
                 <div class="v-cart__submit d-flex align-end">
-                    
                     <div class="v-cart__total d-flex flex-column">
                         <span class="v-cart__total-text">Сумма заказа</span>
                         <div class="v-prices d-flex flex-column align-start v-prices--big" data-id="cart-totals">
                             {% include 'oscar/basket/partials/basket_totals.html' with editable=1 %}
                         </div>
                     </div>
-
                     <div role="separator" class="v-spacer"></div>
-                    
                     <button {% if not basket.has_valid_lines %}disabled{% endif %} onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="v-button v-button--main justify-center shrink">
                         <span class="v-button__value">
                              Оформить заказ
                         </span>
                     </button>
-
                 </div>
             </div>
             {% include "oscar/basket/partials/empty_cart.html" %}    
@@ -137,7 +130,6 @@
         {% endif %}
     </div>
 </div>
-
 <div class="cart-page__totals d-flex flex-column flex-md-row pd-0 pd-sm-2">
     <div class="v-cart__submit d-flex align-end fill-width">
         <div class="v-cart__total d-flex flex-column fill-width">

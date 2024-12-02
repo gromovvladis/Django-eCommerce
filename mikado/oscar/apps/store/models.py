@@ -278,7 +278,7 @@ class StockRecord(models.Model):
         "Доступен",
         default=True,
         db_index=True,
-        help_text="товар доступен к покупке",
+        help_text="Товар доступен к покупке",
     )
 
     # Date information

@@ -20,7 +20,7 @@
         <div class="d-flex flex-wrap justify-content-start store-select">
             <h1 class="mr-2">Группы Эвотор</h1>
             <form method="get" class="btn d-flex align-items-center no-widget-init" id="store_form">
-                <i class="fa-solid fa-store my-1"></i>
+                <i class="fa-solid fa-store mx-1"></i>
                 {% for field in form %}
                     {% render_field field class+='store-point' %}
                     {% for error in field.errors %}
@@ -47,7 +47,7 @@
         </div>
     </div>
     <p class="d-flex align-items-end mb-4 text-muted">
-        Эвотор объединяет категории товаров и родительские товары (товар с вариациями) в группу.
+        Эвотор объединяет категории товаров и родительские товары (товар с вариациями) в группы.
     </p>
     <div class="modal fade" id="product-image-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">

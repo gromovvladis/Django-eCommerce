@@ -458,9 +458,10 @@ class CRMProductEvotorTable(DashboardTable):
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
-    description = Column(
+    description = TemplateColumn(
         verbose_name="Описание",
-        order_by="description",
+        template_code='{{ record.description|default:"-"|striptags'
+        '|cut:"&nbsp;"|truncatewords:6 }}',
         attrs = {'th': {'class': 'description'},}
     )
     parent = TemplateColumn(
@@ -653,7 +654,7 @@ class CRMGroupEvotorTable(DashboardTable):
         attrs = {'th': {'class': 'name'},}
     )
     parent = TemplateColumn(
-        verbose_name="Группа",
+        verbose_name="Родительская группа",
         template_name="oscar/dashboard/crm/groups/evotor_table/group_row_parent.html",
         order_by="parent",
         attrs = {'th': {'class': 'parent'},}
@@ -684,7 +685,7 @@ class CRMGroupEvotorTable(DashboardTable):
     )
 
     icon = "fas fa-object-group"
-    caption = ngettext_lazy("%s Категория или модификация товара", "%s Категорий и модификаций товаров")
+    caption = ngettext_lazy("%s Группа", "%s Групп")
 
     class Meta(DashboardTable.Meta):
         model = Category
@@ -757,7 +758,7 @@ class CRMGroupSiteTable(DashboardTable):
     )
 
     icon = "fas fa-layer-group"
-    caption = ngettext_lazy("%s Категория или модификация товара", "%s Категорий или модификаций товаров")
+    caption = ngettext_lazy("%s Категория", "%s Категорий")
 
     class Meta(DashboardTable.Meta):
         model = Category
