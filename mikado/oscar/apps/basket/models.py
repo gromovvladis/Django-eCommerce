@@ -937,43 +937,20 @@ class Line(models.Model):
         if isinstance(self.purchase_info.availability, Unavailable):
             msg = "Временно не доступен"
             self.warning = msg
+            self.critical_warning = True
             return msg
         elif isinstance(self.purchase_info.availability, StockRequired):
-            # max_quantity = line.get_max_quantity()  # метод для получения максимального количества товара
-            # if line.quantity > max_quantity:
-            #     line.quantity = max_quantity
-            #     line.save()
-            #     updated = True
             available, msg = self.purchase_info.availability.is_purchase_permitted(self.quantity)
             if not available:
                 self.warning = msg
+                self.critical_warning = True
+                max_quantity = self.stockrecord.num_in_stock
+                if self.quantity > max_quantity:
+                    self.quantity = max_quantity
+                    self.critical_warning = False
+                    self.save()
+                
                 return msg
-
-        # if not self.price:
-        #     return
-
-        # Compare current price to price when added to basket
-        # current_price = self.purchase_info.price.money
-        # if current_price != self.price:
-        #     product_prices = {
-        #         "product": self.product.get_title(),
-        #         "old_price": currency(self.price, self.price_currency),
-        #         "new_price": currency(current_price, self.price_currency),
-        #     }
-        #     if current_price_incl_tax > self.price:
-        #         warning = (
-        #             "The price of '%(product)s' has increased from"
-        #             " %(old_price)s to %(new_price)s since you added"
-        #             " it to your basket"
-        #         )
-        #         return warning % product_prices
-        #     else:
-        #         warning = (
-        #             "The price of '%(product)s' has decreased from"
-        #             " %(old_price)s to %(new_price)s since you added"
-        #             " it to your basket"
-        #         )
-        #         return warning % product_prices
 
     def get_options(self):
         ops = []

@@ -122,8 +122,8 @@ class BasketLineForm(forms.ModelForm):
             num_available = getattr(
                 self.instance.purchase_info.availability, "num_available", None
             ) 
-            if num_available is not None:
-                num_available = num_available + self.instance.quantity
+            if num_available is None:
+                num_available = self.instance.quantity
 
             basket_max_allowed_quantity = self.instance.basket.max_allowed_quantity()[0] + self.instance.quantity
             if all([num_available, basket_max_allowed_quantity]):

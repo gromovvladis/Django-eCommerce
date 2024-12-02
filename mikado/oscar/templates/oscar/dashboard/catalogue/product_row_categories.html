@@ -1,4 +1,9 @@
-{% for cat in record.get_categories %}
-    {{ cat }}
-    <br>
-{% endfor %}
+{% with categories=record.get_categories %}
+    {% if categories %}
+        {% for cat in categories %}
+            {{ cat }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    {% else %}
+     -
+    {% endif %}
+{% endwith %}

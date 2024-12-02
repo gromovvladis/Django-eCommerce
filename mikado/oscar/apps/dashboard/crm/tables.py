@@ -345,7 +345,7 @@ class CRMStaffEvotorTable(DashboardTable):
     caption = ngettext_lazy("%s Сотрудник Эвотор", "%s Сотрудники Эвотор")
 
     class Meta(DashboardTable.Meta):
-        model = Store
+        model = Staff
         fields = (
             "name",
             "id",
@@ -458,9 +458,10 @@ class CRMProductEvotorTable(DashboardTable):
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
-    description = Column(
+    description = TemplateColumn(
         verbose_name="Описание",
-        order_by="description",
+        template_code='{{ record.description|default:"-"|striptags'
+        '|cut:"&nbsp;"|truncatewords:6 }}',
         attrs = {'th': {'class': 'description'},}
     )
     parent = TemplateColumn(
@@ -484,10 +485,10 @@ class CRMProductEvotorTable(DashboardTable):
     tax = Column(
         verbose_name="Налог",
         order_by="tax",
-        attrs = {'th': {'class': 'age'},}
+        attrs = {'th': {'class': 'tax'},}
     )
     measure_name = Column(
-        verbose_name="Ед. измерения",
+        verbose_name="Ед.изм.",
         order_by="measure_name",
         attrs = {'th': {'class': 'measure_name'},}
     )
@@ -514,7 +515,7 @@ class CRMProductEvotorTable(DashboardTable):
     caption = ngettext_lazy("%s товар", "%s Продуктов")
 
     class Meta(DashboardTable.Meta):
-        model = Staff
+        model = Product
         fields = (
             "check",
             "name",
@@ -653,7 +654,7 @@ class CRMGroupEvotorTable(DashboardTable):
         attrs = {'th': {'class': 'name'},}
     )
     parent = TemplateColumn(
-        verbose_name="Группа",
+        verbose_name="Родительская группа",
         template_name="oscar/dashboard/crm/groups/evotor_table/group_row_parent.html",
         order_by="parent",
         attrs = {'th': {'class': 'parent'},}
@@ -684,10 +685,10 @@ class CRMGroupEvotorTable(DashboardTable):
     )
 
     icon = "fas fa-object-group"
-    caption = ngettext_lazy("%s Категория или модификация товара", "%s Категорий и модификаций товаров")
+    caption = ngettext_lazy("%s Группа", "%s Групп")
 
     class Meta(DashboardTable.Meta):
-        model = Staff
+        model = Category
         fields = (
             "check",
             "name",
@@ -757,7 +758,7 @@ class CRMGroupSiteTable(DashboardTable):
     )
 
     icon = "fas fa-layer-group"
-    caption = ngettext_lazy("%s Категория или модификация товара", "%s Категорий или модификаций товаров")
+    caption = ngettext_lazy("%s Категория", "%s Категорий")
 
     class Meta(DashboardTable.Meta):
         model = Category

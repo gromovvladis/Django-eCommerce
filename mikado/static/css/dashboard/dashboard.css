@@ -2498,7 +2498,7 @@ textarea.form-control {
   line-height: 1.5;
   /* border-radius: 0.5rem; */
   /* box-shadow: 0 0px 7px rgba(0, 0, 0, 0.07); */
-  border-radius: 10px;
+  border-radius: 15px;
   transition: color 0.1s ease-in-out, background-color 0.1s ease-in-out, border-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
 }
 
@@ -18497,12 +18497,12 @@ h3.app-ico:before {
 .tabbable.dashboard {
   margin-bottom: 1rem;
 }
-.tabbable.dashboard .tab-content {
+/* .tabbable.dashboard .tab-content { */
   /* border: 1px solid #e9ecef; */
   /* border-top-width: 0; */
   /* padding: 30px; */
   /* background: #fff; */
-}
+/* } */
 
 .card.card-body {
   /* margin-bottom: 1rem; */
@@ -19289,10 +19289,10 @@ caption {
   margin-left: .5rem;
 }
 
-
-
 @media screen and (max-width: 1200px) {
 
+  .table .tax,
+  .table .measure_name,
   .table .additionals,
   .page-header span,
   .caption-button{
@@ -20222,19 +20222,48 @@ input[type="number"]:focus {
   display: none;
 }
 
+.store-select{
+  align-items: center;
+}
 
 
-.store-point{
+.store-select form{
+  padding: .5rem;
+  background: #8d6eff;
+  color: #fff;
+}
+
+.store-point option{
+  color: #000;
+}
+
+  .store-point{
     border-style: hidden;
-    color: var(--blue);
-    font-size: 1.1rem;
-    line-height: 1.1rem;
-    font-weight: 500;
+    color: #fff;
+    font-size: .8rem;
     background-color: transparent;
 }
 
 .store-point:focus-visible{
   outline: none;
+}
+
+
+
+@media (max-width: 576px) {
+
+  .store-select{
+    flex-direction: column;
+  } 
+
+  .store-select{
+    align-items: start;
+  }
+
+  .store-select form{
+    margin-top: 1rem;
+  }
+
 }
 
 .order-button {

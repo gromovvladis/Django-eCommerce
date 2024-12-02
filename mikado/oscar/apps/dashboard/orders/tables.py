@@ -104,13 +104,10 @@ class OrderTable(DashboardTable):
             "status",
             "user",
             "total",
-            # "num_products",
             "delivery",
             "payment",
             "order_time",
             "..."
-            # "actions",
-            # "view",
         )
         attrs = {
             'class': 'table table-striped table-bordered table-hover',

@@ -264,11 +264,15 @@ class CRMStaffListView(CRMTablesMixin):
                         if model_instance.user
                         else set()
                     )
+                    
+                    def is_equal(value1, value2):
+                        return value1 in [None, ""] if value2 in [None, ""] else value1 == value2
+                
                     store_matches = bool(store_evotor_ids.intersection(stores_ids))
                     data_item["is_valid"] = (
-                        model_instance.first_name == first_name
-                        and model_instance.last_name == last_name
-                        and model_instance.middle_name == middle_name
+                        is_equal(model_instance.first_name, first_name)
+                        and is_equal(model_instance.last_name, last_name)
+                        and is_equal(model_instance.middle_name, middle_name)
                         and store_matches
                     )
                 else:
@@ -658,3 +662,4 @@ class CRMReportListView(View):
 
 class CRMEventListView(View):
     pass
+       
