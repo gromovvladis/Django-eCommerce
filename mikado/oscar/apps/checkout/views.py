@@ -86,7 +86,6 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
     def get_initial(self):
 
         initial = {}
-        
         if self.request.COOKIES.get('orderNote'):
             initial['order_note'] = unquote(unquote(self.request.COOKIES.get('orderNote')))
         

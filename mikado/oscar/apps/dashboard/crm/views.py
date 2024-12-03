@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import View
 from django.db.models import Count, Max, Min, Case, When, DecimalField, BooleanField, Q
+from django_tables2 import SingleTableView
 
 from oscar.apps.catalogue.serializers import ProductGroupsSerializer, ProductsSerializer
 from oscar.apps.crm.client import EvatorCloud
@@ -421,19 +422,19 @@ class CRMGroupsListView(CRMTablesMixin):
 
         return redirect(self.url_redirect)
 
-    # def send_models(self, is_filtered):
-    #     models = super().send_models(is_filtered)
-    #     try:
-    #         products, error = EvatorCloud().update_or_create_evotor_products(models)
-    #     except Exception as e:
-    #         logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
+    def send_models(self, is_filtered):
+        models = super().send_models(is_filtered)
+        try:
+            error = EvatorCloud().update_or_create_evotor_groups(models)
+        except Exception as e:
+            logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
         
-    #     if error:
-    #         messages.error(self.request, error)
-    #     else:
-    #         messages.success(self.request, "Товары успешно отправлены в Эвотор.")
+        if error:
+            messages.error(self.request, error)
+        else:
+            messages.success(self.request, "Товары успешно отправлены в Эвотор.")
 
-    #     return redirect(self.url_redirect)
+        return redirect(self.url_redirect)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -627,8 +628,13 @@ class CRMProductListView(CRMTablesMixin):
         return ctx
 
 
-class CRMDocsListView(View):
-    pass
+class CRMDocsListView(SingleTableView):
+    template_name = "oscar/dashboard/crm/docs/doc_list.html"
+    # form_class = CRMDocForm
+    # serializer = DocsSerializer
+    context_table_name = "table"
+    # table_site = CRMDocSiteTable
+    url_redirect = reverse_lazy("dashboard:crm-docs")
 
 
 class CRMAcceptListView(View):

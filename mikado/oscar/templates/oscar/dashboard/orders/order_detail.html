@@ -36,9 +36,11 @@
                 <div class="d-flex justify-space-between" >
                     <h3>
                         <i class="fas fa-user"></i> Клиент
-                        <span class="badge badge-info ml-2">
-                            {{ order.user.date_joined|from_now }} / {{ user_info.order_count|default:"-" }} зак.
-                        </span>
+                        {% if order.user %}
+                            <span class="badge badge-info ml-2">
+                                {{ order.user.date_joined|from_now }} / {{ user_info.order_count|default:"-" }} зак.
+                            </span>
+                        {% endif %}
                     </h3>
                     <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
                     <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
@@ -251,16 +253,12 @@
                                             </div>
                                         </td>
                                         <td class="image">
-                                            {% if line.product.primary_image.original.url %}
-                                                {% with image=line.product.primary_image %}
-                                                    {% oscar_thumbnail image.original "80x80" upscale=False as thumb %}
-                                                    <a href="#" data-original="{{ image.original.url }}" class="sub-image">
-                                                        <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.product.get_name }}{% endif %}" loading="lazy">
-                                                    </a>
-                                                {% endwith %}
-                                            {% else %}
-                                                —
-                                            {% endif %}
+                                            {% with image=line.product.primary_image %}
+                                                {% oscar_thumbnail image.original "80x80" upscale=False as thumb %}
+                                                <a href="#" data-original="{{ image.original.url }}" class="sub-image">
+                                                    <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.product.get_name }}{% endif %}" loading="lazy">
+                                                </a>
+                                            {% endwith %}
                                         </td>
                                         <td class="title">
                                             <div class="d-flex align-items-center">

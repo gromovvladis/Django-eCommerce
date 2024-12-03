@@ -106,7 +106,7 @@ class Source(models.Model):
     reference = models.CharField("Референс", max_length=255, blank=True)
 
     # refundable
-    refundable = models.BooleanField("Возвращено", blank=True)
+    refundable = models.BooleanField("Возврат возможен?", blank=True)
 
     # paid
     paid = models.BooleanField("Оплачено", blank=True)

@@ -28,10 +28,6 @@ class RestApiException(serializers.ValidationError):
         self.detail = self.default_detail
 
 
-# class SMSWaitException(RestApiException):
-#     default_detail = detail = get_error(conf.SMS_WAIT_TIME)
-
-
 class UserAlreadyExistException(RestApiException):
     default_detail = detail = get_error(conf.SMS_USER_ALREADY_EXIST)
 

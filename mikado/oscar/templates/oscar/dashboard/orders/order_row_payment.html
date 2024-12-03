@@ -8,8 +8,10 @@
         Yoomoney Карта
     {% elif record.source == 'PAY_CARD' %}
         Картой
-    {% else %}
+    {% elif record.source == 'CASH' %}
         Наличные
+    {% else %}
+        {{ record.source }}
     {% endif %}
     {% if record.amount_paid %}
         {{ record.amount_paid|currency:record.currency }}

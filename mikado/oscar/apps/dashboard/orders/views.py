@@ -377,7 +377,6 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
     def dispatch(self, request, *args, **kwargs):
         # base_queryset is equal to all orders the user is allowed to access
         self.base_queryset = queryset_orders_for_user(request.user).annotate(
-            num_products=Sum("basket__lines__quantity"),
             source=Max("sources__reference"),
             amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             paid=F("sources__paid"),
@@ -476,7 +475,6 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
             queryset = queryset.filter(status=data["status"])
 
         return queryset.annotate(
-            num_products=Sum("basket__lines__quantity"),
             source=Max("sources__reference"),
             amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             paid=F("sources__paid"),
@@ -749,7 +747,6 @@ class OrderActiveListView(OrderListView):
         )
 
         return queryset.annotate(
-            num_products=Sum("basket__lines__quantity"),
             source=Max("sources__reference"),
             amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             paid=F("sources__paid"),

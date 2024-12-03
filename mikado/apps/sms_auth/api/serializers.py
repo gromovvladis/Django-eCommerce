@@ -18,7 +18,6 @@ class ChangePhoneNumberSerializer(serializers.Serializer):
     new_phone_number = PhoneNumberField()
 
 
-
 class DefaultUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

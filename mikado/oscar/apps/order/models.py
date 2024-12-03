@@ -30,7 +30,13 @@ class Order(models.Model):
     number = models.CharField(
         "Номер заказа", max_length=128, db_index=True, unique=True
     )
-
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+        null=True,
+    )
+    
     # We track the site that each order is placed within
     site = models.CharField(verbose_name="Источник заказа", null=True, blank=True, max_length=128)
 
@@ -231,6 +237,12 @@ class Order(models.Model):
             num_items += line.quantity
         return num_items
 
+    @property
+    def get_items_name(self):
+        """
+        Returns the number of items in this order.
+        """
+        return ", ".join(self.lines.all().values_list("name", flat=True))
 
     @property
     def shipping_status(self):
@@ -518,17 +530,6 @@ class Line(models.Model):
     )
     store_name = models.CharField("Название магазина", max_length=128, blank=True)
     evotor_code = models.CharField("Артикул в магазине", max_length=128)
-
-    # A line reference is the ID that a store uses to represent this
-    # particular line (it's not the same as a SKU).
-    # store_line_reference = models.CharField(
-    #     "Код магазина",
-    #     max_length=128,
-    #     blank=True,
-    #     help_text=(
-    #         "Это номер позиции, который партнер использует в своей системе."
-    #     ),
-    # )
     store_line_notes = models.TextField("Примечание магазина", blank=True)
 
     # We keep a link to the stockrecord used for this line which allows us to
@@ -1185,11 +1186,11 @@ class OrderDiscount(models.Model):
     offer_name = models.CharField(
         "Название предложения", max_length=128, db_index=True, blank=True
     )
-    voucher_id = models.PositiveIntegerField("D Промокода", blank=True, null=True)
+    voucher_id = models.PositiveIntegerField("ID Промокода", blank=True, null=True)
     voucher_code = models.CharField(
         "Код", max_length=128, db_index=True, blank=True
     )
-    frequency = models.PositiveIntegerField("Частота", null=True)
+    frequency = models.PositiveIntegerField("Количество применений", null=True)
     amount = models.DecimalField(
         "Сумма", decimal_places=2, max_digits=12, default=0
     )

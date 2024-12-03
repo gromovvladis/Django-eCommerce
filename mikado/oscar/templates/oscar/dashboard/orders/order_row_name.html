@@ -7,10 +7,8 @@
         {% if not record.is_open %}
             <i class="fa-solid fa-bolt" style="color:var(--danger)"></i>
         {% endif %}
-        {% for line in record.basket.all_lines %}
-            {{ line.product }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
+        {{ record.get_items_name }}
     </span>
-    <span class="text-dark small">Товаров:{{ record.num_products }}</span>
+    <span class="text-dark small">Товаров: {{ record.num_items }}</span>
     <span class="text-muted small">№{{ record.number }}</span>
 </a>
