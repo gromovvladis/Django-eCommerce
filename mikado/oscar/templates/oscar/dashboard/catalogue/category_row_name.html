@@ -1,4 +1,5 @@
 {% load django_tables2 %}
+
 <div class="d-flex flex-column">
     <div>
         {% if record.evotor_id %}
@@ -6,10 +7,6 @@
                 <i class="fa-solid fa-circle-check"></i>&nbsp; 
             </span>
         {% endif %}
-        {% if product_access %}
-            <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ record.get_name }}</a>
-        {% else %}
-            <span>{{ record.get_name }}</span>
-        {% endif %}
+        <a href="{% url 'dashboard:catalogue-category-update' pk=record.pk %}{% querystring %}">{{ record.get_name }}</a>
     </div>
 </div>

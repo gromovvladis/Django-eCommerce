@@ -71,11 +71,13 @@ class OrderStatsForm(forms.Form):
         label="Онлайн заказы",
         required=False,
         initial=True,
+        help_text="Заказы с сайта, телеграм бота"
     )
     is_offine = forms.BooleanField(
-        label="Евотор заказы",
+        label="Эвотор заказы",
         required=False,
         initial=True,
+        help_text="Заказы в магазине"
     )
 
     _filters = _excludes = _description = _search_filters = None

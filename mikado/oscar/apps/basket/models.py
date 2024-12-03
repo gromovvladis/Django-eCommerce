@@ -153,25 +153,6 @@ class Basket(models.Model):
             return self._all_lines().filter(product__stockrecords__store_id=self.store_id) 
         return self._all_lines()  
 
-
-    # def all_lines(self):
-    #     """
-    #     Return a cached set of basket lines.
-
-    #     This is important for offers as they alter the line models and you
-    #     don't want to reload them from the DB as that information would be
-    #     lost.
-    #     """
-    #     if self.id is None:
-    #         return self.lines.model.objects.none()  # pylint: disable=E1101
-    #     if self._lines is None:
-    #         self._lines = (
-    #             self.lines.select_related("product", "stockrecord")
-    #             .prefetch_related("attributes", "product__images", "product__categories", "product__stockrecords")
-    #             .order_by(self._meta.pk.name)
-    #         )
-    #     return self._lines
-
     def max_allowed_quantity(self):
         """
         Returns maximum product quantity, that can be added to the basket

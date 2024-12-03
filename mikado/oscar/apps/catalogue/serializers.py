@@ -16,6 +16,7 @@ Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model("store", "StockRecord")
 Category = get_model("catalogue", "Category")
+Attribute = get_model("catalogue", "Attribute")
 AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 
@@ -403,10 +404,11 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             )[0]
 
             category = self._get_or_create_category(parent_id)
-            attr_group = self._get_or_create_attr_group(attributes)
-
             instance.categories.add(category)
-            instance.attributes.add(attr_group)
+
+            attr_group, created = self._get_or_create_attr_group(attributes)
+            if created:
+                instance.attributes.add(attr_group)
         else:
             self.Meta.model = Category
             if parent_id:
@@ -449,25 +451,27 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         
         if attributes:
             self.Meta.model = Product
-
-            category = self._get_or_create_category(parent_id)
-            attr_group = self._get_or_create_attr_group(attributes)
-            
             instance.name = name
             instance.structure = Product.PARENT
+
+            category = self._get_or_create_category(parent_id)
             instance.categories.add(category)
-            instance.attributes.add(attr_group)
+
+            attr_group, created = self._get_or_create_attr_group(attributes)
+            if created:
+                instance.attributes.add(attr_group)
 
             instance.save()
         else:
             self.Meta.model = Category
+            instance.name = name
 
             if parent_id:
                 parent = self._get_or_create_category(parent_id)
-                if instance.parent != parent:
-                    instance.move(parent, pos="last-child")
+                if parent is not None and instance.get_parent() != parent:
+                    instance.move(parent, pos="first-child")
+                    instance.refresh_from_db()
 
-            instance.name = name
             instance.save()
 
         return instance
@@ -544,12 +548,13 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             }
         ]
         """
-        group = None
+        attr = None
         for attribute in attributes:
-            group = AttributeOptionGroup.objects.get_or_create(
+
+            group, created = AttributeOptionGroup.objects.get_or_create(
                 evotor_id=attribute["id"],
                 defaults={"name": attribute["name"]}
-            )[0]
+            )
 
             for choice in attribute.get("choices", []):
                 AttributeOption.objects.get_or_create(
@@ -558,7 +563,15 @@ class ProductGroupSerializer(serializers.ModelSerializer):
                     defaults={"option": choice["name"]}
                 )
 
-        return group
+            if created:
+                attr = Attribute.objects.get_or_create(
+                    name=attribute["name"],
+                    defaults={"type": "multi_option"}
+                )[0]
+
+                attr.option_group.add(group)
+
+        return attr, created
 
 
 class ProductGroupsSerializer(serializers.ModelSerializer):

@@ -8,6 +8,7 @@ from django.contrib.auth.models import Group
 from rest_framework.renderers import JSONRenderer
 from oscar.apps.catalogue.serializers import ProductGroupSerializer, ProductGroupsSerializer, ProductSerializer, ProductsSerializer
 from oscar.apps.customer.serializers import UserGroupSerializer, StaffSerializer
+from oscar.apps.order.serializers import OrderSerializer
 from oscar.apps.store.serializers import StoreSerializer, TerminalSerializer
 from oscar.core.loading import get_model
 
@@ -20,6 +21,7 @@ Staff = get_model("user", "Staff")
 GroupEvotor = get_model("auth", "GroupEvotor")
 Product = get_model('catalogue', 'Product')
 Category = get_model('catalogue', 'Category')
+Order = get_model("order", "Order")
 
 evator_cloud_token = settings.EVOTOR_CLOUD_TOKEN
 
@@ -555,8 +557,8 @@ class EvotorProductClient(EvotorAPICloud):
             }
         """
         endpoint = f"stores/{store_id}/products"
-        return self.send_request(endpoint)
-    
+        return self.send_request(endpoint)    
+
     def get_product_by_id(self, store_id, product_id):
         """
         Получить товар
@@ -1171,7 +1173,6 @@ class EvotorProductClient(EvotorAPICloud):
         endpoint = f"stores/{store_id}/product-groups"
         response = self.send_request(endpoint, "PUT", groups_json, True)
         return response.get("error", None) if isinstance(response, dict) else None
-    
 
     # === вызываются напрямую
 
@@ -1362,7 +1363,7 @@ class EvotorProductClient(EvotorAPICloud):
                     event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
                     CRMEvent.objects.create(
                         body=f"ProductGroup created / or updated - { group.name }",
-                        sender=CRMEvent.TERMINAL,
+                        sender=CRMEvent.GROUP,
                         type=event_type,
                     )
                 else: 
@@ -1384,8 +1385,7 @@ class EvotorProductClient(EvotorAPICloud):
 
         return "Группы товаров и модификаций были успешно обновлены", True 
 
-
-
+# делаем EvotorDocClient и EvotorPushNotifClient
 
 class EvotorDocClient(EvotorAPICloud):
 
@@ -1499,8 +1499,41 @@ class EvotorDocClient(EvotorAPICloud):
 
 # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
-    def create_or_update_site_order(self, products_json, evotor_id):
-        pass
+    def create_or_update_site_order(self, order_json):
+        error_msgs = []
+        orders = Order.objects.all()
+        try:
+            json_valid = True
+            created = False
+            try:
+                evotor_id = order_json.get('id')
+                order = orders.get(evotor_id=evotor_id)
+                serializer = OrderSerializer(order, data=order_json)
+            except Order.DoesNotExist:
+                created = True
+                serializer = OrderSerializer(data=order_json)
+            
+            if serializer.is_valid():
+                order = serializer.save() 
+                event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                CRMEvent.objects.create(
+                    body=f"Order created / updated - { order.number }",
+                    sender=CRMEvent.PRODUCT,
+                    type=event_type,
+                )
+            else: 
+                json_valid = False
+                logger.exception("Ошибка при сериализации", extra={"errors": serializer.errors})
+                error_msgs.append(f"Ошибка сериализации заказа: {serializer.errors}")
+
+            if not json_valid:
+                return  ', '.join(error_msgs), False
+
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении заказа: {e}", exc_info=True)
+            return f"Ошибка при обновлении заказа: {e}", False
+
+        return "Заказ был успешно обновлен", True 
 
 
 class EvotorPushNotifClient(EvotorAPICloud):
@@ -1611,6 +1644,7 @@ class EvotorPushNotifClient(EvotorAPICloud):
         endpoint = f"api/apps/{application_id}/push-notifications"
         return self.send_request(endpoint, "POST", msg_data)
  
+#  =====
 
 class EvatorCloud(EvotorProductClient, EvotorDocClient, EvotorStaffClient, EvotorStoreClient, EvotorPushNotifClient):
     pass

@@ -5,7 +5,7 @@ class CRMEvent(models.Model):
     body = models.TextField()
 
     TERMINAL, STORE, ORDER, DOC = "TERMINAL", "STORE", "ORDER", "DOC"
-    INSTALLATION, STAFF, PRODUCT, MICS  = "INSTALLATION", "STAFF", "PRODUCT", "MICS"
+    INSTALLATION, STAFF, PRODUCT, GROUP, MICS  = "INSTALLATION", "STAFF", "PRODUCT", "GROUP", "MICS"
     sender_choices = (
         (TERMINAL, "Терминал"),
         (STORE, "Магазин"),
@@ -14,6 +14,7 @@ class CRMEvent(models.Model):
         (INSTALLATION, "Установка / Удаление"),
         (STAFF, "Персонал"),
         (PRODUCT, "Товар"),
+        (GROUP, "Группа"),
         (MICS, "Неизвестно"),
     )
     sender = models.CharField(max_length=32, choices=sender_choices, default=MICS)
