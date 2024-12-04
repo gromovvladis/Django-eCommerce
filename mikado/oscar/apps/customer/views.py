@@ -34,10 +34,6 @@ PhoneAuthenticationForm, OrderSearchForm = get_classes(
     "customer.forms",
     ["PhoneAuthenticationForm", "OrderSearchForm"],
 )
-# PhoneAuthenticationForm, PhoneUserCreationForm, OrderSearchForm = get_classes(
-#     "customer.forms",
-#     ["PhoneAuthenticationForm", "PhoneUserCreationForm", "OrderSearchForm"],
-# )
 ProfileForm = get_class("customer.forms", "ProfileForm")
 UserAddressForm = get_class("address.forms", "UserAddressForm")
 Order = get_model("order", "Order")
