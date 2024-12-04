@@ -561,7 +561,10 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             for choice in attribute.get("choices", []):
                 attr_option = AttributeOption.objects.get_or_create(
                     evotor_id=choice["id"],
-                    defaults={"option": choice["name"]}
+                    defaults={
+                        "option": choice["name"],
+                        "group": group,
+                        }
                 )[0]
                 attr_option.option = choice["name"]
                 attr_option.group = group
