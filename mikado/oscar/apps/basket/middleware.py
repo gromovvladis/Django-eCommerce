@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from django.conf import settings
 from django.core.signing import BadSignature, Signer
 from django.utils.functional import SimpleLazyObject, empty
@@ -29,6 +31,18 @@ class BasketMiddleware:
         # cached instance.
         request._basket_cache = None
 
+        def load_referral_source():
+            def extract_domain(url):
+                parsed_url = urlparse(url)
+                return parsed_url.netloc
+
+            if 'referral_source' not in request.COOKIES:
+                return extract_domain(request.META.get('HTTP_REFERER'))
+            
+        _referral_source = SimpleLazyObject(load_referral_source)
+        if _referral_source:
+            request._referral_source = _referral_source
+
         def load_full_basket():
             """
             Return the basket after applying offers.
@@ -54,6 +68,7 @@ class BasketMiddleware:
         # when the attribute is accessed.
         request.basket = SimpleLazyObject(load_full_basket)
         request.basket_hash = SimpleLazyObject(load_basket_hash)
+        request._referral_source = SimpleLazyObject(load_referral_source)
 
         response = self.get_response(request)
         return self.process_response(request, response)
@@ -63,6 +78,15 @@ class BasketMiddleware:
         cookies_to_delete = getattr(request, "cookies_to_delete", [])
         for cookie_key in cookies_to_delete:
             response.delete_cookie(cookie_key)
+
+        if hasattr(request, '_referral_source') and request._referral_source:
+            response.set_cookie(
+                'referral_source',
+                request._referral_source,
+                max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
+                secure=settings.OSCAR_BASKET_COOKIE_SECURE,
+                httponly=True,
+            )
 
         if not hasattr(request, "basket"):
             return response

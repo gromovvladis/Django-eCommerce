@@ -260,7 +260,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.get_name }}
+                                                {{ prd.name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -276,7 +276,7 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button" href="#top_product_price_day" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_day" data-toggle="tab">
                                         По стоимости
                                     </button>
                                     <button role="button" class="tabs-button__button" href="#top_product_count_day" data-toggle="tab">
@@ -445,7 +445,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.get_name }}
+                                                {{ prd.name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -461,7 +461,7 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button" href="#top_product_price_weeks" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_weeks" data-toggle="tab">
                                         По стоимости
                                     </button>
                                     <button role="button" class="tabs-button__button" href="#top_product_count_weeks" data-toggle="tab">
@@ -629,7 +629,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.get_name }}
+                                                {{ prd.name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -645,7 +645,7 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button" href="#top_product_price_months" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_months" data-toggle="tab">
                                         По стоимости
                                     </button>
                                     <button role="button" class="tabs-button__button" href="#top_product_count_months" data-toggle="tab">
@@ -813,7 +813,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.get_name }}
+                                                {{ prd.name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -829,7 +829,7 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button" href="#top_product_price_years" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_years" data-toggle="tab">
                                         По стоимости
                                     </button>
                                     <button role="button" class="tabs-button__button" href="#top_product_count_years" data-toggle="tab">
@@ -862,7 +862,7 @@
 
 {% block templatescripts %}
     {{ block.super }}
-    var products_titles = {{ top_products_titles|safe }}
+    var products_names = {{ top_products_names|safe }}
     var products_sums = {{ top_products_sums|safe }}
     var products_quantities = {{ top_products_quantities|safe }}
     var orders_datas = {{ report_datas|safe }}

@@ -12,7 +12,6 @@ Additional = get_model("catalogue", "Additional")
 Product = get_model("catalogue", "Product")
 Attribute = get_model("catalogue", "Attribute")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
-# ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductImage = get_model("catalogue", "ProductImage")
@@ -21,9 +20,6 @@ ProductRecommendation = get_model("catalogue", "ProductRecommendation")
 
 class AttributeInline(admin.TabularInline):
     model = ProductAttribute
-
-# class AttributeInline(admin.TabularInline):
-#     model = ProductAttributeValue
 
 
 class ProductRecommendationInline(admin.TabularInline):
@@ -79,10 +75,6 @@ class ProductAttributeAdmin(admin.ModelAdmin):
     list_display = ("attribute", "product", "product_class")
 
 
-class ProductAttributeValueAdmin(admin.ModelAdmin):
-    list_display = ("product", "attribute", "value")
-
-
 class AttributeOptionInline(admin.TabularInline):
     model = AttributeOption
 
@@ -103,7 +95,6 @@ admin.site.register(ProductClass, ProductClassAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(ProductAttribute, ProductAttributeAdmin)
-# admin.site.register(ProductAttributeValue, ProductAttributeValueAdmin)
 admin.site.register(AttributeOptionGroup, AttributeOptionGroupAdmin)
 admin.site.register(Option)
 admin.site.register(Additional)

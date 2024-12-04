@@ -48,6 +48,15 @@ class Order(models.Model):
         on_delete=models.SET_NULL,
     )
 
+    store = models.ForeignKey(
+        "store.Store",
+        related_name="orders",
+        null=True,
+        blank=False,
+        verbose_name="Магазин",
+        on_delete=models.SET_NULL,
+    )
+
     # Orders can be placed without the user authenticating so we don't always
     # have a customer ID.
     user = models.ForeignKey(
@@ -196,7 +205,7 @@ class Order(models.Model):
         """
         Check if order offline
         """
-        return self.site in ('offline', 'evotor')
+        return self.site not in settings.OFFLINE_ORDERS
 
     @property
     def basket_total(self):

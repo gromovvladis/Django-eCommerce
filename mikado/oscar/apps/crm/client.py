@@ -9,6 +9,7 @@ from rest_framework.renderers import JSONRenderer
 from oscar.apps.catalogue.serializers import ProductGroupSerializer, ProductGroupsSerializer, ProductSerializer, ProductsSerializer
 from oscar.apps.customer.serializers import UserGroupSerializer, StaffSerializer
 from oscar.apps.order.serializers import OrderSerializer
+from oscar.apps.order.utils import OrderCreator
 from oscar.apps.store.serializers import StoreSerializer, TerminalSerializer
 from oscar.core.loading import get_model
 
@@ -1345,19 +1346,23 @@ class EvotorProductClient(EvotorAPICloud):
                 evotor_ids.append(evotor_id)
                 attributes = group_json.get('attributes')
                 if attributes:
-                    instance, created = Product.objects.get_or_create(evotor_id=evotor_id)
+                    try: 
+                        instance = Product.objects.get(evotor_id=evotor_id)
+                    except Product.DoesNotExist:
+                        instance = None     
                 else:      
                     try:
-                        instance = Category.objects.get(
-                            evotor_id=evotor_id,
-                        )
-                        created = False
+                        instance = Category.objects.get(evotor_id=evotor_id)
                     except Category.DoesNotExist:
-                        instance = Category.add_root(name=f"Категория {evotor_id}", evotor_id=evotor_id)
-                        created = True
+                        instance = None
 
-                serializer = ProductGroupSerializer(instance, data=group_json)
-                
+                if instance:
+                    serializer = ProductGroupSerializer(instance, data=group_json)
+                    created = False
+                else:
+                    serializer = ProductGroupSerializer(data=group_json)
+                    created = True
+
                 if serializer.is_valid():
                     group = serializer.save() 
                     event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
@@ -1384,6 +1389,9 @@ class EvotorProductClient(EvotorAPICloud):
             return f"Ошибка при обновлении группы товаров или модификации товаров: {e}", False
 
         return "Группы товаров и модификаций были успешно обновлены", True 
+
+    # def _create_parent_product(self):
+    #     pass
 
 # делаем EvotorDocClient и EvotorPushNotifClient
 
@@ -1515,6 +1523,12 @@ class EvotorDocClient(EvotorAPICloud):
             
             if serializer.is_valid():
                 order = serializer.save() 
+
+            order_creator = OrderCreator()
+                
+            for line in order.lines.all():
+                order_creator.update_stock_records(line)
+
                 event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
                 CRMEvent.objects.create(
                     body=f"Order created / updated - { order.number }",

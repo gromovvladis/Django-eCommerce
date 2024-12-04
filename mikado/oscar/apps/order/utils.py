@@ -143,6 +143,7 @@ class OrderCreator(object):
         """Create an order model."""
         order_data = {
             "basket": basket,
+            "store": basket.store,
             "number": order_number,
             "currency": total.currency,
             "total": total.money,
@@ -158,8 +159,8 @@ class OrderCreator(object):
             order_data["status"] = status
         if extra_order_fields:
             order_data.update(extra_order_fields)
-        # if "site" not in order_data:
-        #     order_data["site"] = Site._default_manager.get_current(request)
+        if "site" not in order_data:
+            order_data["site"] = self.get_referral_source(request)
         order = Order(**order_data)
         order.save()
         if surcharges is not None:
@@ -173,6 +174,9 @@ class OrderCreator(object):
                 )
 
         return order
+
+    def get_referral_source(self, request):
+        return request.COOKIES.get('referral_source', "mikado-sushi.ru")
 
     def create_line_models(self, order, basket_line, extra_line_fields=None):
         """

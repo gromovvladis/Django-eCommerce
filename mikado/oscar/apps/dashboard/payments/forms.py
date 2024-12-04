@@ -181,9 +181,6 @@ class NewSourceForm(forms.ModelForm):
         for chs in payment_chouces:
             source_type_list.append(chs[1])
 
-        # queryset = source_type_list
-        # queryset = SourceType.objects.filter(name__in=source_type_list)
-
         self.fields["source_type"].queryset = source_type_list
         self.fields["source_type"].initial = source_type_list.get(0)
         self.fields["amount_allocated"].widget.attrs.update({'max': order.total})
@@ -192,7 +189,6 @@ class NewSourceForm(forms.ModelForm):
 
     source_type = forms.ChoiceField(
         choices=[],
-        # queryset=Source.objects.none(),
         label='Способ оплаты',
         required=True,
         help_text='Выберите для какого способа оплаты создате транзакцию',

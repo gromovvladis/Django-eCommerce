@@ -5,7 +5,6 @@ import io
 import datetime
 import logging
 
-from decimal import ROUND_UP
 from decimal import Decimal as D
 from decimal import InvalidOperation
 
@@ -32,16 +31,25 @@ from dateutil.relativedelta import relativedelta
 
 logger = logging.getLogger("oscar.dashboard")
 
-Store = get_model("store", "Store")
-Transaction = get_model("payment", "Transaction")
-SourceType = get_model("payment", "SourceType")
+User = get_user_model()
+
 Order = get_model("order", "Order")
 OrderNote = get_model("order", "OrderNote")
-ShippingAddress = get_model("order", "ShippingAddress")
 Line = get_model("order", "Line")
+ShippingAddress = get_model("order", "ShippingAddress")
 ShippingEventType = get_model("order", "ShippingEventType")
 PaymentEventType = get_model("order", "PaymentEventType")
+Basket = get_model("basket", "Basket")
+Store = get_model("store", "Store")
+StockAlert = get_model("store", "StockAlert")
+Product = get_model("catalogue", "Product")
+Category = get_model("catalogue", "Category")
+Transaction = get_model("payment", "Transaction")
+SourceType = get_model("payment", "SourceType")
+Voucher = get_model("voucher", "Voucher")
+
 EventHandlerMixin = get_class("order.mixins", "EventHandlerMixin")
+
 OrderStatsForm = get_class("dashboard.orders.forms", "OrderStatsForm")
 OrderSearchForm = get_class("dashboard.orders.forms", "OrderSearchForm")
 ActiveOrderSearchForm = get_class("dashboard.orders.forms", "ActiveOrderSearchForm")
@@ -51,15 +59,6 @@ OrderStatusForm = get_class("dashboard.orders.forms", "OrderStatusForm")
 
 OrderTable = get_class("dashboard.orders.tables", "OrderTable")
 ProductSearchForm = get_class("dashboard.catalogue.forms", "ProductSearchForm")
-
-Voucher = get_model("voucher", "Voucher")
-Basket = get_model("basket", "Basket")
-StockAlert = get_model("store", "StockAlert")
-Product = get_model("catalogue", "Product")
-Category = get_model("catalogue", "Category")
-Order = get_model("order", "Order")
-Line = get_model("order", "Line")
-User = get_user_model()
 
 
 def queryset_orders_for_user(user):
@@ -72,8 +71,8 @@ def queryset_orders_for_user(user):
     queryset = Order._default_manager.select_related(
         "shipping_address",
         "user",
+        "store",
     ).prefetch_related("lines", "status_changes", "sources", "payment_events", "shipping_events")
-    # ).prefetch_related("lines", "status_changes", "sources", "payment_events", "shipping_events", "reviews")
     if user.is_staff:
         return queryset
     else:
@@ -121,22 +120,15 @@ class OrderStatsView(FormView):
         ctx["active_tab"] = "day"
         return ctx
 
-    def get_report(self, orders, start, end, range_type, segments=10):
-        """
-        Get report of order revenue split up in days, weeks, months, or years chunks.
-        A report is generated for the specified range type ('day', 'week', 'month', 'year').
-        The report provides ``max_revenue`` of the order revenue sum,
-        ``y-range`` as the labelling for the y-axis in a template and
-        ``order_total_days``, a list of properties for the chunks.
-        *segments* defines the number of labelling segments used for the y-axis.
-        """
+    def get_report(self, orders, start, end, range_type):
+
         start_time = start
         diff = relativedelta(end, start)
 
         if range_type == 'days':
             range_time = (end - start).days
         elif range_type == 'weeks':
-            range_time = max(1, (end - start).days // 7)
+            range_time = (end - start).days // 7
         elif range_type == 'months':
             start_time = start_time.replace(day=1)
             range_time = diff.years * 12 + diff.months + (1 if diff.days > 0 else 0)
@@ -145,6 +137,8 @@ class OrderStatsView(FormView):
             range_time = diff.years + (1 if diff.months > 0 or diff.days > 0 else 0)
         else:
             raise ValueError("Invalid range_type. Must be 'days', 'weeks', 'months', or 'years'.")
+
+        range_time = max(1, range_time)
 
         order_data = {}
         order_labels = []
@@ -420,14 +414,14 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
         if data["store_point"]:
             queryset = queryset.filter(
-                basket__store__code=data["store_point"]
+                store__code=data["store_point"]
             )
 
         if data["is_online"] and not data["is_offine"]:
-            queryset = queryset.exclude(site__in=['offline', 'evotor'])
+            queryset = queryset.exclude(site__in=settings.OFFLINE_ORDERS)
         
         if not data["is_online"] and data["is_offine"]:
-            queryset = queryset.filter(site__in=['offline', 'evotor'])
+            queryset = queryset.filter(site__in=settings.OFFLINE_ORDERS)
 
         if data["order_number"]:
             queryset = queryset.filter(
@@ -646,7 +640,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
     def get_row_values(self, order):
         formatted_items = [
             f"{item.name}({item.quantity})"
-            for item in order.basket.lines.all()
+            for item in order.lines.all()
         ]
         row = {
             "number": order.number,
@@ -743,7 +737,7 @@ class OrderActiveListView(OrderListView):
 
         if data["store_point"]:
             queryset = self.base_queryset.filter(
-                basket__store__code=data["store_point"]
+                store__code=data["store_point"]
         )
 
         return queryset.annotate(

@@ -4923,7 +4923,7 @@ input[type=button].btn-block {
   z-index: 1;
   border-style: none;
   background: transparent;
-  text-wrap: wrap;
+  text-wrap: nowrap;
   padding: .5rem;
 }
 
@@ -4941,7 +4941,7 @@ input[type=button].btn-block {
 }
 
 .tabs-button__icon{
-  padding: 1rem .75rem;
+  padding: 1rem .5rem;
 }
 
 .tabs-button__icon span{
@@ -4954,7 +4954,7 @@ input[type=button].btn-block {
 }
 
 .tabs-button.fill .tabs-button__icon.active{
-  min-width: 140px;
+  min-width: 130px;
 }
 
 .no-wrap {

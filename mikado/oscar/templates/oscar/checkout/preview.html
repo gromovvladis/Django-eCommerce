@@ -100,14 +100,16 @@
                         <div class="v-checkout__detail-text mr-2">
                             <span>Способ оплаты: </span>
                             <span>
-                                {% if payment_method == "PAY_CASH" %}
-                                Наличные
-                                {% elif payment_method == "PAY_SBP" %}
-                                СБП (Система быстрых платежей)
-                                {% elif payment_method == "PAY_ONLINECARD" %}
-                                Картой Онлайн
+                                {% if payment_method == "CASH" %}
+                                    Наличные
+                                {% elif payment_method == "SBP" %}
+                                    СБП (Система быстрых платежей)
+                                {% elif payment_method == "ONLINECARD" %}
+                                    Картой Онлайн
+                                {% elif payment_method == "ELECTRON" %}
+                                    Картой в магазине
                                 {% else %}
-                                Картой при получении
+                                    Неизвестный способ оплаты
                                 {% endif %}
                             </span>
                         </div>    
