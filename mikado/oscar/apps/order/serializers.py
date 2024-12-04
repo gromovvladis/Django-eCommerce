@@ -52,7 +52,6 @@ class OrderSerializer(serializers.Serializer):
         result_sum = body.get("result_sum", None)
         customer_phone = body.get("customer_phone")
 
-        # Order creation
         user = None
         if customer_phone:
             user = User.objects.filter(username=customer_phone).first()
@@ -102,7 +101,7 @@ class OrderSerializer(serializers.Serializer):
                 unit_price=D(position["price"]),
                 tax_code=position["tax"]["type"],
             )
-            # Line prices
+            
             LinePrice.objects.create(
                 order=order,
                 line=line,
