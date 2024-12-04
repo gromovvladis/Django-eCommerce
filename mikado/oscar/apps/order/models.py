@@ -167,7 +167,7 @@ class Order(models.Model):
                     line.status = new_line_status
                     line.save()
         
-        if new_status in ["Отменен", "Завершен"]:
+        if new_status in ["Отменен", "Завершён"]:
             self.date_finish = now()
         
         self.save()

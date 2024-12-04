@@ -34,7 +34,7 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ListView):
         Return Queryset of :py:class:`Order <oscar.apps.order.models.Order>`
         instances for the currently authenticated user.
         """        
-        return self.model.objects.filter(Q(user=self.request.user) & Q(status='Завершен') & Q(has_review=False))
+        return self.model.objects.filter(Q(user=self.request.user) & Q(status='Завершён') & Q(has_review=False))
 
 
     def get_context_data(self, *args, **kwargs):

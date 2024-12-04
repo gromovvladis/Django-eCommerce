@@ -359,7 +359,6 @@ class OrderSearchForm(forms.Form):
             # Форматируем начальное значение перед передачей в поле формы
             self.fields['usesrname'].initial = self.format_phone_number(usesrname)
 
-
     def format_phone_number(self, phone_number):
         # Простейший способ форматирования номера телефона
         phone_number = re.sub(r'\D', '', phone_number)  # Удаляем все нецифровые символы

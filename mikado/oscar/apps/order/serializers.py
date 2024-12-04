@@ -9,7 +9,7 @@ logger = logging.getLogger("oscar.customer")
 
 User = get_model("user", "User")
 Store = get_model("store", "Store")
-Product = get_model('catalogue', 'Product')
+Product = get_model("catalogue", "Product")
 StockRecord = get_model("store", "StockRecord")
 
 Order = get_model("order", "Order")
@@ -35,7 +35,7 @@ class OrderSerializer(serializers.Serializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'number', 'store_id', 'created_at', 'extras', 'body')
+        fields = ("id", "number", "store_id", "created_at", "extras", "body")
 
     def create(self, validated_data):
 
@@ -57,11 +57,14 @@ class OrderSerializer(serializers.Serializer):
         if customer_phone:
             user = User.objects.filter(username=customer_phone).first()
 
+        store = Store.objects.get(evotor_id=store_id)
+
         order = Order.objects.create(
             number=(900000 + number),
             evotor_id=evotor_id,
             site="Эвотор",
             user=user,
+            store=store,
             total=result_sum,
             shipping_method="Самовывоз",
             status=settings.OSCAR_FINAL_ORDER_STATUS,
@@ -76,11 +79,14 @@ class OrderSerializer(serializers.Serializer):
                 message=str(extras),
             )
 
-        # Lines creation
-        store = Store.objects.get(evotor_id=store_id)
         for position in positions:
-            product, _ = Product.objects.get_or_create(evotor_id=position["product_id"], defaults={"name": "Не созданый продукт"})
-            stockrecord = product.stockrecords.filter(store__evotor_id=store_id, is_public=True)[0]
+            product, _ = Product.objects.get_or_create(
+                evotor_id=position["product_id"],
+                defaults={"name": "Не созданый продукт"},
+            )
+            stockrecord = product.stockrecords.filter(
+                store__evotor_id=store_id, is_public=True
+            )[0]
             line = Line.objects.create(
                 order=order,
                 store=store,
@@ -105,13 +111,13 @@ class OrderSerializer(serializers.Serializer):
                 tax_code=line.tax_code,
             )
 
-        # Payments creation
         for payment in payments:
             source_type, _ = SourceType.objects.get_or_create(name=payment["type"])
+            amount_debited = sum(D(part["part_sum"]) - D(part["change"]) for part in payment["parts"])
             source = Source.objects.create(
                 order=order,
                 source_type=source_type,
-                amount_debited=D(payment["sum"]) - D(payment["parts"]["change"]),
+                amount_debited=amount_debited,
                 reference=payment["app_info"]["name"],
                 refundable=False,
                 paid=True,
@@ -129,7 +135,9 @@ class OrderSerializer(serializers.Serializer):
             )
 
         if discounts:
-            frequency_base = OrderDiscount.objects.filter(message="Скидка сотрудником").count()
+            frequency_base = OrderDiscount.objects.filter(
+                message="Скидка сотрудником"
+            ).count()
             for i, discount in enumerate(discounts, start=1):
                 OrderDiscount.objects.create(
                     order=order,
