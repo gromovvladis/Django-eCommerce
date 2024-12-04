@@ -3,13 +3,13 @@ var i = 0
 
 document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
 
-    var products_title = products_titles[i];
+    var products_name = products_names[i];
     var products_sum = products_sums[i];
     var products_quantity = products_quantities[i];
     var orders_data = orders_datas[i];
     i++;
 
-    if (products_title) {
+    if (products_name) {
 
         const getOrCreateLegendList = (chart, DataID) => {
             console.log(DataID)
@@ -70,12 +70,11 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
             }
         };
 
-
         const PriceCtx = tab.querySelector('[data-id="price-chart"]').getContext('2d');
         const PriceChart = new Chart(PriceCtx, {
             type: 'doughnut',
             data: {
-                labels: products_title,
+                labels: products_name,
                 datasets: [{
                     label: 'Выручка по продуктам',
                     data: products_sum,
@@ -126,7 +125,7 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
             type: 'doughnut',
             // type: 'polarArea',
             data: {
-                labels: products_title,
+                labels: products_name,
                 datasets: [{
                     label: 'Самые продаваемые товары',
                     data: products_quantity,
@@ -159,7 +158,7 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
                     tooltip: {
                         callbacks: {
                             label: function(tooltipItem) {
-                                return tooltipItem.label + ': ' + tooltipItem.raw.toFixed(2) + " шт.";
+                                return tooltipItem.label + ': ' + tooltipItem.raw.toFixed(0) + " шт.";
                             }
                         }
                     },

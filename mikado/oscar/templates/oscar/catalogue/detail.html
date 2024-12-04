@@ -12,23 +12,23 @@
 
 {% block title %}{{ product.get_name }} | {{ block.super }}{% endblock %}
 {% block wrapper_class %}menu fill-width fill-height grow-1 pb-2 px-sm-2 pt-sm-2 pb-sm-4{% endblock %}
-{% block app_class %}v-app---dish{% endblock %}
-{% block nav_class %}v-app__nav--dish{% endblock %}
+{% block app_class %}app---dish{% endblock %}
+{% block nav_class %}app__nav--dish{% endblock %}
 
 {% block breadcrumbs %}
     {% cache 1800 product_bread product.id %}
-        <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
+        <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3">
             <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
                 {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
             </button>
-            <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+            <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
             {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
             {% with category=product.get_categories.first %}
                 {% for c in category.get_ancestors_and_self %}
-                    <a href="{{ c.get_absolute_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">{{ c.name }}</a>
+                    <a href="{{ c.get_absolute_url }}" data-id="back-bread-btn" class="bread__link router-link-active">{{ c.name }}</a>
                     {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
                 {% endfor %}
-                <span class="v-bread__link" aria-current="page">{{ product.get_name }}</span>
+                <span class="bread__link" aria-current="page">{{ product.get_name }}</span>
             {% endwith %}
         </div>
     {% endcache %}
@@ -44,13 +44,13 @@
                     <div class="dish-page__image pos-relative">
                         {% currency_symbol session.price.currency as currency_symbol %}
                         {% comment %}------------- изображения товара ---------------{% endcomment %}
-                        <div class="v-carousel__wrap fill-width fill-height pos-relative">
-                            <div class="v-carousel">
-                                <div class="v-carousel__inner d-flex">
-                                    <div class="v-carousel__item fill-width fill-height">
-                                        <div class="v-dish-image fill-width pos-relative">
-                                            <div class="v-image">
-                                                <div class="v-image__inner v-image__inner--detail">
+                        <div class="carousel__wrap fill-width fill-height pos-relative">
+                            <div class="carousel">
+                                <div class="carousel__inner d-flex">
+                                    <div class="carousel__item fill-width fill-height">
+                                        <div class="dish-image fill-width pos-relative">
+                                            <div class="image">
+                                                <div class="image__inner image__inner--detail">
                                                     {% block product_gallery %}
                                                         {% include "oscar/catalogue/partials/gallery.html" %}
                                                     {% endblock %}
@@ -70,13 +70,13 @@
                             <header class="dish-page__header d-flex shrink align-end align-md-end pt-sm-1">
                                 <h1>{{ product.get_name }}</h1>
                                 <meta itemprop="description" content="{{ product.get_meta_description }}"/>
-                                <div role="separator" class="v-spacer"></div>
+                                <div role="separator" class="spacer"></div>
                                 {% if user.is_staff %}
                                     <a href="{% url 'dashboard:catalogue-product' pk=product.id %}" class="float-right d-none d-md-block">
                                         {% icon file_name='interface/edit' size=22 stroke="#111"%}
                                     </a>
                                 {% endif %}
-                                <span class="v-weight ml-2 shrink">
+                                <span class="weight ml-2 shrink">
                                     {% if product.has_weight %}
                                         <span>{{ product.weight }}</span>
                                         <span>г</span>
@@ -140,9 +140,9 @@
                             {% if session.availability.is_available_to_buy %}
                                 <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/Offer" class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
                                     {% with price_exists=session.price.money %}
-                                        <button id="add_to_cart_btn" type="submit" form="add_to_basket_form" data-id="dish-submit-button" class="v-button fill-width v-button--main justify-center shrink" {% if not price_exists %}disabled{% endif %}>
-                                            <span class="v-button__wrapper">
-                                                <span class="v-button__value {% if not price_exists %}d-none{% endif %}" data-id="dish-price-value">В корзину за 
+                                        <button id="add_to_cart_btn" type="submit" form="add_to_basket_form" data-id="dish-submit-button" class="button fill-width button--main justify-center shrink" {% if not price_exists %}disabled{% endif %}>
+                                            <span class="button__wrapper">
+                                                <span class="button__value {% if not price_exists %}d-none{% endif %}" data-id="dish-price-value">В корзину за 
                                                     <span data-id="dish-price-button">
                                                         {% if price_exists %}
                                                             {{ session.price.money|formate_price }}
@@ -156,7 +156,7 @@
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="add_to_cart_line_mark mr-1">
                                                     <path class="add_to_cart_line" d="M4 12.6111L8.92308 17.5L20 6.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                                 </svg>      
-                                                <span class="v-button__loading">Добавлено</span>
+                                                <span class="button__loading">Добавлено</span>
                                             </span>
                                         </button>
                                     {% endwith %}
@@ -164,8 +164,8 @@
                                 </div>    
                             {% else %}
                                 <div class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
-                                    <span class="v-button fill-width v-button--main v-button--main--disabled justify-center shrink">
-                                        <span class="v-button__wrapper">
+                                    <span class="button fill-width button--main button--main--disabled justify-center shrink">
+                                        <span class="button__wrapper">
                                             Временно недоступно
                                         </span>
                                     </span>
@@ -180,9 +180,9 @@
                 {% if recommended_products %}
                     <div class="dish-page__related mt-2 mb-1 px-2 px-sm-0 mt-md-4">
                         <h2>C этим товаром часто покупают</h2>
-                        <div class="v-dishes mt-2 row">
+                        <div class="dishes mt-2 row">
                             {% for product in recommended_products %}
-                                <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-3 col-lg-3">
+                                <div class="dishes--item col col-6 col-xs-6 col-sm-4 col-md-3 col-lg-3">
                                     {% render_product product %}
                                 </div>
                             {% endfor %}

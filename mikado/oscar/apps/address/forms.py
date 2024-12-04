@@ -19,19 +19,19 @@ class UserAddressForm(forms.ModelForm):
 
         widgets = {
             'line1': forms.TextInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__padding',
+                'class' : 'input d-flex align-center input__label-active input__padding',
             }),
             'line2': forms.TextInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__padding',
+                'class' : 'input d-flex align-center input__label-active input__padding',
             }),
             'line3': forms.TextInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__padding',
+                'class' : 'input d-flex align-center input__label-active input__padding',
             }),
             'line4': forms.TextInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__padding',
+                'class' : 'input d-flex align-center input__label-active input__padding',
             }),
             'notes': forms.TextInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__label-active v-input__padding',
+                'class' : 'input d-flex align-center input__label-active input__padding',
             }),
             'coords_long': forms.HiddenInput(),
             'coords_lat': forms.HiddenInput(),

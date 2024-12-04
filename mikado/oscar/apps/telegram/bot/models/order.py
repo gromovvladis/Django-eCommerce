@@ -21,7 +21,7 @@ async def get_period(period: str):
 
 @sync_to_async
 def get_orders(start_period: timezone = None, only_active: bool = False):
-    orders = Order.objects.all().select_related("basket", "user").prefetch_related("sources", "lines")
+    orders = Order.objects.all().select_related("basket", "store", "user").prefetch_related("sources", "lines")
 
     if start_period:
         orders = orders.filter(date_placed__gte=start_period)
@@ -41,18 +41,19 @@ def orders_list(orders):
         for order in orders:
             order_lines = [
                 f"{line.product.get_name()} ({line.quantity})"
-                for line in order.basket.lines.all()
+                for line in order.lines.all()
             ]
             
             source = order.sources.last()
             source_name = source.source_type.name if source else "-----"
+            order_user = order.user if order.user else "-----"
             
             order_msg = (
                 f"<b><a href='{order.get_staff_url()}'>Заказ №{order.number}</a></b>\n"
                 f"{', '.join(order_lines)}\n"
                 f"Статус: {order.status}\n"
                 f"Время заказа: {order.order_time.strftime('%d.%m.%Y %H:%M')}\n"
-                f"Пользователь: {order.user}\n"
+                f"Пользователь: {order_user}\n"
                 f"Оплата: {source_name}\n"
                 f"Доставка: {order.shipping_method}\n"
                 f"Сумма: {order.total} ₽"

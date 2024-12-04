@@ -1302,13 +1302,15 @@ class AttributeOptionGroupDeleteView(PopUpWindowDeleteMixin, generic.DeleteView)
 
         ctx["title"] = "Удалить группу атрибутов '%s'" % self.object.name
 
-        product_attribute_count = self.object.product_attributes.count()
+        product_attributes = self.object.product_attributes
+        product_attribute_count = product_attributes.count()
         if product_attribute_count > 0:
+            product_attribute_names = product_attributes.all().values_list('product__name', flat=True)
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             messages.error(
-                self.request, "%i Атрибуты товара по-прежнему назначены этой группе атрибутов."
-                % product_attribute_count,
+                self.request, "%i aтрибут(а) назначены товарам. %s"
+                % (product_attribute_count, ", ".join(product_attribute_names)),
             )
 
         ctx["http_get_params"] = self.request.GET

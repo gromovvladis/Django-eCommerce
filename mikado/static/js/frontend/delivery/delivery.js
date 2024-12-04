@@ -73,7 +73,7 @@ if (line1Container){
         
             _readyToEvent: function (parentDomContainer) {
                 // Создаем HTML-элемент с текстом.
-                this._$content = document.querySelector('#map_address')?.appendChild(Object.assign(document.createElement('div'), { className: 'v-delivery-map--address' }));
+                this._$content = document.querySelector('#map_address')?.appendChild(Object.assign(document.createElement('div'), { className: 'delivery-map--address' }));
             },
         
             _addressSelected: function (address) {
@@ -292,7 +292,6 @@ if (line1Container){
                 fetch(url_delivery_zones)
                 .then(response => response.json())
                 .then(json => {
-                    console.log(json);
                     ZonesInit(json);
                     if (address) {
                         ymaps.geocode(address, { results: 1, boundedBy: DELIVERYBOUNDS })
@@ -316,7 +315,7 @@ if (line1Container){
                         options: {
                             // noPlacemark: true,
                             layout: ymaps.templateLayoutFactory.createClass(
-                                '<button type="button" data-id="delivery-map-close-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg heigh="24px" width="24px" stroke="#000" viewBox="1 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
+                                '<button type="button" data-id="delivery-map-close-btn" class="button button--small justify-center shrink"><span class="button__wrapper"><span class="d-flex"><svg heigh="24px" width="24px" stroke="#000" viewBox="1 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
                             ),
                             float: 'left',
                             position: {
@@ -351,7 +350,7 @@ if (line1Container){
                         options: {
                             // noPlacemark: true,
                             layout: ymaps.templateLayoutFactory.createClass(
-                                '<button type="button" data-id="delivery-map-clean-btn" class="v-button v-button--small justify-center shrink"><span class="v-button__wrapper"><span class="d-flex"><svg width="20" height="20" stroke="#b60808" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10L7.70141 19.3578C7.87432 20.3088 8.70258 21 9.66915 21H14.3308C15.2974 21 16.1257 20.3087 16.2986 19.3578L18 10" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
+                                '<button type="button" data-id="delivery-map-clean-btn" class="button button--small justify-center shrink"><span class="button__wrapper"><span class="d-flex"><svg width="20" height="20" stroke="#b60808" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10L7.70141 19.3578C7.87432 20.3088 8.70258 21 9.66915 21H14.3308C15.2974 21 16.1257 20.3087 16.2986 19.3578L18 10" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>'
                             ),
                             float: 'right',
                             position: {
@@ -371,8 +370,8 @@ if (line1Container){
                 
                 //кнопки зума
                 ZoomLayout = ymaps.templateLayoutFactory.createClass(
-                    '<div id="zoom-in" class="v-map-custom-controls--zoom-in"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12H18M12 6V18" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
-                    '<div id="zoom-out" class="v-map-custom-controls--zoom-out"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12L18 12" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+                    '<div id="zoom-in" class="map-custom-controls--zoom-in"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12H18M12 6V18" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+                    '<div id="zoom-out" class="map-custom-controls--zoom-out"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12L18 12" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
                     ,
                     {
     
@@ -426,7 +425,7 @@ if (line1Container){
                 var geolocationControl = new ymaps.control.GeolocationControl({
                     options: {
                         layout: ymaps.templateLayoutFactory.createClass(
-                            '<div id="geolocation" class="v-map-custom-controls--geolocation"><svg viewBox="0 0 26 26" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.925 1.78443C21.5328 1.18151 23.1029 2.75156 22.5 4.35933L16.0722 21.5C15.3574 23.4061 12.5838 23.1501 12.23 21.1453L10.8664 13.418L3.1391 12.0544C1.13427 11.7006 0.878261 8.92697 2.78443 8.21216L19.925 1.78443ZM20.6273 3.65708L3.48668 10.0848L11.2139 11.4485C12.0417 11.5945 12.6898 12.2426 12.8359 13.0704L14.1996 20.7977L20.6273 3.65708Z" fill="#0a834f"/></svg></div>'
+                            '<div id="geolocation" class="map-custom-controls--geolocation"><svg viewBox="0 0 26 26" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.925 1.78443C21.5328 1.18151 23.1029 2.75156 22.5 4.35933L16.0722 21.5C15.3574 23.4061 12.5838 23.1501 12.23 21.1453L10.8664 13.418L3.1391 12.0544C1.13427 11.7006 0.878261 8.92697 2.78443 8.21216L19.925 1.78443ZM20.6273 3.65708L3.48668 10.0848L11.2139 11.4485C12.0417 11.5945 12.6898 12.2426 12.8359 13.0704L14.1996 20.7977L20.6273 3.65708Z" fill="#0a834f"/></svg></div>'
                         ),
                         position: {
                             bottom: offsetBtns + "px",
@@ -450,7 +449,7 @@ if (line1Container){
                 var controlsPane = new ymaps.pane.StaticPane(map, {zIndex: 420});
                 map.panes.append('customControls', controlsPane); 
                 var placesPane = map.panes.get('controls').getElement();
-                placesPane.classList.add('v-map-custom-controls', 'd-flex', 'flex-column', 'align-center', 'justify-center');
+                placesPane.classList.add('map-custom-controls', 'd-flex', 'flex-column', 'align-center', 'justify-center');
     
                 map.controls.add(zoomControl);
                 map.controls.add(geolocationControl);

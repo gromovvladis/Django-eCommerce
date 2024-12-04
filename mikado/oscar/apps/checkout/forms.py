@@ -8,7 +8,7 @@ User = get_user_model()
 
 
 class CheckoutVoucherForm(forms.Form):
-    code = forms.CharField(max_length=128, label="Промокод", widget=forms.TextInput(attrs={'class' : 'v-input'}))
+    code = forms.CharField(max_length=128, label="Промокод", widget=forms.TextInput(attrs={'class' : 'input'}))
 
     def clean_code(self):
         return self.cleaned_data["code"].strip().upper()
@@ -28,7 +28,7 @@ class CheckoutForm(forms.ModelForm, forms.Form):
     order_note = forms.CharField(
         label="Комментарий к заказу", 
         widget=forms.Textarea(attrs = {
-                'class' : 'v-input v-text-area d-flex align-center v-input__padding',
+                'class' : 'input text-area d-flex align-center input__padding',
                 'rows': 2,
         }), 
         required=False
@@ -37,7 +37,7 @@ class CheckoutForm(forms.ModelForm, forms.Form):
     email_or_change = forms.CharField(
         label="Эмаил для чеков или поле для сдачи", 
         widget=forms.TextInput(attrs = {
-                'class' : 'v-input v-text-area d-flex align-center v-input__padding',
+                'class' : 'input text-area d-flex align-center input__padding',
         }), 
         required=False
     )
@@ -47,7 +47,7 @@ class CheckoutForm(forms.ModelForm, forms.Form):
         choices=settings.WEBSHOP_PAYMENT_CHOICES,
         initial=settings.WEBSHOP_PAYMENT_CHOICES[0],
         widget=forms.Select(attrs = {
-                'class' : 'fill-width v-button--grey justify-space-between shrink',
+                'class' : 'fill-width button--grey justify-space-between shrink',
         }),
     )
 
@@ -72,26 +72,26 @@ class CheckoutForm(forms.ModelForm, forms.Form):
         
         widgets = {
             'line1': forms.TextInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__padding',
+                'class' : 'input d-flex align-center input__padding',
                 'placeholder': "Введите адрес доставки"
             }),
             'line2': forms.NumberInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__padding',
+                'class' : 'input d-flex align-center input__padding',
                 'min': 1,
                 'max': 1000,
             }),
             'line3': forms.NumberInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__padding',
+                'class' : 'input d-flex align-center input__padding',
                 'min': 1,
                 'max': 100,
             }),
             'line4': forms.NumberInput(attrs={
-                'class' : 'v-input d-flex align-center v-input__padding',
+                'class' : 'input d-flex align-center input__padding',
                 'min': 1,
                 'max': 100,
             }),
             'notes': forms.Textarea(attrs={
-                'class' : 'v-input d-flex align-center v-input__padding',
+                'class' : 'input d-flex align-center input__padding',
                 'rows': 2,
             }),
             'coords_long': forms.HiddenInput(),

@@ -16,27 +16,22 @@
 
 {% block layout %}
     {% selected_store request as store %}
-    {% comment %}------------- header + контент + footer (начало) ---------------{% endcomment %}
-    <div id="app" class="v-app {% block app_class %}{% endblock %}"> 
-        {% comment %}------------- начало хедера ---------------{% endcomment %}
+    <div id="app" class="app {% block app_class %}{% endblock %}"> 
         {% block main_header %}
-            <header class="v-app__header container py-3">
-                <div class="v-app__header-wrapper d-flex align-center py-0 fill-height justify-space-between">
+            <header class="app__header container py-3">
+                <div class="app__header-wrapper d-flex align-center py-0 fill-height justify-space-between">
                     {% include 'oscar/includes/header.html' %}
                 </div>
             </header>
-            <nav class="v-app__nav {% block nav_class %}{% endblock %}"> 
-                <div class="v-app-nav d-flex align-center py-0 fill-height">
-                                        
-                    {% comment %} ------------- кнопка назад --------------- {% endcomment %}
-                    <button onclick="getBack(); return false" data-id="back-main-btn" class="v-button v-app-nav__back v-button--small justify-center mx-2 shrink" aria-label="Назад">
-                        <span class="v-button__wrapper d-flex">
+            <nav class="app__nav {% block nav_class %}{% endblock %}"> 
+                <div class="app-nav d-flex align-center py-0 fill-height">
+                    <button onclick="getBack(); return false" data-id="back-main-btn" class="button app-nav__back button--small justify-center mx-2 shrink" aria-label="Назад">
+                        <span class="button__wrapper d-flex">
                             {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
                         </span>
                     </button>
-
                     <div class="cats_header fill-height fill-width">
-                        <div class="v-app-nav__title d-flex d-sm-none text-center d-flex">
+                        <div class="app-nav__title d-flex d-sm-none text-center d-flex">
                             {% block nav_title %}{% endblock %}
                         </div>
                         {% cache 3600 root_category category.pk %}
@@ -44,7 +39,6 @@
                                 {% root_categories as root_categories %}
                                 {% if root_categories %}
                                     {% for root_category in root_categories %}
-                                    {% comment %}------------- категория item ---------------{% endcomment %} 
                                     <li>
                                         <a class="cat_item {% if root_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ root_category.url }}" data-id="categories-tabs-item-hits">
                                         {{ root_category.name }}
@@ -53,65 +47,48 @@
                                     {% endfor %}
                                 {% endif %}
                             </ul>
-                            {% comment %} ------------- поиск иконка (mobile) --------------- {% endcomment %}
                             <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
-                                class="v-button v-app-nav__button--search v-button--small justify-center mr-sm-0 mr-2 shrink" aria-label="Поиск">
-                                <span class="v-button__wrapper d-flex">
+                                class="button app-nav__button--search button--small justify-center mr-sm-0 mr-2 shrink" aria-label="Поиск">
+                                <span class="button__wrapper d-flex">
                                     {% icon file_name='header/search' size=20 fill='#111'%}
                                 </span>
                             </a>
                         {% endcache %}
                     </div>
-                    {% comment %} ------------- кнопка корзина --------------- {% endcomment %}
-                    <a data-id="nav-basket-btn" class="v-app-nav__button d-none d-sm-flex ml-3" href='{% url 'basket:summary' %}'>
+                    <a data-id="nav-basket-btn" class="app-nav__button d-none d-sm-flex ml-3" href='{% url 'basket:summary' %}'>
                         <div class="d-flex aling-center mr-1">
                             {% icon file_name='header/cart' size=17 stroke='#fff'%}
                         </div>
                         Корзина
                         <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
                     </a>
-                    <div class="v-app-nav__title v-app-nav__title--center d-flex d-sm-none text-center">
+                    <div class="app-nav__title app-nav__title--center d-flex d-sm-none text-center">
                         {% block nav_title_center %}{% endblock %}
                     </div>
-                    <div role="separator" class="v-spacer"></div>
-                    <button type="button" data-id="modal-open-close" class="v-button v-button--small v-button--empty-cart ml-2 justify-center shrink mr-2" aria-label="Очистить корзину">
-                        <span class="v-button__wrapper d-flex">
+                    <div role="separator" class="spacer"></div>
+                    <button type="button" data-id="modal-open-close" class="button button--small button--empty-cart ml-2 justify-center shrink mr-2" aria-label="Очистить корзину">
+                        <span class="button__wrapper d-flex">
                             {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
                         </span>
                     </button>
                 </div> 
             </nav>
         {% endblock main_header %}
-
-        {% comment %}------------- мобильная версия нижняя полоска с иконками меню, корзина и тд. ---------------{% endcomment %}
         {% block app_mobile_sticker %}
             {% include 'oscar/includes/app_mobile_sticker.html' %}
         {% endblock app_mobile_sticker %}
-
-        {% comment %}------------- навигация + основной контент ---------------{% endcomment %}
-        <div class="v-app__wrapper">
-            <main class="v-app__content">
-
-                {% comment %} карусель {% endcomment %}
+        <div class="app__wrapper">
+            <main class="app__content">
                 {% block carousel %}{% endblock %}
-
-                {% comment %} категории + контент {% endcomment %}
                 <div class="d-flex align-start pd-0 fill-height container">
                     <div class="{% block wrapper_class %}{% endblock %}">
-
                         {% include "oscar/partials/alert_messages.html" %}
-
                         {% block breadcrumbs %}{% endblock %}
-
                         {% block sticky_address %}{% endblock %}
-                
                         {% block content %}{% endblock %}
-    
                     </div>
                 </div>
             </main>
-
-            {% comment %}------------- footer ---------------{% endcomment %}
             {% cache 3600 footer store.id %}
                 {% block main_footer %}
                     {% include 'oscar/includes/footer.html' %}
@@ -119,15 +96,12 @@
             {% endcache %}
         </div>
     </div>
-
     {% block auth %}
         <div id="modal" class="d-none"></div>
     {% endblock %}
-
     {% block cookie %}
         <div data-id="cookie"></div>
     {% endblock %}
-
 {% endblock %}
 
 {% block templatescripts %}

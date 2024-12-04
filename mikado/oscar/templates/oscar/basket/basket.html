@@ -4,24 +4,24 @@
 {% load static %}
 
 {% block wrapper_class %}fill-width fill-height pd-sm-2 pb-sm-4{% endblock %}
-{% block app_class %}v-app---cart{% endblock %}
-{% block nav_class %}v-app__nav--cart{% endblock %}
+{% block app_class %}app---cart{% endblock %}
+{% block nav_class %}app__nav--cart{% endblock %}
 {% block title %}Корзина | {{ block.super }}{% endblock %}
 {% block nav_title %}Корзина{% endblock %}
 {% block nav_title_center %}Корзина{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
+    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
         {% for category in category.get_ancestors %}
             {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-            <a href="{{ category.get_absolute_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">{{ category.name }}</a>
+            <a href="{{ category.get_absolute_url }}" data-id="back-bread-btn" class="bread__link router-link-active">{{ category.name }}</a>
         {% endfor %}
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <span class="v-bread__link" aria-current="page">Корзина</span>
+        <span class="bread__link" aria-current="page">Корзина</span>
     </div>
 {% endblock breadcrumbs %}
 

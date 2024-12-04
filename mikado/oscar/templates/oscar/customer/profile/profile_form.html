@@ -8,15 +8,15 @@
 {% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Личный кабинет</a>
+        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Личный кабинет</a>
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
+        <span class="bread__link" aria-current="page">{{ page_title }}</span>
     </div>
 {% endblock %}
 
@@ -40,10 +40,10 @@
                 {% endfor %}
             {% endblock %}
             
-            <div data-id="input-wrapper" class="v-input d-flex align-center{% if request.user.name %} v-input__label-active{% endif %} v-input__padding">
-                <div class="v-input__wrapper">
-                    <div class="v-input__label">Имя</div>
-                    <div class="v-input__control d-flex align-center">
+            <div data-id="input-wrapper" class="input d-flex align-center{% if request.user.name %} input__label-active{% endif %} input__padding">
+                <div class="input__wrapper">
+                    <div class="input__label">Имя</div>
+                    <div class="input__control d-flex align-center">
                         <label>
                             {% include 'oscar/partials/render_field.html' with field=form.name data_id="profile-input" %}
                         </label>
@@ -54,10 +54,10 @@
                 <span class="error-block mt-2 info-message">{{ form.name.errors }}</span>
             {% endif %}
 
-            <div class="v-input d-flex align-center mt-2 v-input__label-active v-input__padding readonly">
-                <div class="v-input__wrapper">
-                    <div class="v-input__label">Телефон</div>
-                    <div class="v-input__control d-flex align-center">
+            <div class="input d-flex align-center mt-2 input__label-active input__padding readonly">
+                <div class="input__wrapper">
+                    <div class="input__label">Телефон</div>
+                    <div class="input__control d-flex align-center">
                         <label>
                             <input value="{{ request.user.username }}" readonly data-id="profile-phone-input" type="text">
                         </label>
@@ -65,10 +65,10 @@
                 </div>
             </div>
 
-            <div data-id="input-wrapper"  class="v-input d-flex align-center{% if request.user.email %} v-input__label-active{% endif %} mt-2 v-input__padding">
-                <div class="v-input__wrapper">
-                    <div class="v-input__label">Почта</div>
-                    <div class="v-input__control d-flex align-center">
+            <div data-id="input-wrapper"  class="input d-flex align-center{% if request.user.email %} input__label-active{% endif %} mt-2 input__padding">
+                <div class="input__wrapper">
+                    <div class="input__label">Почта</div>
+                    <div class="input__control d-flex align-center">
                         <label>
                             {% include 'oscar/partials/render_field.html' with field=form.email data_id="profile-input" %}
                         </label>
@@ -81,9 +81,9 @@
             
             <div class="profile-personal__submit pos-relative d-flex justify-end pt-4 pt-sm-0 px-sm-0 mt-sm-3">
                 <button type="submit" data-id="profile-personal-submit-button"
-                    class="v-button fill-width v-button--main justify-center shrink">
-                    <span class="v-button__wrapper">
-                        <span class="v-button__value"> Сохранить настройки </span>
+                    class="button fill-width button--main justify-center shrink">
+                    <span class="button__wrapper">
+                        <span class="button__value"> Сохранить настройки </span>
                     </span>
                 </button>
             </div> 

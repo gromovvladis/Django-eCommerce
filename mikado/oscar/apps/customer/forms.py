@@ -234,10 +234,10 @@ class OrderSearchForm(forms.Form):
             date_from = None
             date_to = None
 
-            if len(date_range) > 0:
+            if len(date_range) > 0 and date_range[0]:
                 date_from = datetime.datetime.strptime(date_range[0], "%d.%m.%Y").date()
 
-            if len(date_range) > 1:
+            if len(date_range) > 1 and date_range[1]:
                 date_to = datetime.datetime.strptime(date_range[1], "%d.%m.%Y").date()
 
             order_number = self.cleaned_data["order_number"]
@@ -247,30 +247,30 @@ class OrderSearchForm(forms.Form):
         if date_from and date_to:
             if order_number:
                 desc = (
-                    "Заказы, размещенные между %(date_from)s и "
+                    "Заказы с %(date_from)s до "
                     "%(date_to)s и номером заказа содержащий: "
                     "%(order_number)s"
                 )
             else:
-                desc = "Заказы размещены между %(date_from)s и %(date_to)s"
+                desc = "Заказы c %(date_from)s до %(date_to)s"
         elif date_from:
             if order_number:
                 desc = (
-                    "Заказы размещены с %(date_from)s и "
+                    "Заказы с %(date_from)s и "
                     "номер заказа, содержащий %(order_number)s"
                 )
             else:
-                desc = "Заказы размещены с %(date_from)s"
+                desc = "Заказы с %(date_from)s"
         elif date_to:
             if order_number:
                 desc = (
-                    "Заказы размещены до %(date_to)s и "
+                    "Заказы до %(date_to)s и "
                     "номер заказа, содержащий %(order_number)s"
                 )
             else:
-                desc = "Заказы размещены до %(date_to)s"
+                desc = "Заказы до %(date_to)s"
         elif order_number:
-            desc = "Заказы с номером заказа, содержащий номер %(order_number)s"
+            desc = "Заказы с номером, содержащий %(order_number)s"
         else:
             return None
         params = {
@@ -285,10 +285,10 @@ class OrderSearchForm(forms.Form):
         date_from = None
         date_to = None
 
-        if len(date_range) > 0:
+        if len(date_range) > 0 and date_range[0]:
             date_from = datetime.datetime.strptime(date_range[0], "%d.%m.%Y").date()
 
-        if len(date_range) > 1:
+        if len(date_range) > 1 and date_range[1]:
             date_to = datetime.datetime.strptime(date_range[1], "%d.%m.%Y").date()
 
         order_number = self.cleaned_data["order_number"]
@@ -300,253 +300,3 @@ class OrderSearchForm(forms.Form):
         if order_number:
             kwargs["number__contains"] = order_number
         return kwargs
-
-
-
-
-
-
-
-
-
-# class PasswordResetForm(auth_forms.PasswordResetForm):
-#     """
-#     This form takes the same structure as its parent from :py:mod:`django.contrib.auth`
-#     """
-
-#     def save(self, *args, domain_override=None, request=None, **kwargs):
-#         """
-#         Generates a one-use only link for resetting password and sends to the
-#         user.
-#         """
-#         site = get_current_site(request)
-#         if domain_override is not None:
-#             site.domain = site.name = domain_override
-#         for user in self.get_users(self.cleaned_data["email"]):
-#             self.send_password_reset_email(site, user, request)
-
-#     def send_password_reset_email(self, site, user, request=None):
-#         extra_context = {
-#             "user": user,
-#             "site": site,
-#             "reset_url": get_password_reset_url(user),
-#             "request": request,
-#         }
-#         CustomerDispatcher().send_password_reset_email_for_user(user, extra_context)
-
-
-
-
-# def generate_username():
-#     letters = string.ascii_letters
-#     allowed_chars = letters + string.digits + "_"
-#     uname = get_random_string(length=10, allowed_chars=allowed_chars)
-#     try:
-#         User.objects.get(username=uname)
-#         return generate_username()
-#     except User.DoesNotExist:
-#         return uname
-
-
-# class PhoneSmsForm(forms.Form):
-
-#     username = forms.CharField(
-#         label="Телефон",
-#         required=True,
-#         max_length=12,
-#         validators=[validators.RegexValidator(regex = r"^\+?1?\d{8,15}$")]
-#     )
-
-#     error_messages = {
-#         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
-#         "inactive": "Этот аккаунт не активен.",
-#     }
-
-
-#     def __init__(self, host, *args, **kwargs):
-#         self.host = host
-#         self.request = kwargs.pop('request')
-#         self.user_cache = None
-#         super().__init__(*args, **kwargs)
-
-
-#     def get_phone(self):
-#         phone_number = self.cleaned_data.get("username")
-#         return phone_number
-
-
-#     def get_invalid_login_error(self):
-#         messages.error(self.request, 'Invalid code')
-
-
-#     def clean_redirect_url(self):
-#         url = self.cleaned_data["redirect_url"].strip()
-#         if url and url_has_allowed_host_and_scheme(url, self.host):
-#             return url
-
-
-
-
-# class ConfirmPasswordForm(forms.Form):
-#     """
-#     Extends the standard django AuthenticationForm, to support 75 character
-#     usernames. 75 character usernames are needed to support the EmailOrUsername
-#     authentication backend.
-#     """
-
-#     password = forms.CharField(label="Пароль", widget=forms.PasswordInput)
-
-#     def __init__(self, user, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.user = user
-
-#     def clean_password(self):
-#         password = self.cleaned_data["password"]
-#         if not self.user.check_password(password):
-#             raise forms.ValidationError("Введенный пароль недействителен!")
-#         return password
-
-
-
-
-# Profile = get_profile_class()
-# if Profile:
-
-#     class UserAndProfileForm(forms.ModelForm):
-#         def __init__(self, user, *args, **kwargs):
-#             try:
-#                 instance = Profile.objects.get(user=user)
-#             except Profile.DoesNotExist:
-#                 # User has no profile, try a blank one
-#                 instance = Profile(user=user)
-#             kwargs["instance"] = instance
-
-#             super().__init__(*args, **kwargs)
-
-#             # Get profile field names to help with ordering later
-#             profile_field_names = list(self.fields.keys())
-
-#             # Get user field names (we look for core user fields first)
-#             core_field_names = set([f.name for f in User._meta.fields])
-#             user_field_names = ["email"]
-#             for field_name in ("first_name", "last_name"):
-#                 if field_name in core_field_names:
-#                     user_field_names.append(field_name)
-#             user_field_names.extend(User._meta.additional_fields)
-
-#             # Store user fields so we know what to save later
-#             self.user_field_names = user_field_names
-
-#             # Add additional user form fields
-#             additional_fields = forms.fields_for_model(User, fields=user_field_names)
-#             self.fields.update(additional_fields)
-
-#             # Ensure email is required and initialised correctly
-#             self.fields["email"].required = True
-
-#             # Set initial values
-#             for field_name in user_field_names:
-#                 self.fields[field_name].initial = getattr(user, field_name)
-
-#             # Ensure order of fields is email, user fields then profile fields
-#             self.field_order = user_field_names + profile_field_names
-#             self.order_fields(self.field_order)
-
-#         class Meta:
-#             model = Profile
-#             # pylint: disable=modelform-uses-exclude
-#             exclude = ("user",)
-
-#         def clean_email(self):
-#             email = normalise_email(self.cleaned_data["email"])
-
-#             users_with_email = User._default_manager.filter(
-#                 email__iexact=email
-#             ).exclude(id=self.instance.user.id)
-#             if users_with_email.exists():
-#                 raise ValidationError("Пользователь с таким адресом электронной почты уже существует")
-#             return email
-
-#         def save(self, *args, **kwargs):
-#             user = self.instance.user
-
-#             # Save user also
-#             for field_name in self.user_field_names:
-#                 setattr(user, field_name, self.cleaned_data[field_name])
-#             user.save()
-
-#             return super().save(*args, **kwargs)
-
-#     ProfileForm = UserAndProfileForm
-# else:
-#     ProfileForm = UserForm
-# 
-
-
-
-# class ProductAlertForm(forms.ModelForm):
-#     email = forms.EmailField(
-#         required=True,
-#         label="Отправить уведомление на",
-#         widget=forms.TextInput(attrs={"placeholder": "Введите адрес электронной почты"}),
-#     )
-
-#     def __init__(self, user, product, *args, **kwargs):
-#         self.user = user
-#         self.product = product
-#         super().__init__(*args, **kwargs)
-
-#         # Only show email field to unauthenticated users
-#         if user and user.is_authenticated:
-#             self.fields["email"].widget = forms.HiddenInput()
-#             self.fields["email"].required = False
-
-#     def save(self, commit=True):
-#         alert = super().save(commit=False)
-#         if self.user.is_authenticated:
-#             alert.user = self.user
-#         alert.product = self.product
-#         if commit:
-#             alert.save()
-#         return alert
-
-#     def clean(self):
-#         cleaned_data = self.cleaned_data
-#         email = cleaned_data.get("email")
-#         if email:
-#             try:
-#                 ProductAlert.objects.get(
-#                     product=self.product,
-#                     email__iexact=email,
-#                     status=ProductAlert.ACTIVE,
-#                 )
-#             except ProductAlert.DoesNotExist:
-#                 pass
-#             else:
-#                 raise forms.ValidationError("Уже есть активное оповещение о запасах %s" % email)
-
-#             # Check that the email address hasn't got other unconfirmed alerts.
-#             # If they do then we don't want to spam them with more until they
-#             # have confirmed or cancelled the existing alert.
-#             if ProductAlert.objects.filter(
-#                 email__iexact=email, status=ProductAlert.UNCONFIRMED
-#             ).count():
-#                 raise forms.ValidationError(
-#                         "%s было отправлено электронное письмо с подтверждением для другого товара"
-#                         "предупреждение на этом сайте. Пожалуйста, подтвердите или отмените этот запрос"
-#                         "прежде чем подписаться на дополнительные оповещения." % email
-#                 )
-#         elif self.user.is_authenticated:
-#             try:
-#                 ProductAlert.objects.get(
-#                     product=self.product, user=self.user, status=ProductAlert.ACTIVE
-#                 )
-#             except ProductAlert.DoesNotExist:
-#                 pass
-#             else:
-#                 raise forms.ValidationError("У вас уже есть активное оповещение для этого товара.")
-#         return cleaned_data
-
-#     class Meta:
-#         model = ProductAlert
-#         fields = ["email"]

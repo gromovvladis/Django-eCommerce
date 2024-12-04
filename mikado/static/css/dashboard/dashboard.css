@@ -4923,7 +4923,7 @@ input[type=button].btn-block {
   z-index: 1;
   border-style: none;
   background: transparent;
-  text-wrap: wrap;
+  text-wrap: nowrap;
   padding: .5rem;
 }
 
@@ -4941,7 +4941,7 @@ input[type=button].btn-block {
 }
 
 .tabs-button__icon{
-  padding: 1rem .75rem;
+  padding: 1rem .5rem;
 }
 
 .tabs-button__icon span{
@@ -4954,7 +4954,7 @@ input[type=button].btn-block {
 }
 
 .tabs-button.fill .tabs-button__icon.active{
-  min-width: 140px;
+  min-width: 130px;
 }
 
 .no-wrap {
@@ -5516,11 +5516,8 @@ a.badge-dark:focus, a.badge-dark.focus {
 
 .alert {
   position: relative;
-  /* padding: 0.75rem 1.25rem; */
   padding: 1rem 1.25rem;
   margin: 1rem 0;
-  /* margin-bottom: 1rem; */
-  /* margin-top: 1rem; */
   background: #fff;
   border: 1px solid transparent;
   -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .07);
@@ -19436,7 +19433,7 @@ caption {
     will-change: transform;
 } */
 
-.v-carousel__navs button {
+.carousel__navs button {
   display: -webkit-inline-box;
   display: -ms-inline-flexbox;
   display: inline-flex;
@@ -19459,7 +19456,7 @@ caption {
   border: none;
 }
 
-.v-h-nav--button {
+.h-nav--button {
   position: absolute;
   top: 0;
   left: 46%;
@@ -19471,12 +19468,12 @@ caption {
   display: none;
 }
 
-.v-h-nav--button.right {
+.h-nav--button.right {
   left: unset;
   right: 24%;
 }
 
-.v-carousel__navs .right{
+.carousel__navs .right{
   -webkit-transform: rotate(180deg);
   transform: rotate(180deg);
 }
@@ -19694,12 +19691,12 @@ caption {
 
 @media (max-width: 992px) {
 
-  .v-carousel__navs button{
+  .carousel__navs button{
     left: 40%;
   }
 
   
-  .v-h-nav--button.right{
+  .h-nav--button.right{
     right: 20%;
   }
 
@@ -19716,12 +19713,12 @@ caption {
     padding: 10px;
   }
 
-  .v-carousel__navs button{
+  .carousel__navs button{
     left: 10px;
     top: 10px;
   }
 
-  .v-h-nav--button.right{
+  .h-nav--button.right{
     right: 10px;
   }
 
@@ -19763,7 +19760,7 @@ caption {
 }
 
 
-.v-map {
+.map {
   background: #fff url(../../../static/svg/loading/loading.svg) no-repeat 50%;
   background-size: 48px 48px;
   height: 100%;
@@ -19772,25 +19769,25 @@ caption {
 }
 
 
-.v-map__wrapper{
+.map__wrapper{
   height: 100%;
   width: 100%;
 }
 
 
 
-.v-map-custom-controls {
+.map-custom-controls {
   position: absolute;
   top: 57px;
   right: 1rem;
   pointer-events: none
 }
 
-.v-map-custom-controls div+div {
+.map-custom-controls div+div {
   margin-top: .5rem
 }
 
-.v-map-custom-controls div {
+.map-custom-controls div {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -19812,7 +19809,7 @@ caption {
   cursor: pointer
 }
 
-.v-map-custom-controls div svg {
+.map-custom-controls div svg {
   color: var(--color-primary);
   width: 22px;
   height: 22px;
@@ -19820,35 +19817,35 @@ caption {
   transition: .06s
 }
 
-.v-map-custom-controls div:active {
+.map-custom-controls div:active {
   background: #ac090b
 }
 
-.v-map-custom-controls div:active svg {
+.map-custom-controls div:active svg {
   color: #fff
 }
 
 @media screen and (min-width:768px) {
-  .v-map-custom-controls {
+  .map-custom-controls {
       right: 1.5rem
   }
 }
 
 @media screen and (min-width:1024px) {
-  .v-map-custom-controls div:hover {
+  .map-custom-controls div:hover {
       background: var(--color-primary)
   }
 
-  .v-map-custom-controls div:hover svg {
+  .map-custom-controls div:hover svg {
       color: #fff
   }
 
-  .v-map-custom-controls div:active {
+  .map-custom-controls div:active {
       background: #ac090b
   }
 }
 
-.v-delivery-map .v-map-custom-controls {
+.delivery-map .map-custom-controls {
   height: 100vh;
   top: 0
 }
@@ -19856,7 +19853,7 @@ caption {
 
 
 
-.v-delivery-map--map {
+.delivery-map--map {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -19864,7 +19861,7 @@ caption {
   overflow: hidden
 }
 
-.v-delivery-map--label {
+.delivery-map--label {
   width: 100%;
   min-height: 44px;
   background: #fff;
@@ -19876,7 +19873,7 @@ caption {
   z-index: 1
 }
 
-.v-delivery-map--error {
+.delivery-map--error {
   
   font-size: 1rem;
   line-height: 1.25rem;
@@ -19886,7 +19883,7 @@ caption {
   margin-bottom: .25rem
 }
 
-.v-delivery-map--submit {
+.delivery-map--submit {
   width: 100%;
   pointer-events: none;
   bottom: 0;
@@ -19897,26 +19894,26 @@ caption {
   z-index: 6
 }
 
-.v-delivery-map--address {
+.delivery-map--address {
   font-size: .9rem;
   line-height: 1.125rem;
   font-weight: 400
 }
 
-.v-delivery-map--address,
-.v-delivery-map--note {
+.delivery-map--address,
+.delivery-map--note {
   
   font-style: normal;
   color: #000
 }
 
-.v-delivery-map--note {
+.delivery-map--note {
   font-size: 1.125rem;
   line-height: 1.25rem;
   font-weight: 500
 }
 
-.v-delivery-map--info {
+.delivery-map--info {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -19937,18 +19934,18 @@ caption {
 }
 
 
-.v-delivery--clear {
+.delivery--clear {
   border: none;
   background: none;
 }
 
-.v-delivery--clear svg {
+.delivery--clear svg {
   color: var(--color-primary);
   width: 24px;
   height: 24px
 }
 
-.v-delivery--clear:active svg {
+.delivery--clear:active svg {
   color: #ac090b
 }
 

@@ -1,30 +1,7 @@
 
 var searchResult = document.querySelector('#search_result');
 var searchBtn = document.querySelector('#search_clean_btn');
-var searchInput = document.querySelector('[data-id="v-input-search-field"]');
-
-// function getCsrfToken() {
-//     // Extract CSRF token from cookies
-//     // var csrf_token = getCookie('csrftoken');
-    
-//     // var cookies = document.cookie.split(';');
-//     // var csrf_token = null;
-//     // cookies.forEach(function(cookie) {
-//     //     var cookieParts = cookie.trim().split('=');
-//     //     if (cookieParts[0] === 'csrftoken') {
-//     //         csrf_token = cookieParts[1];
-//     //     }
-//     // });
-
-//     // Extract from cookies fails for HTML-Only cookies
-//     if (!csrf_token) {
-//         var csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
-//         if (csrfInput) {
-//             csrf_token = csrfInput.value;
-//         }
-//     }
-//     return csrf_token;
-// }
+var searchInput = document.querySelector('[data-id="input-search-field"]');
 
 var Autocomplete = function(options) {
     this.url = url_suggestions;
@@ -36,7 +13,7 @@ var Autocomplete = function(options) {
 
 Autocomplete.prototype.setup = function() {
     var self = this;
-    this.query_box = document.querySelector('[data-id="v-input-search-field"]');
+    this.query_box = document.querySelector('[data-id="input-search-field"]');
 
     if (this.query_box) {
         this.query_box.addEventListener('keyup', function() {

@@ -2,12 +2,12 @@
 {% load currency_filters %}
 
 <span class="{% if record.paid %}text-success{% else %}{% endif %}">
-    {% if record.source == 'PAY_SBP' %}
-        Yoomoney СБП
-    {% elif record.source == 'PAY_ONLINECARD' %}
-        Yoomoney Карта
-    {% elif record.source == 'PAY_CARD' %}
-        Картой
+    {% if record.source == 'SBP' %}
+        СБП
+    {% elif record.source == 'ONLINECARD' %}
+        Онлайн Карта
+    {% elif record.source == 'ELECTRON' %}
+        Картой в магазине
     {% elif record.source == 'CASH' %}
         Наличные
     {% else %}

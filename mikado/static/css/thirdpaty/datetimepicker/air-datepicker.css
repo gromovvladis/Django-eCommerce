@@ -566,7 +566,7 @@
 
 .air-datepicker-overlay {
     --adp-overlay-background-color: rgba(0, 0, 0, .3);
-    --adp-overlay-transition-duration: .3s;
+    --adp-overlay-transition-duration: .2s;
     --adp-overlay-transition-ease: ease-out;
     --adp-overlay-z-index: 510
 }

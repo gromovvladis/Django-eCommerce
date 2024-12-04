@@ -124,7 +124,7 @@
         <div class="tab-pane fade {% if active_tab == 'day' %}show active{% endif %}" id="statistic_day" data-id="report-tab" role="tabpanel">   
             <div class="content-block rounded">
                 {% if report_exist_days %}
-                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 v-carousel__navs">
+                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 carousel__navs">
                         <button class="mr-4" data-id="prev-page">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 24 24" fill="none" stroke="#007bff" height="20px">
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -260,7 +260,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.get_name }}
+                                                {{ prd.name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -276,7 +276,7 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button" href="#top_product_price_day" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_day" data-toggle="tab">
                                         По стоимости
                                     </button>
                                     <button role="button" class="tabs-button__button" href="#top_product_count_day" data-toggle="tab">
@@ -309,7 +309,7 @@
         <div class="tab-pane fade {% if active_tab == 'week' %}show active{% endif %}" id="statistic_week" data-id="report-tab" role="tabpanel">
             <div class="content-block rounded">
                 {% if report_exist_weeks %}
-                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 v-carousel__navs">
+                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 carousel__navs">
                         <button class="mr-4" data-id="prev-page">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 24 24" fill="none" stroke="#007bff" height="20px">
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -445,7 +445,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.get_name }}
+                                                {{ prd.name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -461,7 +461,7 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button" href="#top_product_price_weeks" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_weeks" data-toggle="tab">
                                         По стоимости
                                     </button>
                                     <button role="button" class="tabs-button__button" href="#top_product_count_weeks" data-toggle="tab">
@@ -493,7 +493,7 @@
         <div class="tab-pane fade {% if active_tab == 'month' %}show active{% endif %}" id="statistic_month" data-id="report-tab" role="tabpanel">
             <div class="content-block rounded">
                 {% if report_exist_months %}
-                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 v-carousel__navs">
+                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 carousel__navs">
                         <button class="mr-4" data-id="prev-page">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 24 24" fill="none" stroke="#007bff" height="20px">
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -629,7 +629,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.get_name }}
+                                                {{ prd.name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -645,7 +645,7 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button" href="#top_product_price_months" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_months" data-toggle="tab">
                                         По стоимости
                                     </button>
                                     <button role="button" class="tabs-button__button" href="#top_product_count_months" data-toggle="tab">
@@ -677,7 +677,7 @@
         <div class="tab-pane fade {% if active_tab == 'year' %}show active{% endif %}" id="statistic_year" data-id="report-tab" role="tabpanel">
             <div class="content-block rounded">
                 {% if report_exist_years %}
-                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 v-carousel__navs">
+                    <div class="bar-caption d-flex justify-content-center align-items-center fill-width my-3 carousel__navs">
                         <button class="mr-4" data-id="prev-page">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 24 24" fill="none" stroke="#007bff" height="20px">
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -813,7 +813,7 @@
                                     <tr>
                                         <th class="col-md-9">
                                             <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.get_name }}
+                                                {{ prd.name }}
                                             </a>
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
@@ -829,7 +829,7 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button" href="#top_product_price_years" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_years" data-toggle="tab">
                                         По стоимости
                                     </button>
                                     <button role="button" class="tabs-button__button" href="#top_product_count_years" data-toggle="tab">
@@ -862,7 +862,7 @@
 
 {% block templatescripts %}
     {{ block.super }}
-    var products_titles = {{ top_products_titles|safe }}
+    var products_names = {{ top_products_names|safe }}
     var products_sums = {{ top_products_sums|safe }}
     var products_quantities = {{ top_products_quantities|safe }}
     var orders_datas = {{ report_datas|safe }}

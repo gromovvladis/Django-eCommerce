@@ -1,7 +1,5 @@
 import logging
 from rest_framework import serializers
-from django.contrib.auth.models import Group
-from oscar.apps.customer.models import GroupEvotor
 from oscar.apps.search.search_indexes import ProductIndex
 from decimal import Decimal as D
 from oscar.core.loading import get_model
@@ -9,8 +7,6 @@ from haystack import connections
 
 logger = logging.getLogger("oscar.customer")
 
-User = get_model("user", "User")
-Staff = get_model("user", "Staff")
 Store = get_model("store", "Store")
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -19,6 +15,7 @@ Category = get_model("catalogue", "Category")
 Attribute = get_model("catalogue", "Attribute")
 AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
+ProductAttribute = get_model("catalogue", "ProductAttribute")
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -333,6 +330,7 @@ class AttributeOptionSerializer(serializers.Serializer):
     class Meta:
         model = AttributeOption
 
+
 class AttributeOptionGroupSerializer(serializers.Serializer):
     id = serializers.CharField()
     name = serializers.CharField()
@@ -340,6 +338,7 @@ class AttributeOptionGroupSerializer(serializers.Serializer):
 
     class Meta:
         model = AttributeOptionGroup
+
 
 class ProductGroupSerializer(serializers.ModelSerializer):
     # категория / товар
@@ -406,9 +405,9 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             category = self._get_or_create_category(parent_id)
             instance.categories.add(category)
 
-            attr_group, created = self._get_or_create_attr_group(attributes)
-            if created:
-                instance.attributes.add(attr_group)
+            attr = self._get_or_create_attrs(instance, attributes)
+            if attr:
+                instance.attributes.add(attr)
         else:
             self.Meta.model = Category
             if parent_id:
@@ -457,9 +456,9 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             category = self._get_or_create_category(parent_id)
             instance.categories.add(category)
 
-            attr_group, created = self._get_or_create_attr_group(attributes)
-            if created:
-                instance.attributes.add(attr_group)
+            attr = self._get_or_create_attrs(instance, attributes)
+            if attr:
+                instance.attributes.add(attr)
 
             instance.save()
         else:
@@ -533,7 +532,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
 
         return cat
     
-    def _get_or_create_attr_group(self, attributes):
+    def _get_or_create_attrs(self, instance, attributes):
         """
         "attributes": [
             {
@@ -549,29 +548,43 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         ]
         """
         attr = None
+        choices = []
         for attribute in attributes:
 
-            group, created = AttributeOptionGroup.objects.get_or_create(
+            group = AttributeOptionGroup.objects.get_or_create(
                 evotor_id=attribute["id"],
                 defaults={"name": attribute["name"]}
-            )
+            )[0]
+            group.name = attribute["name"]
+            group.save()
 
             for choice in attribute.get("choices", []):
-                AttributeOption.objects.get_or_create(
+                attr_option = AttributeOption.objects.get_or_create(
                     evotor_id=choice["id"],
-                    group=group,
                     defaults={"option": choice["name"]}
-                )
+                )[0]
+                attr_option.option = choice["name"]
+                attr_option.group = group
+                attr_option.save()
+                choices.append(attr_option)
 
-            if created:
                 attr = Attribute.objects.get_or_create(
                     name=attribute["name"],
                     defaults={"type": "multi_option"}
                 )[0]
 
-                attr.option_group.add(group)
+                attr.option_group = group
+                attr.save()
 
-        return attr, created
+        prd_attr = ProductAttribute.objects.get_or_create(product=instance, attribute=attr)[0]
+        prd_attr.is_variant=True
+        
+        for choice in choices:
+            prd_attr.value_multi_option.add(choice)
+        
+        prd_attr.save()
+
+        return attr
 
 
 class ProductGroupsSerializer(serializers.ModelSerializer):

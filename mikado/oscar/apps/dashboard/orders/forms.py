@@ -193,14 +193,14 @@ class OrderStatsForm(forms.Form):
             ))
 
         if is_online and not is_offine:
-            self._excludes["site__in"] = ['offline', 'evotor']
+            self._excludes["site__in"] = settings.OFFLINE_ORDERS
             self._search_filters.append((
                 ('Онлайн заказы')
                 , (("is_online", True),)
             ))
 
         if not is_online and is_offine:
-            self._filters["site__in"] = ['offline', 'evotor']
+            self._filters["site__in"] = settings.OFFLINE_ORDERS
             self._search_filters.append((
                 ('Эвотор заказы')
                 , (("is_offline", True),)

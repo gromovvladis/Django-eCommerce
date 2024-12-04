@@ -13,22 +13,22 @@
 {% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Личный кабинет</a>
+        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Личный кабинет</a>
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
+        <span class="bread__link" aria-current="page">{{ page_title }}</span>
     </div>
 {% endblock %}
 
 {% block tabcontent %}
     <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
 
-        <div class="v-order__title d-flex justify-start mb-2 align-center">
+        <div class="order__title d-flex justify-start mb-2 align-center">
             <div class="d-flex">
                 <h1>Отзыв к заказу №{{ order.number }}</h1>
             </div>
@@ -38,19 +38,19 @@
             <div class="fill-width mb-2">
                 <div class="cabinet-orders fill-width grow-1">
                     <div class="cabinet__promo-wrapper fill-width d-flex flex-column">
-                        <ul class="v-orders-list d-flex flex-column fill-width fill-width">
+                        <ul class="orders-list d-flex flex-column fill-width fill-width">
                             {% for line in order.basket.all_lines %}
                                 {% with product=line.product %}
-                                    <li class="v-orders-list-item fill-width">
-                                        <div data-id="cart-item-form" class="v-cart-items--item">
-                                            <div class="v-dish-order d-flex fill-width">
-                                                <div class="v-dish-order__picture">
+                                    <li class="orders-list-item fill-width">
+                                        <div data-id="cart-item-form" class="cart-items--item">
+                                            <div class="dish-order d-flex fill-width">
+                                                <div class="dish-order__picture">
                                                     <a href="{{ product.get_absolute_url }}" aria-current="page"
                                                         class="d-block router-link-exact-active router-link-active"
                                                         data-id="dish-order-image-link">
-                                                        <div class="v-dish-image fill-width pos-relative">
-                                                            <div class="v-image">
-                                                                <div class="v-image__inner" style="padding-bottom: 72.072%;">
+                                                        <div class="dish-image fill-width pos-relative">
+                                                            <div class="image">
+                                                                <div class="image__inner" style="padding-bottom: 72.072%;">
                                                                     {% if product %}
                                                                         {% with image=product.primary_image %}
                                                                             {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
@@ -69,12 +69,12 @@
                                                     </a>
                                                 </div>
 
-                                                <div class="v-dish-order__content d-flex flex-column fill-width ml-1">
+                                                <div class="dish-order__content d-flex flex-column fill-width ml-1">
                                                     
-                                                    <div class="v-dish-order__title s d-flex align-start fill-width">
-                                                        <div class="v-dish-order__name-wrapper d-flex fill-width">
+                                                    <div class="dish-order__title s d-flex align-start fill-width">
+                                                        <div class="dish-order__name-wrapper d-flex fill-width">
                                                             <a href="{{ product.get_absolute_url }}" aria-current="page"
-                                                                class="v-dish-order__name router-link-exact-active router-link-active"
+                                                                class="dish-order__name router-link-exact-active router-link-active"
                                                                 data-id="dish-order-link"> 
                                                                 {% if product and product.is_public %}
                                                                     <a href="{{ line.product.get_absolute_url }}">{{ product.get_name }}</a>
@@ -83,12 +83,12 @@
                                                                 {% endif %}
                                                             </a>
                                                         </div>
-                                                        <span class="v-dish-order__name d-flex shrink pd-0">
+                                                        <span class="dish-order__name d-flex shrink pd-0">
                                                             ( {{ line.quantity }} шт. )
                                                         </span>
                                                     </div>
 
-                                                    <div class="v-dish-order__toppings d-flex fill-width">
+                                                    <div class="dish-order__toppings d-flex fill-width">
                                                         <div class="d-flex flex-wrap" data-id="dish-order-toppings">
                                                             <span class="d-flex">{{ line.variants }}</span>
                                                             <span class="d-flex">{{ line.options }}</span>
@@ -100,14 +100,14 @@
                                                         <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}#addreview">Оценить</a>
                                                     {% endif %}
                                                 
-                                                    <div role="separator" class="v-spacer"></div>
+                                                    <div role="separator" class="spacer"></div>
 
                                                     <div class="d-flex fill-width mt-1 pos-relative align-center">
 
-                                                        <div role="separator" class="v-spacer"></div>
+                                                        <div role="separator" class="spacer"></div>
                                                         
-                                                        <span class="v-prices d-flex flex-column align-start">
-                                                            <span class="v-prices__price no-wrap">
+                                                        <span class="prices d-flex flex-column align-start">
+                                                            <span class="prices__price no-wrap">
                                                                 {% purchase_info_for_product request product as session %}
                                                                 {% if session.price.exists %}
                                                                     {{ session.price.money|currency:session.price.currency }}
@@ -150,16 +150,16 @@
                                 </div>
                             </div>
                             
-                            <div class="v-input v-text-area v-input-textarea d-flex align-center mb-3 mb-sm-3 v-input__padding v-input__label-active">
-                                <div class="v-input__wrapper">
-                                    <div class="v-input__control d-flex align-center">
+                            <div class="input text-area input-textarea d-flex align-center mb-3 mb-sm-3 input__padding input__label-active">
+                                <div class="input__wrapper">
+                                    <div class="input__control d-flex align-center">
                                         {% include "oscar/partials/render_field.html" with field=form.body %}
                                     </div>
                                 </div>
                             </div>
 
                             <div class="profile-feedback__submit">
-                                <button type="submit" class="v-button v-button--main" data-loading-text="Saving...'">Отправить отзыв</button>
+                                <button type="submit" class="button button--main" data-loading-text="Saving...'">Отправить отзыв</button>
                             </div>
 
                         </fieldset>

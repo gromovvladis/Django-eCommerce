@@ -269,7 +269,6 @@ class ProductAttributesContainer:
                     if (
                         value_obj is None or value_obj.product != self.product
                     ):  # it doesn't exist yet so should be created
-                        # new_value_obj = ProductAttributeValue(
                         new_value_obj = ProductAttribute(
                             attribute=attribute, product=self.product
                         )

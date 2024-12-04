@@ -6,27 +6,27 @@
 <div class="d-flex flex-column fill-width mb-5 mb-md-8">
     <div class="home__subtitle mb-2 mb-md-2 d-flex align-center">
         <h2>{{ promo_cat.get_title }}</h2>
-        <div role="separator" class="v-spacer"></div>
+        <div role="separator" class="spacer"></div>
         <a href="{{ promo_cat.get_absolute_url }}" class="home__category-link" data-id="home-categories-link-new" aria-label="{{ promo_cat.get_title }}"> 
             Смотреть все 
         </a>
     </div>
-    <div class="v-dish-slider fill-width v-dish-slider--dish-small">
-        <div class="v-h-nav--wrapper" data-id="slider-action" data-per-page="3">
-            <button type="button" class="v-h-nav--button" data-id="swiper-prev">
+    <div class="dish-slider fill-width dish-slider--dish-small">
+        <div class="home-nav--wrapper" data-id="slider-action" data-per-page="3">
+            <button type="button" class="home-nav--button" data-id="swiper-prev">
                 {% icon file_name='interface/arrow-home' stroke="#000" %}
             </button>
-            <div class="v-h-nav" data-id="slider-swiper">
-                <div class="v-h-nav--inner swiper-wrapper">                                   
+            <div class="home-nav" data-id="slider-swiper">
+                <div class="home-nav--inner swiper-wrapper">                                   
                     {% if promo_cat.has_products %}
                         {% for product in promo_cat.all_products|slice:":6" %}
-                            <div class="v-h-nav--item v-h-nav--width swiper-slide">
-                                <a href="{{ product.get_absolute_url }}" class="v-dish-order d-flex fill-width fill-height mb-1 v-dish-order--info" aria-label="{{ product.get_title }}">
-                                    <div class="v-dish-order__picture">
+                            <div class="home-nav--item home-nav--width swiper-slide">
+                                <a href="{{ product.get_absolute_url }}" class="dish-order d-flex fill-width fill-height mb-1 dish-order--info" aria-label="{{ product.get_title }}">
+                                    <div class="dish-order__picture">
                                         <div class="d-block" data-id="dish-order-image-link">
-                                            <div class="v-dish-image fill-width pos-relative">
-                                                <div class="v-image">
-                                                    <div class="v-image__inner" style="padding-bottom: 100%;">
+                                            <div class="dish-image fill-width pos-relative">
+                                                <div class="image">
+                                                    <div class="image__inner" style="padding-bottom: 100%;">
                                                         {% with image=product.primary_image %}
                                                             {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
                                                             <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
@@ -36,16 +36,16 @@
                                             </div>
                                         </div>                                                
                                     </div>                                            
-                                    <div class="v-dish-order__content d-flex flex-column fill-width">
+                                    <div class="dish-order__content d-flex flex-column fill-width">
                                         <div class="d-flex align-start fill-width">
-                                            <div class="v-dish-order__name-wrapper d-flex flex-column fill-width">
-                                                <span class="v-dish-order__name mb-1" data-id="dish-order-link">{{ product.get_title }}</span>
+                                            <div class="dish-order__name-wrapper d-flex flex-column fill-width">
+                                                <span class="dish-order__name mb-1" data-id="dish-order-link">{{ product.get_title }}</span>
                                                 {% if product.short_description %}
                                                     <span class="short-description">{{ product.short_description }}</span>
                                                 {% endif %}
                                             </div>
                                         </div>
-                                        <div role="separator" class="v-spacer"></div>
+                                        <div role="separator" class="spacer"></div>
                                         {% purchase_info_for_product request product as session %}
                                         {% include "oscar/catalogue/partials/product_price.html" %}
                                     </div>
@@ -55,7 +55,7 @@
                     {% endif %}
                 </div>
             </div>
-            <button type="button" class="v-h-nav--button right"data-id="swiper-next"> 
+            <button type="button" class="home-nav--button right"data-id="swiper-next"> 
                 {% icon file_name='interface/arrow-home' stroke="#000" %}
             </button>
         </div>

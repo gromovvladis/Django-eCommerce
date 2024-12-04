@@ -7,23 +7,23 @@
 
 {% block title %}{{ category.name }} | {{ block.super }}{% endblock %}
 {% block wrapper_class %}menu fill-width fill-height grow-1 pd-2 pb-sm-4{% endblock %}
-{% block app_class %}v-app---category{% endblock %}
-{% block nav_class %}v-app__nav--category{% endblock %}
+{% block app_class %}app---category{% endblock %}
+{% block nav_class %}app__nav--category{% endblock %}
 {% block nav_title %}{{ category.name }}{% endblock %}
 {% block description %}{{ category.get_description }}{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
+    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
         {% for category in category.get_ancestors %}
             <a href="{{ category.get_absolute_url }}">{{ category.name }}</a>
             {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
         {% endfor %}
-        <span class="v-bread__link" aria-current="page">{{ category.name }}</span>
+        <span class="bread__link" aria-current="page">{{ category.name }}</span>
     </div>
 {% endblock %}
 
@@ -52,9 +52,9 @@
   
     {% comment %}------------- содержимое категории ---------------{% endcomment %}
     {% if products %}
-    <div class="v-dishes row">
+    <div class="dishes row">
         {% for product in products %}
-            <div class="v-dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
+            <div class="dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
                 {% render_product product.object %}
             </div>
         {% endfor %}

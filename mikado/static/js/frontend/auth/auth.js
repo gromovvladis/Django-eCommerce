@@ -81,13 +81,13 @@ function authModalLoaded(redirect_url=null) {
 
     function successFunc(authType, response) {
         if (authType == "sms") {
-            btnSms.classList.remove('v-auth-modal__repeat-button', 'v-button', 'v-button--main');
-            btnSms.classList.add('v-auth-modal__repeat-text');
+            btnSms.classList.remove('auth-modal__repeat-button', 'button', 'button--main');
+            btnSms.classList.add('auth-modal__repeat-text');
             passwordGroup.classList.remove('d-none');
-            passwordGroup.classList.add('v-input', 'v-input__label-active');
+            passwordGroup.classList.add('input', 'input__label-active');
             passwordGroup.querySelector('input').focus();
             btnAuth.classList.remove('d-none');
-            btnAuth.classList.add('v-button', 'v-button--main');
+            btnAuth.classList.add('button', 'button--main');
             phoneInput.readOnly = true;
             var seconds = 30;
             var intId = setInterval(function() {
@@ -98,8 +98,8 @@ function authModalLoaded(redirect_url=null) {
                     clearInterval(intId);
                     btnSms.disabled = false;
                     btnSms.textContent = "Повторить SMS";
-                    btnSms.classList.remove('v-auth-modal__repeat-text');
-                    btnSms.classList.add('v-auth-modal__repeat-button');
+                    btnSms.classList.remove('auth-modal__repeat-text');
+                    btnSms.classList.add('auth-modal__repeat-button');
                 }
             }, 1000);
         } else {

@@ -24,7 +24,7 @@
         {% if not record.is_online %}
             <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
         {% endif %} 
-        {{ order.basket.store|default:"-" }} | Заказ №{{ order.number }}
+        {{ order.store|default:"-" }} | Заказ №{{ order.number }}
     </h1>
 {% endblock  %}
 
@@ -77,7 +77,7 @@
                         <td>{{ user_info.order_amount|default:"-"|currency }}</td>
                     </tr>
                 {% else %}
-                    <tr><td>Аккаунт пользователя удален</td></tr>
+                    <tr><td>Аккаунт пользователя не найден</td></tr>
                 {% endif %}
             </tbody>
         </table>
@@ -164,7 +164,7 @@
             <ul class="nav nav-tabs mb-3 mb-lg-4 p-0" role="tablist">
                 <div class="half-wrapper">
                     <div class="nav tabs-button d-flex fill">
-                        <div class="tabs-button__active-block" style="width: 140px; left: 0px;"><div class="fill-width fill-height"></div></div>
+                        <div class="tabs-button__active-block" style="width: 130px; left: 0px;"><div class="fill-width fill-height"></div></div>
                         <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'lines' %}active{% endif %}" href="#lines" data-toggle="tab">
                             <i class="fas fa-shopping-cart"></i>
                             <span>
@@ -329,7 +329,6 @@
                                         </tr>
                                     {% endif %}
                                 {% endwith %}
-
                                 {% if order.has_shipping_discounts %}
                                     <tr>
                                         <td colspan="5"></td>
@@ -359,7 +358,6 @@
                                         <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
                                     </tr>
                                 {% endif %}
-
                                 {% with surcharges=order.surcharges.all %}
                                     {% if surcharges %}
                                         {% for charge in surcharges %}
@@ -371,7 +369,6 @@
                                         {% endfor %}
                                     {% endif %}
                                 {% endwith %}
-
                                 <tr>
                                     <td colspan="5"></td>
                                     <th>Итого</th>

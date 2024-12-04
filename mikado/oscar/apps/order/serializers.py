@@ -1,4 +1,5 @@
 import logging
+from django.conf import settings
 from rest_framework import serializers
 from decimal import Decimal as D
 from oscar.core.loading import get_model
@@ -13,6 +14,7 @@ StockRecord = get_model("store", "StockRecord")
 
 Order = get_model("order", "Order")
 OrderNote = get_model("order", "OrderNote")
+OrderDiscount = get_model("order", "OrderDiscount")
 Line = get_model("order", "Line")
 LinePrice = get_model("order", "LinePrice")
 
@@ -45,6 +47,7 @@ class OrderSerializer(serializers.Serializer):
         extras = validated_data.get("extras", None)
 
         positions = body.get("positions", None)
+        discounts = body.get("doc_discounts", None)
         payments = body.get("payments", None)
         result_sum = body.get("result_sum", None)
         customer_phone = body.get("customer_phone")
@@ -57,11 +60,11 @@ class OrderSerializer(serializers.Serializer):
         order = Order.objects.create(
             number=(900000 + number),
             evotor_id=evotor_id,
-            site="evotor",
+            site="Эвотор",
             user=user,
             total=result_sum,
             shipping_method="Самовывоз",
-            status="Выполнен",
+            status=settings.OSCAR_FINAL_ORDER_STATUS,
             date_finish=now(),
             order_time=now(),
         )
@@ -108,7 +111,7 @@ class OrderSerializer(serializers.Serializer):
             source = Source.objects.create(
                 order=order,
                 source_type=source_type,
-                amount_debited=D(payment["sum"]),
+                amount_debited=D(payment["sum"]) - D(payment["parts"]["change"]),
                 reference=payment["app_info"]["name"],
                 refundable=False,
                 paid=True,
@@ -124,5 +127,17 @@ class OrderSerializer(serializers.Serializer):
                 code=payment["id"],
                 receipt=True,
             )
+
+        if discounts:
+            frequency_base = OrderDiscount.objects.filter(message="Скидка сотрудником").count()
+            for i, discount in enumerate(discounts, start=1):
+                OrderDiscount.objects.create(
+                    order=order,
+                    category=OrderDiscount.BASKET,
+                    message="Скидка сотрудником",
+                    voucher_code=discount.get("coupon"),
+                    amount=discount.get("discount_sum", 0),
+                    frequency=frequency_base + i,
+                )
 
         return order

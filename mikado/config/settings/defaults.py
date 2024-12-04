@@ -462,6 +462,7 @@ SMS_AUTH_SETTINGS = {
 # Sample order/line status settings. This is quite simplistic. It's like you'll
 # want to override the set_status method on the order object to do more
 # sophisticated things.
+OSCAR_FINAL_ORDER_STATUS = 'Завершён'
 OSCAR_INITIAL_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = 'Ожидает оплаты'
 OSCAR_PAID_ONLINE_PAYMENT_ORDER_STATUS = 'Обрабатывается'
@@ -473,10 +474,10 @@ OSCAR_ORDER_STATUS_PIPELINE = {
     'Ожидает оплаты': ('Оплачен', 'Отменен'),
     'Оплачен': ('Готовится', 'Отменен'),
     'Готовится': ('Готов', 'Отменен'),
-    'Готов': ('Доставляется', 'Завершен', 'Отменен'),
-    'Доставляется': ('Завершен', 'Отменен'),
+    'Готов': ('Доставляется', 'Завершён', 'Отменен'),
+    'Доставляется': ('Завершён', 'Отменен'),
     'Отменен': (),
-    'Завершен': (),
+    'Завершён': (),
 }
 
 # This dict defines the line statuses that will be set when an order's status
@@ -496,24 +497,28 @@ ORDER_ACTIVE_STATUSES = (
 
 # Payment choices
 WEBSHOP_PAYMENT_CHOICES = (
-    ('PAY_SBP', 'СБП Онлайн'),
-    ('PAY_ONLINECARD', 'Карта Онлайн'),
-    ('PAY_CASH', 'Наличные'),
-    # ('COURIER-CARD', 'Картой курьеру при получении'),
+    ('SBP', 'СБП Онлайн'),
+    ('ONLINECARD', 'Картой Онлайн'),
+    ('ELECTRON', 'Картой в магазине'),
+    ('CASH', 'Наличные'),
 )
 
 ONLINE_PAYMENTS = (
-    'PAY_ONLINECARD',
-    'PAY_SBP',
+    'ONLINECARD',
+    'SBP',
 )
 
 OFFLINE_PAYMENTS = (
-    'PAY_CASH',
-    'PAY_CARD',
+    'CASH',
+    'ELECTRON',
 )
 
 CASH_PAYMENTS = (
-    'PAY_CASH',
+    'CASH',
+)
+
+OFFLINE_ORDERS = (
+    'Эвотор',
 )
 
 PAYMENT_STATUS = {
