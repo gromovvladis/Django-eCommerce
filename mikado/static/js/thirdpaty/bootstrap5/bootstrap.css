@@ -12059,12 +12059,12 @@ textarea.form-control-lg {
 
 @media (max-width: 992px) {
 
-  .v-carousel__navs button{
+  .carousel__navs button{
     left: 40%;
   }
 
   
-  .v-h-nav--button.right{
+  .h-nav--button.right{
     right: 20%;
   }
 
@@ -12081,12 +12081,12 @@ textarea.form-control-lg {
     padding: 10px;
   }
 
-  .v-carousel__navs button{
+  .carousel__navs button{
     left: 22px;
     top: 22px;
   }
 
-  .v-h-nav--button.right{
+  .h-nav--button.right{
     right: 22px;
   }
 
@@ -12122,7 +12122,7 @@ textarea.form-control-lg {
 }
 
 
-.v-map {
+.map {
   background: #fff url(../../../svg/loading/loading.svg) no-repeat 50%;
   background-size: 48px 48px;
   height: 100%;
@@ -12130,7 +12130,7 @@ textarea.form-control-lg {
 }
 
 
-.v-map__wrapper{
+.map__wrapper{
   height: 100%;
   width: 100%;
 }

@@ -19,7 +19,7 @@ class ProductReviewForm(forms.ModelForm):
         widgets = {
             'score': forms.RadioSelect(),
             'body': forms.Textarea(attrs={
-                'class' : 'v-input v-input-textarea fill-width fill-height d-flex align-center v-input__padding pd-2',
+                'class' : 'input input-textarea fill-width fill-height d-flex align-center input__padding pd-2',
                 'rows': 6,
                 'placeholder': "Ваш отзыв"
             }),
@@ -40,7 +40,7 @@ class OrderReviewForm(forms.ModelForm):
         widgets = {
             'score': forms.RadioSelect(),
             'body': forms.Textarea(attrs={
-                'class' : 'v-input v-input-textarea fill-width fill-height d-flex align-center v-input__padding pd-2',
+                'class' : 'input input-textarea fill-width fill-height d-flex align-center input__padding pd-2',
                 'rows': 6,
                 'placeholder': "Ваш отзыв"
             }),

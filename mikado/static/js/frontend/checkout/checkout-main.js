@@ -22,13 +22,13 @@ var timeTitle = document.querySelector('[data-id="order-time-title"]');
 var shipping = document.querySelector('#id_method_code');
 
 var checkoutTotals = document.getElementById('checkout_totals');
-var checkout_fields = document.querySelectorAll('[data-id="v-input-field"]');
+var checkout_fields = document.querySelectorAll('[data-id="input-field"]');
 var textares = document.querySelectorAll('textarea');
 var paymentMethod = document.getElementById('id_payment_method');
 var line2 = document.querySelector('#id_line2');
 var line3 = document.querySelector('#id_line3');
 var line4 = document.querySelector('#id_line4');
-var emailBlock = document.querySelector('[data-field="v-email-field"]');
+var emailBlock = document.querySelector('[data-field="email-field"]');
 var emailField = emailBlock.querySelector('#email_field_label');
 
 const OFFLINE_PAYMENT = ['CASH', 'ELECTRON'];
@@ -155,16 +155,16 @@ paymentMethod.addEventListener('change', function() {
 
 // Лейблы при заполнении текста
 checkout_fields.forEach(function(wrapper) {
-    var input_field = wrapper.querySelector('.v-input');
+    var input_field = wrapper.querySelector('.input');
     if (input_field.value !== "") {
-        wrapper.classList.add('v-input__label-active');
+        wrapper.classList.add('input__label-active');
     }
     input_field.addEventListener('focusin', function() {
-        wrapper.classList.add('v-input__label-active');
+        wrapper.classList.add('input__label-active');
     });
     input_field.addEventListener('focusout', function() {
         if (input_field.value === "") {
-            wrapper.classList.remove('v-input__label-active');
+            wrapper.classList.remove('input__label-active');
         }
         validateAddress();
         checkValid();

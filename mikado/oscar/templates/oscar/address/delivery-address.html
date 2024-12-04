@@ -6,18 +6,18 @@
 
 {% block title %}Адрес доставки | {{ block.super }}{% endblock %}
 {% block wrapper_class %}delivery wrapper--small fill-width pd-2 pb-sm-4 delivery-address{% endblock %}
-{% block app_class %}v-app---delivery{% endblock %}
-{% block nav_class %}v-app__nav--delivery{% endblock %}
+{% block app_class %}app---delivery{% endblock %}
+{% block nav_class %}app__nav--delivery{% endblock %}
 {% block nav_title %}Адрес доставки{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
+    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=22 stroke='#999'%}
-        <span class="v-bread__link" aria-current="page">Доставка</span>
+        <span class="bread__link" aria-current="page">Доставка</span>
     </div>
 {% endblock %}
 
@@ -28,26 +28,21 @@
             {{ error }}
         </div>
         {% endif %}
-        {% comment %} формы для изменения адресса {% endcomment %}
         {% block pickup_address %}
-
             <div class="delivery__address">
-
                 <div class="delivery__title mb-2 d-none d-sm-block">
                     <h1>Доставка и оплата</h1>
                 </div>
-
-                {% comment %} сохранине в бд или куки{% endcomment %}
                 <form action="{% url 'address:delivery-address' %}" method="post" id="set_address">
                     <div class="delivery__address-input fill-width pos-relative">
-                        <div class="v-address-info d-flex flex-column flex-sm-row">
-                            <div class="v-input-search d-flex fill-width justify-space-between align-center">
+                        <div class="address-info d-flex flex-column flex-sm-row">
+                            <div class="input-search d-flex fill-width justify-space-between align-center">
                                 {% icon file_name='interface/search' size=20 fill="#8a8a8a"%}
-                                <div id="line1_container" class="v-delivery fill-width v-input fill-width">
-                                    <div class="v-delivery--input d-flex">
+                                <div id="line1_container" class="delivery fill-width input fill-width">
+                                    <div class="delivery--input d-flex">
                                         <input for="set_address" type="text" name="line1" placeholder="Введите улицу и дом" data-id="address-input" id="id_line1" value="{{ address.line1 }}" autocomplete="off" {% if address.readonly %}readonly{% endif %}>
-                                        <div class="v-delivery--btn d-flex align-center justify-end">
-                                            <button id="clean_address" type="button" class="v-delivery--clear shrink d-flex align-center justify-center fill-height fill-width">
+                                        <div class="delivery--btn d-flex align-center justify-end">
+                                            <button id="clean_address" type="button" class="delivery--clear shrink d-flex align-center justify-center fill-height fill-width">
                                                 {% icon file_name='interface/close' size=24 stroke="#d32225"%}
                                             </button>
                                         </div>
@@ -58,30 +53,27 @@
                                 </div>
                             </div>
                         </div>
-                        <span id="line1_hints" class="v-delivery__address-hint d-flex flex-column justify-center px-2 mt-2 d-none"></span>
+                        <span id="line1_hints" class="delivery__address-hint d-flex flex-column justify-center px-2 mt-2 d-none"></span>
                     </div>
                 </form>
             </div>
-
             <div class="delivery__map mt-2">
-                <div class="v-map__wrapper fill-width fill-height">
-                    <div class="v-map fill-width fill-height">
+                <div class="map__wrapper fill-width fill-height">
+                    <div class="map fill-width fill-height">
                         <div id="map" class="fill-width fill-height"></div>
-                        <div id="map_controls" class="v-delivery-map--submit d-flex flex-column align-center justify-center pd-2 pd-md-4 d-none">
-                            <div id="map_address" class="v-delivery-map--label d-flex flex-column justify-center align-center px-2 py-1 mb-1 mb-sm-2"></div>
-                            <button id="submit_address" type="button" data-id="delivery-map-submit-btn" class="v-button fill-width v-button--main v-button--map justify-center shrink">
-                                <span class="v-button__wrapper">
-                                    <span class="v-button__value"> Доставить на этот адрес </span>
-                                    <span class="v-button__value v-button__value--saved"> Адрес сохранен </span>
+                        <div id="map_controls" class="delivery-map--submit d-flex flex-column align-center justify-center pd-2 pd-md-4 d-none">
+                            <div id="map_address" class="delivery-map--label d-flex flex-column justify-center align-center px-2 py-1 mb-1 mb-sm-2"></div>
+                            <button id="submit_address" type="button" data-id="delivery-map-submit-btn" class="button fill-width button--main button--map justify-center shrink">
+                                <span class="button__wrapper">
+                                    <span class="button__value"> Доставить на этот адрес </span>
+                                    <span class="button__value button__value--saved"> Адрес сохранен </span>
                                 </span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="delivery__info mt-4 pd-md-0">
-                {% comment %} <h2>Доставка и оплата</h2> {% endcomment %}
                 <div class="delivery__regions-block mt-4">
                     <p>
                         <span class="mb-1">

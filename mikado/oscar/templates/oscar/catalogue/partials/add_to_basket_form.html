@@ -13,7 +13,7 @@
             </div>
         {% endif %}
         
-        <div class="v-dish-actions fill-width d-flex flex-column">
+        <div class="dish-actions fill-width d-flex flex-column">
             {% comment %}------------- вариации + поля опций---------------{% endcomment %}
             {% if product.is_parent %}
                 {% include "oscar/catalogue/partials/variants.html" with form=basket_form %}

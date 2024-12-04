@@ -8,17 +8,17 @@
 {% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Личный кабинет</a>
+        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Личный кабинет</a>
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <a href="{% url 'customer:address-list' %}" data-id="back-bread-btn" class="v-bread__link router-link-active">Адрес доставки</a>
+        <a href="{% url 'customer:address-list' %}" data-id="back-bread-btn" class="bread__link router-link-active">Адрес доставки</a>
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <span class="v-bread__link" aria-current="page">{{ page_title }}</span>
+        <span class="bread__link" aria-current="page">{{ page_title }}</span>
     </div>
 {% endblock %}
 
@@ -26,7 +26,7 @@
     <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">    
         <form method="post">
             {% csrf_token %}
-            <div class="v-delivery mb-3 mb-sm-4" id="address_fields">
+            <div class="delivery mb-3 mb-sm-4" id="address_fields">
 
                 <div class="d-none d-sm-flex mb-2">
                     <h1>Вы уверены, что хотите удалить этот адрес?</h1>
@@ -40,18 +40,18 @@
                 </p>
 
                 <div class="d-flex align-center justify-space-between mt-2 mt-sm-3">
-                    <div class="v-confirm__button">
-                        <button type="submit" class="v-button fill-width v-button--outline justify-center shrink">
-                            <span class="v-button__wrapper">
-                                <span class="v-button__value"> Удалить адрес </span>
+                    <div class="confirm__button">
+                        <button type="submit" class="button fill-width button--outline justify-center shrink">
+                            <span class="button__wrapper">
+                                <span class="button__value"> Удалить адрес </span>
                             </span>
                         </button>
                     </div>
 
-                    <div class="v-confirm__button">
-                        <button onclick="window.location.href='{% url 'customer:address-list' %}" type="button" class="v-button fill-width v-button--white justify-center shrink">
-                            <span class="v-button__wrapper">
-                                <span class="v-button__value"> Отмена </span>
+                    <div class="confirm__button">
+                        <button onclick="window.location.href='{% url 'customer:address-list' %}" type="button" class="button fill-width button--white justify-center shrink">
+                            <span class="button__wrapper">
+                                <span class="button__value"> Отмена </span>
                             </span>
                         </button>
                     </div>

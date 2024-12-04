@@ -7,7 +7,7 @@
         <button data-link="{% url 'customer:profile-view' %}" class="profile__menu-button{% if active_tab == "profile" %} active{% endif %}"
             data-id="profile-tab">
             Личные данные 
-            <div role="separator" class="v-spacer"></div>
+            <div role="separator" class="spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
     </button>
     </li>
@@ -15,7 +15,7 @@
     <li class="profile__menu-list">
         <button data-link="{% url 'customer:order-list' %}" class="profile__menu-button{% if active_tab == "orders" %} active{% endif %}" data-id="profile-tab">
             История заказов 
-            <div role="separator" class="v-spacer"></div>
+            <div role="separator" class="spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </button>
     </li>
@@ -23,7 +23,7 @@
     <li class="profile__menu-list">
         <button data-link="{% url 'customer:address-list' %}" class="profile__menu-button{% if active_tab == "addresses" %} active{% endif %}" data-id="profile-tab">
             Адрес доставки
-            <div role="separator" class="v-spacer"></div>
+            <div role="separator" class="spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </button>
     </li>
@@ -31,7 +31,7 @@
     <li class="profile__menu-list">
         <button data-link="{% url 'customer:feedbacks-available' %}" class="profile__menu-button{% if active_tab == "feedback" %} active{% endif %}" data-id="profile-tab">
             Оставить отзыв 
-            <div role="separator" class="v-spacer"></div>
+            <div role="separator" class="spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </button>
     </li>
@@ -44,7 +44,7 @@
                     <span data-id="notifications-nums" class="notif-badge d-flex justify-center align-center">{{ num_unread_notifications }}</span>
                 </div>
             </div>
-            <div role="separator" class="v-spacer"></div>
+            <div role="separator" class="spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </button>
     </li>
@@ -52,7 +52,7 @@
     <li class="profile__menu-list">
         <button data-link="{% url 'customer:wishlist' %}" class="profile__menu-button{% if active_tab == "wishlist" %} active{% endif %}" data-id="profile-tab"> 
             Избранное 
-            <div role="separator" class="v-spacer"></div>
+            <div role="separator" class="spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </button>
     </li>
@@ -60,7 +60,7 @@
     <li class="profile__menu-list">
         <a target="_blank" href="#" data-id="profile-tab-help" class="profile__menu-button">
             Поддержка 
-            <div role="separator" class="v-spacer"></div>
+            <div role="separator" class="spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </a>
     </li>
@@ -70,7 +70,7 @@
             <a class="profile__menu-button"
                 data-id="profile-tab-admin" href="{% url 'dashboard:index' %}">
                 Админ-панель 
-                <div role="separator" class="v-spacer"></div>
+                <div role="separator" class="spacer"></div>
                 {% icon file_name='app_mobile_sticker/settings' size=24 stroke='#222'%}
             </a>
         </li>
@@ -78,9 +78,9 @@
 
     <li class="profile__menu-list d-sm-flex">
         <a data-id="profile-logout-btn" href="{% url 'dashboard:logout' %}"
-            class="v-button fill-width v-button--outline justify-center shrink">
-                <span class="v-button__wrapper">
-                <span class="v-button__value"> Выйти из аккаунта </span>
+            class="button fill-width button--outline justify-center shrink">
+                <span class="button__wrapper">
+                <span class="button__value"> Выйти из аккаунта </span>
             </span>
         </a>
     </li>

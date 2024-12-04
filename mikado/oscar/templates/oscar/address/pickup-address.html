@@ -6,42 +6,36 @@
 
 {% block title %}Адрес самовывоза | {{ block.super }}{% endblock %}
 {% block wrapper_class %}delivery wrapper--small fill-width pd-2 pb-sm-4 delivery-address{% endblock %}
-{% block app_class %}v-app---delivery{% endblock %}
-{% block nav_class %}v-app__nav--delivery{% endblock %}
+{% block app_class %}app---delivery{% endblock %}
+{% block nav_class %}app__nav--delivery{% endblock %}
 {% block nav_title %}Адрес самовывоза{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3">
+    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=22 stroke='#999'%}
-        <span class="v-bread__link" aria-current="page">Cамовывоз</span>
+        <span class="bread__link" aria-current="page">Cамовывоз</span>
     </div>
 {% endblock %}
 
 {% block content %}
     <div class="delivery__wrapper">
-        {% comment %} формы для изменения адресса {% endcomment %}
         {% block shipping_address %}
-
             <div class="delivery__address">
-
                 <div class="delivery__title mb-2 d-none d-sm-block">
                     <h1>Самовывоз</h1>
                 </div>
-
             </div>
-
             <div class="delivery__map">
-                <div class="v-map__wrapper fill-width fill-height">
-                    <div class="v-map fill-width fill-height">
+                <div class="map__wrapper fill-width fill-height">
+                    <div class="map fill-width fill-height">
                         <div id="pickup_map" class="fill-width fill-height"></div>
                     </div>
                 </div>
             </div>
-
             <div class="delivery__info mt-4 pd-md-0">
                 <div class="delivery__regions-block mt-4">
                     <p>
@@ -83,7 +77,6 @@
                     </p>
                 </div>
             </div>
-
         {% endblock shipping_address %}
     </div>
 {% endblock content %}

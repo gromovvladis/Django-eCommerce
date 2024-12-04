@@ -2,13 +2,13 @@
 {% load shipping_tags %}
 
 {% with offer_discounts=basket.offer_discounts voucher_discounts=basket.grouped_voucher_discounts %}
-    <div class="v-order__total_and_discounts d-flex flex-column mt-3">
+    <div class="order__total_and_discounts d-flex flex-column mt-3">
         {% block discount_totals %}
             {% if offer_discounts or voucher_discounts or shipping_charge != 0 %}
-                <div class="v-prices__price_discounts">
+                <div class="prices__price_discounts">
                     <span class="d-flex justify-space-between no-wrap">
                         Заказ
-                        <span class="v-prices__price-before">
+                        <span class="prices__price-before">
                             {{ basket.total_excl_discounts|currency:basket.currency }}
                         </span>
                     </span>
@@ -20,7 +20,7 @@
                                 {% if discount.description %}
                                     <br/><small>{{ discount.description }}</small>
                                 {% endif %}
-                                <span class="v-prices__price-before">
+                                <span class="prices__price-before">
                                     - {{ discount.discount|currency:basket.currency }}
                                 </span>
                             </span>
@@ -36,7 +36,7 @@
                                     {% endif %}
 
                                     <span class="d-flex">
-                                        <span class="v-prices__price-before">
+                                        <span class="prices__price-before">
                                             - {{ discount.discount|currency:basket.currency }}
                                         </span>
 
@@ -54,7 +54,7 @@
                     {% if shipping_charge != 0 %}
                         <span class="d-flex justify-space-between no-wrap">
                             {{ shipping_method.name }}
-                            <span class="v-prices__price-before">
+                            <span class="prices__price-before">
                                 {{ shipping_charge|currency:basket.currency }}
                             </span>
                         </span>
@@ -65,11 +65,11 @@
         {% endblock %}
 
         {% order_totals_and_shipping basket shipping_charge as basket_totals %}
-        <div class="v-order__info-total d-flex align-end total" data-min-order="{% if basket_totals >= min_order %}true{% else %}false{% endif %}">
+        <div class="order__info-total d-flex align-end total" data-min-order="{% if basket_totals >= min_order %}true{% else %}false{% endif %}">
             Итого
-            <div role="separator" class="v-spacer"></div>
-            <span class="v-prices d-flex flex-column align-start v-prices--big">
-                <span class="v-prices__price no-wrap">
+            <div role="separator" class="spacer"></div>
+            <span class="prices d-flex flex-column align-start prices--big">
+                <span class="prices__price no-wrap">
                     {{ basket_totals|currency:basket.currency }}
                 </span>
             </span>

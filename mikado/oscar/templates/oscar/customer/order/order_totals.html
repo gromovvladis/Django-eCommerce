@@ -2,15 +2,15 @@
 
 {% with offer_discounts=basket.offer_discounts voucher_discounts=basket.grouped_voucher_discounts %}
         
-    <div class="v-order__total_and_discounts d-flex flex-column mt-3">
+    <div class="order__total_and_discounts d-flex flex-column mt-3">
 
         {% block discount_totals %}
             {% if order.basket_discounts or order.shipping != 0 %}
-                <div class="v-prices__price_discounts">
+                <div class="prices__price_discounts">
 
                     <span class="d-flex justify-space-between no-wrap">
                         Заказ
-                        <span class="v-prices__price-before">
+                        <span class="prices__price-before">
                             {{ order.basket_total_before_discounts|currency:basket.currency }}
                         </span>
                     </span>
@@ -26,7 +26,7 @@
                                         <br/><small>({{ discount.description }})</small>
                                     {% endif %}
                                 </span>
-                                <span class="v-prices__price-before">
+                                <span class="prices__price-before">
                                     - {{ discount.amount|currency:basket.currency }}
                                 </span>
                             </div>
@@ -40,7 +40,7 @@
                                     {{ order.shipping_method }}
                                 </span>
                             </span>
-                            <span class="v-prices__price-before">
+                            <span class="prices__price-before">
                                 {{ order.shipping|currency:basket.currency }}
                             </span>
                         </div>
@@ -49,11 +49,11 @@
             {% endif %}
         {% endblock %}
 
-        <div class="v-order__info-total d-flex align-end total">
+        <div class="order__info-total d-flex align-end total">
             Итого
-            <div role="separator" class="v-spacer"></div>
-            <span class="v-prices d-flex flex-column align-start v-prices--big">
-                <span class="v-prices__price no-wrap">
+            <div role="separator" class="spacer"></div>
+            <span class="prices d-flex flex-column align-start prices--big">
+                <span class="prices__price no-wrap">
                     {{ order.total|currency:basket.currency }}
                 </span>
             </span>

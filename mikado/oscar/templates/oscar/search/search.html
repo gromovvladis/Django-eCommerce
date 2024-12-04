@@ -7,19 +7,19 @@
 
 {% block title %}Поиск | {{ block.super }}{% endblock %}
 {% block wrapper_class %}search d-flex fill-width flex-column justify-start grow-1 fill-height pb-3 pb-sm-4 pt-sm-2 px-sm-2{% endblock %}
-{% block app_class %}v-app---search{% endblock %}
-{% block nav_class %}v-app__nav--search{% endblock %}
+{% block app_class %}app---search{% endblock %}
+{% block nav_class %}app__nav--search{% endblock %}
 {% block nav_title %}Поиск{% endblock %}
 {% block nav_title_center %}Поиск{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="v-bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
         <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
             {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
         </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="v-bread__link router-link-active">Главная</a>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
         {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <span class="v-bread__link" aria-current="page">Поиск{{ query }}</span>
+        <span class="bread__link" aria-current="page">Поиск{{ query }}</span>
     </div>
 {% endblock %}
 
@@ -32,21 +32,21 @@
             </div>
             <div class="search__input d-flex fill-width px-2 px-sm-0">
                 <div id="search_form" class="d-flex fill-width py-2 px-md-0">
-                    <div class="v-input-search fill-width">
+                    <div class="input-search fill-width">
                         {% icon file_name='interface/search' size=20 fill="#8a8a8a"%}
-                        <input data-id="v-input-search-field" name="q" id="id_q" placeholder="Поиск" aria-label="Поиск">
+                        <input data-id="input-search-field" name="q" id="id_q" placeholder="Поиск" aria-label="Поиск">
                     </div>
                     <div class="d-none d-sm-flex ml-2">
-                        <button id="search_clean_btn" type="button" data-test-id="search-back-button" class="v-button v-button--main v-button--clear justify-center shrink">
-                            <span class="v-button__wrapper">
-                                <span class="v-button__value"> Очистить </span>
+                        <button id="search_clean_btn" type="button" data-test-id="search-back-button" class="button button--main button--clear justify-center shrink">
+                            <span class="button__wrapper">
+                                <span class="button__value"> Очистить </span>
                             </span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div id="search_result" class="v-dishes v-dishes--search mt-1 fill-width px-2 px-sm-0"></div>
+            <div id="search_result" class="dishes dishes--search mt-1 fill-width px-2 px-sm-0"></div>
         </div>
     </div>
 {% endblock %}

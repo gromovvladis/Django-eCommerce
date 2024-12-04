@@ -20,17 +20,17 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Активируем метки в полях ввода и добавляем обработчики событий
-document.querySelectorAll('[data-id="v-input-field"]').forEach(function(wrapper) {
-    var inputField = wrapper.querySelector('.v-input');
+document.querySelectorAll('[data-id="input-field"]').forEach(function(wrapper) {
+    var inputField = wrapper.querySelector('.input');
     if (inputField.value !== "") {
-        wrapper.classList.add('v-input__label-active');
+        wrapper.classList.add('input__label-active');
     }
     inputField.addEventListener('focusin', function() {
-        wrapper.classList.add('v-input__label-active');
+        wrapper.classList.add('input__label-active');
     });
     inputField.addEventListener('focusout', function() {
         if (inputField.value === "") {
-            wrapper.classList.remove('v-input__label-active');
+            wrapper.classList.remove('input__label-active');
         }
         validateAddress();
     });
