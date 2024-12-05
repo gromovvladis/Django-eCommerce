@@ -20405,13 +20405,15 @@ input[type="number"]:focus {
       display: block;
       position: relative;
       padding: 1rem 0;
-      /* padding: .5rem 0; */
-      /* padding: .5rem 0 1rem; */
-      /* padding: .5rem 0 1.5rem; */
-      /* padding: .5rem 0; */
-      /* margin-bottom: 1rem; */
-      /* min-height: 70px; */
       min-height: 70px;
+  }
+
+  .mobile-table tbody .order-totals { 
+      display: table;
+      table-layout: fixed;
+      width: 100%;
+      padding: 0;
+      min-height: unset;
   }
 
   .mobile-table tbody tr:last-child{
