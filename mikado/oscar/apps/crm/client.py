@@ -236,7 +236,7 @@ class EvotorStoreClient(EvotorAPICloud):
                     )
                 else: 
                     json_valid = False
-                    logger.exception("Ошибка при сериализации", extra={"errors": serializer.errors})
+                    logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(f"Ошибка сериализации магазина: {serializer.errors}")
 
             if not json_valid:
@@ -275,7 +275,7 @@ class EvotorStoreClient(EvotorAPICloud):
                     )
                 else: 
                     json_valid = False
-                    logger.exception("Ошибка при сериализации", extra={"errors": serializer.errors})
+                    logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(f"Ошибка сериализации терминалов: {serializer.errors}")
             
             if not json_valid:
@@ -449,7 +449,7 @@ class EvotorStaffClient(EvotorAPICloud):
                     )
                 else: 
                     json_valid = False
-                    logger.exception("Ошибка при сериализации", extra={"errors": serializer.errors})
+                    logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(f"Ошибка сериализации роли сотрудника: {serializer.errors}")
             
             if not json_valid:
@@ -493,7 +493,7 @@ class EvotorStaffClient(EvotorAPICloud):
                     )
                 else: 
                     json_valid = False
-                    logger.exception("Ошибка при сериализации", extra={"errors": serializer.errors})
+                    logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(f"Ошибка сериализации сотрудника: {serializer.errors}")
             
             if not json_valid:
@@ -1318,7 +1318,7 @@ class EvotorProductClient(EvotorAPICloud):
                     )
                 else: 
                     json_valid = False
-                    logger.exception("Ошибка при сериализации", extra={"errors": serializer.errors})
+                    logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(f"Ошибка сериализации товара: {serializer.errors}")
 
             if not json_valid:
@@ -1373,7 +1373,7 @@ class EvotorProductClient(EvotorAPICloud):
                     )
                 else: 
                     json_valid = False
-                    logger.exception("Ошибка при сериализации", extra={"errors": serializer.errors})
+                    logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(f"Ошибка сериализации группы товаров или модификации товаров: {serializer.errors}")
             
             if not json_valid:
@@ -1537,7 +1537,8 @@ class EvotorDocClient(EvotorAPICloud):
                 )
             else: 
                 json_valid = False
-                logger.exception("Ошибка при сериализации", extra={"errors": serializer.errors})
+                logger.error("Ошибка при сериализации %s" % serializer.errors)
+                logger.error("Ошибка при сериализации заказа %s" % str(order_json))
                 error_msgs.append(f"Ошибка сериализации заказа: {serializer.errors}")
 
             if not json_valid:

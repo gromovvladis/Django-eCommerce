@@ -391,12 +391,11 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         
         if attributes:
             self.Meta.model = Product
-            product_class = self._get_or_create_product_class()
             instance = Product.objects.get_or_create(
                 evotor_id=evotor_id,
                 defaults={
                     "structure": Product.PARENT,
-                    "product_class": product_class,
+                    "product_class": self._get_or_create_product_class(),
                     "is_public": True,
                     **validated_data
                 }

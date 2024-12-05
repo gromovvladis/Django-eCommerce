@@ -21,7 +21,7 @@
 
 {% block navtext %}
     <h1>
-        {% if not record.is_online %}
+        {% if record.is_online %}
             <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
         {% endif %} 
         {{ order.store|default:"-" }} | Заказ №{{ order.number }}
@@ -159,7 +159,6 @@
     {% endblock additional_order_information %}
 
     <div class="tabbable dashboard">
-
         {% block nav_tabs %}
             <ul class="nav nav-tabs mb-3 mb-lg-4 p-0" role="tablist">
                 <div class="half-wrapper">
@@ -293,20 +292,20 @@
                                         </td>
                                     </tr>
                                 {% endfor %}
-                                <tr>
+                                <tr class="order-totals">
                                     <td colspan="5"></td>
                                     <th>Скидки</th>
-                                    <td class="text-right">{{ order.total_discount|currency:order.currency }}</td>
+                                    <th class="text-right">{{ order.total_discount|currency:order.currency }}</th>
                                 </tr>
                                 {% with discounts=order.basket_discounts %}
                                     {% if discounts %}
-                                        <tr>
+                                        <tr class="order-totals">
                                             <td colspan="5"></td>
                                             <th>Сумма заказа без скидки</th>
                                             <td class="text-right">{{ order.basket_total_before_discounts|currency:order.currency }}</td>
                                         </tr>
                                         {% for discount in discounts %}
-                                            <tr>
+                                            <tr class="order-totals">
                                                 <td colspan="5"></td>
                                                 <td>
                                                     <span class="badge badge-success">Скидки</span>
@@ -316,13 +315,13 @@
                                                 <td class="text-right">- {{ discount.amount|currency:order.currency }}</td>
                                             </tr>
                                         {% endfor %}
-                                        <tr>
+                                        <tr class="order-totals">
                                             <td colspan="5"></td>
                                             <th>Сумма заказа со скидкой</th>
                                             <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
                                         </tr>
                                     {% else %}
-                                        <tr>
+                                        <tr class="order-totals">
                                             <td colspan="5"></td>
                                             <th>Товары</th>
                                             <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
@@ -330,13 +329,13 @@
                                     {% endif %}
                                 {% endwith %}
                                 {% if order.has_shipping_discounts %}
-                                    <tr>
+                                    <tr class="order-totals">
                                         <td colspan="5"></td>
                                         <td>Доставка без скидки</td>
                                         <td class="text-right">{{ order.shipping_before_discounts|currency:order.currency }}</td>
                                     </tr>
                                     {% for discount in order.shipping_discounts %}
-                                        <tr>
+                                        <tr class="order-totals">
                                             <td colspan="5"></td>
                                             <td>
                                                 <span class="badge badge-success">Скидка на доставку</span>
@@ -346,13 +345,13 @@
                                             <td class="text-right">- {{ discount.amount|currency:order.currency }}</td>
                                         </tr>
                                     {% endfor %}
-                                    <tr>
+                                    <tr class="order-totals">
                                         <td colspan="5"></td>
                                         <th>Доставка</th>
                                         <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
                                     </tr>
                                 {% else %}
-                                    <tr>
+                                    <tr class="order-totals">
                                         <td colspan="5"></td>
                                         <th>Доставка</th>
                                         <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
@@ -361,7 +360,7 @@
                                 {% with surcharges=order.surcharges.all %}
                                     {% if surcharges %}
                                         {% for charge in surcharges %}
-                                            <tr>
+                                            <tr class="order-totals">
                                                 <td colspan="5"></td>
                                                 <th>Доплата {{ charge.name }}</th>
                                                 <th class="text-right">{{ charge.money|currency:order.currency }}</th>
@@ -369,7 +368,7 @@
                                         {% endfor %}
                                     {% endif %}
                                 {% endwith %}
-                                <tr>
+                                <tr class="order-totals">
                                     <td colspan="5"></td>
                                     <th>Итого</th>
                                     <th class="text-right">{{ order.total|currency:order.currency }}</th>
