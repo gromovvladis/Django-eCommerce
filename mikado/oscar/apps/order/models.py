@@ -1280,16 +1280,15 @@ class OrderLineDiscount(models.Model):
         related_name="discount_lines",
         verbose_name="Скидка заказа",
     )
-
     amount = models.DecimalField(
-        "Скидка позиции", decimal_places=2, max_digits=12, default=0
+        "Скидка на позицию заказа", decimal_places=2, max_digits=12, default=0
     )
 
     class Meta:
         app_label = "order"
         ordering = ["pk"]
-        verbose_name = "Скидка позиции заказа"
-        verbose_name_plural = "Скидки позиций заказов"
+        verbose_name = "Скидка на позицию заказа"
+        verbose_name_plural = "Скидки на позиции заказов"
 
 
 class Surcharge(models.Model):

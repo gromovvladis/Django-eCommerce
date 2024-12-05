@@ -2,7 +2,6 @@
 from decimal import Decimal as D
 
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.db import transaction
 from oscar.apps.order.signals import order_placed
 from oscar.core.loading import get_class, get_model
