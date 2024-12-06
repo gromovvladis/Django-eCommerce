@@ -37,22 +37,24 @@
         </form>
         {% block form_actions %}
             <div class="fixed-actions-group">
-                <div class="float-right">  
-                    <a class="btn btn-dark mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
-                        <i class="fa-regular fa-circle-xmark"></i> 
-                        Отменить
-                    </a>      
-                    <button class="btn btn-primary" type="submit" form="range-form" data-loading-text="Сохранение...">
-                        <i class="fa-regular fa-floppy-disk"></i>
-                        Сохранить
+                <div class="container container-fluid">
+                    <div class="float-right">  
+                        <a class="btn btn-dark mr-2" href="{% url 'dashboard:catalogue-product-list' %}">
+                            <i class="fa-regular fa-circle-xmark"></i> 
+                            Отменить
+                        </a>      
+                        <button class="btn btn-primary" type="submit" form="range-form" data-loading-text="Сохранение...">
+                            <i class="fa-regular fa-floppy-disk"></i>
+                            Сохранить
+                        </button>
+                    </div>
+                    <button class="btn btn-success" type="submit" form="range-form" name="action"/>
+                        <i class="fa-solid fa-pencil"></i>
+                        <span>
+                            Изменить список продуктов
+                        </span>
                     </button>
                 </div>
-                <button class="btn btn-success" type="submit" form="range-form" name="action"/>
-                    <i class="fa-solid fa-pencil"></i>
-                    <span>
-                        Изменить список продуктов
-                    </span>
-                </button>
             </div>
         {% endblock form_actions %}
     </div>

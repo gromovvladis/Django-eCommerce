@@ -7052,7 +7052,7 @@ html.drawer .app__side {
     background: #fff
 }
 
-.card>:first-child:not(.btn),
+/* .card>:first-child:not(.btn),
 .card>a:first-child>:first-child:not(.btn),
 .card>a:first-child picture:first-child img,
 .card>form>:first-child:not(.btn),
@@ -7068,7 +7068,7 @@ html.drawer .app__side {
 .card>picture:last-child img {
     border-bottom-left-radius: inherit;
     border-bottom-right-radius: inherit
-}
+} */
 
 .card--outlined {
     border: 1px solid #ddd

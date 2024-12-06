@@ -280,6 +280,10 @@ class Order(models.Model):
         return status
 
     @property
+    def has_shipping(self):
+        return self.shipping > 0
+
+    @property
     def has_shipping_discounts(self):
         return len(self.shipping_discounts) > 0
 

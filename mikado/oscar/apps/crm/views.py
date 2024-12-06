@@ -375,30 +375,165 @@ class CRMDocsEndpointView(APIView):
     8. Изъятие наличных (CASH_OUTCOME)
     """
 
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        request_info = {
-            "method": request.method,
-            "path": request.path,
-            "headers": dict(request.headers),
-            "data": request.data,
-        }
-        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
-        send_message_to_staffs(
-            f"request: {json.dumps(request_info, ensure_ascii=False)}",
-            TelegramMessage.TECHNICAL,
-        )
 
-        not_allowed = is_valid_user_token(request)
-        if not_allowed:
-            return not_allowed
+        data = {
+                "type": "SELL",
+                "id": "24fbebfb-af35-46b8-ab57-4e8b1b466399",
+                "extras": {},
+                "number": 31998,
+                "close_date": "2024-12-06T05:57:07.000+0000",
+                "time_zone_offset": 25200000,
+                "session_id": "0ee885c2-04f7-4828-9364-fd1061a68b91",
+                "session_number": 150,
+                "close_user_id": "20240713-4403-40BB-80DA-F84959820434",
+                "device_id": "20240713-6F49-40AC-803B-E020F9D50BEF",
+                "store_id": "20240713-774A-4038-8037-E66BF3AA7552",
+                "user_id": "01-000000010409029",
+                "body": {
+                    "positions": [
+                        {
+                            "product_id": "ac0a279a-6eda-49c6-afba-f2c093c2ac49",
+                            "quantity": 1,
+                            "initial_quantity": -168,
+                            "quantity_in_package": None,
+                            "bar_code": None,
+                            "product_type": "NORMAL",
+                            "mark": None,
+                            "mark_data": None,
+                            "alcohol_by_volume": 0,
+                            "alcohol_product_kind_code": 0,
+                            "tare_volume": 0,
+                            "code": "95",
+                            "product_name": "сэндвич",
+                            "measure_name": "шт",
+                            "id": 239576,
+                            "uuid": "a3889792-75b7-4e10-b5bd-a21c7b6e25a0",
+                            "extra_keys": [],
+                            "sub_positions": [],
+                            "measure_precision": 0,
+                            "price": 320,
+                            "cost_price": 0,
+                            "result_price": 160,
+                            "sum": 320,
+                            "tax": {"type": "NO_VAT", "sum": 0, "result_sum": 0},
+                            "result_sum": 160,
+                            "position_discount": None,
+                            "doc_distributed_discount": {
+                                "discount_sum": 160,
+                                "discount_percent": 50,
+                                "discount_type": "SUM",
+                                "coupon": None,
+                                "discount_price": None,
+                            },
+                            "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+                            "splitted_positions": None,
+                            "attributes_choices": None,
+                            "settlement_method": {
+                                "type": "CHECKOUT_FULL",
+                                "amount": None,
+                            },
+                            "agent_requisites": None,
+                        }
+                    ],
+                    "doc_discounts": [
+                        {
+                            "discount_sum": 160,
+                            "discount_percent": 50,
+                            "discount_type": "SUM",
+                            "coupon": None,
+                        }
+                    ],
+                    "payments": [
+                        {
+                            "id": "368f8874-ec08-44a3-98b1-e3e56f665535",
+                            "parent_id": None,
+                            "sum": 160,
+                            "type": "ELECTRON",
+                            "parts": [
+                                {
+                                    "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+                                    "part_sum": 160,
+                                    "change": 0,
+                                }
+                            ],
+                            "app_payment": None,
+                            "merchant_info": {
+                                "number": "123",
+                                "english_name": "123",
+                                "category_code": "123",
+                            },
+                            "bank_info": {"name": "ПАО СБЕРБАНК"},
+                            "app_info": {"app_id": None, "name": "Банковская карта"},
+                        }
+                    ],
+                    "print_groups": [
+                        {
+                            "id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+                            "type": "CASH_RECEIPT",
+                            "org_name": None,
+                            "org_inn": None,
+                            "org_address": None,
+                            "taxation_system": None,
+                            "medicine_attributes": None,
+                        }
+                    ],
+                    "pos_print_results": [
+                        {
+                            "receipt_number": 284,
+                            "document_number": 299,
+                            "session_number": 149,
+                            "receipt_date": "06122024",
+                            "receipt_time": "1257",
+                            "fn_reg_number": None,
+                            "fiscal_sign_doc_number": "3455354808",
+                            "fiscal_document_number": 30418,
+                            "fn_serial_number": "7382440700036332",
+                            "kkt_serial_number": "00307900652283",
+                            "kkt_reg_number": "0008200608019020",
+                            "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+                            "check_sum": 160,
+                        }
+                    ],
+                    "sum": 320,
+                    "result_sum": 160,
+                    "customer_email": None,
+                    "customer_phone": None,
+                },
+                "counterparties": None,
+                "created_at": "2024-12-06T05:57:45.228+0000",
+                "version": "V2",
+            }
 
-        request_type = request.data.get("type")
+        # request_info = {
+        #     "method": request.method,
+        #     "path": request.path,
+        #     "headers": dict(request.headers),
+        #     "data": request.data,
+        # }
+        # logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
+        # send_message_to_staffs(
+        #     f"request: {json.dumps(request_info, ensure_ascii=False)}",
+        #     TelegramMessage.TECHNICAL,
+        # )
+
+        # not_allowed = is_valid_user_token(request)
+        # if not_allowed:
+        #     return not_allowed
+
+        # request_type = request.data.get("type")
+
+        request_type = "SELL"
 
         if request_type == "SELL":
-            self.sell(request.data, *args, **kwargs)
+            self.sell(data, *args, **kwargs)
+            # self.sell(request.data, *args, **kwargs)
         elif request_type == "PAYBACK":
             self.payback(request.data, *args, **kwargs)
         elif request_type == "ACCEPT":

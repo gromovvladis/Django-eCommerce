@@ -25,19 +25,18 @@
 {% endblock %}
 
 {% block navtext %}
-  <h1>{{ range.name }}: товары</h1>
+  <h1>{{ range.name }}: Товары</h1>
 {% endblock %}
 
 {% block dashboard_content %}
 
-<div class="tabbable dashboard fixed-actions">
-
+<div class="dashboard fixed-actions">
   <div class="half-wrapper mb-3">
     <div class="nav tabs-button d-flex fill">
       {% block nav_tabs %}
         <div class="tabs-button__active-block" style="width: 50%; left: 0px;"><div class="fill-width fill-height"></div></div>
-        <button role="button" class="tabs-button__button {% if not upload_type == "excluded" %}active{% endif %}" href="#included" data-toggle="tab">Добавленные товары</button>
-        <button role="button" class="tabs-button__button {% if upload_type == "excluded" %}active{% endif %}" href="#excluded" data-toggle="tab">Исключенные товары</button>
+        <button role="button" class="tabs-button__button {% if not upload_type == "excluded" %}active{% endif %}" href="#included" data-toggle="tab">Добавленные</button>
+        <button role="button" class="tabs-button__button {% if upload_type == "excluded" %}active{% endif %}" href="#excluded" data-toggle="tab">Исключенные</button>
       {% endblock nav_tabs %}
     </div>
   </div>
@@ -181,7 +180,6 @@
     </div>
 
     <div class="tab-pane fade {% if upload_type == "excluded" %}show active{% endif %}" id="excluded" role="tabpanel">
-
         {% if range.excluded_products.count %}
           <form method="post" class="fill-width mb-3">
             {% csrf_token %}
@@ -267,7 +265,6 @@
           </table>
         {% endif %}
 
-
         <div class="table-header">
           <h3>Исключить товары</h3>
         </div>
@@ -314,7 +311,6 @@
           {% endif %}
           {% endwith %}
         </div>
-
     </div>
   </div>
 
@@ -338,9 +334,7 @@
       </div>
     </div>
   {% endblock fixed_actions_group %}
-
 </div>
-
 {% endblock dashboard_content %}
 
 {% block onbodyload %}

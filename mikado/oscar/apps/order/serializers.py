@@ -125,7 +125,7 @@ class OrderSerializer(serializers.Serializer):
                     order=order,
                     message="Скидка сотрудником позицию заказа",
                     amount=position_discount.get("discount_sum", 0),
-                    voucher_code=position_discount.get("coupon", ""),
+                    voucher_code=position_discount.get("coupon") or "",
                 )
                 order_discount.save()
                 line.discounts.create(
@@ -159,17 +159,19 @@ class OrderSerializer(serializers.Serializer):
                 receipt=True,
             )
 
-        if discounts:
-            for discount in discounts:
-                order_discount = OrderDiscount(
-                    order=order,
-                    message="Скидка сотрудником на весь заказ",
-                    amount=discount.get("discount_sum", 0),
-                    voucher_code=discount.get("coupon", ""),
-                )
-                order_discount.save()
+        for discount in discounts:
+            order_discount = OrderDiscount(
+                order=order,
+                message="Скидка сотрудником на весь заказ",
+                amount=discount.get("discount_sum", 0),
+                voucher_code=discount.get("coupon") or "",
+            )
+            order_discount.save()
 
         return order
+
+    def update(self, instance, validated_data):
+        return instance
 
     def _get_or_create_product_class(self):
         """Создание или извлечение класса товара"""
@@ -181,3 +183,4 @@ class OrderSerializer(serializers.Serializer):
                 "measure_name": "шт",
             },
         )[0]
+
