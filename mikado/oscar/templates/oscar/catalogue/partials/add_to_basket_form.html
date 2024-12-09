@@ -12,18 +12,15 @@
                 <strong>Упс! Что-то пошло не так</strong> - пожалуйста, проверьте ошибки ниже и поторите снова
             </div>
         {% endif %}
-        
         <div class="dish-actions fill-width d-flex flex-column">
             {% comment %}------------- вариации + поля опций---------------{% endcomment %}
             {% if product.is_parent %}
                 {% include "oscar/catalogue/partials/variants.html" with form=basket_form %}
             {% endif %}
-
             {% comment %}------------- поля опций ---------------{% endcomment %}
             {% if product.has_options %}
                 {% include "oscar/catalogue/partials/options.html" with form=basket_form %}
             {% endif %}
-
             {% comment %}------------- дополнительные ингридиенты ---------------{% endcomment %}
             {% if product.has_additions %}
                 {% include "oscar/catalogue/partials/additinal_products.html" with form=basket_form currency_symbol=currency_symbol %}

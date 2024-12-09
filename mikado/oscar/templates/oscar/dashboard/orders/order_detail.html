@@ -21,7 +21,7 @@
 
 {% block navtext %}
     <h1>
-        {% if record.is_online %}
+        {% if order.is_online %}
             <i class="fa-solid fa-globe" style="color:var(--primary)"></i>
         {% endif %} 
         {{ order.store|default:"-" }} | Заказ №{{ order.number }}
@@ -261,16 +261,19 @@
                                         <td class="title">
                                             <div class="d-flex align-items-center">
                                                 <span class="spinner-border-sm {% if line.status == "Готовится" %}badge-warning{% elif line.status == "Отменен" %}badge-danger{% else %}badge-success{% endif %} rounded-circle mr-1">&nbsp;</span>
-                                                {% if line.product %}
-                                                    <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">
+                                                    {% if line.product %}
+                                                        <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">
+                                                            {{ line.name }}
+                                                        </a>
+                                                    {% else %}
                                                         {{ line.name }}
-                                                        {{ line.variants }}
-                                                    </a>
-                                                {% else %}
-                                                    {{ line.name }}
-                                                    {{ line.variants }}
-                                                {% endif %}
+                                                    {% endif %}
+                                                </div>
                                             </div>
+                                            <span>
+                                                {{ line.variants }}
+                                            </span>
+                                            <br>
                                             <span class="text-muted">
                                                 Артикул: {{ line.article|default:"-" }}
                                             </span>
@@ -292,11 +295,12 @@
                                     </tr>
                                 {% endfor %}
                                 {% if order.total_discount %}
-                                    <tr class="order-totals" data-toggle="collapse" data-target=".discount_details" aria-expanded="false" aria-controls="discount_details" style="cursor: pointer;">
+                                    <tr class="order-totals table-caption" data-toggle="collapse" data-target=".discount_details" aria-expanded="false" aria-controls="discount_details" style="cursor: pointer;">
                                         <td colspan="5"></td>
                                         <th class="text-left" style="color: var(--primary);">
                                             Скидки 
                                             <i class="fa-solid fa-chevron-down"></i>
+                                            <i class="fa-solid fa-chevron-up"></i>
                                         </th>
                                         <th class="text-right">{{ order.total_discount|currency:order.currency }}</th>
                                     </tr>
@@ -375,91 +379,82 @@
                             </tbody>
                         </table>
                     </div>
-                    {% endblock order_lines %}
-                    
+                    {% endblock order_lines %}              
                     {% block line_actions %}
-                    <div class="d-none mb-4" id="actions_lines">
-                        <div class="table-header">
-                            <div class="d-flex justify-space-between" >
-                                <h3>
-                                    <i class="fa-solid fa-rotate"></i> Действия
-                                </h3>
+                        <div class="d-none mb-4" id="actions_lines">
+                            <div class="table-header">
+                                <div class="d-flex justify-space-between" >
+                                    <h3>
+                                        <i class="fa-solid fa-rotate"></i> Действия
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="card card-body bg-light">
+                                <h3>С выбранными позициями:</h3>
+                                <div class="form-inline mb-sm-2">
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <input id="line_status_check" class="form-check-input" type="radio" name="line_action" value="change_line_statuses"/>
+                                            <label for="line_status_check" class="form-check-label">Изменить статус позиций</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="sr-only" for="new_status_select">Выбрать новый статус</label>
+                                        <select id="new_status_select" name="new_status">
+                                            <option value=""> -- Выберите новый статус -- </option>
+                                            {% for status in line_statuses %}
+                                            <option>{{ status }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-inline mb-sm-2">
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <input id="shipping_event_check" class="form-check-input" type="radio" name="line_action" value="create_shipping_event" />
+                                            <label for="shipping_event_check" class="form-check-label">Создать событие доставки</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mr-1">
+                                        <label class="sr-only" for="shipping_event_type_select">Выбрать тип события</label>
+                                        <select id="shipping_event_type_select" name="shipping_event_type">
+                                            <option value=""> -- Выберете тип события -- </option>
+                                            {% for event_type in shipping_event_types %}
+                                            <option value="{{ event_type.code }}">{{ event_type.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reference_input">со ссылкой</label>
+                                        <input id="reference_input" type="text" name="reference" value="" />
+                                    </div>
+                                </div>
+                                <div class="form-inline mb-sm-2">
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <input id="payment_event_check" class="form-check-input" type="radio" name="line_action" value="create_payment_event" />
+                                            <label for="payment_event_check" class="form-check-label">Создать платежное событие</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mr-1">
+                                        <label class="sr-only" for="payment_event_type_select">Выберете тип события</label>
+                                        <select id="payment_event_type_select" name="payment_event_type">
+                                            <option value=""> -- Выберете тип события -- </option>
+                                            {% for event_type in payment_event_types %}
+                                            <option value="{{ event_type.code }}">{{ event_type.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="amount_input">с суммой</label>
+                                        <input id="amount_input" type="text" name="amount" value="" />
+                                    </div>
+                                </div>
+                                <div class="flex-nowrap">
+                                    <button type="submit" class="btn btn-primary">Подтвердить</button>
+                                </div>
                             </div>
                         </div>
-                        <div class="card card-body bg-light">
-                            <h3>С выбранными позициями:</h3>
-                            
-                            <div class="form-inline mb-sm-2">
-                                
-                                <div class="form-group">
-                                    <div class="form-check">
-                                        <input id="line_status_check" class="form-check-input" type="radio" name="line_action" value="change_line_statuses"/>
-                                        <label for="line_status_check" class="form-check-label">Изменить статус позиций</label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="sr-only" for="new_status_select">Выбрать новый статус</label>
-                                    <select id="new_status_select" name="new_status">
-                                        <option value=""> -- Выберите новый статус -- </option>
-                                        {% for status in line_statuses %}
-                                        <option>{{ status }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-inline mb-sm-2">
-                                <div class="form-group">
-                                    <div class="form-check">
-                                        <input id="shipping_event_check" class="form-check-input" type="radio" name="line_action" value="create_shipping_event" />
-                                        <label for="shipping_event_check" class="form-check-label">Создать событие доставки</label>
-                                    </div>
-                                </div>
-                                <div class="form-group mr-1">
-                                    <label class="sr-only" for="shipping_event_type_select">Выбрать тип события</label>
-                                    <select id="shipping_event_type_select" name="shipping_event_type">
-                                        <option value=""> -- Выберете тип события -- </option>
-                                        {% for event_type in shipping_event_types %}
-                                        <option value="{{ event_type.code }}">{{ event_type.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="reference_input">со ссылкой</label>
-                                    <input id="reference_input" type="text" name="reference" value="" />
-                                </div>
-                            </div>
-
-                            <div class="form-inline mb-sm-2">
-                                <div class="form-group">
-                                    <div class="form-check">
-                                        <input id="payment_event_check" class="form-check-input" type="radio" name="line_action" value="create_payment_event" />
-                                        <label for="payment_event_check" class="form-check-label">Создать платежное событие</label>
-                                    </div>
-                                </div>
-                                <div class="form-group mr-1">
-                                    <label class="sr-only" for="payment_event_type_select">Выберете тип события</label>
-                                    <select id="payment_event_type_select" name="payment_event_type">
-                                        <option value=""> -- Выберете тип события -- </option>
-                                        {% for event_type in payment_event_types %}
-                                        <option value="{{ event_type.code }}">{{ event_type.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="amount_input">с суммой</label>
-                                    <input id="amount_input" type="text" name="amount" value="" />
-                                </div>
-                            </div>
-
-
-                            <div class="flex-nowrap">
-                                <button type="submit" class="btn btn-primary">Подтвердить</button>
-                            </div>
-
-                        </div>
-                    </div>
                     {% endblock line_actions %}
                 </form>
 
@@ -602,8 +597,6 @@
                             {% endif %}
                         </tbody>
                     </table>
-
-
                     {% block shipping_events %}
                         {% with events=order.shipping_events.all %}
                         <div class="table-header" data-target="#delivery-body" data-toggle="collapse" aria-controls="delivery-body" aria-expanded="false">
@@ -656,13 +649,11 @@
                             </table>
                         {% endwith %}
                     {% endblock %}
-                    
                 {% endblock %}           
             </div>
 
             <div class="tab-pane fade {% if active_tab == 'payment' %}show active{% endif %}" id="payment" role="tabpanel">
                 {% block tab_payment %}
-
                     {% with sources=order.sources.all %}
                         <div class="table-header">
                             <h3 class="float-left">
@@ -915,8 +906,6 @@
                             </div>
                         {% endwith %}
                     {% endblock %}
-
-
                 {% endblock %}
             </div>
 
@@ -931,38 +920,46 @@
                             </h3>
                         </div>
                         {% if discounts %}
-                            <table class="table table-striped table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Тип</th>
-                                        <th>Промокод</th>
-                                        <th>Скидка</th>
-                                        <th>Frequency</th>
-                                        <th>Сообщение</th>
-                                        <th>Сумма</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for discount in discounts %}
+                            <div class="mobile-table">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
                                         <tr>
-                                            <td>{{ discount.get_category_display }}</td>
-                                            <td>
-                                                {{ discount.voucher.code|default:"-" }}
-                                            </td>
-                                            <td>
-                                                {% if discount.offer %}
-                                                    <a href="{% url 'dashboard:offer-detail' pk=discount.offer.id %}">{{ discount.offer.name }}</a>
-                                                {% else %}
-                                                    {{ discount.offer_name }}
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ discount.frequency }}</td>
-                                            <td>{{ discount.message|default:"-" }}</td>
-                                            <td>{{ discount.amount|currency:order.currency }}</td>
+                                            <th>Тип</th>
+                                            <th>Промокод</th>
+                                            <th>Акция</th>
+                                            <th>Использований</th>
+                                            <th>Сообщение</th>
+                                            <th>Сумма</th>
                                         </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {% for discount in discounts %}
+                                            <tr>
+                                                <td class="name">{{ discount.get_category_display }}</td>
+                                                <td data-label="Промокод">
+                                                    {{ discount.voucher.code|default:"-" }}
+                                                </td>
+                                                <td data-label="Акция">
+                                                    {% if discount.offer %}
+                                                        <a href="{% url 'dashboard:offer-detail' pk=discount.offer.id %}">{{ discount.offer.name }}</a>
+                                                    {% else %}
+                                                        {{ discount.offer_name|default:"-" }}
+                                                    {% endif %}
+                                                </td>
+                                                <td data-label="Использований">{{ discount.frequency|default:"-" }}</td>
+                                                <td data-label="Сообщение">{{ discount.message|default:"-" }}</td>
+                                                <td data-label="Сумма">{{ discount.amount|currency:order.currency }}</td>
+                                                <td class="toggle-row">
+                                                    <button class="btn btn-secondary" type="button">
+                                                        <i class="fa-solid fa-chevron-up"></i>
+                                                        <i class="fa-solid fa-chevron-down"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         {% else %}
                             <table class="table table-striped table-bordered table-hover">
                                 <tr><td>К этому заказу скидки не применялись.</td></tr>

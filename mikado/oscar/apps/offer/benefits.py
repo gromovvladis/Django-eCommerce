@@ -30,7 +30,6 @@ def apply_discount(line, discount, quantity, offer=None):
     """
     Apply a given discount to the passed basket
     """
-    # use OSCAR_OFFERS_INCL_TAX setting if t is left unspecified.
     line.discount(discount, quantity, offer=offer)
 
 
@@ -346,11 +345,6 @@ class MultibuyDiscountBenefit(Benefit):
         if not line_tuples:
             return ZERO_DISCOUNT
 
-        # Cheapest line gives free product
-        # for discount, line in line_tuples:
-        #     if line.line_price_incl_discounts > 0:
-        #         break
-
         discount, line = line_tuples[0]
         if line.quantity_with_offer_discount(offer) == 0:
             apply_discount(line, discount, 1, offer)
@@ -388,8 +382,8 @@ class ShippingAbsoluteDiscountBenefit(ShippingBenefit):
     class Meta:
         app_label = "offer"
         proxy = True
-        verbose_name = "Преимущество абсолютной скидки на доставку"
-        verbose_name_plural = "Преимущества абсолютной скидки на доставку"
+        verbose_name = "Абсолютная скидка на доставку"
+        verbose_name_plural = "Абсолютные скидки на доставку"
 
     def shipping_discount(self, charge, currency=None):
         return min(charge, self.value)

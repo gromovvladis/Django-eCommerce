@@ -67,11 +67,11 @@ def send_message(chat_id: int, text: str, type: str = TelegramMessage.MISC, user
 
 def send_message_to_staffs(text: str, type: str = TelegramMessage.MISC, store_id: str = None, bot_token: str = STAFF_BOT, **kwargs):
     if type == TelegramMessage.TECHNICAL:
-        staffs = Staff.objects.filter(is_active=True, notif=Staff.TECHNICAL).select_related("user")
+        staffs = Staff.objects.filter(is_active=True, notif=Staff.TECHNICAL, telegram_id__isnull=False).select_related("user")
     elif type == TelegramMessage.STATUS: 
-        staffs = Staff.objects.filter(is_active=True, notif__in=[Staff.STATUS, Staff.TECHNICAL]).select_related("user")
+        staffs = Staff.objects.filter(is_active=True, notif__in=[Staff.STATUS, Staff.TECHNICAL], telegram_id__isnull=False).select_related("user")
     else:
-        staffs = Staff.objects.filter(is_active=True).exclude(notif=Staff.OFF).select_related("user")
+        staffs = Staff.objects.filter(is_active=True, telegram_id__isnull=False).exclude(notif=Staff.OFF).select_related("user")
     
     if store_id:
         staffs = staffs.filter(

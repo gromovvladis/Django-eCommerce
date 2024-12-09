@@ -97,13 +97,13 @@ class Basket(models.Model):
         # so we want to avoid reloading them as this would drop the discount
         # information.
         self._lines = None
+        self._filtered_lines = None
         self.offer_applications = OfferApplications()
 
     def __str__(self):
-        return "%(status)s Корзина (пользователь: %(owner)s, позиции: %(num_lines)d)" % {
+        return "%(status)s Корзина (пользователь: %(owner)s)" % {
             "status": self.status,
             "owner": self.owner,
-            "num_lines": self.num_lines,
         }
 
     # ========
@@ -149,9 +149,10 @@ class Basket(models.Model):
         return self._lines
 
     def all_lines(self):
-        if self.store_id:
-            return self._all_lines().filter(product__stockrecords__store_id=self.store_id) 
-        return self._all_lines()  
+        if self._filtered_lines is None:
+            store_id = self.store_id or settings.STORE_DEFAULT
+            self._filtered_lines = [line for line in self._all_lines() if line.product.stockrecords.filter(store_id=store_id).exists()]
+        return self._filtered_lines    
 
     def max_allowed_quantity(self):
         """
@@ -194,12 +195,11 @@ class Basket(models.Model):
             if not line_purchase_permitted:
                 return line_purchase_permitted, (
                     "Доступный запас составляет только %(max)d, "
-                    "что превышено, поскольку несколько строк содержат один и тот же товар."
                 ) % {"max": line.purchase_info.availability.num_available}
 
         if max_allowed is not None and qty > max_allowed:
-            return False, ("Из-за технических ограничений мы не можем отправить"
-                           " более %(threshold)d товаров в одном заказе."
+            return False, ("Из-за технических ограничений мы не можем оформить заказ на"
+                           " более чем %(threshold)d товаров в одном заказе."
             ) % {"threshold": basket_threshold}
 
         return True, None
@@ -209,7 +209,7 @@ class Basket(models.Model):
         The basket can contain multiple lines with the same product and
         stockrecord, but different options. Those quantities are summed up.
         """
-        matching_lines = self.lines.filter(stockrecord=line.stockrecord)
+        matching_lines = self.lines.filter(stockrecord_id=line.stockrecord_id)
         quantity = matching_lines.aggregate(Sum("quantity"))["quantity__sum"]
         return quantity or 0
 
@@ -225,6 +225,7 @@ class Basket(models.Model):
             raise PermissionDenied("A frozen basket cannot be flushed")
         self.lines.all().delete()
         self._lines = None
+        self._filtered_lines = None
 
     # pylint: disable=unused-argument
     def get_stock_info(self, product, options, additionals):
@@ -236,7 +237,6 @@ class Basket(models.Model):
         return self.strategy.fetch_for_product(product)
 
     def check_store(self, line):
-                
         if not self.store_id or self.is_empty:
             self.store_id = line.stockrecord.store_id
             self.save()
@@ -349,12 +349,9 @@ class Basket(models.Model):
         # audit and sometimes caching.
         defaults = {
             "quantity": quantity,
-            # "price": stock_info.price.money,
             "price_currency": stock_info.price.currency,
             "tax_code": stock_info.price.tax_code,
         }
-
-        # defaults["price"] = stock_info.price.money
 
         line, created = self.lines.get_or_create(
             line_reference=line_ref,
@@ -381,6 +378,7 @@ class Basket(models.Model):
         """
         self.offer_applications = OfferApplications()
         self._lines = None
+        self._filtered_lines = None
 
     def merge_line(self, line, add_quantities=True):
         """
@@ -406,6 +404,7 @@ class Basket(models.Model):
             line.delete()
         finally:
             self._lines = None
+            self._filtered_lines = None
 
     merge_line.alters_data = True
 
@@ -423,6 +422,7 @@ class Basket(models.Model):
         basket.status = self.MERGED
         basket.date_merged = now()
         basket._lines = None
+        basket._filtered_lines = None
         basket.save()
         self.store_id = basket.store_id
         self.save()
@@ -473,34 +473,27 @@ class Basket(models.Model):
             if line.product.is_shipping_required:
                 return True
         return False
+    
+    def change_basket_store(self, new_store_id):
+        self.store_id = new_store_id
+        self.save()
+        self._update_lines()
 
     # =======
     # Helpers
     # =======
 
-
-    def change_basket_store(self, new_store_id):
-        self.store_id = new_store_id
-        self.save()
-        self.update_lines()
-
-
-    def update_lines(self):
+    def _update_lines(self):
         for line in self.all_lines():
             new_stockrecord = line.product.stockrecords.filter(store_id=self.store_id).first()
             if new_stockrecord is not None:
                 line.stockrecord = new_stockrecord
-                line.line_reference = self.replace_stockrecord(line.line_reference, new_stockrecord.id)
-                # line.line_reference = self._create_line_reference(
-                #     line.product, line.stockrecord, line.get_options(), line.get_additions()
-                # )
+                line.line_reference = self._update_stockrecord(line.line_reference, new_stockrecord.id)
                 line.save()
 
-
-    def replace_stockrecord(self, s: str, new: str) -> str:
+    def _update_stockrecord(self, s: str, new: str) -> str:
         return re.sub(r'^([^_]+)_([^_]+)', rf'\1_{new}', s)
     
-
     def _create_line_reference(self, product, stockrecord, options, additionals):
         """
         Returns a reference string for a line based on the item
@@ -529,7 +522,6 @@ class Basket(models.Model):
 
         return "%s_%s" % (base, zlib.crc32(repr(repr_list).encode("utf8")))
     
-
     def _get_total(self, model_property):
         """
         For executing a named method on each line of the basket
@@ -560,7 +552,6 @@ class Basket(models.Model):
         """
         return self.id is not None and self.num_items > 0
     
-
     @property
     def is_empty(self):
         """ 
@@ -571,7 +562,7 @@ class Basket(models.Model):
     @property
     def total(self):
         """
-        Return total line price excluding tax
+        Return total line price incl discounts
         """
         return self._get_total("line_price_incl_discounts")
 
@@ -784,15 +775,9 @@ class Line(models.Model):
 
     quantity = models.PositiveIntegerField("Количество", default=1)
 
-    # We store the unit price incl tax of the product when it is first added to
-    # the basket.  This allows us to tell if a product has changed price since
-    # a person first added it to their basket.
     price_currency = models.CharField(
         "Валюта", max_length=12, default=get_default_currency
     )
-    # price = models.DecimalField(
-    #     "Цена", decimal_places=2, max_digits=12, null=True
-    # ) 
     tax_code = models.CharField(
         "Налоговый код", max_length=64, blank=True, null=True
     )
@@ -802,6 +787,8 @@ class Line(models.Model):
         "Дата создания", auto_now_add=True, db_index=True
     )
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
+
+    _cached_unit_price = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -870,12 +857,12 @@ class Line(models.Model):
         else:
             # Need to split the discount among the affected quantity
             # of products.
-            # item_discount = self.discount_value / int(
-            #     self.discounts.num_consumed()
-            # )
+            item_discount = self.discount_value / int(
+                self.discounts.num_consumed()
+            )
             prices.append(
                 (
-                    self.unit_price,
+                    self.unit_price - item_discount,
                     self.discounts.num_consumed(),
                 )
             )
@@ -990,10 +977,12 @@ class Line(models.Model):
     
     @property
     def unit_price(self):
-        price_item =  self.purchase_info.price.money
-        if price_item:
-            price_item = price_item + self.additions_total
-        return price_item
+        if self._cached_unit_price is None:
+            price_item = self.purchase_info.price.money
+            if price_item:
+                price_item = price_item + self.additions_total
+            self._cached_unit_price = price_item
+        return self._cached_unit_price
 
     @property
     def line_price(self):
@@ -1003,7 +992,7 @@ class Line(models.Model):
     @property
     def line_price_incl_discounts(self):
         _discounts = self.discounts.total
-
+        
         if self.line_price is not None and _discounts:
             return max(0, self.line_price - _discounts)
 

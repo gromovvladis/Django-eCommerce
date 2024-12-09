@@ -3,8 +3,6 @@ import phonenumbers
 
 from django import forms
 from django.conf import settings
-from django.contrib.auth import forms as auth_forms
-from django.contrib.sites.shortcuts import get_current_site
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.utils.module_loading import import_string
@@ -12,12 +10,10 @@ from django.utils.module_loading import import_string
 from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.phonenumber import PhoneNumber
 
-from oscar.apps.customer.utils import get_password_reset_url, normalise_email
+from oscar.apps.customer.utils import normalise_email
 from oscar.core.compat import existing_user_fields, get_user_model
-from oscar.core.loading import get_class
 from oscar.core.utils import datetime_combine
 
-CustomerDispatcher = get_class("customer.utils", "CustomerDispatcher")
 User = get_user_model()
 
 

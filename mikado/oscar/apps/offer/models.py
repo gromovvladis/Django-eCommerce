@@ -227,8 +227,8 @@ class ConditionalOffer(models.Model):
         null=True,
         blank=True,
         help_text=(
-            "Когда предложение дало большую скидку на заказы"
-            "чем этот порог, то предложение становится недоступным"
+            "Когда сумма всех скидок предложения достигнет этого значения,"
+            "то предложение становится недоступным"
         ),
     )
 
@@ -727,7 +727,6 @@ class Benefit(BaseOfferMixin, models.Model):
             return rounding_function(amount, currency)
 
         return amount.quantize(D("1"), ROUND_DOWN)
-        # return amount.quantize(D(".01"), ROUND_DOWN)
 
     def _effective_max_affected_items(self):
         """

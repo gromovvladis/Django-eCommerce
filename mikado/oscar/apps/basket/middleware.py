@@ -1,3 +1,4 @@
+from collections import namedtuple
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -12,6 +13,7 @@ Selector = get_class("store.strategy", "Selector")
 
 selector = Selector()
 
+store = namedtuple("store", ["id"])
 
 class BasketMiddleware:
     def __init__(self, get_response):
@@ -21,15 +23,16 @@ class BasketMiddleware:
         # Keep track of cookies that need to be deleted (which can only be done
         # when we're processing the response instance).
         request.cookies_to_delete = []
-
+        
+        # We lazily load the basket so use a private variable to hold the
+        # cached instance.
+        request._basket_cache = None
+        request._store_cache = None
+    
         # Load stock/price strategy and assign to request (it will later be
         # assigned to the basket too).
         strategy = selector.strategy(request=request, user=request.user)
         request.strategy = strategy
-
-        # We lazily load the basket so use a private variable to hold the
-        # cached instance.
-        request._basket_cache = None
 
         def load_referral_source():
             def extract_domain(url):
@@ -42,6 +45,18 @@ class BasketMiddleware:
         _referral_source = SimpleLazyObject(load_referral_source)
         if _referral_source:
             request._referral_source = _referral_source
+
+        def load_store():
+            if not request._store_cache:
+                basket = self.get_basket(request)
+                store_id = basket.store_id
+
+                if not store_id:
+                    store_id = int(request.COOKIES.get("store", settings.STORE_DEFAULT))
+
+                request._store_cache = store(store_id)
+
+            return request._store_cache
 
         def load_full_basket():
             """
@@ -68,6 +83,7 @@ class BasketMiddleware:
         # when the attribute is accessed.
         request.basket = SimpleLazyObject(load_full_basket)
         request.basket_hash = SimpleLazyObject(load_basket_hash)
+        request.store = SimpleLazyObject(load_store)
         request._referral_source = SimpleLazyObject(load_referral_source)
 
         response = self.get_response(request)
@@ -202,21 +218,6 @@ class BasketMiddleware:
 
         # Cache basket instance for the during of this request
         request._basket_cache = basket
-
-        # if num_items_merged > 0:
-        #     # show warning only if items have been merged
-        #     messages.add_message(
-        #         request,
-        #         messages.WARNING,
-        #         ngettext_lazy(
-        #             "We have merged %(num_items_merged)d item from a "
-        #             "previous session to your basket.",
-        #             "We have merged %(num_items_merged)d items from a "
-        #             "previous session to your basket.",
-        #             num_items_merged,
-        #         )
-        #         % {"num_items_merged": num_items_merged},
-        #     )
 
         return basket
 

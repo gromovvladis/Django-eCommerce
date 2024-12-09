@@ -18,15 +18,7 @@ def selected_store(request):
             cache.set("stores_select", stores_select, 21600)  # Кэш на 6 часов
 
         if stores_select:
-            store_id = store_default
-            store_basket = request.basket.store_id
-            store_cookies = request.COOKIES.get("store")
-
-            if store_basket is not None:
-                store_id = store_basket
-            elif store_cookies is not None:
-                store_id = store_cookies
-
+            store_id = request.store.id
             return Store.objects.get(id=store_id)
 
         return None
