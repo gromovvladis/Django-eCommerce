@@ -1524,29 +1524,28 @@ class EvotorDocClient(EvotorAPICloud):
             if serializer.is_valid():
                 order = serializer.save() 
 
-            order_creator = OrderCreator()
-                
-            for line in order.lines.all():
-                order_creator.update_stock_records(line)
+                order_creator = OrderCreator()
+                    
+                for line in order.lines.all():
+                    order_creator.update_stock_records(line)
 
-                event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
-                CRMEvent.objects.create(
-                    body=f"Order created / updated - { order.number }",
-                    sender=CRMEvent.PRODUCT,
-                    type=event_type,
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body=f"Order created / updated - { order.number }",
+                        sender=CRMEvent.PRODUCT,
+                        type=event_type,
                 )
             else: 
                 json_valid = False
                 logger.error("Ошибка при сериализации %s" % serializer.errors)
-                logger.error("Ошибка при сериализации заказа %s" % str(order_json))
                 error_msgs.append(f"Ошибка сериализации заказа: {serializer.errors}")
 
             if not json_valid:
                 return  ', '.join(error_msgs), False
 
         except Exception as e:
-            logger.error(f"Ошибка при обновлении заказа: {e}", exc_info=True)
-            return f"Ошибка при обновлении заказа: {e}", False
+            logger.error(f"Ошибка при создании / обновлении заказа: {e}", exc_info=True)
+            return f"Ошибка при создании / обновлении заказа: {e}", False
 
         return "Заказ был успешно обновлен", True 
 

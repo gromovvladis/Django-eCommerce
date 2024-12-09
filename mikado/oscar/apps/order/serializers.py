@@ -82,6 +82,8 @@ class OrderSerializer(serializers.Serializer):
                 message=str(extras),
             )
 
+        order_discount = None
+
         for position in positions:
             product, _ = Product.objects.get_or_create(
                 evotor_id=position["product_id"],
@@ -121,13 +123,18 @@ class OrderSerializer(serializers.Serializer):
 
             position_discount = position.get("position_discount", None)
             if position_discount:
-                order_discount = OrderDiscount(
-                    order=order,
-                    message="Скидка сотрудником позицию заказа",
-                    amount=position_discount.get("discount_sum", 0),
-                    voucher_code=position_discount.get("coupon", ""),
-                )
+                if order_discount:
+                    order_discount.amount = order_discount.amount + position_discount.get("discount_sum", 0)
+                else:
+                    order_discount = OrderDiscount(
+                        order=order,
+                        message="Скидка сотрудником позицию заказа",
+                        amount=position_discount.get("discount_sum", 0),
+                        voucher_code=position_discount.get("coupon") or "",
+                    )
+
                 order_discount.save()
+                
                 line.discounts.create(
                     order_discount=order_discount,
                     amount=position_discount.get("discount_sum", 0),
@@ -159,17 +166,19 @@ class OrderSerializer(serializers.Serializer):
                 receipt=True,
             )
 
-        if discounts:
-            for discount in discounts:
-                order_discount = OrderDiscount(
-                    order=order,
-                    message="Скидка сотрудником на весь заказ",
-                    amount=discount.get("discount_sum", 0),
-                    voucher_code=discount.get("coupon", ""),
-                )
-                order_discount.save()
+        for discount in discounts:
+            order_discount = OrderDiscount(
+                order=order,
+                message="Скидка сотрудником на весь заказ",
+                amount=discount.get("discount_sum", 0),
+                voucher_code=discount.get("coupon") or "",
+            )
+            order_discount.save()
 
         return order
+
+    def update(self, instance, validated_data):
+        return instance
 
     def _get_or_create_product_class(self):
         """Создание или извлечение класса товара"""
@@ -181,3 +190,4 @@ class OrderSerializer(serializers.Serializer):
                 "measure_name": "шт",
             },
         )[0]
+

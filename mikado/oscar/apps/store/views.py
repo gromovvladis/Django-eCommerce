@@ -55,15 +55,16 @@ class StoreSelectModalView(APIView):
     def post(self, request, *args, **kwargs):
         form = self.form_class(self.request.POST)
         if form.is_valid():
-            store_id = form.cleaned_data["store_id"]
-            if request.basket:
-                if request.basket.store_id != int(store_id):
-                    request.basket.change_basket_store(store_id)
+            form_store_id = form.cleaned_data["store_id"]
+            request_store_id = request.store.id
+            if request_store_id:
+                if request_store_id != int(form_store_id):
+                    request.basket.change_basket_store(form_store_id)
                     response = http.JsonResponse({"refresh": True, "status": 200}, status=200)
                 else:
                     response = http.JsonResponse({"refresh": False, "status": 200}, status=200)
            
-            response.set_cookie('store', store_id)
+            response.set_cookie('store', form_store_id)
             return response
 
         return http.JsonResponse({"error": "Ошибка выбора магазина", "status": 400}, status=404)
@@ -73,8 +74,7 @@ class StoreSelectModalView(APIView):
         return self.form_class(**self.get_form_class_kwargs(*args, **kwargs))
 
     def get_form_class_kwargs(self, *args, **kwargs):
-        store_id = self.request.basket.store_id or self.request.COOKIES.get('store_id') or store_default
         kwargs["initial"] = {
-            "store_id": store_id,
+            "store_id": self.request.store.id,
         }
         return kwargs

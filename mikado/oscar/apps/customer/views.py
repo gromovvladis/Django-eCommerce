@@ -9,7 +9,6 @@ from django.urls import reverse_lazy
 from django.views import generic
 
 from oscar.apps.customer.mixins import RegisterUserPhoneMixin
-from oscar.apps.customer.utils import get_password_reset_url
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 from django.template.loader import render_to_string
@@ -29,7 +28,6 @@ from . import signals
 PageTitleMixin, RegisterUserMixin = get_classes(
     "customer.mixins", ["PageTitleMixin", "RegisterUserMixin"]
 )
-CustomerDispatcher = get_class("customer.utils", "CustomerDispatcher")
 PhoneAuthenticationForm, OrderSearchForm = get_classes(
     "customer.forms",
     ["PhoneAuthenticationForm", "OrderSearchForm"],
@@ -277,7 +275,6 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
             "new_email": new_email,
             "request": self.request,
         }
-        CustomerDispatcher().send_email_changed_email_for_user(old_user, extra_context)
 
 
 # =============
@@ -419,46 +416,6 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
             self.response = redirect("basket:summary")
         else:
             self.response = redirect("customer:order-list")
-
-
-# class OrderLineView(PostActionMixin, generic.DetailView):
-#     """Customer order line"""
-
-#     def get_object(self, queryset=None):
-#         order = get_object_or_404(
-#             Order, user=self.request.user, number=self.kwargs["order_number"]
-#         )
-#         return order.lines.get(id=self.kwargs["line_id"])
-
-#     def do_reorder(self, line):
-#         self.response = redirect("customer:order", self.kwargs["order_number"])
-#         basket = self.request.basket
-
-#         line_available_to_reorder, reason = line.is_available_to_reorder(
-#             basket, self.request.strategy
-#         )
-
-#         if not line_available_to_reorder:
-#             messages.warning(self.request, reason)
-#             return
-
-#         # We need to pass response to the get_or_create... method
-#         # as a new basket might need to be created
-#         self.response = redirect("basket:summary")
-
-#         # Convert line attributes into basket options
-#         options = []
-#         for attribute in line.attributes.all():
-#             if attribute.option:
-#                 options.append({"option": attribute.option, "value": attribute.value})
-#         basket.add_product(line.product, line.quantity, options)
-
-#         if line.quantity > 1:
-#             msg = "%(qty)d шт. - '%(product)s' были добавлены в вашу корзину" % {"qty": line.quantity, "product": line.product}
-#         else:
-#             msg = "'%s' добавлен в вашу корзину" % line.product
-
-#         messages.info(self.request, msg)
 
 
 # ------------

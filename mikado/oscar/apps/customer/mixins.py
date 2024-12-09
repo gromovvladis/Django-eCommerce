@@ -10,7 +10,6 @@ from oscar.core.loading import get_class, get_model
 
 User = get_user_model()
 CommunicationEventType = get_model("communication", "CommunicationEventType")
-CustomerDispatcher = get_class("customer.utils", "CustomerDispatcher")
 
 logger = logging.getLogger("oscar.customer")
 
@@ -81,11 +80,6 @@ class RegisterUserMixin(object):
 
         return user
 
-    def send_registration_email(self, user):
-        extra_context = {"user": user, "request": self.request}
-        CustomerDispatcher().send_registration_email_for_user(user, extra_context)
-
-
 
 class RegisterUserPhoneMixin(object):
     def register_user(self, form):
@@ -130,7 +124,3 @@ class RegisterUserPhoneMixin(object):
         auth_login(self.request, user)
 
         return user
-
-    def send_registration_email(self, user):
-        extra_context = {"user": user, "request": self.request}
-        CustomerDispatcher().send_registration_email_for_user(user, extra_context)

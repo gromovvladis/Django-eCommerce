@@ -59,7 +59,6 @@ class BasketView(ModelFormSetView):
             for line in self.request.basket._all_lines():
                 line.get_warning()
             
-
     def get_formset_kwargs(self):
         kwargs = super().get_formset_kwargs()
         kwargs["strategy"] = self.request.strategy

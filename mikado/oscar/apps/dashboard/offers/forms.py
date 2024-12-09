@@ -45,10 +45,18 @@ class MetaDataForm(forms.ModelForm):
 
 class RestrictionsForm(forms.ModelForm):
     start_datetime = forms.DateTimeField(
-        widget=widgets.DateTimePickerInput(), label="Дата начала", required=False
+        widget=widgets.DateTimePickerInput(
+            format='%d.%m.%Y %H:%M',
+        ), 
+        input_formats=['%d.%m.%Y %H:%M'],
+        label="Дата начала", required=False
     )
     end_datetime = forms.DateTimeField(
-        widget=widgets.DateTimePickerInput(), label="Дата окончания", required=False
+        widget=widgets.DateTimePickerInput(
+            format='%d.%m.%Y %H:%M',
+        ),
+        input_formats=['%d.%m.%Y %H:%M'],
+        label="Дата окончания", required=False
     )
 
     def __init__(self, *args, **kwargs):

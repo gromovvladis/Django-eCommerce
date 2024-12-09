@@ -3064,7 +3064,7 @@ input[type=button].btn-block {
 }
 
 .collapse:not(.show) {
-  display: none;
+  display: none !important;
 }
 
 .collapsing {
@@ -3095,12 +3095,6 @@ input[type=button].btn-block {
 .dropleft {
   position: relative;
 }
-/* 
-.dropdown-toggle {
-  white-space: nowrap;
-} */
-
-
 
 
 .dropdown-menu {
@@ -9922,6 +9916,10 @@ button.bg-dark:focus {
 
 .font-weight-normal {
   font-weight: 400 !important;
+}
+
+.font-weight-semibold {
+  font-weight: 500 !important;
 }
 
 .font-weight-bold {

@@ -624,14 +624,14 @@ class Product(models.Model):
             if cat:
                 category = cat.full_slug
             else:
-                category = "misc-category"
+                category = "misc"
         else:
             slug = self.slug
             cat = self.categories.first()
             if cat:
                 category = cat.full_slug
             else:
-                category = "misc-category"
+                category = "misc"
                 
         return reverse(
             "catalogue:detail", kwargs={"product_slug": slug, "category_slug": category}

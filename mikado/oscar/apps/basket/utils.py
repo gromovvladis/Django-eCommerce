@@ -12,7 +12,6 @@ DiscountApplication = namedtuple(
     "DiscountApplication", ["amount", "quantity", "offer"]
 )
 
-
 class BasketMessageGenerator(object):
     
     offer_lost_template_name = "oscar/basket/messages/offer_lost.html"
@@ -83,7 +82,7 @@ class LineOfferConsumer(object):
         num_consumed = min(available, quantity)
         self._affected_quantity += num_consumed
         return num_consumed
-
+    
     # public
     def consume(self, quantity: int, offer=None):
         """
@@ -184,13 +183,11 @@ class LineDiscountRegistry(LineOfferConsumer):
     def __init__(self, line):
         super().__init__(line)
         self._discounts = []
-        self._discount = None
 
     def discount(self, amount, quantity, offer=None):
         self._discounts.append(DiscountApplication(amount, quantity, offer))
         self.consume(quantity, offer=offer)
 
-    
     @property
     def total(self):
         return sum([d.amount for d in self._discounts], 0)

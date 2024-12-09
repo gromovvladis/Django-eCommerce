@@ -177,7 +177,7 @@ def round_half_up(money):
     >>> round_half_up(should_not_be_one)
     Decimal('1.01')
     """
-    return money.quantize(decimal.Decimal("0.01"), decimal.ROUND_HALF_UP)
+    return money.quantize(decimal.Decimal("1"), decimal.ROUND_HALF_UP)
 
 
 def is_ajax(request):

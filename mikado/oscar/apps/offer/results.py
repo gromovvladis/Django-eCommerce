@@ -139,6 +139,7 @@ class BasketDiscount(ApplicationResult):
     For when an offer application leads to a simple discount off the basket's
     total
     """
+    is_final = True
 
     affects = ApplicationResult.BASKET
 
@@ -151,6 +152,13 @@ class BasketDiscount(ApplicationResult):
         Returns ``True`` if the discount is greater than zero
         """
         return self.discount > 0
+
+    # @property
+    # def is_final(self):
+    #     """
+    #     Returns ``True`` if the discount is greater than zero
+    #     """
+    #     return self.discount > 0
 
     def __str__(self):
         return "<Basket discount of %s>" % self.discount
