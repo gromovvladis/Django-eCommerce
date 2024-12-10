@@ -121,9 +121,7 @@
                 </tr>
                 <tr>
                     <th>Источник</th>
-                    <td>
-                        {{ order.site|default:"Сайт" }}</td>
-                    </td>
+                    <td>{{ order.site|default:"Сайт" }}</td>
                 </tr>
                 <tr>
                     <th>Сумма заказа</th>
@@ -270,13 +268,12 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
-                                            <span>
-                                                {{ line.variants }}
-                                            </span>
-                                            <br>
-                                            <span class="text-muted">
-                                                Артикул: {{ line.article|default:"-" }}
-                                            </span>
+                                            <div class="d-flex flex-column">
+                                                <span>{{ line.variants }}</span>
+                                                <span class="text-muted">
+                                                    Артикул: {{ line.article|default:"-" }}
+                                                </span>
+                                            </div>
                                         </td>
                                         <td data-label="Количество" class="quantity">{{ line.quantity }}</td>
                                         <td data-label="Доп. товары" class="title">{{ line.additions|default:"-" }}</td>
@@ -315,7 +312,7 @@
                                         {% for discount in discounts %}
                                             <tr class="order-totals collapse discount_details">
                                                 <td colspan="5"></td>
-                                                <th class="text-left">{{ discount.offer_name }}</th>
+                                                <th class="text-left">{{ discount.offer_name|default:discount.message }}</th>
                                                 <th class="text-right">- {{ discount.amount|currency:order.currency }}</th>
                                             </tr>
                                         {% endfor %}

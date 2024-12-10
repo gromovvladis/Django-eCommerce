@@ -19478,22 +19478,18 @@ caption {
 
 .order_graph {
   position: relative;
-  /* padding-bottom: 5em; */
-  /* width: 99%; */
-  /* height: 330px; */
   width: 100%;
   -webkit-box-flex: 0;
   -ms-flex: 0 0 100%;
   flex: 0 0 100%;
-  height: calc(100% - 2rem);
+  height: calc(100% - 3rem);
   position: absolute;
   bottom: 0;
-  /* top: 0; */
 }
 .order_graph .bar-caption {
   position: relative;
   text-align: center;
-  top: -25px;
+  top: -2.75rem;
   height: 20px;
 }
 .bar-caption h2 {
@@ -19613,9 +19609,9 @@ caption {
 .order_graph .bar-chart span p {
   position: relative;
   width: 300%;
-  top: -1.5em;
+  top: -3.5em;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) rotate(-90deg);
   margin: 0;
   color: #8a8a8a;
   z-index: 5;
