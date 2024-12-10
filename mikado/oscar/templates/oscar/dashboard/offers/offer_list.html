@@ -3,70 +3,89 @@
 {% load currency_filters %}
 {% load sorting_tags %}
 {% load i18n %}
+
 {% load widget_tweaks %}
 
 {% block title %}
-    {% trans "Offers" %} | {{ block.super }}
+    Акции | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{% trans "Offers" %}</li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Акции</li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block header %}
     <div class="page-header d-flex justify-content-between">
-        <h1>{% trans "Offers" %}</h1>
-        <a href="{% url 'dashboard:offer-metadata' %}" class="btn btn-primary ml-3"><i class="fas fa-plus"></i> {% trans "Create new offer" %}</a>
+        <h1>Акции</h1>
+        <a href="{% url 'dashboard:offer-metadata' %}" class="btn btn-primary ml-3">
+            <i class="fas fa-plus"></i> Создать акцию
+        </a>
     </div>
 {% endblock header %}
 
 {% block dashboard_content %}
-    <div class="table-header">
-        <h3><i class="fas fa-search"></i> {% trans "Search" %}</h3>
-    </div>
-    <div class="card card-body bg-light">
-        <form method="get" class="form-inline">
-            {% for field in form %}
-                {% if field.name in form.basic_fields %}
-                    {% if field.is_hidden %}
-                        {{ field }}
-                    {% else %}
-                        <div class="form-group mr-2{% if field.errors %} error{% endif %}">
-                            {{ field.label_tag }}
-                            {% render_field field class+='form-control' %}
-                            {% for error in field.errors %}
-                                <ul class="error-block">
-                                    <li>{{ error }}</li>
-                                </ul>
-                            {% endfor %}
-                            {# No help text as it wraps #}
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">
-                {% endif %}
-            {% endfor %}
-            <button type="submit" class="btn btn-primary mr-2" data-loading-text="{% trans 'Searching...' %}">{% trans "Search" %}</button>
-            <a data-toggle="modal" data-target="#SearchModal" href="#" class="mr-2">{% trans "Advanced Search" %}</a>
-            <a href="{% url 'dashboard:offer-list' %}" class="btn btn-secondary">{% trans "Reset" %}</a>
-        </form>
-
-        {# Search modal, if there are form errors the form is automatically openend #}
-        {% include "oscar/dashboard/partials/advanced_search_modal.html" with form=advanced_form style='horizontal' %}
-
-        {% if search_filters %}
-        <div class="search-filter-list">
-            <label>Filters:</label>
-            {% for filter in search_filters %}
-            <span class="badge badge-success">{{ filter }}</span>
-            {% endfor %}
+    <div class="table-wrapper mb-4">
+        <div class="table-header d-flex justify-space-between" data-target="#search-body" 
+        data-toggle="collapse" aria-controls="search-body" aria-expanded="false">
+            <h3><i class="fas fa-search"></i> Поиск</h3>
+            <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+            <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
         </div>
-        {% endif %}
+        <div class="card card-body bg-light {% if form.is_valid %}collapse{% endif %}" id="search-body">
+            <form method="get" class="form-inline fill-width d-flex justify-content-between">
+                <div>
+                    {% for field in form %}
+                        {% if field.name in form.basic_fields %}
+                            {% if field.is_hidden %}
+                                {{ field }}
+                            {% else %}
+                                <div class="form-group mr-2{% if field.errors %} error{% endif %}">
+                                    {{ field.label_tag }}
+                                    {% render_field field class+='form-control' %}
+                                    {% for error in field.errors %}
+                                        <ul class="error-block">
+                                            <li>{{ error }}</li>
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="btn-form d-flex">
+                    <button class="btn btn-primary flex-fill" type="submit" data-loading-text="Поиск...">
+                        <i class="fas fa-search"></i>
+                        <span class="ml-2">
+                            Поиск
+                        </span>
+                    </button>
+                    <a data-toggle="modal" class="btn btn-third ml-2" data-target="#SearchModal" href="#">
+                        <i class="fa-solid fa-bars"></i>
+                    </a>
+                    {% if request.GET %}
+                        <a href="{% url 'dashboard:offer-list' %}" class="btn btn-danger ml-2">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+            {% include "oscar/dashboard/partials/advanced_search_modal.html" with form=advanced_form style='horizontal' %}
+            {% if search_filters %}
+            <div class="search-filter-list">
+                <label>Filters:</label>
+                {% for filter in search_filters %}
+                <span class="badge badge-success">{{ filter }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
     </div>
 
     <form method="post" class="order_table">
@@ -75,9 +94,9 @@
             <caption>
                 <i class="fas fa-gift"></i>
                 {% if search_filters %}
-                {% trans "Offer Search Results" %}
+                    Результаты поиска
                 {% else %}
-                {% trans "All Offers" %}
+                    Все акции
                 {% endif %}
             </caption>
             {% if offers %}

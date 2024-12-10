@@ -1,27 +1,30 @@
 import datetime
 import logging
 
+from decimal import Decimal as D
+from urllib.parse import unquote
+
 from django import http
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views import generic
-from urllib.parse import unquote
-from decimal import Decimal as D
-
 from django.template.loader import render_to_string
+from django.views.generic import FormView, View
+from django.core.exceptions import ObjectDoesNotExist
 
-from oscar.apps.basket.views import Repository
-from oscar.apps.payment.models import Source, SourceType
 from oscar.core import prices
 from oscar.core.loading import get_class, get_classes, get_model
-
-from django.views.generic import FormView, View
 from oscar.apps.basket.signals import voucher_addition, voucher_removal
 from oscar.core.utils import redirect_to_referrer
-from django.core.exceptions import ObjectDoesNotExist
+
 from . import signals
+
+
+Source = get_model("payment", "Source")
+SourceType = get_model("payment", "SourceType")
+Repository = get_class("shipping.repository", "Repository")
 
 CheckoutForm = get_class("checkout.forms", "CheckoutForm")
 UserAddressForm = get_class("address.forms", "UserAddressForm")
@@ -544,7 +547,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         
         payment_name = self.get_payment_method_display(payment_method)
 
-        source_type, is_created = SourceType.objects.get_or_create(name=payment_name, code=payment_method)
+        source_type = SourceType.objects.get_or_create(name=payment_name)[0]
 
         source = Source(
             source_type=source_type,
@@ -651,9 +654,12 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
             amount=total,
             email=email,
         )
+
+        if email:
+            order.user.email = email
+            order.user.save()
         
         if payment is not None:
-            
             self.add_payment_event(
                 'Оплата начата',
                 total.money,

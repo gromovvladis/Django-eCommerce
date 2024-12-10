@@ -1390,9 +1390,6 @@ class EvotorProductClient(EvotorAPICloud):
 
         return "Группы товаров и модификаций были успешно обновлены", True 
 
-    # def _create_parent_product(self):
-    #     pass
-
 # делаем EvotorDocClient и EvotorPushNotifClient
 
 class EvotorDocClient(EvotorAPICloud):

@@ -350,7 +350,7 @@ class Basket(models.Model):
         defaults = {
             "quantity": quantity,
             "price_currency": stock_info.price.currency,
-            "tax_code": stock_info.price.tax_code,
+            "tax_code": stock_info.stockrecord.tax,
         }
 
         line, created = self.lines.get_or_create(

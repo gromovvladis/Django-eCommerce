@@ -274,12 +274,6 @@ var oscar = (function(o, $) {
                     });
                 }
             });
-
-            // Add href to url, so when the page is reloaded this tab will be displayed.
-            $('.nav-tabs a').on('shown.bs.tab', function (e) {
-                window.location.hash = e.target.hash;
-            });
-
             // Display tabs that have invalid input fields
             $('input').on('invalid', function(){
                 var id = $(this).closest('.tab-pane').attr('id');
@@ -369,40 +363,17 @@ var oscar = (function(o, $) {
         },
         product: {
             initProductClass: function() {
-
                 const selectElement = document.getElementById('id_product_class');
-                
                 $(selectElement).on("select2:select", function () {
                     const form = selectElement.closest('form');
                     form.submit();
                 });
-                
-                // const currentUrl = window.location.pathname;
-
-                // Проверяем, есть ли ID продукта в URL
-                // const isEditPage = /\/products\/\d+\/\?$/.test(currentUrl);
-
-                // if (isEditPage) {
-                //     selectElement.addEventListener('change', () => {
-                //         // Найти форму, к которой относится select
-                //         const form = selectElement.closest('form');
-                //         if (form) {
-                //             form.submit(); // Отправить форму
-                //         } else {
-                //             console.error("Форма не найдена для отправки.");
-                //         }
-                //     });
-                // }
             }
         },
         orders: {
-            initTabs: function() {
-                if (location.hash) {
-                    $('.nav-tabs a[href=' + location.hash + ']').tab('show');
-                }
-            },
             initTable: function() {
                 var table = $('form table'),
+                lines = document.querySelectorAll('[data-id="line-container"]'),
                 checkboxes = document.querySelectorAll('.table input[type="checkbox"]'),
                 actionsLinesDiv = document.getElementById('actions_lines'),
                 input = $('<input type="checkbox"/>');
@@ -425,28 +396,13 @@ var oscar = (function(o, $) {
                 });
                 checkboxes.forEach(checkbox => {
                     checkbox.addEventListener('change', function() {
-                        var checkbox = this;
-                        var inputContainer = this.closest('td').querySelector('[data-id="selected-line-input"]');
-                        if (inputContainer){
-                            if (this.checked) {
-                                inputContainer.classList.remove('d-none');
-                                var input_field = $(inputContainer).find('input');
-                                $(input_field).val((input_field).attr('max'));
-                                $(inputContainer).find('[data-id="order-button-plus"]').prop('disabled', true);
-                                $(inputContainer).find('[data-id="order-button-minus"]').prop('disabled', false);
-                                checkbox.classList.add('d-none');
-                            } else {
-                                inputContainer.classList.add('d-none');
-                                checkbox.classList.remove('d-none');
-                            }
-                        }
                         toggleActionsDiv();
                     });
                 });
-                var lines_input = $('[data-id="selected-line-container"]');
-                if ($(lines_input).length > 0){
-                    $(lines_input).each(function(){
-                        var input_container = $(this).find('[data-id="selected-line-input"]');
+                
+                if (lines){
+                    $(lines).each(function(){
+                        var input_container = $(this).find('[data-id="line-input"]');
                         var input_checkbox = $(this).find('input[type="checkbox"]');
                         var input_field = $(input_container).find('input');
                         var more = $(this).find('[data-id="order-button-plus"]');
@@ -459,8 +415,9 @@ var oscar = (function(o, $) {
                             if ($(input_field).val() == $(input_field).attr('max')) {
                                 $(this).prop('disabled', true);
                             }
+                            $(input_checkbox).prop("checked", true);
+                            toggleActionsDiv();
                         });
-
                         less.on('click', function(){
                             if ($(input_field).val() > 0){
                                 $(input_field).val(parseInt($(input_field).val()) - 1);
@@ -468,10 +425,9 @@ var oscar = (function(o, $) {
                             }
                             if ($(input_field).val() == 0) {
                                 $(this).prop('disabled', true);
-                                $(input_container).addClass('d-none');
-                                $(input_checkbox).removeClass('d-none');
-                                $(input_checkbox).prop("checked", false);
                             }
+                            $(input_checkbox).prop("checked", true);
+                            toggleActionsDiv();
                         });
                     })
                 }
@@ -485,6 +441,7 @@ var oscar = (function(o, $) {
                         storeForm.submit();
                     });
                 }
+
             }
         },
         crm: {
