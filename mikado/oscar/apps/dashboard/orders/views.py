@@ -313,6 +313,7 @@ class OrderStatsView(FormView):
             )
             stats[f"orders_{period}"] = orders_period.count()
             stats[f"revenue_{period}"] = orders_period.aggregate(Sum('total'))['total__sum'] or D('0.00')
+            stats[f"discount_{period}"] = orders_period.aggregate(Sum('lines__line_price_before_discounts'))['lines__line_price_before_discounts__sum'] - stats[f"revenue_{period}"] or D('0.00')
             stats[f"average_costs_{period}"] = orders_period.aggregate(Avg("total"))["total__avg"] or D('0.00')
             stats[f"alerts_{period}"] = alerts.filter(date_created__range=(start_date, end_date)).count()
             stats[f"baskets_{period}"] = baskets.filter(date_created__range=(start_date, end_date)).count()
@@ -736,7 +737,7 @@ class OrderActiveListView(OrderListView):
         data = self.form.cleaned_data
 
         if data["store_point"]:
-            queryset = self.base_queryset.filter(
+            queryset = queryset.filter(
                 store__code=data["store_point"]
         )
 

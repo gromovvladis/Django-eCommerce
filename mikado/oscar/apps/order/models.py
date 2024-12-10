@@ -603,6 +603,12 @@ class Line(models.Model):
 
     # Stores often want to assign some status to each line to help with their
     # own business processes.
+    # is_active = models.BooleanField(
+    #     "Активен",
+    #     default=True,
+    #     db_index=True,
+    #     help_text="Активена позиция или нет",
+    # )
     status = models.CharField("Статус", max_length=255, blank=True)
 
     #: Order status pipeline.  This should be a dict where each (key, value)
@@ -672,7 +678,35 @@ class Line(models.Model):
         )
 
     set_status.alters_data = True
+
+    # def get_evotor_name(self):
+    #     name_list = []
+    #     name_list.append(self.product.get_name())
+
+    #     all_attributes = self.product.parent.attributes.all() + self.attributes.all()
+        
+    #     for attribute in all_attributes:
+    #         value = attribute.value
+    #         if isinstance(value, list):
+    #             name_list.append(
+    #                 "%s:  %s"
+    #                 % (attribute.option.name, (", ".join([str(v) for v in value])))
+    #             )
+    #         else:
+    #             name_list.append("%s:  %s" % (attribute.option.name, value))
+
+    #     return "%s" % (", ".join(name_list))
     
+
+    def get_evotor_name(self):
+        name_parts = [
+            self.product.get_name(),
+            self.variants or None,
+            self.options or None,
+            self.additions or None,
+        ]
+        return ", ".join(filter(None, name_parts))
+
     @property
     def options(self):
         ops = []

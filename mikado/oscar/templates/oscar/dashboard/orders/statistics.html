@@ -70,9 +70,6 @@
                     {% if request.GET %}
                         <a href="{% url 'dashboard:order-stats' %}" class="btn btn-danger ml-2">
                             <i class="fa-solid fa-trash"></i>
-                            <span class="caption-button">
-                                Сбросить
-                            </span>
                         </a>
                     {% endif %}
                 </div>   
@@ -172,7 +169,7 @@
                         </tr>
                         <tr>
                             <th class="col-md-10">Всего позиций</th>
-                            <td class="col-md-2" >{{ alerts_days }}</td>
+                            <td class="col-md-2" >{{ lines_days }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Новых пользователей</th>
@@ -189,6 +186,10 @@
                         <tr>
                             <th class="col-md-10">Общий доход</th>
                             <td class="col-md-2" >{{ revenue_days|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_days|currency }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Средняя стоимость заказа</th>
@@ -357,7 +358,7 @@
                         </tr>
                         <tr>
                             <th class="col-md-10">Всего позиций</th>
-                            <td class="col-md-2" >{{ alerts_weeks }}</td>
+                            <td class="col-md-2" >{{ lines_weeks }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Новых пользователей</th>
@@ -374,6 +375,10 @@
                         <tr>
                             <th class="col-md-10">Общий доход</th>
                             <td class="col-md-2" >{{ revenue_weeks|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_weeks|currency }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Средняя стоимость заказа</th>
@@ -541,7 +546,7 @@
                         </tr>
                         <tr>
                             <th class="col-md-10">Всего позиций</th>
-                            <td class="col-md-2" >{{ alerts_months }}</td>
+                            <td class="col-md-2" >{{ lines_months }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Новых пользователей</th>
@@ -558,6 +563,10 @@
                         <tr>
                             <th class="col-md-10">Общий доход</th>
                             <td class="col-md-2" >{{ revenue_months|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_months|currency }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Средняя стоимость заказа</th>
@@ -725,7 +734,7 @@
                         </tr>
                         <tr>
                             <th class="col-md-10">Всего позиций</th>
-                            <td class="col-md-2" >{{ alerts_years }}</td>
+                            <td class="col-md-2" >{{ lines_years }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Новых пользователей</th>
@@ -742,6 +751,10 @@
                         <tr>
                             <th class="col-md-10">Общий доход</th>
                             <td class="col-md-2" >{{ revenue_years|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_years|currency }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Средняя стоимость заказа</th>

@@ -226,27 +226,17 @@
                                     <th class="image"></th>
                                     <th class="title">Продукт</th>
                                     <th class="quantity">Кол-во</th>
-                                    <th class="title">Доп. товары</th>
                                     <th class="actions"></th>
-                                    <th class="text-right">Цена</th>
+                                    <th class="text-right">Цена за шт.</th>
+                                    <th class="text-right">Цена без скидки</th>
+                                    <th class="text-right">Итоговая цена</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for line in lines %}
-                                    <tr>
+                                    <tr data-id="line-container">
                                         <td class="checkbox">
-                                            <div data-id="selected-line-container">
-                                                <input type="checkbox" name="selected_line" value="{{ line.id }}"/>
-                                                <div data-id="selected-line-input" class="order-button d-none">
-                                                    <button type="button" data-id="order-button-minus" class="order-button-elem">
-                                                        <i class="fa-solid fa-minus"></i>
-                                                    </button>
-                                                    <input type="text" name="selected_line_qty_{{ line.id }}" value="{{ line.quantity }}" min="0" max="{{ line.quantity }}" size="2" class="order-button-value"/>
-                                                    <button type="button" {% if line.quantity == 1 %}disabled="disabled"{% endif %} data-id="order-button-plus" class="order-button-elem">
-                                                        <i class="fa-solid fa-plus"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            <input type="checkbox" name="selected_line" value="{{ line.id }}"/>
                                         </td>
                                         <td class="image">
                                             {% with image=line.product.primary_image %}
@@ -258,31 +248,49 @@
                                         </td>
                                         <td class="title">
                                             <div class="d-flex align-items-center">
-                                                <span class="spinner-border-sm {% if line.status == "Готовится" %}badge-warning{% elif line.status == "Отменен" %}badge-danger{% else %}badge-success{% endif %} rounded-circle mr-1">&nbsp;</span>
-                                                    {% if line.product %}
-                                                        <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">
-                                                            {{ line.name }}
-                                                        </a>
-                                                    {% else %}
-                                                        {{ line.name }}
-                                                    {% endif %}
-                                                </div>
+                                                <span class="spinner-border-sm {% if line.status == "Готовится" %}badge-warning{% elif line.status == "Отменен" %}badge-danger{% else %}badge-success{% endif %} rounded-circle mr-2">&nbsp;</span>
+                                                {% if line.product %}
+                                                    <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">
+                                                        {{ line.name }} 
+                                                    </a>
+                                                {% else %}
+                                                    {{ line.name }}
+                                                {% endif %}
                                             </div>
                                             <div class="d-flex flex-column">
+                                                <span>{{ line.options }}</span>
                                                 <span>{{ line.variants }}</span>
+                                                <span>{{ line.additions }}</span>
                                                 <span class="text-muted">
                                                     Артикул: {{ line.article|default:"-" }}
                                                 </span>
                                             </div>
+                                            <span class="badge badge-info my-1 d-md-none">
+                                                {{ line.quantity }} шт.
+                                            </span>
                                         </td>
-                                        <td data-label="Количество" class="quantity">{{ line.quantity }}</td>
-                                        <td data-label="Доп. товары" class="title">{{ line.additions|default:"-" }}</td>
+                                        <td data-label="Количество" class="quantity">
+                                            <div data-id="line-input" class="order-button">
+                                                <button type="button" data-id="order-button-minus" class="order-button-elem">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </button>
+                                                <input type="text" name="selected_line_qty_{{ line.id }}" value="{{ line.quantity }}" min="0" max="99" size="2" class="order-button-value"/>
+                                                <button type="button" {% if line.quantity == 1 %}disabled="disabled"{% endif %} data-id="order-button-plus" class="order-button-elem">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </td>
                                         <td class="actions">
                                             <a class="btn btn-secondary" href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}">
                                                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
                                             </a>
+                                            {% comment %} <span class="badge badge-info ml-1">
+                                                {{ line.quantity }} шт.
+                                            </span> {% endcomment %}
                                         </td>
-                                        <td data-label="Цена" class="text-right">{{ line.line_price_before_discounts|currency:order.currency }}</td>
+                                        <td data-label="Цена за шт." class="text-right">{{ line.unit_price|currency:order.currency }}</td>
+                                        <td data-label="Цена без скидки" class="text-right">{{ line.line_price_before_discounts|currency:order.currency }}</td>
+                                        <td data-label="Итоговая цена" class="text-right">{{ line.line_price|currency:order.currency }}</td>
                                         <td class="toggle-row">
                                             <button class="btn btn-secondary" type="button">
                                                 <i class="fa-solid fa-chevron-up"></i>
@@ -294,7 +302,7 @@
                                 {% if order.total_discount %}
                                     <tr class="order-totals table-caption" data-toggle="collapse" data-target=".discount_details" aria-expanded="false" aria-controls="discount_details" style="cursor: pointer;">
                                         <td colspan="5"></td>
-                                        <th class="text-left" style="color: var(--primary);">
+                                        <th colspan="2" class="text-left" style="color: var(--primary);">
                                             Скидки 
                                             <i class="fa-solid fa-chevron-down"></i>
                                             <i class="fa-solid fa-chevron-up"></i>
@@ -306,25 +314,25 @@
                                     {% if discounts %}
                                         <tr class="order-totals collapse discount_details">
                                             <td colspan="5"></td>
-                                            <th class="text-left">Сумма заказа без скидки</th>
+                                            <th colspan="2" class="text-left">Сумма заказа без скидки</th>
                                             <th class="text-right">{{ order.basket_total_before_discounts|currency:order.currency }}</th>
                                         </tr>
                                         {% for discount in discounts %}
                                             <tr class="order-totals collapse discount_details">
                                                 <td colspan="5"></td>
-                                                <th class="text-left">{{ discount.offer_name|default:discount.message }}</th>
+                                                <th colspan="2" class="text-left">{{ discount.offer_name|default:discount.message }}</th>
                                                 <th class="text-right">- {{ discount.amount|currency:order.currency }}</th>
                                             </tr>
                                         {% endfor %}
                                         <tr class="order-totals collapse discount_details">
                                             <td colspan="5"></td>
-                                            <th class="text-left">Сумма заказа со скидкой</th>
+                                            <th colspan="2" class="text-left">Сумма заказа со скидкой</th>
                                             <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
                                         </tr>
                                     {% else %}
                                         <tr class="order-totals">
                                             <td colspan="5"></td>
-                                            <th class="text-left">Товары</th>
+                                            <th colspan="2" class="text-left">Товары</th>
                                             <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
                                         </tr>
                                     {% endif %}
@@ -332,13 +340,13 @@
                                 {% if order.has_shipping_discounts %}
                                     <tr class="order-totals">
                                         <td colspan="5"></td>
-                                        <th class="text-left">Доставка без скидки</th>
+                                        <th colspan="2" class="text-left">Доставка без скидки</th>
                                         <th class="text-right">{{ order.shipping_before_discounts|currency:order.currency }}</th>
                                     </tr>
                                     {% for discount in order.shipping_discounts %}
                                         <tr class="order-totals">
                                             <td colspan="5"></td>
-                                            <th class="text-left">
+                                            <th colspan="2" class="text-left">
                                                 <span class="badge badge-success">Скидка на доставку</span>
                                                 {{ discount.offer_name }}
                                             </th>
@@ -347,13 +355,13 @@
                                     {% endfor %}
                                     <tr class="order-totals">
                                         <td colspan="5"></td>
-                                        <th class="text-left">Доставка</th>
+                                        <th colspan="2" class="text-left">Доставка</th>
                                         <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
                                     </tr>
                                 {% elif order.has_shipping %}
                                     <tr class="order-totals">
                                         <td colspan="5"></td>
-                                        <th class="text-left">Доставка</th>
+                                        <th colspan="2" class="text-left">Доставка</th>
                                         <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
                                     </tr>
                                 {% endif %}
@@ -362,7 +370,7 @@
                                         {% for charge in surcharges %}
                                             <tr class="order-totals">
                                                 <td colspan="5"></td>
-                                                <th class="text-left">Доплата {{ charge.name }}</th>
+                                                <th colspan="2" class="text-left">Доплата {{ charge.name }}</th>
                                                 <th class="text-right">{{ charge.money|currency:order.currency }}</th>
                                             </tr>
                                         {% endfor %}
@@ -370,7 +378,7 @@
                                 {% endwith %}
                                 <tr class="order-totals">
                                     <td colspan="5"></td>
-                                    <th class="font-weight-semibold text-left">Итого</th>
+                                    <th colspan="2" class="font-weight-semibold text-left">Итого</th>
                                     <th class="text-right font-weight-semibold">{{ order.total|currency:order.currency }}</th>
                                 </tr>
                             </tbody>
@@ -1085,6 +1093,5 @@
 {% block onbodyload %}
     {{ block.super }}
     oscar.dashboard.thumbnails.init();
-    oscar.dashboard.orders.initTabs();
     oscar.dashboard.orders.initTable();
 {% endblock %}

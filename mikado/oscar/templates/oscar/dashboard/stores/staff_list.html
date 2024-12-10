@@ -61,13 +61,9 @@
                             Поиск
                         </span>
                     </button>
-
                     {% if request.GET %}
                         <a href="{% url 'dashboard:staff-list' %}" class="btn btn-danger ml-2">
                             <i class="fa-solid fa-trash"></i>
-                            <span class="caption-button">
-                                Сбросить
-                            </span>
                         </a>
                     {% endif %}
                 </div>

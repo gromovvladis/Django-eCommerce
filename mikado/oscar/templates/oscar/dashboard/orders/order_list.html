@@ -45,7 +45,6 @@
             <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
         </div>
         <div class="card card-body bg-light {% if form.is_valid %}collapse{% endif %}" id="search-body">
-
             <form method="get" class="form-inline fill-width d-flex justify-content-between" id="search_form">
                 {% for field in form %}
                     {% if "order" in field.id_for_label %}
@@ -77,9 +76,6 @@
                     {% if request.GET %}
                         <a href="{% url 'dashboard:order-list' %}" class="btn btn-danger ml-2">
                             <i class="fa-solid fa-trash"></i>
-                            <span class="caption-button">
-                                Сбросить
-                            </span>
                         </a>
                     {% endif %}
                 </div>
@@ -118,7 +114,6 @@
                         <h2 class="mb-3">Изменить статус заказа</h2>
                         {% if order_statuses %}
                             <div class="form-inline fill-width justify-space-between">
-                                {% comment %} <div class="form-group form-flex-inline my-2"> {% endcomment %}
                                 <div class="form-group form-flex-inline">
                                     <label for="new_status_id">Новый статус</label>
                                     <select id="new_status_id" name="new_status">

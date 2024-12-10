@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import QueryDict
 
 from oscar.apps.payment.models import Source, Transaction
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_model
 from oscar.forms.mixins import PhoneNumberMixin
 from oscar.forms.widgets import DatePickerInput, DateRangeInput
 
@@ -319,7 +319,6 @@ class OrderSearchForm(forms.Form):
         required=False,
         initial=True,
     )
-
     format_choices = (
         ("html", "Показать на сайте"),
         ("csv", "Скачать CSV (Excel)"),
@@ -388,7 +387,7 @@ class OrderSearchForm(forms.Form):
 
     def store_choices(self):
         return (("", "Все магазины"),) + tuple(
-            [(src.code, src.name) for src in Store.objects.all()]
+            [(src.code, src.name) for src in Store.objects.filter(is_active=True)]
         )
 
 
@@ -409,7 +408,6 @@ class ActiveOrderSearchForm(forms.Form):
 
         super().__init__(data, *args, **kwargs)
         self.fields["store_point"].choices = self.store_choices()
-
 
     def format_phone_number(self, phone_number):
         # Простейший способ форматирования номера телефона
@@ -439,8 +437,8 @@ class ActiveOrderSearchForm(forms.Form):
         )
 
     def store_choices(self):
-        return (("", "Все магазин"),) + tuple(
-            [(src.code, src.name) for src in Store.objects.all()]
+        return (("", "Все магазины"),) + tuple(
+            [(src.code, src.name) for src in Store.objects.filter(is_active=True)]
         )
 
 
@@ -508,11 +506,9 @@ class NewSourceForm(forms.Form):
 class NewTransactionForm(forms.ModelForm):
 
     def __init__(self, order, *args, **kwargs):
-        
         super().__init__(*args, **kwargs)
 
         self.order = order
-
         txn_type_choices = (('Payment', 'Оплата'), ('Refund', 'Возврат'))
         status_choices = (('succeeded', 'Успешно'), ('canceled', 'Отклонен'), ('pending', 'Обработка'))
         queryset = Source.objects.filter(order_id=order.id)
@@ -531,23 +527,19 @@ class NewTransactionForm(forms.ModelForm):
         required=True,
         help_text='Выберите для какого способа оплаты создате транзакцию',
     )
-
     status = forms.ChoiceField(
         label='Статус транзакции',
         required=True,
         help_text='Выберите статус транзакции',
     )
-
     txn_type = forms.ChoiceField(
         label='Тип операции',
         required=True,
         help_text='Оплата или возврат',
     )
-
     amount = forms.DecimalField(
         label="Сумма", min_value=0, required=True, help_text='Сумма транзакции'
     )
-
     code = forms.CharField(max_length=128, label="Код транзакции", required=False, help_text='Код для интернет транзакций. Формат "0e000b000-000f-0000-a000-00000000ac00"')
     paid = forms.BooleanField(initial=True, label="Оплачено", required=True, help_text='Заказ оплачен?')
     refundable = forms.BooleanField(initial=True, label="Возврат возможен?", required=True, help_text='Оплату возможно вернуть?')

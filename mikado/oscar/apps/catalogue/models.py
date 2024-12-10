@@ -896,7 +896,7 @@ class Product(models.Model):
             pairs = [attribute.summary() for attribute in attributes]
             return ", ".join(pairs)
     
-        return []
+        return ""
     
     def get_variant_attributes(self):
         """

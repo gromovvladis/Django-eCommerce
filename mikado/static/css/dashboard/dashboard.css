@@ -590,23 +590,6 @@ pre code {
   }
 }
 
-/*
-@media (min-width: 660px) {
-  .container-sm, .container {
-    max-width: 650px;
-  }
-}
-@media (min-width: 768px) {
-  .container-md, .container-sm, .container {
-    max-width: 760px;
-  }
-}
-@media (min-width: 992px) {
-  .container-lg, .container-md, .container-sm, .container {
-    max-width: 990px;
-  }
-} */
-
 @media (min-width: 1200px) {
   .container-xl, .container-lg, .container-md, .container-sm, .container {
     max-width: 1180px;
@@ -614,7 +597,7 @@ pre code {
 }
 @media (min-width: 1350px) {
   .container-xl, .container-lg, .container-md, .container-sm, .container {
-    max-width: 1320px;
+    max-width: 1450px;
   }
 }
 .row {
@@ -2570,9 +2553,8 @@ fieldset:disabled a.btn {
 .btn-secondary {
   color: #000000;
   background-color: #f3f3f7;
-  /* color: #fff; */
-  /* background-color: #6c757d; */
-  /* border-color: #6c757d; */
+  border: 3px solid #eee;
+  outline: 3px solid #fff;
 }
 .btn-secondary:hover {
   color: #fff;
@@ -4155,11 +4137,9 @@ input[type=button].btn-block {
   min-width: 40px;
   min-height: 38px;
   background-color: #f6f6f6;
-  border: none;
-  border-radius: 10px;
+  border: 3px solid #eee;
+  border-radius: 15px;
   padding: .55rem .75rem;
-  /* padding: 5px 10px; */
-  /* border-radius: 10px; */
   color: #222;
 }
 
@@ -20266,14 +20246,14 @@ input[type="number"]:focus {
   -ms-flex-pack: center;
   justify-content: center;
   min-width: unset;
-  border-radius: 15px;
-  background: #fafafa;
+  border-radius: 40px;
+  background: #f3f3f7;
   -ms-flex-negative: 0;
   flex-shrink: 0;
   overflow: hidden !important;
   border-style: none;
-  -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .07);
-  box-shadow: 0 0 10px rgba(0, 0, 0, .07);
+  /* -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, .07); */
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, .07); */
   /* box-shadow: 0px 0px 3px rgba(0, 0, 0, .07); */
 }
 
@@ -20299,7 +20279,7 @@ input[type="number"]:focus {
   -webkit-box-flex: 1;
   -ms-flex-positive: 1;
   flex-grow: 1;
-  color: #000
+  color: #111
 }
 
 .order-button button {
@@ -20309,11 +20289,13 @@ input[type="number"]:focus {
   border: 0;
   padding: 0;
   width: var(--size);
-  border-radius: 10px !important;
+  border-radius: 40px !important;
   -webkit-transition: .06s;
   transition: .06s;
   cursor: pointer;
-  background: #fafafa;
+  background: #ffffff;
+  border: 3px solid #e7e7e7;
+  box-shadow: 0px 0px 8px rgba(0, 0, 0, .1);
 }
 
 .order-button button:active i{
@@ -20334,10 +20316,10 @@ input[type="number"]:focus {
   font-weight: 500;
   font-style: normal;
   background: transparent;
-  min-width: 9px;
-  max-width: 20px;
+  min-width: 20px;
+  max-width: 30px;
   padding: 0;
-  color: #000 !important;
+  color: #111 !important;
   text-align: center !important;
   cursor: default;
   border-style: none;
@@ -20418,9 +20400,7 @@ input[type="number"]:focus {
   .mobile-table tbody td {
       display: block;
       text-align: right;
-      padding-left: 180px !important;
-      /* position: relative; */
-      /* white-space: nowrap; */
+      padding-left: 170px !important;
   }
 
   .mobile-table tbody td div{
@@ -20433,7 +20413,7 @@ input[type="number"]:focus {
       left: 0;
       /* width: 50%; */
       width: 50%;
-      min-width: 180px;
+      min-width: 170px;
       padding-left: 1rem;
       font-weight: 500;
       text-align: left;
@@ -20462,7 +20442,7 @@ input[type="number"]:focus {
   .mobile-table tbody .title a,
   .mobile-table tbody .name a{
     color: var(--purple);
-    font-size: 1rem;
+    font-size: .9rem;
     font-weight: 500;
   }
 
