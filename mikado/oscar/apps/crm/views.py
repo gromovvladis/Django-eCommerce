@@ -375,8 +375,8 @@ class CRMDocsEndpointView(APIView):
     8. Изъятие наличных (CASH_OUTCOME)
     """
 
-    def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
+    # def get(self, request, *args, **kwargs):
+    #     return self.post(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)

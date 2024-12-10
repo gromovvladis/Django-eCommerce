@@ -107,7 +107,7 @@ class OrderSerializer(serializers.Serializer):
                 stockrecord=stockrecord,
                 quantity=position["quantity"],
                 article=position["id"],
-                line_price=D(position["result_price"]),
+                line_price=D(position["result_sum"]),
                 line_price_before_discounts=D(position["sum"]),
                 unit_price=D(position["price"]),
                 tax_code=position["tax"]["type"],
