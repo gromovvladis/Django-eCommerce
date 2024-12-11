@@ -930,12 +930,14 @@ class Line(models.Model):
         return ops
     
     def get_additions(self):
-        addit = []
-        for attribute in self.attributes.all():
-            if attribute.additional:
-                if attribute.value > 0:
-                    addit.append(attribute)
-        return addit
+        return [
+            attribute
+            for attribute in self.attributes.all()
+            if attribute.additional
+            and self.basket.store_id in attribute.additional.stores.values_list("id", flat=True)
+            and attribute.additional.is_public
+            and attribute.value > 0
+        ]
 
     # ==========
     # Properties
@@ -1008,47 +1010,59 @@ class Line(models.Model):
         d = smart_str(self.product)
         return d
     
+    # @property
+    # def options(self):
+    #     ops = []
+    #     d = ""
+    #     for attribute in self.attributes.all():
+    #         if attribute.option:
+    #             value = attribute.value
+    #             if isinstance(value, list):
+    #                 ops.append(
+    #                     "%s:  %s"
+    #                     % (attribute.option.name, (", ".join([str(v) for v in value])))
+    #                 )
+    #             else:
+    #                 ops.append("%s:  %s" % (attribute.option.name, value))
+
+    #     if ops:
+    #         d = "%s" % ("\n".join(ops))
+    #     return d
+    
     @property
     def options(self):
-        ops = []
-        d = ""
-        for attribute in self.attributes.all():
-            if attribute.option:
-                value = attribute.value
-                if isinstance(value, list):
-                    ops.append(
-                        "%s:  %s"
-                        % (attribute.option.name, (", ".join([str(v) for v in value])))
-                    )
-                else:
-                    ops.append("%s:  %s" % (attribute.option.name, value))
-
-        if ops:
-            d = "%s" % ("\n".join(ops))
-        return d
+        attributes = self.attributes.filter(option__isnull=False)
+        ops = [
+            f"{attribute.option.name}: {', '.join(map(str, attribute.value))}" 
+            if isinstance(attribute.value, list) 
+            else f"{attribute.option.name}: {attribute.value}"
+            for attribute in attributes
+        ]
+        return "\n".join(ops) if ops else ""
     
-    @property 
+    @property
     def additions(self):
-        addit = []
-        d = ""
-        for attribute in self.attributes.all():
-            if attribute.additional:
-                value = attribute.value
-                if value > 0:
-                    addit.append("%s (%s)" % (attribute.additional.name, value))
-            if addit:
-                d = "%s" % (", ".join(addit))
-        return d
-    
-    @property 
-    def additions_total(self):
-        total = D("0.00")
-        if self.pk:
-            for attribute in self.attributes.all():
-                if attribute.additional:
-                    total += attribute.value * attribute.additional.price 
+        additions = [
+            f"{attribute.additional.name} ({attribute.value})"
+            for attribute in self.attributes.all()
+            if attribute.additional
+            and self.basket.store_id in attribute.additional.stores.values_list("id", flat=True)
+            and attribute.additional.is_public
+            and attribute.value > 0
+        ]
+        return ", ".join(additions) if additions else ""
 
-        return total
+    @property
+    def additions_total(self):
+        if not self.pk:
+            return D("0.00")
+        return sum(
+            attribute.value * attribute.additional.price
+            for attribute in self.attributes.all()
+            if attribute.additional
+            and self.basket.store_id in attribute.additional.stores.values_list("id", flat=True)
+            and attribute.additional.is_public
+        )
 
     @property 
     def variants(self):

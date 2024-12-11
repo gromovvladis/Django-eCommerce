@@ -1,6 +1,5 @@
 from collections import namedtuple
 from decimal import Decimal as D
-from django.conf import settings
 
 from oscar.core.loading import get_class
 

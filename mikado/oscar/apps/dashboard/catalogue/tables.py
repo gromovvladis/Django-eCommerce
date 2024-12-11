@@ -410,6 +410,12 @@ class AdditionalTable(DashboardTable):
         order_by="name",
         attrs = {'th': {'class': 'name'},}
     )
+    stores = TemplateColumn(
+        verbose_name="Магазины",
+        template_name="oscar/dashboard/catalogue/additional_row_stores.html",
+        order_by="stores",
+        attrs = {'th': {'class': 'stores'},}
+    )
     max_amount = Column(
         verbose_name="Максимум",
         order_by="max_amount",
@@ -450,8 +456,8 @@ class AdditionalTable(DashboardTable):
 
     class Meta(DashboardTable.Meta):
         model = Additional
-        fields = ("image", "name", "price", "old_price", "weight", "max_amount", "is_public")
-        sequence = ("image", "name", "price", "old_price", "weight", "max_amount", "is_public", "actions")
+        fields = ("image", "name", "stores", "price", "old_price", "weight", "max_amount", "is_public")
+        sequence = ("image", "name", "stores", "price", "old_price", "weight", "max_amount", "is_public", "actions")
         per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
         attrs = {
             'class': 'table table-striped table-bordered table-hover',

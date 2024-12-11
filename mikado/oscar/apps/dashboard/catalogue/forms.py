@@ -565,7 +565,21 @@ class ProductRecommendationForm(forms.ModelForm):
 class AdditionalForm(forms.ModelForm):
     class Meta:
         model = Additional
-        fields = ["name", "article", "order", "description", "price_currency", "price", "old_price", "weight", "max_amount", "image"]
+        fields = [
+            "name",
+            "article",
+            "order",
+            "description",
+            "stores",
+            "price_currency",
+            "price",
+            "old_price",
+            "weight",
+            "max_amount",
+            "tax",
+            "is_public",
+            "image",
+        ]
         widgets = {
             "image": ThumbnailInput(),
         }

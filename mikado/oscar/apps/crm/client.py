@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 
 from rest_framework.renderers import JSONRenderer
-from oscar.apps.catalogue.serializers import ProductGroupSerializer, ProductGroupsSerializer, ProductSerializer, ProductsSerializer
+from oscar.apps.catalogue.serializers import AdditionalSerializer, AdditionalsSerializer, ProductGroupSerializer, ProductGroupsSerializer, ProductSerializer, ProductsSerializer
 from oscar.apps.customer.serializers import UserGroupSerializer, StaffSerializer
 from oscar.apps.order.serializers import OrderSerializer
 from oscar.apps.order.utils import OrderCreator
@@ -23,6 +23,7 @@ GroupEvotor = get_model("auth", "GroupEvotor")
 Product = get_model('catalogue', 'Product')
 Category = get_model('catalogue', 'Category')
 Order = get_model("order", "Order")
+Additional = get_model("catalogue", "Additional")
 
 evator_cloud_token = settings.EVOTOR_CLOUD_TOKEN
 
@@ -560,6 +561,36 @@ class EvotorProductClient(EvotorAPICloud):
         endpoint = f"stores/{store_id}/products"
         return self.send_request(endpoint)    
 
+    def get_primary_products(self, store_id):
+        """
+        Получить все основные товары
+        """
+        all_products = self.get_products(store_id)
+        items = all_products.get("items", None)
+
+        if items:
+            parent_id = Additional.parent_id
+            filtered_items = [item for item in items if item.get("parent_id") != parent_id]
+            all_products["items"] = filtered_items
+            return all_products
+        
+        return all_products
+
+    def get_additionals_products(self, store_id):
+        """
+        Получить все дополнительные товары
+        """
+        all_products = self.get_products(store_id)
+        items = all_products.get("items", None)
+
+        if items:
+            parent_id = Additional.parent_id
+            filtered_items = [item for item in items if item.get("parent_id") == parent_id]
+            all_products["items"] = filtered_items
+            return all_products
+        
+        return all_products
+
     def get_product_by_id(self, store_id, product_id):
         """
         Получить товар
@@ -642,6 +673,97 @@ class EvotorProductClient(EvotorAPICloud):
     # products ============
 
     # ===  не вызываются напрямую 
+
+    def create_evotor_additionals(self, additionals, store_id):
+        """
+        Создать доп. товар
+        """
+
+        if len(additionals) > 1:
+            bulk = True
+            serializer = AdditionalsSerializer({"items": additionals}, context={"store_id": store_id})
+            additionals_json = json.loads(JSONRenderer().render(serializer.data.get('items')).decode('utf-8'))
+        else:
+            bulk = False
+            serializer = AdditionalSerializer(additionals[0], context={"store_id": store_id})
+            additionals_json = json.loads(JSONRenderer().render(serializer.data).decode('utf-8'))
+
+        endpoint = f"stores/{store_id}/products"
+        response = self.send_request(endpoint, "POST", additionals_json, bulk)
+        error = response.get("error", None) if isinstance(response, dict) else None
+    
+        if not error:
+            if bulk:
+                for product_response in response:
+                    name = product_response.get("name")
+                    additional = next((p for p in additionals if p.name == name), None)
+                    if additional:
+                        additional.evotor_id = product_response.get("id")
+                        additional.save()
+            else:
+                additionals[0].evotor_id = response.get("id")
+                additionals[0].save()
+
+        return error
+    
+    def update_evotor_additionals(self, products, store_id):
+        """
+        Обновить данные товара
+
+        Создаёт или заменяет в магазине один товар или модификацию товара с указанным идентификатором.
+        PATCH /stores/{store-id}/products/{product-id}
+
+        Обновляет цену, закупочную цену и остатки товара или модификации товара в магазине.
+        Вы можете обновить как один, так и несколько параметров.
+        Запрос не может быть пустым.
+
+        product - объект Product
+
+        ТЕЛО: 
+            {
+            "quantity": 12,
+            "cost_price": 100.123,
+            "price": 123.12
+            }
+
+        ОТВЕТ: 
+            {
+                "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
+                "name": "Сидр",
+                "measure_name": "шт",
+                "tax": "VAT_18",
+                "allow_to_sell": true,
+                "price": 123.12,
+                "description": "Вкусный яблочный сидр",
+                "article_number": "СДР-ЯБЛЧ",
+                "code": "42",
+                "barcodes": [
+                    "2000000000060"
+                ],
+                "type": "ALCOHOL_NOT_MARKED",
+                "id": "01ba18b6-8707-5f47-3d9c-4db058054cb2",
+                "quantity": 12,
+                "cost_price": 100.123,
+                "attributes_choices": {},
+                "store_id": "string",
+                "user_id": "string",
+                "created_at": "string",
+                "updated_at": "string"
+            }
+        """
+        self.create_products_parent(products, store_id)
+
+        serializer = ProductsSerializer({"items": products}, context={"store_id": store_id})
+        products_json = json.loads(JSONRenderer().render(serializer.data.get('items')).decode('utf-8'))
+
+        endpoint = f"stores/{store_id}/products"
+        response = self.send_request(endpoint, "PUT", products_json, True)
+        error = response.get("error", None) if isinstance(response, dict) else None
+    
+        return error
+    
+
+
 
     def create_evotor_products(self, products, store_id):
         """
@@ -819,6 +941,66 @@ class EvotorProductClient(EvotorAPICloud):
         return " ".join(errors)
 
     # === вызываются напрямую
+
+
+
+    
+    def update_or_create_evotor_additional(self, product):
+        """
+        Создаёт или заменяет в магазине один товар или модификацию товара..
+        """
+        return self.update_or_create_evotor_products([product])
+
+    def update_or_create_evotor_additionals(self, products):
+        """
+        Создаёт или заменяет товары или модификации товаров в магазине. 
+        Идентификаторы объектов формирует клиент API.
+        """
+        errors = []
+        groups_filtered = {"create": defaultdict(list), "update": defaultdict(list)}
+        products_filtered = {"create": defaultdict(list), "update": defaultdict(list)}
+
+        for product in products:
+            if product.is_parent:
+                store_ids = set()
+                for child in product.children.all():
+                    key = "update" if child.evotor_id else "create"
+                    for stockrecord in child.stockrecords.all():
+                        store_id = stockrecord.store.evotor_id
+                        if store_id:
+                            store_ids.add(store_id)
+                key = "update" if product.evotor_id else "create"
+                for store_id in store_ids:
+                    groups_filtered[key][store_id].append(product)
+            else:
+                key = "update" if product.evotor_id else "create"
+                for stockrecord in product.stockrecords.all():
+                    store_id = stockrecord.store.evotor_id
+                    products_filtered[key][store_id].append(product)
+
+        for action, groups_by_action in groups_filtered.items():
+            for store_id, groups_by_store in groups_by_action.items():
+                if action == "create":
+                    error = self.create_evotor_groups(groups_by_store, store_id)
+                else:
+                    error = self.update_evotor_groups(groups_by_store, store_id)
+                if error:
+                    errors.append(error)
+
+        for action, products_by_action in products_filtered.items():
+            for store_id, products_by_store in products_by_action.items():
+                if action == "create":
+                    error = self.create_evotor_products(products_by_store, store_id)
+                else:
+                    error = self.update_evotor_products(products_by_store, store_id)
+                if error:
+                    errors.append(error)
+
+        return ", ".join(errors)
+
+
+
+
 
     def update_or_create_evotor_product(self, product):
         """
@@ -1291,6 +1473,60 @@ class EvotorProductClient(EvotorAPICloud):
     
 # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
+
+
+
+    def create_or_update_site_additionals(self, additionals_json, is_filtered=False):
+        error_msgs = []
+        products = Product.objects.all()
+        try:
+            evotor_ids = []
+            json_valid = True
+            created = False
+            for additional_json in additionals_json:
+                evotor_id = additional_json.get('id')
+                evotor_ids.append(evotor_id)
+                try:
+                    prd = products.get(evotor_id=evotor_id)
+                    serializer = AdditionalSerializer(prd, data=additional_json)
+                except Product.DoesNotExist:
+                    created = True
+                    serializer = AdditionalSerializer(data=additional_json)
+                
+                if serializer.is_valid():
+                    additional = serializer.save()
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body=f"Product created / updated - { additional.name }",
+                        sender=CRMEvent.PRODUCT,
+                        type=event_type,
+                        )
+                else: 
+                    json_valid = False
+                    logger.error("Ошибка при сериализации %s" % serializer.errors)
+                    error_msgs.append(f"Ошибка сериализации товара: {serializer.errors}")
+
+            if not json_valid:
+                return  ', '.join(error_msgs), False
+            
+            if not is_filtered:
+                for additional in Additional.objects.all():
+                    if additional.evotor_id not in evotor_ids:
+                        additional.evotor_id = None
+                        additional.save()
+
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении дополнительного товара: {e}", exc_info=True)
+            return f"Ошибка при обновлении дополнительного товара: {e}", False
+
+        return "Дополнительные товары были успешно обновлены", True 
+
+
+
+
+
+
+
     def create_or_update_site_products(self, products_json, is_filtered=False):
         error_msgs = []
         products = Product.objects.all()
@@ -1309,13 +1545,14 @@ class EvotorProductClient(EvotorAPICloud):
                     serializer = ProductSerializer(data=product_json)
                 
                 if serializer.is_valid():
-                    product = serializer.save() 
-                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
-                    CRMEvent.objects.create(
-                        body=f"Product created / updated - { product.name }",
-                        sender=CRMEvent.PRODUCT,
-                        type=event_type,
-                    )
+                    if serializer.data.get('parent_id') != Additional.parent_id: 
+                        product = serializer.save()
+                        event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                        CRMEvent.objects.create(
+                            body=f"Product created / updated - { product.name }",
+                            sender=CRMEvent.PRODUCT,
+                            type=event_type,
+                        )
                 else: 
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
@@ -1364,13 +1601,14 @@ class EvotorProductClient(EvotorAPICloud):
                     created = True
 
                 if serializer.is_valid():
-                    group = serializer.save() 
-                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
-                    CRMEvent.objects.create(
-                        body=f"ProductGroup created / or updated - { group.name }",
-                        sender=CRMEvent.GROUP,
-                        type=event_type,
-                    )
+                    if serializer.data.get('id') != Additional.parent_id: 
+                        group = serializer.save() 
+                        event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                        CRMEvent.objects.create(
+                            body=f"ProductGroup created / or updated - { group.name }",
+                            sender=CRMEvent.GROUP,
+                            type=event_type,
+                        )
                 else: 
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
@@ -1389,6 +1627,7 @@ class EvotorProductClient(EvotorAPICloud):
             return f"Ошибка при обновлении группы товаров или модификации товаров: {e}", False
 
         return "Группы товаров и модификаций были успешно обновлены", True 
+
 
 # делаем EvotorDocClient и EvotorPushNotifClient
 

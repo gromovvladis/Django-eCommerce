@@ -289,6 +289,10 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:crm-products",
             },
             {
+                "label": "Дополнительные товары",
+                "url_name": "dashboard:crm-additionals",
+            },
+            {
                 "label": "Документы",
                 "url_name": "dashboard:crm-docs",
             },

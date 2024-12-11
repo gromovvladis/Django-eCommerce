@@ -29,11 +29,13 @@ from oscar.models.fields.slugfield import SlugField
 from oscar.utils.models import get_image_upload_path
 
 CategoryQuerySet, ProductQuerySet, AdditionalQuerySet, AttributeQuerySet = get_classes(
-    "catalogue.managers", ["CategoryQuerySet", "ProductQuerySet", "AdditionalQuerySet", "AttributeQuerySet"]
+    "catalogue.managers",
+    ["CategoryQuerySet", "ProductQuerySet", "AdditionalQuerySet", "AttributeQuerySet"],
 )
 ProductAttributesContainer = get_class(
     "catalogue.product_attributes", "ProductAttributesContainer"
 )
+
 
 # pylint: disable=abstract-method
 class ReverseStartsWith(StartsWith):
@@ -79,9 +81,20 @@ class ProductClass(models.Model):
 
     Not necessarily equivalent to top-level categories but usually will be.
     """
+
     name = models.CharField("Имя", max_length=128)
     slug = AutoSlugField("Ярлык", max_length=128, unique=True, populate_from="name")
-    EMPTY, PCS, KG, LITR, MLITR, METR, COMPLECT, UPAC, ED = "", "шт", "кг", "л", "мл", "м", "компл", "упак", "ед"
+    EMPTY, PCS, KG, LITR, MLITR, METR, COMPLECT, UPAC, ED = (
+        "",
+        "шт",
+        "кг",
+        "л",
+        "мл",
+        "м",
+        "компл",
+        "упак",
+        "ед",
+    )
     MEASURE_CHOICES = (
         (EMPTY, "Не задано"),
         (PCS, "шт. - штуки"),
@@ -94,11 +107,11 @@ class ProductClass(models.Model):
         (ED, "ед. - единицы"),
     )
     measure_name = models.CharField(
-        "Единицы изменения", 
+        "Единицы изменения",
         max_length=128,
         null=False,
         choices=MEASURE_CHOICES,
-        default=EMPTY
+        default=EMPTY,
     )
 
     #: Some product type don't require shipping (e.g. digital products) - we use
@@ -121,18 +134,14 @@ class ProductClass(models.Model):
         through="ProductAdditional",
         blank=True,
         verbose_name="Дополнительные товары класса",
-        help_text=(
-            "Дополнительные товары для всех товаров этого класса"
-        ),
+        help_text=("Дополнительные товары для всех товаров этого класса"),
     )
     class_attributes = models.ManyToManyField(
         "catalogue.Attribute",
         through="ProductAttribute",
         blank=True,
         verbose_name="Атрибуты класса",
-        help_text=(
-            "Атрибуты для всех товаров этого класса"
-        ),
+        help_text=("Атрибуты для всех товаров этого класса"),
     )
 
     class Meta:
@@ -141,7 +150,7 @@ class ProductClass(models.Model):
         permissions = (
             ("full_access", "Полный доступ к товарам"),
             ("read", "Просматривать товары и категории"),
-            ("update_stockrecord", "Изменять наличие товаров"),        
+            ("update_stockrecord", "Изменять наличие товаров"),
         )
         verbose_name = "Класс товара"
         verbose_name_plural = "Классы товара"
@@ -160,7 +169,7 @@ class ProductClass(models.Model):
     @property
     def get_options(self):
         return self.options.all()
-    
+
     @property
     def get_additionals(self):
         return self.class_additionals.all()
@@ -173,6 +182,7 @@ class Category(MP_Node):
 
     Uses :py:mod:`django-treebeard`.
     """
+
     #: Allow comparison of categories on a limited number of fields by ranges.
     #: When the Category model is overwritten to provide CMS content, defining
     #: this avoids fetching a lot of unneeded extra data from the database.
@@ -222,7 +232,7 @@ class Category(MP_Node):
 
     def __str__(self):
         return self.full_name
-    
+
     # Images
     @cached_property
     def primary_image(self):
@@ -237,7 +247,6 @@ class Category(MP_Node):
             return {"original": mis_img, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}
-
 
     @property
     def full_name(self):
@@ -356,7 +365,7 @@ class Category(MP_Node):
         # cache_key = "CATEGORY_URL_%s_%s" % (current_locale, self.pk)
         cache_key = "CATEGORY_URL_%s" % (self.pk)
         return cache_key
-    
+
     def get_name(self):
         return self.name
 
@@ -378,15 +387,12 @@ class Category(MP_Node):
 
     def get_absolute_url(self):
         return self._get_absolute_url()
-    
+
     def get_staff_url(self):
         """
         Return a category's absolute URL
         """
-        return reverse(
-            "dashboard:catalogue-category-update",
-            kwargs={"pk": self.id}
-        )
+        return reverse("dashboard:catalogue-category-update", kwargs={"pk": self.id})
 
     class Meta:
         app_label = "catalogue"
@@ -493,7 +499,9 @@ class Product(models.Model):
 
     slug = SlugField("Ярлык", max_length=255, unique=True)
     description = models.TextField("Описание", blank=True)
-    short_description = models.CharField("Краткое описание", max_length=255, null=True, blank=True)
+    short_description = models.CharField(
+        "Краткое описание", max_length=255, null=True, blank=True
+    )
 
     meta_title = models.CharField(
         "Мета заголовок", max_length=255, blank=True, null=True
@@ -536,18 +544,14 @@ class Product(models.Model):
         through="ProductAdditional",
         blank=True,
         verbose_name="Дополнительные товары товара",
-        help_text=(
-            "Дополнительные товары для данного товара"
-        ),
+        help_text=("Дополнительные товары для данного товара"),
     )
     recommended_products = models.ManyToManyField(
         "catalogue.Product",
         through="ProductRecommendation",
         blank=True,
         verbose_name="Рекомендуемые товары",
-        help_text=(
-            "Это товары, которые рекомендуется сопровождать основной товар."
-        ),
+        help_text=("Это товары, которые рекомендуется сопровождать основной товар."),
     )
 
     # Denormalised product rating - used by reviews app.
@@ -556,22 +560,22 @@ class Product(models.Model):
 
     order = models.IntegerField(
         "Порядок",
-        null=False, 
-        blank=False, 
+        null=False,
+        blank=False,
         default=0,
         help_text="Определяет порядок отображения в списке. (Чем меньше, тем выше в списке)",
     )
     cooking_time = models.IntegerField(
-        "Время приготовления", 
-        null=False, 
-        blank=False, 
+        "Время приготовления",
+        null=False,
+        blank=False,
         default=20,
         help_text="Приблизительное время, которое уйдет у повара на приготовление и сборку заказа на кухне. Указывается в минутах.",
     )
     weight = models.IntegerField(
-        "Вес", 
-        null=True, 
-        blank=True, 
+        "Вес",
+        null=True,
+        blank=True,
         help_text="Вес товара в граммах.",
     )
     date_created = models.DateTimeField(
@@ -632,7 +636,7 @@ class Product(models.Model):
                 category = cat.full_slug
             else:
                 category = "misc"
-                
+
         return reverse(
             "catalogue:detail", kwargs={"product_slug": slug, "category_slug": category}
         )
@@ -641,10 +645,7 @@ class Product(models.Model):
         """
         Return a category's absolute URL
         """
-        return reverse(
-            "dashboard:catalogue-product",
-            kwargs={"pk": self.id}
-        )
+        return reverse("dashboard:catalogue-product", kwargs={"pk": self.id})
 
     def clean(self):
         """
@@ -686,7 +687,9 @@ class Product(models.Model):
         if not self.product_class:
             raise ValidationError("Ваш товар должен иметь класс товара.")
         if self.parent_id:
-            raise ValidationError("Родительский товар может иметь только дочерний товар.")
+            raise ValidationError(
+                "Родительский товар может иметь только дочерний товар."
+            )
 
     def _clean_child(self):
         """
@@ -697,7 +700,9 @@ class Product(models.Model):
         if not has_parent:
             raise ValidationError("Дочернему товару нужен родительский товар.")
         if has_parent and not self.parent.is_parent:
-            raise ValidationError("Вы можете назначать только дочерние товары родительским товарам.")
+            raise ValidationError(
+                "Вы можете назначать только дочерние товары родительским товарам."
+            )
         if self.product_class:
             raise ValidationError("Дочерний товар не может иметь класс товара.")
         if self.pk and self.categories.exists():
@@ -714,7 +719,6 @@ class Product(models.Model):
         if self.has_stockrecords:
             raise ValidationError("Родительский товар не может иметь складские записи.")
 
-
     def save(self, *args, **kwargs):
         if not self.slug:
             if self.is_child:
@@ -730,13 +734,14 @@ class Product(models.Model):
         counter = 1
 
         # Проверка на уникальность slug
-        while self.__class__.objects.filter(slug=self.slug).exclude(id=self.id).exists():
+        while (
+            self.__class__.objects.filter(slug=self.slug).exclude(id=self.id).exists()
+        ):
             self.slug = f"{original_slug}-{counter}"
             counter += 1
 
         super().save(*args, **kwargs)
         self.attr.save()
-
 
     def refresh_from_db(self, using=None, fields=None):
         super().refresh_from_db(using, fields)
@@ -781,13 +786,13 @@ class Product(models.Model):
         It's possible to have options product class-wide, and per product.
         """
         return self.get_product_class().options.all() | self.product_options.all()
-    
+
     @property
     def additionals(self):
         """
         Returns a set of all additionals for this product.
         """
-        return self.get_product_class().class_additionals.all() | self.get_product_additionals()
+        return self.get_class_additionals() | self.get_product_additionals()
 
     @cached_property
     def has_options(self):
@@ -797,12 +802,12 @@ class Product(models.Model):
         # has_product_options = getattr(self, "has_product_options", None)
         # if has_product_class_options is not None and has_product_options is not None:
         #     return has_product_class_options or has_product_options
-        
+
         options = self.options.all()
         if options:
             return True
         return False
-    
+
     @cached_property
     def has_additions(self):
         # Extracting annotated value with number of product class options
@@ -811,12 +816,12 @@ class Product(models.Model):
         # has_product_additionals = getattr(self, "has_product_additionals", None)
         # if has_product_class_additionals is not None and has_product_additionals is not None:
         #     return has_product_class_additionals or has_product_additionals
-        
-        additionals = self.additionals.all()
+
+        additionals = self.additionals.filter(is_public=True)
         if additionals:
             return True
         return False
-    
+
     @cached_property
     def has_attributes(self):
         # Extracting annotated value with number of product class options
@@ -825,16 +830,16 @@ class Product(models.Model):
         # has_product_additionals = getattr(self, "has_product_additionals", None)
         # if has_product_class_additionals is not None and has_product_additionals is not None:
         #     return has_product_class_additionals or has_product_additionals
-        
-        additionals = self.attributes.all()
-        if additionals:
+
+        attributes = self.attributes.all()
+        if attributes:
             return True
         return False
-    
+
     @cached_property
     def has_weight(self):
         return bool(self.weight)
-    
+
     @property
     def is_shipping_required(self):
         return self.get_product_class().requires_shipping
@@ -878,15 +883,17 @@ class Product(models.Model):
         if not name and self.parent_id:
             name = self.parent.name
         return name
-    
+
     def get_variant_name(self):
         """
         Return a variant name
         """
         patent_name = self.get_name()
-        variants = "-".join(str(attr[0].option) for attr in self.attr.get_attribute_values())
+        variants = "-".join(
+            str(attr[0].option) for attr in self.attr.get_attribute_values()
+        )
         return "%s-%s" % (patent_name, variants)
-    
+
     def get_variants(self):
         """
         Return a product's varian
@@ -895,9 +902,9 @@ class Product(models.Model):
             attributes = self.attribute_values.all()
             pairs = [attribute.summary() for attribute in attributes]
             return ", ".join(pairs)
-    
+
         return ""
-    
+
     def get_variant_attributes(self):
         """
         Return a product's varian
@@ -921,9 +928,7 @@ class Product(models.Model):
             meta_description = self.parent.meta_description
         return meta_description or striptags(self.description)
 
-    get_meta_description.short_description = (
-        "Мета-описание товара", "Мета-описание"
-    )
+    get_meta_description.short_description = ("Мета-описание товара", "Мета-описание")
 
     def get_parent(self):
         return self.parent if self.parent else self.categories.first()
@@ -939,11 +944,20 @@ class Product(models.Model):
 
     get_product_class.short_description = "Класс товара"
 
+    def get_class_additionals(self):
+        return self.get_product_class().class_additionals.filter(
+            is_public=True
+        )
+
     def get_product_additionals(self):
         if self.is_child:
-            return self.parent.product_additionals.all()    
-        return self.product_additionals.all()
-    
+            return self.parent.product_additionals.filter(
+                is_public=True
+            )
+        return self.product_additionals.filter(
+            is_public=True
+        )
+
     # pylint: disable=no-member
     def get_categories(self):
         """
@@ -966,7 +980,7 @@ class Product(models.Model):
     def get_attribute_values(self):
         if not self.pk:
             return self.attribute_values.model.objects.none()
-        
+
         attribute_values = self.attribute_values.all()
         if self.is_child:
             parent_attribute_values = self.parent.attribute_values.exclude(
@@ -975,7 +989,7 @@ class Product(models.Model):
             return attribute_values | parent_attribute_values
 
         return attribute_values
-    
+
     def get_prices(self):
         """
         Get list of stockrecord prices
@@ -986,9 +1000,9 @@ class Product(models.Model):
             if self.is_parent:
                 childs = self.children.all()
                 for child in childs:
-                    stockrecords += child.stockrecords.values_list('price')
-            else: 
-                stockrecords += self.stockrecords.values_list('price')
+                    stockrecords += child.stockrecords.values_list("price")
+            else:
+                stockrecords += self.stockrecords.values_list("price")
             if stockrecords:
                 for stc in stockrecords:
                     prices.append(stc[0])
@@ -1019,10 +1033,10 @@ class Product(models.Model):
         images = self.get_all_images().order_by("display_order")
         # ordering = self.images.model.Meta.ordering
         # if not ordering or ordering[0] != "display_order":
-            # Only apply order_by() if a custom model doesn't use default
-            # ordering. Applying order_by() busts the prefetch cache of
-            # the ProductManager
-            # images = images.order_by("display_order")
+        # Only apply order_by() if a custom model doesn't use default
+        # ordering. Applying order_by() busts the prefetch cache of
+        # the ProductManager
+        # images = images.order_by("display_order")
         try:
             return images[0]
         except IndexError:
@@ -1130,12 +1144,9 @@ class Attribute(models.Model):
     Defines an attribute for a product class. (For example, number_of_pages for
     a 'book' class)
     """
+
     name = models.CharField("Имя", max_length=128)
-    code = models.SlugField(
-        "Код",
-        max_length=128,
-        unique=True
-    )
+    code = models.SlugField("Код", max_length=128, unique=True)
 
     # Attribute types
     TEXT = "text"
@@ -1171,7 +1182,7 @@ class Attribute(models.Model):
         on_delete=models.CASCADE,
         related_name="product_attributes",
         verbose_name="Группа атрибутов",
-        help_text='Выберите группу параметров, если используете тип «Атрибут группы» или «Множество атрибутов группы».',
+        help_text="Выберите группу параметров, если используете тип «Атрибут группы» или «Множество атрибутов группы».",
     )
     required = models.BooleanField("Обязательный атрибут", default=False)
 
@@ -1202,7 +1213,9 @@ class Attribute(models.Model):
         if self.type == self.BOOLEAN and self.required:
             raise ValidationError("Логический атрибут не должен быть обязательным.")
         if self.type == self.RICHTEXT and self.required:
-            raise ValidationError("Текстовое поле не должено быть обязательным атрибутом.")
+            raise ValidationError(
+                "Текстовое поле не должено быть обязательным атрибутом."
+            )
 
     def _get_value_obj(self, product, value):
         try:
@@ -1313,15 +1326,16 @@ class Attribute(models.Model):
 
     def _validate_option(self, value, valid_values=None):
         if not isinstance(value, get_model("catalogue", "AttributeOption")):
-            raise ValidationError("Должен быть экземпляром объекта модели AttributeOption.")
+            raise ValidationError(
+                "Должен быть экземпляром объекта модели AttributeOption."
+            )
         if not value.pk:
             raise ValidationError("AttributeOption еще не сохранен.")
         if valid_values is None:
             valid_values = self.option_group.options.values_list("option", flat=True)
         if value.option not in valid_values:
             raise ValidationError(
-                ("%(enum)s не корректен для %(attr)s")
-                % {"enum": value, "attr": self}
+                ("%(enum)s не корректен для %(attr)s") % {"enum": value, "attr": self}
             )
 
     def _validate_file(self, value):
@@ -1371,7 +1385,9 @@ class ProductAttribute(models.Model):
     value_boolean = models.BooleanField(
         "Логическое значение", blank=True, null=True, db_index=True
     )
-    value_float = models.FloatField("Дробное число", blank=True, null=True, db_index=True)
+    value_float = models.FloatField(
+        "Дробное число", blank=True, null=True, db_index=True
+    )
     value_richtext = models.TextField("Текстовое поле", blank=True, null=True)
     value_multi_option = models.ManyToManyField(
         "catalogue.AttributeOption",
@@ -1526,7 +1542,7 @@ class AttributeOptionGroup(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     def save(self, *args, **kwargs):
         if not self.evotor_id:
             self.evotor_id = str(uuid.uuid1())
@@ -1566,7 +1582,7 @@ class AttributeOption(models.Model):
 
     def __str__(self):
         return self.option
-    
+
     def save(self, *args, **kwargs):
         if not self.evotor_id:
             self.evotor_id = str(uuid.uuid1())
@@ -1617,7 +1633,6 @@ class Option(models.Model):
         (RADIO, "Радио кнопка"),
         (MULTI_SELECT, "Multi select"),
         (CHECKBOX, "Флажок"),
-        
     )
 
     empty_label = "------"
@@ -1625,9 +1640,7 @@ class Option(models.Model):
 
     name = models.CharField("Имя", max_length=128, db_index=True)
     code = AutoSlugField("Код", max_length=128, unique=True, populate_from="name")
-    type = models.CharField(
-        "Тип", max_length=255, default=TEXT, choices=TYPE_CHOICES
-    )
+    type = models.CharField("Тип", max_length=255, default=TEXT, choices=TYPE_CHOICES)
     required = models.BooleanField("Обязательная ли эта опция?", default=False)
     option_group = models.ForeignKey(
         "catalogue.AttributeOptionGroup",
@@ -1636,7 +1649,7 @@ class Option(models.Model):
         on_delete=models.CASCADE,
         related_name="product_options",
         verbose_name="Группа опций",
-        help_text='Выберите группу параметров, если используете тип «Опция» или «Множество опций».',
+        help_text="Выберите группу параметров, если используете тип «Опция» или «Множество опций».",
     )
     help_text = models.CharField(
         verbose_name="Текст справки",
@@ -1700,7 +1713,8 @@ class Option(models.Model):
                 )
         elif self.option_group:
             raise ValidationError(
-                ("Группа опций не может использоваться с типом %s") % self.get_type_display()
+                ("Группа опций не может использоваться с типом %s")
+                % self.get_type_display()
             )
         return super().clean()
 
@@ -1718,6 +1732,7 @@ class ProductAdditional(models.Model):
     """
     'Through' model for product additional
     """
+
     primary_class = models.ForeignKey(
         "catalogue.ProductClass",
         on_delete=models.CASCADE,
@@ -1763,61 +1778,91 @@ class ProductAdditional(models.Model):
 class Additional(models.Model):
     """
     An additional that can be selected for a particular item when the product
-    is added to the basket. 
+    is added to the basket.
     """
 
     name = models.CharField("Имя", max_length=128, db_index=True)
     code = AutoSlugField("Код", max_length=128, unique=True, populate_from="name")
-    article = models.CharField("Уникальный код товара в базе", max_length=128, unique=True)
-
+    article = models.CharField(
+        "Уникальный код товара в базе", max_length=128, unique=True
+    )
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+        null=True,
+    )
     order = models.IntegerField(
         "Порядок",
         null=True,
         blank=True,
         help_text="Управляет порядком опций товара на страницах сведений о товаре.",
     )
-
-    is_public = models.BooleanField(
-        "Является общедоступным",
-        default=True,
-        help_text="Показывать этот товар в результатах поиска и каталогах.",
-    )
-
     description = models.TextField("Описание", blank=True)
-
     price_currency = models.CharField(
         "Валюта", max_length=12, default=get_default_currency
     )
-        
     price = models.DecimalField(
         "Цена",
         decimal_places=2,
-        max_digits=12, 
+        max_digits=12,
         default=0,
         help_text="Цена продажи",
     )
-
     old_price = models.DecimalField(
         "Цена до скидки",
         decimal_places=2,
-        max_digits=12, 
+        max_digits=12,
         blank=True,
         null=True,
         help_text="Цена до скидки. Оставить пустым, если скидки нет",
     )
-
     weight = models.IntegerField(
         "Вес",
         default=0,
         help_text="Вес дополнительного товара",
     )
-
     max_amount = models.IntegerField(
         "Максимальное количество",
         default=1,
         help_text="Максимальное количество доп. товара, которое может быть добавлено к основному товару",
     )
-
+    NO_VAT, VAT_10, VAT_18, VAT_0, VAT_18_118, VAT_10_110 = (
+        "NO_VAT",
+        "VAT_10",
+        "VAT_18",
+        "VAT_0",
+        "VAT_18_118",
+        "VAT_10_110",
+    )
+    VAT_CHOICES = (
+        (NO_VAT, "Без НДС."),
+        (VAT_0, "Основная ставка 0%"),
+        (VAT_10, "Основная ставка 10%."),
+        (VAT_10_110, "Расчётная ставка 10%."),
+        (
+            VAT_18,
+            "Основная ставка 18%. С первого января 2019 года может указывать как на 18%, так и на 20% ставку.",
+        ),
+        (
+            VAT_18_118,
+            "Расчётная ставка 18%. С первого января 2019 года может указывать как на 18%, так и на 20% ставку.",
+        ),
+    )
+    tax = models.CharField(
+        "Налог в процентах", default=NO_VAT, choices=VAT_CHOICES, max_length=128
+    )
+    is_public = models.BooleanField(
+        "Является общедоступным",
+        default=True,
+        db_index=True,
+        help_text="Показывать этот дополнительный товар у товаров.",
+    )
+    stores = models.ManyToManyField(
+        "store.Store",
+        blank=True,
+        verbose_name="Магазины",
+    )
     image = models.ImageField(
         "Изображение", upload_to="additionals", blank=True, null=True, max_length=255
     )
@@ -1825,8 +1870,9 @@ class Additional(models.Model):
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
-    objects = AdditionalQuerySet.as_manager()
+    parent_id = "507e005b-t4d2-42dd-adt5-9fb1e5707450"
 
+    objects = AdditionalQuerySet.as_manager()
 
     @cached_property
     def primary_image(self):
@@ -1929,9 +1975,7 @@ class ProductImage(models.Model):
         "Порядок отображения",
         default=0,
         db_index=True,
-        help_text=(
-            "Изображение с нулевым порядком отображения будет основным"
-        ),
+        help_text=("Изображение с нулевым порядком отображения будет основным"),
     )
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
