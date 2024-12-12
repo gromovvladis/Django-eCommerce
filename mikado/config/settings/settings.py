@@ -117,7 +117,6 @@ INSTALLED_APPS = [
 
     'config.settings.config.Shop',
 
-    #vlad
     'smsaero',
     'apps.sms_auth.apps.SmsConfig',
     'apps.user.apps.UserConfig',
@@ -174,13 +173,9 @@ INSTALLED_APPS = [
     'celery',
     'django_celery_beat',
     'django_celery_results',
-    # 'rest_framework.authtoken',
 
     # Django apps that the sandbox depends on
     'django.contrib.sitemaps',
-
-    # 3rd-party apps that the sandbox depends on
-    # 'django_extensions',
 ]
 if DEBUG:
     INSTALLED_APPS += ['debug_toolbar']

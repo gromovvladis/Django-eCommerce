@@ -3,14 +3,14 @@
 {% load widget_tweaks %}
 
 {% block title %}
-    Товары Эвотор | {{ block.super }}
+    Дополнительные товары Эвотор | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Товары Эвотор</li>
+            <li class="breadcrumb-item active" aria-current="page">Дополнительные товары Эвотор</li>
         </ol>
     </nav>
 {% endblock %}
@@ -18,7 +18,7 @@
 {% block header %}
     <div class="page-header d-flex justify-content-between align-items-end">
         <div class="d-flex flex-wrap justify-content-start store-select">
-            <h1 class="mr-2">Товары Эвотор</h1>
+            <h1 class="mr-2">Дополнительные товары Эвотор</h1>
             <form method="get" class="btn d-flex align-items-center no-widget-init" id="store_form">
                 <i class="fa-solid fa-store mx-1"></i>
                 {% for field in form %}

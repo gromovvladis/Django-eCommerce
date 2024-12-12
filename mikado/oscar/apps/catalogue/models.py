@@ -189,13 +189,13 @@ class Category(MP_Node):
     COMPARISON_FIELDS = ("pk", "path", "depth")
 
     name = models.CharField("Имя", max_length=255, db_index=True)
-    code = NullCharField(
-        "Код",
-        max_length=255,
-        blank=True,
-        null=True,
-        unique=True,
-    )
+    # code = NullCharField(
+    #     "Код",
+    #     max_length=255,
+    #     blank=True,
+    #     null=True,
+    #     unique=True,
+    # )
     description = models.TextField("Описание", blank=True)
     meta_title = models.CharField(
         "Мета заголовок", max_length=255, blank=True, null=True
@@ -467,11 +467,11 @@ class Product(models.Model):
         blank=True,
         null=True,
     )
-    article = NullCharField(
+    article = AutoSlugField(
         "Артикул товара",
         max_length=64,
-        blank=True,
-        null=True,
+        populate_from="name",
+        editable=True,
         unique=True,
         help_text=(
             "Универсальный код товара (Артикул) является идентификатором для "
@@ -1736,25 +1736,20 @@ class ProductAdditional(models.Model):
     primary_class = models.ForeignKey(
         "catalogue.ProductClass",
         on_delete=models.CASCADE,
-        # related_name="class_additionals",
         verbose_name="Основной класс",
         blank=True,
         null=True,
     )
-
     primary_product = models.ForeignKey(
         "catalogue.Product",
         on_delete=models.CASCADE,
-        # related_name="product_additionals",
         verbose_name="Основной товар",
         blank=True,
         null=True,
     )
-
     additional_product = models.ForeignKey(
         "catalogue.Additional",
         on_delete=models.CASCADE,
-        # related_name="product_additional",
         verbose_name="Дополнительный товар",
     )
     ranking = models.PositiveSmallIntegerField(
@@ -1775,6 +1770,33 @@ class ProductAdditional(models.Model):
         verbose_name_plural = "Дополнительные товары"
 
 
+class AdditionalCategory(models.Model):
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+        null=True,
+    )
+    store = models.ForeignKey(
+        "store.Store",
+        blank=True,
+        verbose_name="Магазин",
+        on_delete=models.CASCADE,
+    )
+    
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True)
+    
+    class Meta:
+        app_label = "catalogue"
+        verbose_name = "Категория дополнительного товара"
+        verbose_name_plural = "Категории дополнительных товаров"
+
+
+    def get_name(self):
+        return "Дополнительные товары"
+
+
 class Additional(models.Model):
     """
     An additional that can be selected for a particular item when the product
@@ -1782,9 +1804,16 @@ class Additional(models.Model):
     """
 
     name = models.CharField("Имя", max_length=128, db_index=True)
-    code = AutoSlugField("Код", max_length=128, unique=True, populate_from="name")
-    article = models.CharField(
-        "Уникальный код товара в базе", max_length=128, unique=True
+    article = AutoSlugField(
+        "Артикул товара",
+        max_length=64,
+        editable=True,
+        populate_from="name",
+        unique=True,
+        help_text=(
+            "Универсальный код товара (Артикул) является идентификатором для "
+            "товара, который является специфичным для конкретного товара."
+        ),
     )
     evotor_id = models.CharField(
         "ID Эвотор",
@@ -1816,6 +1845,13 @@ class Additional(models.Model):
         blank=True,
         null=True,
         help_text="Цена до скидки. Оставить пустым, если скидки нет",
+    )
+    cost_price = models.DecimalField(
+        "Цена закупки",
+        decimal_places=2,
+        max_digits=12,
+        default=0,
+        help_text="Закупочная цена за ед. доп товара",
     )
     weight = models.IntegerField(
         "Вес",
@@ -1870,8 +1906,6 @@ class Additional(models.Model):
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
-    parent_id = "507e005b-t4d2-42dd-adt5-9fb1e5707450"
-
     objects = AdditionalQuerySet.as_manager()
 
     @cached_property
@@ -1893,6 +1927,9 @@ class Additional(models.Model):
         ordering = ["order", "name"]
         verbose_name = "Дополнительный товар"
         verbose_name_plural = "Дополнительные товары"
+
+    def get_name(self):
+        return self.name
 
     def __str__(self):
         return self.name

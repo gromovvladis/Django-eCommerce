@@ -572,7 +572,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
             response.set_cookie('evotor_update', evotor_update)
             if evotor_update:
                 stockrecord_formset = formsets["stockrecord_formset"]
-                stock_update = not form.changed_data and bool(stockrecord_formset.changed_objects)
+                stock_update = not form.changed_data and bool(stockrecord_formset.changed_objects) and self.object.evotor_id
                 stores_to_delete = [
                     form.cleaned_data.get("store")
                     for form in stockrecord_formset.forms
@@ -1305,7 +1305,7 @@ class AttributeOptionGroupDeleteView(PopUpWindowDeleteMixin, generic.DeleteView)
         product_attributes = self.object.product_attributes
         product_attribute_count = product_attributes.count()
         if product_attribute_count > 0:
-            product_attribute_names = product_attributes.all().values_list('product__name', flat=True)
+            product_attribute_names = product_attributes.values_list('product__name', flat=True)
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             messages.error(
@@ -1445,9 +1445,23 @@ class AdditionalCreateUpdateView(generic.UpdateView):
     def form_valid(self, form):
         self.object = form.save()
         if self.is_popup:
-            return self.popup_response(form.instance)
+            response = self.popup_response(form.instance)
         else:
-            return HttpResponseRedirect(self.get_success_url())
+            response = HttpResponseRedirect(self.get_success_url())
+        
+        evotor_update = form.cleaned_data.get('evotor_update')
+        response.set_cookie('evotor_update', evotor_update)
+        if evotor_update:
+            additional_updated = bool(form.changed_data)
+            error = None
+            if additional_updated:
+                error = form.update_or_create_evotor_additional(self.object)
+            
+            if error:
+                messages.warning(self.request, error)
+
+        return response
+
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

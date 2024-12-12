@@ -132,7 +132,7 @@ class CRMInstallationEndpointView(APIView):
         CRMEvent.objects.create(
             body=f"Terminals recived {request.data}",
             sender=CRMEvent.INSTALLATION,
-            type=CRMEvent.INFO,
+            event_type=CRMEvent.INFO,
         )
         return JsonResponse({"status": "success"}, status=200)
 
@@ -194,7 +194,7 @@ class CRMStoreEndpointView(APIView):
         CRMEvent.objects.create(
             body=f"Добавлены или изменены магазины: {', '.join(stores)}",
             sender=CRMEvent.STORE,
-            type=CRMEvent.UPDATE,
+            event_type=CRMEvent.UPDATE,
         )
 
         EvatorCloud().create_or_update_site_stores(stores_json)
@@ -238,7 +238,7 @@ class CRMTerminalEndpointView(APIView):
         CRMEvent.objects.create(
             body=f"Добавлены или изменены терминалы: {', '.join(terminals)}",
             sender=CRMEvent.TERMINAL,
-            type=CRMEvent.UPDATE,
+            event_type=CRMEvent.UPDATE,
         )
 
         EvatorCloud().create_or_update_site_terminals(terminals_json)
@@ -270,7 +270,7 @@ class CRMStaffEndpointView(APIView):
         CRMEvent.objects.create(
             body=f"Добавлены или изменены сотрудники: {', '.join(staffs)}",
             sender=CRMEvent.STAFF,
-            type=CRMEvent.UPDATE,
+            event_type=CRMEvent.UPDATE,
         )
 
         EvatorCloud().create_or_update_site_staffs(staffs_json)
@@ -302,7 +302,7 @@ class CRMRoleEndpointView(APIView):
         CRMEvent.objects.create(
             body=f"Добавлены или изменены роли сотрудников: {', '.join(roles)}",
             sender=CRMEvent.STAFF,
-            type=CRMEvent.UPDATE,
+            event_type=CRMEvent.UPDATE,
         )
 
         EvatorCloud().create_or_update_site_roles(roles_json)
@@ -350,7 +350,7 @@ class CRMProductEndpointView(APIView):
         CRMEvent.objects.create(
             body=f"Добавлены или изменены продукты: {', '.join(products)}",
             sender=CRMEvent.PRODUCT,
-            type=CRMEvent.UPDATE,
+            event_type=CRMEvent.UPDATE,
         )
 
         EvatorCloud().create_or_update_site_products(products_json)
@@ -419,7 +419,7 @@ class CRMDocsEndpointView(APIView):
             CRMEvent.objects.create(
                 body="Error: Неподдерживаемый тип документа.",
                 sender=CRMEvent.DOC,
-                type=CRMEvent.ERROR,
+                event_type=CRMEvent.ERROR,
             )
 
         return JsonResponse({"status": "success"}, status=200)
@@ -429,7 +429,7 @@ class CRMDocsEndpointView(APIView):
         CRMEvent.objects.create(
             body=f"Добавлен оффлайн заказ: { data.get('id', 'ID Неизвестен') }",
             sender=CRMEvent.ORDER,
-            type=CRMEvent.CREATION,
+            event_type=CRMEvent.CREATION,
         )
 
         EvatorCloud().create_or_update_site_order(data)

@@ -109,7 +109,7 @@ class CategoryForm(SEOFormMixin, BaseCategoryForm):
         try:
             return EvatorCloud().update_or_create_evotor_group(category)
         except Exception as e:
-            error = "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e
+            error = "Ошибка при отправке созданной / измененной категории в Эвотор. Ошибка %s", e
             logger.error(error)
             return error
 
@@ -563,6 +563,13 @@ class ProductRecommendationForm(forms.ModelForm):
 
 
 class AdditionalForm(forms.ModelForm):
+    evotor_update = forms.BooleanField(
+        label="Эвотор", 
+        required=False, 
+        initial=True,
+        help_text="Синхронизировать с Эвотор", 
+    )
+
     class Meta:
         model = Additional
         fields = [
@@ -574,6 +581,7 @@ class AdditionalForm(forms.ModelForm):
             "price_currency",
             "price",
             "old_price",
+            "cost_price",
             "weight",
             "max_amount",
             "tax",
@@ -583,6 +591,14 @@ class AdditionalForm(forms.ModelForm):
         widgets = {
             "image": ThumbnailInput(),
         }
+
+    def update_or_create_evotor_additional(self, additional):
+        try:
+            return EvatorCloud().update_or_create_evotor_additional(additional)
+        except Exception as e:
+            error = "Ошибка при отправке созданного / измененного дополнительного товара в Эвотор. Ошибка %s", e
+            logger.error(error)
+            return error
 
 
 class ProductAdditionalForm(forms.ModelForm):

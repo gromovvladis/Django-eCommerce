@@ -50,12 +50,9 @@ class ProductDetailView(DetailView):
             return self.object
         else:
             return self._get_object(self.kwargs.get("product_slug"))
-            # self.kwargs["slug"] = self.kwargs.get("product_slug")
-            # return super().get_object(queryset)
 
     def _get_object(self, product_slug):
         return self.model.objects.select_related("product_class").get(slug=product_slug)
-
 
     def redirect_if_necessary(self, current_path, product):
         if self.enforce_parent and product.is_child:

@@ -1,8 +1,6 @@
-from django.apps import AppConfig
 from django.urls import include, path
 
 from oscar.core.application import OscarConfig
-from oscar.core.loading import get_class
 
 
 class SmsConfig(OscarConfig):
@@ -11,8 +9,20 @@ class SmsConfig(OscarConfig):
     namespace = "sms_auth"
 
     def ready(self):
-        pass
-        # from apps.sms_auth.listeners import phone_code_post_save
+        from django_celery_beat.models import PeriodicTask, IntervalSchedule
+        from celery import current_app
+
+        if current_app.loader:
+            schedule = IntervalSchedule.objects.get_or_create(
+                every=1,
+                period=IntervalSchedule.HOURS,
+            )[0]
+
+            PeriodicTask.objects.get_or_create(
+                interval=schedule,
+                name="Удалить неактуальные СМС",
+                task="sms_auth.tasks.clear_expired",
+            )
 
     def get_urls(self):
         urls = [

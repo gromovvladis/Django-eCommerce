@@ -37,7 +37,6 @@ class AuthService(SmsService):
             )
         else:
             user.save(**kwargs)
-            # user.save()
 
         generated_code.delete()
 

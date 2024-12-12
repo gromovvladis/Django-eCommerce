@@ -17,6 +17,7 @@ AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Additional = get_model("catalogue", "Additional")
+AdditionalCategory = get_model("catalogue", "AdditionalCategory")
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -617,21 +618,17 @@ class ProductGroupsSerializer(serializers.ModelSerializer):
         return product_groups
     
 
-
-
-
-
 class AdditionalSerializer(serializers.ModelSerializer):
     # товар
     id = serializers.CharField(source="evotor_id")
     name = serializers.CharField()
-    code = serializers.CharField(write_only=True, required=False, allow_blank=True)
     description = serializers.CharField(required=False, allow_blank=True)
     article_number = serializers.CharField(source="article", required=False, allow_blank=True)
     
     parent_id = serializers.CharField(required=False, allow_blank=True, write_only=True)
     
     price = serializers.CharField(write_only=True, required=False)
+    cost_price = serializers.CharField(write_only=True, required=False)
     store_id = serializers.CharField(write_only=True, required=False)
     allow_to_sell = serializers.BooleanField(write_only=True, required=False)
     tax = serializers.CharField(write_only=True, required=False)
@@ -643,11 +640,11 @@ class AdditionalSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
-            "code",
             "description",
             "article_number",
             "parent_id",
             "price",
+            "cost_price",
             "store_id",
             "allow_to_sell",
             "tax",
@@ -656,113 +653,81 @@ class AdditionalSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Извлечение данных из validated_data
-        parent_id = validated_data.pop("parent_id", None)
-        measure_name = validated_data.pop("measure_name", None)
-        store_id = validated_data.pop("store_id", None)
-        price = validated_data.pop("price", None)
-        cost_price = validated_data.pop("cost_price", None)
-        quantity = validated_data.pop("quantity", None)
-        tax = validated_data.pop("tax", None)
-        allow_to_sell = validated_data.pop("allow_to_sell", None)
-        code = validated_data.pop("code", None)
-
-        type = validated_data.pop("type", None)
-        updated_at = validated_data.pop("updated_at", None)
-
         evotor_id = validated_data.get("evotor_id")
+        store_id = validated_data.get("store_id", None)
+        allow_to_sell = validated_data.get("allow_to_sell", None)
+        description = validated_data.get("description", None)
+        article_number = validated_data.get("article_number", None)
+        tax = validated_data.get("tax", None)
+        price = validated_data.get("tax", None)
+        cost_price = validated_data.get("tax", None)
 
-        # Инициализация переменных
-        parent_product = category = None
+        return Additional.objects.get_or_create(
+            evotor_id=evotor_id,
+            defaults={
+                "stores": Store.objects.filter(evotor_id=store_id).first(),
+                "is_public": allow_to_sell,
+                "description": description,
+                "article": article_number,
+                "price": price,
+                "cost_price": cost_price,
+                "tax": tax,
+            }
+        )[0]
 
-        # Обработка родительского товара или категории
-        if parent_id:
-            parent_product = self._get_parent_product(parent_id)
-            category = self._get_or_create_category(parent_id)
+    def update(self, additional, validated_data):
+        evotor_id = validated_data.get("evotor_id")
+        store_id = validated_data.get("store_id", None)
+        allow_to_sell = validated_data.get("allow_to_sell", None)
+        description = validated_data.get("description", None)
+        article_number = validated_data.get("article_number", None)
+        tax = validated_data.get("tax", None)
+        price = validated_data.get("tax", None)
+        cost_price = validated_data.get("tax", None)
 
-        # Создание типа товара
-        product_class = self._get_or_create_product_class(measure_name, quantity)
+        additional.evotor_id = evotor_id
+        additional.is_public = allow_to_sell
+        additional.description = description
+        additional.article = article_number
+        additional.tax = tax
+        additional.price = price
+        additional.cost_price = cost_price
 
-        # Создание или извлечение товара
-        product = self._get_or_create_product(evotor_id, validated_data, parent_product, product_class)
+        additional.save()
 
-        # Добавление категории, если она не существует
-        if category:
-            # Добавление категории к товару
-            self._add_category_to_product(product, category)
+        store = Store.objects.filter(evotor_id=store_id).first()
+        if store:
+            additional.stores.add()
 
-        # Обновление родительского товара и структуры, если необходимо
-        if parent_product:
-            self._update_parent_product(product, parent_product)
-
-        # Сохранение товара
-        self._save(product)
-
-        # Создание или извлечение партнера
-        store = self._get_or_create_store(store_id)
-
-        # Обработка товарной записи
-        self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
-
-        return product
-
-    def update(self, product, validated_data):
-        # Извлечение данных из validated_data
-        parent_id = validated_data.pop("parent_id", None)
-        store_id = validated_data.pop("store_id", None)
-        price = validated_data.pop("price", None)
-        cost_price = validated_data.pop("cost_price", None)
-        quantity = validated_data.pop("quantity", None)
-        tax = validated_data.pop("tax", None)
-        allow_to_sell = validated_data.pop("allow_to_sell", None)
-        code = validated_data.pop("code", None)
-
-        # Инициализация переменных
-        parent_product = category = None
-
-        return product
+        return additional
     
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         try:     
+            representation["tax"] = instance.tax
+            representation["allow_to_sell"] = instance.is_public
+            representation["article_number"] = instance.article
+            representation["price"] = instance.price
+            representation["cost_price"] = instance.cost_price
+            
             store_id = self.context.get("store_id", None)
-            
-            representation["measure_name"] = instance.get_product_class().measure_name
-
-            parent_id = instance.get_evotor_parent_id()
-            if parent_id:
-                representation["parent_id"] = parent_id
-            
-            stc = StockRecord.objects.filter(product=instance, store__evotor_id=store_id).first()
-            
-            if stc:
-                representation["code"] = stc.evotor_code
-                representation["price"] = stc.price
-                representation["cost_price"] = stc.cost_price
-                representation["quantity"] = stc.num_in_stock
-                representation["tax"] = stc.tax
-                representation["allow_to_sell"] = stc.is_public
-
-            if instance.is_child:
-                attribute_values = instance.attribute_values.all()
-                representation["attributes_choices"] = {
-                    attribute_value.attribute.option_group.evotor_id: value.evotor_id
-                    for attribute_value in attribute_values
-                    if (value := attribute_value.value.first())
-                    and attribute_value.attribute.option_group and attribute_value.attribute.option_group.evotor_id
-                    and value.evotor_id
-                }
+            if store_id:
+                store = Store.objects.filter(evotor_id=store_id).first()
+                if store:
+                    additional_category = AdditionalCategory.objects.filter(store=store).first()
+                    if additional_category:
+                        representation["parent_id"] = additional_category.evotor_id
 
         except Exception as e:
             logger.error(f"Ошибка определения товара: {e}")
-            representation["measure_name"] = "шт"
             representation["tax"] = "NO_VAT"
             representation["allow_to_sell"] = False
             representation["price"] = 0
             representation["cost_price"] = 0
-            representation["quantity"] = 0
 
+        representation["measure_name"] = "шт"
         representation["type"] = "NORMAL"
+        representation["cost_price"] = 0
 
         if not representation.get("id"):
             representation.pop("id", None)

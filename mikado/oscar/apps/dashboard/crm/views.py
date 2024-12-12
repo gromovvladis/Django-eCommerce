@@ -29,6 +29,7 @@ Line = get_model("order", "Line")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 Additional = get_model("catalogue", "Additional")
+AdditionalCategory = get_model("catalogue", "AdditionalCategory")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 
 CRMStoreForm = get_class("dashboard.crm.forms", "CRMStoreForm")
@@ -367,14 +368,10 @@ class CRMGroupsListView(CRMTablesMixin):
 
                 parent_id = data_item.get("parent_id", None)
                 if parent_id is not None:
-                    try:
-                        data_item["parent"] = Category.objects.get(
-                            evotor_id=parent_id
-                        )
-                    except Category.DoesNotExist:
-                        data_item["parent"] = Product.objects.filter(
-                            evotor_id=parent_id
-                        ).first()
+                    data_item["parent"] = (
+                        Category.objects.filter(evotor_id=parent_id).first()
+                        or Product.objects.filter(evotor_id=parent_id).first()
+                    )
 
                 store_id = data_item.get("store_id", None)
                 if store_id is not None:
@@ -432,7 +429,8 @@ class CRMGroupsListView(CRMTablesMixin):
         try:
             error = EvatorCloud().update_or_create_evotor_groups(models)
         except Exception as e:
-            logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
+            error = "Ошибка при отправке созданной / измененной категории или модификации в Эвотор. Ошибка %s", e
+            logger.error(error)
         
         if error:
             messages.error(self.request, error)
@@ -555,6 +553,7 @@ class CRMProductListView(CRMTablesMixin):
                     data_item["parent"] = (
                         Category.objects.filter(evotor_id=parent_id).first()
                         or Product.objects.filter(evotor_id=parent_id).first()
+                        or AdditionalCategory.objects.filter(evotor_id=parent_id).first()
                     )
 
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
@@ -672,7 +671,6 @@ class CRMAdditionalListView(CRMTablesMixin):
         return self.table_site(site_models)
 
     def get_queryset(self):
-
         self.form = self.form_class(self.request.GET)
         if not self.form.is_valid():
             messages.error(
@@ -691,7 +689,7 @@ class CRMAdditionalListView(CRMTablesMixin):
             )
             return []
 
-        data_json = EvatorCloud().get_primary_products(store_evotor_id)
+        data_json = EvatorCloud().get_additionals_products(store_evotor_id)
         error = data_json.get("error")
 
         if error:
@@ -718,40 +716,22 @@ class CRMAdditionalListView(CRMTablesMixin):
 
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
 
-                data_item["is_valid"] = True
-                data_item["is_created"] = True
-
-                # if not model_instance:
-                #     data_item.update({"is_created": False, "is_valid": False})
-                # else:
-                #     data_item["is_created"] = True
-                #     if store:
-                #         stockrecord = model_instance.stockrecords.filter(store__evotor_id=store_id).first()
-
-                #         stockrecord_match = (
-                #             stockrecord
-                #             # and stockrecord.evotor_code == data_item.get("code")
-                #             and stockrecord.price == data_item.get("price", 0)
-                #             and stockrecord.cost_price == data_item.get("cost_price", 0)
-                #             and stockrecord.num_in_stock == data_item.get("quantity", 0)
-                #             and stockrecord.tax == data_item.get("tax")
-                #             and stockrecord.is_public == data_item.get("allow_to_sell", False)
-                #         ) or False
-
-                #         product_class_match = (
-                #             model_instance.get_product_class().measure_name
-                #             == data_item.get("measure_name")
-                #         )
-                #         data_item["is_valid"] = (
-                #             model_instance.name == data_item.get("name", "").strip()
-                #             and model_instance.article == data_item.get("article_number", "").strip()
-                #             and model_instance.short_description == data_item.get("description", None)
-                #             and model_instance.get_evotor_parent_id() == data_item.get("parent_id", None)
-                #             and stockrecord_match
-                #             and product_class_match
-                #         )
-                #     else:
-                #         data_item["is_valid"] = False
+                if not model_instance:
+                    data_item.update({"is_created": False, "is_valid": False})
+                else:
+                    data_item["is_created"] = True
+                    if store:
+                        data_item["is_valid"] = (
+                            model_instance.name == data_item.get("name", "").strip()
+                            and model_instance.article == data_item.get("article_number", "").strip()
+                            and model_instance.description == data_item.get("description", None)
+                            and model_instance.parent_id == data_item.get("parent_id", None)
+                            and model_instance.stores.values_list("id", flat=True) in data_item.get("store_id", None)
+                            and model_instance.is_public == data_item.get("allow_to_sell", None)
+                            and model_instance.tax == data_item.get("tax", None)
+                        )
+                    else:
+                        data_item["is_valid"] = False
 
             self.queryset = sorted(data_items, key=lambda x: (x["is_created"], x["is_valid"]))
 

@@ -483,8 +483,9 @@ class CRMProductEvotorTable(DashboardTable):
         order_by="price",
         attrs = {'th': {'class': 'price'},}
     )
-    tax = Column(
+    tax = TemplateColumn(
         verbose_name="Налог",
+        template_name="oscar/dashboard/crm/products/evotor_table/product_row_tax.html",
         order_by="tax",
         attrs = {'th': {'class': 'tax'},}
     )
