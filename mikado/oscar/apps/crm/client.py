@@ -127,22 +127,25 @@ class EvotorAPICloud:
         bulk.save()
 
         if bulk.status in CRMBulk.FINAL_STATUSES:
-            self.finish_bulk(bulk, response)
+            return self.finish_bulk(bulk, response)
         else:
             self.create_periodic_task(bulk)
 
     def finish_bulk(self, bulk, response):
         bulk.date_finish = now()
+        bulk.status = response.get("status")
         details = response.get("details")
         if details:
             if bulk.object_type == CRMBulk.PRODUCT:
                 self.set_evotor_ids(details, Product, "article")
             elif bulk.object_type == CRMBulk.PRODUCT_GROUP:
                 self.set_evotor_ids(details, Category, "name")
-
+        
+        return bulk
+                
     def create_periodic_task(self, bulk):
-        process_bulk_task.apply_async(kwargs={"bulk_evotor_id": bulk.evotor_id, "retry_count": 1}, countdown=10)
-
+        process_bulk_task.apply_async(kwargs={"bulk_evotor_id": bulk.evotor_id}, countdown=5)
+        
     def get_bulk_by_id(self, bulk_id):
         """"
         Получить подробную информацию о состоянии определённой задачи
