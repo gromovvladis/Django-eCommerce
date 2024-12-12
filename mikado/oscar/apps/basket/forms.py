@@ -191,11 +191,13 @@ class AddToBasketForm(forms.Form):
         Option.CHECKBOX: _option_checkbox_field,
     }
 
-    def __init__(self, basket, product, *args, **kwargs):
+    def __init__(self, basket, product, store_id, *args, **kwargs):
         # Note, the product passed in here isn't necessarily the product being
         # added to the basket. For child products, it is the *parent* product
         # that gets passed to the form. An optional product_id param is passed
         # to indicate the ID of the child product being added to the basket.
+        self.store_id = store_id
+        self.has_additions = False
         self.basket = basket
         self.parent_product = product
 
@@ -275,8 +277,9 @@ class AddToBasketForm(forms.Form):
             self._add_option_field(product, option)
         
         for additional in product.additionals:
-            self._add_additional_field(product, additional)
-            
+            if self.store_id in additional.stores.values_list("id", flat=True):
+                self._add_additional_field(product, additional)
+                self.has_additions = True
 
     def _add_option_field(self, product, option):
         """

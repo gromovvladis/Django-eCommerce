@@ -7,10 +7,10 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
     var products_sum = products_sums[i];
     var products_quantity = products_quantities[i];
     var orders_data = orders_datas[i];
+    
     i++;
 
     if (products_name) {
-
         const getOrCreateLegendList = (chart, DataID) => {
             console.log(DataID)
             const legendContainer = tab.querySelector(DataID);
@@ -122,8 +122,8 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
         // Данные для диаграммы по количеству
         const CountCtx = tab.querySelector('[data-id="count-chart"]').getContext('2d');
         const CountChart = new Chart(CountCtx, {
-            type: 'doughnut',
-            // type: 'polarArea',
+            // type: 'doughnut',
+            type: 'polarArea',
             data: {
                 labels: products_name,
                 datasets: [{

@@ -5,7 +5,7 @@ from django.views.generic import View
 from django.db.models import Count, Max, Min, Case, When, DecimalField, BooleanField, Q
 from django_tables2 import SingleTableView
 
-from oscar.apps.catalogue.serializers import ProductGroupsSerializer, ProductsSerializer
+from oscar.apps.catalogue.serializers import AdditionalsSerializer, ProductGroupsSerializer, ProductsSerializer
 from oscar.apps.crm.client import EvatorCloud
 from oscar.apps.customer.serializers import StaffsSerializer
 from oscar.apps.dashboard.crm.mixins import CRMTablesMixin
@@ -28,6 +28,8 @@ Order = get_model("order", "Order")
 Line = get_model("order", "Line")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
+Additional = get_model("catalogue", "Additional")
+AdditionalCategory = get_model("catalogue", "AdditionalCategory")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 
 CRMStoreForm = get_class("dashboard.crm.forms", "CRMStoreForm")
@@ -41,6 +43,8 @@ CRMStoreForm = get_class("dashboard.crm.forms", "CRMStoreForm")
     CRMStaffSiteTable,
     CRMProductEvotorTable,
     CRMProductSiteTable,
+    CRMAdditionalEvotorTable,
+    CRMAdditionalSiteTable,
     CRMGroupEvotorTable,
     CRMGroupSiteTable,
 ) = get_classes(
@@ -54,6 +58,8 @@ CRMStoreForm = get_class("dashboard.crm.forms", "CRMStoreForm")
         "CRMStaffSiteTable",
         "CRMProductEvotorTable",
         "CRMProductSiteTable",
+        "CRMAdditionalEvotorTable",
+        "CRMAdditionalSiteTable",
         "CRMGroupEvotorTable",
         "CRMGroupSiteTable",
     ),
@@ -362,14 +368,10 @@ class CRMGroupsListView(CRMTablesMixin):
 
                 parent_id = data_item.get("parent_id", None)
                 if parent_id is not None:
-                    try:
-                        data_item["parent"] = Category.objects.get(
-                            evotor_id=parent_id
-                        )
-                    except Category.DoesNotExist:
-                        data_item["parent"] = Product.objects.filter(
-                            evotor_id=parent_id
-                        ).first()
+                    data_item["parent"] = (
+                        Category.objects.filter(evotor_id=parent_id).first()
+                        or Product.objects.filter(evotor_id=parent_id).first()
+                    )
 
                 store_id = data_item.get("store_id", None)
                 if store_id is not None:
@@ -427,7 +429,8 @@ class CRMGroupsListView(CRMTablesMixin):
         try:
             error = EvatorCloud().update_or_create_evotor_groups(models)
         except Exception as e:
-            logger.error("Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e)
+            error = "Ошибка при отправке созданной / измененной категории или модификации в Эвотор. Ошибка %s", e
+            logger.error(error)
         
         if error:
             messages.error(self.request, error)
@@ -520,7 +523,7 @@ class CRMProductListView(CRMTablesMixin):
             )
             return []
 
-        data_json = EvatorCloud().get_products(store_evotor_id)
+        data_json = EvatorCloud().get_primary_products(store_evotor_id)
         error = data_json.get("error")
 
         if error:
@@ -550,6 +553,7 @@ class CRMProductListView(CRMTablesMixin):
                     data_item["parent"] = (
                         Category.objects.filter(evotor_id=parent_id).first()
                         or Product.objects.filter(evotor_id=parent_id).first()
+                        or AdditionalCategory.objects.filter(evotor_id=parent_id).first()
                     )
 
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
@@ -619,6 +623,149 @@ class CRMProductListView(CRMTablesMixin):
             messages.error(self.request, error)
         else:
             messages.success(self.request, "Товары успешно отправлены в Эвотор.")
+
+        return redirect(self.url_redirect)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["form"] = self.form
+        return ctx
+
+
+class CRMAdditionalListView(CRMTablesMixin):
+    template_name = "oscar/dashboard/crm/additionals/additional_list.html"
+    model = Additional
+    form_class = CRMStoreForm
+    serializer = AdditionalsSerializer
+    context_table_name = "tables"
+    table_prefix = "additional_{}-"
+    table_evotor = CRMAdditionalEvotorTable
+    table_site = CRMAdditionalSiteTable
+    url_redirect = reverse_lazy("dashboard:crm-additionals")
+
+    def get_site_table(self):
+        evotor_ids = [model_qs['id'] for model_qs in self.queryset]
+        correct_ids = [model_qs['id'] for model_qs in self.queryset if model_qs['is_valid'] == True]
+
+        site_models = self.model.objects.all().annotate(
+            is_valid=Case(
+                When(Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids), then=True),
+                default=False,
+                output_field=BooleanField()
+            ),
+            wrong_evotor_id=Case(
+                When(
+                    Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
+                    then=True
+                ),
+                default=False,
+                output_field=BooleanField()
+            ),
+        ).order_by(
+            '-wrong_evotor_id',
+            'is_valid',
+            'evotor_id',
+            '-is_valid'
+        )
+            
+        return self.table_site(site_models)
+
+    def get_queryset(self):
+        self.form = self.form_class(self.request.GET)
+        if not self.form.is_valid():
+            messages.error(
+                self.request,
+                "Ошибка при формировании запроса к Эвотор. Неверные данные формы",
+            )
+            return []
+
+        data = self.form.cleaned_data
+        store_evotor_id = data.get("store") or self.form.fields.get("store").initial
+
+        if not store_evotor_id:
+            messages.error(
+                self.request,
+                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список точек продаж",
+            )
+            return []
+
+        data_json = EvatorCloud().get_additionals_products(store_evotor_id)
+        error = data_json.get("error")
+
+        if error:
+            self.queryset = []
+            logger.error(f"Ошибка {error}")
+            messages.error(self.request, error)
+            return self.queryset
+
+        serializer = self.serializer(data=data_json)
+        if serializer.is_valid():
+            data_items = serializer.initial_data["items"]
+
+            for data_item in data_items:
+                data_item["updated_at"] = datetime.strptime(
+                    data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+                )
+
+                evotor_id = data_item["id"]
+                store_id = data_item["store_id"]
+
+                store = Store.objects.filter(evotor_id=store_id).first()
+                data_item["store"] = store
+                data_item["is_valid"] = bool(store)
+
+                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
+
+                if not model_instance:
+                    data_item.update({"is_created": False, "is_valid": False})
+                else:
+                    data_item["is_created"] = True
+                    if store:
+                        data_item["is_valid"] = (
+                            model_instance.name == data_item.get("name", "").strip()
+                            and model_instance.article == data_item.get("article_number", "").strip()
+                            and model_instance.description == data_item.get("description", None)
+                            and model_instance.parent_id == data_item.get("parent_id", None)
+                            and model_instance.stores.values_list("id", flat=True) in data_item.get("store_id", None)
+                            and model_instance.is_public == data_item.get("allow_to_sell", None)
+                            and model_instance.tax == data_item.get("tax", None)
+                        )
+                    else:
+                        data_item["is_valid"] = False
+
+            self.queryset = sorted(data_items, key=lambda x: (x["is_created"], x["is_valid"]))
+
+            return self.queryset
+        else:
+            self.queryset = []
+            logger.error(f"Ошибка при сериализации данных {serializer.errors}")
+            messages.error(self.request,(f"Ошибка при сериализации данных {serializer.errors}"))
+            return self.queryset
+
+    def update_models(self, data_items, is_filtered):
+        msg, success = EvatorCloud().create_or_update_site_additionals(
+            data_items, is_filtered
+        )
+
+        if success:
+            messages.success(self.request, msg)
+        else:
+            messages.error(self.request, msg)
+
+        return self.redirect_with_get_params(self.url_redirect, self.request)
+
+    def send_models(self, is_filtered):
+        models = super().send_models(is_filtered)
+        try:
+            error = EvatorCloud().update_or_create_evotor_additionals(models)
+        except Exception as e:
+            error = "Ошибка при отправке созданного / измененного дополнительного товара в Эвотор. Ошибка %s", e
+            logger.error(error)
+        
+        if error:
+            messages.error(self.request, error)
+        else:
+            messages.success(self.request, "Дополнительные товары успешно отправлены в Эвотор.")
 
         return redirect(self.url_redirect)
 

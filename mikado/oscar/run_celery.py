@@ -20,7 +20,7 @@ def setup_celery_logging(loglevel=None, **kwargs):
         logging.getLogger(CELERY_LOGGER_NAME).setLevel(loglevel)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", config("DJANGO_SETTINGS_MODULE"))
-app = Celery("mikado-celery", broker=BROKER_URL, backend=BROKER_URL)
+app = Celery("celery", broker=BROKER_URL, backend=BROKER_URL)
 app.config_from_object(settings, namespace="CELERY")
 
 app.conf.broker_read_url = BROKER_URL

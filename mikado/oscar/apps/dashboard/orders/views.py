@@ -7,12 +7,13 @@ import logging
 
 from decimal import Decimal as D
 from decimal import InvalidOperation
+import math
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django_tables2 import SingleTableView
-from django.db.models import Count, Sum, fields, F, Max, ExpressionWrapper, DurationField, When, Value, Case, Avg
+from django.db.models import Count, Sum, fields, F, Max, ExpressionWrapper, DurationField, When, Value, Case, Avg, Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -79,7 +80,6 @@ def queryset_orders_for_user(user):
         stores = Store._default_manager.filter(users=user)
         return queryset.filter(lines__store__in=stores).distinct()
 
-
 def get_order_for_user_or_404(user, number):
     try:
         return queryset_orders_for_user(user).get(number=number)
@@ -126,9 +126,9 @@ class OrderStatsView(FormView):
         diff = relativedelta(end, start)
 
         if range_type == 'days':
-            range_time = (end - start).days
+            range_time = end.day - start.day + 1
         elif range_type == 'weeks':
-            range_time = (end - start).days // 7
+            range_time = math.ceil((end.day - start.day + 1) / 7)
         elif range_type == 'months':
             start_time = start_time.replace(day=1)
             range_time = diff.years * 12 + diff.months + (1 if diff.days > 0 else 0)
@@ -161,7 +161,7 @@ class OrderStatsView(FormView):
             order_count.append(count) 
             order_total.append(int(total))
             if range_type == 'days':
-                order_labels.append(end_time.strftime('%d.%m'))
+                order_labels.append(start_time.strftime('%d.%m'))
             elif range_type == 'weeks':
                 order_labels.append(start_time.strftime('%d.%m') + "-" + end_time.strftime('%d.%m'))
             elif range_type == 'months':
@@ -300,40 +300,87 @@ class OrderStatsView(FormView):
             "top_products_sums": [],
         }
 
-        # Добавление отчетов и статистики
+        def aggregate_orders(queryset, field, operation, default=D('0.00')):
+            result = queryset.aggregate(result=operation(field))['result']
+            return result or default
+
+        def count_customers_with_orders(customers, min_orders):
+            return customers.annotate(order_count=Count('orders')).filter(order_count__gte=min_orders, date_joined__range=(start_date, end_date)).count()
+
         for period, start in start_dates.items():
             orders_period = orders.filter(date_placed__range=(start_date, end_date))
             lines_period = lines.filter(order__in=orders_period)
+
             top_products = (
                 lines_period
                 .values('product', 'name')
                 .annotate(total_quantity=Sum('quantity'), total_sum=Sum('line_price'))
-                .order_by('-total_quantity')
-                [:5]
+                .order_by('-total_quantity')[:5]
             )
-            stats[f"orders_{period}"] = orders_period.count()
-            stats[f"revenue_{period}"] = orders_period.aggregate(Sum('total'))['total__sum'] or D('0.00')
-            stats[f"discount_{period}"] = orders_period.aggregate(Sum('lines__line_price_before_discounts'))['lines__line_price_before_discounts__sum'] - stats[f"revenue_{period}"] or D('0.00')
-            stats[f"average_costs_{period}"] = orders_period.aggregate(Avg("total"))["total__avg"] or D('0.00')
-            stats[f"alerts_{period}"] = alerts.filter(date_created__range=(start_date, end_date)).count()
-            stats[f"baskets_{period}"] = baskets.filter(date_created__range=(start_date, end_date)).count()
-            stats[f"users_{period}"] = users.filter(date_joined__range=(start_date, end_date)).count()
-            stats[f"customers_{period}"] = customers.filter(date_joined__range=(start_date, end_date)).count()
-            stats[f"customers_2orders_{period}"] = customers.annotate(order_count=Count('orders')).filter(order_count__gte=2, date_joined__range=(start_date, end_date)).count()
-            stats[f"customers_5orders_{period}"] = customers.annotate(order_count=Count('orders')).filter(order_count__gte=5, date_joined__range=(start_date, end_date)).count()
-            stats[f"lines_{period}"] = lines_period.count()
-            stats[f"products_{period}"] = products.filter(date_created__range=(start_date, end_date)).count()
-            
-            report, stats[f"report_exist_{period}"] = self.get_report(orders, start, end_date, period)
-            stats["report_datas"].append(report)
 
-            stats[f"top_products_{period}"] = top_products
+            revenue = aggregate_orders(orders_period, 'total', Sum)
+            revenue_offline = aggregate_orders(orders_period.filter(site="Эвотор"), 'total', Sum)
+            revenue_online = revenue - revenue_offline
+
+            discount = (
+                aggregate_orders(orders_period, 'lines__line_price_before_discounts', Sum)
+                - revenue
+            )
+            discount_offline = (
+                aggregate_orders(orders_period.filter(site="Эвотор"), 'lines__line_price_before_discounts', Sum)
+                - revenue_offline
+            )
+            discount_online = discount - discount_offline
+
+            stats.update({
+                f"orders_{period}": orders_period.count(),
+                f"orders_offline_{period}": orders_period.filter(site="Эвотор").count(),
+                f"orders_online_{period}": orders_period.exclude(site="Эвотор").count(),
+
+                f"revenue_{period}": revenue,
+                f"revenue_offline_{period}": revenue_offline,
+                f"revenue_online_{period}": revenue_online,
+
+                f"discount_{period}": discount,
+                f"discount_offline_{period}": discount_offline,
+                f"discount_online_{period}": discount_online,
+
+                f"average_costs_{period}": aggregate_orders(orders_period, 'total', Avg),
+                f"average_offline_costs_{period}": aggregate_orders(orders_period.filter(site="Эвотор"), 'total', Avg),
+                f"average_online_costs_{period}": aggregate_orders(orders_period.exclude(site="Эвотор"), 'total', Avg),
+
+                f"alerts_{period}": alerts.filter(date_created__range=(start_date, end_date)).count(),
+                f"baskets_{period}": baskets.filter(date_created__range=(start_date, end_date)).count(),
+                f"users_{period}": users.filter(date_joined__range=(start_date, end_date)).count(),
+
+                f"customers_{period}": customers.filter(date_joined__range=(start_date, end_date)).count(),
+                f"customers_2orders_{period}": count_customers_with_orders(customers, 2),
+                f"customers_5orders_{period}": count_customers_with_orders(customers, 5),
+
+                f"lines_{period}": lines_period.count(),
+                f"lines_offline_{period}": lines_period.filter(order__site="Эвотор").count(),
+                f"lines_online_{period}": lines_period.exclude(order__site="Эвотор").count(),
+
+                f"orders_discount_{period}": orders_period.filter(~Q(lines__line_price_before_discounts=F('lines__line_price'))).count(),
+                f"orders_offline_discount_{period}": orders_period.filter(~Q(lines__line_price_before_discounts=F('lines__line_price')), site="Эвотор").count(),
+                f"orders_online_discount_{period}": orders_period.filter(~Q(lines__line_price_before_discounts=F('lines__line_price'))).exclude(site="Эвотор").count(),
+
+                f"lines_discount_{period}": lines_period.filter(~Q(line_price_before_discounts=F('line_price'))).count(),
+                f"lines_offline_discount_{period}": lines_period.filter(~Q(line_price_before_discounts=F('line_price')), order__site="Эвотор").count(),
+                f"lines_online_discount_{period}": lines_period.filter(~Q(line_price_before_discounts=F('line_price'))).exclude(order__site="Эвотор").count(),
+
+                f"products_{period}": products.filter(date_created__range=(start_date, end_date)).count(),
+                f"top_products_{period}": top_products,
+                f"order_status_breakdown_{period}": orders_period.order_by("status").values("status").annotate(freq=Count("id")),
+
+            })
+
             stats["top_products_names"].append([product['name'] for product in top_products])
             stats["top_products_quantities"].append([product['total_quantity'] for product in top_products])
             stats["top_products_sums"].append([int(product['total_sum']) for product in top_products])
-            
-            # Разбивка заказов по статусам
-            stats[f"order_status_breakdown_{period}"] = orders.filter(date_placed__range=(start_date, end_date)).order_by("status").values("status").annotate(freq=Count("id"))
+
+            report, stats[f"report_exist_{period}"] = self.get_report(orders, start, end_date, period)
+            stats["report_datas"].append(report)
 
         return stats
 
@@ -1142,7 +1189,6 @@ def get_changes_between_models(model1, model2, excludes=None):
                 field.value_from_object(model2),
             )
     return changes
-
 
 def get_change_summary(model1, model2):
     """

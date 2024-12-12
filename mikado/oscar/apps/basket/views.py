@@ -244,6 +244,7 @@ class BasketAddView(FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["basket"] = self.request.basket
+        kwargs["store_id"] = self.request.store.id
         kwargs["product"] = self.product
         return kwargs
 

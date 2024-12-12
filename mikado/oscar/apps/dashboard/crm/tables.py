@@ -9,6 +9,7 @@ Store = get_model("store", "Store")
 Terminal = get_model("store", "Terminal")
 Staff = get_model("user", "Staff")
 Product = get_model('catalogue', 'Product')
+Additional = get_model('catalogue', 'Additional')
 Category = get_model('catalogue', 'Category')
 
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
@@ -482,8 +483,9 @@ class CRMProductEvotorTable(DashboardTable):
         order_by="price",
         attrs = {'th': {'class': 'price'},}
     )
-    tax = Column(
+    tax = TemplateColumn(
         verbose_name="Налог",
+        template_name="oscar/dashboard/crm/products/evotor_table/product_row_tax.html",
         order_by="tax",
         attrs = {'th': {'class': 'tax'},}
     )
@@ -636,6 +638,163 @@ class CRMProductSiteTable(DashboardTable):
             'class': 'table table-striped table-bordered table-hover',
         }
         empty_text = "Нет созданых товаров"
+
+# ===========================================
+
+class CRMAdditionalEvotorTable(DashboardTable):
+
+    check = TemplateColumn(
+        template_name="oscar/dashboard/crm/additionals/evotor_table/additional_row_checkbox.html",
+        verbose_name="",
+        orderable=False,
+    )
+    name = TemplateColumn(
+        verbose_name="Имя",
+        template_name="oscar/dashboard/crm/additionals/evotor_table/additional_row_name.html",
+        order_by="name",
+        attrs = {'th': {'class': 'name'},}
+    )
+    description = TemplateColumn(
+        verbose_name="Описание",
+        template_code='{{ record.description|default:"-"|striptags'
+        '|cut:"&nbsp;"|truncatewords:6 }}',
+        attrs = {'th': {'class': 'description'},}
+    )
+    stores = TemplateColumn(
+        verbose_name="Магазин",
+        template_name="oscar/dashboard/crm/additionals/evotor_table/additional_row_store.html",
+        order_by="store",
+        attrs = {'th': {'class': 'stores'},}
+    )
+    price = TemplateColumn(
+        verbose_name="Цена",
+        template_name="oscar/dashboard/crm/additionals/evotor_table/additional_row_price.html",
+        order_by="price",
+        attrs = {'th': {'class': 'price'},}
+    )
+    tax = Column(
+        verbose_name="Налог",
+        order_by="tax",
+        attrs = {'th': {'class': 'tax'},}
+    )
+    measure_name = Column(
+        verbose_name="Ед.изм.",
+        order_by="measure_name",
+        attrs = {'th': {'class': 'measure_name'},}
+    )
+    allow_to_sell = TemplateColumn(
+        verbose_name="Доступен",        
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by="allow_to_sell",
+        attrs = {'th': {'class': 'allow_to_sell'},}
+    )
+    date_updated = TemplateColumn(
+        verbose_name="Изменен",   
+        template_name="oscar/dashboard/crm/additionals/evotor_table/additional_row_date.html",
+        order_by="updated_at",     
+        attrs = {'th': {'class': 'date_updated'},}
+    )
+    actions = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/crm/additionals/evotor_table/additional_row_actions.html",
+        orderable=False,
+        attrs = {'th': {'class': 'actions'},}
+    )
+
+    icon = "fas fa-cookie-bite"
+    caption = ngettext_lazy("%s товар", "%s Продуктов")
+
+    class Meta(DashboardTable.Meta):
+        model = Product
+        fields = (
+            "check",
+            "name",
+            "description",
+            "stores",
+            "price",
+            "tax",
+            "measure_name",
+            "allow_to_sell",
+            "date_updated",
+            "actions",
+        )
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
+        empty_text = "Список товаров пуст"
+
+
+class CRMAdditionalSiteTable(DashboardTable):
+    check = TemplateColumn(
+        template_name="oscar/dashboard/crm/additionals/site_table/additional_row_checkbox.html",
+        verbose_name="",
+        orderable=False,
+    )
+    image = TemplateColumn(
+        verbose_name='',
+        template_name="oscar/dashboard/catalogue/product_row_image.html",
+        orderable=False,
+        attrs = {'th': {'class': 'image'},}
+    )
+    name = TemplateColumn(
+        verbose_name="Имя",
+        template_name="oscar/dashboard/crm/additionals/site_table/additional_row_name.html",
+        order_by="name",
+        attrs = {'th': {'class': 'title'},}
+    )
+    stores = TemplateColumn(
+        verbose_name="Магазины",
+        template_name="oscar/dashboard/catalogue/additional_row_stores.html",
+        order_by="stores",
+        attrs = {'th': {'class': 'stores'},}
+    )
+    max_amount = Column(
+        verbose_name="Максимум",
+        order_by="max_amount",
+        attrs = {'th': {'class': 'max_amount'},},
+    )
+    weight = TemplateColumn(
+        verbose_name="Вес",
+        template_name="oscar/dashboard/catalogue/additional_row_weight.html",
+        order_by="weight",
+        attrs = {'th': {'class': 'weight'},},
+    )
+    price = TemplateColumn(
+        verbose_name="Цена",
+        template_name="oscar/dashboard/catalogue/additional_row_price.html",
+        order_by="price",
+        attrs = {'th': {'class': 'price'},},
+    )
+    old_price = TemplateColumn(
+        verbose_name="Цена без скидки",
+        template_name="oscar/dashboard/catalogue/additional_row_old_price.html",
+        order_by="old_price",
+        attrs = {'th': {'class': 'old_price'},},
+    )
+    actions = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/catalogue/additional_row_actions.html",
+        orderable=False,
+        attrs = {'th': {'class': 'actions'},}
+    )
+    is_public = TemplateColumn(
+        verbose_name="Доступен",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by=("is_public"),
+        attrs = {'th': {'class': 'is_public'},})
+
+    icon = "fas fa-chart-bar" 
+    caption = ngettext_lazy("%s Дополнительный товар","%s Дополнительных товара")
+
+    class Meta(DashboardTable.Meta):
+        model = Additional
+        fields = ("check", "image", "name", "stores", "price", "old_price", "weight", "max_amount", "is_public")
+        sequence = ("check", "image", "name", "stores", "price", "old_price", "weight", "max_amount", "is_public", "actions")
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
+        empty_text = "Нет созданых дополнительных товаров"
+
 
 # ===========================================
 

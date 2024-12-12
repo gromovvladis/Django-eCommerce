@@ -1,4 +1,5 @@
 {% extends 'oscar/dashboard/layout.html' %}
+
 {% load currency_filters %}
 {% load django_tables2 %}
 {% load widget_tweaks %}
@@ -28,7 +29,6 @@
 {% endblock %}
 
 {% block dashboard_content %}
-
     <div class="table-wrapper mb-4">
         <div class="table-header d-flex justify-space-between" data-target="#search-body" 
         data-toggle="collapse" aria-controls="search-body" aria-expanded="false">
@@ -89,8 +89,6 @@
             {% endif %}
         </div>
     </div>
-
-        
     <div class="page-header d-flex justify-content-between mb-2">
         <h1>Заказы</h1>
     </div>
@@ -115,8 +113,6 @@
             </div>
         {% endblock nav_tabs %}
     </ul>
-
-
     <div class="tab-content">
         <div class="tab-pane fade {% if active_tab == 'day' %}show active{% endif %}" id="statistic_day" data-id="report-tab" role="tabpanel">   
             <div class="content-block rounded">
@@ -127,7 +123,7 @@
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
                             </svg>
                         </button>
-                        <h2 class="my-0">Заказы | <span data-id="page-info"class="text-primary"> {{ start_date_days|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2>
+                        <h2 class="my-0">Заказы | <span data-id="page-info"class="text-primary">{{ start_date_days|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2>
                         <button class="right ml-4" data-id="next-page">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 0 24 24" fill="none" stroke="#007bff" height="20px">
                                 <path d="M15 7L10 12L15 17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -137,7 +133,6 @@
                     <div class="chart-container my-2">
                         <canvas class="canvas-graph" data-id="graph-chart"></canvas>
                     </div>
-
                     <div class="d-flex flex-column flex-sm-row justify-content-center mt-4">
                         <div class="legend-chart legend-chart--graph" data-id="legend-graph-chart"></div>
                         <div class="range-container" data-id="range-container">
@@ -149,7 +144,6 @@
                             </div>
                         </div>
                     </div>
-
                 {% else %}
                     <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_days|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
                     <div class="empty-report" style="min-height: 350px;">
@@ -162,7 +156,7 @@
             <div class="row">
                 <div class="col-md-4">
                     <table class="table table-striped table-bordered table-hover table-text-right">
-                        <caption><i class="fas fa-shopping-cart"></i> Заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <caption><i class="fas fa-shopping-cart"></i> Все заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
                         <tr>
                             <th class="col-md-10">Всего заказов</th>
                             <td class="col-md-2" >{{ orders_days }}</td>
@@ -172,16 +166,12 @@
                             <td class="col-md-2" >{{ lines_days }}</td>
                         </tr>
                         <tr>
-                            <th class="col-md-10">Новых пользователей</th>
-                            <td class="col-md-2" >{{ users_days }}</td>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_discount_days }}</td>
                         </tr>
                         <tr>
-                            <th class="col-md-10">Новых клиентов</th>
-                            <td class="col-md-2" >{{ customers_days }}</td>
-                        </tr>
-                        <tr>
-                            <th class="col-md-10">Всего создано корзин</th>
-                            <td class="col-md-2" >{{ baskets_days }}</td>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_discount_days }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Общий доход</th>
@@ -197,7 +187,72 @@
                         </tr>
                     </table>
                 </div>
-            
+                <div class="col-md-4">
+                    <table class="table table-striped table-bordered table-hover table-text-right">
+                        <caption><i class="fas fa-shopping-cart"></i> Эвотор заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <tr>
+                            <th class="col-md-10">Всего заказов</th>
+                            <td class="col-md-2" >{{ orders_offline_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего позиций</th>
+                            <td class="col-md-2" >{{ lines_offline_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_offline_discount_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_offline_discount_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общий доход</th>
+                            <td class="col-md-2" >{{ revenue_offline_days|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_offline_days|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Средняя стоимость заказа</th>
+                            <td class="col-md-2" >{{ average_offline_costs_days|currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-striped table-bordered table-hover table-text-right">
+                        <caption><i class="fas fa-shopping-cart"></i> Онлайн заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <tr>
+                            <th class="col-md-10">Всего заказов</th>
+                            <td class="col-md-2" >{{ orders_online_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего позиций</th>
+                            <td class="col-md-2" >{{ lines_online_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_online_discount_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_online_discount_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общий доход</th>
+                            <td class="col-md-2" >{{ revenue_online_days|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_online_days|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Средняя стоимость заказа</th>
+                            <td class="col-md-2" >{{ average_online_costs_days|currency }}</td>
+                        </tr>
+                    </table>
+                </div>
                 <div class="col-md-4">
                     <table class="table table-striped table-bordered table-hover table-text-right">
                         <caption><i class="fas fa-users"></i> Клиенты
@@ -215,6 +270,18 @@
                             <td class="col-md-2" >{{ customers_days }}</td>
                         </tr>
                         <tr>
+                            <th class="col-md-10">Новых пользователей</th>
+                            <td class="col-md-2" >{{ users_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Новых клиентов</th>
+                            <td class="col-md-2" >{{ customers_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего создано корзин</th>
+                            <td class="col-md-2" >{{ baskets_days }}</td>
+                        </tr>
+                        <tr>
                             <th class="col-md-10">Клиенты с 2 и более заказами</th>
                             <td class="col-md-2" >{{ customers_2orders_days }}</td>
                         </tr>
@@ -224,7 +291,6 @@
                         </tr>
                     </table>
                 </div>
-        
                 {% if order_status_breakdown_days %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -238,7 +304,8 @@
                         </table>
                     </div>
                 {% endif %}
-
+            </div>
+            <div class="row">
                 {% if report_exist_days %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -271,7 +338,6 @@
                             </tbody>
                         </table>
                     </div>
-
                     <div class="col-md-8">
                         <div class="content-block rounded tab-content d-flex flex-column align-items-center">
                             <div class="half-wrapper">
@@ -292,7 +358,6 @@
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-
                             <div class="tab-pane fade chart-container" id="top_product_count_day" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
@@ -303,10 +368,8 @@
                         </div>
                     </div>
                 {% endif %}
-
             </div>
         </div>
-
         <div class="tab-pane fade {% if active_tab == 'week' %}show active{% endif %}" id="statistic_week" data-id="report-tab" role="tabpanel">
             <div class="content-block rounded">
                 {% if report_exist_weeks %}
@@ -338,7 +401,6 @@
                             </div>
                         </div>
                     </div>
-
                 {% else %}
                     <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_weeks|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
                     <div class="empty-report" style="min-height: 350px;">
@@ -386,7 +448,6 @@
                         </tr>
                     </table>
                 </div>
-            
                 <div class="col-md-4">
                     <table class="table table-striped table-bordered table-hover table-text-right">
                         <caption><i class="fas fa-users"></i> Клиенты
@@ -413,7 +474,6 @@
                         </tr>
                     </table>
                 </div>
-        
                 {% if order_status_breakdown_weeks %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -427,7 +487,6 @@
                         </table>
                     </div>
                 {% endif %}
-
                 {% if report_exist_weeks %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -460,7 +519,6 @@
                             </tbody>
                         </table>
                     </div>
-
                     <div class="col-md-8">
                         <div class="content-block rounded tab-content d-flex flex-column align-items-center">
                             <div class="half-wrapper">
@@ -474,27 +532,23 @@
                                     </button>
                                 </div>
                             </div>
-        
                             <div class="tab-pane fade show active chart-container" id="top_product_price_weeks" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-
                             <div class="tab-pane fade chart-container" id="top_product_count_weeks" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 {% endif %}
             </div>
         </div>
-
         <div class="tab-pane fade {% if active_tab == 'month' %}show active{% endif %}" id="statistic_month" data-id="report-tab" role="tabpanel">
             <div class="content-block rounded">
                 {% if report_exist_months %}
@@ -526,7 +580,6 @@
                             </div>
                         </div>
                     </div>
-
                 {% else %}
                     <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_months|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
                     <div class="empty-report" style="min-height: 350px;">
@@ -574,7 +627,6 @@
                         </tr>
                     </table>
                 </div>
-            
                 <div class="col-md-4">
                     <table class="table table-striped table-bordered table-hover table-text-right">
                         <caption><i class="fas fa-users"></i> Клиенты
@@ -601,7 +653,6 @@
                         </tr>
                     </table>
                 </div>
-        
                 {% if order_status_breakdown_months %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -615,7 +666,6 @@
                         </table>
                     </div>
                 {% endif %}
-
                 {% if report_exist_months %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -648,7 +698,6 @@
                             </tbody>
                         </table>
                     </div>
-
                     <div class="col-md-8">
                         <div class="content-block rounded tab-content d-flex flex-column align-items-center">
                             <div class="half-wrapper">
@@ -662,27 +711,23 @@
                                     </button>
                                 </div>
                             </div>
-        
                             <div class="tab-pane fade show active chart-container" id="top_product_price_months" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-
                             <div class="tab-pane fade chart-container" id="top_product_count_months" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 {% endif %}
             </div>
         </div>
-        
         <div class="tab-pane fade {% if active_tab == 'year' %}show active{% endif %}" id="statistic_year" data-id="report-tab" role="tabpanel">
             <div class="content-block rounded">
                 {% if report_exist_years %}
@@ -702,7 +747,6 @@
                     <div class="chart-container my-2">
                         <canvas class="canvas-graph" data-id="graph-chart"></canvas>
                     </div>
-
                     <div class="d-flex flex-column flex-sm-row justify-content-center mt-4">
                         <div class="legend-chart legend-chart--graph" data-id="legend-graph-chart"></div>
                         <div class="range-container" data-id="range-container">
@@ -714,7 +758,6 @@
                             </div>
                         </div>
                     </div>
-
                 {% else %} 
                     <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_weeks|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
                     <div class="empty-report" style="min-height: 350px;">
@@ -762,7 +805,6 @@
                         </tr>
                     </table>
                 </div>
-            
                 <div class="col-md-4">
                     <table class="table table-striped table-bordered table-hover table-text-right">
                         <caption><i class="fas fa-users"></i> Клиенты
@@ -789,7 +831,6 @@
                         </tr>
                     </table>
                 </div>
-        
                 {% if order_status_breakdown_years %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -803,7 +844,6 @@
                         </table>
                     </div>
                 {% endif %}
-
                 {% if report_exist_years %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -836,7 +876,6 @@
                             </tbody>
                         </table>
                     </div>
-
                     <div class="col-md-8">
                         <div class="content-block rounded tab-content d-flex flex-column align-items-center">
                             <div class="half-wrapper">
@@ -850,21 +889,18 @@
                                     </button>
                                 </div>
                             </div>
-        
                             <div class="tab-pane fade show active chart-container" id="top_product_price_years" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-
                             <div class="tab-pane fade chart-container" id="top_product_count_years" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 {% endif %}

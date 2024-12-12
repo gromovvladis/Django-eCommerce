@@ -33,7 +33,7 @@ def basket_form(request, product, quantity_type="single"):
         basket_post_data = JSONSerializer().loads(basket_post_data.encode("latin-1"))
 
     form = form_class(
-        request.basket, data=basket_post_data, product=product, initial=initial
+        request.basket, data=basket_post_data, product=product, store_id=request.store.id, initial=initial
     )
 
     return form

@@ -16,13 +16,9 @@
                                 <img src="{{ thumb.url }}" loading="lazy" alt="{{ field.label|safe }}" class="img-thumbnail w-auto mx-auto my-0">
                             </div>
                         </div>
-
                         <div class="topping-description px-1 pb-1 fill-width d-flex align-center flex-column pos-relative">
-    
                             <p class="dish-toppings__name mt-2">{{ field.label|safe }}</p>
-
                             <div role="separator" class="spacer"></div>
-    
                             <span data-id="dish-toppings-price" class="prices d-flex flex-column align-start mt-1 prices--red prices--small">
                                 <span class="prices__price prices__price--topping no-wrap">
                                     <span data-id="additional-product-price">{{ field.field.widget.attrs.price|formate_price }}</span>
@@ -33,7 +29,6 @@
                                     </span>
                                 </span>
                             </span>
-    
                             <div class="order-button order-button--transparent">
                                 <button type="button" disabled="disabled" data-id="order-button-minus" class="order-button--elem" aria-label="Уменьшить">
                                     <svg viewBox="0 0 24 24" fill="none">
@@ -48,10 +43,8 @@
                                 </button>
                             </div>
                         </div>
-
                     </div>
                 </li>
-            
             {% endif %}
         {% endfor %}
     </ul>

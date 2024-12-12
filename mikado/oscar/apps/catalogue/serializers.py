@@ -16,6 +16,8 @@ Attribute = get_model("catalogue", "Attribute")
 AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
+Additional = get_model("catalogue", "Additional")
+AdditionalCategory = get_model("catalogue", "AdditionalCategory")
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -23,9 +25,7 @@ class ProductSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source="evotor_id")
     name = serializers.CharField()
     article_number = serializers.CharField(source="article", required=False, allow_blank=True)
-    description = serializers.CharField(
-        source="short_description", required=False, allow_blank=True
-    )
+    description = serializers.CharField(source="short_description", required=False, allow_blank=True)
     parent_id = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     # класс товара
@@ -617,3 +617,148 @@ class ProductGroupsSerializer(serializers.ModelSerializer):
 
         return product_groups
     
+
+class AdditionalSerializer(serializers.ModelSerializer):
+    # товар
+    id = serializers.CharField(source="evotor_id")
+    name = serializers.CharField()
+    description = serializers.CharField(required=False, allow_blank=True)
+    article_number = serializers.CharField(source="article", required=False, allow_blank=True)
+    
+    parent_id = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    
+    price = serializers.CharField(write_only=True, required=False)
+    cost_price = serializers.CharField(write_only=True, required=False)
+    store_id = serializers.CharField(write_only=True, required=False)
+    allow_to_sell = serializers.BooleanField(write_only=True, required=False)
+    tax = serializers.CharField(write_only=True, required=False)
+
+    updated_at = serializers.DateTimeField(write_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "name",
+            "description",
+            "article_number",
+            "parent_id",
+            "price",
+            "cost_price",
+            "store_id",
+            "allow_to_sell",
+            "tax",
+            "updated_at",
+        ]
+
+    def create(self, validated_data):
+        # Извлечение данных из validated_data
+        evotor_id = validated_data.get("evotor_id")
+        store_id = validated_data.get("store_id", None)
+        allow_to_sell = validated_data.get("allow_to_sell", None)
+        description = validated_data.get("description", None)
+        article_number = validated_data.get("article_number", None)
+        tax = validated_data.get("tax", None)
+        price = validated_data.get("tax", None)
+        cost_price = validated_data.get("tax", None)
+
+        return Additional.objects.get_or_create(
+            evotor_id=evotor_id,
+            defaults={
+                "stores": Store.objects.filter(evotor_id=store_id).first(),
+                "is_public": allow_to_sell,
+                "description": description,
+                "article": article_number,
+                "price": price,
+                "cost_price": cost_price,
+                "tax": tax,
+            }
+        )[0]
+
+    def update(self, additional, validated_data):
+        evotor_id = validated_data.get("evotor_id")
+        store_id = validated_data.get("store_id", None)
+        allow_to_sell = validated_data.get("allow_to_sell", None)
+        description = validated_data.get("description", None)
+        article_number = validated_data.get("article_number", None)
+        tax = validated_data.get("tax", None)
+        price = validated_data.get("tax", None)
+        cost_price = validated_data.get("tax", None)
+
+        additional.evotor_id = evotor_id
+        additional.is_public = allow_to_sell
+        additional.description = description
+        additional.article = article_number
+        additional.tax = tax
+        additional.price = price
+        additional.cost_price = cost_price
+
+        additional.save()
+
+        store = Store.objects.filter(evotor_id=store_id).first()
+        if store:
+            additional.stores.add()
+
+        return additional
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        try:     
+            representation["tax"] = instance.tax
+            representation["allow_to_sell"] = instance.is_public
+            representation["article_number"] = instance.article
+            representation["price"] = instance.price
+            representation["cost_price"] = instance.cost_price
+            
+            store_id = self.context.get("store_id", None)
+            if store_id:
+                store = Store.objects.filter(evotor_id=store_id).first()
+                if store:
+                    additional_category = AdditionalCategory.objects.filter(store=store).first()
+                    if additional_category:
+                        representation["parent_id"] = additional_category.evotor_id
+
+        except Exception as e:
+            logger.error(f"Ошибка определения товара: {e}")
+            representation["tax"] = "NO_VAT"
+            representation["allow_to_sell"] = False
+            representation["price"] = 0
+            representation["cost_price"] = 0
+
+        representation["measure_name"] = "шт"
+        representation["type"] = "NORMAL"
+        representation["cost_price"] = 0
+
+        if not representation.get("id"):
+            representation.pop("id", None)
+
+        return representation
+
+
+class AdditionalsSerializer(serializers.ModelSerializer):
+    items = AdditionalSerializer(many=True)
+
+    class Meta:
+        model = Additional
+        fields = ["items"]
+
+    def create(self, validated_data):    
+        items_data = validated_data.get("items", [])
+        store_id = self.context.get("store_id", None)
+        return [AdditionalSerializer(context={"store_id": store_id}).create(item_data) for item_data in items_data]
+
+    def update(self, instances, validated_data):
+        items_data = validated_data.get('items', [])
+        store_id = self.context.get("store_id", None)
+        products = []
+
+        for item_data in items_data:
+            try:
+                product_instance = instances.get(evotor_id=item_data['id'])  # `instance` — это QuerySet
+                product = AdditionalSerializer(context={"store_id": store_id}).update(product_instance, item_data)
+            except Additional.DoesNotExist:
+                continue  # Пропускаем, если объект не найден
+
+            products.append(product)
+
+        return products

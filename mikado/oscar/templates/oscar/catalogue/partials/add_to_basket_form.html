@@ -22,7 +22,7 @@
                 {% include "oscar/catalogue/partials/options.html" with form=basket_form %}
             {% endif %}
             {% comment %}------------- дополнительные ингридиенты ---------------{% endcomment %}
-            {% if product.has_additions %}
+            {% if basket_form.has_additions %}
                 {% include "oscar/catalogue/partials/additinal_products.html" with form=basket_form currency_symbol=currency_symbol %}
             {% endif %}
         </div>

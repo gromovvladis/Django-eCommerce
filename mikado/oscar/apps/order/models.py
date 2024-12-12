@@ -251,7 +251,7 @@ class Order(models.Model):
         """
         Returns the number of items in this order.
         """
-        return ", ".join(self.lines.all().values_list("name", flat=True))
+        return ", ".join(self.lines.values_list("name", flat=True))
 
     @property
     def shipping_status(self):
