@@ -6,7 +6,7 @@ logger = logging.getLogger("oscar.crm")
 
 
 @shared_task(bind=True, max_retries=10)
-def process_bulk_task(self, bulk_evotor_id, retry_count=1):
+def process_bulk_task(self, bulk_evotor_id):
     """
     Задача обработки bulks с ограничением на 10 попыток.
     """
@@ -26,12 +26,11 @@ def process_bulk_task(self, bulk_evotor_id, retry_count=1):
         )
 
         response = EvotorAPICloud().get_bulk_by_id(bulk_evotor_id)
-        EvotorAPICloud().finish_bulk(bulk, response)
+        bulk = EvotorAPICloud().finish_bulk(bulk, response)
 
-        # Проверяем, нужно ли повторить задачу
-        if bulk.status not in CRMBulk.FINAL_STATUSES and retry_count < 10:
-            interval = 10 if retry_count <= 3 else 30
-            self.retry(countdown=interval, retry_count=retry_count + 1)
+        if bulk.status not in CRMBulk.FINAL_STATUSES:
+            interval = 5 if self.request.retries <= 3 else 30
+            self.retry(countdown=interval)
 
     except MaxRetriesExceededError:
         logger.error(f"Задача превысила максимальное количество попыток для evotor_id={bulk_evotor_id}.")
