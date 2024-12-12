@@ -655,8 +655,6 @@ class Basket(models.Model):
 
     @property
     def time_since_creation(self, test_datetime=None):
-        if not test_datetime:
-            test_datetime = now()
         return test_datetime - self.date_created
 
     @property

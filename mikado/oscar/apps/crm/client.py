@@ -132,7 +132,7 @@ class EvotorAPICloud:
             self.create_periodic_task(bulk)
 
     def finish_bulk(self, bulk, response):
-        bulk.date_fineshed = now()
+        bulk.date_finish = now()
         details = response.get("details")
         if details:
             if bulk.object_type == CRMBulk.PRODUCT:
