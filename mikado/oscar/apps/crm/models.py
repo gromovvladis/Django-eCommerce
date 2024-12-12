@@ -77,8 +77,8 @@ class CRMBulk(models.Model):
     date_created = models.DateTimeField(
         "Дата создания", auto_now_add=True
     )
-    date_fineshed = models.DateTimeField(
-        "Дата окончания",
+    date_finish = models.DateTimeField(
+        "Дата окончания", blank=True, null=True
     )
 
     FINAL_STATUSES = (
