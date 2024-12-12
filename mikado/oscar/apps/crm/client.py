@@ -137,7 +137,7 @@ class EvotorAPICloud:
         if details:
             if bulk.object_type == CRMBulk.PRODUCT:
                 self.set_evotor_ids(details, Product, "article")
-            elif bulk.object_type == CRMBulk.CATEGORY:
+            elif bulk.object_type == CRMBulk.PRODUCT_GROUP:
                 self.set_evotor_ids(details, Category, "name")
 
     def create_periodic_task(self, bulk):
