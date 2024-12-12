@@ -12,7 +12,6 @@ from django_tables2 import SingleTableMixin, SingleTableView
 from django.db.models import Count, Max, Min, Case, When, DecimalField, F
 from django.utils.timezone import now
 
-from oscar.apps.catalogue.models import ProductAttribute
 from oscar.apps.crm.client import EvatorCloud
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import ObjectLookupView
@@ -81,6 +80,7 @@ StoreProductFilterMixin = get_class(
     "dashboard.catalogue.mixins", "StoreProductFilterMixin"
 )
 Attribute = get_model("catalogue", "Attribute")
+ProductAttribute = get_model("catalogue", "ProductAttribute")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 ProductImage = get_model("catalogue", "ProductImage")
