@@ -64,15 +64,6 @@ class WishList(models.Model):
             if not cls._default_manager.filter(key=key).exists():
                 return key
 
-    # def is_allowed_to_see(self, user):
-    #     if user == self.owner:
-    #         return True
-    #     elif self.visibility == self.PUBLIC:
-    #         return True
-    #     elif self.visibility == self.SHARED and user.is_authenticated:
-    #         return self.shared_emails.filter(email=user.email).exists()
-    #     return False
-    
     def is_have_this_product(self, product):
         if len(self.lines.filter(product=product)) != 0:
             return True
@@ -89,6 +80,7 @@ class WishList(models.Model):
             "date_created",
         )
         verbose_name = "Избранное"
+        verbose_name_plural = "Списки избранного"
 
     def get_absolute_url(self):
         # return reverse("customer:wishlist-detail", kwargs={"key": self.key})
@@ -101,17 +93,9 @@ class WishList(models.Model):
         lines = self.lines.filter(product=product)
         if len(lines) == 0:
             self.lines.create(product=product, name=product.get_name())
-        # else:
-        #     line = lines[0]
-        #     line.quantity += 1
-        #     line.save()
 
     def get_shared_url(self):
         return reverse("wishlists:detail", kwargs={"key": self.key})
-
-    # @property
-    # def is_shareable(self):
-    #     return self.visibility in [self.PUBLIC, self.SHARED]
 
 
 class Line(models.Model):
@@ -153,4 +137,5 @@ class Line(models.Model):
         ordering = ["pk"]
         unique_together = (("wishlist", "product"),)
         verbose_name = "Позиция избранного"
+        verbose_name_plural = "Позиции избранного"
 

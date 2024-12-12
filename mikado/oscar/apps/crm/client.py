@@ -174,20 +174,17 @@ class EvotorAPICloud:
         try:
             if method == "GET":
                 response = requests.get(url, headers=self.headers)
+            elif method == "POST":
+                response = requests.post(url, headers=self.headers, json=data)
+            elif method == "PUT":
+                response = requests.post(url, headers=self.headers, json=data)
+            elif method == "PATCH":
+                response = requests.patch(url, headers=self.headers, json=data)
+            elif method == "DELETE":
+                response = requests.delete(url, headers=self.headers)
             else:
-                return {"error": "Invalid"}
-
-            # elif method == "POST":
-            #     response = requests.post(url, headers=self.headers, json=data)
-            # elif method == "PUT":
-            #     response = requests.post(url, headers=self.headers, json=data)
-            # elif method == "PATCH":
-            #     response = requests.patch(url, headers=self.headers, json=data)
-            # elif method == "DELETE":
-            #     response = requests.delete(url, headers=self.headers)
-            # else:
-            #     logger.error(f"Ошибка HTTP запроса. Неизвестный http метод: {method}")
-            #     raise ValueError(f"Unsupported HTTP method: {method}")
+                logger.error(f"Ошибка HTTP запроса. Неизвестный http метод: {method}")
+                raise ValueError(f"Unsupported HTTP method: {method}")
 
             response.raise_for_status()  # Проверка на успешный статус запроса (2xx)
             return response.json()  # Возврат данных в формате JSON
