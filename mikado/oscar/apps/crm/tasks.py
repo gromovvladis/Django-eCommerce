@@ -2,6 +2,12 @@ from celery.exceptions import MaxRetriesExceededError
 from celery import shared_task
 import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+
 logger = logging.getLogger("oscar.crm")
 
 
@@ -28,8 +34,13 @@ def process_bulk_task(self, bulk_evotor_id):
         response = EvotorAPICloud().get_bulk_by_id(bulk_evotor_id)
         bulk = EvotorAPICloud().finish_bulk(bulk, response)
 
-        if bulk.status not in CRMBulk.FINAL_STATUSES:
+        logger.info(f"Статус bulk {bulk.status}, попытки {self.request.retries}")
+
+        if bulk.status not in CRMBulk.FINAL_STATUSES and self.request.retries < self.max_retries:
             interval = 5 if self.request.retries <= 3 else 30
+            
+            logger.info(f"Повторяем {bulk.status}")
+
             self.retry(countdown=interval)
 
     except MaxRetriesExceededError:
