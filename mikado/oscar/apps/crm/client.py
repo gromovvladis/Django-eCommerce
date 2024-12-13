@@ -180,7 +180,7 @@ class EvotorAPICloud:
             elif method == "POST":
                 response = requests.post(url, headers=self.headers, json=data)
             elif method == "PUT":
-                response = requests.post(url, headers=self.headers, json=data)
+                response = requests.put(url, headers=self.headers, json=data)
             elif method == "PATCH":
                 response = requests.patch(url, headers=self.headers, json=data)
             elif method == "DELETE":
@@ -700,13 +700,18 @@ class EvotorGroupClient(EvotorAPICloud):
         serializer = ProductGroupSerializer(group)
         group_json = json.loads(JSONRenderer().render(serializer.data).decode("utf-8"))
 
-        endpoint = f"stores/{store_id}/product-groups"
-        response = self.send_request(endpoint, "PUT", group_json)
-        error = response.get("error", None) if isinstance(response, dict) else None
-
-        if not error:
-            group.evotor_id = response.get("id")
-            group.save()
+        if group.evotor_id:
+            endpoint = f"stores/{store_id}/product-groups/{group.evotor_id}"
+            response = self.send_request(endpoint, "PUT", group_json)
+            error = response.get("error", None) if isinstance(response, dict) else None
+        else:
+            endpoint = f"stores/{store_id}/product-groups"
+            response = self.send_request(endpoint, "POST", group_json)
+            error = response.get("error", None) if isinstance(response, dict) else None
+            
+            if not error:
+                group.evotor_id = response.get("id")
+                group.save()
 
         return error
 
@@ -1077,13 +1082,18 @@ class EvotorProductClient(EvotorGroupClient):
         serializer = ProductSerializer(product, context={"store_id": store_id})
         product_json = json.loads(JSONRenderer().render(serializer.data).decode("utf-8"))
 
-        endpoint = f"stores/{store_id}/products"
-        response = self.send_request(endpoint, "PUT", product_json)
-        error = response.get("error", None) if isinstance(response, dict) else None
+        if product.evotor_id:
+            endpoint = f"stores/{store_id}/products/{product.evotor_id}"
+            response = self.send_request(endpoint, "PUT", product_json)
+            error = response.get("error", None) if isinstance(response, dict) else None
+        else:
+            endpoint = f"stores/{store_id}/products"
+            response = self.send_request(endpoint, "POST", product_json)
+            error = response.get("error", None) if isinstance(response, dict) else None
 
-        if not error:
-            product.evotor_id = response.get("id")
-            product.save()
+            if not error:
+                product.evotor_id = response.get("id")
+                product.save()
 
         return error
 
@@ -1483,13 +1493,18 @@ class EvotorAdditionalClient(EvotorProductClient):
         serializer = AdditionalSerializer(additional, context={"store_id": store_id})
         additional_json = json.loads(JSONRenderer().render(serializer.data).decode("utf-8"))
 
-        endpoint = f"stores/{store_id}/products"
-        response = self.send_request(endpoint, "PUT", additional_json)
-        error = response.get("error", None) if isinstance(response, dict) else None
-
-        if not error:
-            additional.evotor_id = response.get("id")
-            additional.save()
+        if additional.evotor_id:
+            endpoint = f"stores/{store_id}/products/{additional.evotor_id}"
+            response = self.send_request(endpoint, "PUT", additional_json)
+            error = response.get("error", None) if isinstance(response, dict) else None
+        else:
+            endpoint = f"stores/{store_id}/products"
+            response = self.send_request(endpoint, "POST", additional_json)
+            error = response.get("error", None) if isinstance(response, dict) else None
+            
+            if not error:
+                additional.evotor_id = response.get("id")
+                additional.save()
 
         return error
 
@@ -1531,7 +1546,7 @@ class EvotorAdditionalClient(EvotorProductClient):
         Идентификаторы объектов формирует клиент API.
         """
         errors = []
-        additionals_filtered = defaultdict(list),
+        additionals_filtered = defaultdict(list)
 
         active_stores = Store.objects.filter(is_active=True).values_list("id", "evotor_id")
         existing_categories = set(

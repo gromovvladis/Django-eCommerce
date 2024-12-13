@@ -471,6 +471,7 @@ class Product(models.Model):
         "Артикул товара",
         max_length=64,
         populate_from="name",
+        overwrite=False,
         editable=True,
         unique=True,
         help_text=(
@@ -1807,8 +1808,9 @@ class Additional(models.Model):
     article = AutoSlugField(
         "Артикул товара",
         max_length=64,
-        editable=True,
         populate_from="name",
+        overwrite=False,
+        editable=True,
         unique=True,
         help_text=(
             "Универсальный код товара (Артикул) является идентификатором для "
