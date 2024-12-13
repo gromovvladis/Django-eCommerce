@@ -29,7 +29,6 @@ Line = get_model("order", "Line")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 Additional = get_model("catalogue", "Additional")
-AdditionalCategory = get_model("catalogue", "AdditionalCategory")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 
 CRMStoreForm = get_class("dashboard.crm.forms", "CRMStoreForm")
@@ -397,7 +396,10 @@ class CRMGroupsListView(CRMTablesMixin):
                         and parent_match
                     )
                 else:
-                    data_item.update({"is_created": False, "is_valid": False})
+                    if evotor_id == Additional.parent_id:
+                        data_item.update({"is_created": True, "is_valid": True})
+                    else:
+                        data_item.update({"is_created": False, "is_valid": False})
 
             self.queryset = sorted(
                 data_items, key=lambda x: (x["is_created"], x["is_valid"])
@@ -553,7 +555,7 @@ class CRMProductListView(CRMTablesMixin):
                     data_item["parent"] = (
                         Category.objects.filter(evotor_id=parent_id).first()
                         or Product.objects.filter(evotor_id=parent_id).first()
-                        or AdditionalCategory.objects.filter(evotor_id=parent_id).first()
+                        or Additional.parent_id == parent_id
                     )
 
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
@@ -726,7 +728,7 @@ class CRMAdditionalListView(CRMTablesMixin):
                             and model_instance.article == data_item.get("article_number", "").strip()
                             and model_instance.description == data_item.get("description", None)
                             and model_instance.parent_id == data_item.get("parent_id", None)
-                            and model_instance.stores.values_list("id", flat=True) in data_item.get("store_id", None)
+                            and data_item.get("store_id", None) in model_instance.stores.values_list("evotor_id", flat=True) 
                             and model_instance.is_public == data_item.get("allow_to_sell", None)
                             and model_instance.tax == data_item.get("tax", None)
                         )

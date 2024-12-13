@@ -30,11 +30,13 @@
         <div class="table-header">
             <h2>{{ title }}</h2>
         </div>
-        <form method="post" class="card card-body bg-light">
+        <form method="post" class="card card-body card-confirm bg-light">
             {% csrf_token %}
             {{ form }}
             <p>Удалить категорию <strong>{{ object.name }}</strong> - вы уверены?</p>
-            <div class="form-actions d-flex justify-content-between flex-wrap align-items-end fill-width mt-3">
+        </form>
+        <div class="table-footer">
+            <div class="form-actions d-flex justify-content-between flex-wrap align-items-end fill-width">
                 <div>         
                     <label for="id_evotor_update" class="checkbox-ios">
                         <input type="checkbox" name="evotor_update" class="form-control" id="id_evotor_update" checked>
@@ -55,6 +57,6 @@
                     </button>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 {% endblock %}

@@ -1097,6 +1097,7 @@ class ProductClassCreateUpdateView(generic.UpdateView):
 
         # pylint: disable=no-member
         ctx["title"] = self.get_title()
+        ctx["product_class"] = self.object
 
         return ctx
 

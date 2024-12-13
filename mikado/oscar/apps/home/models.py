@@ -53,7 +53,7 @@ class Action(models.Model):
     def get_meta_description(self):
         return self.meta_description or striptags(self.description)
     
-    get_meta_description.short_description = ("Мета-описание товара", "Мета-описание")
+    get_meta_description.short_description = "Мета-описание товара"
 
     @cached_property
     def full_slug(self):
@@ -161,7 +161,7 @@ class PromoCategory(models.Model):
     def get_meta_description(self):
         return self.meta_description or striptags(self.description)
     
-    get_meta_description.short_description = ("Мета-описание товара", "Мета-описание")
+    get_meta_description.short_description = "Мета-описание товара"
 
     @property
     def full_slug(self):

@@ -32,7 +32,6 @@ Staff = get_model("user", "Staff")
 GroupEvotor = get_model("auth", "GroupEvotor")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
-AdditionalCategory = get_model("catalogue", "AdditionalCategory")
 Order = get_model("order", "Order")
 Additional = get_model("catalogue", "Additional")
 
@@ -929,7 +928,7 @@ class EvotorGroupClient(EvotorAPICloud):
                     created = True
 
                 if serializer.is_valid():
-                    if not AdditionalCategory.objects.filter(evotor_id=evotor_id).exists():
+                    if evotor_id != Additional.parent_id:
                         group = serializer.save()
                         event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
                         CRMEvent.objects.create(
@@ -1022,9 +1021,8 @@ class EvotorProductClient(EvotorGroupClient):
         items = all_products.get("items", None)
 
         if items:
-            additional_categories = AdditionalCategory.objects.values_list("evotor_id")
             filtered_items = [
-                item for item in items if item.get("parent_id") not in additional_categories
+                item for item in items if item.get("parent_id") != Additional.parent_id
             ]
             all_products["items"] = filtered_items
             return all_products
@@ -1412,7 +1410,6 @@ class EvotorProductClient(EvotorGroupClient):
     def create_or_update_site_products(self, products_json, is_filtered=False):
         error_msgs = []
         products = Product.objects.all()
-        addit_parent_ids = AdditionalCategory.objects.values_list("evotor_id", flat=True)
         try:
             evotor_ids = []
             json_valid = True
@@ -1429,9 +1426,7 @@ class EvotorProductClient(EvotorGroupClient):
 
                 if serializer.is_valid():
                     parent_id = product_json.get("parent_id")
-                    is_additional = parent_id in addit_parent_ids
-
-                    if not is_additional:
+                    if parent_id != Additional.parent_id:
                         product = serializer.save()
                         event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
                         CRMEvent.objects.create(
@@ -1474,9 +1469,8 @@ class EvotorAdditionalClient(EvotorProductClient):
         items = all_products.get("items", None)
 
         if items:
-            additional_categories = AdditionalCategory.objects.values_list("evotor_id")
             filtered_items = [
-                item for item in items if item.get("parent_id") in additional_categories
+                item for item in items if item.get("parent_id") == Additional.parent_id
             ]
             all_products["items"] = filtered_items
             return all_products
@@ -1549,22 +1543,17 @@ class EvotorAdditionalClient(EvotorProductClient):
         additionals_filtered = defaultdict(list)
 
         active_stores = Store.objects.filter(is_active=True).values_list("id", "evotor_id")
-        existing_categories = set(
-            AdditionalCategory.objects.values_list("store_id", flat=True)
-        )
 
         for store_id, store_evotor_id in active_stores:
-            if store_id not in existing_categories:
-                endpoint = f"stores/{store_evotor_id}/product-groups/"
-                response = self.send_request(endpoint, "PUT", {"name": "Дополнительные товары"})
-                error = response.get("error") if isinstance(response, dict) else None
-                if error:
-                    errors.append(error)
-                else:
-                    AdditionalCategory.objects.create(
-                        store_id=store_id,
-                        evotor_id=response.get("id"),
-                    )
+            additional_parent = {
+                "id": Additional.parent_id,
+                "name": "Дополнительные товары", 
+            }
+            endpoint = f"stores/{store_evotor_id}/product-groups/{Additional.parent_id}"
+            response = self.send_request(endpoint, "PUT", additional_parent)
+            error = response.get("error") if isinstance(response, dict) else None
+            if error:
+                errors.append(error)
 
         for additional in additionals:
             for store in additional.stores.filter(is_active=True):
