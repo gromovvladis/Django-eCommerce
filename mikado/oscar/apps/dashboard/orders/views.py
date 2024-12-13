@@ -62,7 +62,7 @@ OrderTable = get_class("dashboard.orders.tables", "OrderTable")
 ProductSearchForm = get_class("dashboard.catalogue.forms", "ProductSearchForm")
 
 
-def queryset_orders_for_user(user):
+def queryset_orders(user, product=None, category=None):
     """
     Returns a queryset of all orders that a user is allowed to access.
     A staff user may access all orders.
@@ -74,15 +74,22 @@ def queryset_orders_for_user(user):
         "user",
         "store",
     ).prefetch_related("lines", "status_changes", "sources", "payment_events", "shipping_events")
-    if user.is_staff:
+
+    if product:
+        queryset = queryset.filter(lines__product=product)
+
+    if category:
+        queryset = queryset.filter(lines__product__categories=category)
+
+    if user.is_superuser:
         return queryset
     else:
         stores = Store._default_manager.filter(users=user)
         return queryset.filter(lines__store__in=stores).distinct()
 
-def get_order_for_user_or_404(user, number):
+def get_order_or_404(user, number):
     try:
-        return queryset_orders_for_user(user).get(number=number)
+        return queryset_orders(user=user).get(number=number)
     except ObjectDoesNotExist:
         raise Http404()
 
@@ -122,7 +129,7 @@ class OrderStatsView(FormView):
 
     def get_report(self, orders, start, end, range_type):
 
-        start_time = start
+        start_time = datetime_combine(start, datetime.time.min)
         diff = relativedelta(end, start)
 
         if range_type == 'days':
@@ -195,7 +202,7 @@ class OrderStatsView(FormView):
 
     def get_data(self, filters, excludes):
         
-        orders = queryset_orders_for_user(self.request.user).filter(**filters).exclude(**excludes)
+        orders = queryset_orders(user=self.request.user).filter(**filters).exclude(**excludes)
         
         if filters.get('date_placed__range') is not None:
             start_date, end_date = filters['date_placed__range']
@@ -418,7 +425,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
     def dispatch(self, request, *args, **kwargs):
         # base_queryset is equal to all orders the user is allowed to access
-        self.base_queryset = queryset_orders_for_user(request.user).annotate(
+        self.base_queryset = queryset_orders(user=request.user).annotate(
             source=Max("sources__reference"),
             amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             paid=F("sources__paid"),
@@ -833,7 +840,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
     )
 
     def get_object(self, queryset=None):
-        order = get_order_for_user_or_404(self.request.user, self.kwargs["number"])
+        order = get_order_or_404(self.request.user, self.kwargs["number"])
         order.open()
         if not order.date_finish:  # Проверяем, что дата завершения ещё не установлена
             order.before_order = order.order_time - now()
@@ -1157,7 +1164,7 @@ class LineDetailView(DetailView):
     template_name = "oscar/dashboard/orders/line_detail.html"
 
     def get_object(self, queryset=None):
-        order = get_order_for_user_or_404(self.request.user, self.kwargs["number"])
+        order = get_order_or_404(self.request.user, self.kwargs["number"])
         try:
             return order.lines.get(pk=self.kwargs["line_id"])
         except self.model.DoesNotExist:
@@ -1216,7 +1223,7 @@ class ShippingAddressUpdateView(UpdateView):
     form_class = ShippingAddressForm
 
     def get_object(self, queryset=None):
-        order = get_order_for_user_or_404(self.request.user, self.kwargs["number"])
+        order = get_order_or_404(self.request.user, self.kwargs["number"])
         return get_object_or_404(self.model, order=order)
 
     def get_context_data(self, **kwargs):
