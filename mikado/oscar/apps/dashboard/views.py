@@ -11,7 +11,7 @@ from django.utils.timezone import now
 from django.views.generic import TemplateView
 
 from oscar.apps.customer.views import AccountAuthView
-from oscar.apps.dashboard.orders.views import queryset_orders_for_user
+from oscar.apps.dashboard.orders.views import queryset_orders
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
 
@@ -169,24 +169,25 @@ class IndexView(TemplateView):
         users = User.objects.all()
 
         if prod_slug:
-            prod = Product.objects.get(slug=prod_slug)
+            prods = Product.objects.filter(slug=prod_slug)
+            prod = prods.first()
             data = {
                 "title": "Статистика для товара '%s'" % prod.get_name(),
-                "orders": queryset_orders_for_user(self.request.user),
+                "orders": queryset_orders(user=self.request.user, product=prod),
                 "alerts": StockAlert.objects.filter(stockrecord__product_id=prod.id),
                 "baskets": Basket.objects.filter(lines__product_id=prod.id).filter(status=Basket.OPEN),
                 "users": users.filter(baskets__lines__product_id=prod.id).distinct(),
                 "customers": users.filter(orders__lines__product_id=prod.id).distinct(),
                 "lines": Line.objects.filter(product_id=prod.id),
-                "products": Product.objects.filter(id=prod.id),
+                "products": prods,
             }
         elif cat_slug:
             cat = Category.objects.get(slug=cat_slug)
-            prod_cat = Product.objects.filter(categories__slug=cat_slug)
+            prod_cat = Product.objects.filter(categories=cat)
             ids = [prod.id for prod in prod_cat]
             data = {
                 "title": "Статистика для категории '%s'" % cat.name,
-                "orders": queryset_orders_for_user(self.request.user),
+                "orders": queryset_orders(user=self.request.user, category=cat),
                 "alerts": StockAlert.objects.filter(stockrecord__product_id__in=ids),
                 "baskets": Basket.objects.filter(lines__product_id__in=ids).filter(status=Basket.OPEN),
                 "users": users.filter(baskets__lines__product_id__in=ids).distinct(),
@@ -197,7 +198,7 @@ class IndexView(TemplateView):
         else:
             data = {
                 "title": "Статистика",
-                "orders": queryset_orders_for_user(self.request.user),
+                "orders": queryset_orders(user=self.request.user),
                 "alerts": StockAlert.objects.all(),
                 "baskets": Basket.objects.filter(status=Basket.OPEN),
                 "users": users,

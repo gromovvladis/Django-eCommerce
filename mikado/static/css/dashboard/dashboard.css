@@ -4842,10 +4842,6 @@ input[type=button].btn-block {
 }
 
 
-
-
-
-
 .half-wrapper {
   max-width: 100%;
   width: 100%;
@@ -4855,6 +4851,7 @@ input[type=button].btn-block {
 .tabs-button {
   overflow: hidden;
   border-radius: 10px;
+  border: 2px solid #fff;
   background: #f3f3f7;
   position: relative;
   padding: 0;
