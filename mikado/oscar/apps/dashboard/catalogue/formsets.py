@@ -63,28 +63,13 @@ class StockRecordFormSet(BaseStockRecordFormSet):
 
     def set_initial_data(self):
         store_field = self.forms[0].fields.get("store", None)
-        if store_field and store_field.initial is None:
+        if store_field and store_field.initial is not None:
             store_field.disabled = True
 
     def _construct_form(self, i, **kwargs):
         kwargs["product_class"] = self.product_class
         kwargs["user"] = self.user
         return super()._construct_form(i, **kwargs)
-
-    def clean(self):
-        """
-        If the user isn't a staff user, this validation ensures that at least
-        one stock record's store is associated with a users stores.
-        """
-        if any(self.errors):
-            return
-        if self.require_user_stockrecord:
-            stockrecord_stores = set(
-                [form.cleaned_data.get("store", None) for form in self.forms]
-            )
-            user_stores = set(self.user.stores.all())
-            if not user_stores & stockrecord_stores:
-                raise exceptions.ValidationError("По крайней мере одна товарная запись должна быть установлена магазину, который связана с вами.")
 
     def update_evotor_stockrecord(self, product):
         try:
@@ -111,52 +96,20 @@ BaseStockRecordStockFormSet = inlineformset_factory(
 class StockRecordStockFormSet(BaseStockRecordStockFormSet):
     def __init__(self, product_class, user, *args, **kwargs):
         self.user = user
-        self.require_user_stockrecord = not user.is_staff
         self.product_class = product_class
 
         super().__init__(*args, **kwargs)
         self.set_initial_data()
 
     def set_initial_data(self):
-        """
-        If user has only one store associated, set the first
-        stock record's store to it. Can't pre-select for staff users as
-        they're allowed to save a product without a stock record.
-
-        This is intentionally done after calling __init__ as passing initial
-        data to __init__ creates a form for each list item. So depending on
-        whether we can pre-select the store or not, we'd end up with 1 or 2
-        forms for an unbound form.
-        """
-        if self.require_user_stockrecord:
-            try:
-                user_store = self.user.stores.get()
-            except (exceptions.ObjectDoesNotExist, exceptions.MultipleObjectsReturned):
-                pass
-            else:
-                store_field = self.forms[0].fields.get("store", None)
-                if store_field and store_field.initial is None:
-                    store_field.initial = user_store
+        store_field = self.forms[0].fields.get("store", None)
+        if store_field and store_field.initial is not None:
+            store_field.disabled = True
 
     def _construct_form(self, i, **kwargs):
         kwargs["product_class"] = self.product_class
         kwargs["user"] = self.user
         return super()._construct_form(i, **kwargs)
-
-    def clean(self):
-        """
-        If the user isn't a staff user, this validation ensures that at least
-        one stock record's store is associated with a users stores.
-        """
-        if any(self.errors):
-            return
-        if self.require_user_stockrecord:
-            stockrecord_stores = set(
-                [form.cleaned_data.get("store", None) for form in self.forms]
-            )
-            user_stores = set(self.user.stores.all())
-            if not user_stores & stockrecord_stores:
-                raise exceptions.ValidationError("По крайней мере одна товарная запись должна быть установлена магазину, который связана с вами.")
 
 
 BaseProductCategoryFormSet = inlineformset_factory(

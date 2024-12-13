@@ -28,13 +28,13 @@
 {% endblock %}
 
 {% block navtext %}
-        <h1>{{ title }}</h1>
-        {% if product %}
-            <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-delete' pk=product.id %}">
-                <i class="fa-solid fa-trash"></i>
-                <span>Удалить</span>
-            </a>
-        {% endif %}
+    <h1>{{ title }}</h1>
+    {% if product %}
+        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-delete' pk=product.id %}">
+            <i class="fa-solid fa-trash"></i>
+            <span>Удалить</span>
+        </a>
+    {% endif %}
 {% endblock %}
 
 {% block dashboard_content %}

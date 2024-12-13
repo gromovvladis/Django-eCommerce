@@ -22,24 +22,26 @@
 {% endblock %}
 
 {% block dashboard_content %}
-    <div class="table-header">
-        <h2>Удалить ассортимент</h2>
-    </div>
-    <form method="post" class="card card-body bg-light">
-        <p>Вы уверены, что хотите удалить этот ассортимент?</p>
-        <span>Это действие нельзя отменить!</span>
-        {% csrf_token %}
-        <div class="form-actions fill-width mt-3">
-            <div class="float-right">
-                <a class="btn btn-secondary" href="{% url 'dashboard:range-list' %}">
-                    <i class="fa-solid fa-ban"></i>
-                    Отмена
-                </a>
-                <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
-                    <i class="fa-solid fa-trash"></i>
-                    Удалить
-                </button>
-            </div>
+    <div class="confirm-content">
+        <div class="table-header">
+            <h2>Удалить ассортимент</h2>
         </div>
-    </form>
+        <form method="post" class="card card-body bg-light">
+            <p>Вы уверены, что хотите удалить этот ассортимент?</p>
+            <span>Это действие нельзя отменить!</span>
+            {% csrf_token %}
+            <div class="form-actions fill-width mt-3">
+                <div class="float-right">
+                    <a class="btn btn-secondary" href="{% url 'dashboard:range-list' %}">
+                        <i class="fa-solid fa-ban"></i>
+                        Отмена
+                    </a>
+                    <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                        <i class="fa-solid fa-trash"></i>
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 {% endblock dashboard_content %}

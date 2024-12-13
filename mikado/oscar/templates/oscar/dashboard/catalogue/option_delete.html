@@ -35,31 +35,33 @@
 {% endblock %}
 
 {% block dashboard_content %}
-    {% if disallow %}
-        <p>Перед удалением убедитесь, что опция не назначена продуктам или классам продуктов.</p>
-    {% else %}
-        <div class="table-header">
-            <h2>Удалить опцию</h2>
-        </div>
-        <form action="." method="post" class="card card-body bg-light">
-            {% csrf_token %}
-            {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1" />{% endif %}
-            {% if not is_popup %}
-            {% for key, value in http_get_params.items %}
-                <input type="hidden" name="{{ key }}" value="{{ value }}" />
-            {% endfor %}
-            {% endif %}
-            <p>
-                Удалить опцию <strong>{{ object.name }}</strong> - вы уверены?
-            </p>
-            <div class="form-actions fill-width d-flex justify-content-end">
-                <a class="btn btn-info ml-2" href="{% url 'dashboard:catalogue-option-list' %}">
-                    Отмена
-                </a>
-                <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">
-                    Удалить
-                </button>
+    <div class="confirm-content">
+        {% if disallow %}
+            <p>Перед удалением убедитесь, что опция не назначена продуктам или классам продуктов.</p>
+        {% else %}
+            <div class="table-header">
+                <h2>Удалить опцию</h2>
             </div>
-        </form>
-    {% endif %}
+            <form action="." method="post" class="card card-body bg-light">
+                {% csrf_token %}
+                {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1" />{% endif %}
+                {% if not is_popup %}
+                {% for key, value in http_get_params.items %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}" />
+                {% endfor %}
+                {% endif %}
+                <p>
+                    Удалить опцию <strong>{{ object.name }}</strong> - вы уверены?
+                </p>
+                <div class="form-actions fill-width d-flex justify-content-end">
+                    <a class="btn btn-info ml-2" href="{% url 'dashboard:catalogue-option-list' %}">
+                        Отмена
+                    </a>
+                    <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                        Удалить
+                    </button>
+                </div>
+            </form>
+        {% endif %}
+    </div>
 {% endblock %}

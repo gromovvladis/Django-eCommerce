@@ -781,7 +781,7 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
             is_last_child = parent.children.count() == 1    
             
         # This also deletes any child products.
-        # self.object.delete()
+        self.object.delete()
 
         # If the product being deleted is the last child, then pass control
         # to a method than can adjust the parent itself.
@@ -1166,7 +1166,7 @@ class ProductClassDeleteView(generic.DeleteView):
         if product_count > 0:
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
-            messages.error(self.request, "%i товаров по-прежнему относятся к этому типу" % product_count)
+            messages.error(self.request, "%i товар(ов) по-прежнему относятся к этому типу" % product_count)
         return ctx
 
     def get_success_url(self):

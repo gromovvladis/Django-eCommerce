@@ -22,49 +22,50 @@
 {% endblock %}
 
 {% block dashboard_content %}
-    <div class="table-header">
-        <h2>{{ title }}</h2>
-    </div>
-    <form method="post" class="card card-body bg-light">
-        {% csrf_token %}
-        <p>
-            {% if product.is_child %}
-                Удалить вариант продукта - <strong>{{ product.get_name }}</strong> - вы уверены?
-            {% else %}
-                Удалить продукт <strong>{{ product.get_name }}</strong> - вы уверены?
-            {% endif %}
-        </p>
-        {% if product.is_parent %}
-            <p>
-                При этом также будут удалены следующие вариации:
-                <ul>
-                    {% for child in product.children.all %}
-                        <li><strong>{{ child.get_variants }}</strong></li>
-                    {% endfor %}
-                </ul>
-            </p>
-        {% endif %}
-        <div class="form-actions d-flex justify-content-between flex-wrap align-items-end fill-width mt-3">
-            <div>         
-                <label for="id_evotor_update" class="checkbox-ios">
-                    <input type="checkbox" name="evotor_update" class="form-control" id="id_evotor_update" checked>
-                    <span class="checkbox-ios-switch"></span>
-                </label>
-                <small class="form-text text-muted">
-                    Удалить в Эвотор
-                </small>
-            </div>
-            <div class="d-flex justify-content-end mt-3">
-                <a class="btn btn-secondary" href="{% url 'dashboard:catalogue-product-list' %}">
-                    <i class="fa-solid fa-ban"></i>
-                    Отмена
-                </a>
-                <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
-                    <i class="fa-solid fa-trash"></i>
-                    Удалить
-                </button>
-            </div>
+    <div class="confirm-content">
+        <div class="table-header">
+            <h2>{{ title }}</h2>
         </div>
-
-    </form>
+        <form method="post" class="card card-body bg-light">
+            {% csrf_token %}
+            <p>
+                {% if product.is_child %}
+                    Удалить вариант товара - <strong>{{ product.get_name }}</strong> - вы уверены?
+                {% else %}
+                    Удалить товар <strong>{{ product.get_name }}</strong> - вы уверены?
+                {% endif %}
+            </p>
+            {% if product.is_parent %}
+                <p>
+                    При этом также будут удалены следующие вариации:
+                    <ul>
+                        {% for child in product.children.all %}
+                            <li><strong>{{ child.get_variants }}</strong></li>
+                        {% endfor %}
+                    </ul>
+                </p>
+            {% endif %}
+            <div class="form-actions d-flex justify-content-between flex-wrap align-items-end fill-width mt-3">
+                <div>         
+                    <label for="id_evotor_update" class="checkbox-ios">
+                        <input type="checkbox" name="evotor_update" class="form-control" id="id_evotor_update" checked>
+                        <span class="checkbox-ios-switch"></span>
+                    </label>
+                    <small class="form-text text-muted">
+                        Удалить в Эвотор
+                    </small>
+                </div>
+                <div class="d-flex justify-content-end mt-3">
+                    <a class="btn btn-secondary" href="{% url 'dashboard:catalogue-product-list' %}">
+                        <i class="fa-solid fa-ban"></i>
+                        Отмена
+                    </a>
+                    <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                        <i class="fa-solid fa-trash"></i>
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 {% endblock %}
