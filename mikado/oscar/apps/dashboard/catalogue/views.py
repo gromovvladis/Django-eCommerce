@@ -1508,6 +1508,19 @@ class AdditionalUpdateView(PopUpWindowUpdateMixin, AdditionalCreateUpdateView):
 class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
     template_name = "oscar/dashboard/catalogue/additional_delete.html"
     model = Additional
+
+    def form_valid(self, form):
+        self.perform_deletion(form)
+        return super().form_valid(form)
+    
+    def perform_deletion(self, form):
+        """
+        Perform custom deletion logic.
+        """
+        evotor_update = form.data.get("evotor_update", 'off')
+        if evotor_update == "on":
+            self.object = self.get_object()
+            EvatorCloud().delete_evotor_additional(self.object)
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
