@@ -2,14 +2,7 @@ from celery.exceptions import MaxRetriesExceededError
 from celery import shared_task
 import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
-
 logger = logging.getLogger("oscar.crm")
-
 
 @shared_task(bind=True, max_retries=10)
 def process_bulk_task(self, bulk_evotor_id):

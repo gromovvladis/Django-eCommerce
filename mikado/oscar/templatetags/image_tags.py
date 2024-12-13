@@ -7,7 +7,6 @@ from django.db.models.fields.files import ImageFieldFile
 from django.utils.encoding import smart_str
 from django.utils.html import escape
 
-from oscar.apps.catalogue.models import MissingProductImage
 from oscar.core.thumbnails import get_thumbnailer
 
 register = template.Library()

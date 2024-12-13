@@ -4,7 +4,6 @@ from oscar.apps.crm.client import EvatorCloud
 logger = logging.getLogger("oscar.catalogue")
 
 from django import forms
-from django.core import exceptions
 from django.forms.models import inlineformset_factory
 
 from oscar.core.loading import get_classes, get_model

@@ -5,7 +5,6 @@ from treebeard.forms import movenodeform_factory
 
 from django.db.models.query import QuerySet
 
-from django.contrib import messages
 from oscar.apps.crm.client import EvatorCloud
 
 from oscar.core.loading import get_class, get_classes, get_model
