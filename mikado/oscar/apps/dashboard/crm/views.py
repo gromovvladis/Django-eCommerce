@@ -759,7 +759,7 @@ class CRMAdditionalListView(CRMTablesMixin):
         try:
             error = EvatorCloud().update_or_create_evotor_additionals(models)
         except Exception as e:
-            error = "Ошибка при отправке созданного / измененного дополнительного товара в Эвотор. Ошибка %s", e
+            error = "Ошибка при отправке дополнительных товаров в Эвотор. Ошибка %s", e
             logger.error(error)
         
         if error:

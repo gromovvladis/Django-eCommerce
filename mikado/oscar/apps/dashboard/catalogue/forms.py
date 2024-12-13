@@ -593,6 +593,8 @@ class AdditionalForm(forms.ModelForm):
         }
 
     def update_or_create_evotor_additional(self, additional):
+        return EvatorCloud().update_or_create_evotor_additional(additional)
+        
         try:
             return EvatorCloud().update_or_create_evotor_additional(additional)
         except Exception as e:
