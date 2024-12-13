@@ -18463,15 +18463,13 @@ h3.app-ico:before {
   background: #fff;
 }
 
+.confirm-content{
+  max-width: 800px;
+}
+
 .tabbable.dashboard {
   margin-bottom: 1rem;
 }
-/* .tabbable.dashboard .tab-content { */
-  /* border: 1px solid #e9ecef; */
-  /* border-top-width: 0; */
-  /* padding: 30px; */
-  /* background: #fff; */
-/* } */
 
 .card.card-body {
   /* margin-bottom: 1rem; */

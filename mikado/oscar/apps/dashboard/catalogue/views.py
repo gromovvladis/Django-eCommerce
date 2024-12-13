@@ -781,7 +781,7 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
             is_last_child = parent.children.count() == 1    
             
         # This also deletes any child products.
-        # self.object.delete()
+        self.object.delete()
 
         # If the product being deleted is the last child, then pass control
         # to a method than can adjust the parent itself.
@@ -1166,7 +1166,7 @@ class ProductClassDeleteView(generic.DeleteView):
         if product_count > 0:
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
-            messages.error(self.request, "%i товаров по-прежнему относятся к этому типу" % product_count)
+            messages.error(self.request, "%i товар(ов) по-прежнему относятся к этому типу" % product_count)
         return ctx
 
     def get_success_url(self):
@@ -1508,6 +1508,19 @@ class AdditionalUpdateView(PopUpWindowUpdateMixin, AdditionalCreateUpdateView):
 class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
     template_name = "oscar/dashboard/catalogue/additional_delete.html"
     model = Additional
+
+    def form_valid(self, form):
+        self.perform_deletion(form)
+        return super().form_valid(form)
+    
+    def perform_deletion(self, form):
+        """
+        Perform custom deletion logic.
+        """
+        evotor_update = form.data.get("evotor_update", 'off')
+        if evotor_update == "on":
+            self.object = self.get_object()
+            EvatorCloud().delete_evotor_additional(self.object)
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

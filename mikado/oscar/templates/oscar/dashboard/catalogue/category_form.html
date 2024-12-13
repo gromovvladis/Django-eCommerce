@@ -26,6 +26,12 @@
 
 {% block navtext %}
     <h1>{{ title }}</h1>
+    {% if category %}
+        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-category-delete' pk=category.id %}">
+            <i class="fa-solid fa-trash"></i>
+            <span>Удалить</span>
+        </a>
+    {% endif %}
 {% endblock %}
 
 {% block dashboard_content %}

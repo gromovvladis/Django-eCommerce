@@ -168,7 +168,7 @@ class PaymentSerializer(serializers.Serializer):
             source=source,
             txn_type="Payment",
             amount=D(validated_data["sum"]),
-            reference=validated_data["app_info"]["name"] + "Эвотор",
+            reference="Эвотор",
             status="succeeded",
             paid=True,
             refundable=False,

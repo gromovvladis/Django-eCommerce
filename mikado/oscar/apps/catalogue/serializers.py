@@ -416,7 +416,8 @@ class ProductGroupSerializer(serializers.ModelSerializer):
                     **validated_data
                 )
             else:
-                instance = self._get_or_create_category(evotor_id)
+                name = validated_data.get("name")
+                instance = self._get_or_create_category(evotor_id, name)
 
         return instance
 
@@ -520,14 +521,23 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             }
         )[0]
     
-    def _get_or_create_category(self, evotor_id):
+    def _get_or_create_category(self, evotor_id, name=None):
         """Создание или извлечение категории"""
         try:
             cat = Category.objects.get(
                 evotor_id=evotor_id,
             )
         except Category.DoesNotExist:
-            cat = Category.add_root(name=f"Категория {evotor_id}", evotor_id=evotor_id)
+            if name is None:
+                name=f"Категория {evotor_id}"
+
+            base_name = name
+            counter = 1
+            while Category.objects.filter(Q(name=name)).exists():
+                name = f"{base_name}-{counter}"
+                counter += 1
+
+            cat = Category.add_root(name=name, evotor_id=evotor_id)
 
         return cat
     
