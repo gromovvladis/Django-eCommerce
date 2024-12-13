@@ -1833,18 +1833,17 @@ class EvotorDocClient(EvotorAPICloud):
 
             if serializer.is_valid():
                 order = serializer.save()
-
+                event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                CRMEvent.objects.create(
+                    body=f"Order created / updated - { order.number }",
+                    sender=CRMEvent.PRODUCT,
+                    event_type=event_type,
+                )
+                
                 order_creator = OrderCreator()
-
                 for line in order.lines.all():
                     order_creator.update_stock_records(line)
 
-                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
-                    CRMEvent.objects.create(
-                        body=f"Order created / updated - { order.number }",
-                        sender=CRMEvent.PRODUCT,
-                        event_type=event_type,
-                    )
             else:
                 json_valid = False
                 logger.error("Ошибка при сериализации %s" % serializer.errors)

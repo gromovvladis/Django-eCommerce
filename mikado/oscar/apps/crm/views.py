@@ -555,13 +555,6 @@ class CRMDocsEndpointView(APIView):
         return JsonResponse({"status": "success"}, status=200)
 
     def sell(self, data):
-
-        CRMEvent.objects.create(
-            body=f"Добавлен оффлайн заказ: { data.get('id', 'ID Неизвестен') }",
-            sender=CRMEvent.ORDER,
-            event_type=CRMEvent.CREATION,
-        )
-
         EvatorCloud().create_or_update_site_order(data)
 
     def payback(self, data):

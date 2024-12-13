@@ -42,6 +42,7 @@ class OrderAdmin(admin.ModelAdmin):
         "shipping",
     )
     inlines = [LineInline]
+    search_fields = ["number"]
 
 
 class LineAdmin(admin.ModelAdmin):
