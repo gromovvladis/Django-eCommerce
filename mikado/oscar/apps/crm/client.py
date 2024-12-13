@@ -697,7 +697,7 @@ class EvotorGroupClient(EvotorAPICloud):
             ]
         }
         """
-        serializer = ProductGroupsSerializer(group, context={"store_id": store_id})
+        serializer = ProductGroupSerializer(group)
         group_json = json.loads(JSONRenderer().render(serializer.data).decode("utf-8"))
 
         endpoint = f"stores/{store_id}/product-groups"
@@ -792,7 +792,9 @@ class EvotorGroupClient(EvotorAPICloud):
         """
         errors = []
         groups_filtered = defaultdict(list)
-        evotor_store_ids = []
+        evotor_store_ids = Store.objects.filter(is_active=True).values_list(
+            "evotor_id", flat=True
+        )
 
         for group in groups:
             if isinstance(group, Product):
@@ -801,14 +803,11 @@ class EvotorGroupClient(EvotorAPICloud):
                     for child in group.children.all():
                         for stockrecord in child.stockrecords.all():
                             store_id = stockrecord.store.evotor_id
-                            store_ids.add(store_id)
+                            if store_id:
+                                store_ids.add(store_id)
                     for store_id in store_ids:
                         groups_filtered[store_id].append(group)
             else:
-                if not evotor_store_ids:
-                    evotor_store_ids = Store.objects.filter(is_active=True).values_list(
-                        "evotor_id", flat=True
-                    )
                 for store_id in evotor_store_ids:
                     groups_filtered[store_id].append(group)
 
@@ -1481,7 +1480,7 @@ class EvotorAdditionalClient(EvotorProductClient):
         Создать или изменить доп. товар
         """
 
-        serializer = AdditionalsSerializer(additional, context={"store_id": store_id})
+        serializer = AdditionalSerializer(additional, context={"store_id": store_id})
         additional_json = json.loads(JSONRenderer().render(serializer.data).decode("utf-8"))
 
         endpoint = f"stores/{store_id}/products"

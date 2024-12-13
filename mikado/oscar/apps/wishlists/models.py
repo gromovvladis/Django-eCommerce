@@ -83,7 +83,6 @@ class WishList(models.Model):
         verbose_name_plural = "Списки избранного"
 
     def get_absolute_url(self):
-        # return reverse("customer:wishlist-detail", kwargs={"key": self.key})
         return reverse("customer:wishlist-detail")
 
     def add(self, product):
