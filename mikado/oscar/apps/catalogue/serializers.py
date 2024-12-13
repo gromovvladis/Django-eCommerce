@@ -17,7 +17,6 @@ AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Additional = get_model("catalogue", "Additional")
-AdditionalCategory = get_model("catalogue", "AdditionalCategory")
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -533,7 +532,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
 
             base_name = name
             counter = 1
-            while Category.objects.filter(Q(name=name)).exists():
+            while Category.objects.filter(name=name).exists():
                 name = f"{base_name}-{counter}"
                 counter += 1
 
@@ -724,9 +723,7 @@ class AdditionalSerializer(serializers.ModelSerializer):
             if store_id:
                 store = Store.objects.filter(evotor_id=store_id).first()
                 if store:
-                    additional_category = AdditionalCategory.objects.filter(store=store).first()
-                    if additional_category:
-                        representation["parent_id"] = additional_category.evotor_id
+                    representation["parent_id"] = Additional.parent_id
 
         except Exception as e:
             logger.error(f"Ошибка определения товара: {e}")

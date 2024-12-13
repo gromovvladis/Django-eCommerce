@@ -24,12 +24,14 @@
             <div class="table-header">
                 <h2>Удалить тип продукта</h2>
             </div>
-            <form method="post" class="card card-body">
+            <form method="post" class="card card-body card-confirm bg-light">
                 {% csrf_token %}
                 {{ form }}
                 <p>
                     Удалить тип продукта <strong>{{ object.name }}</strong> - вы уверены?
                 </p>
+            </form>
+            <div class="table-footer">
                 <div class="form-actions fill-width">
                     <div class="float-right">
                         <a class="btn btn-secondary" href="{% url 'dashboard:catalogue-class-list' %}">
@@ -42,7 +44,7 @@
                         </button>
                     </div>
                 </div>
-            </form>
+            </div>
         {% endif %}
     </div>
 {% endblock %}

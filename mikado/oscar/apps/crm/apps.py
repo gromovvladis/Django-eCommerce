@@ -7,7 +7,7 @@ from oscar.core.loading import get_class
 class CRMConfig(OscarConfig):
     label = "crm"
     name = "oscar.apps.crm"
-    verbose_name = "API Evotor"
+    verbose_name = "API Эвотор"
 
     namespace = "crm"
 

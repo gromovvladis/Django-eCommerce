@@ -56,6 +56,8 @@
                 <p>
                     Удалить группу атрибутов <strong>{{ object.name }}</strong> - вы уверены?
                 </p>
+            </form>
+            <div class="table-footer">
                 <div class="form-actions fill-width d-flex justify-content-end">
                     <a class="btn btn-info mr-2" {% if not is_popup %}href="{% url 'dashboard:catalogue-attribute-option-group-list' %}"{% else %}href="#" onclick="window.close();return false;"{% endif %}>
                         Отмена
@@ -64,7 +66,7 @@
                         Удалить
                     </button>
                 </div>
-            </form>
+            </div>
         {% endif %}
     </div>
 {% endblock %}

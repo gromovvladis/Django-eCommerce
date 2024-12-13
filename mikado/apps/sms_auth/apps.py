@@ -5,7 +5,7 @@ from oscar.core.application import OscarConfig
 
 class SmsConfig(OscarConfig):
     name = "apps.sms_auth"
-    verbose_name = "SMS auth"
+    verbose_name = "СМС Аутентификация"
     namespace = "sms_auth"
 
     def ready(self):

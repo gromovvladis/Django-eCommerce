@@ -38,6 +38,9 @@ class CRMEvent(models.Model):
         verbose_name = "Событие Эвотор"
         verbose_name_plural = "События Эвотор"
 
+    def __str__(self):
+        return f"{self.event_type} - {self.body}"
+
 
 class CRMBulk(models.Model):
     evotor_id = models.CharField(
@@ -92,3 +95,6 @@ class CRMBulk(models.Model):
         ordering = ("-date_created",)
         verbose_name = "Массовая задача Эвотор"
         verbose_name_plural = "Массовая задача Эвотор"
+
+    def __str__(self):
+        return f"{self.object_type} - {self.status} - {self.date_finish}"

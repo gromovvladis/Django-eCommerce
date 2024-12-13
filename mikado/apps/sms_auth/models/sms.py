@@ -24,8 +24,8 @@ class SMSMessage(models.Model):
         return f"{self.phone_number}"
 
     class Meta:
-        verbose_name = "Sms log"
-        verbose_name_plural = "Sms log"
+        verbose_name = "Отправленное СМС"
+        verbose_name_plural = "Отправленные СМС"
 
 
 class PhoneCode(models.Model):
@@ -44,8 +44,8 @@ class PhoneCode(models.Model):
 
     class Meta:
         ordering = ("created_at",)
-        verbose_name = "Phone code"
-        verbose_name_plural = "Phone codes"
+        verbose_name = "СМС код аутентификации"
+        verbose_name_plural = "СМС коды аутентификации"
 
     def __str__(self):
         return f"{self.phone_number} ({self.code})"

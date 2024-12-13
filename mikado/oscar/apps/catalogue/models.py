@@ -913,7 +913,7 @@ class Product(models.Model):
         attribute_values = self.attribute_values.filter(is_variant=True)
         return attribute_values
 
-    get_name.short_description = ("Название товара", "Название")
+    get_name.short_description = "Название товара"
 
     def get_meta_title(self):
         title = self.meta_title
@@ -921,7 +921,7 @@ class Product(models.Model):
             title = self.parent.meta_title
         return title or self.get_name()
 
-    get_meta_title.short_description = ("Мета-заголовок товара", "Мета-заголовок")
+    get_meta_title.short_description = "Мета-заголовок товара"
 
     def get_meta_description(self):
         meta_description = self.meta_description
@@ -929,7 +929,7 @@ class Product(models.Model):
             meta_description = self.parent.meta_description
         return meta_description or striptags(self.description)
 
-    get_meta_description.short_description = ("Мета-описание товара", "Мета-описание")
+    get_meta_description.short_description = "Мета-описание товара"
 
     def get_parent(self):
         return self.parent if self.parent else self.categories.first()
@@ -1771,33 +1771,6 @@ class ProductAdditional(models.Model):
         verbose_name_plural = "Дополнительные товары"
 
 
-class AdditionalCategory(models.Model):
-    evotor_id = models.CharField(
-        "ID Эвотор",
-        max_length=128,
-        blank=True,
-        null=True,
-    )
-    store = models.ForeignKey(
-        "store.Store",
-        blank=True,
-        verbose_name="Магазин",
-        on_delete=models.CASCADE,
-    )
-    
-    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
-    date_updated = models.DateTimeField("Дата изменения", auto_now=True)
-    
-    class Meta:
-        app_label = "catalogue"
-        verbose_name = "Категория дополнительного товара"
-        verbose_name_plural = "Категории дополнительных товаров"
-
-
-    def get_name(self):
-        return "Дополнительные товары"
-
-
 class Additional(models.Model):
     """
     An additional that can be selected for a particular item when the product
@@ -1909,6 +1882,8 @@ class Additional(models.Model):
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
     objects = AdditionalQuerySet.as_manager()
+
+    parent_id = "201r02r2-5A02-403A-8tF6-r5C360350820"
 
     @cached_property
     def primary_image(self):

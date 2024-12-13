@@ -45,7 +45,7 @@
             <div class="table-header">
                 <h2>Удалить атрибут</h2>
             </div>
-            <form method="post" class="card card-body bg-light">
+            <form method="post" class="card card-body card-confirm bg-light">
                 {% csrf_token %}
                 {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1" />{% endif %}
                 {% if not is_popup %}
@@ -56,6 +56,8 @@
                 <p>
                     Удалить атрибут <strong>{{ object.name }}</strong> - вы уверены?
                 </p>
+            </form>  
+            <div class="table-footer">
                 <div class="form-actions fill-width d-flex justify-content-end">
                     <a class="btn btn-info mr-2" {% if not is_popup %}href="{% url 'dashboard:catalogue-attribute-list' %}"{% else %}href="#" onclick="window.close();return false;"{% endif %}>
                         Отмена
@@ -64,7 +66,7 @@
                         Удалить
                     </button>
                 </div>
-            </form>
+            </div>
         {% endif %}
     </div>
 {% endblock %}
