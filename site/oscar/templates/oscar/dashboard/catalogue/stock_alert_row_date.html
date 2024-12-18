@@ -1,7 +1,0 @@
-{% load django_tables2 %}
-
-Открытие: {{ record.date_created|date:"d.m.y H:i" }}
-{% if record.date_closed %}
-<br>
-Закрытие: {{ record.date_closed|date:"d.m.y H:i" }}
-{% endif %}

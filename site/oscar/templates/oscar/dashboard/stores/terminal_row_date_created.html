@@ -1,7 +1,0 @@
-{% load django_tables2 %}
-
-{% if record.date_created %}
-    {{ record.date_created|date:"d.m.y H:i" }}
-{% else %}
-    -
-{% endif %}
