@@ -16,8 +16,8 @@ logs/*
 /pip-selfcheck.json
 
 # migrations
+*migrations/*
 !*migrations/__init__.py
-*migrations*
 
 /config/*.conf
 
