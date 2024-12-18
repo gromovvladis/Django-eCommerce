@@ -41,7 +41,7 @@
     sudo -u postgres psql / запускаем в консоли возможность управлять PostgresQL
 
     Команды от имени "postgres=#": (точка с запятой в конце обязательны)
-        CREATE DATABASE mikado; / создаем бд
+        CREATE DATABASE mikado; / создаем бд для микадо
         CREATE USER user_db WITH PASSWORD 'mikadosushi25'; / создаем пользователя с именем и паролем
         ALTER ROLE user_db SET client_encoding TO 'utf8'; / кодировка
         ALTER ROLE user_db SET default_transaction_isolation TO 'read committed'; / хз
@@ -50,6 +50,9 @@
         ALTER DATABASE mikado OWNER TO user_db; / передаем владение бд пользователю 
         \q     / выйти из пользователя "postgres=#"
 
+        CREATE DATABASE provence; / создаем бд для прованса
+        GRANT ALL PRIVILEGES ON DATABASE provence TO user_db; / все привелении для бд provence пользователю user_db
+        ALTER DATABASE provence OWNER TO user_db; / передаем владение бд пользователю 
 
     На случай, если понадобится удалить базу данных:
         cd ~postgres/ / переходим в папку postgres/
@@ -282,6 +285,9 @@
 
     sudo supervisorctl stop all
     sudo supervisorctl stop mikado
+
+
+git clone https://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@github.com/gromovvladis/mikado.git ~/mikado
 
 
 
