@@ -485,7 +485,7 @@ class ReceiptSerializer(serializers.Serializer):
         representation = {
             "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
             "external_id": instance.id,
-            "service": {"callback_url": f"https://{settings.ALLOWED_HOSTS[0]}{reverse_lazy("payment:evotor", kwargs={"pk": instance.id})}"},
+            "service": {"callback_url": f"https://{settings.ALLOWED_HOSTS[0]}{reverse_lazy('payment:evotor', kwargs={'pk': instance.id})}"},
             "receipt": {
                 "client": {
                     "email": instance.user.email if instance.user else None,
