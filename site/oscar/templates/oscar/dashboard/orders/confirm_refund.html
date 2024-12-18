@@ -1,0 +1,51 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load l10n %}
+
+{% block body_class %}refund-money{% endblock %}
+
+{% block title %}
+    Осуществить возврат у заказа №{{ transaction.source.order.number }}? | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">Заказы</a></li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard:order-detail' number=transaction.source.order.number %}">№{{ transaction.source.order.number }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Подтвердите возврат</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block navtext %}
+    <h1>Отменить оплату по заказу №{{ transaction.source.order.number }}?</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+    <div class="alert alert-danger">
+        <p><strong>Это действие нельзя отменить!</strong></p>
+        После отмены заказ перейдет в статус "Отменен"
+    </div>
+    <div class="table-header">
+        <h3>
+            <i class="fa-solid fa-rotate-left"></i>
+            Возврат средств
+        </h3>
+    </div>
+    <div class="card card-body bg-light">
+        <form action="" method="post" class="fill-width">
+            {% csrf_token %}
+            {{ form }}
+            <p>Отменить транзакцию и вернуть деньги клиенту?</p>
+            <input class="form-control" style="max-width: 300px;" name="amount" step="1" type="number" min="1" max="{{ transaction.source.amount_available_for_refund|unlocalize }}" value="{{ transaction.source.amount_available_for_refund|unlocalize }}" placeholder="Сумма к возврату"/>
+            <br>
+            <div class="form-actions d-flex justify-content-end">
+                <a class="btn btn-info mr-2" href="{% url 'dashboard:order-detail' number=transaction.source.order.number %}">Отмена</a>
+                <button type="submit" class="btn btn-danger" data-loading-text="Возврат...">Вернуть указанную сумму</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

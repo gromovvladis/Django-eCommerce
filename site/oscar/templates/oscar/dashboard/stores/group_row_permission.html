@@ -1,0 +1,12 @@
+{% load django_tables2 %}
+
+{% with permissions=record.permissions.all %}
+    {% if permissions %}
+        {{ permissions.model.content_type.name }} 
+        {% for permission in permissions %}
+            {{ permission.name }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    {% else %}
+        -
+    {% endif %}
+{% endwith %}

@@ -1,0 +1,69 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% block title %}
+    {{ title }} | Удалить опцию | {{ block.super }}
+{% endblock %}
+
+{% block body_class %}{{ block.super }} create-page{% endblock %}
+
+{% block navbar %}
+    {% if not is_popup %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block dashboard_nav %}
+    {% if not is_popup %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+    {% if not is_popup %}
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-option-list' %}">Опции</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Удалить</li>
+            </ol>
+        </nav>
+    {% endif %}
+{% endblock %}
+
+{% block navtext %}
+    <h1>{{ title }}</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+    <div class="confirm-content">
+        {% if disallow %}
+            <p>Перед удалением убедитесь, что опция не назначена продуктам или классам продуктов.</p>
+        {% else %}
+            <div class="table-header">
+                <h2>Удалить опцию</h2>
+            </div>
+            <form action="." method="post" class="card card-body card-confirm bg-light">
+                {% csrf_token %}
+                {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1" />{% endif %}
+                {% if not is_popup %}
+                {% for key, value in http_get_params.items %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}" />
+                {% endfor %}
+                {% endif %}
+                <p>
+                    Удалить опцию <strong>{{ object.name }}</strong> - вы уверены?
+                </p>
+            </form>
+            <div class="table-footer">
+                <div class="form-actions fill-width d-flex justify-content-end">
+                    <a class="btn btn-info ml-2" href="{% url 'dashboard:catalogue-option-list' %}">
+                        Отмена
+                    </a>
+                    <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

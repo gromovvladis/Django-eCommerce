@@ -1,0 +1,47 @@
+{% load svg_tags %}
+
+<div class="app__mobile">
+    <div class="app-mobile d-flex fill-height align-center justify-space-around">
+        {% comment %} ------------- меню --------------- {% endcomment %}
+        <a href="{{ homepage_url }}" data-id="mobile-main-link"{% if summary == "Главная" %} class="active"{% endif %}>
+            {% icon file_name='app_mobile_sticker/menu' size=24 stroke='#999' %}
+            <span class="mt-1">
+                Меню
+            </span>
+        </a>
+        {% comment %} ------------- акции --------------- {% endcomment %}
+        <a href="{% url 'home:actions' %}" data-id="mobile-actions-link"{% if summary == "Акции" %} class="active"{% endif %}>
+            {% icon file_name='app_mobile_sticker/actions' size=24 stroke='#999'%}
+            <span class="mt-1">
+                Акции
+            </span>
+        </a>
+        {% comment %} ------------- профиль --------------- {% endcomment %}
+        {% if user.is_authenticated %}
+            <a href="{% url 'customer:summary' %}" data-id="mobile-cabinet-link"{% if summary == "Профиль" %} class="active"{% endif %}>
+                {% icon file_name='app_mobile_sticker/profile' size=24 stroke='#999'%}
+                <span data-id="notifications-nums" class="badge d-flex justify-center align-center" style="right: 0.5rem;">{{ num_unread_notifications }}</span>
+                <span class="mt-1">
+                    Профиль
+                </span>
+            </a>
+        {% else %}
+            <button onclick="openAuthModal()" data-id="mobile-cabinet-link">
+                {% icon file_name='app_mobile_sticker/profile' size=24 stroke='#999'%}
+                <span class="mt-1">
+                    Войти
+                </span>
+            </button>
+        {% endif %}
+        {% comment %} ------------- корзина --------------- {% endcomment %}
+        <button data-id="mobile-cart-button" onclick="window.location.href='{% url 'basket:summary' %}'">
+            <span class="d-flex pos-relative">
+                {% icon file_name='app_mobile_sticker/cart' size=24 stroke='#999'%}
+                <span data-id="cart-nums" class="badge d-flex justify-center align-center">{% if request.basket.num_items > 0 %}{{ request.basket.num_items }}{% endif %}</span>
+            </span>
+            <span class="mt-1">
+                Корзина
+            </span>
+        </button>
+    </div>
+</div>

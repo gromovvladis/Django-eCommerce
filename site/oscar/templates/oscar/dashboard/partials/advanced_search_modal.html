@@ -1,0 +1,43 @@
+<div class="modal fade" data-show="true" id="SearchModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Расширенный поиск</h3>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <form method="get" class="form-stacked">
+                <div class="modal-body mt-1">
+                    {% if form.is_bound and not form.is_valid %}
+                        <div class="alert alert-danger">
+                            <strong>Упс! Мы нашли некоторые ошибки</strong>
+                            <br>
+                            Пожалуйста, проверьте сообщения об ошибках ниже и попробуйте еще раз
+                        </div>
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                            <div class="alert alert-danger form-group">
+                                <span class="help-inline"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% for field in form %}
+                        {% if field.name != "date_range" %}
+                            {% include 'oscar/dashboard/partials/form_field.html' with field=field style=style %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <a href="#" class="btn btn-secondary m-0 mr-2" data-dismiss="modal">
+                        Закрыть
+                    </a>
+                    <button type="submit" class="btn btn-primary m-0" data-loading-text="Поиск...">
+                        <i class="fas fa-search"></i> Поиск
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

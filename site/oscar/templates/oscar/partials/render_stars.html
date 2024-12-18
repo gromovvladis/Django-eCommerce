@@ -1,0 +1,4 @@
+{% for value, label in field.field.choices %}
+    <option value="{{ value }}" id="id_star_{{ value }}" {% if field.value|default:"" == value %} selected{% endif %}></option>
+    <label for="id_star_{{ value }}" title="Оценка «{{ label }}»"></label>
+{% endfor %}

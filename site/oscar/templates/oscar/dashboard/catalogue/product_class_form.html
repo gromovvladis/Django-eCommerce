@@ -1,0 +1,149 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% block title %}
+    {{ title }} | Тип продукта | {{ block.super }}
+{% endblock %}
+
+{% block body_class %}{{ block.super }} create-page{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-class-list' %}">Тип продукта</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block navtext %}
+    <h1>{{ title }}</h1>
+    {% if product_class %}
+        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-class-delete' pk=product_class.id %}">
+            <i class="fa-solid fa-trash"></i>
+            <span>Удалить</span>
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+    <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors">
+        {% csrf_token %}
+        <div class="row">
+            {% block tab_nav %}
+                <div class="col-md-3">
+                    <div class="tab-nav sticky-top">
+                        <div class="table-header">
+                            <h3>Редактирование</h3>
+                        </div>
+                        <ul class="nav flex-column bs-docs-sidenav" id="product_update_tabs">
+                            {% block tabs %}
+                                <li class="nav-item">
+                                    <a class="nav-link active" href="#product_class_details" data-toggle="tab">
+                                        Описание
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#product_attributes" data-toggle="tab">
+                                        Атрибуты
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#product_additional" data-toggle="tab">
+                                        Дополнительные товары
+                                    </a>
+                                </li>
+                            {% endblock tabs %}
+                        </ul>
+                    </div>
+                </div>
+            {% endblock tab_nav %}
+
+            <div class="col-md-9">
+                <div class="tab-content">
+                    {% block tab_content %}
+                        {% block product_class_details %}
+                            <div class="tab-pane active" id="product_class_details">
+                                <div class="table-header">
+                                    <h3>Описание</h3>
+                                </div>
+                                <div class="card card-body product-class-details">
+                                    {% if form.non_field_errors %}
+                                        {% for error in form.non_field_errors %}
+                                            <div class="alert alert-danger">
+                                                <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% for field in form %}
+                                        {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endblock %}
+                        {% block product_attributes %}
+                            <div class="tab-pane" id="product_attributes">
+                                <table class="table table-striped table-bordered">
+                                    <caption>Атрибуты</caption>
+                                    {{ attribute_formset.management_form }}
+                                    {{ attribute_formset.non_form_errors }}
+                                    {% for attribute_form in attribute_formset %}
+                                        <tr>
+                                            <td class="form-inline">
+                                                {% include "oscar/dashboard/partials/form_fields_inline.html" with form=attribute_form %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        {% endblock %}
+                        {% block additional_products %}
+                            <div class="tab-pane" id="product_additional">
+                                {% block additional_products_content %}
+                                    <table class="table table-striped table-bordered">
+                                        <caption>Дополнительные товары</caption>
+                                        {{ additional_formset.management_form }}
+                                        {{ additional_formset.non_form_errors }}
+                                        {% for additional_form in additional_formset %}
+                                            <tr>
+                                                <td class="form-inline">
+                                                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=additional_form %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                {% endblock additional_products_content %}
+                            </div>
+                        {% endblock additional_products %}
+                    {% endblock tab_content %}
+                </div>
+            </div>
+        </div>
+
+        {% block fixed_actions_group %}
+            <div class="fixed-actions-group">
+                <div class="container container-fluid">
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-secondary mr-2" href="#" onclick="window.history.go(-1);return false" >
+                            <i class="fa-regular fa-circle-xmark"></i> 
+                            <span>
+                                Отменить
+                            </span>
+                        </a>
+                        <button class="btn btn-primary" type="submit" data-loading-text="Сохранение...">
+                            <i class="fa-regular fa-floppy-disk"></i>
+                            <span>
+                                Сохранить
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endblock fixed_actions_group %}
+    </form>
+{% endblock dashboard_content %}
+
+{% block onbodyload %}
+    {{ block.super }}
+    oscar.dashboard.product_attributes.init();
+{% endblock %}
