@@ -166,9 +166,9 @@ INSTALLED_APPS = [
     'compressor', # static
     'rest_framework', # api
     'django_tables2', # tables
-    'django_celery_beat', # celery
+    'celery', # celery
+    'django_celery_beat',
     'django_celery_results',
-    'celery', 
     'django.contrib.sitemaps', # sitemap
 ]
 if DEBUG:
