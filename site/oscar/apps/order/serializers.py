@@ -492,9 +492,9 @@ class ReceiptSerializer(serializers.Serializer):
                     "phone": str(instance.user.username) if instance.user else None,
                 },
                 "company": {
-                    "email": "s.gromovvladis@gmail.com",
-                    "sno": "osn", # переделай
-                    "inn": "246607594685",
+                    "email": settings.PAYMENT_EMAIL,
+                    "sno": settings.SNO,
+                    "inn": settings.INN,
                     "payment_address": settings.ALLOWED_HOSTS[0],
                 },
                 "items": [ReceiptLineSerializer(line).data for line in instance.lines.all()],
