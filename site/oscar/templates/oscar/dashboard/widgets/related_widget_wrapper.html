@@ -1,0 +1,23 @@
+{% load static %}
+<div class="related-widget-wrapper single d-flex">
+    {{ rendered_widget }}
+    {% block links %}
+        {% spaceless %}
+        <a class="related-widget-wrapper-link change-related ml-2" id="change_id_{{ name }}"
+            data-href-template="{{ change_related_template_url }}?{{ url_params }}"
+            title="Изменить выбранное - {{ model }}">
+            <img src="{% static 'img/ui/icon-changelink.svg' %}" alt="Изменить" loading="lazy"/>
+        </a>
+        <a class="related-widget-wrapper-link add-related ml-2" id="create_id_{{ name }}"
+            href="{{ add_related_url }}?{{ url_params }}"
+            title="Добавить новое - {{ model }}">
+            <img src="{% static 'img/ui/icon-addlink.svg' %}" alt="Добавить" loading="lazy"/>
+        </a>
+        <a class="related-widget-wrapper-link delete-related ml-2" id="delete_id_{{ name }}"
+            data-href-template="{{ delete_related_template_url }}?{{ url_params }}"
+            title="Удалить выбранное - {{ model }}">
+            <img src="{% static 'img/ui/icon-deletelink.svg' %}" alt="Удалить" loading="lazy"/>
+        </a>
+        {% endspaceless %}
+    {% endblock %}
+</div>

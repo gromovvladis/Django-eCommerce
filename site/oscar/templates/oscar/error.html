@@ -1,0 +1,16 @@
+{% extends "oscar/layout.html" %}
+
+{% block wrapper_class %}fill-width px-2 py-3 pb-sm-4 pt-sm-2{% endblock %}
+
+{% block app_class %}app---error{% endblock %}
+{% block nav_class %}app__nav--error{% endblock %}
+
+{% block content %}
+    <div class="error-container d-flex flex-column justify-center align-center my-6">
+        <h1 class="error-code mb-1">{% block error_code %}{% endblock %}</h1>
+        {% block error_message %}{% endblock %}
+        <div class="d-flex mt-2">
+            <a class="button button--main button--second" href="{{ homepage_url }}">На главную страницу</a>
+        </div>
+    </div>
+{% endblock %}

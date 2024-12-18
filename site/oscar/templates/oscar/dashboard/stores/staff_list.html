@@ -1,0 +1,120 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load render_table from django_tables2 %}
+{% load dashboard_tags %}
+
+{% block body_class %}{{ block.super }} users{% endblock %}
+
+{% block title %} Сотрудники | {{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Сотрудники</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header d-flex justify-content-between">
+        <h1>Сотрудники</h1>
+        <a href="{% url 'dashboard:staff-create' %}" class="btn btn-primary ml-3"><i class="fas fa-plus"></i> 
+            <span>
+                Создать сотрудника
+            </span>
+        </a>
+    </div>
+{% endblock header %}
+
+{% block dashboard_content %}
+    <div class="table-wrapper mb-4">
+        <div class="table-header d-flex justify-space-between" data-target="#search-body" 
+        data-toggle="collapse" aria-controls="search-body" aria-expanded="false">
+            <h3><i class="fas fa-filter"></i> Фильтры</h3>
+            <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+            <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+        </div>
+        <div class="card card-body bg-light collapse" id="search-body">
+
+            <form method="get" class="form-inline fill-width justify-space-between align-items-end">
+                <div class="d-flex form-row">
+                    {% include "oscar/dashboard/partials/form_fields_inline.html" with form=form %}
+                </div>
+
+                {% if search_filters %}
+                    <div class="search-filter-list mt-3">
+                        <label class="mr-2">Фильтры:</label>
+                        {% for filter, param in search_filters %}
+                            <span class="badge badge-filter mb-2 mr-1">{{ filter }}
+                                <a class="delete-filter text-danger ml-1" href="{% delete_filter request param %}">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </a>    
+                            </span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="btn-form d-flex mt-3">
+                    <button class="btn btn-primary flex-fill" type="submit" name="search" data-loading-text="Поиск...">
+                        <i class="fas fa-search"></i>
+                        <span class="ml-2">
+                            Поиск
+                        </span>
+                    </button>
+                    {% if request.GET %}
+                        <a href="{% url 'dashboard:staff-list' %}" class="btn btn-danger ml-2">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if staffs %}
+        <form id="user_list_form" method="post" class="mobile-table">
+            {% csrf_token %}
+            {% render_table staffs %}
+            <div class="table-wrapper mb-4 d-none" id="actions_lines">
+                <div class="table-header d-flex justify-space-between" data-target="#status-body" 
+                data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
+                    <h3><i class="fa-solid fa-list-check"></i>Изменить сотрудника</h3>
+                    <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+                    <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+                </div>
+                <div class="card card-body dropdown-list collapse" id="status-body">
+                    <h2 class="mb-3">Изменить статус сотрудника</h2>
+                    <div class="form-inline fill-width justify-space-between">
+                        <div class="form-group form-flex-inline">
+                            <label for="new_status_id">Новый статус</label>
+                            <select name="action" id="new_status_id" name="new_status">
+                                <option value="make_nothing"> -- Новый статус -- </option>
+                                <option id="make_active_check" value="make_active">Активен</option>
+                                <option id="make_inactive_check" value="make_inactive">Не активен</option>
+                            </select>
+                        </div>
+                        <div class="btn-form d-flex">
+                            <button type="submit" class="btn btn-primary" data-loading-text="Смена статуса...">
+                                Изменить статус заказа
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% else %}
+        <table class="table table-striped table-bordered table-hover">
+            <caption>
+                <i class="fas fa-id-card-clip"></i>
+                Все сотрудники
+            </caption>
+            <tr><td>Список персонала пуст</td></tr>
+        </table>
+    {% endif %}
+
+{% endblock dashboard_content %}
+
+{% block onbodyload %}
+    {{ block.super }}
+    oscar.dashboard.orders.initTable();
+{% endblock onbodyload %}

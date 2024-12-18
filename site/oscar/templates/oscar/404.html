@@ -1,0 +1,14 @@
+{% extends "oscar/error.html" %}
+
+{% block title %} Страница не найдена | {{ block.super }}{% endblock %}
+
+{% block nav_title %}Страница не найдена{% endblock %}
+{% block nav_title_center %}Страница не найдена{% endblock %}
+
+{% block error_code %}404{% endblock %}
+
+{% block error_message %}
+    <p class="font-bold mb-2">Страница не найдена</p>
+    <p class="text--grey">У нас нет такой страницы</p>
+    <p class="text--grey">Зато есть множество других :)</p>
+{% endblock %}

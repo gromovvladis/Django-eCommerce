@@ -1,0 +1,16 @@
+{% load django_tables2 %}
+<div class="d-flex flex-column">
+    <div>
+        {% if record.evotor_id %}
+            <span class="text-success">
+                <i class="fa-solid fa-circle-check"></i>&nbsp; 
+            </span>
+        {% endif %}
+        {% if product_access %}
+            <a href="{% url 'dashboard:catalogue-additional-update' pk=record.pk %}{% querystring %}">{{ value }}</a>
+        {% else %}
+            <span>{{ value }}</span>
+        {% endif %}
+    </div>
+    <span class="text-muted small">Артикул: {{ record.article }}</span>
+</div>

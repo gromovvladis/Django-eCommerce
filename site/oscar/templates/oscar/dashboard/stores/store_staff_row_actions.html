@@ -1,0 +1,11 @@
+{% load django_tables2 %}
+
+{% if record.is_related_to_store %}
+    <a class="btn btn-danger" href="{% url 'dashboard:store-user-unlink' store_pk=store.id user_pk=record.user.id %}{% querystring %}">
+        <i class="fas fa-minus"></i>
+    </a>
+{% else %}
+    <a class="btn btn-success" href="{% url 'dashboard:store-user-link' store_pk=store.id user_pk=record.user.id %}{% querystring %}">
+        <i class="fas fa-plus"></i>
+    </a>
+{% endif %}

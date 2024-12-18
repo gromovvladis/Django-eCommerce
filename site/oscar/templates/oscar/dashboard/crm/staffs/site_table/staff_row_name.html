@@ -1,0 +1,24 @@
+{% load django_tables2 %}
+
+<span>
+    {% if record.wrong_evotor_id %}
+        <span class="text-danger">
+            <i class="fa-solid fa-circle-xmark"></i>&nbsp; 
+        </span>
+    {% elif record.is_valid %}
+        <span class="text-success">
+            <i class="fa-solid fa-circle-check"></i>&nbsp; 
+        </span>
+    {% elif not record.evotor_id %}
+        <span class="text-primary">
+            <i class="fa-solid fa-circle-exclamation"></i>&nbsp;
+        </span>
+    {% else %}
+        <span class="text-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>&nbsp; 
+        </span>
+    {% endif %}
+    <a href="{% url 'dashboard:staff-detail' pk=record.id %}">
+        {{ record.get_full_name }}
+    </a>
+</span>

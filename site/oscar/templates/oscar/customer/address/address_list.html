@@ -1,0 +1,71 @@
+{% extends "oscar/customer/baseaccountpage.html" %}
+
+{% load currency_filters %}
+{% load purchase_info_tags %}
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
+
+{% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
+{% block nav_title_center %}{{ page_title }}{% endblock %}
+
+{% block breadcrumbs %}
+    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+        <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
+            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
+        </button>
+        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
+        <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Личный кабинет</a>
+        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
+        <span class="bread__link" aria-current="page">{{ page_title }}</span>
+    </div>
+{% endblock %}
+
+{% block tabcontent %}
+    <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
+        
+        <div class="d-none d-sm-flex mb-2">
+            <h1>Адрес</h1>
+        </div>
+        
+        {% if addresses %}
+            <div class="fill-width mb-2">
+                <div class="cabinet-orders fill-width grow-1">
+                    <div class="cabinet__promo-wrapper fill-width d-flex flex-column">
+                        <ul class="orders-list d-flex flex-column fill-width fill-width">
+                            {% for address in addresses %}
+                                <li class="orders-list-item fill-width">
+                                    <div class="orders-list-item fill-width">
+                                        <div class="orders-list-item__button d-flex flex-column fill-width py-3">
+                                            <div class="d-flex justify-space-between align-start fill-width">
+                                                <a href="{% url 'customer:address-detail' pk=address.id %}"  class="orders-list-item__title">
+                                                    {% for field in address.active_address_fields_and_labels %}
+                                                        {{ field.label }}: {{ field.value }}{% if not forloop.last %},{% endif %}
+                                                        <br>
+                                                    {% endfor %}
+                                                </a>
+                                                <a href="{% url 'customer:address-delete' pk=address.id %}" class="text--red orders-list-item__address ml-3">
+                                                    Удалить
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <a href="{% url 'customer:address-create' %}" class="text--info">Добавить адрес</a>
+        {% endif %}
+    </div>
+{% endblock tabcontent %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    {% compress js %}
+        <script src="{% static "js/frontend/profile/profile.js" %}" defer></script>
+    {% endcompress %}
+{% endblock %}
