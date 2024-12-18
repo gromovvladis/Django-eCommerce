@@ -349,7 +349,7 @@ class OrderSerializer(serializers.Serializer):
         OrderNote.objects.create(
             order=instance,
             note_type=OrderNote.SYSTEM,
-            message=f"Заказ обновлен. {msg}. Сообщение: {body.get("reason", "-")}",
+            message=f"Заказ обновлен. {msg}. Сообщение: {body.get('reason', '-')}",
         )
 
         self._delete_old_data(instance)
