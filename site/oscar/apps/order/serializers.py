@@ -485,16 +485,16 @@ class ReceiptSerializer(serializers.Serializer):
         representation = {
             "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
             "external_id": instance.id,
-            "service": {"callback_url": f"https://{settings.ALLOWED_HOSTS[0]}{reverse_lazy("payment:evotor", kwargs={"pk": instance.id})}"},
+            "service": {"callback_url": f"https://{settings.ALLOWED_HOSTS[0]}{reverse_lazy('payment:evotor', kwargs={'pk': instance.id})}"},
             "receipt": {
                 "client": {
                     "email": instance.user.email if instance.user else None,
                     "phone": str(instance.user.username) if instance.user else None,
                 },
                 "company": {
-                    "email": "s.gromovvladis@gmail.com",
-                    "sno": "osn", # переделай
-                    "inn": "246607594685",
+                    "email": settings.PAYMENT_EMAIL,
+                    "sno": settings.SNO,
+                    "inn": settings.INN,
                     "payment_address": settings.ALLOWED_HOSTS[0],
                 },
                 "items": [ReceiptLineSerializer(line).data for line in instance.lines.all()],
