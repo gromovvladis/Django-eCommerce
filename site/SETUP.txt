@@ -269,9 +269,22 @@
 
 13. Обновить изменения с Development в Production
     ssh vladis@5.35.89.111
+
     source venv/bin/activate
     cd mikado
-    git pull https://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@github.com/gromovvladis/mikado.git server
+    cd site
+    git pull https://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@github.com/gromovvladis/mikado.git
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py collectstatic
+    python manage.py compress
+    sudo supervisorctl restart all
+    redis-cli Flushall
+
+    source venv/bin/activate
+    cd provence
+    cd site
+    git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
     python manage.py collectstatic
