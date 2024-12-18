@@ -19,6 +19,8 @@ logs/*
 !*migrations/__init__.py
 *migrations*
 
+/config/*.conf
+
 # Vagrant 
 .vagrant
 
