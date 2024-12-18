@@ -1,0 +1,42 @@
+{% load svg_tags %}
+{% load widget_tweaks %}
+
+<div class="modal pos-fixed d-flex align-center justify-center" data-id="modal-close">
+    <div class="modal__content scrollbar px-2 pt-6 pd-sm-4 no-scroll">
+        <button onclick="openStoreModal()" data-id="close-store-modal" class="button app-header__back button--small justify-center shrink d-block d-sm-none" style="top: -38px;">
+            <span class="button__wrapper">
+                <span class="d-flex">
+                    {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
+                </span>
+            </span>
+        </button>
+        <div class="d-flex flex-column align-center justify-center align-sm-start mb-3">
+            <header class="fill-width d-flex justify-sm-space-between">
+                <div class="modal__title">Адрес</div>
+                <div class="d-none d-sm-flex">
+                    <button data-id="close-button" onclick="openStoreModal()"
+                        class="close-button d-flex justify-center align-center">
+                        {% icon file_name='interface/close' size=24 stroke="#111"%}
+                    </button>
+                </div>
+            </header>
+        </div>
+        <div class="auth flex flex-column text-start">
+            <form id="store_form" action="{{ request.get_full_path }}" method="post" class="card card-body bg-light d-flex flex-column">
+                {% for radio in store_form.store_id %}
+                    <div class="store_select mb-2 d-flex flex-column {% if radio.data.selected %}checked{% endif %}">
+                        <div class="d-none">{{ radio.tag }}</div>
+                        <label for="{{ radio.id_for_label }}" class="header_store">
+                            {{ radio.choice_label }}
+                        </label>
+                        {% for store in store_form.stores %}
+                            {% if store.id == radio.data.value and store.primary_address %}
+                                <span class="header_address">{{ store.primary_address }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </form>    
+        </div>
+    </div>
+</div>

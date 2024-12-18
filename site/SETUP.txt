@@ -286,10 +286,9 @@
 
 
 
-sftp://vladis@5.35.89.111/home/vladis/mikado
--b provence
 
-git pull https://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@github.com/gromovvladis/mikado.git /home/vladis/provence
+
+
 
 
 
