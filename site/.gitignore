@@ -15,11 +15,11 @@ logs/*
 /pyvenv.cfg
 /pip-selfcheck.json
 
-config/*.conf
-
 # migrations
 !*migrations/__init__.py
 *migrations*
+
+/config/*.conf
 
 # Vagrant 
 .vagrant
