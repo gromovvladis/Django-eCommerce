@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from django.core.management.base import BaseCommand
-from bot_loader import dp, bot
+from bot_loader import staff_dp, staff_bot
 
 from oscar.apps.telegram.bot.middlewares import *
 from oscar.apps.telegram.bot.handlers import *
@@ -29,6 +29,6 @@ class Command(BaseCommand):
 
     async def start_polling(self):
         logging.info("Bot Start")
-        await on_startup(bot, dp)
-        await dp.start_polling(bot)
+        await on_startup(staff_bot, staff_dp)
+        await staff_dp.start_polling(staff_bot)
 
