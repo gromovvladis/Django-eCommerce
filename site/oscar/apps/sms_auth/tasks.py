@@ -1,4 +1,4 @@
-from apps.sms_auth.services.clean import CleanService
+from oscar.apps.sms_auth.services.clean import CleanService
 
 from .conf import conf
 from .models import PhoneCode
