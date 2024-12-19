@@ -1,0 +1,17 @@
+{% load django_tables2 %}
+{% load dashboard_tags %}
+
+{% if record.before_order %}
+    <span class="badge {% if record.before_order|in_future %}badge-success{% else %}badge-danger{% endif %} my-2">
+        {% if record.before_order.days %}
+            {{ record.before_order.days }} дн.
+        {% endif %}
+        {% with hours=record.before_order|hours %}
+            {% if hours %}
+                {{ hours }} ч.
+            {% else %}
+                {{ record.before_order|minutes }} мин.
+            {% endif %}
+        {% endwith %}
+    </span>
+{% endif %}

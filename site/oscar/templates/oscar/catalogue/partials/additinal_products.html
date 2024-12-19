@@ -1,0 +1,51 @@
+{% load widget_tweaks %}
+{% load currency_filters %}
+{% load image_tags %}
+
+<div class="mt-2">
+    <h2 class="dish-actions__block-name">Добавить ингредиенты</h2>
+    <ul class="dish-toppings d-flex flex-wrap mt-2">
+        {% for field in form %}
+            {% if field.field.widget.attrs.additional %}
+                <li class="dish-toppings__item d-flex">
+                    <div data-id="additional-product" class="dish-toppings__card d-flex flex-column align-center grow-1 pos-relative">
+                        
+                        <div class="dish-image fill-width pos-relative">
+                            <div class="image__inner image__inner--topping">
+                                {% url_thumbnail field.field.widget.attrs.image.original "x150" upscale=False as thumb %}
+                                <img src="{{ thumb.url }}" loading="lazy" alt="{{ field.label|safe }}" class="img-thumbnail w-auto mx-auto my-0">
+                            </div>
+                        </div>
+                        <div class="topping-description px-1 pb-1 fill-width d-flex align-center flex-column pos-relative">
+                            <p class="dish-toppings__name mt-2">{{ field.label|safe }}</p>
+                            <div role="separator" class="spacer"></div>
+                            <span data-id="dish-toppings-price" class="prices d-flex flex-column align-start mt-1 prices--red prices--small">
+                                <span class="prices__price prices__price--topping no-wrap">
+                                    <span data-id="additional-product-price">{{ field.field.widget.attrs.price|formate_price }}</span>
+                                    <span>{{ currency_symbol }}</span>
+                                    <span class="weight weight--additional">
+                                        <span>/&nbsp;&nbsp;{{ field.field.widget.attrs.weight|safe }}</span>
+                                        <span>г</span>
+                                    </span>
+                                </span>
+                            </span>
+                            <div class="order-button order-button--transparent">
+                                <button type="button" disabled="disabled" data-id="order-button-minus" class="order-button--elem" aria-label="Уменьшить">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                {% render_field field class="order-button--elem order-button--value remove-arrows" aria-label="Количество" readonly="true"%}
+                                <button type="button" data-id="order-button-plus" class="order-button--elem" aria-label="Увеличить">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>

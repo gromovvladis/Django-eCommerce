@@ -1,0 +1,63 @@
+{% load currency_filters %}
+
+{% with offer_discounts=basket.offer_discounts voucher_discounts=basket.grouped_voucher_discounts %}
+        
+    <div class="order__total_and_discounts d-flex flex-column mt-3">
+
+        {% block discount_totals %}
+            {% if order.basket_discounts or order.shipping != 0 %}
+                <div class="prices__price_discounts">
+
+                    <span class="d-flex justify-space-between no-wrap">
+                        Заказ
+                        <span class="prices__price-before">
+                            {{ order.basket_total_before_discounts|currency:basket.currency }}
+                        </span>
+                    </span>
+
+                    {% if order.basket_discounts %}
+                        {% for discount in order.basket_discounts %}
+                            <div class="d-flex justify-space-between no-wrap">
+                                <span class="d-flex align-end">
+                                    <span class="mr-1">
+                                        {{ discount.offer_name }}
+                                    </span>
+                                    {% if discount.description %}
+                                        <br/><small>({{ discount.description }})</small>
+                                    {% endif %}
+                                </span>
+                                <span class="prices__price-before">
+                                    - {{ discount.amount|currency:basket.currency }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if order.shipping != 0 %}
+                        <div class="d-flex justify-space-between no-wrap">
+                            <span class="d-flex align-end">
+                                <span class="mr-1">
+                                    {{ order.shipping_method }}
+                                </span>
+                            </span>
+                            <span class="prices__price-before">
+                                {{ order.shipping|currency:basket.currency }}
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endblock %}
+
+        <div class="order__info-total d-flex align-end total">
+            Итого
+            <div role="separator" class="spacer"></div>
+            <span class="prices d-flex flex-column align-start prices--big">
+                <span class="prices__price no-wrap">
+                    {{ order.total|currency:basket.currency }}
+                </span>
+            </span>
+        </div>
+    </div>
+
+{% endwith %}

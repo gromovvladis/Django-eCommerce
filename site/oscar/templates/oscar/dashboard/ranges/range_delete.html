@@ -1,0 +1,47 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% block body_class %}{{ block.super }} create-page{% endblock %}
+
+{% block title %}
+    Удалить ассортимент '{{ range.name }}'? | Ассортименты | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:range-list' %}">Ассортименты</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:range-update' pk=range.pk %}">{{ range.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Удалить {{ range.name }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block navtext %}
+    <h1>Удалить ассортимент '{{ range.name }}'?</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+    <div class="confirm-content">
+        <div class="table-header">
+            <h2>Удалить ассортимент</h2>
+        </div>
+        <form method="post" class="card card-body bg-light">
+            <p>Вы уверены, что хотите удалить этот ассортимент?</p>
+            <span>Это действие нельзя отменить!</span>
+            {% csrf_token %}
+            <div class="form-actions fill-width mt-3">
+                <div class="float-right">
+                    <a class="btn btn-secondary" href="{% url 'dashboard:range-list' %}">
+                        <i class="fa-solid fa-ban"></i>
+                        Отмена
+                    </a>
+                    <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                        <i class="fa-solid fa-trash"></i>
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock dashboard_content %}

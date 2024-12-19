@@ -1,0 +1,8 @@
+{% if not record.additionals %}
+    -
+{% else %}
+    {% for add in record.additionals %}
+        {{ add }}
+        <br>
+    {% endfor %}
+{% endif %}

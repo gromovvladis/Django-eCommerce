@@ -1,0 +1,45 @@
+{% load currency_filters %}
+{% load shipping_tags %}
+
+{% with offer_discounts=basket.offer_discounts voucher_discounts=basket.grouped_voucher_discounts %}
+    {% block discount_totals %}
+        {% if offer_discounts or voucher_discounts %}
+
+        <span class="prices__price_discounts">
+            <span class="no-wrap">
+                Заказ:
+                <span class="prices__price-before">
+                    {{ basket.total_excl_discounts|currency:basket.currency }}
+                </span>
+            </span>
+
+            {% for discount in offer_discounts %}
+                <span class="no-wrap">
+                    {{ discount.name }}:
+                    <span>
+                        -{{ discount.discount|currency:basket.currency }}
+                    </span>
+                </span>
+            {% endfor %}
+
+            {% if voucher_discounts %}
+                {% for discount in voucher_discounts %}
+                    <span class="no-wrap">
+                        {% if discount.voucher.voucher_set %}
+                            {{ discount.voucher.voucher_set.name }} ({{ discount.voucher.code }})
+                        {% else %}
+                            {{ discount.voucher.name }} ({{ discount.voucher.code }})
+                        {% endif %}
+                        <span>- {{ discount.discount|currency:basket.currency }}</span>
+                    </span>
+                {% endfor %}
+            {% endif %}
+
+        </span>
+        {% endif %}
+    {% endblock %}
+{% endwith %}
+
+<span class="prices__price no-wrap mt-sm-1">
+    {{ order_total.money|currency:basket.currency }}
+</span>
