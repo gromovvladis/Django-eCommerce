@@ -220,7 +220,8 @@
     создаем ссылку:
         sudo ln /home/vladis/mikado/site/config/mikado-site.conf
         sudo ln /home/vladis/mikado/site/config/mikado-celery.conf
-        sudo ln /home/vladis/mikado/site/config/mikado-telegram-staff.conf
+        
+        
 
         sudo ln /home/vladis/provence/site/config/provence-site.conf
         sudo ln /home/vladis/provence/site/config/provence-celery.conf
