@@ -106,7 +106,7 @@ class Order(models.Model):
     order_time = models.DateTimeField(blank=True)
 
     # Date and time of finish order
-    date_finish = models.DateTimeField(date_finish, blank=True, null=True)
+    date_finish = models.DateTimeField(db_index=True, blank=True, null=True)
 
     has_review = models.BooleanField(default=False)
 
