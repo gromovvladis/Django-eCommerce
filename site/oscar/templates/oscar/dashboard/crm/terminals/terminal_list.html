@@ -1,0 +1,28 @@
+{% extends 'oscar/dashboard/crm/crm_list.html' %}
+
+{% block title %}
+    Терминалы Эвотор | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Терминалы Эвотор</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header d-flex justify-content-between align-items-end">
+        <h1>Терминалы Эвотор</h1>
+        <div class="d-flex ml-2">
+            <button type="submit" form="evotor_form" name="update_site" value="True" data-loading-text="Обновление..." class="btn btn-success">
+                <i class="fa-solid fa-download"></i>
+                <span>
+                    Скачать 
+                </span>
+            </button>
+        </div>
+    </div>
+{% endblock header %}

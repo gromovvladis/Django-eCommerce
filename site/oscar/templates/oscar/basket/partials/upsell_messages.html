@@ -1,0 +1,13 @@
+{% load svg_tags %}
+
+{% if upsell_messages %}
+    <div class="upsell-header">
+        {% icon file_name='upsale_massege/sale' size=22 fill="rgb(211, 34, 37)"%}
+        <h3>Вы можете пропустить акцию!</h3>
+    </div>
+    <div class="upsell-scroll">
+        {% for upsell in upsell_messages %}
+            <a class="upsell-item" href="{{ upsell.offer.get_absolute_url }}">{{ upsell.message }} для применения {{ upsell.offer.name }}</a>
+        {% endfor %}
+    </div>
+{% endif %}

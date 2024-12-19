@@ -1,0 +1,6 @@
+{% load django_tables2 %}
+
+<a class="btn btn-info" href="{% url 'dashboard:stock-alert-update-list' pk=record.stockrecord.id %}">
+    <i class="fa-solid fa-arrows-rotate"></i>
+    <span class="caption-button"> Обновить</span>
+</a>

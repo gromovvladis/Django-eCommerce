@@ -1,0 +1,9 @@
+{% load django_tables2 %}
+
+{% with adr=record.address %}
+    {% if adr %}
+        {{ adr }}
+    {% else %}
+        -
+    {% endif %}
+{% endwith %}

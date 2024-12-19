@@ -1,0 +1,82 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% block title %}
+    {{ title }} | Удалить дополнительный товар | {{ block.super }}
+{% endblock %}
+
+{% block body_class %}{{ block.super }} create-page{% endblock %}
+
+{% block navbar %}
+    {% if not is_popup %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block dashboard_nav %}
+    {% if not is_popup %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+    {% if not is_popup %}
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-option-list' %}">Дополнительные товары</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Удалить</li>
+            </ol>
+        </nav>
+    {% endif %}
+{% endblock %}
+
+{% block navtext %}
+    <h1>{{ title }}</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+    <div class="confirm-content">
+        {% if disallow %}
+            <p>Перед удалением убедитесь, что дополнительный товар не назначен продуктам или классам продуктов.</p>
+        {% else %}
+            <div class="table-header">
+                <h2>Удалить дополнительный товар</h2>
+            </div>
+            <form action="." method="post" class="card card-body card-confirm bg-light">
+                {% csrf_token %}
+                {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1" />{% endif %}
+                {% if not is_popup %}
+                {% for key, value in http_get_params.items %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}" />
+                {% endfor %}
+                {% endif %}
+                <p>
+                    Удалить дополнительный товар <strong>{{ object.name }}</strong> - вы уверены?
+                </p>
+            </form>
+            <div class="table-footer">
+                <div class="form-actions d-flex justify-content-between flex-wrap align-items-end fill-width">
+                    <div>         
+                        <label for="id_evotor_update" class="checkbox-ios">
+                            <input type="checkbox" name="evotor_update" class="form-control" id="id_evotor_update" checked>
+                            <span class="checkbox-ios-switch"></span>
+                        </label>
+                        <small class="form-text text-muted">
+                            Удалить в Эвотор
+                        </small>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <a class="btn btn-secondary" href="{% if parent %}{% url 'dashboard:catalogue-additional-list' %}{% else %}{% url 'dashboard:catalogue-category-list' %}{% endif %}">
+                            <i class="fa-solid fa-ban"></i>
+                            Отмена
+                        </a>
+                        <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                            <i class="fa-solid fa-trash"></i>
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

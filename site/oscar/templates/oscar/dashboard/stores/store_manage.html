@@ -1,0 +1,206 @@
+{% extends 'oscar/dashboard/layout.html' %}
+{% load static %}
+
+{% block body_class %}{{ block.super }} create-page stores{% endblock %}
+{% block title %}
+    {{ store.name|default:"Магазин" }} | Магазин | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:store-list' %}">Магазин</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ store.name|default:"Магазин" }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header d-flex flex-column justify-content-start">
+        <h1>{{ store.name|default:"Магазин" }}</h1>
+        <div class="d-flex align-items-end mt-2 mb-0 text-muted">
+            {% if store.evotor_id %}
+                <div class="text-success list-inline-item">
+                    <i class="fa-solid fa-circle-check"></i>&nbsp; 
+                </div>    
+                {{ store.evotor_id }}
+            {% endif %}
+        </div>
+    </div>
+{% endblock header %}
+
+{% block dashboard_content %}
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="table-header">
+                <h2 class="d-flex"><i class="fa-solid fa-house"></i> Магазин на карте</h2>
+            </div>
+            <div class="delivery__map">
+                <div class="map__wrapper">
+                    <div id="map" class="map"></div>
+                </div>
+            </div>
+            {% include "oscar/dashboard/partials/form.html" with form=form class="card card-body" %}
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="table-header">
+                <div class="d-flex justify-content-start">
+                    <h2 class="d-flex"><i class="fas fa-tablet-screen-button"></i> Терминалы</h2>
+                </div>
+            </div>
+            <div class="mobile-table">
+                <table class="table table-striped table-bordered m-0">
+                    {% if terminals %}
+                        <thead>
+                            <tr>
+                                <th class="name">Название</th>
+                                <th>Модель</th>
+                                <th>IMEI</th>
+                                <th>Серийный номер</th>
+                                <th>Создан</th>
+                                <th>Изменен</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for terminal in terminals %}
+                                <tr>
+                                    <td class="name">
+                                        <a href="{% url 'dashboard:terminal-detail' pk=terminal.id %}">
+                                            {% if terminal.evotor_id %}
+                                                <span class="text-success list-inline-item">
+                                                    <i class="fa-solid fa-circle-check"></i>&nbsp; 
+                                                </span>    
+                                            {% endif %}
+                                            {{ terminal.name|default:"Терминал" }}
+                                        </a>
+                                    </td>
+                                    <td data-label="Модель">
+                                        {{ terminal.model|default:"-" }}
+                                    </td>
+                                    <td data-label="IMEI">{{ terminal.imei|default:"-" }}</td>
+                                    <td data-label="Серийный номер">{{ terminal.serial_number|default:"-" }}</td>
+                                    <td data-label="Создан">{{ terminal.date_created }}</td>
+                                    <td data-label="Изменен">{{ terminal.date_updated }}</td>
+                                    <td class="toggle-row">
+                                        <button class="btn btn-secondary" type="button">
+                                            <i class="fa-solid fa-chevron-up"></i>
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    {% else %}
+                        <tbody>
+                            <tr><td class="empty" colspan="8">Нет добавленных терминалов</td></tr>
+                        </tbody>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="table-header">
+                <div class="d-flex justify-content-between">
+                    <h2 class="d-flex"><i class="fa-solid fa-user-group"></i> Песонал</h2>
+                    <div class="form-group form-actions fill-width">
+                        <div class="d-flex justify-content-end">
+                            <a class="btn btn-primary mr-2" href="{% url 'dashboard:store-user-select' store_pk=store.pk %}">
+                                <i class="fa-solid fa-link"></i>
+                                <span class="caption-button">
+                                    Добавить сотрудника
+                                </span>
+                            </a>
+                            <a class="btn btn-info" href="{% url 'dashboard:store-user-create' store_pk=store.pk %}">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <span class="caption-button">
+                                    Создать сотрудника
+                                </span>
+                            </a>             
+                        </div>
+                    </div>
+                </div>
+            </div>    
+            <div class="mobile-table">
+                <table class="table table-striped table-bordered m-0">
+                    {% if users %}
+                        <thead>
+                            <tr>
+                                <th class="title">ФИО</th>
+                                <th>Должность</th>
+                                <th>Телефон</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td class="title">
+                                        <a class="d-flex align-items-center" href="{% url 'dashboard:staff-detail' pk=user.profile.id %}">
+                                            <span class="spinner-border-sm {% if user.profile.gender == "М" %}badge-primary{% else %}badge-pink{% endif %}  rounded-circle mr-2">&nbsp;</span>
+                                            {{ user.profile.get_full_name|default:user.username }}
+                                        </a>
+                                    </td>
+                                    <td data-label="Должность">
+                                        {{ user.profile.role }}
+                                    </td>
+                                    <td data-label="Телефон">{{ user.username }}</td>
+                                    <td class="d-flex justify-content-end actions">
+                                        <form class="btn-toolbar" action="{% url 'dashboard:store-user-unlink' store_pk=store.id user_pk=user.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                                                <i class="fa-solid fa-trash"></i>
+                                                <span class="caption-button">
+                                                    Удалить
+                                                </span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="toggle-row">
+                                        <button class="btn btn-secondary" type="button">
+                                            <i class="fa-solid fa-chevron-up"></i>
+                                            <i class="fa-solid fa-chevron-down"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    {% else %}
+                        <tbody>
+                            <tr><td class="empty" colspan="8">Нет добавленного персонала</td></tr>
+                        </tbody>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock dashboard_content %}
+
+
+{% block externalscripts %}
+    <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&lang=ru_RU"></script>
+{% endblock %}
+
+
+{% block templatescripts %}
+    {{ block.super }}
+    var url_delivery_zones = "{% url 'dashboard:delivery-zona-json' %}";
+{% endblock %}
+
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/dashboard/store/store-address.js" %}"></script>
+{% endblock %}
+
+{% block onbodyload %}
+    createMap("{{ line1 }}");
+{% endblock %}

@@ -1,0 +1,31 @@
+{% load currency_filters %}
+{% load purchase_info_tags %}
+
+{% if session.price.exists %}
+    {% if product.is_parent %}
+        {% if session.price.min_price  %}
+            <div class="py-1 mr-1">
+                <span class="prices d-flex flex-column align-start">
+                    <span class="prices__price no-wrap">
+                        от {{ session.price.min_price|currency:session.price.currency }}
+                    </span>
+                </span>
+            </div> 
+        {% endif %}
+    {% else %}
+        <span class="prices d-flex flex-column align-start mr-1">
+            {% if session.price.old_price %}
+                <span class="dish__mobile-total-price prices__price shrink no-wrap py-1">
+                    {{ session.price.money|currency:session.price.currency }}
+                </span>    
+                <span class="dish__mobile-total-label dish__profit d-flex align-center mt-05">
+                    Цена по акции
+                </span>
+            {% else %}
+                <span class="prices__price no-wrap py-1">
+                    {{ session.price.money|currency:session.price.currency }}
+                </span>
+            {% endif %}
+        </span>
+    {% endif %}
+{% endif %}

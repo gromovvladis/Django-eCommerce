@@ -1,0 +1,15 @@
+{% extends "oscar/error.html" %}
+
+{% block title %} Тахнические неполадки | {{ block.super }}{% endblock %}
+
+{% block nav_title %}Тахнические неполадки{% endblock %}
+{% block nav_title_center %}Тахнические неполадки{% endblock %}
+
+{% block error_code %}500{% endblock %}
+
+{% block error_message %}
+    <p class="font-bold mb-2">Тахнические неполадки</p>
+    <p class="text--grey">У нас небольшие тахнические неполадки</p>
+    <p class="text--grey">Мы уже получили отчет об ошибке и работаем над ней :)</p>
+{% endblock %}
+

@@ -1,0 +1,16 @@
+{% load django_tables2 %}
+
+<div class="d-flex flex-column">
+    {% if product_access %}
+        <a href="{% url 'dashboard:catalogue-product' record.stockrecord.product.id %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
+            {{ record.name }}
+        </a>
+    {% else %}
+        <span>{{ record.name }}</span>
+    {% endif %}
+    {% if record.stockrecord.product.is_child and record.stockrecord.product.variant %}
+        <span class="small">{{ record.stockrecord.product.variant }}</span>
+        <br>
+    {% endif %}
+    <span class="text-muted small">Артикул: {{ record.stockrecord.product.article }}</span>
+</div>

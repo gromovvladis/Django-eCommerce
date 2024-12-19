@@ -1,0 +1,15 @@
+{% load django_tables2 %}
+
+{% if record.telegram_id %}
+    {% if record.notif == "new-order" %}
+        Новые заказы
+    {% elif record.notif == "status-order" %}
+        Изменение статусов заказов и новые заказы
+    {% elif record.notif == "technical" %}
+        Технические уведомления
+    {% else %}
+        Уведомления отключены
+    {% endif %}
+{% else %}
+    -
+{% endif %}
