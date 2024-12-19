@@ -187,6 +187,7 @@
 
     Активируйте сайты сайта:
         sudo ln -s /etc/nginx/sites-available/mikado-sushi /etc/nginx/sites-enabled/
+        sudo ln -s /etc/nginx/sites-available/provence-coffee /etc/nginx/sites-enabled/
 
     после установки сертификата дописать "http2" после "listen 433" - listen 433 ssl http2;    
 
@@ -217,9 +218,13 @@
 
     в этой папке создаем ссылки на файлы конфигураций mikado.conf, celery.conf, telegram.conf,
     создаем ссылку:
-        sudo ln /home/vladis/mikado/config/mikado.conf
-        sudo ln /home/vladis/mikado/config/celery.conf
-        sudo ln /home/vladis/mikado/config/telegram.conf
+        sudo ln /home/vladis/mikado/site/config/mikado-site.conf
+        sudo ln /home/vladis/mikado/site/config/mikado-celery.conf
+        sudo ln /home/vladis/mikado/site/config/mikado-telegram-staff.conf
+
+        sudo ln /home/vladis/provence/site/config/provence-site.conf
+        sudo ln /home/vladis/provence/site/config/provence-celery.conf
+        sudo ln /home/vladis/provence/site/config/provence-telegram-staff.conf
 
         для проверки телеграм бота: 
             /home/vladis/venv/bin/python /home/vladis/mikado/manage.py runbot
@@ -296,8 +301,10 @@
     sudo supervisorctl restart all
     redis-cli Flushall
 
-    sudo supervisorctl stop all
+    sudo supervisorctl stop celery
+    sudo supervisorctl stop telegram
     sudo supervisorctl stop mikado
+    sudo systemctl stop redis-server
 
 
 git clone https://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@github.com/gromovvladis/mikado.git ~/mikado

@@ -38,7 +38,7 @@ class Order(models.Model):
     )
     
     # We track the site that each order is placed within
-    site = models.CharField(verbose_name="Источник заказа", null=True, blank=True, max_length=128)
+    site = models.CharField(verbose_name="Источник заказа", null=True, blank=True, db_index=True, max_length=128)
 
     basket = models.ForeignKey(
         "basket.Basket",
@@ -53,6 +53,7 @@ class Order(models.Model):
         related_name="orders",
         null=True,
         blank=False,
+        db_index=True,
         verbose_name="Магазин",
         on_delete=models.SET_NULL,
     )
@@ -93,21 +94,21 @@ class Order(models.Model):
         on_delete=models.SET_NULL,
     )
 
-    shipping_method = models.CharField("Способ доставки", max_length=128, blank=True)
+    shipping_method = models.CharField("Способ доставки", max_length=128, blank=True, db_index=True)
 
     # Use this field to indicate that an order is on hold / awaiting payment
-    status = models.CharField("Статус", max_length=100, blank=True)
+    status = models.CharField("Статус", max_length=100, blank=True, db_index=True)
 
     # Index added to this field for reporting
     date_placed = models.DateTimeField(db_index=True, editable=False)
 
     # Date and time of order
-    order_time = models.DateTimeField(db_index=True, blank=True)
+    order_time = models.DateTimeField(blank=True)
 
     # Date and time of finish order
-    date_finish = models.DateTimeField(db_index=True, blank=True, null=True)
+    date_finish = models.DateTimeField(date_finish, blank=True, null=True)
 
-    has_review = models.BooleanField(db_index=True, default=False)
+    has_review = models.BooleanField(default=False)
 
     is_open = models.BooleanField("Заказ просмотрен", default=False, db_index=True)
     

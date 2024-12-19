@@ -20,6 +20,7 @@ migrations/*
 !migrations/__init__.py
 
 /config/*.conf
+/config/*.conf.py
 
 # Vagrant 
 .vagrant
