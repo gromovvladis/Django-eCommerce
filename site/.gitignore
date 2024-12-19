@@ -38,6 +38,10 @@ db.sqlite
 /public/media/*
 /whoosh_index/*
 
+# static
+favicon.ico
+logo.svg
+footer.html
 
 # IDE files
 .project
