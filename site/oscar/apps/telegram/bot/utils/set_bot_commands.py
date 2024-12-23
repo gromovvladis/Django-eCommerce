@@ -7,7 +7,7 @@ from oscar.apps.telegram.bot.handlers.staff.settings import settings_router
 from oscar.apps.telegram.bot.handlers.staff.stores import store_router
 from oscar.apps.telegram.bot.handlers.staff.reports import report_router
 
-from oscar.apps.telegram.bot.handlers.support.customer_message import report_router
+# from oscar.apps.telegram.bot.handlers.support.customer_message import report_router
 
 
 async def set_staffbot_commands(dp: Dispatcher):
@@ -19,7 +19,9 @@ async def set_staffbot_commands(dp: Dispatcher):
     dp.include_router(report_router)
 
 async def set_customerbot_commands(dp: Dispatcher):
-    dp.include_router(start_router)
+    pass
+    # dp.include_router(start_router)
 
 async def set_supportbot_commands(dp: Dispatcher):
-    dp.include_router(start_router)
+    pass
+    # dp.include_router(start_router)
