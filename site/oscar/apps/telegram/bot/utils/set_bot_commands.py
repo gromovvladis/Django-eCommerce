@@ -7,7 +7,7 @@ from oscar.apps.telegram.bot.handlers.staff.settings import settings_router
 from oscar.apps.telegram.bot.handlers.staff.stores import store_router
 from oscar.apps.telegram.bot.handlers.staff.reports import report_router
 
-from mikado.site.oscar.apps.telegram.bot.handlers.support.customer_message import report_router
+from oscar.apps.telegram.bot.handlers.support.customer_message import report_router
 
 
 async def set_staffbot_commands(dp: Dispatcher):
