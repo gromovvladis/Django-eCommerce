@@ -663,50 +663,54 @@ class AdditionalSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Извлечение данных из validated_data
         evotor_id = validated_data.get("evotor_id")
+        name = validated_data.get("name", None)
         store_id = validated_data.get("store_id", None)
-        allow_to_sell = validated_data.get("allow_to_sell", None)
+        allow_to_sell = validated_data.get("allow_to_sell", False)
         description = validated_data.get("description", None)
-        article_number = validated_data.get("article_number", None)
-        tax = validated_data.get("tax", None)
-        price = validated_data.get("tax", None)
-        cost_price = validated_data.get("tax", None)
+        article = validated_data.get("article", None)
+        tax = validated_data.get("tax", "NO_VAT")
+        price = D(validated_data.get("price", 0))
+        cost_price = D(validated_data.get("cost_price", 0))
 
-        return Additional.objects.get_or_create(
+        additional = Additional.objects.get_or_create(
             evotor_id=evotor_id,
             defaults={
-                "stores": Store.objects.filter(evotor_id=store_id).first(),
+                "name": name,
                 "is_public": allow_to_sell,
                 "description": description,
-                "article": article_number,
+                "article": article,
                 "price": price,
                 "cost_price": cost_price,
                 "tax": tax,
             }
         )[0]
 
+        additional.stores.add(*Store.objects.filter(evotor_id=store_id))
+
+        return additional
+
     def update(self, additional, validated_data):
         evotor_id = validated_data.get("evotor_id")
+        name = validated_data.get("name", None)
         store_id = validated_data.get("store_id", None)
-        allow_to_sell = validated_data.get("allow_to_sell", None)
+        allow_to_sell = validated_data.get("allow_to_sell", False)
         description = validated_data.get("description", None)
-        article_number = validated_data.get("article_number", None)
-        tax = validated_data.get("tax", None)
-        price = validated_data.get("tax", None)
-        cost_price = validated_data.get("tax", None)
+        article = validated_data.get("article", None)
+        tax = validated_data.get("tax", "NO_VAT")
+        price = D(validated_data.get("price", 0))
+        cost_price = D(validated_data.get("cost_price", 0))
 
         additional.evotor_id = evotor_id
+        additional.name = name
         additional.is_public = allow_to_sell
         additional.description = description
-        additional.article = article_number
+        additional.article = article
         additional.tax = tax
         additional.price = price
         additional.cost_price = cost_price
+        additional.stores.add(*Store.objects.filter(evotor_id=store_id))
 
         additional.save()
-
-        store = Store.objects.filter(evotor_id=store_id).first()
-        if store:
-            additional.stores.add()
 
         return additional
     

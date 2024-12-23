@@ -1,8 +1,6 @@
 from django.urls import reverse_lazy
 
 OSCAR_HOMEPAGE = reverse_lazy("home:index")
-STORE_SELECT = True
-STORE_DEFAULT = 1
 
 # Dynamic class loading
 OSCAR_DYNAMIC_CLASS_LOADER = "oscar.core.loading.default_class_loader"
@@ -38,7 +36,6 @@ OSCAR_DELETE_IMAGE_FILES = True
 OSCAR_MISSING_IMAGE_URL = "image_not_found.jpg"
 
 # Pagination settings
-
 OSCAR_OFFERS_PER_PAGE = 40
 OSCAR_PRODUCTS_PER_PAGE = 100
 OSCAR_REVIEWS_PER_PAGE = 30
@@ -376,37 +373,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "icon": "fas fa-chart-bar",
         "url_name": "dashboard:reports-index",
     },
-]
-
-
-# ======= продажи / возвраты - важно!!!
-# Документ продажи товара - SELL 
-# Документ возврата - PAYBACK 
-
-# ======= товароучетная система
-# Информация о приёмке товаров - ACCEPT
-# Описание документа инвентаризации - INVENTORY  
-# Информация о переоценке товаров - REVALUATION 
-# Документ списания товара - WRITE_OFF
-
-# ======= доки
-# Данные о открытии смены -= OPEN_SESSION
-# Данные о закрытии смены = CLOSE_SESSION 
-# Документ внесения наличных = CASH_INCOME
-# Документ выплаты наличных = CASH_OUTCOME
-# Z-отчёт = Z_REPORT
-
-
-# ======= потом или не надо
-# Документ возврата товара поставщику - RETURN
-# Документ возврата товара поставщику - RETURN
-# Документ выкупа товара магазином - BUY
-# Документ выкупа товара клиентом - BUYBACK
-# Документ вскрытия тары - OPEN_TARE
-# Данные об открытии смены в ККТ = POS_OPEN_SESSION
-# X-отчёт = X_REPORT
-# Документ коррекции = CORRECTION
-  
+]  
 
 OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION = "oscar.apps.dashboard.nav.default_access_fn"
 
@@ -441,8 +408,10 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'user.User'
 PHONENUMBER_DEFAULT_REGION = 'RU'
 
-# Order processing
-# ================
+
+# =============
+# ORDER
+# =============
 
 # Sample order/line status settings. This is quite simplistic. It's like you'll
 # want to override the set_status method on the order object to do more
@@ -453,13 +422,16 @@ OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = 'Ожидает оплаты'
 OSCAR_PAID_ONLINE_PAYMENT_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_LINE_STATUS = 'Обрабатывается'
 
-# Наличные:
-# Обрабатывается - Готовится - Готов - Завершён
-# Обрабатывается - Готовится - Доставляется - Готов - Завершён
+# Доставка возможна:
+    # Наличные:
+    # Обрабатывается - Готовится - Готов - (Доставляется)- Завершён
 
-# Безналичные:
-# Ожидает оплаты - Оплачен - Готовится - Готов - Завершён
-# Ожидает оплаты - Оплачен - Готовится - Доставляется - Готов - Завершён
+    # Безналичные:
+    # Ожидает оплаты - Оплачен - Готовится - Готов - (Доставляется) - Завершён
+
+# Без доставки
+    # Безналичные / Наличные:
+    # Ожидает оплаты - Оплачен - Готовится - Готов - Завершён
 
 # This dict defines the new order statuses than an order can move to
 OSCAR_ORDER_STATUS_PIPELINE = {
@@ -492,9 +464,8 @@ ORDER_ACTIVE_STATUSES = (
 )
 
 ORDER_FINAL_STATUSES = (
-    'Готовится', 
-    'Готов', 
-    'Доставляется',
+    'Завершён', 
+    'Отменен',
 )
 
 ORDER_STATUS_SEND_TO_EVOTOR = (
@@ -502,9 +473,7 @@ ORDER_STATUS_SEND_TO_EVOTOR = (
     'Оплачен', 
 )
 
-# Payment choices
 WEBSHOP_PAYMENT_CHOICES = (
-    ('SBP', 'СБП Онлайн'),
     ('ONLINECARD', 'Картой Онлайн'),
     ('ELECTRON', 'Картой в магазине'),
     ('CASH', 'Наличные'),
@@ -512,7 +481,6 @@ WEBSHOP_PAYMENT_CHOICES = (
 
 ONLINE_PAYMENTS = (
     'ONLINECARD',
-    'SBP',
 )
 
 OFFLINE_PAYMENTS = (

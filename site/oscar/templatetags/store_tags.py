@@ -19,7 +19,7 @@ def selected_store(request):
 
         if stores_select:
             store_id = request.store.id
-            return Store.objects.get(id=store_id)
+            return stores_select.get(id=store_id)
 
         return None
 

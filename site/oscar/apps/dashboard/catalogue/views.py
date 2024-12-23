@@ -1525,7 +1525,6 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
         ctx["title"] = "Удалить дополнительный товар '%s'" % self.object.name
 
         products = self.object.product_set

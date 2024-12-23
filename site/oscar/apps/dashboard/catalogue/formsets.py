@@ -61,9 +61,12 @@ class StockRecordFormSet(BaseStockRecordFormSet):
         self.set_initial_data()
 
     def set_initial_data(self):
-        store_field = self.forms[0].fields.get("store", None)
-        if store_field and store_field.initial is not None:
-            store_field.disabled = True
+        for form in self.forms:
+            store_initial = form.initial.get("store")
+            if store_initial:
+                store_field = form.fields.get("store")
+                if store_field:
+                    store_field.disabled = True
 
     def _construct_form(self, i, **kwargs):
         kwargs["product_class"] = self.product_class

@@ -75,7 +75,7 @@
                 {% csrf_token %}
                 {% render_table products %}
             </form>
-            {% comment %} <div class="modal fade" id="product-image-modal" tabindex="-1" role="dialog">
+            <div class="modal fade" id="product-image-modal" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -87,14 +87,14 @@
                         </div>
                     </div>
                 </div>
-            </div> {% endcomment %}
+            </div>
         {% endblock product_list %}
     {% else %}
         <p class="py-2">Ничего не найдено</p>
     {% endif %}
 {% endblock dashboard_content %}
-{% comment %} 
+
 {% block onbodyload %}
     {{ block.super }}
     oscar.dashboard.thumbnails.init();
-{% endblock onbodyload %} {% endcomment %}
+{% endblock onbodyload %}

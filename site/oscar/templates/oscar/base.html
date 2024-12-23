@@ -7,34 +7,21 @@
         <meta name="description" content="{% block description %}{% endblock %}" />
         <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
         <link href="https://fonts.googleapis.com/css2?family=Galada&family=Onest:wght@100..700&display=swap" rel="stylesheet">
-        {% block favicon %}
-            <link rel="shortcut icon" href="{% static "favicon.ico" %}" />
-        {% endblock %}
-        {# Block where global CSS will go. #}     
+        <link rel="shortcut icon" href="{% static "favicon.ico" %}"/>
         {% block styles %}{% endblock %}
-        {# Additional CSS - specific to certain pages #}
         {% block extrastyles %}{% endblock %}    
         {% block tracking %}
-            {# Default to using Google analytics #}
             {% include "oscar/partials/analytics.html" %}
         {% endblock %}
     </head>
     <body>
-        {# Main content goes in this 'layout' block #}
         {% block layout %}{% endblock %}
-        {# SVG #}
         {% block SVG %}{% endblock %}
-        {# Scripts loaded from a CDN. #}
         {% block cdn_scripts %}{% endblock %}
-        {# Функции / переменные шаблона #}
         <script>{% block templatescripts %}{% endblock %}</script>
-        {# Внешние скрипты #}
         {% block externalscripts %}{% endblock %}
-        {# Общие скрипты, которые нужно обеднить в один #}
         {% block scripts %}{% endblock %}
-        {# Специфичные для данной страницы скрипты #}
         {% block extrascripts %}{% endblock %}
-        {# Block for body onload functions #}
         <script>document.addEventListener('DOMContentLoaded', function() { {% block onbodyload %}{% endblock %} })</script>
     </body>
 </html>

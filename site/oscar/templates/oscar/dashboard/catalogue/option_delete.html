@@ -35,14 +35,14 @@
 {% endblock %}
 
 {% block dashboard_content %}
-    <div class="confirm-content">
+    <form action="." method="post" class="confirm-content">
         {% if disallow %}
             <p>Перед удалением убедитесь, что опция не назначена продуктам или классам продуктов.</p>
         {% else %}
             <div class="table-header">
                 <h2>Удалить опцию</h2>
             </div>
-            <form action="." method="post" class="card card-body card-confirm bg-light">
+            <div class="card card-body card-confirm bg-light">
                 {% csrf_token %}
                 {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1" />{% endif %}
                 {% if not is_popup %}
@@ -53,7 +53,7 @@
                 <p>
                     Удалить опцию <strong>{{ object.name }}</strong> - вы уверены?
                 </p>
-            </form>
+            </div>
             <div class="table-footer">
                 <div class="form-actions fill-width d-flex justify-content-end">
                     <a class="btn btn-info ml-2" href="{% url 'dashboard:catalogue-option-list' %}">
@@ -65,5 +65,5 @@
                 </div>
             </div>
         {% endif %}
-    </div>
+    </form>
 {% endblock %}

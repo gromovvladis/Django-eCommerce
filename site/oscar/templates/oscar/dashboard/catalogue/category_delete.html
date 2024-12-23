@@ -26,15 +26,15 @@
 {% endblock %}
 
 {% block dashboard_content %}
-    <div class="confirm-content">
+    <form method="post"  class="confirm-content">
         <div class="table-header">
             <h2>{{ title }}</h2>
         </div>
-        <form method="post" class="card card-body card-confirm bg-light">
+        <div class="card card-body card-confirm bg-light">
             {% csrf_token %}
             {{ form }}
             <p>Удалить категорию <strong>{{ object.name }}</strong> - вы уверены?</p>
-        </form>
+        </div>
         <div class="table-footer">
             <div class="form-actions d-flex justify-content-between flex-wrap align-items-end fill-width">
                 <div>         
@@ -47,7 +47,7 @@
                     </small>
                 </div>
                 <div class="d-flex justify-content-end mt-3">
-                    <a class="btn btn-secondary" href="{% if parent %}{% url 'dashboard:catalogue-category-list' %}{% else %}{% url 'dashboard:catalogue-category-list' %}{% endif %}">
+                    <a class="btn btn-secondary" href="{% url 'dashboard:catalogue-category-list' %}{% endif %}">
                         <i class="fa-solid fa-ban"></i>
                         Отмена
                     </a>
@@ -58,5 +58,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 {% endblock %}

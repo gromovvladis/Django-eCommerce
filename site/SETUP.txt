@@ -273,6 +273,7 @@
 
 
 13. Обновить изменения с Development в Production
+    
     ssh vladis@5.35.89.111
 
     source venv/bin/activate

@@ -2,6 +2,14 @@ from .settings import *
 from yookassa import Configuration
 
 # =============
+# MULTI STORES
+# =============
+
+DELIVERY_AVAILABLE = True
+STORE_SELECT = True
+STORE_DEFAULT = 1
+
+# =============
 # COMPANY
 # =============
 
@@ -20,6 +28,7 @@ INN = "246607594685"
 # =============
 
 PRIMARY_TITLE = "Доставка суши и роллов | Микадо Красноярск"
+SUPPORT_LINK = "#"
 
 # =============
 # DATABASES
@@ -125,7 +134,6 @@ SMS_AUTH_SETTINGS = {
 
 Configuration.account_id = 470199
 Configuration.secret_key = 'test_NbCwf5jnxkwJN7IzigODrtShMkQfsZRO_yU_SzEIa50'
-# Configuration.secret_key = 'test_ty2zO4Cqfsodn0iGiAPDfOZ9E90X8bT1K2E6YYWyn6o'
 
 # =============
 # MAP settings
@@ -148,6 +156,12 @@ YANDEX_ANALYTICS_ID = None
 # =============
 
 TELEGRAM_STAFF_BOT_TOKEN = "7440346552:AAH-k0ooubFF51xjcp3r-MIOkTAvnUF6F3I"
+TELEGRAM_CUSTOMER_BOT_TOKEN = None
+TELEGRAM_SUPPORT_CHAT_ID = 1001234567890
+TELEGRAM_SUPPORT_CHAT_ID = 2357120788
+TELEGRAM_SUPPORT_CHAT_ID = 2357120788
+TELEGRAM_SUPPORT_BOT_TOKEN = None
+
 TELEGRAM_ADMINS_LIST = ("6560722014",)
 
 # =============
