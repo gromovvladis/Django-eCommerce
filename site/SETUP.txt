@@ -227,7 +227,7 @@
         sudo ln /home/vladis/provence/site/config/provence-telegram-staff.conf
 
         для проверки телеграм бота: 
-            /home/vladis/venv/bin/python /home/vladis/mikado/manage.py runbot
+            /home/vladis/venv/bin/python /home/vladis/mikado/site/manage.py runbot_staff
 
     активируем супервизора:
         sudo update-rc.d supervisor enable
