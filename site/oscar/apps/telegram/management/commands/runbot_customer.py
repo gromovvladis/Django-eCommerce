@@ -29,6 +29,7 @@ class Command(BaseCommand):
 
     async def start_polling(self):
         logging.info("Customer Bot Start")
-        await on_startup(customer_bot, customer_dp)
-        await customer_dp.start_polling(customer_bot)
+        if customer_bot:
+            await on_startup(customer_bot, customer_dp)
+            await customer_dp.start_polling(customer_bot)
 
