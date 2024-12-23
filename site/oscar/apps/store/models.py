@@ -81,12 +81,12 @@ class Store(models.Model):
         field or flag to base your decision on.
         """
         addresses = self.addresses.all()
-        if len(addresses) == 0:  # intentionally using len() to save queries
-            return None
+        if len(addresses) == 0:
+            return ""
         elif len(addresses) == 1:
             if addresses[0].line1:
                 return addresses[0]
-            return None
+            return ""
         else:
             raise NotImplementedError(
                 "Oscar's default implementation of primary_address only "

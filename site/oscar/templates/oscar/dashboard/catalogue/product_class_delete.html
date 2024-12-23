@@ -17,20 +17,18 @@
 {% endblock %}
 
 {% block dashboard_content %}
-    <div class="confirm-content">
+    <form method="post" class="confirm-content">
         {% if disallow %}
             <p>Перед удалением убедитесь, что всем продуктам присвоен другой тип.</p>
         {% else %}
             <div class="table-header">
                 <h2>Удалить тип продукта</h2>
             </div>
-            <form method="post" class="card card-body card-confirm bg-light">
+            <div class="card card-body card-confirm bg-light">
                 {% csrf_token %}
                 {{ form }}
-                <p>
-                    Удалить тип продукта <strong>{{ object.name }}</strong> - вы уверены?
-                </p>
-            </form>
+                <p>Удалить тип продукта <strong>{{ object.name }}</strong> - вы уверены?</p>
+            </div>
             <div class="table-footer">
                 <div class="form-actions fill-width">
                     <div class="float-right">
@@ -46,5 +44,5 @@
                 </div>
             </div>
         {% endif %}
-    </div>
+    </form>
 {% endblock %}

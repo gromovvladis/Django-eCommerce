@@ -30,3 +30,20 @@ class TelegramMessage(models.Model):
 
     def __str__(self):
         return "%s - %s" % (self.user, self.type)
+
+class TelegramSupportChat(models.Model):
+    """
+    Implements the interface declared by shipping.base.Base
+    """
+    telegram_id = models.CharField(verbose_name="ID Telegram", max_length=10,)
+    chat_id = models.CharField(verbose_name="ID Telegram", max_length=10,)
+
+    date_created = models.DateTimeField("Дата создания ображения", auto_now_add=True)
+
+    class Meta:
+        app_label = "telegram"
+        verbose_name = "Обращение в поддержку Телеграм"
+        verbose_name_plural = "Обращение в поддержку Телеграм"
+
+    def __str__(self):
+        return "%s - %s" % (self.telegram_id, self.date_created)

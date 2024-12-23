@@ -183,7 +183,7 @@ class Basket(models.Model):
             if not line_purchase_permitted:
                 return line_purchase_permitted, reason
 
-            # Also check if it's permitted with potentional other lines of the same product & stocrecord
+            # Also check if it's permitted with potentional other lines of the same product & stockrecord
             total_lines_quantity = self.basket_quantity(line) + qty
             (
                 line_purchase_permitted,
@@ -928,14 +928,12 @@ class Line(models.Model):
         return ops
     
     def get_additions(self):
-        return [
-            attribute
-            for attribute in self.attributes.all()
-            if attribute.additional
-            and self.basket.store_id in attribute.additional.stores.values_list("id", flat=True)
-            and attribute.additional.is_public
-            and attribute.value > 0
-        ]
+        return self.attributes.filter(
+            additional__isnull=False,
+            additional__is_public=True,
+            additional__stores__id=self.basket.store_id,
+            value__gt=0,
+        ).distinct()
     
     def get_full_name(self):
         name_parts = [
@@ -1019,24 +1017,21 @@ class Line(models.Model):
     
     @property
     def options(self):
-        ops = [
-            f"{attribute.option.name}: {', '.join(map(str, attribute.value))}" 
-            if isinstance(attribute.value, list) 
-            else f"{attribute.option.name}: {attribute.value}"
-            for attribute in self.attributes.filter(option__isnull=False)
-        ]
-        return "\n".join(ops) if ops else ""
+        return "\n".join(
+            f"{attr.option.name}: {', '.join(map(str, attr.value))}" if isinstance(attr.value, list)
+            else f"{attr.option.name}: {attr.value}"
+            for attr in self.attributes.filter(option__isnull=False)
+        )
     
     @property
     def additions(self):
-        additions = [
-            f"{attribute.additional.name} ({attribute.value} шт)"
-            for attribute in self.attributes.filter(additional__isnull=False)
-            if self.basket.store_id in attribute.additional.stores.values_list("id", flat=True)
-            and attribute.additional.is_public
-            and attribute.value > 0
-        ]
-        return ", ".join(additions) if additions else ""
+        additions = self.attributes.filter(
+            additional__isnull=False,
+            additional__is_public=True,
+            additional__stores__id=self.basket.store_id,
+            value__gt=0,
+        ).distinct()
+        return ", ".join(f"{attr.additional.name} ({attr.value} шт)" for attr in additions)
 
     @property
     def additions_total(self):
@@ -1044,10 +1039,12 @@ class Line(models.Model):
             return D("0.00")
         return sum(
             attribute.value * attribute.additional.price
-            for attribute in self.attributes.all()
-            if attribute.additional
-            and self.basket.store_id in attribute.additional.stores.values_list("id", flat=True)
-            and attribute.additional.is_public
+            for attribute in self.attributes.filter(
+                additional__isnull=False,
+                additional__is_public=True,
+                additional__stores__id=self.basket.store_id,
+                value__gt=0,
+            )
         )
 
     @property 

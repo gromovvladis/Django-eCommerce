@@ -84,7 +84,9 @@
                     <div class="{% block wrapper_class %}{% endblock %}">
                         {% include "oscar/partials/alert_messages.html" %}
                         {% block breadcrumbs %}{% endblock %}
-                        {% block sticky_address %}{% endblock %}
+                        {% if delivety_available %}
+                            {% block sticky_address %}{% endblock %}
+                        {% endif %}
                         {% block content %}{% endblock %}
                     </div>
                 </div>
@@ -132,5 +134,5 @@
 {% endblock %}
 
 {% block onbodyload %}
-    initStore({{ request.basket.store.id }});
+    initStore({{ request.store.id }});
 {% endblock %}

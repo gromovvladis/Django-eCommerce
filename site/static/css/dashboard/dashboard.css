@@ -19020,21 +19020,17 @@ h3.app-ico:before {
   /* list-style: none; */
 }
 
-.form-inline .form-text, .form-inline .error-block {
+.form-inline .form-text {
   display: inline-block;
   margin: 0 20px 0 10px;
+}
+.form-inline .error-block {
+  display: inline-block;
 }
 .form-inline .form-text li, .form-inline .error-block li {
   list-style: none;
   color: #dc3545;
 }
-
-/* .form-inline input[type=number],
-.form-inline input[type=email],
-.form-inline input[type=url],
-.form-inline input[type=text] {
-  min-width: 250px;
-}  */
 
 .fill-width {
   width: 100%;

@@ -2,16 +2,14 @@
 {% load svg_tags %}
 
 <ul class="profile__menu-collection d-flex flex-column fill-width  pt-3 pt-sm-0 pb-sm-0">
-
     <li class="profile__menu-list d-sm-flex">
         <button data-link="{% url 'customer:profile-view' %}" class="profile__menu-button{% if active_tab == "profile" %} active{% endif %}"
             data-id="profile-tab">
             Личные данные 
             <div role="separator" class="spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
-    </button>
-    </li>
-                        
+        </button>
+    </li>                
     <li class="profile__menu-list">
         <button data-link="{% url 'customer:order-list' %}" class="profile__menu-button{% if active_tab == "orders" %} active{% endif %}" data-id="profile-tab">
             История заказов 
@@ -19,15 +17,15 @@
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </button>
     </li>
-
-    <li class="profile__menu-list">
-        <button data-link="{% url 'customer:address-list' %}" class="profile__menu-button{% if active_tab == "addresses" %} active{% endif %}" data-id="profile-tab">
-            Адрес доставки
-            <div role="separator" class="spacer"></div>
-            {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
-        </button>
-    </li>
-
+    {% if delivety_available %}
+        <li class="profile__menu-list">
+            <button data-link="{% url 'customer:address-list' %}" class="profile__menu-button{% if active_tab == "addresses" %} active{% endif %}" data-id="profile-tab">
+                Адрес доставки
+                <div role="separator" class="spacer"></div>
+                {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
+            </button>
+        </li>
+    {% endif %}
     <li class="profile__menu-list">
         <button data-link="{% url 'customer:feedbacks-available' %}" class="profile__menu-button{% if active_tab == "feedback" %} active{% endif %}" data-id="profile-tab">
             Оставить отзыв 
@@ -35,7 +33,6 @@
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </button>
     </li>
-
     <li class="profile__menu-list">
         <button data-link="{% url 'customer:notifications-inbox' %}" class="profile__menu-button{% if active_tab == "notifications" %} active{% endif %}" data-id="profile-tab">
             <div class="d-flex">
@@ -48,7 +45,6 @@
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </button>
     </li>
-
     <li class="profile__menu-list">
         <button data-link="{% url 'customer:wishlist' %}" class="profile__menu-button{% if active_tab == "wishlist" %} active{% endif %}" data-id="profile-tab"> 
             Избранное 
@@ -56,15 +52,13 @@
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </button>
     </li>
-    
     <li class="profile__menu-list">
-        <a target="_blank" href="#" data-id="profile-tab-help" class="profile__menu-button">
+        <a target="_blank" href="{{ support_link }}" data-id="profile-tab-help" class="profile__menu-button">
             Поддержка 
             <div role="separator" class="spacer"></div>
             {% icon file_name='interface/arrow-left' size=24 stroke="#222"%}
         </a>
     </li>
-
     {% if user.is_staff or perms.store.dashboard_access %}
         <li class="profile__menu-list d-sm-flex">
             <a class="profile__menu-button"
@@ -75,14 +69,12 @@
             </a>
         </li>
     {% endif %}
-
     <li class="profile__menu-list d-sm-flex">
         <a data-id="profile-logout-btn" href="{% url 'dashboard:logout' %}"
             class="button fill-width button--outline justify-center shrink">
-                <span class="button__wrapper">
+            <span class="button__wrapper">
                 <span class="button__value"> Выйти из аккаунта </span>
             </span>
         </a>
     </li>
-    
 </ul>

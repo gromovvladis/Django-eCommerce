@@ -234,7 +234,7 @@
                                         <td class="image">
                                             {% with image=line.product.primary_image %}
                                                 {% oscar_thumbnail image.original "80x80" upscale=False as thumb %}
-                                                <a href="#" data-original="{{ image.original.url }}" class="sub-image">
+                                                <a href="#" data-original="{{ image.url }}" class="sub-image">
                                                     <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.product.get_name }}{% endif %}" loading="lazy">
                                                 </a>
                                             {% endwith %}

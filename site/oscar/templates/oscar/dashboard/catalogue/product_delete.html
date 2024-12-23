@@ -22,11 +22,11 @@
 {% endblock %}
 
 {% block dashboard_content %}
-    <div class="confirm-content">
+    <form method="post" class="confirm-content">
         <div class="table-header">
             <h2>{{ title }}</h2>
         </div>
-        <form method="post" class="card card-body card-confirm bg-light">
+        <div class="card card-body card-confirm bg-light">
             {% csrf_token %}
             <p>
                 {% if product.is_child %}
@@ -45,7 +45,7 @@
                     </ul>
                 </p>
             {% endif %}
-        </form>
+        </div>
         <div class="table-footer">
             <div class="form-actions d-flex justify-content-between flex-wrap align-items-end fill-width">
                 <div>         
@@ -69,5 +69,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 {% endblock %}

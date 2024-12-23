@@ -12,6 +12,7 @@ Staff = get_model("user", "Staff")
 TelegramMessage = get_model("telegram", "TelegramMessage")
 
 STAFF_BOT = settings.TELEGRAM_STAFF_BOT_TOKEN
+CUSTOMER_BOT = settings.TELEGRAM_CUSTOMER_BOT_TOKEN
 
 # Синхронная функция отправки сообщения через Telegram API
 def send_message(chat_id: int, text: str, type: str = TelegramMessage.MISC, user = None, bot_token: str = STAFF_BOT,  **kwargs):
@@ -64,7 +65,6 @@ def send_message(chat_id: int, text: str, type: str = TelegramMessage.MISC, user
         logger.error(f"Ошибка при отправке телеграм сообщения синхроно: {err}")
         raise Exception(f"An error occurred: {err}")
     
-
 def send_message_to_staffs(text: str, type: str = TelegramMessage.MISC, store_id: str = None, bot_token: str = STAFF_BOT, **kwargs):
     if type == TelegramMessage.TECHNICAL:
         staffs = Staff.objects.filter(is_active=True, notif=Staff.TECHNICAL, telegram_id__isnull=False).select_related("user")
@@ -80,3 +80,7 @@ def send_message_to_staffs(text: str, type: str = TelegramMessage.MISC, store_id
 
     for staff in staffs:
         send_message(staff.telegram_id, text, type, staff.user, bot_token, **kwargs)
+    
+def send_message_to_customer(text, user, type=TelegramMessage.MISC, bot_token=CUSTOMER_BOT, **kwargs):
+    if user.telegram_id:
+        send_message(user.telegram_id, text, type, user, bot_token, **kwargs)

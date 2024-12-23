@@ -31,7 +31,7 @@ class PaymentManager:
         self.payment_method = payment_method
 
     def get_method(self):
-        if self.payment_method in ['SBP', 'ONLINECARD']:
+        if self.payment_method =='ONLINECARD':
             return Yoomoney(self.payment_method)
         if self.payment_method == 'ELECTRON':
             return CardOffline(self.payment_method)
