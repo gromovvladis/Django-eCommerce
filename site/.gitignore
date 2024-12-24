@@ -40,9 +40,11 @@ db.sqlite
 /whoosh_index/*
 
 # static
+variables.css
+footer.html
+
 favicon.ico
 logo.svg
-footer.html
 
 # IDE files
 .project
