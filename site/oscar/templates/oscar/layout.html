@@ -10,6 +10,7 @@
 {% block styles %}
     {{ block.super }}
     {% compress css %}   
+        <link rel="stylesheet" href="{% static "css/frontend/variables.css" %}"/>
         <link rel="stylesheet" href="{% static "css/frontend/planet-styles.css" %}"/>
     {% endcompress %}
 {% endblock %}

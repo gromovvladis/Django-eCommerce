@@ -1,0 +1,15 @@
+
+:root {
+    --color-background: #fefefe;
+    --color-background-green: #24a66e3a;
+    --color-button-primary: #f9e8dd;
+    --color-button-secondary: #b9ffc7;
+    --color-primary-text: #261d1b;
+    --color-secondary-text: #343434;
+    --color-primary: #24a66e;
+    --color-secondary: #c21313;
+    --color-dark-red: #660000;
+    --color-info: #2196f3;
+    --color-footer: #0a152f;
+    --padding-cart: 77px;
+}

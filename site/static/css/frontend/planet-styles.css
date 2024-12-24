@@ -77,20 +77,6 @@
     font-weight: 900
 }
 
-:root {
-    --color-background: #fefefe;
-    --color-background-green: #24a66e3a;
-    --color-button-primary: #f9e8dd;
-    --color-button-secondary: #b9ffc7;
-    --color-primary-text: #261d1b;
-    --color-secondary-text: #343434;
-    --color-primary: #24a66e;
-    --color-secondary: #c21313;
-    --color-dark-red: #660000;
-    --color-info: #2196f3;
-    --padding-cart: 77px;
-}
-
 *,
 :after,
 :before {
@@ -6183,7 +6169,7 @@ color: #491217;
 }
 
 .app__footer {
-    background: #0a152f;
+    background: var(--color-footer);
     color: #a6a6a6
 }
 
