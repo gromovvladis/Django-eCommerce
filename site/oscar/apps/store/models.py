@@ -93,6 +93,29 @@ class Store(models.Model):
                 "supports one StoreAddress.  You need to override the "
                 "primary_address to look up the right address"
             )
+        
+    @property
+    def address(self):
+        """
+        Returns a stores primary address. Usually that will be the
+        headquarters or similar.
+
+        This is a rudimentary implementation that raises an error if there's
+        more than one address. If you actually want to support multiple
+        addresses, you will likely need to extend StoreAddress to have some
+        field or flag to base your decision on.
+        """
+        addresses = self.addresses.all()
+        if len(addresses) == 0:
+            return None
+        elif len(addresses) == 1:
+            return addresses[0]
+        else:
+            raise NotImplementedError(
+                "Oscar's default implementation of primary_address only "
+                "supports one StoreAddress.  You need to override the "
+                "primary_address to look up the right address"
+            )
 
     # pylint: disable=unused-argument
     def get_address_for_stockrecord(self, stockrecord):

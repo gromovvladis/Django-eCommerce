@@ -145,7 +145,7 @@ class StoreManageView(UpdateView):
 
     def get_object(self, queryset=None):
         self.store = get_object_or_404(Store, pk=self.kwargs["pk"])
-        self.address = self.store.primary_address
+        self.address = self.store.address
         if self.address is None:
             self.address = self.store.addresses.model(store=self.store)
         return self.store
@@ -156,17 +156,16 @@ class StoreManageView(UpdateView):
         ctx["title"] = self.store.name
         ctx["users"] = self.store.users.all()
         ctx["terminals"] = self.store.terminals.all()
-        if self.address.line1:
+        if self.address and self.address.line1:
             ctx['line1'] = self.address.line1
         return ctx
 
     def form_valid(self, form):
         self.object = form.save()
-        self.object.address = self.address
-        self.object.address.line1 = form.cleaned_data["line1"]
-        self.object.address.coords_long = form.cleaned_data["coords_long"]
-        self.object.address.coords_lat = form.cleaned_data["coords_lat"]
-        self.object.address.save()
+        self.address.line1 = form.cleaned_data["line1"]
+        self.address.coords_long = form.cleaned_data["coords_long"]
+        self.address.coords_lat = form.cleaned_data["coords_lat"]
+        self.address.save()
         messages.success(
             self.request,
             "Магазин '%s' успешно обновлен." % self.object.name,
