@@ -277,8 +277,7 @@
     ssh vladis@5.35.89.111
 
     source venv/bin/activate
-    cd mikado
-    cd site
+    cd mikado/site
     git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
@@ -286,8 +285,7 @@
     python manage.py compress
 
     source venv/bin/activate
-    cd provence
-    cd site
+    cd provence/site
     git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
@@ -301,16 +299,14 @@
 
     source venv/bin/activate
     cd
-    cd mikado
-    cd site
+    cd mikado/site
     git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
     python manage.py collectstatic
     python manage.py compress
     cd
-    cd provence
-    cd site
+    cd provence/site
     git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
