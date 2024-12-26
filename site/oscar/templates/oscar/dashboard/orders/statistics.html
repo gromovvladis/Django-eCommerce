@@ -389,7 +389,6 @@
                     <div class="chart-container my-2">
                         <canvas class="canvas-graph" data-id="graph-chart"></canvas>
                     </div>
-
                     <div class="d-flex flex-column flex-sm-row justify-content-center mt-4">
                         <div class="legend-chart legend-chart--graph" data-id="legend-graph-chart"></div>
                         <div class="range-container" data-id="range-container">
@@ -413,7 +412,7 @@
             <div class="row">
                 <div class="col-md-4">
                     <table class="table table-striped table-bordered table-hover table-text-right">
-                        <caption><i class="fas fa-shopping-cart"></i> Заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <caption><i class="fas fa-shopping-cart"></i> Все заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
                         <tr>
                             <th class="col-md-10">Всего заказов</th>
                             <td class="col-md-2" >{{ orders_weeks }}</td>
@@ -423,16 +422,12 @@
                             <td class="col-md-2" >{{ lines_weeks }}</td>
                         </tr>
                         <tr>
-                            <th class="col-md-10">Новых пользователей</th>
-                            <td class="col-md-2" >{{ users_weeks }}</td>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_discount_weeks }}</td>
                         </tr>
                         <tr>
-                            <th class="col-md-10">Новых клиентов</th>
-                            <td class="col-md-2" >{{ customers_weeks }}</td>
-                        </tr>
-                        <tr>
-                            <th class="col-md-10">Всего создано корзин</th>
-                            <td class="col-md-2" >{{ baskets_weeks }}</td>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_discount_weeks }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Общий доход</th>
@@ -445,6 +440,72 @@
                         <tr>
                             <th class="col-md-10">Средняя стоимость заказа</th>
                             <td class="col-md-2" >{{ average_costs_weeks|currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-striped table-bordered table-hover table-text-right">
+                        <caption><i class="fas fa-shopping-cart"></i> Эвотор заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <tr>
+                            <th class="col-md-10">Всего заказов</th>
+                            <td class="col-md-2" >{{ orders_offline_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего позиций</th>
+                            <td class="col-md-2" >{{ lines_offline_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_offline_discount_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_offline_discount_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общий доход</th>
+                            <td class="col-md-2" >{{ revenue_offline_weeks|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_offline_weeks|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Средняя стоимость заказа</th>
+                            <td class="col-md-2" >{{ average_offline_costs_weeks|currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-striped table-bordered table-hover table-text-right">
+                        <caption><i class="fas fa-shopping-cart"></i> Онлайн заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <tr>
+                            <th class="col-md-10">Всего заказов</th>
+                            <td class="col-md-2" >{{ orders_online_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего позиций</th>
+                            <td class="col-md-2" >{{ lines_online_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_online_discount_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_online_discount_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общий доход</th>
+                            <td class="col-md-2" >{{ revenue_online_weeks|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_online_weeks|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Средняя стоимость заказа</th>
+                            <td class="col-md-2" >{{ average_online_costs_weeks|currency }}</td>
                         </tr>
                     </table>
                 </div>
@@ -463,6 +524,18 @@
                         <tr>
                             <th class="col-md-10">Всего клиентов</th>
                             <td class="col-md-2" >{{ customers_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Новых пользователей</th>
+                            <td class="col-md-2" >{{ users_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Новых клиентов</th>
+                            <td class="col-md-2" >{{ customers_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего создано корзин</th>
+                            <td class="col-md-2" >{{ baskets_weeks }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Клиенты с 2 и более заказами</th>
@@ -487,6 +560,8 @@
                         </table>
                     </div>
                 {% endif %}
+            </div>
+            <div class="row">
                 {% if report_exist_weeks %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -524,21 +599,21 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button active" href="#top_product_price_weeks" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_week" data-toggle="tab">
                                         По стоимости
                                     </button>
-                                    <button role="button" class="tabs-button__button" href="#top_product_count_weeks" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_count_top_product_price_week" data-toggle="tab">
                                         По количеству
                                     </button>
                                 </div>
                             </div>
-                            <div class="tab-pane fade show active chart-container" id="top_product_price_weeks" role="tabpanel">
+                            <div class="tab-pane fade show active chart-container" id="top_product_price_week" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-                            <div class="tab-pane fade chart-container" id="top_product_count_weeks" role="tabpanel">
+                            <div class="tab-pane fade chart-container" id="top_product_count_top_product_price_week" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
@@ -592,7 +667,7 @@
             <div class="row">
                 <div class="col-md-4">
                     <table class="table table-striped table-bordered table-hover table-text-right">
-                        <caption><i class="fas fa-shopping-cart"></i> Заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <caption><i class="fas fa-shopping-cart"></i> Все заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
                         <tr>
                             <th class="col-md-10">Всего заказов</th>
                             <td class="col-md-2" >{{ orders_months }}</td>
@@ -602,16 +677,12 @@
                             <td class="col-md-2" >{{ lines_months }}</td>
                         </tr>
                         <tr>
-                            <th class="col-md-10">Новых пользователей</th>
-                            <td class="col-md-2" >{{ users_months }}</td>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_discount_months }}</td>
                         </tr>
                         <tr>
-                            <th class="col-md-10">Новых клиентов</th>
-                            <td class="col-md-2" >{{ customers_months }}</td>
-                        </tr>
-                        <tr>
-                            <th class="col-md-10">Всего создано корзин</th>
-                            <td class="col-md-2" >{{ baskets_months }}</td>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_discount_months }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Общий доход</th>
@@ -624,6 +695,72 @@
                         <tr>
                             <th class="col-md-10">Средняя стоимость заказа</th>
                             <td class="col-md-2" >{{ average_costs_months|currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-striped table-bordered table-hover table-text-right">
+                        <caption><i class="fas fa-shopping-cart"></i> Эвотор заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <tr>
+                            <th class="col-md-10">Всего заказов</th>
+                            <td class="col-md-2" >{{ orders_offline_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего позиций</th>
+                            <td class="col-md-2" >{{ lines_offline_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_offline_discount_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_offline_discount_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общий доход</th>
+                            <td class="col-md-2" >{{ revenue_offline_months|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_offline_months|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Средняя стоимость заказа</th>
+                            <td class="col-md-2" >{{ average_offline_costs_months|currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-striped table-bordered table-hover table-text-right">
+                        <caption><i class="fas fa-shopping-cart"></i> Онлайн заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <tr>
+                            <th class="col-md-10">Всего заказов</th>
+                            <td class="col-md-2" >{{ orders_online_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего позиций</th>
+                            <td class="col-md-2" >{{ lines_online_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_online_discount_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_online_discount_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общий доход</th>
+                            <td class="col-md-2" >{{ revenue_online_months|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_online_months|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Средняя стоимость заказа</th>
+                            <td class="col-md-2" >{{ average_online_costs_months|currency }}</td>
                         </tr>
                     </table>
                 </div>
@@ -642,6 +779,18 @@
                         <tr>
                             <th class="col-md-10">Всего клиентов</th>
                             <td class="col-md-2" >{{ customers_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Новых пользователей</th>
+                            <td class="col-md-2" >{{ users_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Новых клиентов</th>
+                            <td class="col-md-2" >{{ customers_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего создано корзин</th>
+                            <td class="col-md-2" >{{ baskets_months }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Клиенты с 2 и более заказами</th>
@@ -666,6 +815,8 @@
                         </table>
                     </div>
                 {% endif %}
+            </div>
+            <div class="row">
                 {% if report_exist_months %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -703,21 +854,21 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button active" href="#top_product_price_months" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_month" data-toggle="tab">
                                         По стоимости
                                     </button>
-                                    <button role="button" class="tabs-button__button" href="#top_product_count_months" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_count_month" data-toggle="tab">
                                         По количеству
                                     </button>
                                 </div>
                             </div>
-                            <div class="tab-pane fade show active chart-container" id="top_product_price_months" role="tabpanel">
+                            <div class="tab-pane fade show active chart-container" id="top_product_price_month" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-                            <div class="tab-pane fade chart-container" id="top_product_count_months" role="tabpanel">
+                            <div class="tab-pane fade chart-container" id="top_product_count_month" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
@@ -759,7 +910,7 @@
                         </div>
                     </div>
                 {% else %} 
-                    <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_weeks|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
+                    <div class="d-flex justify-content-center fill-width my-2"><h2>Заказы |<span class="text-primary"> {{ start_date_years|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></h2></div>
                     <div class="empty-report" style="min-height: 350px;">
                         <span>
                             Нет созданных заказов
@@ -770,7 +921,7 @@
             <div class="row">
                 <div class="col-md-4">
                     <table class="table table-striped table-bordered table-hover table-text-right">
-                        <caption><i class="fas fa-shopping-cart"></i> Заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <caption><i class="fas fa-shopping-cart"></i> Все заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
                         <tr>
                             <th class="col-md-10">Всего заказов</th>
                             <td class="col-md-2" >{{ orders_years }}</td>
@@ -780,16 +931,12 @@
                             <td class="col-md-2" >{{ lines_years }}</td>
                         </tr>
                         <tr>
-                            <th class="col-md-10">Новых пользователей</th>
-                            <td class="col-md-2" >{{ users_years }}</td>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_discount_years }}</td>
                         </tr>
                         <tr>
-                            <th class="col-md-10">Новых клиентов</th>
-                            <td class="col-md-2" >{{ customers_years }}</td>
-                        </tr>
-                        <tr>
-                            <th class="col-md-10">Всего создано корзин</th>
-                            <td class="col-md-2" >{{ baskets_years }}</td>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_discount_years }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Общий доход</th>
@@ -802,6 +949,72 @@
                         <tr>
                             <th class="col-md-10">Средняя стоимость заказа</th>
                             <td class="col-md-2" >{{ average_costs_years|currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-striped table-bordered table-hover table-text-right">
+                        <caption><i class="fas fa-shopping-cart"></i> Эвотор заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <tr>
+                            <th class="col-md-10">Всего заказов</th>
+                            <td class="col-md-2" >{{ orders_offline_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего позиций</th>
+                            <td class="col-md-2" >{{ lines_offline_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_offline_discount_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_offline_discount_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общий доход</th>
+                            <td class="col-md-2" >{{ revenue_offline_years|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_offline_years|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Средняя стоимость заказа</th>
+                            <td class="col-md-2" >{{ average_offline_costs_years|currency }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-striped table-bordered table-hover table-text-right">
+                        <caption><i class="fas fa-shopping-cart"></i> Онлайн заказы |<span class="text-primary"> {{ start_date|date:"d.m.y" }} - {{ end_time|date:"d.m.y" }}</span></caption>
+                        <tr>
+                            <th class="col-md-10">Всего заказов</th>
+                            <td class="col-md-2" >{{ orders_online_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего позиций</th>
+                            <td class="col-md-2" >{{ lines_online_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Заказы со скидками</th>
+                            <td class="col-md-2" >{{ orders_online_discount_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Позиции со скидками</th>
+                            <td class="col-md-2" >{{ lines_online_discount_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общий доход</th>
+                            <td class="col-md-2" >{{ revenue_online_years|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Общая скидка</th>
+                            <td class="col-md-2" >{{ discount_online_years|currency }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Средняя стоимость заказа</th>
+                            <td class="col-md-2" >{{ average_online_costs_years|currency }}</td>
                         </tr>
                     </table>
                 </div>
@@ -820,6 +1033,18 @@
                         <tr>
                             <th class="col-md-10">Всего клиентов</th>
                             <td class="col-md-2" >{{ customers_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Новых пользователей</th>
+                            <td class="col-md-2" >{{ users_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Новых клиентов</th>
+                            <td class="col-md-2" >{{ customers_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего создано корзин</th>
+                            <td class="col-md-2" >{{ baskets_years }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Клиенты с 2 и более заказами</th>
@@ -844,6 +1069,8 @@
                         </table>
                     </div>
                 {% endif %}
+            </div>
+            <div class="row">
                 {% if report_exist_years %}
                     <div class="col-md-4">
                         <table class="table table-striped table-bordered table-hover table-text-right">
@@ -881,21 +1108,21 @@
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
                                     <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
-                                    <button role="button" class="tabs-button__button active" href="#top_product_price_years" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button active" href="#top_product_price_year" data-toggle="tab">
                                         По стоимости
                                     </button>
-                                    <button role="button" class="tabs-button__button" href="#top_product_count_years" data-toggle="tab">
+                                    <button role="button" class="tabs-button__button" href="#top_product_count_year" data-toggle="tab">
                                         По количеству
                                     </button>
                                 </div>
                             </div>
-                            <div class="tab-pane fade show active chart-container" id="top_product_price_years" role="tabpanel">
+                            <div class="tab-pane fade show active chart-container" id="top_product_price_year" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-price-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="price-chart"></canvas>
                                 </div>
                             </div>
-                            <div class="tab-pane fade chart-container" id="top_product_count_years" role="tabpanel">
+                            <div class="tab-pane fade chart-container" id="top_product_count_year" role="tabpanel">
                                 <div class="d-flex justify-content-center mt-4">
                                     <div class="legend-chart d-flex flex-column" data-id="legend-count-chart"></div>
                                     <canvas class="canvas-graph canvas-graph--doughnut" data-id="count-chart"></canvas>
