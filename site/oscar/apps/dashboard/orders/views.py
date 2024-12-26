@@ -120,6 +120,14 @@ class OrderStatsView(FormView):
         ctx = super().get_context_data(**kwargs)
         ctx["form"] = kwargs.get("form", self.form_class)
         filters = kwargs.get("filters", {})
+
+        # if filters.get('date_placed__range') is not None:
+        #     filters['date_placed__range'] = (datetime_combine(filters['date_placed__range'][0], datetime.time.min), datetime_combine(filters['date_placed__range'][1], datetime.time.min))
+        # elif filters.get('date_placed__gte') is not None:
+        #     filters['date_placed__gte'] = (datetime_combine(filters['date_placed__gte'][0], datetime.time.min),)
+        # elif filters.get('date_placed__lte') is not None:
+        #     filters['date_placed__lte'] = (datetime_combine(filters['date_placed__lte'][0], datetime.time.min),)
+    
         excludes = kwargs.get("excludes", {})
         ctx.update(self.get_stats(filters, excludes))
         ctx["title"] = kwargs["form"].get_filter_description()
@@ -129,7 +137,7 @@ class OrderStatsView(FormView):
 
     def get_report(self, orders, start, end, range_type):
 
-        start_time = datetime_combine(start, datetime.time.min)
+        start_time = start
         diff = relativedelta(end, start)
 
         if range_type == 'days':
@@ -201,7 +209,7 @@ class OrderStatsView(FormView):
         return order_data, sum(order_count) > 0
 
     def get_data(self, filters, excludes):
-        
+
         orders = queryset_orders(user=self.request.user).filter(**filters).exclude(**excludes)
         
         if filters.get('date_placed__range') is not None:
@@ -274,6 +282,9 @@ class OrderStatsView(FormView):
             else:
                 start_date = end_date - datetime.timedelta(days=90)
 
+        start_date = datetime_combine(start_date, datetime.time.min)
+        end_date = datetime_combine(end_date, datetime.time.max)
+
         # Установка стартовых дат для различных интервалов
         start_dates = {
             "days": max(start_date, end_date - datetime.timedelta(days=60)),
@@ -281,17 +292,6 @@ class OrderStatsView(FormView):
             "months": max(start_date, end_date - relativedelta(months=12)),
             "years": max(start_date, end_date - relativedelta(years=3)),
         }
-
-        # Ограничение данных для пользователей без прав администратора
-        user = self.request.user
-        if not user.is_staff:
-            stores_ids = tuple(user.stores.values_list("id", flat=True))
-            orders = orders.filter(lines__store_id__in=stores_ids).distinct()
-            alerts = alerts.filter(stockrecord__store_id__in=stores_ids)
-            baskets = baskets.filter(lines__stockrecord__store_id__in=stores_ids).distinct()
-            customers = customers.filter(orders__lines__store_id__in=stores_ids).distinct()
-            lines = lines.filter(store_id__in=stores_ids)
-            products = products.filter(stockrecords__store_id__in=stores_ids)
 
         # Создание словаря с результатами
         stats = {
@@ -368,9 +368,9 @@ class OrderStatsView(FormView):
                 f"lines_offline_{period}": lines_period.filter(order__site="Эвотор").count(),
                 f"lines_online_{period}": lines_period.exclude(order__site="Эвотор").count(),
 
-                f"orders_discount_{period}": orders_period.filter(~Q(lines__line_price_before_discounts=F('lines__line_price'))).count(),
-                f"orders_offline_discount_{period}": orders_period.filter(~Q(lines__line_price_before_discounts=F('lines__line_price')), site="Эвотор").count(),
-                f"orders_online_discount_{period}": orders_period.filter(~Q(lines__line_price_before_discounts=F('lines__line_price'))).exclude(site="Эвотор").count(),
+                f"orders_discount_{period}": orders_period.filter(~Q(lines__line_price_before_discounts=F('lines__line_price'))).distinct().count(),
+                f"orders_offline_discount_{period}": orders_period.filter(~Q(lines__line_price_before_discounts=F('lines__line_price')), site="Эвотор").distinct().count(),
+                f"orders_online_discount_{period}": orders_period.filter(~Q(lines__line_price_before_discounts=F('lines__line_price'))).exclude(site="Эвотор").distinct().count(),
 
                 f"lines_discount_{period}": lines_period.filter(~Q(line_price_before_discounts=F('line_price'))).count(),
                 f"lines_offline_discount_{period}": lines_period.filter(~Q(line_price_before_discounts=F('line_price')), order__site="Эвотор").count(),

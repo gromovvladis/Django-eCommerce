@@ -6,6 +6,7 @@ from django.http import QueryDict
 
 from oscar.apps.payment.models import Source, Transaction
 from oscar.core.loading import get_model
+from oscar.core.utils import datetime_combine
 from oscar.forms.mixins import PhoneNumberMixin
 from oscar.forms.widgets import DatePickerInput, DateRangeInput
 
@@ -52,13 +53,6 @@ class OrderStatsForm(forms.Form):
     )
     status = forms.ChoiceField(
         choices=status_choices, label="Статус", required=False
-    )
-
-    date_from = forms.DateField(
-        required=False, label="Дата с", widget=DatePickerInput
-    )
-    date_to = forms.DateField(
-        required=False, label="Дата до", widget=DatePickerInput
     )
 
     voucher = forms.CharField(required=False, label="Промокод")
@@ -132,7 +126,6 @@ class OrderStatsForm(forms.Form):
         elif date_range:
             date_from, date_to = self._format_date_range(date_range) 
             if date_from and date_to:
-                # self._filters["date_placed__range"] = [date_from, date_to + datetime.timedelta(days=1)]
                 self._filters["date_placed__range"] = [date_from, date_to]
                 self._search_filters.append((
                     ("Размещено между {start_date} и {end_date}").format(
@@ -235,21 +228,21 @@ class OrderStatsForm(forms.Form):
             )
         return phone_number
     
-    def _format_date_range(self, range):
-        ranges = range.split('-')
-        date_from = None
-        date_to = None
-
+    def _format_date_range(self, range_str):
         try:
-            date_from = ranges[0].strip()
-            date_to = ranges[1].strip()
-            date_from = datetime.datetime.strptime(date_from, '%d.%m.%Y')
-            date_to = datetime.datetime.strptime(date_to, '%d.%m.%Y')
-        except Exception:
-            date_to = None
-            date_from = None
-
-        return date_from, date_to
+            # Разбиваем строку диапазона на даты
+            date_from_str, date_to_str = map(str.strip, range_str.split('-'))
+            # Преобразуем строки в объекты datetime
+            date_from = datetime_combine(
+                datetime.datetime.strptime(date_from_str, '%d.%m.%Y'), datetime.time.min
+            )
+            date_to = datetime_combine(
+                datetime.datetime.strptime(date_to_str, '%d.%m.%Y'), datetime.time.max
+            )
+            return date_from, date_to
+        except (ValueError, AttributeError):
+            # Возвращаем None, если произошла ошибка при разборе
+            return None, None
 
     def clean_username(self):
         phone_number = self.cleaned_data.get('username', '')
@@ -257,6 +250,20 @@ class OrderStatsForm(forms.Form):
             return self.remove_non_digits(phone_number)
         
         return ''
+
+    def clean_date_from(self):
+        date_from = self.cleaned_data.get("date_from")
+        if date_from:
+            # Добавляем время начала дня
+            return datetime_combine(date_from, datetime.time.min)
+        return None
+
+    def clean_date_to(self):
+        date_to = self.cleaned_data.get("date_to")
+        if date_to:
+            # Добавляем время окончания дня
+            return datetime_combine(date_to, datetime.time.max)
+        return None
     
     def remove_non_digits(self, phone_number):
         # Удаляем все нецифровые символы

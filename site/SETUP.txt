@@ -299,6 +299,28 @@
     redis-cli Flushall
 
 
+    source venv/bin/activate
+    cd
+    cd mikado
+    cd site
+    git pull https://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@github.com/gromovvladis/mikado.git
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py collectstatic
+    python manage.py compress
+    cd
+    cd provence
+    cd site
+    git pull https://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@github.com/gromovvladis/mikado.git
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py collectstatic
+    python manage.py compress
+    sudo supervisorctl restart all
+    redis-cli Flushall
+
+
+
     sudo supervisorctl stop all
     sudo systemctl stop redis-server
 

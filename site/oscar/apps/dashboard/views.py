@@ -1,5 +1,6 @@
 import json
 from datetime import datetime, timedelta
+import datetime as datetime_min
 from decimal import ROUND_UP
 from decimal import Decimal as D
 
@@ -12,6 +13,7 @@ from django.views.generic import TemplateView
 
 from oscar.apps.customer.views import AccountAuthView
 from oscar.apps.dashboard.orders.views import queryset_orders
+from oscar.core.utils import datetime_combine
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
 
@@ -211,7 +213,7 @@ class IndexView(TemplateView):
 
     def get_stats(self):
         current_time = now()
-        datetime_24hrs_ago = current_time - timedelta(hours=24)
+        datetime_day_ago = datetime_combine(current_time, datetime_min.time.min)
         start_of_week = current_time.weekday()
         datetime_week_ago = current_time - timedelta(days=start_of_week)
         start_of_month = datetime(year=current_time.year, month=current_time.month, day=1, tzinfo=current_time.tzinfo)
@@ -229,21 +231,7 @@ class IndexView(TemplateView):
         lines = data['lines']
         products = data['products']
 
-        user = self.request.user
-        if not user.is_staff:
-            stores_ids = tuple(user.stores.values_list("id", flat=True))
-            orders = orders.filter(lines__store_id__in=stores_ids).distinct()
-            alerts = alerts.filter(stockrecord__store_id__in=stores_ids)
-            baskets = baskets.filter(
-                lines__stockrecord__store_id__in=stores_ids
-            ).distinct()
-            customers = customers.filter(
-                orders__lines__store_id__in=stores_ids
-            ).distinct()
-            lines = lines.filter(store_id__in=stores_ids)
-            products = products.filter(stockrecords__store_id__in=stores_ids)
-
-        orders_last_day = orders.filter(date_placed__gt=datetime_24hrs_ago)
+        orders_last_day = orders.filter(date_placed__gt=datetime_day_ago)
         orders_last_week = orders.filter(date_placed__gt=datetime_week_ago)
         orders_last_month = orders.filter(date_placed__gt=datetime_month_ago)
 
@@ -283,13 +271,13 @@ class IndexView(TemplateView):
             ]
             or D("0.00"),
             "total_customers_last_day": customers.filter(
-                date_joined__gt=datetime_24hrs_ago,
+                date_joined__gt=datetime_day_ago,
             ).count(),
             "total_users_last_day": users.filter(
-                date_joined__gt=datetime_24hrs_ago,
+                date_joined__gt=datetime_day_ago,
             ).count(),
             "total_open_baskets_last_day": baskets.filter(
-                date_created__gt=datetime_24hrs_ago
+                date_created__gt=datetime_day_ago
             ).count(),
 
             "total_open_baskets_last_week": baskets.filter(
@@ -387,7 +375,8 @@ class IndexView(TemplateView):
             .values("status")
             .annotate(freq=Count("id")),
         }
-        if user.is_staff:
+
+        if self.request.user.is_staff:
             stats.update(
                 offer_maps=(
                     ConditionalOffer.objects.filter(end_datetime__gt=now())
