@@ -212,11 +212,12 @@ class IndexView(TemplateView):
         return data
 
     def get_stats(self):
-        current_time = now()
-        datetime_day_ago = datetime_combine(current_time, datetime_min.time.min)
+        current_time = datetime_combine(now(), datetime_min.time.min)
         start_of_week = current_time.weekday()
-        datetime_week_ago = current_time - timedelta(days=start_of_week)
         start_of_month = datetime(year=current_time.year, month=current_time.month, day=1, tzinfo=current_time.tzinfo)
+        
+        datetime_day_ago = current_time
+        datetime_week_ago = current_time - timedelta(days=start_of_week)
         datetime_month_ago = current_time - (current_time - start_of_month)
         datetime_7days_ago = current_time - timedelta(days=7)
         datetime_30days_ago = current_time - timedelta(days=30)
