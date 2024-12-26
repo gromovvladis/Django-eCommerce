@@ -121,8 +121,7 @@ class IndexView(TemplateView):
         *segments* defines the number of labelling segments used for the y-axis
         when generating the y-axis labels (default=10).
         """
-        # day_now = now().replace(hour=0, minute=0, second=0)
-        day_now = now()
+        day_now = datetime_combine(now(), datetime_min.time.min)
         start_time = day_now - timedelta(days=days)
 
         order_total_days = []
