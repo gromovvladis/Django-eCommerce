@@ -1,6 +1,6 @@
 from django.template import loader
 from celery import shared_task
-from oscar.apps.crm.client import EvotorMobileCashier
+from oscar.apps.order.client import EvotorKomtet
 from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs, send_message
 from oscar.core.loading import get_model
 from django.contrib.auth import get_user_model
@@ -103,4 +103,4 @@ def _send_telegram_message_to_user(telegram_id: int, msg: str, type: str):
 # ================= Evotor =================
 
 def _send_order_to_evotor(order_json: dict):
-    EvotorMobileCashier().send_order(order_json)
+    EvotorKomtet().send_order(order_json)
