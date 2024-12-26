@@ -69,8 +69,7 @@ class IndexView(TemplateView):
         when generating the y-axis labels (default=10).
         """
         # Get datetime for 24 hours ago
-        time_now = now().replace(minute=0, second=0)
-        start_time = time_now - timedelta(hours=hours - 1)
+        start_time = now().replace(minute=0, second=0) - timedelta(hours=hours - 1)
 
         order_total_hourly = []
         for _ in range(0, hours, 2):
@@ -121,8 +120,7 @@ class IndexView(TemplateView):
         *segments* defines the number of labelling segments used for the y-axis
         when generating the y-axis labels (default=10).
         """
-        day_now = datetime_combine(now(), datetime_min.time.min)
-        start_time = day_now - timedelta(days=days)
+        start_time = datetime_combine(now(), datetime_min.time.max) - timedelta(days=days)
 
         order_total_days = []
         for _ in range(0, days, 1):
