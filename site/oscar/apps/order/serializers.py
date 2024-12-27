@@ -1,4 +1,3 @@
-import logging
 from django.conf import settings
 from datetime import datetime
 from django.urls import reverse_lazy
@@ -6,8 +5,6 @@ from rest_framework import serializers
 from decimal import Decimal as D
 from oscar.core.loading import get_model
 from django.utils.timezone import now
-
-logger = logging.getLogger("oscar.customer")
 
 User = get_model("user", "User")
 Store = get_model("store", "Store")
@@ -422,100 +419,5 @@ class OrderSerializer(serializers.Serializer):
         notes = instance.notes.values_list("note_type", "message")
         if notes.exists():
             representation["note"] = ", ".join(f"{note_type}: {message}" for note_type, message in notes)
-
-        return representation
-
-
-# ========== Сериализоторы АТОЛ для отправки / изменения чеков ==========
-
-
-class ReceiptLineSerializer(serializers.Serializer):
-
-    unit_codes = {
-        "шт": 0,
-        "г": 10,
-        "кг": 11,
-        "т": 12,
-        "см": 20,
-        "дм": 21,
-        "м": 22,
-        "см²": 30,
-        "дм²": 31,
-        "м²": 32,
-        "мл": 40,
-        "л": 41,
-        "м³": 42,
-        "кВт·ч": 50,
-        "Гкал": 51,
-        "сутки": 70,
-        "день": 70,
-        "час": 71,
-        "минута": 72,
-        "секунда": 73,
-        "КБ": 80,
-        "МБ": 81,
-        "ГБ": 82,
-        "ТБ": 83,
-    }
-
-    vats = {
-        "none":"NO_VAT",
-        "vat0":"VAT_0",
-        "vat10":"VAT_10",
-        "vat110":"VAT_10_110",
-        "vat20":"VAT_18",
-        "vat120":"VAT_18_118",
-    }
-
-    def to_representation(self, instance):      
-        return {
-            "name": instance.get_full_name(),
-            "price": instance.unit_price,
-            "quantity": instance.quantity,
-            "measure": self.unit_codes.get(instance.product.get_product_class().measure_name, 255),
-            "sum": instance.line_price,
-            "payment_method": "full_payment",
-            "payment_object": 1,
-            "vat": {"type": self.vats.get(instance.tax_code, "vat20")},
-        }
-
-
-class ReceiptSerializer(serializers.Serializer):
-     def to_representation(self, instance):        
-        representation = {
-            "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
-            "external_id": instance.id,
-            "service": {"callback_url": f"https://{settings.ALLOWED_HOSTS[0]}{reverse_lazy('payment:evotor', kwargs={'pk': instance.id})}"},
-            "receipt": {
-                "client": {
-                    "email": instance.user.email if instance.user else None,
-                    "phone": str(instance.user.username) if instance.user else None,
-                },
-                "company": {
-                    "email": settings.PAYMENT_EMAIL,
-                    "sno": settings.SNO,
-                    "inn": settings.INN,
-                    "payment_address": settings.ALLOWED_HOSTS[0],
-                },
-                "items": [ReceiptLineSerializer(line).data for line in instance.lines.all()],
-                "payments": [
-                    {"type": 0 if src.reference in settings.CASH_PAYMENTS else 1, "sum": src.amount_allocated}
-                    for src in instance.sources.all()
-                ],
-                "total": instance.total,
-            },
-        }
-
-        if instance.shipping > 0:
-            representation["items"].append({     
-                "name": "Доставка",
-                "price": instance.shipping,
-                "quantity": 1,
-                "measure": 0,
-                "sum": instance.shipping,
-                "payment_method": "full_payment",
-                "payment_object": 4,
-                "vat": {"type": "vat20"},
-            })
 
         return representation
