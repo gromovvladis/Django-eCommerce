@@ -12,6 +12,14 @@ from komtet_kassa_sdk.v2 import (
 logger = logging.getLogger("oscar.order")
 callback_url = reverse_lazy('order:callback')
 
+tax_system = settings.TAX_SYSTEM
+shop_id = settings.KOMTET_SHOP_ID
+secret_key = settings.KOMTET_SECRET_KEY
+payment_address = settings.ALLOWED_HOSTS[0]
+payment_method = PaymentMethod.PRE_PAYMENT_FULL
+
+client = Client(shop_id, secret_key)
+
 class EvotorKomtet:
 
     unit_codes = {
@@ -49,83 +57,104 @@ class EvotorKomtet:
         "vat120":VatRate.RATE_120,
     }
 
-    tax_system = TaxSystem.COMMON
-    shop_id = settings.KOMTET_SHOP_ID
-    secret_key = settings.KOMTET_SECRET_KEY
-    client = Client(shop_id, secret_key)
-    payment_address = settings.ALLOWED_HOSTS[0]
-        
-    def create_order(self, order_json):
-        intent = Intent.RETURN
-        oid = order_json.get('number')
-        check = Check(oid, intent)
+    # Receipt
 
-        user = order_json.get('user')
-        email = user.get('email')
-        phone = user.get('username')
-        name = user.get('name')
-        check.set_client(email=email, phone=phone, name=name)
-
-        check.set_company(payment_address=self.payment_address, tax_system=self.tax_system)
-
+    def create_check(self, order_json):
         lines = order_json.get('lines')
-        # shipping_method = order_json.get("shipping_method")
-        # payment_method = PaymentMethod.PRE_PAYMENT_FULL if shipping_method == "Самовывоз" else PaymentMethod.FULL_PAYMENT
-        payment_method = PaymentMethod.PRE_PAYMENT_FULL
+        user = order_json.get('user')
+
+        check = Check(order_json.get('number'), Intent.SELL)
+        check.set_client(email=user.get('email'), phone=user.get('username'))
+        check.set_company(payment_address=payment_address, tax_system=tax_system)
 
         for line in lines:
-            position_name = line.get('name')
-            position_price = line.get('unit_price')
-            quantity = line.get('quantity')
-            line_price = line.get('line_price')
-            measure = self.unit_codes.get(line.get('measure_name'), MeasureTypes.PIECE)
-            vat_rate = self.unit_codes.get(line.get('vat'), VatRate.RATE_NO)
-            payment_object = PaymentObject.PRODUCT
-            position = Position(
-                        name=position_name,
-                        price=position_price, # Цена за единицу
-                        quantity=quantity,  # Количество единиц
-                        total=line_price, # Общая стоимость позиции
-                        measure=measure, # Единица измерения
-                        payment_method=payment_method, # Метод расчёта
-                        vat=vat_rate,  # Тип налога
-                        payment_object=payment_object # Объект расчёта
-                        )
-            check.add_position(position)
-
+            check.add_position(
+                Position(
+                    id=line.get('evotor_id'),
+                    name=line.get('name'),
+                    price=line.get('unit_price'), # Цена за единицу
+                    quantity=line.get('quantity'),  # Количество единиц
+                    total=line.get('line_price'), # Общая стоимость позиции
+                    measure=self.unit_codes.get(line.get('measure_name'), MeasureTypes.PIECE), # Единица измерения
+                    payment_method=payment_method, # Метод расчёта
+                    vat=self.unit_codes.get(line.get('vat'), VatRate.RATE_NO),  # Тип налога
+                    payment_object=PaymentObject.PRODUCT # Объект расчёта
+                )
+            )
 
         sipping_price = D(order_json.get('shipping'))
-
         if sipping_price > 0:
-            position_name = "Доставка"
-            position_price = sipping_price
-            measure = MeasureTypes.OTHER_MEASURMENTS
-            vat_rate = VatRate.RATE_20
-            payment_object = PaymentObject.SERVICE
-            position = Position(name=position_name,
-                        price=position_price, # Цена за единицу
-                        quantity=1,  # Количество единиц
-                        total=sipping_price, # Общая стоимость позиции
-                        measure=measure, # Единица измерения
-                        payment_method=payment_method, # Метод расчёта
-                        vat=vat_rate,  # Тип налога
-                        payment_object=payment_object # Объект расчёта
-                        )
-            check.add_position(position)
+            check.add_position(
+                Position(name="Доставка",
+                    price=sipping_price, # Цена за единицу
+                    quantity=1,  # Количество единиц
+                    total=sipping_price, # Общая стоимость позиции
+                    measure=MeasureTypes.OTHER_MEASURMENTS, # Единица измерения
+                    payment_method=payment_method, # Метод расчёта
+                    vat=VatRate.RATE_20, #переделай, Тип налога
+                    payment_object=PaymentObject.SERVICE # Объект расчёта
+                )
+            )
 
         check.add_payment(order_json.get('amount_allocated'))
         check.set_print(False)
-        check.set_callback_url(f"https://{self.payment_address}{callback_url}")
+        check.set_callback_url(f"https://{payment_address}{callback_url}")
         
         try:
-            self.client.create_task(check)
+            client.create_task(check)
         except HTTPError as exc:
             logger.error(f"Ошибка при отправке заказа: {exc.response.text}")
 
-    def refund_order(self, order_json):
-        intent = Intent.SELL
-        oid = order_json.get('number')
-        check = Check(oid, intent)
+    def refund_check(self, order_json):
+        pass
+
+    # Order Evotor
+
+    def create_order(self, order_json):
+        lines = order_json.get('lines')
+        user = order_json.get('user')
+
+        check = Check(order_json.get('number'), Intent.SELL)
+        check.set_client(email=user.get('email'), phone=user.get('username'))
+        check.set_company(payment_address=payment_address, tax_system=tax_system)
+
+        for line in lines:
+            check.add_position(
+                Position(
+                    id=line.get('evotor_id'),
+                    name=line.get('name'),
+                    price=line.get('unit_price'), # Цена за единицу
+                    quantity=line.get('quantity'),  # Количество единиц
+                    total=line.get('line_price'), # Общая стоимость позиции
+                    measure=self.unit_codes.get(line.get('measure_name'), MeasureTypes.PIECE), # Единица измерения
+                    payment_method=payment_method, # Метод расчёта
+                    vat=self.unit_codes.get(line.get('vat'), VatRate.RATE_NO),  # Тип налога
+                    payment_object=PaymentObject.PRODUCT # Объект расчёта
+                )
+            )
+
+        sipping_price = D(order_json.get('shipping'))
+        if sipping_price > 0:
+            check.add_position(
+                Position(name="Доставка",
+                    price=sipping_price, # Цена за единицу
+                    quantity=1,  # Количество единиц
+                    total=sipping_price, # Общая стоимость позиции
+                    measure=MeasureTypes.OTHER_MEASURMENTS, # Единица измерения
+                    payment_method=payment_method, # Метод расчёта
+                    vat=VatRate.RATE_20, #переделай, Тип налога
+                    payment_object=PaymentObject.SERVICE # Объект расчёта
+                )
+            )
+
+        check.add_payment(order_json.get('amount_allocated'))
+        check.set_print(False)
+        check.set_callback_url(f"https://{payment_address}{callback_url}")
+        
+        try:
+            client.create_task(check)
+        except HTTPError as exc:
+            logger.error(f"Ошибка при отправке заказа: {exc.response.text}")
 
     def update_order(self, order_json):
         pass
@@ -136,7 +165,22 @@ class EvotorKomtet:
     def order_info(self, order_json):
         pass
 
-    # дальше с сотрудниками 
+    # Employees
+
+    def get_employees(self, order_json):
+        pass
+
+    def create_employee(self, order_json):
+        pass
+
+    def update_employee(self, order_json):
+        pass
+
+    def delete_employee(self, order_json):
+        pass
+
+
+
 
 
 
