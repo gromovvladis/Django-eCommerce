@@ -35,7 +35,7 @@
             {% block dashboard_nav %}
                 {% dashboard_navigation user as nav_items %}
 
-                <div class="navbar-expand-lg navbar-light navbar-primary flex-column flex-shrink-0 bg-light" data-id="navbar-primary">
+                <div class="navbar-expand-lg navbar-light navbar-primary bg-light flex-column flex-shrink-0" data-id="navbar-primary">
                     <div class="navbar-header py-3 px-1">
                         {% comment %} <a class="navbar-brand" href="{{ homepage_url }}">
                             {% icon file_name='footer/logo' size=20 fill="#838383" %}
@@ -135,6 +135,7 @@
     {{ block.super }}
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% comment %} <script src="//www.gstatic.com/firebasejs/3.6.8/firebase.js"></script> {% endcomment %}
 {% endblock %}
 
 {% block templatescripts %}
@@ -165,9 +166,14 @@
             <script src="{% static "js/dashboard/utils/phone-mask.js" %}"></script>
             <script src="{% static "js/dashboard/utils/map.js" %}"></script>
 
+            <script src="{% static "js/dashboard/utils/webpush.js" %}"></script>
+
         {% endcompress %}
         {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script> {% endcomment %}
 {% endblock %}
+
+
+
 
 {% block onbodyload %}
     {{ block.super }}

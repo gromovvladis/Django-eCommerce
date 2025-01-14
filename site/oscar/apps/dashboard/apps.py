@@ -12,7 +12,6 @@ class DashboardConfig(OscarDashboardConfig):
     namespace = "dashboard"
     permissions_map = {
         "index": (["is_staff"]),
-        # "index": (["is_staff"], ["store.dashboard_access"]),
     }
 
     # pylint: disable=attribute-defined-outside-init
@@ -32,7 +31,6 @@ class DashboardConfig(OscarDashboardConfig):
         self.vouchers_app = apps.get_app_config("vouchers_dashboard")
         self.comms_app = apps.get_app_config("communications_dashboard")
         self.shipping_app = apps.get_app_config("shipping_dashboard")
-        
         self.payments_app = apps.get_app_config("payments_dashboard")
         self.delivery_app = apps.get_app_config("delivery_dashboard")
         self.telegram_app = apps.get_app_config("telegram_dashboard")
@@ -43,6 +41,7 @@ class DashboardConfig(OscarDashboardConfig):
 
         urls = [
             path("", self.index_view.as_view(), name="index"),
+
             path("catalogue/", include(self.catalogue_app.urls[0])),
             path("reports/", include(self.reports_app.urls[0])),
             path("orders/", include(self.orders_app.urls[0])),
@@ -55,7 +54,6 @@ class DashboardConfig(OscarDashboardConfig):
             path("vouchers/", include(self.vouchers_app.urls[0])),
             path("comms/", include(self.comms_app.urls[0])),
             path("shipping/", include(self.shipping_app.urls[0])),
-
             path("payments/", include(self.payments_app.urls[0])),
             path("delivery/", include(self.delivery_app.urls[0])),
             path("telegram/", include(self.telegram_app.urls[0])),

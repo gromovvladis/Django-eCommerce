@@ -12,13 +12,13 @@ from komtet_kassa_sdk.v2 import (
 logger = logging.getLogger("oscar.order")
 callback_url = reverse_lazy('order:callback')
 
+shop_id = ""
+secret_key = ""
+
 tax_system = settings.TAX_SYSTEM
-shop_id = settings.KOMTET_SHOP_ID
-secret_key = settings.KOMTET_SECRET_KEY
 payment_address = settings.ALLOWED_HOSTS[0]
 payment_method = PaymentMethod.PRE_PAYMENT_FULL
 
-client = Client(shop_id, secret_key)
 
 class EvotorKomtet:
 
@@ -60,6 +60,8 @@ class EvotorKomtet:
     # Receipt
 
     def create_check(self, order_json):
+        client = Client(shop_id, secret_key)
+        
         lines = order_json.get('lines')
         user = order_json.get('user')
 
@@ -85,7 +87,8 @@ class EvotorKomtet:
         sipping_price = D(order_json.get('shipping'))
         if sipping_price > 0:
             check.add_position(
-                Position(name="Доставка",
+                Position(
+                    name="Доставка",
                     price=sipping_price, # Цена за единицу
                     quantity=1,  # Количество единиц
                     total=sipping_price, # Общая стоимость позиции
@@ -103,7 +106,7 @@ class EvotorKomtet:
         try:
             client.create_task(check)
         except HTTPError as exc:
-            logger.error(f"Ошибка при отправке заказа: {exc.response.text}")
+            logger.error(f"Ошибка при отправке заказа в очередь КОМТЕТ: {exc.response.text}")
 
     def refund_check(self, order_json):
         pass

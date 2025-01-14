@@ -5,13 +5,13 @@ from rest_framework.renderers import JSONRenderer
 from oscar.apps.checkout.signals import post_payment
 from oscar.apps.order.serializers import OrderSerializer
 from oscar.apps.order.signals import order_status_changed, send_order_to_evotor
-from .tasks import _notify_staff_about_new_order, _notify_customer_about_new_order, _notify_customer_about_order_status, _send_order_to_evotor, _send_telegram_message_new_order_to_staff
+from .tasks import _notify_staff_about_new_order, _notify_customer_about_new_order, _notify_customer_about_order_status, _send_order_to_evotor, _send_push_notification_new_order_to_staff, _send_telegram_message_new_order_to_staff
 
 def notify_about_new_order(sender, view, **kwargs):
 
     order_list = []
 
-    for line in kwargs['order'].basket.lines.all():
+    for line in kwargs['order'].lines.all():
             order_list.append("%s (%s)" % (line.product.get_name(), line.quantity))
     
     order = ", ".join(order_list)
@@ -34,14 +34,15 @@ def notify_about_new_order(sender, view, **kwargs):
         'url': kwargs['order'].get_full_url(),
         'staff_url': kwargs['order'].get_staff_url(),
     }
-    
     if not settings.DEBUG: 
         _notify_customer_about_new_order.delay(ctx)
         _notify_staff_about_new_order.delay(ctx)
+        _send_push_notification_new_order_to_staff.delay(ctx)
         _send_telegram_message_new_order_to_staff.delay(ctx)
     else: 
         _notify_staff_about_new_order(ctx)
         _notify_customer_about_new_order(ctx)
+        _send_push_notification_new_order_to_staff(ctx)
         _send_telegram_message_new_order_to_staff(ctx)
 
 post_payment.connect(notify_about_new_order) 

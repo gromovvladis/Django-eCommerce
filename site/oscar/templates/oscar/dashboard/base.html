@@ -46,7 +46,10 @@
         {% endblock %}
         
         {# Template vars #}
-        <script>{% block templatescripts %}{% endblock %}</script>
+        <script>
+            var webpush_save_url = "{% url 'home:webpush-save' %}";
+            {% block templatescripts %}{% endblock %}
+        </script>
 
         {# Внешние скрипты #}
         {% block externalscripts %}{% endblock %}

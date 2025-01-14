@@ -248,3 +248,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         pass
 
+
+class WebPushSubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    endpoint = models.URLField()
+    p256dh = models.TextField()
+    auth = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "auth_webpush"
+        verbose_name = "WEB-уведомление"
+        verbose_name_plural = "WEB-уведомления"
+
+    def __str__(self):
+        return f"Subscription for {self.user or 'Anonymous'}"
