@@ -4,6 +4,7 @@
 {% load sorting_tags %}
 {% load widget_tweaks %}
 {% load dashboard_tags %}
+{% load static %}
 
 {% block body_class %}{{ block.super }} orders{% endblock %}
 
@@ -24,7 +25,7 @@
         <form method="get" class="btn d-flex align-items-center no-widget-init" id="store_form">
             <i class="fa-solid fa-store mx-1"></i>
             {% for field in form %}
-                {% if "store_point" in field.id_for_label %}
+                {% if "store" in field.id_for_label %}
                     {% render_field field class+='store-point' %}
                     {% for error in field.errors %}
                         <ul class="error-block">
@@ -98,7 +99,7 @@
             {% endif %}
         </div>
     </div>
-    <form method="post" id="orders_form" class="mobile-table order_table">
+    <form method="post" id="orders_form" class="mobile-table order-table">
         {% csrf_token %}
         {% if orders %} 
             {% render_table orders %}  
@@ -151,7 +152,22 @@
             <p class="empty">Заказы не найдены</p>
         {% endif %}
     </form>
+    <div class="order-modal modal fade justify-content-center" data-id="order-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content content-loading"></div>
+        </div>
+    </div>
 {% endblock dashboard_content %}
+
+{% block templatescripts %}
+    {{ block.super }}
+    var order_modal_url = "{% url 'dashboard:order-modal' %}";
+{% endblock %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/dashboard/orders/order-modal.js" %}"></script>
+{% endblock %}
 
 {% block onbodyload %}
     {{ block.super }}

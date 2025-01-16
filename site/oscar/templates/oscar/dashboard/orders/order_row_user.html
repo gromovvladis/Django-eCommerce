@@ -4,6 +4,9 @@
         {{ record.user.name }}
         {{ record.user.username }}
     </a>
+    {% if record.client_note %}
+        <span>Комментарий: {{ record.client_note }}</span>
+    {% endif %}
 {% else %}
     -
 {% endif %}

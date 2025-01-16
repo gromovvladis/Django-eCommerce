@@ -21,11 +21,21 @@
 
     {% block navbar %}
         <nav class="navbar navbar-expand-lg navbar-light navbar-accounts">
-            <div class="container fill-width">
-                <button class="navbar-toggler navbar-toggler--mobile" type="button" data-id="navbar-toggler">
-                    <i class="fa-solid fa-bars"></i>
-                    {% comment %} <span class="navbar-toggler-icon"></span> {% endcomment %}
-                </button>
+            <div class="container-navbar fill-width fill-height d-flex justify-content-between">
+                <div>
+                    <button class="navbar-toggler navbar-toggler--mobile" type="button" data-id="navbar-toggler">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+                <div class="badges-navbar">
+                    {% if active_orders %}
+                        <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1">
+                            <i class="fas fa-shopping-cart"></i>
+                            <div class="dropdown-item-badge item-badge-navbar">{{ active_orders }}</div>
+                        </a>
+                    {% endif %}
+                    <span class="badge badge-info">{{ revenue_today }} ₽</span>
+                </div>
             </div>
         </nav>
     {% endblock navbar %}
@@ -34,17 +44,15 @@
         <div class="navbar-menu">
             {% block dashboard_nav %}
                 {% dashboard_navigation user as nav_items %}
-
                 <div class="navbar-expand-lg navbar-light navbar-primary bg-light flex-column flex-shrink-0" data-id="navbar-primary">
                     <div class="navbar-header py-3 px-1">
                         {% comment %} <a class="navbar-brand" href="{{ homepage_url }}">
                             {% icon file_name='footer/logo' size=20 fill="#838383" %}
                         </a> {% endcomment %}
-                        <button class="navbar-toggler p-0" data-id="navbar-toggler">
+                        <button class="navbar-toggler navbar-toggler--mobile p-0" data-id="navbar-toggler">
                             {% icon file_name='interface/arrow-home' size=30 stroke='#007bff'%}
                         </button>
                     </div>
-
                     <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
                         {% for item in nav_items %}
                         <li class="nav-item{% if request.path|tab:item.paths %} current-tab{% endif %}">
@@ -81,14 +89,11 @@
                         </li>
                     {% endfor %}
                     </ul>
-
                     <div class="dropdown border-top py-3 px-1"> 
-                        
                         <button role="button" class="nav-account d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="nav-account" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <div class="rounded-circle">{{ user.get_img }}</div>
                             <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.username }}</span>
                         </button>
-
                         <ul class="dropdown-menu text-small actions mb-2" aria-labelledby="nav-account">
                             <li><a class="dropdown-item" href="#">Задачи: 0</a></li>
                             <li><a class="dropdown-item" href="{% url 'customer:summary' %}">Аккаунт</a></li>
@@ -135,7 +140,6 @@
     {{ block.super }}
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    {% comment %} <script src="//www.gstatic.com/firebasejs/3.6.8/firebase.js"></script> {% endcomment %}
 {% endblock %}
 
 {% block templatescripts %}
@@ -171,9 +175,6 @@
         {% endcompress %}
         {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script> {% endcomment %}
 {% endblock %}
-
-
-
 
 {% block onbodyload %}
     {{ block.super }}

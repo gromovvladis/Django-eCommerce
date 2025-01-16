@@ -419,7 +419,6 @@ PHONENUMBER_DEFAULT_REGION = 'RU'
 OSCAR_FINAL_ORDER_STATUS = 'Завершён'
 OSCAR_INITIAL_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = 'Ожидает оплаты'
-OSCAR_PAID_ONLINE_PAYMENT_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_LINE_STATUS = 'Обрабатывается'
 
 # Доставка возможна:
@@ -458,9 +457,9 @@ OSCAR_ORDER_STATUS_CASCADE = {
 }
 
 ORDER_ACTIVE_STATUSES = (
+    'Обрабатывается',
     'Готовится', 
-    'Готов', 
-    'Доставляется',
+    'Готов',
 )
 
 ORDER_FINAL_STATUSES = (

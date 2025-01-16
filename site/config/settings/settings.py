@@ -95,6 +95,7 @@ MIDDLEWARE = [
 
     # oscar
     'oscar.apps.basket.middleware.BasketMiddleware',
+    'oscar.apps.dashboard.middleware.DashboardMiddleware',
 ]
 
 if DEBUG:

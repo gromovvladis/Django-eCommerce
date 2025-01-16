@@ -553,7 +553,13 @@ pre code {
   overflow-y: scroll;
 }
 
+.container-navbar{
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+}
+
 .container,
+.container-navbar,
 .container-fluid,
 .container-xl,
 .container-lg,
@@ -568,6 +574,7 @@ pre code {
 
  @media (min-width: 768px) {
   .container,
+  .container-navbar,
   .container-fluid,
   .container-xl,
   .container-lg,
@@ -580,6 +587,7 @@ pre code {
 
 @media (min-width: 992px) {
   .container,
+  .container-navbar,
   .container-fluid,
   .container-xl,
   .container-lg,
@@ -1553,35 +1561,6 @@ pre code {
     #f0f0f0 60px
   ); */
 }
-
-
-/* .empty-report {
-  height: 100%;
-  width: 100%;
-  position: relative;
-  background-color: #f0f0f0;
-  overflow: hidden;
-} */
-
-/* .empty-report::before {
-  content: "Пусто ";
-  font-size: 20px;
-  color: #ccc;
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform: rotate(-45deg);
-  transform-origin: 0 0;
-  white-space: nowrap;
-  line-height: 1;
-  opacity: 0.5;
-  z-index: 0;
-  overflow: hidden;
-} */
-
-
-
-
 
 
 
@@ -3332,6 +3311,21 @@ input[type=button].btn-block {
   font-size: .8rem;
 }
 
+.navbar-active{
+  display: inline-block;
+}
+
+.navbar-active i{
+  width: 15px;
+  margin-top: 8px;
+}
+
+.item-badge-navbar{
+  position: relative;
+  left: -8px;
+  top: -8px;
+}
+
 .dropdown-item-badge--nav{
   background-color: var(--primary);
 }
@@ -4487,11 +4481,9 @@ input[type=button].btn-block {
 }
 
 .navbar-toggler {
-  padding: 0.25rem 0.75rem;
   font-size: 1rem;
   line-height: 1;
-  background-color: transparent;
-  /* border: 1px solid transparent; */
+  background-color: #eee;
   border: none;
   border-radius: 0.25rem;
   transform: rotate(180deg);
@@ -4500,6 +4492,7 @@ input[type=button].btn-block {
 
 .navbar-toggler--mobile{
   display: block;
+  height: 100%;
 }
 
 .navbar-toggler:hover, .navbar-toggler:focus {
@@ -5298,6 +5291,13 @@ input[type=button].btn-block {
   border-radius: 0.25rem;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
+
+.badges-navbar{
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .badge {
     transition: none;
@@ -5379,11 +5379,11 @@ a.badge-info:focus, a.badge-info.focus {
 }
 
 .badge-pink {
-  color: #f61bb8;
+  color: #ffffff;
   background-color: #ea19af;
 }
 a.badge-pink:hover, a.badge-pink:focus {
-  color: #f61bb8;
+  color: #ffd3f3;
   background-color: #c31090;
 }
 a.badge-pink:focus, a.badge-pink.focus {
@@ -6076,8 +6076,13 @@ a.close.disabled {
 .modal-dialog {
   position: relative;
   width: auto;
-  margin: 0.5rem;
   pointer-events: none;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 1rem;
 }
 .modal.fade .modal-dialog {
   transition: transform 0.15s ease-out;
@@ -6143,11 +6148,14 @@ a.close.disabled {
   background-color: #fff;
   background-clip: padding-box;
   /* border: 1px solid rgba(0, 0, 0, 0.2); */
-  /* border-radius: 10px; */
-  border-radius: 5px;
+  border-radius: 10px;
   outline: 0;
-  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .05);
-  box-shadow: 0 0 5px rgba(0, 0, 0, .05);
+}
+
+.content-loading{
+  min-height: 500px;
+  background: #fff url(../../../static/svg/loading/loading.svg) no-repeat 50%;
+  background-size: 50px 50px;
 }
 
 .modal-backdrop {
@@ -6192,11 +6200,9 @@ a.close.disabled {
 .modal-body {
   position: relative;
   flex: 1 1 auto;
-  /* padding: .5rem; */
   padding: 1rem .5rem;
   border-radius: 0 0 10px 10px;
-  /* background: #eaeaea; */
-  /* background: linear-gradient(0deg, #e4e4e4, white); */
+  min-height: 439px;
 }
 
 .modal-footer {
@@ -6225,7 +6231,6 @@ a.close.disabled {
 @media (min-width: 576px) {
   .modal-dialog {
     max-width: 500px;
-    margin: 1.75rem auto;
   }
   .modal-dialog-scrollable {
     max-height: calc(100% - 3.5rem);
@@ -18858,6 +18863,10 @@ h3.app-ico:before {
   height: 150px;
 }
 
+.pointer{
+  cursor: pointer;
+}
+
 .table input[type=checkbox]{
   width: 15px;
   height: 15px;
@@ -18884,14 +18893,15 @@ h3.app-ico:before {
 }
 .navbar.navbar-accounts .navbar-toggler, .navbar.navbar-primary .navbar-toggler {
   border: none;
-  padding: 8px 1rem;
+  padding-left: .75rem;
+  padding-right: .75rem;
   outline: none;
   color: #dee2e6;
 }
 .navbar.navbar-accounts .navbar-nav .nav-link, .navbar.navbar-primary .navbar-nav .nav-link {
   color: #dee2e6;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: .75rem;
+  padding-right: .75rem;
 }
 .navbar.navbar-accounts .navbar-nav .nav-link i, .navbar.navbar-primary .navbar-nav .nav-link i {
   padding-right: 5px;
@@ -19049,6 +19059,7 @@ h3.app-ico:before {
 }
 
 .table-container {
+  position: relative;
   width: 100%;
 }
 
@@ -20349,9 +20360,9 @@ input[type="number"]:focus {
     height: 50px;
   }
 
-  .navbar.navbar-accounts .navbar-toggler, .navbar.navbar-primary .navbar-toggler{
+  /* .navbar.navbar-accounts .navbar-toggler, .navbar.navbar-primary .navbar-toggler{
     padding: 1rem .75rem;
-  }
+  } */
 
   .navbar-primary{
     z-index: 650;

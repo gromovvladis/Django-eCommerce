@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 from django.utils.timezone import now
-from oscar.apps.order.signals import order_line_status_changed, order_status_changed, send_order_to_evotor
+from oscar.apps.order.signals import order_line_status_changed, order_status_changed, active_order_placed
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_model
 from oscar.core.utils import get_default_currency
@@ -173,8 +173,8 @@ class Order(models.Model):
                 
         self.save()
         
-        if new_status in settings.ORDER_STATUS_SEND_TO_EVOTOR:
-            send_order_to_evotor.send(
+        if not self.evotor_id and new_status in settings.ORDER_STATUS_SEND_TO_EVOTOR:
+            active_order_placed.send(
                 sender=self,
                 order=self,
             )
@@ -190,6 +190,11 @@ class Order(models.Model):
         self._create_order_status_change(old_status, new_status)
 
     set_status.alters_data = True
+
+    def set_next_status(self):
+        pass
+
+    set_next_status.alters_data = True
 
     def _create_order_status_change(self, old_status, new_status):
         # Not setting the status on the order as that should be handled before
@@ -258,7 +263,7 @@ class Order(models.Model):
         """
         Returns the number of items in this order.
         """
-        return ", ".join(line.get_full_name() for line in self.lines.all())
+        return ", ".join(f"{line.get_full_name()} ({line.quantity})" for line in self.lines.all())
 
     @property
     def shipping_status(self):

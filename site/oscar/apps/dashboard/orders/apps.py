@@ -16,6 +16,7 @@ class OrdersDashboardConfig(OscarDashboardConfig):
     permissions_map = {
         "order-list": (["user.full_access"], ["order.full_access"], ["order.read"]),
         "order-active-list": (["user.full_access"], ["order.full_access"], ["order.read"]),
+        "order-active-list-lookup": (["user.full_access"], ["order.full_access"], ["order.read"]),
         "order-detail": (["user.full_access"], ["order.full_access"], ["order.read"]),
         "order-line-detail": (["user.full_access"], ["order.full_access"], ["order.read"]),
 
@@ -36,9 +37,16 @@ class OrdersDashboardConfig(OscarDashboardConfig):
         self.line_detail_view = get_class("dashboard.orders.views", "LineDetailView")
         self.order_stats_view = get_class("dashboard.orders.views", "OrderStatsView")
 
+        self.order_active_list_lookup_view = get_class("dashboard.orders.views", "OrderActiveListLookupView")
+        self.order_modal_view = get_class("dashboard.orders.views", "OrderModalView")
+        self.order_next_status_view = get_class("dashboard.orders.views", "OrderNextStatusView")
+
     def get_urls(self):
         urls = [
             path("active/", self.order_active_list_view.as_view(), name="order-active-list"),
+            path("active-lookup/", self.order_active_list_lookup_view.as_view(), name="order-active-list-lookup"),
+            path("order-modal/", self.order_modal_view.as_view(), name="order-modal"),
+            path("order-next-status/", self.order_next_status_view.as_view(), name="order-next-status"),
             path("all/", self.order_list_view.as_view(), name="order-list"),
             path("statistics/", self.order_stats_view.as_view(), name="order-stats"),
             path(

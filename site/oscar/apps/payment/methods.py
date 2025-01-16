@@ -413,8 +413,8 @@ class Yoomoney(PaymentMethod):
 
             receipt = Receipt()
             receipt.customer = {
-                "email": email if email else order.user.email,
-                "phone": str(order.user.username)
+                "phone": str(order.user.username),
+                **({"email": email} if email else {}),
             }
             receipt.tax_system_code = 4
             receipt.items = self._receipt_items(order)

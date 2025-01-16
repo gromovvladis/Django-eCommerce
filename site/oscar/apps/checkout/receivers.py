@@ -1,7 +1,6 @@
 from django.dispatch import receiver
 
-from oscar.apps.checkout.signals import post_payment, error_order
-from oscar.core.compat import get_user_model
+from oscar.apps.checkout.signals import error_order
 from oscar.core.loading import get_model
 
 Notification = get_model("communication", "Notification")

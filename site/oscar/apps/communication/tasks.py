@@ -9,7 +9,6 @@ from pywebpush import webpush, WebPushException
 from django.template import loader
 from django.contrib.auth import get_user_model
 
-from oscar.apps.order.client import EvotorKomtet
 from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs, send_message
 from oscar.core.loading import get_model
 
@@ -24,7 +23,7 @@ logger = logging.getLogger("oscar.communications")
 # ================= Site Notification =================
 
 @shared_task
-def _notify_staff_about_new_order(ctx: dict):
+def _send_site_notification_new_order_to_staff(ctx: dict):
 
     subject = "Пользовательский заказ"
     message_tpl = loader.get_template("oscar/customer/alerts/staff_new_order_message.html")
@@ -42,7 +41,7 @@ def _notify_staff_about_new_order(ctx: dict):
         )
 
 @shared_task()
-def _notify_customer_about_new_order(ctx: dict):
+def _send_site_notification_new_order_to_customer(ctx: dict):
     
     subject = "Новый заказ"
     message_tpl = loader.get_template("oscar/customer/alerts/new_order_message.html")
@@ -60,7 +59,7 @@ def _notify_customer_about_new_order(ctx: dict):
     )
 
 @shared_task()
-def _notify_customer_about_order_status(ctx: dict):
+def _send_site_notification_order_status_to_customer(ctx: dict):
     
     subject = "Статус заказа изменен"
     message_tpl = loader.get_template("oscar/customer/alerts/order_status_chenged_message.html")
@@ -162,4 +161,3 @@ def _send_telegram_message_to_user(telegram_id: int, msg: str, type: str):
 
 def _send_order_to_evotor(order_json: dict):
     pass
-    # EvotorKomtet().send_order(order_json)

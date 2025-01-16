@@ -283,7 +283,7 @@ class OrderSearchForm(forms.Form):
             'placeholder': '100000',
         }),
     )
-    store_point = forms.ChoiceField(
+    store = forms.ChoiceField(
         label="Магазин", required=False, choices=()
     )
     username = forms.CharField(
@@ -358,7 +358,7 @@ class OrderSearchForm(forms.Form):
 
         super().__init__(data, *args, **kwargs)
         self.fields["payment_method"].choices = self.payment_method_choices()
-        self.fields["store_point"].choices = self.store_choices()
+        self.fields["store"].choices = self.store_choices()
         
         usesrname = kwargs.pop('usesrname', None)
         if usesrname:
@@ -399,7 +399,7 @@ class OrderSearchForm(forms.Form):
 
 
 class ActiveOrderSearchForm(forms.Form):
-    store_point = forms.ChoiceField(
+    store = forms.ChoiceField(
         label="Магазин", required=False, choices=()
     )
     def __init__(self, *args, **kwargs):
@@ -414,7 +414,7 @@ class ActiveOrderSearchForm(forms.Form):
             data = None
 
         super().__init__(data, *args, **kwargs)
-        self.fields["store_point"].choices = self.store_choices()
+        self.fields["store"].choices = self.store_choices()
 
     def format_phone_number(self, phone_number):
         # Простейший способ форматирования номера телефона
