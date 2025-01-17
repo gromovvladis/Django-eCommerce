@@ -824,9 +824,6 @@ class OrderActiveListLookupView(APIView):
         Build the queryset for this list.
         """
         user = request.user
-        if not user.is_staff:
-            return JsonResponse({'update': False})
-        
         active_statuses = settings.ORDER_ACTIVE_STATUSES
         self.form = self.form_class(request.GET)
 
@@ -844,7 +841,7 @@ class OrderActiveListLookupView(APIView):
         num_orders = queryset.count()
 
         # Проверяем, требует ли запрос обновления
-        if num_orders <= int(request.GET.get('order_num', 0)):
+        if num_orders <= int(request.GET.get('order_num', 0)) and request.GET.get('force', 'false') == 'false':
             return JsonResponse({'update': False, 'num_orders': num_orders})
         
         # Аннотируем и сортируем queryset
@@ -878,16 +875,22 @@ class OrderModalView(APIView):
     authentication_classes = [SessionAuthentication]
 
     def get(self, request, *args, **kwargs):
-        user = request.user
-        if not user.is_staff:
-            return JsonResponse({'order': None})
-        
         order_number = request.GET.get('order_number', None)
 
         try:
             order = Order.objects.get(number=order_number)
-            order_html = render_to_string("oscar/dashboard/orders/partials/order-modal.html", {"order": order}, request=self.request)
-            return JsonResponse({"html": order_html, "status": 202}, status = 202)
+            order.open()
+            if not order.date_finish:
+                order.before_order = order.order_time - now()
+            else:
+                order.before_order = None
+            lines = order.lines.all()
+            paid = 0
+            for src in order.sources.all():
+                paid += src.amount_debited - src.amount_refunded
+
+            order_html = render_to_string("oscar/dashboard/orders/partials/order-modal.html", {"order": order, "paid": paid, "lines": lines}, request=self.request)
+            return JsonResponse({"html": order_html}, status = 200)
         except Exception:
             return JsonResponse({'order': None})
         
@@ -897,20 +900,17 @@ class OrderNextStatusView(APIView):
     authentication_classes = [SessionAuthentication]
 
     def post(self, request, *args, **kwargs):
-        user = request.user
-        if not user.is_staff:
-            return JsonResponse({'order': None})
-        
-        order_number = request.GET.get('order_number', None)
-
+        order_number = request.data.get('order_number', None)
         try:
             order = Order.objects.get(number=order_number)
-            order.set_next_status()
-            return JsonResponse({"status": "success"}, status = 200)
+            next_status = request.data.get('next_status', order.status)
+            order.set_status(next_status)
+            if next_status in settings.ORDER_FINAL_STATUSES:
+                return JsonResponse({"next_status": None, "final": True}, status = 200)
+            return JsonResponse({"next_status": order.next_status, "final": False}, status = 200)
         except Exception:
-            JsonResponse({"status": "error"}, status = 400)
+            JsonResponse({"next_status": None}, status = 400)
         
-
 
 class OrderDetailView(EventHandlerMixin, DetailView):
     """

@@ -374,20 +374,12 @@ h1, .h1 {
   font-size: 1.5rem;
 }
 
-h2, .h2 {
+h2, .h2, h4, .h4, h5, .h5{
   font-size: 1rem;
 }
 
 h3, .h3 {
   font-size: 0.9rem;
-}
-
-h4, .h4 {
-  font-size: 1.2rem;
-}
-
-h5, .h5 {
-  font-size: 1rem;
 }
 
 h6, .h6 {
@@ -1595,6 +1587,11 @@ pre code {
   border-left: 1px solid #dee2e6;
 }
 
+.modal-table td,
+.modal-table th {
+  padding: 0.25rem;
+}
+
 .table th:first-of-type,
 .table th:first-child,
 /* .table td:first-of-type, */
@@ -2452,12 +2449,44 @@ textarea.form-control {
   background-color: transparent;
   border: none;
   border: 1px solid transparent;
-  padding: .55rem .75rem;
+  padding: .5rem .65rem;
   font-size: 0.8rem;
   line-height: 1.5;
-  border-radius: 15px;
+  border-radius: 5px;
   border: 2px solid #fff;
   transition: color 0.1s ease-in-out, background-color 0.1s ease-in-out, border-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.btn.loading {
+  position: relative;
+  pointer-events: none; /* Отключить клики */
+  opacity: 0.7;
+  color: transparent;;
+}
+
+/* Индикатор загрузки */
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border: 2px solid #0072ff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Анимация вращения */
+@keyframes spin {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2761,11 +2790,12 @@ fieldset:disabled a.btn {
 .btn-outline-primary {
   color: var(--primary);
   /* border-color: var(--primary); */
+  border: #007bff33 1px solid
 }
 .btn-outline-primary:hover {
   color: #fff;
   background-color: var(--primary);
-  /* border-color: var(--primary); */
+  border-color: var(--primary);
 }
 .btn-outline-primary:focus, .btn-outline-primary.focus {
   box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.3);
@@ -2777,7 +2807,7 @@ fieldset:disabled a.btn {
 .btn-outline-primary:not(:disabled):not(.disabled):active, .btn-outline-primary:not(:disabled):not(.disabled).active, .show > .btn-outline-primary.dropdown-toggle {
   color: #fff;
   background-color: var(--primary);
-  /* border-color: var(--primary); */
+  border-color: var(--primary);
 }
 .btn-outline-primary:not(:disabled):not(.disabled):active:focus, .btn-outline-primary:not(:disabled):not(.disabled).active:focus, .show > .btn-outline-primary.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.3);
@@ -2785,12 +2815,12 @@ fieldset:disabled a.btn {
 
 .btn-outline-secondary {
   color: #6c757d;
-  /* border-color: #6c757d; */
+  border-color: #6c757d;
 }
 .btn-outline-secondary:hover {
   color: #fff;
   background-color: #6c757d;
-  /* border-color: #6c757d; */
+  border-color: #6c757d;
 }
 .btn-outline-secondary:focus, .btn-outline-secondary.focus {
   box-shadow: 0 0 0 0.1rem rgba(108, 117, 125, 0.3);
@@ -2802,7 +2832,7 @@ fieldset:disabled a.btn {
 .btn-outline-secondary:not(:disabled):not(.disabled):active, .btn-outline-secondary:not(:disabled):not(.disabled).active, .show > .btn-outline-secondary.dropdown-toggle {
   color: #fff;
   background-color: #6c757d;
-  /* border-color: #6c757d; */
+  border-color: #6c757d;
 }
 .btn-outline-secondary:not(:disabled):not(.disabled):active:focus, .btn-outline-secondary:not(:disabled):not(.disabled).active:focus, .show > .btn-outline-secondary.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.1rem rgba(108, 117, 125, 0.3);
@@ -2810,6 +2840,7 @@ fieldset:disabled a.btn {
 
 .btn-outline-success {
   color: #28a745;
+  border: #00ff7333 1px solid
   /* border-color: #28a745; */
 }
 .btn-outline-success:hover {
@@ -5984,12 +6015,12 @@ a.badge-dark:focus, a.badge-dark.focus {
 
 .close {
   float: right;
-  font-size: 1.3rem;
+  font-size: 2rem;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.5;
   color: #000;
   text-shadow: 0 1px 0 #fff;
-  opacity: 0.5;
+  opacity: 0.85;
 }
 .close:hover {
   color: #000;
@@ -6060,17 +6091,14 @@ a.close.disabled {
 
 .modal {
   position: fixed;
-  /* top: 20px; */
-  /* bottom: 20px; */
-  top: 0;
-  bottom: 0;
-  left: 0;
   z-index: 560;
   display: none;
   width: 100%;
-  /* height: 100%; */
   overflow: hidden;
   outline: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .modal-dialog {
@@ -6082,7 +6110,7 @@ a.close.disabled {
   justify-content: center;
   align-items: center;
   height: 100%;
-  padding: 1rem;
+  padding: .75rem;
 }
 .modal.fade .modal-dialog {
   transition: transform 0.15s ease-out;
@@ -6147,14 +6175,25 @@ a.close.disabled {
   pointer-events: auto;
   background-color: #fff;
   background-clip: padding-box;
-  /* border: 1px solid rgba(0, 0, 0, 0.2); */
   border-radius: 10px;
   outline: 0;
 }
 
 .content-loading{
   min-height: 500px;
-  background: #fff url(../../../static/svg/loading/loading.svg) no-repeat 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.content-loading::before{
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff99 url(../../../static/svg/loading/loading.svg) no-repeat 50%;
   background-size: 50px 50px;
 }
 
@@ -6182,14 +6221,15 @@ a.close.disabled {
   padding: 1rem 0;
   margin: 0 1rem;
   border-bottom: 1px solid #dee2e6;
-  border-top-left-radius: calc(0.3rem - 1px);
-  border-top-right-radius: calc(0.3rem - 1px);
 }
 .modal-header .close {
-  padding: .5rem 1rem;
-  margin: -1rem -1rem -1rem auto;
+  padding: 0 .25rem;
   font-size: 2rem;
+  line-height: 1.5rem;
   color: var(--danger);
+}
+.close span{
+  line-height: 1.5rem;
 }
 
 .modal-title {
@@ -6203,6 +6243,8 @@ a.close.disabled {
   padding: 1rem .5rem;
   border-radius: 0 0 10px 10px;
   min-height: 439px;
+  max-height: 500px;
+  overflow-y: scroll;
 }
 
 .modal-footer {
@@ -6213,12 +6255,10 @@ a.close.disabled {
   padding: 1rem 0;
   margin: 0 1rem;
   border-top: 1px solid #dee2e6;
-  border-bottom-right-radius: calc(0.3rem - 1px);
-  border-bottom-left-radius: calc(0.3rem - 1px);
 }
-.modal-footer > * {
+/* .modal-footer > * {
   margin: 0.25rem;
-}
+} */
 
 .modal-scrollbar-measure {
   position: absolute;
@@ -6230,7 +6270,7 @@ a.close.disabled {
 
 @media (min-width: 576px) {
   .modal-dialog {
-    max-width: 500px;
+    max-width: 650px;
   }
   .modal-dialog-scrollable {
     max-height: calc(100% - 3.5rem);

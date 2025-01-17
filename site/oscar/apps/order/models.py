@@ -191,11 +191,6 @@ class Order(models.Model):
 
     set_status.alters_data = True
 
-    def set_next_status(self):
-        pass
-
-    set_next_status.alters_data = True
-
     def _create_order_status_change(self, old_status, new_status):
         # Not setting the status on the order as that should be handled before
         self.status_changes.create(old_status=old_status, new_status=new_status)
@@ -203,6 +198,15 @@ class Order(models.Model):
     def open(self):
         self.is_open = True
         self.save()
+    
+    @property
+    def next_status(self):
+        pipeline = (
+            settings.PICKUP_NEXT_STATUS_PIPELINE 
+            if self.shipping_method == "Самовывоз" 
+            else settings.DELIVERY_NEXT_STATUS_PIPELINE
+        )
+        return pipeline.get(self.status, None)
 
     @property
     def basket_total_before_discounts(self):

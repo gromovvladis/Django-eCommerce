@@ -84,15 +84,23 @@
         {% endif %}
     </form>
     <audio id="order-sound" src="{% static "audio/dashboard/orders/new-order.mp3" %}" preload="auto"></audio>
+    <div class="order-modal modal fade justify-content-center" data-id="order-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content content-loading"></div>
+        </div>
+    </div>
 {% endblock dashboard_content %}
 
 {% block templatescripts %}
     {{ block.super }}
     var active_orders_lookup_url = "{% url 'dashboard:order-active-list-lookup' %}";
+    var order_modal_url = "{% url 'dashboard:order-modal' %}";
+    var next_status_url = "{% url 'dashboard:order-next-status' %}";
 {% endblock %}
 
 {% block extrascripts %}
     {{ block.super }}
+    <script type="application/javascript" src="{% static "js/dashboard/orders/order-modal.js" %}"></script>
     <script type="application/javascript" src="{% static "js/dashboard/orders/active-orders.js" %}"></script>
 {% endblock %}
 

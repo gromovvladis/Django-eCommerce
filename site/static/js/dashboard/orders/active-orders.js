@@ -1,11 +1,10 @@
 let intervalId; // Объявляем переменную для идентификатора таймера
-let orderNum = parseInt(document.querySelector('caption[data-num]').getAttribute('data-num'), 10);
 let tableContainer = document.querySelector('[data-id="active-orders"]');
-
+let orderNum = parseInt(document.querySelector('caption[data-num]').getAttribute('data-num'), 10);
 const audio = document.getElementById('order-sound');
 
-const updateTable = () => {
-    fetch(`${active_orders_lookup_url}?order_num=${orderNum}`, {
+const updateTable = (force=false) => {
+    fetch(`${active_orders_lookup_url}?order_num=${orderNum}&force=${force}`, {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -13,12 +12,15 @@ const updateTable = () => {
     })
     .then(response => response.json())
     .then(data => {
-        if (data.update){
+        if (data.update || force){
             if (tableContainer && data.html) {
                 tableContainer.innerHTML = data.html;
                 orderNum = data.num_orders;
-                if (audio) {
+                if (audio && !force) {
                     audio.play();
+                }
+                if (orderModal){
+                    orderModal();
                 }
             }
         }

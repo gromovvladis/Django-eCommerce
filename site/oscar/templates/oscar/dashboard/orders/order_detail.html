@@ -80,7 +80,6 @@
             </tbody>
         </table>
     {% endblock customer_information %}
-
     {% block order_information %}
         <table class="table table-striped table-bordered table-hover half-wrapper" id="order-table">
             <caption class="table-caption" data-target="#orderinfo-body" data-toggle="collapse" aria-controls="orderinfo-body" aria-expanded="false">
@@ -113,7 +112,7 @@
                         {% if order.store %}
                             <a href="{% url 'dashboard:store-manage' pk=order.store.id %}">{{ order.store|default:"-" }}</a>
                         {% else %}
-                            {{ order.store|default:"-" }}
+                            -
                         {% endif %}
                     </td>
                 </tr>
@@ -208,7 +207,7 @@
                         {{ order.status|default:"N/A" }}
                     </span>
                 </div>
-                <form id="order_lines_form" method="post" class="form-inline1">
+                <form id="order_lines_form" method="post">
                     {% csrf_token %}
                     {% block order_lines %}
                     <div class="mobile-table">

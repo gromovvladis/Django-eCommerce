@@ -162,6 +162,7 @@
 {% block templatescripts %}
     {{ block.super }}
     var order_modal_url = "{% url 'dashboard:order-modal' %}";
+    var next_status_url = "{% url 'dashboard:order-next-status' %}";
 {% endblock %}
 
 {% block extrascripts %}
