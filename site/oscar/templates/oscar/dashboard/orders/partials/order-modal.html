@@ -44,15 +44,15 @@
                             </span>
                         </p>
                     {% endif %}
-                    
-                    <p class="text-secondary mb-0 mt-2">Клиент</p>
                     {% if order.user %}
+                        <p class="text-secondary mb-0 mt-2">Клиент</p>
                         <span>{{ order.user.get_full_name }}</span>
                         <a href="{% url 'dashboard:user-detail' pk=order.user.id %}" class="d-flex flex-column">
                             {{ order.user.username }}
                         </a>
+                    {% else %}
+                        Эвотор заказ
                     {% endif %}
-
                     {% with notes=order.notes.all %}
                         {% if notes %}
                             <p class="text-secondary mb-0 mt-2">Заметки</p>
@@ -96,7 +96,7 @@
                                     <span class="spinner-border-sm {% if source.paid %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
                                     {{ source.source_type }}
                                     <span class="ml-2"><i class="fa-solid fa-arrow-down text-success"></i> {{ source.amount_debited|currency:order.currency }}</span>&nbsp;
-                                    <span class="ml-1"><i class="fa-solid fa-arrow-up text-danger"></i> {{ source.amount_debited|currency:order.currency }}</span>
+                                    <span class="ml-1"><i class="fa-solid fa-arrow-up text-danger"></i> {{ source.amount_refunded|currency:order.currency }}</span>
                                 </div>
                             {% endfor %}
                         {% endif %}
