@@ -5,7 +5,7 @@ from rest_framework.renderers import JSONRenderer
 from oscar.apps.checkout.signals import post_payment
 from oscar.apps.order.serializers import OrderSerializer
 from oscar.apps.order.signals import order_status_changed, active_order_placed
-from .tasks import _send_site_notification_new_order_to_customer, _send_site_notification_new_order_to_staff, _send_site_notification_order_status_to_customer, _send_order_to_evotor, _send_push_notification_new_order_to_staff, _send_telegram_message_new_order_to_staff
+from .tasks import _send_site_notification_new_order_to_customer, _send_site_notification_new_order_to_staff, _send_site_notification_order_status_to_customer, _send_order_to_evotor, _send_push_notification_new_order_to_staff, _send_sms_notification_order_status_to_customer, _send_telegram_message_new_order_to_staff
 
 def notify_about_new_order(sender, view, **kwargs):
 
@@ -37,16 +37,20 @@ post_payment.connect(notify_about_new_order)
 def notify_customer_about_order_status(sender, order, **kwargs):
     ctx = {
         'user_id': order.user.id,
+        'phone': order.user.username,
         'number': order.number,
         'new_status': kwargs['new_status'],
+        'shipping_method': order.shipping_method,
         'url': order.get_absolute_url(),
         'order_id': order.id,
     }
 
     if not settings.DEBUG:
         _send_site_notification_order_status_to_customer.delay(ctx)
+        _send_sms_notification_order_status_to_customer.delay(ctx)
     else:
         _send_site_notification_order_status_to_customer(ctx)
+        _send_sms_notification_order_status_to_customer(ctx)
     
 order_status_changed.connect(notify_customer_about_order_status)
 
@@ -83,6 +87,8 @@ def active_order_created(sender, order, **kwargs):
         _send_telegram_message_new_order_to_staff(ctx)
     
 active_order_placed.connect(active_order_created)
+
+# helpers
 
 def create_order_list(order):
     """Создает строку с перечнем товаров"""

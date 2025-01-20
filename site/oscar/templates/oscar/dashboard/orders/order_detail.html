@@ -262,7 +262,8 @@
                                             </span>
                                         </td>
                                         <td data-label="Количество" class="quantity">
-                                            <div data-id="line-input" class="order-button">
+                                            <span>{{ line.quantity }}</span>
+                                            {% comment %} <div data-id="line-input" class="order-button">
                                                 <button type="button" data-id="order-button-minus" class="order-button-elem">
                                                     <i class="fa-solid fa-minus"></i>
                                                 </button>
@@ -270,7 +271,7 @@
                                                 <button type="button" {% if line.quantity == 1 %}disabled="disabled"{% endif %} data-id="order-button-plus" class="order-button-elem">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </button>
-                                            </div>
+                                            </div> {% endcomment %}
                                         </td>
                                         <td class="actions">
                                             <a class="btn btn-secondary" href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}">
@@ -723,11 +724,11 @@
                                         <tr>
                                             <td class="payment-footer" colspan="8">
                                                 {% if order_paid == order.total %}
-                                                    <span style="text-success"><strong>Заказ оплачен</strong></span>
+                                                    <span class="text-success"><strong>Заказ оплачен</strong></span>
                                                 {% elif order_paid == 0 %}
-                                                    <span style="text-danger"><strong>Заказ не оплачен</strong></span>
+                                                    <span class="text-danger"><strong>Заказ не оплачен</strong></span>
                                                 {% else %}
-                                                    <span style="text-warning"><strong>Оплачено: {{ order_paid|currency:order.currency }}</strong></span>
+                                                    <span class="text-warning"><strong>Оплачено: {{ order_paid|currency:order.currency }}</strong></span>
                                                 {% endif %}
                                             </td>
                                         </tr>

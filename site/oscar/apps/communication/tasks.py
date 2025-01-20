@@ -9,11 +9,14 @@ from pywebpush import webpush, WebPushException
 from django.template import loader
 from django.contrib.auth import get_user_model
 
+from oscar.apps.sms_auth.providers.base import Smsaero
 from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs, send_message
 from oscar.core.loading import get_model
 
 
 Notification = get_model("communication", "Notification")
+CommunicationEvent = get_model("order", "CommunicationEvent")
+CommunicationEventType = get_model("communication", "CommunicationEventType")
 WebPushSubscription = get_model("user", "WebPushSubscription")
 TelegramMessage = get_model("telegram", "TelegramMessage")
 User = get_user_model()
@@ -24,7 +27,6 @@ logger = logging.getLogger("oscar.communications")
 
 @shared_task
 def _send_site_notification_new_order_to_staff(ctx: dict):
-
     subject = "Пользовательский заказ"
     message_tpl = loader.get_template("oscar/customer/alerts/staff_new_order_message.html")
     description = "Заказ №%s успешно создан!" % (ctx['number'])
@@ -42,7 +44,6 @@ def _send_site_notification_new_order_to_staff(ctx: dict):
 
 @shared_task()
 def _send_site_notification_new_order_to_customer(ctx: dict):
-    
     subject = "Новый заказ"
     message_tpl = loader.get_template("oscar/customer/alerts/new_order_message.html")
     description = "Заказ №%s успешно создан!" % (ctx['number'])
@@ -57,6 +58,35 @@ def _send_site_notification_new_order_to_customer(ctx: dict):
         description=description,
         status="Success"
     )
+
+@shared_task()
+def _send_sms_notification_order_status_to_customer(ctx: dict):
+    event_type_name_map = {
+        "Отменен": "Заказ отменен",
+        "Готов": "Заказ ожидает получения",
+        "Доставляется": "Заказ доставляется",
+    }
+    
+    if ctx['new_status'] in event_type_name_map:
+        event_name = event_type_name_map[ctx['new_status']]
+        event_type, _ = CommunicationEventType.objects.get_or_create(
+            name=event_name,
+            category="Order"
+        )
+        CommunicationEvent.objects.create(order_id=ctx['order_id'], event_type=event_type)
+        
+        message = None
+        if ctx['new_status'] == "Отменен":
+            message = f"Заказ №{ctx['number']} отменен." 
+        elif ctx['shipping_method'] == "Самовывоз" and ctx['new_status'] == "Готов":
+            message = f"Заказ №{ctx['number']} ожидает получения."
+        elif ctx['new_status'] == "Доставляется":
+            message = f"Заказ №{ctx['number']} уже доставляется."
+
+        if message:
+            auth_service = Smsaero(ctx['phone'], message)
+            auth_service.send_sms()
+
 
 @shared_task()
 def _send_site_notification_order_status_to_customer(ctx: dict):
@@ -87,6 +117,7 @@ def _send_site_notification_order_status_to_customer(ctx: dict):
         description=description,
         status=status,
     )
+
 
 # ================= WEb Push Notification =================
 

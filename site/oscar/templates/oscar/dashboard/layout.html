@@ -29,7 +29,7 @@
                 </div>
                 <div class="badges-navbar">
                     {% if active_orders %}
-                        <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1">
+                        <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1" data-id="active-navbar">
                             <i class="fas fa-shopping-cart"></i>
                             <div class="dropdown-item-badge item-badge-navbar">{{ active_orders }}</div>
                         </a>
@@ -61,26 +61,24 @@
                                     data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" type="button"
                                     aria-expanded="{% if request.path|tab:item.paths %}true{% else %}false{% endif %}">
                                     <span>
-                                        {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
+                                        {% if item.icon %}<i class="{{ item.icon }}" style="width:15px"></i>{% endif %}
                                         <span class="item_text arrow-dropdown ml-sm-2">{{ item.label }}</span>
                                     </span>
-                                    <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>
+                                    <div class="dropdown-item-badge dropdown-item-badge--nav" data-id="{{ item.label }}">{% if item.notif %}{{ item.notif }}{% endif %}</div>
                                 </button>
                                 <div class="dropdown-list collapse {% if request.path|tab:item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
                                     {% for subitem in item.children %}
                                         <a class="dropdown-item dropdown-item--nav nav-dropdown{% if request.path|subtab:subitem.url %} active{% endif %}" href="{{ subitem.url }}">
                                             {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
-                                            <span>
-                                                {{ subitem.label }}
-                                            </span>
-                                            <div class="dropdown-item-badge ml-1">{% if subitem.notif %}{{ subitem.notif }}{% endif %}</div>
+                                            <span>{{ subitem.label }}</span>
+                                            <div class="dropdown-item-badge ml-1" data-id="{{ subitem.label }}">{% if subitem.notif %}{{ subitem.notif }}{% endif %}</div>
                                         </a>
                                     {% endfor %}
                                 </div>
                             {% else %}
                                 <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
                                     <span>
-                                        {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
+                                        {% if item.icon %}<i class="{{ item.icon }}" style="width:15px"></i>{% endif %}
                                         <span class="item_text ml-sm-2">{{ item.label }}</span>
                                     </span>
                                     <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>

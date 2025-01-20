@@ -80,11 +80,11 @@ class CommunicationEventType(models.Model):
 
     # We allow communication types to be categorised
     # For backwards-compatibility, the choice values are quite verbose
-    ORDER_RELATED = "Order related"
-    USER_RELATED = "User related"
+    ORDER_RELATED = "Order"
+    USER_RELATED = "User"
     CATEGORY_CHOICES = (
-        (ORDER_RELATED, "Связанный с заказом"),
-        (USER_RELATED, "Связанный с пользователем"),
+        (ORDER_RELATED, "Связанное с заказом"),
+        (USER_RELATED, "Связанное с пользователем"),
     )
 
     category = models.CharField(

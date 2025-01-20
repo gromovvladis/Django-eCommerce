@@ -876,7 +876,6 @@ class OrderModalView(APIView):
 
     def get(self, request, *args, **kwargs):
         order_number = request.GET.get('order_number', None)
-
         try:
             order = Order.objects.get(number=order_number)
             order.open()
@@ -885,11 +884,11 @@ class OrderModalView(APIView):
             else:
                 order.before_order = None
             lines = order.lines.all()
-            paid = 0
+            order_paid = 0
             for src in order.sources.all():
-                paid += src.amount_debited - src.amount_refunded
+                order_paid += src.amount_debited - src.amount_refunded
 
-            order_html = render_to_string("oscar/dashboard/orders/partials/order-modal.html", {"order": order, "paid": paid, "lines": lines}, request=self.request)
+            order_html = render_to_string("oscar/dashboard/orders/partials/order-modal.html", {"order": order, "order_paid": order_paid, "lines": lines}, request=self.request)
             return JsonResponse({"html": order_html}, status = 200)
         except Exception:
             return JsonResponse({'order': None})

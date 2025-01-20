@@ -111,7 +111,7 @@ class Order(models.Model):
     has_review = models.BooleanField(default=False)
 
     is_open = models.BooleanField("Заказ просмотрен", default=False, db_index=True)
-    
+
     #: Order status pipeline.  This should be a dict where each (key, value) #:
     #: corresponds to a status and a list of possible statuses that can follow
     #: that one.
@@ -198,7 +198,7 @@ class Order(models.Model):
     def open(self):
         self.is_open = True
         self.save()
-    
+
     @property
     def next_status(self):
         pipeline = (
@@ -518,12 +518,12 @@ class CommunicationEvent(models.Model):
 
     class Meta:
         app_label = "order"
-        verbose_name = "Событие связи"
-        verbose_name_plural = "События связи"
+        verbose_name = "Уведомление заказа"
+        verbose_name_plural = "Уведомления заказов"
         ordering = ["-date_created"]
 
     def __str__(self):
-        return ("'%(type)s' событие заказа #%(number)s") % {
+        return ("'%(type)s' уведомление заказа №%(number)s") % {
             "type": self.event_type.name,
             "number": self.order.number,
         }

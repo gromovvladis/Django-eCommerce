@@ -1,5 +1,9 @@
 let intervalId; // Объявляем переменную для идентификатора таймера
 let tableContainer = document.querySelector('[data-id="active-orders"]');
+let activeNavbar = document.querySelector('[data-id="active-navbar"]');
+let activeNavbarNum = activeNavbar.querySelector('div');
+let navbarOrders = document.querySelector('[data-id="Заказы"]');
+let navbarActiveOrders = document.querySelector('[data-id="Активные заказы"]');
 let orderNum = parseInt(document.querySelector('caption[data-num]').getAttribute('data-num'), 10);
 const audio = document.getElementById('order-sound');
 
@@ -16,6 +20,16 @@ const updateTable = (force=false) => {
             if (tableContainer && data.html) {
                 tableContainer.innerHTML = data.html;
                 orderNum = data.num_orders;
+                activeNavbarNum.innerHTML = orderNum;
+                if (orderNum > 0){
+                    navbarOrders.innerHTML = orderNum;
+                    navbarActiveOrders.innerHTML = orderNum;
+                    activeNavbar.classList.remove = "d-none";
+                } else {
+                    navbarOrders.innerHTML = "";
+                    navbarActiveOrders.innerHTML = "";
+                    activeNavbar.classList.add = "d-none";
+                }
                 if (audio && !force) {
                     audio.play();
                 }

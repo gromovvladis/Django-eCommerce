@@ -7,6 +7,7 @@ const orderModal = () => {
             event.preventDefault();
             modalContainer.modal();
             order_number = order.getAttribute('data-number');
+            order.closest('tr').classList.remove('new-record');
             fetch(`${order_modal_url}?order_number=${order_number}`, {
                 method: 'GET',
                 headers: {
@@ -17,6 +18,7 @@ const orderModal = () => {
             .then(data => {
                 if (modalContainer && data.html) {
                     modalContainer.html(data.html);
+                    toggle_table(modalContainer.find(".toggle-row"));
                     document.querySelector('[data-id="next-status"]').addEventListener('click', function () {
                         let button = this;
                         button.classList.add('loading');
@@ -43,7 +45,7 @@ const orderModal = () => {
                                 }
                                 if (updateTable){
                                     updateTable(true)
-                                } 
+                                }
                             })
                             .catch(error => console.error('Error:', error))
                             .finally(() => {
