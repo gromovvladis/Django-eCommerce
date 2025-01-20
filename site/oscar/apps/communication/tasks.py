@@ -1,27 +1,40 @@
-from django.template import loader
+import json
+import logging
+from django.conf import settings
+from django.templatetags.static import static
+
 from celery import shared_task
-from oscar.apps.order.client import EvotorKomtet
-from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs, send_message
-from oscar.core.loading import get_model
+from pywebpush import webpush, WebPushException
+
+from django.template import loader
 from django.contrib.auth import get_user_model
 
+from oscar.apps.sms_auth.providers.base import Smsaero
+from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs, send_message
+from oscar.core.loading import get_model
+
+
 Notification = get_model("communication", "Notification")
+CommunicationEvent = get_model("order", "CommunicationEvent")
+CommunicationEventType = get_model("communication", "CommunicationEventType")
+WebPushSubscription = get_model("user", "WebPushSubscription")
 TelegramMessage = get_model("telegram", "TelegramMessage")
 User = get_user_model()
 
-# ================= Notification =================
+logger = logging.getLogger("oscar.communications")
+
+# ================= Site Notification =================
 
 @shared_task
-def _notify_staff_about_new_order(ctx: dict):
-
+def _send_site_notification_new_order_to_staff(ctx: dict):
     subject = "Пользовательский заказ"
     message_tpl = loader.get_template("oscar/customer/alerts/staff_new_order_message.html")
     description = "Заказ №%s успешно создан!" % (ctx['number'])
-    admins = User.objects.filter(is_staff=True)
+    staffs = User.objects.filter(is_staff=True)
 
-    for user in admins:
+    for staff in staffs:
         Notification.objects.create(
-            recipient=user, 
+            recipient=staff, 
             order_id=ctx["order_id"],
             subject=subject, 
             body=message_tpl.render(ctx).strip(), 
@@ -30,8 +43,7 @@ def _notify_staff_about_new_order(ctx: dict):
         )
 
 @shared_task()
-def _notify_customer_about_new_order(ctx: dict):
-    
+def _send_site_notification_new_order_to_customer(ctx: dict):
     subject = "Новый заказ"
     message_tpl = loader.get_template("oscar/customer/alerts/new_order_message.html")
     description = "Заказ №%s успешно создан!" % (ctx['number'])
@@ -48,7 +60,36 @@ def _notify_customer_about_new_order(ctx: dict):
     )
 
 @shared_task()
-def _notify_customer_about_order_status(ctx: dict):
+def _send_sms_notification_order_status_to_customer(ctx: dict):
+    event_type_name_map = {
+        "Отменен": "Заказ отменен",
+        "Готов": "Заказ ожидает получения",
+        "Доставляется": "Заказ доставляется",
+    }
+    
+    if ctx['new_status'] in event_type_name_map:
+        event_name = event_type_name_map[ctx['new_status']]
+        event_type, _ = CommunicationEventType.objects.get_or_create(
+            name=event_name,
+            category="Order"
+        )
+        CommunicationEvent.objects.create(order_id=ctx['order_id'], event_type=event_type)
+        
+        message = None
+        if ctx['new_status'] == "Отменен":
+            message = f"Заказ №{ctx['number']} отменен." 
+        elif ctx['shipping_method'] == "Самовывоз" and ctx['new_status'] == "Готов":
+            message = f"Заказ №{ctx['number']} ожидает получения."
+        elif ctx['new_status'] == "Доставляется":
+            message = f"Заказ №{ctx['number']} уже доставляется."
+
+        if message:
+            auth_service = Smsaero(ctx['phone'], message)
+            auth_service.send_sms()
+
+
+@shared_task()
+def _send_site_notification_order_status_to_customer(ctx: dict):
     
     subject = "Статус заказа изменен"
     message_tpl = loader.get_template("oscar/customer/alerts/order_status_chenged_message.html")
@@ -77,6 +118,53 @@ def _notify_customer_about_order_status(ctx: dict):
         status=status,
     )
 
+
+# ================= WEb Push Notification =================
+
+@shared_task
+def _send_push_notification(subscription_info, payload):
+    try:
+        webpush(
+            subscription_info=subscription_info,
+            data=json.dumps(payload),
+            vapid_private_key=settings.WEBPUSH_PRIVATE_KEY,
+            vapid_claims={
+                "sub": f"mailto:{settings.WEBPUSH_ADMIN_EMAIL}",
+            },
+        )
+    except WebPushException as ex:
+        logger.error(f"Ошибка отправки уведомления: {str(ex)}")
+
+@shared_task
+def _send_push_notification_new_order_to_staff(ctx):
+    payload = {
+        "title": "Новый заказ!",
+        "body": ctx.get("order"),
+        "icon": static('svg/webpush/new_order.svg'),
+        "url": ctx.get("staff_url"),
+    }
+
+    subscriptions = WebPushSubscription.objects.filter(user__is_staff=True)
+    for subscription in subscriptions:
+        subscription_info = {
+            "endpoint": subscription.endpoint,
+            "keys": {
+                "p256dh": subscription.p256dh,
+                "auth": subscription.auth,
+            },
+        }
+        try:
+            webpush(
+                subscription_info=subscription_info,
+                data=json.dumps(payload),
+                vapid_private_key=settings.WEBPUSH_PRIVATE_KEY,
+                vapid_claims={
+                    "sub": f"mailto:{settings.WEBPUSH_ADMIN_EMAIL}",
+                },
+            )
+        except WebPushException as ex:
+            logger.error(f"Ошибка отправки уведомления: {str(ex)}")
+
 # ================= Telegram =================
 
 @shared_task
@@ -103,4 +191,4 @@ def _send_telegram_message_to_user(telegram_id: int, msg: str, type: str):
 # ================= Evotor =================
 
 def _send_order_to_evotor(order_json: dict):
-    EvotorKomtet().send_order(order_json)
+    pass

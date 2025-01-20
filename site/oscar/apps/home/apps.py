@@ -20,11 +20,18 @@ class HomeConfig(OscarConfig):
         self.action_detail_view = get_class("home.views", "ActionDetailView")
         self.promocat_detail_view = get_class("home.views", "PromoCatDetailView")
         self.cookies_view = get_class("home.views", "GetCookiesView")
+        
+        self.webpush_save_view = get_class("home.views", "WebpushSaveSubscription")
+        self.service_worker_view = get_class("home.views", "service_worker")
 
     def get_urls(self):
         urls = super().get_urls()
         urls += [
             path("", self.home_view.as_view(), name="index"),
+
+            path("webpush/save-subscription/", self.webpush_save_view.as_view(), name="webpush-save"),
+            path('service-worker.js', self.service_worker_view, name='service_worker'),
+
             path("actions/", self.actions_view.as_view(), name="actions"),
             re_path(
                 r"^actions/(?P<action_slug>[\w-]+(/[\w-]+)*)/$",

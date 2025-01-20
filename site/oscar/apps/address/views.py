@@ -5,9 +5,6 @@ from django.template.response import TemplateResponse
 
 from django.urls import reverse_lazy
 from django.views import generic
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework.authentication import SessionAuthentication
 
 from oscar.core.loading import get_class, get_model
 UserLiteAddressForm = get_class("address.forms", "UserLiteAddressForm")
@@ -40,7 +37,6 @@ class SetAddressView(PageTitleMixin, generic.CreateView):
         return kwargs
 
     def get_context_data(self, **kwargs):
-        # context = super().get_context_data(**kwargs)
         context = {}
         context["title"] = "Добавить новый адрес"
         context['readonly'] = False
@@ -72,25 +68,4 @@ class PickUpView(generic.View):
         context = {}
         context["title"] = "Самовывоз"
         return context
-
-# class SessionAddressView(CheckoutSessionMixin, APIView):
-
-#     permission_classes = [AllowAny]
-#     authentication_classes = [SessionAuthentication]
-    
-#     def post(self, request, *args, **kwargs):
-#         try:
-#             address_fields = {
-#                 "line1": request.POST.get('line1'),
-#                 "line2": request.POST.get('line2'),
-#                 "line3": request.POST.get('line3'),
-#                 "line4": request.POST.get('line4'),
-#             } 
-#             self.checkout_session.set_session_address(address_fields)
-#         except Exception:
-#             pass
-        
-#         return http.HttpResponse(200)
-    
-
     

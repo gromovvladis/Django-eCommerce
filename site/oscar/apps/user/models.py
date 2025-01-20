@@ -1,12 +1,14 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import Group
 from phonenumber_field.modelfields import PhoneNumberField
 from oscar.core import compat
-from django.contrib.auth.models import Group
+from .tasks import send_sms_async
 
 
 class Staff(models.Model):
@@ -155,7 +157,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text="Активен пользователь или нет",
     )
     is_email_verified = models.BooleanField(
-        "Email verified",
+        "Email подтвержден",
         default=False,
         help_text="Email подтвержден или нет",
     )
@@ -242,9 +244,28 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
-    def sms_user(self, subject, message, from_email=None, **kwargs):
+    def sms_user(self, message):
         """
-        Send an email to this user.
+        Send an sms to this user.
         """
-        pass
+        if not settings.DEBUG: 
+            return send_sms_async.delay(message)
+        else:
+            return send_sms_async(message)
 
+
+
+class WebPushSubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    endpoint = models.URLField()
+    p256dh = models.TextField()
+    auth = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "auth_webpush"
+        verbose_name = "WEB-уведомление"
+        verbose_name_plural = "WEB-уведомления"
+
+    def __str__(self):
+        return f"Subscription for {self.user or 'Anonymous'}"

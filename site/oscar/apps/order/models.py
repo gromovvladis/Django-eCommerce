@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 from django.utils.timezone import now
-from oscar.apps.order.signals import order_line_status_changed, order_status_changed, send_order_to_evotor
+from oscar.apps.order.signals import order_line_status_changed, order_status_changed, active_order_placed
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_model
 from oscar.core.utils import get_default_currency
@@ -111,7 +111,7 @@ class Order(models.Model):
     has_review = models.BooleanField(default=False)
 
     is_open = models.BooleanField("Заказ просмотрен", default=False, db_index=True)
-    
+
     #: Order status pipeline.  This should be a dict where each (key, value) #:
     #: corresponds to a status and a list of possible statuses that can follow
     #: that one.
@@ -173,8 +173,8 @@ class Order(models.Model):
                 
         self.save()
         
-        if new_status in settings.ORDER_STATUS_SEND_TO_EVOTOR:
-            send_order_to_evotor.send(
+        if not self.evotor_id and new_status in settings.ORDER_STATUS_SEND_TO_EVOTOR:
+            active_order_placed.send(
                 sender=self,
                 order=self,
             )
@@ -198,6 +198,15 @@ class Order(models.Model):
     def open(self):
         self.is_open = True
         self.save()
+
+    @property
+    def next_status(self):
+        pipeline = (
+            settings.PICKUP_NEXT_STATUS_PIPELINE 
+            if self.shipping_method == "Самовывоз" 
+            else settings.DELIVERY_NEXT_STATUS_PIPELINE
+        )
+        return pipeline.get(self.status, None)
 
     @property
     def basket_total_before_discounts(self):
@@ -258,7 +267,7 @@ class Order(models.Model):
         """
         Returns the number of items in this order.
         """
-        return ", ".join(line.get_full_name() for line in self.lines.all())
+        return ", ".join(f"{line.get_full_name()} ({line.quantity})" for line in self.lines.all())
 
     @property
     def shipping_status(self):
@@ -509,12 +518,12 @@ class CommunicationEvent(models.Model):
 
     class Meta:
         app_label = "order"
-        verbose_name = "Событие связи"
-        verbose_name_plural = "События связи"
+        verbose_name = "Уведомление заказа"
+        verbose_name_plural = "Уведомления заказов"
         ordering = ["-date_created"]
 
     def __str__(self):
-        return ("'%(type)s' событие заказа #%(number)s") % {
+        return ("'%(type)s' уведомление заказа №%(number)s") % {
             "type": self.event_type.name,
             "number": self.order.number,
         }

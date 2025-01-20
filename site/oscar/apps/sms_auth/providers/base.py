@@ -62,17 +62,18 @@ class Smsaero(SMSProvider):
         """
         signature = self.conf.SMS_PROVIDER_FROM
 
-        # api = SmsAero(
-        #     email=self.conf.SMS_PROVIDER_LOGIN,
-        #     api_key=self.conf.SMS_PROVIDER_API_TOKEN,
-        # )
-        # res = api.send(
-        #     number=self.to,
-        #     text=self.message, 
-        #     date_send=None, 
-        #     callback_url=None,
-        # )
-        # assert res.get('success'), res.get('message')
-        # return res.get('data')
+        if conf.SMS_DEBUG:
+            return {'cost': 12}
 
-        return {'cost': 12}
+        api = SmsAero(
+            email=self.conf.SMS_PROVIDER_LOGIN,
+            api_key=self.conf.SMS_PROVIDER_API_TOKEN,
+        )
+        res = api.send(
+            number=self.to,
+            text=self.message, 
+            date_send=None, 
+            callback_url=None,
+        )
+        assert res.get('success'), res.get('message')
+        return res.get('data')

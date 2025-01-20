@@ -21,11 +21,21 @@
 
     {% block navbar %}
         <nav class="navbar navbar-expand-lg navbar-light navbar-accounts">
-            <div class="container fill-width">
-                <button class="navbar-toggler navbar-toggler--mobile" type="button" data-id="navbar-toggler">
-                    <i class="fa-solid fa-bars"></i>
-                    {% comment %} <span class="navbar-toggler-icon"></span> {% endcomment %}
-                </button>
+            <div class="container-navbar fill-width fill-height d-flex justify-content-between">
+                <div>
+                    <button class="navbar-toggler navbar-toggler--mobile" type="button" data-id="navbar-toggler">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+                <div class="badges-navbar">
+                    {% if active_orders %}
+                        <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1" data-id="active-navbar">
+                            <i class="fas fa-shopping-cart"></i>
+                            <div class="dropdown-item-badge item-badge-navbar">{{ active_orders }}</div>
+                        </a>
+                    {% endif %}
+                    <span class="badge badge-info">{{ revenue_today }} ₽</span>
+                </div>
             </div>
         </nav>
     {% endblock navbar %}
@@ -34,17 +44,15 @@
         <div class="navbar-menu">
             {% block dashboard_nav %}
                 {% dashboard_navigation user as nav_items %}
-
-                <div class="navbar-expand-lg navbar-light navbar-primary flex-column flex-shrink-0 bg-light" data-id="navbar-primary">
+                <div class="navbar-expand-lg navbar-light navbar-primary bg-light flex-column flex-shrink-0" data-id="navbar-primary">
                     <div class="navbar-header py-3 px-1">
                         {% comment %} <a class="navbar-brand" href="{{ homepage_url }}">
                             {% icon file_name='footer/logo' size=20 fill="#838383" %}
                         </a> {% endcomment %}
-                        <button class="navbar-toggler p-0" data-id="navbar-toggler">
+                        <button class="navbar-toggler navbar-toggler--mobile p-0" data-id="navbar-toggler">
                             {% icon file_name='interface/arrow-home' size=30 stroke='#007bff'%}
                         </button>
                     </div>
-
                     <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
                         {% for item in nav_items %}
                         <li class="nav-item{% if request.path|tab:item.paths %} current-tab{% endif %}">
@@ -53,26 +61,24 @@
                                     data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" type="button"
                                     aria-expanded="{% if request.path|tab:item.paths %}true{% else %}false{% endif %}">
                                     <span>
-                                        {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
+                                        {% if item.icon %}<i class="{{ item.icon }}" style="width:15px"></i>{% endif %}
                                         <span class="item_text arrow-dropdown ml-sm-2">{{ item.label }}</span>
                                     </span>
-                                    <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>
+                                    <div class="dropdown-item-badge dropdown-item-badge--nav" data-id="{{ item.label }}">{% if item.notif %}{{ item.notif }}{% endif %}</div>
                                 </button>
                                 <div class="dropdown-list collapse {% if request.path|tab:item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
                                     {% for subitem in item.children %}
                                         <a class="dropdown-item dropdown-item--nav nav-dropdown{% if request.path|subtab:subitem.url %} active{% endif %}" href="{{ subitem.url }}">
                                             {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
-                                            <span>
-                                                {{ subitem.label }}
-                                            </span>
-                                            <div class="dropdown-item-badge ml-1">{% if subitem.notif %}{{ subitem.notif }}{% endif %}</div>
+                                            <span>{{ subitem.label }}</span>
+                                            <div class="dropdown-item-badge ml-1" data-id="{{ subitem.label }}">{% if subitem.notif %}{{ subitem.notif }}{% endif %}</div>
                                         </a>
                                     {% endfor %}
                                 </div>
                             {% else %}
                                 <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
                                     <span>
-                                        {% if item.icon %}<i class="{{ item.icon }}" style="width: 15px;"></i>{% endif %}
+                                        {% if item.icon %}<i class="{{ item.icon }}" style="width:15px"></i>{% endif %}
                                         <span class="item_text ml-sm-2">{{ item.label }}</span>
                                     </span>
                                     <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>
@@ -81,14 +87,11 @@
                         </li>
                     {% endfor %}
                     </ul>
-
                     <div class="dropdown border-top py-3 px-1"> 
-                        
                         <button role="button" class="nav-account d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="nav-account" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <div class="rounded-circle">{{ user.get_img }}</div>
                             <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.username }}</span>
                         </button>
-
                         <ul class="dropdown-menu text-small actions mb-2" aria-labelledby="nav-account">
                             <li><a class="dropdown-item" href="#">Задачи: 0</a></li>
                             <li><a class="dropdown-item" href="{% url 'customer:summary' %}">Аккаунт</a></li>
@@ -164,6 +167,8 @@
             <script src="{% static "js/dashboard/utils/datepicker.js" %}"></script>
             <script src="{% static "js/dashboard/utils/phone-mask.js" %}"></script>
             <script src="{% static "js/dashboard/utils/map.js" %}"></script>
+
+            <script src="{% static "js/dashboard/utils/webpush.js" %}"></script>
 
         {% endcompress %}
         {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script> {% endcomment %}

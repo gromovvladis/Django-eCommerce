@@ -3,6 +3,7 @@
 {% load sorting_tags %}
 {% load widget_tweaks %}
 {% load dashboard_tags %}
+{% load static %}
 
 {% block body_class %}{{ block.super }} orders{% endblock %}
 
@@ -24,7 +25,7 @@
         <h1 class="mr-2">Активные заказы</h1>
         <form method="get" class="btn d-flex align-items-center no-widget-init" id="store_form">
             {% for field in form %}
-                {% if "store_point" in field.id_for_label %}
+                {% if "store" in field.id_for_label %}
                     {% render_field field class+='store-point' %}
                     {% for error in field.errors %}
                         <ul class="error-block">
@@ -38,9 +39,11 @@
 {% endblock header %}
 
 {% block dashboard_content %}
-    <form method="post" id="orders_form" class="mobile-table order_table">
+    <form method="post" id="orders_form" class="mobile-table order-table">
         {% if orders %} 
-            {% render_table orders %}  
+            <div data-id="active-orders">
+                {% render_table orders %}  
+            </div>
             {% csrf_token %}
             {% if orders.paginated_rows %}
                 <div class="table-wrapper mb-4 d-none" id="actions_lines">
@@ -80,7 +83,26 @@
             <p class="empty">Заказы не найдены</p>
         {% endif %}
     </form>
+    <audio id="order-sound" src="{% static "audio/dashboard/orders/new-order.mp3" %}" preload="auto"></audio>
+    <div class="order-modal modal fade justify-content-center" data-id="order-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content content-loading"></div>
+        </div>
+    </div>
 {% endblock dashboard_content %}
+
+{% block templatescripts %}
+    {{ block.super }}
+    var active_orders_lookup_url = "{% url 'dashboard:order-active-list-lookup' %}";
+    var order_modal_url = "{% url 'dashboard:order-modal' %}";
+    var next_status_url = "{% url 'dashboard:order-next-status' %}";
+{% endblock %}
+
+{% block extrascripts %}
+    {{ block.super }}
+    <script type="application/javascript" src="{% static "js/dashboard/orders/order-modal.js" %}"></script>
+    <script type="application/javascript" src="{% static "js/dashboard/orders/active-orders.js" %}"></script>
+{% endblock %}
 
 {% block onbodyload %}
     {{ block.super }}

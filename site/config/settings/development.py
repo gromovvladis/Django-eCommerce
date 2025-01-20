@@ -19,9 +19,7 @@ STORE_DEFAULT = 1
 # 4	Единый налог на вмененный доход (ЕНВД)
 # 5	Единый сельскохозяйственный налог (ЕСН)
 # 6	Патентная система налогообложения
-SNO = 2
-PAYMENT_EMAIL = "s.gromovvladis@gmail.com"
-INN = "246607594685"
+TAX_SYSTEM = 2
 
 # =============
 # SITE
@@ -85,7 +83,7 @@ STATICFILES_FINDERS = (
 # SECURE
 # =============
 
-ALLOWED_HOSTS = ("mikado-sushi.ru", "127.0.0.1")
+ALLOWED_HOSTS = ("mikado-sushi.ru", "127.0.0.1", "localhost")
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
@@ -142,14 +140,12 @@ Configuration.secret_key = 'test_NbCwf5jnxkwJN7IzigODrtShMkQfsZRO_yU_SzEIa50'
 YANDEX_API_KEY = "27bbbf17-40e2-4c01-a257-9b145870aa2a"
 GIS_API_KEY = "6013c28d-62ae-4764-a509-f403d2ee92c6"
 
-
 # =============
 # TRACING
 # =============
 
 GOOGLE_ANALYTICS_ID = None
 YANDEX_ANALYTICS_ID = None
-
 
 # =============
 # TELEGRAM
@@ -175,14 +171,13 @@ EVOTOR_SITE_PASS = "Evotormikadopassword25"
 EVOTOR_SITE_TOKEN = "9179d780-56a4-49ea-b042-435e3257eaf7"
 EVOTOR_SITE_USER_TOKEN = "9179d780-56a4-49ea-b042-435e3257eaf8"
 
-KOMTET_SHOP_ID = ""
-KOMTET_SECRET_KEY = ""
-
 # =============
-# CAMS
+# WEBPUSH
 # =============
 
-# CAMS_PASSWORD = "Mastersup25"
+WEBPUSH_PUBLIC_KEY = "BHuErJY5HcTiN8iGz5EOBgCP_vGhjrQmHhYMb81qP7hgmDm6IW2PmriE-GSVOOzlTLCqz5gbQKWhJc7R2OE437Q"
+WEBPUSH_PRIVATE_KEY = "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg6nb0Jg7856xHDcKr7sJ2d1s_XDQHRX6dS462Ge3Tf4yhRANCAAR7hKyWOR3E4jfIhs-RDgYAj_7xoY60Jh4WDG_Naj-4YJg5uiFtj5q4hPhklTjs5Uywqs-YG0CloSXO0djhON-0"
+WEBPUSH_ADMIN_EMAIL = "s.gromovvladis@gmail.com"
 
 # =============
 # EMAIL
@@ -197,3 +192,9 @@ OSCAR_SEND_REGISTRATION_EMAIL = False
 # Email
 # EMAIL_USER=
 # EMAIL_PASSWORD=
+
+# =============
+# CAMS
+# =============
+
+# CAMS_PASSWORD = "Mastersup25"

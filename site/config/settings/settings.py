@@ -95,6 +95,7 @@ MIDDLEWARE = [
 
     # oscar
     'oscar.apps.basket.middleware.BasketMiddleware',
+    'oscar.apps.dashboard.middleware.DashboardMiddleware',
 ]
 
 if DEBUG:
@@ -159,6 +160,7 @@ INSTALLED_APPS = [
     'oscar.apps.dashboard.telegram.apps.TelegramDashboardConfig',
 
     'smsaero', #sms
+    'webpush', # notif push
     'widget_tweaks', # inputs
     'haystack', # search
     'treebeard', # thumbnail

@@ -67,7 +67,6 @@ class IndexView(CheckoutSessionMixin, generic.FormView):
 # =========
 
 class CheckoutView(CheckoutSessionMixin,  generic.FormView):
-   
     template_name = "oscar/checkout/checkout_form.html"
     form_class = CheckoutForm
     success_url = reverse_lazy("checkout:payment-details")
@@ -439,11 +438,10 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
             # their bankcard has expired, wrong card number - that kind of
             # thing. This type of exception is supposed to set a friendly error
             # message that makes sense to the customer.
-            self.restore_frozen_basket()
             msg = str(e)
             signals.error_order.send_robust(sender=self, error=e, order_number=order_number)
             logger.warning(
-                "Заказ #%s: Невозможно произвести оплату (%s) - корзина доступна",
+                "Заказ #%s: Невозможно произвести оплату (%s)",
                 order_number,
                 msg,
             )
@@ -464,7 +462,6 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
             logger.error(
                 "Заказ #%s: ошибка оплаты (%s)", order_number, msg, exc_info=True
             )
-            self.restore_frozen_basket()
             return self.render_preview(self.request, error=error_msg, **payment_kwargs)
         except Exception as e:
             # Unhandled exception - hopefully, you will only ever see this in
@@ -475,11 +472,10 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
                 order_number,
                 e,
             )
-            self.restore_frozen_basket()
             return self.render_preview(self.request, error=error_msg, **payment_kwargs)
 
         signals.post_payment.send_robust(sender=self, view=self, order=order)
-        return self.handle_successful_order(order)
+        return redirect("checkout:thank-you")
 
     def get_payment_method_display(self, payment_method):
         return dict(settings.WEBSHOP_PAYMENT_CHOICES).get(payment_method)

@@ -2,32 +2,38 @@
 
 import csv
 import io
+import math
 import datetime
 import logging
 
 from decimal import Decimal as D
 from decimal import InvalidOperation
-import math
+from dateutil.relativedelta import relativedelta
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-from django_tables2 import SingleTableView
+from django_tables2 import SingleTableView, RequestConfig
 from django.db.models import Count, Sum, fields, F, Max, ExpressionWrapper, DurationField, When, Value, Case, Avg, Q
-from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic import DetailView, FormView, UpdateView
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.timezone import now
+from django.template.loader import render_to_string
 
-from oscar.core.compat import get_user_model
 from oscar.views.generic import BulkEditMixin
 from oscar.apps.order import exceptions as order_exceptions
 from oscar.apps.payment.exceptions import PaymentError
+from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import datetime_combine, format_datetime
 from oscar.views import sort_queryset
-from dateutil.relativedelta import relativedelta
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
 
 
 logger = logging.getLogger("oscar.dashboard")
@@ -456,7 +462,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         Build the queryset for this list.
         """
         queryset = sort_queryset(
-            self.base_queryset, self.request, ["number", "total"]
+            self.base_queryset, self.request, ["number", "total", "-date_placed"]
         ).order_by(
             "-date_placed"
         )
@@ -467,9 +473,9 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
         data = self.form.cleaned_data
 
-        if data["store_point"]:
+        if data["store"]:
             queryset = queryset.filter(
-                store__code=data["store_point"]
+                store__code=data["store"]
             )
 
         if data["is_online"] and not data["is_offine"]:
@@ -790,21 +796,12 @@ class OrderActiveListView(OrderListView):
 
         data = self.form.cleaned_data
 
-        if data["store_point"]:
+        if data.get("store", None):
             queryset = queryset.filter(
-                store__code=data["store_point"]
+                store__code=data["store"]
         )
 
-        return queryset.annotate(
-            source=Max("sources__reference"),
-            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
-            paid=F("sources__paid"),
-            before_order=Case(
-                When(date_finish__isnull=True, then=ExpressionWrapper(F('order_time') - now(), output_field=DurationField())),
-                default=Value(None),
-                output_field=DurationField()
-            )
-        )
+        return queryset
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -813,6 +810,106 @@ class OrderActiveListView(OrderListView):
         ctx["title"] = "Активные заказы"
         return ctx
 
+
+class OrderActiveListLookupView(APIView):
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+    table_class = OrderTable
+    form_class = ActiveOrderSearchForm
+    template_name = "oscar/dashboard/table.html"
+
+    def get(self, request):
+        """
+        Build the queryset for this list.
+        """
+        user = request.user
+        active_statuses = settings.ORDER_ACTIVE_STATUSES
+        self.form = self.form_class(request.GET)
+
+        if not self.form.is_valid():
+            return JsonResponse({'update': False})
+        
+        # Построение базового queryset с фильтрацией
+        queryset = queryset_orders(user=user).filter(status__in=active_statuses)
+
+        # Применяем фильтрацию по store только если store существует
+        store_code = self.form.cleaned_data.get("store")
+        if store_code:
+            queryset = queryset.filter(store__code=store_code)
+
+        num_orders = queryset.count()
+
+        # Проверяем, требует ли запрос обновления
+        if num_orders <= int(request.GET.get('order_num', 0)) and request.GET.get('force', 'false') == 'false':
+            return JsonResponse({'update': False, 'num_orders': num_orders})
+        
+        # Аннотируем и сортируем queryset
+        queryset = (
+            queryset.order_by("order_time")
+            .annotate(
+                source=Max("sources__reference"),
+                amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
+                paid=F("sources__paid"),
+                before_order=Case(
+                    When(date_finish__isnull=True, then=ExpressionWrapper(F('order_time') - now(), output_field=DurationField())),
+                    default=Value(None),
+                    output_field=DurationField(),
+                ),
+            )
+        )
+
+        # Сортировка в зависимости от запроса
+        queryset = sort_queryset(queryset, request, ["number", "total"])
+
+        # Формируем таблицу и рендерим HTML
+        table = self.table_class(queryset)
+        RequestConfig(request).configure(table)
+        html = render(request, self.template_name, {'table': table}).content.decode('utf-8')
+
+        return JsonResponse({'html': html, 'update': True, 'num_orders': num_orders})
+
+
+class OrderModalView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        order_number = request.GET.get('order_number', None)
+        try:
+            order = Order.objects.get(number=order_number)
+            order.open()
+            if not order.date_finish:
+                order.before_order = order.order_time - now()
+            else:
+                order.before_order = None
+            lines = order.lines.all()
+            order_paid = 0
+            for src in order.sources.all():
+                order_paid += src.amount_debited - src.amount_refunded
+
+            order_html = render_to_string("oscar/dashboard/orders/partials/order-modal.html", {"order": order, "order_paid": order_paid, "lines": lines}, request=self.request)
+            return JsonResponse({"html": order_html}, status = 200)
+        except Exception:
+            return JsonResponse({'order': None})
+        
+
+class OrderNextStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+
+    def post(self, request, *args, **kwargs):
+        order_number = request.data.get('order_number', None)
+        try:
+            order = Order.objects.get(number=order_number)
+            next_status = request.data.get('next_status', order.status)
+            order.set_status(next_status)
+            if next_status in settings.ORDER_FINAL_STATUSES:
+                return JsonResponse({"next_status": None, "final": True}, status = 200)
+            return JsonResponse({"next_status": order.next_status, "final": False}, status = 200)
+        except Exception:
+            JsonResponse({"next_status": None}, status = 400)
+        
 
 class OrderDetailView(EventHandlerMixin, DetailView):
     """

@@ -160,8 +160,8 @@ class ShippingAddress(Address):
     """
     notes = models.TextField(
         blank=True,
-        verbose_name="Коментарий курьеру",
-        help_text="Коментарий курьеру по поводу адреса доставки",
+        verbose_name="Комментарий курьеру",
+        help_text="Комментарий курьеру по поводу адреса доставки",
     )
 
     note_field = [

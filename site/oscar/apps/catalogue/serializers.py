@@ -4,6 +4,7 @@ from oscar.apps.search.search_indexes import ProductIndex
 from decimal import Decimal as D
 from oscar.core.loading import get_model
 from haystack import connections
+from oscar.core.utils import slugify
 
 logger = logging.getLogger("oscar.customer")
 
@@ -120,6 +121,7 @@ class ProductSerializer(serializers.ModelSerializer):
         price = validated_data.pop("price", None)
         cost_price = validated_data.pop("cost_price", None)
         quantity = validated_data.pop("quantity", None)
+        article = validated_data.pop("article")
         tax = validated_data.pop("tax", None)
         allow_to_sell = validated_data.pop("allow_to_sell", None)
         code = validated_data.pop("code", None)
@@ -133,8 +135,10 @@ class ProductSerializer(serializers.ModelSerializer):
             category = self._get_or_create_category(parent_id)
         
         product.name = validated_data.get("name")
-        product.article = validated_data.get("article")
         product.short_description = validated_data.get("short_description")
+
+        if article:
+            self._update_article(product, article)
 
         # Добавление категории к товару
         if category:
@@ -159,6 +163,16 @@ class ProductSerializer(serializers.ModelSerializer):
         product.save()
         search_backend = connections['default'].get_backend()
         search_backend.update(ProductIndex(), [product])
+
+
+    def _update_article(self, product, article):
+        product.article = article
+        counter = 1
+        while (
+            product.__class__.objects.filter(article=product.article).exclude(id=product.id).exists()
+        ):
+            product.article = f"{article}-{counter}"
+            counter += 1
 
     def _get_parent_product(self, parent_id):
         """Обработка родительского товара или категории"""

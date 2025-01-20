@@ -68,16 +68,6 @@ class Free(Base):
         return prices.Price(currency=basket.currency, money=D("0.00")), prices.Price(currency=basket.currency, money=D("0.00"))
 
 
-class FixedDiscount(Base):
-    """
-    This is a special shipping method that indicates that no shipping is
-    actually required (e.g. for digital goods).
-    """
-
-    code = "no-shipping-required"
-    name = "Доставка не нужна"
-
-
 class NoShippingRequired(Free):
     """
     This shipping method indicates that shipping costs a fixed price and
@@ -181,7 +171,6 @@ class ZonaBasedShipping(Base):
         
         return amount
     
-
 
 # pylint: disable=abstract-method
 class OfferDiscount(Base):
