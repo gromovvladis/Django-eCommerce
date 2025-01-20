@@ -278,7 +278,7 @@
 
     source venv/bin/activate
     cd mikado/site
-    git pull https://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@github.com/gromovvladis/mikado.git
+    git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
     python manage.py collectstatic
@@ -286,7 +286,7 @@
 
     source venv/bin/activate
     cd provence/site
-    git pull https://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@github.com/gromovvladis/mikado.git
+    git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
     python manage.py collectstatic
@@ -300,14 +300,14 @@
     source venv/bin/activate
     cd
     cd mikado/site
-    git pull https://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@github.com/gromovvladis/mikado.git
+    git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
     python manage.py collectstatic
     python manage.py compress
     cd
     cd provence/site
-    git pull https://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@github.com/gromovvladis/mikado.git
+    git pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
     python manage.py collectstatic
@@ -321,8 +321,8 @@
     sudo systemctl stop redis-server
 
 
-git clone https://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@github.com/gromovvladis/mikado.git ~/mikado
-
+git clone https://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@github.com/gromovvladis/mikado.git ~/mikado
+pip install -r requirements.txt
 
 
 
