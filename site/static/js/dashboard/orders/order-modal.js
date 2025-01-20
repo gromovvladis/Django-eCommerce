@@ -19,44 +19,46 @@ const orderModal = () => {
                 if (modalContainer && data.html) {
                     modalContainer.html(data.html);
                     toggle_table(modalContainer.find(".toggle-row"));
-                    document.querySelector('[data-id="next-status"]').addEventListener('click', function () {
-                        let button = this;
-                        button.classList.add('loading');
-                        fetch(next_status_url, {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': csrf_token,
-                            },
-                            body: JSON.stringify({
-                                "order_number": button.getAttribute('data-number'),
-                                "next_status": button.getAttribute('data-status'),
-                            }),
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.next_status) {
-                                    button.setAttribute('data-status', data.next_status);
-                                    button.textContent = data.next_status;
-                                }
-                                if (data.final) {
-                                    button.disabled = true;
-                                }
-                                if (updateTable){
-                                    updateTable(true)
-                                }
+                    next_status = document.querySelector('[data-id="next-status"]');
+                    if (next_status){
+                        next_status.addEventListener('click', function () {
+                            let button = this;
+                            button.classList.add('loading');
+                            fetch(next_status_url, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrf_token,
+                                },
+                                body: JSON.stringify({
+                                    "order_number": button.getAttribute('data-number'),
+                                    "next_status": button.getAttribute('data-status'),
+                                }),
                             })
-                            .catch(error => console.error('Error:', error))
-                            .finally(() => {
-                                button.classList.remove('loading'); // Удаляем класс загрузки
-                            });
-                    });
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.next_status) {
+                                        button.setAttribute('data-status', data.next_status);
+                                        button.textContent = data.next_status;
+                                    }
+                                    if (data.final) {
+                                        button.disabled = true;
+                                    }
+                                    if (updateTable){
+                                        updateTable(true)
+                                    }
+                                })
+                                .catch(error => console.error('Error:', error))
+                                .finally(() => {
+                                    button.classList.remove('loading'); // Удаляем класс загрузки
+                                });
+                        });
+                    }
                 }
             })        
         });
     });
-    
     modalContainer.on('hidden.bs.modal', function () {
         modalContainer.html('<div class="modal-dialog" role="document"><div class="modal-content content-loading"></div></div>');
     });
