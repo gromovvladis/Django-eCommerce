@@ -28,12 +28,10 @@
                     </button>
                 </div>
                 <div class="badges-navbar">
-                    {% if active_orders %}
-                        <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1" data-id="active-navbar">
-                            <i class="fas fa-shopping-cart"></i>
-                            <div class="dropdown-item-badge item-badge-navbar">{{ active_orders }}</div>
-                        </a>
-                    {% endif %}
+                    <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1{% if not active_orders %}d-none{% endif %}" data-id="active-navbar">
+                        <i class="fas fa-shopping-cart"></i>
+                        <div class="dropdown-item-badge item-badge-navbar">{{ active_orders }}</div>
+                    </a>
                     <span class="badge badge-info">{{ revenue_today }} ₽</span>
                 </div>
             </div>
