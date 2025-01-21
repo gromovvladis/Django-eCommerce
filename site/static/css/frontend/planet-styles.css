@@ -7817,7 +7817,6 @@ html.drawer .app__side {
 }
 
 .button--grey {
-    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -7826,12 +7825,20 @@ html.drawer .app__side {
     min-width: 44px;
     padding: .25rem 1rem;
     border-radius: 15px;
-    color: #fff;
-    /* color: #000; */
-    background: #5c5c5c !important;
+    background: #f3f3f7 !important;
+    color: #000;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+}
+
+.button--grey-dark {
+    background: #616161 !important;
+    color: #fff
+}
+
+.button--grey-dark:hover {
+    color: #000
 }
 
 @media screen and (min-width:768px) {
@@ -8004,7 +8011,7 @@ html.drawer .app__side {
     }
 
     .button--grey:hover {
-        background: #808080 !important;
+        background: #e2e2e2 !important;
     }
 
     .button--grey--disabled:hover,
@@ -10875,10 +10882,7 @@ html::-webkit-scrollbar-thumb {
     font-style: normal
 }
 
-.app .button--grey-dark {
-    background: #717171;
-    color: #fff
-}
+
 
 .app .button--address {
     
