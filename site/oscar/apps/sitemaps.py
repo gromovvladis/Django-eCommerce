@@ -65,4 +65,4 @@ neutral_sitemaps = {
 # Construct the sitemaps for every language
 base_sitemaps = {}
 for name, sitemap_class in neutral_sitemaps.items():
-    base_sitemaps['{name}'.format(name)] = sitemap_class()
+    base_sitemaps[name] = sitemap_class()
