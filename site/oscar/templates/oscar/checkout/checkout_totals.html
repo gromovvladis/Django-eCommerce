@@ -12,11 +12,10 @@
                             {{ basket.total_excl_discounts|currency:basket.currency }}
                         </span>
                     </span>
-
                     {% if offer_discounts or voucher_discounts %}
                         {% for discount in offer_discounts %}
                             <span class="d-flex justify-space-between no-wrap">
-                                {{ discount.name }}
+                                {{ discount.name|default"Скидка" }} 
                                 {% if discount.description %}
                                     <br/><small>{{ discount.description }}</small>
                                 {% endif %}
@@ -25,21 +24,18 @@
                                 </span>
                             </span>
                         {% endfor %}
-
                         {% if voucher_discounts %}
                             {% for discount in voucher_discounts %}
                                 <div class="d-flex justify-space-between no-wrap">
                                     {% if discount.voucher.voucher_set %}
-                                        {{ discount.voucher.voucher_set.name }} ({{ discount.voucher.code }})
+                                        {{ discount.voucher.voucher_set.name|default"Скидка" }} ({{ discount.voucher.code }})
                                     {% else %}
                                         {{ discount.voucher.name }} ({{ discount.voucher.code }})
                                     {% endif %}
-
                                     <span class="d-flex">
                                         <span class="prices__price-before">
                                             - {{ discount.discount|currency:basket.currency }}
                                         </span>
-
                                         {% if editable %}
                                             <form class="d-flex align-end ml-1" action="{% url 'checkout:vouchers-remove' pk=discount.voucher.id %}" method="POST" data-id="voucher-remove">
                                                 <input type="submit" value="Удалить" class="text--red" />
@@ -50,7 +46,6 @@
                             {% endfor %}
                         {% endif %}
                     {% endif %}
-
                     {% if shipping_charge != 0 %}
                         <span class="d-flex justify-space-between no-wrap">
                             {{ shipping_method.name }}
@@ -59,11 +54,9 @@
                             </span>
                         </span>
                     {% endif %} 
-                    
                 </div>
             {% endif %} 
         {% endblock %}
-
         {% order_totals_and_shipping basket shipping_charge as basket_totals %}
         <div class="order__info-total d-flex align-end total" data-min-order="{% if basket_totals >= min_order %}true{% else %}false{% endif %}">
             Итого
