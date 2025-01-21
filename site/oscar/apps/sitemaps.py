@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from django.utils.translation import get_language, activate
@@ -22,7 +21,7 @@ class I18nSitemap(Sitemap):
     A language-specific Sitemap class. Returns URLS for items for passed
     language.
     """
-    def __init__(self, language):
+    def __init__(self, language="ru"):
         self.language = language
         self.original_language = get_language()
 
@@ -54,10 +53,10 @@ class ProductSitemap(I18nSitemap):
 class CategorySitemap(I18nSitemap):
 
     def items(self):
-        return Category.objects.all()
+        return Category.objects.filter(is_public=True)
 
 
-language_neutral_sitemaps = {
+neutral_sitemaps = {
     'static': StaticSitemap,
     'products': ProductSitemap,
     'categories': CategorySitemap,
@@ -65,6 +64,5 @@ language_neutral_sitemaps = {
 
 # Construct the sitemaps for every language
 base_sitemaps = {}
-for language, __ in settings.LANGUAGES:
-    for name, sitemap_class in language_neutral_sitemaps.items():
-        base_sitemaps['{0}-{1}'.format(name, language)] = sitemap_class(language)
+for name, sitemap_class in neutral_sitemaps.items():
+    base_sitemaps['{name}'.format(name)] = sitemap_class()

@@ -1589,8 +1589,7 @@ pre code {
 
 .modal-table{
   box-shadow: none;
-  /* margin: 0 -1rem; */
-  /* width: calc(100% + 2rem); */
+  border: 1px solid #dee2e6;
 }
 
 
@@ -4531,7 +4530,7 @@ input[type=button].btn-block {
   line-height: 1;
   background-color: #eee;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 15px;
   transform: rotate(180deg);
   transition: all .15s ease-in-out;
 }
@@ -18959,8 +18958,8 @@ h3.app-ico:before {
 }
 .navbar.navbar-accounts .navbar-toggler, .navbar.navbar-primary .navbar-toggler {
   border: none;
-  padding-left: .75rem;
-  padding-right: .75rem;
+  padding-left: .65rem;
+  padding-right: .65rem;
   outline: none;
   color: #dee2e6;
 }
