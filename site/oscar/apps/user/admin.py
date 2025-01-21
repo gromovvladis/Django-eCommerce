@@ -3,6 +3,11 @@ from oscar.core.loading import get_model
 
 User = get_model("user", "User")
 Staff = get_model("user", "Staff")
+WebPushSubscription = get_model("user", "WebPushSubscription")
+
+admin.site.register(User)
+admin.site.register(Staff) 
+admin.site.register(WebPushSubscription) 
 
 # class CustomUserAdmin(UserAdmin):
 #     add_form = PhoneUserCreationForm
@@ -22,8 +27,4 @@ Staff = get_model("user", "Staff")
 #     )
 #     search_fields = ('username',)
 #     ordering = ('username',)
-
-
 # admin.site.register(User, CustomUserAdmin)
-admin.site.register(User)
-admin.site.register(Staff) 
