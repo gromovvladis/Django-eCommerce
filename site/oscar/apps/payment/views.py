@@ -32,13 +32,10 @@ class UpdatePayment(APIView):
             if pay_id:
                 try:
                     pay_code = source.reference
-                    logger.error(f'pay_code {pay_code}')
                     payment_method = PaymentManager(pay_code).get_method()
                     payment_api = payment_method.get_payment_api(pay_id)
                     refund_id = source.refund_id
-                    logger.error(f'refund_id {refund_id}')
                     refund_api = payment_method.get_refund_api(refund_id)
-                    logger.error(f'updating!!!')
                     payment_method.update(source, payment_api, refund_api)
                 except Exception as e:
                     logger.error(f'Failed to update payment for source {source.id}. Error: {e}')

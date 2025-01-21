@@ -1,12 +1,12 @@
 import uuid
+import logging
 from django.urls import reverse_lazy
 from django.conf import settings
-import logging
+from django.contrib import messages
 from oscar.apps.order.models import PaymentEventQuantity
 from oscar.apps.payment.exceptions import DebitedAmountIsNotEqualsRefunded, UnableToRefund, UnableToTakePayment
 from oscar.apps.payment.models import Source, Transaction
 from oscar.apps.order.models import Order, PaymentEvent, PaymentEventType
-from django.contrib import messages
 
 from yookassa import Refund
 from yookassa import Payment
@@ -133,7 +133,6 @@ class PaymentMethodHelper(object):
             )
 
     def change_order_status(self, tnx_status, tnx_type, order):
-        
         current_status = order.status
 
         if tnx_type == 'payment':
@@ -156,22 +155,25 @@ class PaymentMethodHelper(object):
 
 class PaymentMethod(PaymentMethodHelper):
 
-    #override pass
     def pay(self, order, amount=None, email=None):
-        return None
+        raise NotImplementedError(
+            "A PaymentMethod must define a pay method "
+        )
 
-    #override pass
     def refund(self, transaction, amount=None):
-        pass
+        raise NotImplementedError(
+            "A PaymentMethod must define a refund method "
+        )
 
-    #override pass
     def get_payment_api(self, pay_id):
-        pass
+        raise NotImplementedError(
+            "A PaymentMethod must define a get_payment_api method "
+        )
 
-    #override pass
     def get_refund_api(self, refund_id):
-        pass
-
+        raise NotImplementedError(
+            "A PaymentMethod must define a get_refund_api method "
+        )
 
     def _check_balance(self, refund, payment, source):
         if isinstance(refund, RefundResponse) and refund.status == 'succeeded':
@@ -228,7 +230,6 @@ class PaymentMethod(PaymentMethodHelper):
                     "Требуется ручная проверка. На данный момент оплачено: {0} Р.".format(float(payment_refunded))
                 )
             
-
     def update(self, source, payment=None, refund=None): 
         refund_updated = False
         payment_updated = False
@@ -254,7 +255,6 @@ class PaymentMethod(PaymentMethodHelper):
                 order=source.order,
             )
 
-
     def update_payment(self, payment, source):
         payment_transactions = self.get_transactions(source).filter(txn_type="Payment")
         existing_transactions = []
@@ -268,7 +268,6 @@ class PaymentMethod(PaymentMethodHelper):
             return True
         else:
             return self.update_payment_transaction(payment, source)
-
 
     def create_payment_transaction(self, payment, source):
         if payment.payment_method:
@@ -287,7 +286,6 @@ class PaymentMethod(PaymentMethodHelper):
         )
 
         self.add_event(order=source.order, transaction=payment, transaction_status_list=self.payment_status_list())
-
 
     def update_payment_transaction(self, payment, source):
         if payment.payment_method:
@@ -310,7 +308,6 @@ class PaymentMethod(PaymentMethodHelper):
         
         return updated
 
-
     def update_refund(self, refund, source):
         refund_transactions = self.get_transactions(source).filter(txn_type="Refund")
         existing_transactions = []
@@ -325,7 +322,6 @@ class PaymentMethod(PaymentMethodHelper):
         else:
             return self.update_refund_transaction(refund, source)
 
-
     def create_refund_transaction(self, refund, source):
         source.new_refund(
             amount=refund.amount.value, 
@@ -336,7 +332,6 @@ class PaymentMethod(PaymentMethodHelper):
         )
 
         self.add_event(order=source.order, transaction=refund, transaction_status_list=self.refund_status_list())
-
 
     def update_refund_transaction(self, refund, source):
         updated = source.update_refund(
@@ -351,7 +346,6 @@ class PaymentMethod(PaymentMethodHelper):
             self.add_event(order=source.order, transaction=refund, updated=True)
         
         return updated
-
 
     def __str__(self) -> str:
         return self.payment_method
