@@ -7837,6 +7837,10 @@ html.drawer .app__side {
     color: #fff
 }
 
+.button--grey-dark:hover {
+    color: #000
+}
+
 @media screen and (min-width:768px) {
     .button--grey {
         min-height: 44px;
