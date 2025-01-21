@@ -30,14 +30,12 @@ function getPaymentInfo() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data);
         closeModal(data);
     })
     .catch(error => console.error('Error:', error));
 }
 
 function closeModal(response = null) {
-    console.log(response);
     if (response) {
         if (paymentStatus) {
             paymentStatus.innerHTML = response.status;
