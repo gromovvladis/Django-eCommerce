@@ -189,6 +189,6 @@ def _send_telegram_message_to_user(telegram_id: int, msg: str, type: str):
     send_message(telegram_id, msg, type)
 
 # ================= Evotor =================
-
+@shared_task
 def _send_order_to_evotor(order_json: dict):
     pass
