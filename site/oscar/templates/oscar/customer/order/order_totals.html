@@ -16,7 +16,7 @@
                             <div class="d-flex justify-space-between no-wrap">
                                 <span class="d-flex align-end">
                                     <span class="mr-1">
-                                        {{ discount.offer_name|default"Скидка" }}
+                                        {{ discount.offer_name|default:"Скидка" }}
                                     </span>
                                     {% if discount.description %}
                                         <br/><small>({{ discount.description }})</small>

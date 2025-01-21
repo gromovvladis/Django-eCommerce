@@ -2,13 +2,13 @@
 var waitingPayment = document.querySelector('[data-id="waiting-payment"]');
 var paymentStatus = document.querySelector('[data-id="payment-status"]');
 var paymentSvg = document.querySelector('[data-id="payment-icon-svg"]');
-var waitingSeconds = 15;
+var waitingSeconds = 14;
 var interval;
 
 if (waitingPayment) {
     interval = setInterval(function() {
         if (waitingSeconds > 0) {
-            waitingSeconds -= 3;
+            waitingSeconds -= 2;
             getPaymentInfo();
         } else {
             closeModal();
@@ -16,7 +16,7 @@ if (waitingPayment) {
                 paymentStatus.innerHTML = "Ответ от банка не получен. Обновите страницу";
             }
         }
-    }, 3000);
+    }, 2000);
 }
 
 function getPaymentInfo() {
@@ -36,21 +36,25 @@ function getPaymentInfo() {
 }
 
 function closeModal(response = null) {
-    if (response) {
-        if (paymentStatus) {
-            paymentStatus.innerHTML = response.status;
-        }
-        if (paymentSvg) {
-            if (response.status === "Ожидает оплаты") {
-                paymentSvg.innerHTML = '<use xlink:href="#svg-order-pending"></use>';
-            } else if (response.status === "Отменен") {
-                paymentSvg.innerHTML = '<use xlink:href="#svg-order-cancel"></use>';
-            } else {
-                paymentSvg.innerHTML = '<use xlink:href="#svg-order-success"></use>';
-            }
-        }
+    if (!response?.order_status) return;
+
+    const { order_status } = response;
+
+    if (paymentStatus) {
+        paymentStatus.innerHTML = order_status;
     }
+
+    if (paymentSvg) {
+        const svgMap = {
+            "Ожидает оплаты": "#svg-order-pending",
+            "Отменен": "#svg-order-cancel",
+        };
+        const svgHref = svgMap[order_status] || "#svg-order-success";
+        paymentSvg.innerHTML = `<use xlink:href="${svgHref}"></use>`;
+    }
+
     clearInterval(interval);
+
     if (waitingPayment) {
         waitingPayment.classList.add('d-none');
     }

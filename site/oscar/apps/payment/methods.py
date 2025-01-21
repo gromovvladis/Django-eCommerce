@@ -174,9 +174,7 @@ class PaymentMethod(PaymentMethodHelper):
 
 
     def _check_balance(self, refund, payment, source):
-        
         if isinstance(refund, RefundResponse) and refund.status == 'succeeded':
-            
             refund_refunded = refund.amount.value
             source_refunded = source.amount_refunded
 
@@ -193,7 +191,6 @@ class PaymentMethod(PaymentMethodHelper):
                 )
 
         if isinstance(payment, PaymentResponse) and payment.status == 'succeeded':
-            
             debited = payment.amount.value
             payment_refunded = payment.refunded_amount.value
             source_balance = source.amount_debited - source.amount_refunded
@@ -233,7 +230,6 @@ class PaymentMethod(PaymentMethodHelper):
             
 
     def update(self, source, payment=None, refund=None): 
-        
         refund_updated = False
         payment_updated = False
 
@@ -260,7 +256,6 @@ class PaymentMethod(PaymentMethodHelper):
 
 
     def update_payment(self, payment, source):
-        
         payment_transactions = self.get_transactions(source).filter(txn_type="Payment")
         existing_transactions = []
 
@@ -276,7 +271,6 @@ class PaymentMethod(PaymentMethodHelper):
 
 
     def create_payment_transaction(self, payment, source):
-    
         if payment.payment_method:
             reference = payment.payment_method.title
         else:
@@ -296,7 +290,6 @@ class PaymentMethod(PaymentMethodHelper):
 
 
     def update_payment_transaction(self, payment, source):
-
         if payment.payment_method:
             reference = payment.payment_method.title 
         else:
@@ -402,14 +395,13 @@ class Yoomoney(PaymentMethod):
         "ТБ": "terabyte",
     }
 
-
     def pay(self, order, amount=None, email=None):
         try:
-            client_id = order.user.id
-            description = "Заказ №" + str(order.number)
-
             if amount is None:
                 amount = order.total
+            
+            if email is None:
+                email = order.user.email
 
             receipt = Receipt()
             receipt.customer = {
@@ -423,10 +415,10 @@ class Yoomoney(PaymentMethod):
             builder.set_amount({"value": amount.money, "currency": amount.currency}) \
                 .set_confirmation({"type": ConfirmationType.REDIRECT, "return_url": self.success_url}) \
                 .set_capture(True) \
-                .set_description(description) \
+                .set_description("Заказ №" + str(order.number)) \
                 .set_metadata({"orderNumber": order.number}) \
                 .set_receipt(receipt) \
-                .set_merchant_customer_id(client_id) \
+                .set_merchant_customer_id(order.user.id) \
                 
             request = builder.build()
             pay = Payment.create(request, uuid.uuid4())
@@ -436,6 +428,71 @@ class Yoomoney(PaymentMethod):
 
         return pay
 
+    def refund(self, transaction, amount=None):
+        try:
+            payment_id = transaction.code
+            order = transaction.source.order
+            if payment_id:
+                if email is None:
+                    email = order.user.email
+
+                if amount is None:
+                    amount = transaction.amount
+
+                receipt = Receipt()
+                receipt.customer = {
+                    "phone": str(order.user.username),
+                    **({"email": email} if email else {}),
+                }
+                receipt.tax_system_code = 4
+                receipt.items = self._receipt_items(order)
+
+                item_list = []
+                for line in order.lines.all():
+                    item = {
+                        'description': line.name,
+                        'quantity': line.quantity,
+                            'amount': {
+                                "value": line.line_price,
+                                "currency": order.currency,
+                            },
+                        'vat_code': 4,
+                    }
+                    item_list.append(item)
+                
+                receipt.items = item_list
+                    
+                builder = RefundRequestBuilder()
+                builder.set_payment_id(payment_id) \
+                    .set_description("Возврат по заказу №" + str(order.number)) \
+                    .set_amount({"value": amount, "currency": transaction.source.currency}) \
+                    .set_receipt(receipt) \
+
+                request = builder.build()
+                refund_responce = Refund.create(request)
+                transaction.refundable = False
+                transaction.save()
+        except Exception:
+            raise UnableToRefund('Не возможно произвести возврат')
+
+        return refund_responce
+    
+    def get_payment_api(self, pay_id):
+        try:
+            responce = Payment.find_one(pay_id)
+        except Exception:
+            return None
+        
+        return responce
+
+    def get_refund_api(self, refund_id):
+        try:
+            responce = Refund.find_one(refund_id)
+        except Exception:
+            return None
+        
+        return responce
+      
     def _receipt_items(self, order):
         item_list = []
         for line in order.lines.all():
@@ -469,80 +526,8 @@ class Yoomoney(PaymentMethod):
 
         return item_list
 
-    def refund(self, transaction, amount=None):
-        try:
-            payment_id = transaction.code
-            order = transaction.source.order
-            description = "Возврат по заказу №" + str(order.number)
-            if not amount:
-                amount = transaction.amount
-            if payment_id:
 
-                customer_dict = {}
-                item_list = []
-                
-                phone = order.user.username
-                email = order.user.email
-                description = "Заказ №" + str(order.number)
-
-                if amount is None:
-                    amount = order.total
-                if email:
-                    customer_dict['email'] = email       
-                if phone:
-                    customer_dict['phone'] = phone
-
-                receipt = Receipt()
-                receipt.customer = customer_dict
-                receipt.tax_system_code = 1
-
-                for line in order.lines.all():
-                    item = {
-                        'description': line.name,
-                        'quantity': line.quantity,
-                            'amount': {
-                                "value": line.line_price,
-                                "currency": order.currency,
-                            },
-                        'vat_code': 4,
-                    }
-                    item_list.append(item)
-                
-                receipt.items = item_list
-                    
-                builder = RefundRequestBuilder()
-                builder.set_payment_id(payment_id) \
-                    .set_description(description) \
-                    .set_amount({"value": amount, "currency": transaction.source.currency}) \
-                    .set_receipt(receipt) \
-
-                request = builder.build()
-                refund_responce = Refund.create(request)
-                transaction.refundable = False
-                transaction.save()
-        except Exception:
-            raise UnableToRefund('Не возможно произвести возврат')
-
-        return refund_responce
-    
-    def get_payment_api(self, pay_id):
-        try:
-            responce = Payment.find_one(pay_id)
-        except Exception:
-            return None
-        
-        return responce
-
-    def get_refund_api(self, refund_id):
-        try:
-            responce = Refund.find_one(refund_id)
-        except Exception:
-            return None
-        
-        return responce
-    
 # переделай
-
 class Cash(PaymentMethod):
     def pay(self, order, amount=None, email=None):
         pass

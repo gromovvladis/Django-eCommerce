@@ -25,7 +25,7 @@ class UpdatePayment(APIView):
             sources = PaymentManager.get_sources(pk)
         except Exception as e:
             logger.error(f'Error retrieving sources for order {pk}: {e}')
-            return http.JsonResponse({'error': 'Sources for order not found', "status": 400}, status=400)
+            return http.JsonResponse({'error': 'Sources for order not found'}, status=400)
         
         for source in sources:
             pay_id = source.payment_id
@@ -39,13 +39,13 @@ class UpdatePayment(APIView):
                     payment_method.update(source, payment_api, refund_api)
                 except Exception as e:
                     logger.error(f'Failed to update payment for source {source.id}. Error: {e}')
-                    return http.JsonResponse({'error': f'Failed API payment. Error: {e}', "status": 400}, status=400)
+                    return http.JsonResponse({'error': f'Failed API payment. Error: {e}'}, status=400)
         try:
             order = sources.first().order
-            return http.JsonResponse({'status': order.status}, status=200)
+            return http.JsonResponse({'order_status': order.status}, status=200)
         except Exception as e:
             logger.error(f'Failed to retrieve order from sources: {e}')
-            return http.JsonResponse({'status': "Не удалось получить статус. Обновите страницу"}, status=200)
+            return http.JsonResponse({'order_status': "Не удалось получить статус. Обновите страницу"}, status=200)
 
 
 class YookassaPaymentHandler(APIView):

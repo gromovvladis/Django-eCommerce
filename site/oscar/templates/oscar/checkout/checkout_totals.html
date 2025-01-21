@@ -15,7 +15,7 @@
                     {% if offer_discounts or voucher_discounts %}
                         {% for discount in offer_discounts %}
                             <span class="d-flex justify-space-between no-wrap">
-                                {{ discount.name|default"Скидка" }} 
+                                {{ discount.name|default:"Скидка" }} 
                                 {% if discount.description %}
                                     <br/><small>{{ discount.description }}</small>
                                 {% endif %}
@@ -28,7 +28,7 @@
                             {% for discount in voucher_discounts %}
                                 <div class="d-flex justify-space-between no-wrap">
                                     {% if discount.voucher.voucher_set %}
-                                        {{ discount.voucher.voucher_set.name|default"Скидка" }} ({{ discount.voucher.code }})
+                                        {{ discount.voucher.voucher_set.name|default:"Скидка" }} ({{ discount.voucher.code }})
                                     {% else %}
                                         {{ discount.voucher.name }} ({{ discount.voucher.code }})
                                     {% endif %}
