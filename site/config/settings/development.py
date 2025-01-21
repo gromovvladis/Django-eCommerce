@@ -130,8 +130,8 @@ SMS_AUTH_SETTINGS = {
 # Yoomaney settings
 # =============
 
-Configuration.account_id = 470199
-Configuration.secret_key = 'test_NbCwf5jnxkwJN7IzigODrtShMkQfsZRO_yU_SzEIa50'
+Configuration.account_id = 1017790
+Configuration.secret_key = 'test_edf_VEetjIP5Yi4JDjvOsgzItD1whJpET4Px3nLIa6U'
 
 # =============
 # MAP settings

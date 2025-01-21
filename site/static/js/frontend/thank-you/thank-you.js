@@ -2,13 +2,14 @@
 var waitingPayment = document.querySelector('[data-id="waiting-payment"]');
 var paymentStatus = document.querySelector('[data-id="payment-status"]');
 var paymentSvg = document.querySelector('[data-id="payment-icon-svg"]');
-var waitingSeconds = 14;
+var waitingSeconds = 15;
 var interval;
 
 if (waitingPayment) {
+    getPaymentInfo();
     interval = setInterval(function() {
         if (waitingSeconds > 0) {
-            waitingSeconds -= 2;
+            waitingSeconds -= 3;
             getPaymentInfo();
         } else {
             closeModal();
@@ -16,7 +17,7 @@ if (waitingPayment) {
                 paymentStatus.innerHTML = "Ответ от банка не получен. Обновите страницу";
             }
         }
-    }, 2000);
+    }, 3000);
 }
 
 function getPaymentInfo() {
