@@ -31,7 +31,7 @@
 {% block templatescripts %}
     {{ block.super }}
     var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
-    var url_time = "{% url 'delivery:delivery-now' %}";
+    var url_time = "{% url 'delivery:order-now' %}";
 {% endblock %}
 
 {% block externalscripts %}

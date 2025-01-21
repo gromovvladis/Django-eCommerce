@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
+from django.utils.timezone import now
 from django.views import generic
 from django.template.loader import render_to_string
 from django.views.generic import FormView, View
@@ -20,7 +21,6 @@ from oscar.apps.basket.signals import voucher_addition, voucher_removal
 from oscar.core.utils import redirect_to_referrer
 
 from . import signals
-
 
 Source = get_model("payment", "Source")
 SourceType = get_model("payment", "SourceType")
@@ -63,21 +63,19 @@ class IndexView(CheckoutSessionMixin, generic.FormView):
         return redirect(self.get_success_url())
 
 # =========
-# Checkout View
+# Checkout
 # =========
 
 class CheckoutView(CheckoutSessionMixin,  generic.FormView):
     template_name = "oscar/checkout/checkout_form.html"
     form_class = CheckoutForm
     success_url = reverse_lazy("checkout:payment-details")
+    context_object_name = "order"
     pre_conditions = [
         "check_basket_is_not_empty",
         "check_basket_is_valid",
         "check_user_phone_is_captured",
     ]
-
-    context_object_name = "order"
-
 
     def get_initial(self):
 
@@ -105,7 +103,8 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
             if self.request.COOKIES.get('line4'):
                 initial['notes'] = unquote(unquote(self.request.COOKIES.get('notes')))
 
-        initial['order_time'] = format(datetime.datetime.today().replace(minute=0) + datetime.timedelta(hours=3),'%d.%m.%Y %H:%M')
+        # initial['order_time'] = format(now() + datetime.timedelta(hours=2),'%d.%m.%Y %H:%M')
+        initial['order_time'] = now() + datetime.timedelta(hours=2)
         
         return initial
 
@@ -275,20 +274,17 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
 
     template_name_preview = "oscar/checkout/preview.html"
     preview = False
-
+    # If preview=True, then we render a preview template that shows all order
+    # details ready for submission.
     # These conditions are extended at runtime depending on whether we are in
     # 'preview' mode or not.
     pre_conditions = [
         "check_basket_is_not_empty",
         "check_basket_is_valid",
-
         "check_shipping_data_is_captured",
         "check_payment_method_is_captured", # переделай
         "check_order_time_is_captured", # переделай
     ]
-
-    # If preview=True, then we render a preview template that shows all order
-    # details ready for submission.
 
     def get(self, request, *args, **kwargs):
         return self.handle_place_order_submission(request)
@@ -308,7 +304,6 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         """
         # Collect all the data!
         submission = self.build_submission()
-        
         submission['payment_kwargs']['submission'] = submission
 
         # Start the payment process!
@@ -609,7 +604,6 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         return email
 
     def handle_payment(self, total, source, order, method, email_or_change, **kwargs):
-
         payment_method = PaymentManager(method).get_method()
         email = ""
 
@@ -692,7 +686,6 @@ class UpdateTotalsView(View):
 # =========
 # Thank you
 # =========
-
 
 class ThankYouView(generic.DetailView):
     """

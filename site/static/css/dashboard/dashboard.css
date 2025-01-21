@@ -1603,7 +1603,7 @@ pre code {
 
 .modal-table td,
 .modal-table th {
-  padding: 0.25rem;
+  padding: 0.25rem !important;
 }
 
 .table th:first-of-type,

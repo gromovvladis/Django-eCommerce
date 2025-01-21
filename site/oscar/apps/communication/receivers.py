@@ -37,7 +37,7 @@ post_payment.connect(notify_about_new_order)
 def notify_customer_about_order_status(sender, order, **kwargs):
     ctx = {
         'user_id': order.user.id,
-        'phone': order.user.username,
+        'phone': str(order.user.username),
         'number': order.number,
         'new_status': kwargs['new_status'],
         'shipping_method': order.shipping_method,

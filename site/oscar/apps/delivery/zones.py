@@ -9,22 +9,20 @@ class ZonesUtils:
     
     @classmethod
     @lru_cache(maxsize=128)  
-    def getZones(self):
+    def zones(self):
         return DeliveryZona.objects.filter(isHide=False)
     
     @classmethod
-    def getAvailableZones(self):
+    def available_zones(self):
         """Return list of available delivery zones."""
         return DeliveryZona.objects.filter(isHide=False, isAvailable=True)
 
     @classmethod
     @lru_cache(maxsize=128)  
-    def getZonesPolygon(self, zones=None):
-
+    def zones_polygon(self, zones=None):
         polygon_zones = {}
-
         if zones is None:
-            zones = self.getZones()
+            zones = self.zones()
         
         for zona in zones:
             coords = []
@@ -38,10 +36,9 @@ class ZonesUtils:
         return polygon_zones
 
     @classmethod
-    def getZonaId(self, coords, zones=None) -> int:
+    def zona_id(self, coords, zones=None) -> int:
         """Получает координы обекта, возвращает id зоны доставки, либо 0, если адрес вне зоны доставки"""
-        zones = self.getZonesPolygon(zones)
-
+        zones = self.zones_polygon(zones)
         coords_point = Point(coords[0], coords[1])
 
         for zonaId, zona in zones.items():
@@ -50,29 +47,23 @@ class ZonesUtils:
 
         return 0
 
-
 # ==================================================
     
     @classmethod
-    def getMinOrderForZona(self, zona_id, zones=None) -> int:
-
-        min_order = 700
-
+    def min_order_for_zona(self, zona_id, zones=None) -> int:
         try:
             if zones is None:
-                zones = self.getAvailableZones()
+                zones = self.available_zones()
             zona = zones.get(number=zona_id)
-            min_order = zona.order_price
+            return zona.order_price
         except Exception:
-            return min_order
-        
-        return min_order
+            return 700
 
     @classmethod
-    def IsZonaAvailable(self, zona_id, zones=None) -> bool:
+    def is_zona_available(self, zona_id, zones=None) -> bool:
         try:
             if zones is None:
-                zones = self.getAvailableZones()
+                zones = self.available_zones()
             isAvailable = zones.get(number=zona_id)
         except Exception:
             return False
