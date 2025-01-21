@@ -486,7 +486,8 @@ OSCAR_ORDER_STATUS_CASCADE = {
 
 ORDER_ACTIVE_STATUSES = (
     'Обрабатывается',
-    'Готовится', 
+    'Оплачен',
+    'Готовится',
     'Готов',
 )
 
