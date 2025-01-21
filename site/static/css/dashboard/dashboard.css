@@ -19370,7 +19370,7 @@ caption {
     display: none;
   }
   .date_updated .column-header::before{
-    content: "Дата";
+    content: "Date";
   }
 
   .variants .header-text{
