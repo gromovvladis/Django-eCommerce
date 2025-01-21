@@ -121,7 +121,7 @@ class ProductSerializer(serializers.ModelSerializer):
         price = validated_data.pop("price", None)
         cost_price = validated_data.pop("cost_price", None)
         quantity = validated_data.pop("quantity", None)
-        article = validated_data.pop("article")
+        article = validated_data.pop("article", None)
         tax = validated_data.pop("tax", None)
         allow_to_sell = validated_data.pop("allow_to_sell", None)
         code = validated_data.pop("code", None)

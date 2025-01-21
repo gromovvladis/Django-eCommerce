@@ -1910,10 +1910,10 @@ class EvotorDocClient(EvotorAPICloud):
             except Order.DoesNotExist:
                 logger.error(
                     "Ошибка при создании возврата. Заказ не найден %s"
-                    % serializer.errors
+                    % order_json
                 )
                 error_msgs.append(
-                    f"Ошибка при создании возврата. Заказ не найден: {serializer.errors}"
+                    f"Ошибка при создании возврата. Заказ не найден: {order_json}"
                 )
 
             if not json_valid:

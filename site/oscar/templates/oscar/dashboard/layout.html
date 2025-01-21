@@ -1,6 +1,7 @@
 {% extends "oscar/dashboard/base.html" %}
 
 {% load category_tags %}
+{% load currency_filters %}
 {% load dashboard_tags %}
 {% load svg_tags %}
 {% load compress %}
@@ -24,15 +25,15 @@
             <div class="container-navbar fill-width fill-height d-flex justify-content-between">
                 <div>
                     <button class="navbar-toggler navbar-toggler--mobile" type="button" data-id="navbar-toggler">
-                        <i class="fa-solid fa-bars"></i>
+                        <i class="fa-solid fa-bars align-middle"></i>
                     </button>
                 </div>
                 <div class="badges-navbar">
-                    <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1{% if not active_orders %}d-none{% endif %}" data-id="active-navbar">
+                    <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1{% if not active_orders %} d-none{% endif %}" data-id="active-navbar">
                         <i class="fas fa-shopping-cart"></i>
                         <div class="dropdown-item-badge item-badge-navbar">{{ active_orders }}</div>
                     </a>
-                    <span class="badge badge-info">{{ revenue_today }} ₽</span>
+                    <span class="badge badge-info">{{ revenue_today|currency:"RUB" }}</span>
                 </div>
             </div>
         </nav>
