@@ -47,7 +47,7 @@
                         <form class="promo__input-wrapper d-flex align-center g-1 g-sm-2" id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
                             <div data-id="input-field" class="input d-flex align-center fill-width input__padding{% if voucher_form.initial.code %} input__label-active{% endif %}">
                                 <div class="input__wrapper">
-                                    <div class="input__label">Введите промокод</div>
+                                    <div class="input__label">Промокод</div>
                                     <div id="voucher_form_container" class="input__control d-flex align-center">
                                         {% if voucher_form %}
                                             {% include "oscar/partials/render_field.html" with field=voucher_form.code data_id="voucher-input-code" %}
@@ -101,8 +101,8 @@
     {{ block.super }}
     var url_voucher = "{% url 'checkout:vouchers-add' %}";
     var url_update_totals = "{% url 'checkout:update-totals' %}";
-    var url_time = "{% url 'delivery:delivery-now' %}";
-    var url_delivery_later = "{% url 'delivery:delivery-later' %}";
+    var url_time = "{% url 'delivery:order-now' %}";
+    var url_delivery_later = "{% url 'delivery:order-later' %}";
     var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
 {% endblock %}
 

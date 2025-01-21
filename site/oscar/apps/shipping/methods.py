@@ -130,27 +130,24 @@ class ZonaBasedShipping(Base):
 
     def calculate(self, basket, address):
         """"Returns the shipping charges and minimum order price"""
-        
         zona_id = 0
         shipping_charge = D("0.0")
         min_order = D("700.0")
 
-        zones = ZonesUtils.getAvailableZones()
+        zones = ZonesUtils.available_zones()
 
         if isinstance(address, ShippingAddress) or isinstance(address, UserAddress):
-            zona_id = ZonesUtils.getZonaId([address.coords_lat, address.coords_long], zones)
+            zona_id = ZonesUtils.zona_id([address.coords_lat, address.coords_long], zones)
         else:
             zona_id = int(address)
 
         if zona_id > 0:
-            shipping_charge = self.getZonaCharge(zona_id, zones)
-            min_order = self.minOrder(zona_id, zones)
+            shipping_charge = self.zona_charge(zona_id, zones)
+            min_order = self.min_order(zona_id, zones)
 
         return prices.Price(currency=basket.currency, money=shipping_charge), prices.Price(currency=basket.currency, money=min_order)
         
-
-    
-    def getZonaCharge(self, zona_id, zones):
+    def zona_charge(self, zona_id, zones):
         charge = 0
         try:
             zona = zones.get(number=zona_id)
@@ -161,7 +158,7 @@ class ZonaBasedShipping(Base):
         return charge
     
 
-    def minOrder(self, zona_id, zones):
+    def min_order(self, zona_id, zones):
         amount = 700
         try:
             zona = zones.get(number=zona_id)

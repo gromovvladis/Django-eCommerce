@@ -89,11 +89,13 @@ deliveryTimeBtn.forEach(function(time_btn) {
             if (addressFields){
                 GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
                     orderTime.value = result.timeUTC;
+                    // orderTime.value = new Date(result.timeUTC).toISOString();
                     timeCaptured(result);
                 });
             } else {
                 GetTime({shippingMethod: shippingMethod}).then(function(result) {
                     orderTime.value = result.timeUTC;
+                    // orderTime.value = new Date(result.timeUTC).toISOString();
                     timeCaptured(result);
                 });
             }
@@ -278,13 +280,45 @@ submitBtn.addEventListener('click', function() {
     this.classList.add('sending');
 });
 
-// Таймер обновления времени доставки к адресу каждые 5 минут
+// Таймер обновления времени доставки к адресу каждые 2.5 минут
 function updateTimes() {
     setInterval(function() {
-        GetTime({address: line1.value, shippingMethod: shippingMethod}).then(function(result) {
-            timeCaptured(result);
-        });
-    }, 300000);
+        if (addressFields){
+            GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
+                orderTime.value = result.timeUTC;
+                // orderTime.value = new Date(result.timeUTC).toISOString();
+                timeCaptured(result);
+            });
+        } else {
+            GetTime({shippingMethod: shippingMethod}).then(function(result) {
+                orderTime.value = result.timeUTC;
+                // orderTime.value = new Date(result.timeUTC).toISOString();
+                timeCaptured(result);
+            });
+        }
+    }, 150000);
 }
 updateTimes();
 
+
+function updateTimes() {
+    if (addressFields){
+        GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
+            orderTime.value = result.timeUTC;
+            // orderTime.value = new Date(result.timeUTC).toISOString();
+            timeCaptured(result);
+        });
+    } else {
+        GetTime({shippingMethod: shippingMethod}).then(function(result) {
+            orderTime.value = result.timeUTC;
+            // orderTime.value = new Date(result.timeUTC).toISOString();
+            timeCaptured(result);
+        });
+    }
+}
+
+setInterval(function() {
+    updateTimes()
+}, 150000);
+
+updateTimes();

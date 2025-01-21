@@ -285,8 +285,7 @@
     python manage.py compress
 
     source venv/bin/activate
-    cd provence/site
-    git pull https://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@github.com/gromovvladis/mikado.git
+    cd provence/sitegit pull https://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@github.com/gromovvladis/mikado.git
     python manage.py makemigrations
     python manage.py migrate
     python manage.py collectstatic
@@ -295,6 +294,7 @@
 
     sudo supervisorctl restart all
     redis-cli Flushall
+    
 
 
     source venv/bin/activate

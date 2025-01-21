@@ -31,7 +31,7 @@ datapicker = new AirDatepicker('#delivery_time_later', {
     isMobile: true,
     timepicker: true,
     altField: "#id_order_time",
-    altFieldDateFormat: "dd.MM.yyyy HH:mm",
+    // altFieldDateFormat: "dd.MM.yyyy HH:mm",
     dateFormat: 'd MMM',
     timeFormat: 'HH:mm',
     minutesStep: 15,
@@ -46,12 +46,14 @@ datapicker = new AirDatepicker('#delivery_time_later', {
     selectedTime: selectedTime,
     minDate: minDate,
     maxDate: maxDate,
-    onShow(isFinished) {
-        if (!isFinished) {
-            console.log('AirDatepickerTime');
-            AirDatepickerTime();
-        }
-    }
+    // onShow(isFinished) {
+    //     if (!isFinished) {
+    //         AirDatepickerTime(updateSelected=false);
+    //     }
+    // },
+    altFieldDateFormat(date) {
+        return new Date(date).toISOString();
+    },
 });
 
 function AirDatepickerTime() {
@@ -65,25 +67,22 @@ function AirDatepickerTime() {
     })
     .then(response => response.json())
     .then(data => {
-        minHours = data.datapicker.minHours;
-        maxHours = data.datapicker.maxHours;
-        minDate = new Date(data.datapicker.minDate);
-        maxDate = new Date(data.datapicker.maxDate);
+        const { minDate: minDateRaw, maxDate: maxDateRaw, minHours, maxHours } = data.datapicker;
+        minDate = new Date(minDateRaw);
+        maxDate = new Date(maxDateRaw);
         selectedDate = new Date(minDate);
         selectedTime = minDate.getTime();
-
         datapicker.update({
             minHours: minHours,
             maxHours: maxHours,
             selectedDates: selectedDate,
             selectedTime: selectedTime,
             minDate: minDate,
-            maxDate: maxDate
+            maxDate: maxDate,
         });
+        
     })
-    .catch(error => {
-        console.log('error', error);
-    });
+    .catch(error => console.error('Error:', error));
 }
 
 AirDatepickerTime();
