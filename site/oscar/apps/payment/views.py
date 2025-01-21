@@ -17,7 +17,6 @@ logger = logging.getLogger("oscar.payment")
 
 
 class UpdatePayment(APIView):
-
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
@@ -53,10 +52,7 @@ class YookassaPaymentHandler(APIView):
     """
     Get status from yookassa.
     """
-
     permission_classes = [AllowAny]
-
-
     IP_RANGES = [
         '185.71.76.0/27',
         '185.71.77.0/27',
@@ -68,12 +64,10 @@ class YookassaPaymentHandler(APIView):
         '127.0.0.1',
     ]
 
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Преобразуем IP-диапазоны в объекты ipaddress для быстрого поиска
         self.allowed_ips = [ipaddress.ip_network(ip) for ip in self.IP_RANGES]
-
 
     def get_client_ip(self, request):
         """Получение IP-адреса клиента с учётом прокси."""
@@ -84,7 +78,6 @@ class YookassaPaymentHandler(APIView):
             ip = request.META.get('REMOTE_ADDR')
         return ip
 
-
     def is_ip_allowed(self, ip):
         """Проверка, принадлежит ли IP к разрешённым диапазонам."""
         try:
@@ -93,7 +86,6 @@ class YookassaPaymentHandler(APIView):
         except ValueError:
             logger.error("Неверный IP-адрес: %s", ip)
             return False
-
 
     def post(self, request, *args, **kwargs):
         try:
@@ -104,7 +96,6 @@ class YookassaPaymentHandler(APIView):
         
             event_json = json.loads(request.body)
             notification = WebhookNotificationFactory().create(event_json)
-
             trans_id = notification.object.id
             source = Source.objects.get(Q(payment_id=trans_id) | Q(refund_id=trans_id))
             payment = PaymentManager(source.reference).get_method()

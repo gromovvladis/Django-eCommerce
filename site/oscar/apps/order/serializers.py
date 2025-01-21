@@ -188,6 +188,7 @@ class PaymentSerializer(serializers.Serializer):
         source = Source.objects.create(
             order=order,
             source_type=source_type,
+            amount_allocated=amount_debited,
             amount_debited=amount_debited,
             reference=validated_data["type"],
             refundable=False,
