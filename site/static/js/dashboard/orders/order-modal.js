@@ -5,7 +5,7 @@ const orderModal = () => {
     document.querySelectorAll('[data-id="order-status"]').forEach(function(order) {
         order.addEventListener('click', function(event) {
             event.preventDefault();
-            modalContainer.modal();
+            modalContainer.modal('show');
             order_number = order.getAttribute('data-number');
             order.closest('tr').classList.remove('new-record');
             fetch(`${order_modal_url}?order_number=${order_number}`, {
@@ -18,8 +18,7 @@ const orderModal = () => {
             .then(data => {
                 if (modalContainer && data.html) {
                     modalContainer.html(data.html);
-                    toggle_table(modalContainer.find(".toggle-row"));
-                    next_status = document.querySelector('[data-id="next-status"]');
+                    let next_status = document.querySelector('[data-id="next-status"]');
                     if (next_status){
                         next_status.addEventListener('click', function () {
                             let button = this;
@@ -55,13 +54,14 @@ const orderModal = () => {
                                 });
                         });
                     }
+                    toggle_table(modalContainer.find(".toggle-row"));
                 }
             })        
         });
     });
     modalContainer.on('hidden.bs.modal', function () {
-        modalContainer.html('<div class="modal-dialog" role="document"><div class="modal-content content-loading"></div></div>');
-    });
+        modalContainer.html('<div class="modal-dialog"><div class="modal-content content-loading"></div></div>');
+    });   
 }
 
 orderModal();
