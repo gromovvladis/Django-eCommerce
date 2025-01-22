@@ -49,6 +49,42 @@ class IndexView(TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx.update(self.get_stats())
+        
+        import json
+        import logging
+        from django.templatetags.static import static
+        from django.conf import settings
+        from pywebpush import webpush, WebPushException
+        logger = logging.getLogger("oscar.communications")
+
+        payload = {
+            "title": "Новый заказ!",
+            "body": "dfgdfgdgdfgdfgdfgdfgdf",
+            "icon": static('svg/webpush/new_order.svg'),
+        }
+        WebPushSubscription = get_model("user", "WebPushSubscription")
+        
+        subscriptions = WebPushSubscription.objects.filter(user__is_staff=True)
+        for subscription in subscriptions:
+            subscription_info = {
+                "endpoint": subscription.endpoint,
+                "keys": {
+                    "p256dh": subscription.p256dh,
+                    "auth": subscription.auth,
+                },
+            }
+            try:
+                webpush(
+                    subscription_info=subscription_info,
+                    data=json.dumps(payload),
+                    vapid_private_key=settings.WEBPUSH_PRIVATE_KEY,
+                    vapid_claims={
+                        "sub": f"mailto:{settings.WEBPUSH_ADMIN_EMAIL}",
+                    },
+                )
+            except WebPushException as ex:
+                logger.error(f"Ошибка отправки уведомления: {str(ex)}")
+
         return ctx
 
     def get_active_vouchers(self):
