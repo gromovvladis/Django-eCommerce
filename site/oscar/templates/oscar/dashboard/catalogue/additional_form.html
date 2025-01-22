@@ -137,3 +137,8 @@
         </div>
     </div>
 {% endblock dashboard_content %}
+
+{% block onbodyload %}
+    {{ block.super }}
+    oscar.dashboard.thumbnails.init();
+{% endblock onbodyload %}

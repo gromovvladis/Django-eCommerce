@@ -3,6 +3,7 @@
 {% load sorting_tags %}
 {% load widget_tweaks %}
 {% load dashboard_tags %}
+{% load compress %}
 {% load static %}
 
 {% block body_class %}{{ block.super }} orders{% endblock %}
@@ -100,8 +101,10 @@
 
 {% block extrascripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/dashboard/orders/order-modal.js" %}"></script>
-    <script type="application/javascript" src="{% static "js/dashboard/orders/active-orders.js" %}"></script>
+    {% compress js %}
+        <script type="application/javascript" src="{% static "js/dashboard/orders/order-modal.js" %}"></script>
+        <script type="application/javascript" src="{% static "js/dashboard/orders/active-orders.js" %}"></script>
+    {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}

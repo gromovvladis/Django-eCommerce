@@ -95,6 +95,9 @@ class CategoryForm(SEOFormMixin, BaseCategoryForm):
             "meta_description",
             "evotor_update",
         ]
+        widgets = {
+            "image": ThumbnailInput(),
+        }
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

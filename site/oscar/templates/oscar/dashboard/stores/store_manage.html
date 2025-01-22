@@ -1,4 +1,5 @@
 {% extends 'oscar/dashboard/layout.html' %}
+{% load compress %}
 {% load static %}
 
 {% block body_class %}{{ block.super }} create-page stores{% endblock %}
@@ -184,21 +185,20 @@
 
 {% endblock dashboard_content %}
 
-
 {% block externalscripts %}
     <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&lang=ru_RU"></script>
 {% endblock %}
-
 
 {% block templatescripts %}
     {{ block.super }}
     var url_delivery_zones = "{% url 'dashboard:delivery-zona-json' %}";
 {% endblock %}
 
-
 {% block extrascripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/dashboard/store/store-address.js" %}"></script>
+    {% compress js %}
+        <script type="application/javascript" src="{% static "js/dashboard/store/store-address.js" %}"></script>
+    {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}

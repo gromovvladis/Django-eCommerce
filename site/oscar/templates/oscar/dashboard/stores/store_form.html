@@ -1,5 +1,6 @@
 {% extends 'oscar/dashboard/layout.html' %}
 {% load category_tags %}
+{% load compress %}
 {% load static %}
 
 {% block body_class %}{{ block.super }} create-page store{% endblock %}
@@ -51,7 +52,9 @@
 
 {% block extrascripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/dashboard/store/store-address.js" %}"></script>
+    {% compress js %}
+        <script type="application/javascript" src="{% static "js/dashboard/store/store-address.js" %}"></script>
+    {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}

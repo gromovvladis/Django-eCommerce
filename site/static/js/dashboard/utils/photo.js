@@ -1,8 +1,8 @@
 
 let $files_list;
 let $photo_input;
+let $checkbox;
 let $thumbnail_name = $('input[name="name"]').val();
-let $checkbox = $($photo_input).find('input[type="checkbox"]')
 
 $(document).ready(function () {
     $photo_input = $('.photo-input');
@@ -25,7 +25,7 @@ var dt = new DataTransfer();
 $('#id_image').on('change', function (){
 
     let file = this.files.item(0);
-    
+
     dt = new DataTransfer();
     dt.items.add(file);
 
@@ -44,7 +44,7 @@ $('#id_image').on('change', function (){
     
     this.files = dt.files;
 
-    checkbox = $($photo_input).find('input[type="checkbox"]')
+    $checkbox = $($photo_input).find('input[type="checkbox"]')
     if ($checkbox.length > 0) {
         $checkbox.prop('checked', false);
     }
