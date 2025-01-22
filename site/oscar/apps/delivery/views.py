@@ -1,4 +1,5 @@
 import json
+from zoneinfo import ZoneInfo
 from datetime import datetime, timedelta
 
 from django import http
@@ -41,22 +42,20 @@ def pickup_now(basket):
     )
 
     # Текущее время
-    current_time = now()
-    timezone = current_time.tzinfo
+    timezone = ZoneInfo(settings.TIME_ZONE)
+    current_time = datetime.now(tz=timezone)
+
     busy_periods = [
         (
-            order.order_time - timedelta(minutes=order.total_cooking_time),
-            order.order_time,
+            order.order_time.astimezone(timezone) - timedelta(minutes=order.total_cooking_time),
+            order.order_time.astimezone(timezone),
         )
         for order in active_orders
-        if order.order_time > current_time
+        if order.order_time.astimezone(timezone) > current_time
     ]
 
     # Добавляем рабочие границы текущего дня
     current_day_start = datetime.combine(current_time.date(), start_time, tzinfo=timezone)
-    busy_periods.append((current_day_start, current_day_start))  # Начало дня
-    busy_periods.sort(key=lambda x: x[0])
-
     earliest_start_time = max(current_time, current_day_start)
 
     new_order_time = None
@@ -65,13 +64,21 @@ def pickup_now(basket):
         work_day_start = datetime.combine(earliest_start_time.date(), start_time, tzinfo=timezone)
         work_day_end = datetime.combine(earliest_start_time.date(), end_time, tzinfo=timezone)
 
+        # Если текущий день уже закончился, переход к следующему дню
+        if earliest_start_time >= work_day_end:
+            earliest_start_time = datetime.combine(
+                earliest_start_time.date() + timedelta(days=1), start_time, tzinfo=timezone
+            )
+            continue
+
         # Фильтруем занятые периоды для текущего дня
         day_busy_periods = [
             (max(start, work_day_start), min(end, work_day_end))
             for start, end in busy_periods
             if start.date() == earliest_start_time.date() or end.date() == earliest_start_time.date()
         ]
-        day_busy_periods.append((work_day_start, work_day_start))  # Начало рабочего дня
+        work_day_start_end = current_time if current_time > work_day_start else work_day_start
+        day_busy_periods.append((work_day_start, work_day_start_end))  # Начало рабочего дня
         day_busy_periods.append((work_day_end, work_day_end))  # Конец рабочего дня
         day_busy_periods.sort(key=lambda x: x[0])
 
@@ -259,7 +266,7 @@ class OrderLaterView(APIView):
         start_time = request.basket.store.start_worktime
         end_time = request.basket.store.end_worktime
         
-        pickup_time = pickup_now(request.basket) + timedelta(hours=2)
+        pickup_time = pickup_now(request.basket) + timedelta(hours=1)
 
         if pickup_time.hour > end_time.hour or pickup_time.hour < start_time.hour:
             pickup_time = datetime.combine(pickup_time.date() + timedelta(days=1), start_time)
