@@ -17,7 +17,7 @@ from oscar.core.loading import get_model
 Notification = get_model("communication", "Notification")
 CommunicationEvent = get_model("order", "CommunicationEvent")
 CommunicationEventType = get_model("communication", "CommunicationEventType")
-WebPushSubscription = get_model("user", "WebPushSubscription")
+WebPushSubscription = get_model("communication", "WebPushSubscription")
 TelegramMessage = get_model("telegram", "TelegramMessage")
 User = get_user_model()
 

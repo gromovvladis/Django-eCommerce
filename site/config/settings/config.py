@@ -25,6 +25,7 @@ class Shop(OscarConfig):
         self.delivery_app = apps.get_app_config("delivery")
         self.telegram_app = apps.get_app_config("telegram")
         self.crm_app = apps.get_app_config("crm")
+        self.communication_app = apps.get_app_config("communication")
 
     def get_urls(self):
         urls = [
@@ -44,5 +45,6 @@ class Shop(OscarConfig):
             path("delivery/", self.delivery_app.urls),
             path("telegram/", self.telegram_app.urls),
             path("crm/", self.crm_app.urls),
+            path("communication/", self.communication_app.urls),
         ]
         return urls

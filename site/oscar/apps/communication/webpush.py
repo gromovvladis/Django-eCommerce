@@ -5,7 +5,7 @@ from django.conf import settings
 from apps.communication.tasks import _send_push_notification
 from oscar.core.loading import get_model
 
-WebPushSubscription = get_model("user", "WebPushSubscription")
+WebPushSubscription = get_model("communication", "WebPushSubscription")
     
 logger = logging.getLogger("oscar.communications")
 

@@ -21,17 +21,12 @@ class HomeConfig(OscarConfig):
         self.promocat_detail_view = get_class("home.views", "PromoCatDetailView")
         self.cookies_view = get_class("home.views", "GetCookiesView")
         
-        self.webpush_save_view = get_class("home.views", "WebpushSaveSubscription")
         self.service_worker_view = get_class("home.views", "service_worker")
 
     def get_urls(self):
         urls = super().get_urls()
         urls += [
             path("", self.home_view.as_view(), name="index"),
-
-            path("webpush/save-subscription/", self.webpush_save_view.as_view(), name="webpush-save"),
-            path('service-worker.js', self.service_worker_view, name='service_worker'),
-
             path("actions/", self.actions_view.as_view(), name="actions"),
             re_path(
                 r"^actions/(?P<action_slug>[\w-]+(/[\w-]+)*)/$",
@@ -44,5 +39,6 @@ class HomeConfig(OscarConfig):
                 name="promo-detail",
             ),
             path("api/cookies/", cache_page(60 * 60 * 12)(self.cookies_view.as_view()), name="cookies"),
+            path('service-worker.js', self.service_worker_view),
         ]
         return self.post_process_urls(urls)

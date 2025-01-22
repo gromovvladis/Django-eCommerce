@@ -252,19 +252,3 @@ class User(AbstractBaseUser, PermissionsMixin):
             return send_sms_async.delay(message)
         else:
             return send_sms_async(message)
-
-
-class WebPushSubscription(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    endpoint = models.URLField()
-    p256dh = models.TextField()
-    auth = models.TextField()
-    date_created = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "auth_webpush"
-        verbose_name = "Подписка на WebPush"
-        verbose_name_plural = "Подписки на WebPush"
-
-    def __str__(self):
-        return f"Subscription for {self.user or 'Anonymous'}"
