@@ -59,9 +59,9 @@ const orderModal = () => {
             })        
         });
     });
-    // modalContainer.on('hidden.bs.modal', function () {
-    //     modalContainer.html('<div class="modal-dialog"><div class="modal-content content-loading"></div></div>');
-    // });   
+    modalContainer.on('hidden.bs.modal', function () {
+        modalContainer.html('<div class="modal-dialog"><div class="modal-content content-loading"></div></div>');
+    });   
 }
 
 orderModal();
