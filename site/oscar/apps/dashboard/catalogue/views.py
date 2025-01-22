@@ -569,7 +569,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         
         if form is not None:
             evotor_update = form.cleaned_data.get('evotor_update')
-            response.set_cookie('evotor_update', evotor_update)
+            response.set_cookie('evotor_update', evotor_update, max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME)
             if evotor_update:
                 stockrecord_formset = formsets["stockrecord_formset"]
                 stock_update = not form.changed_data and bool(stockrecord_formset.changed_objects) and self.object.evotor_id
@@ -959,7 +959,7 @@ class CategoryCreateView(CategoryListMixin, generic.CreateView):
         response = super().form_valid(form)
         
         evotor_update = form.cleaned_data.get('evotor_update')
-        response.set_cookie('evotor_update', evotor_update)
+        response.set_cookie('evotor_update', evotor_update, max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME)
 
         if evotor_update:
             error = form.update_or_create_evotor_group(self.object)
@@ -992,7 +992,7 @@ class CategoryUpdateView(CategoryListMixin, generic.UpdateView):
         response = super().form_valid(form)
         
         evotor_update = form.cleaned_data.get('evotor_update')
-        response.set_cookie('evotor_update', evotor_update)
+        response.set_cookie('evotor_update', evotor_update, max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME)
 
         if evotor_update:
             error = form.update_or_create_evotor_group(self.object)
@@ -1451,7 +1451,7 @@ class AdditionalCreateUpdateView(generic.UpdateView):
             response = HttpResponseRedirect(self.get_success_url())
         
         evotor_update = form.cleaned_data.get('evotor_update')
-        response.set_cookie('evotor_update', evotor_update)
+        response.set_cookie('evotor_update', evotor_update, max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME)
         if evotor_update:
             additional_updated = bool(form.changed_data)
             error = None

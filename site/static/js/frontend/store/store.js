@@ -61,16 +61,10 @@ function storeModalLoaded() {
 
     authLoaded = false;
     storeLoaded = true;
-
 }
 
-function initStore(basketStore=null) {
-    if (!basketStore && !getCookie("store")) {
-
-        console.log("store open")
-        console.log(basketStore)
-        console.log(getCookie("store"))
-
+function initStore() {
+    if (!getCookie("store")) {
         openStoreModal();
     }
 }

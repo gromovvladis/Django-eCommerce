@@ -38,10 +38,10 @@ class StoreSelectModalView(APIView):
 
         if basket_store and basket_store != cookie_store:
             # Устанавливаем партнера из корзины, если данные не совпадают с куки
-            response.set_cookie("store", basket_store)
+            response.set_cookie("store", basket_store, max_age=settings.OSCAR_STORE_COOKIE_LIFETIME)
         elif not cookie_store and not basket_store:
             # Если данные о партнере отсутствуют в куки и корзине, устанавливаем по умолчанию
-            response.set_cookie("store", store_default)
+            response.set_cookie("store", store_default, max_age=settings.OSCAR_STORE_COOKIE_LIFETIME)
 
         # Возвращаем JSON-ответ с данными
         return response
@@ -64,7 +64,7 @@ class StoreSelectModalView(APIView):
                 else:
                     response = http.JsonResponse({"refresh": False, "status": 200}, status=200)
            
-            response.set_cookie('store', form_store_id)
+            response.set_cookie('store', form_store_id, max_age=settings.OSCAR_STORE_COOKIE_LIFETIME)
             return response
 
         return http.JsonResponse({"error": "Ошибка выбора магазина", "status": 400}, status=404)
