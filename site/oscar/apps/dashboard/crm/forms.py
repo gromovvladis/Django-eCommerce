@@ -1,8 +1,6 @@
 from django import forms
 
-from oscar.apps.dashboard.widgets import RelatedMultipleFieldWidgetWrapper
-from oscar.core.loading import get_class, get_classes, get_model
-from oscar.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
+from oscar.core.loading import get_model
 
 Store = get_model("store", "Store")
 

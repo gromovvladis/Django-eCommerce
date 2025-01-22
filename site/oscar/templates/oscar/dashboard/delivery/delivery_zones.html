@@ -1,5 +1,6 @@
 {% extends 'oscar/dashboard/layout.html' %}
 {% load render_table from django_tables2 %}
+{% load compress %}
 {% load static %}
 
 {% block body_class %}{{ block.super }} delivery-zones{% endblock %}
@@ -70,7 +71,9 @@
 
 {% block extrascripts %}
     {{ block.super }}
-    <script type="application/javascript" src="{% static "js/dashboard/delivery/delivery-zones-dashboard.js" %}"></script>
+    {% compress js %}
+        <script type="application/javascript" src="{% static "js/dashboard/delivery/delivery-zones-dashboard.js" %}"></script>
+    {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}

@@ -5,7 +5,7 @@ const orderModal = () => {
     document.querySelectorAll('[data-id="order-status"]').forEach(function(order) {
         order.addEventListener('click', function(event) {
             event.preventDefault();
-            modalContainer.modal('show');
+            modalContainer.modal();
             order_number = order.getAttribute('data-number');
             order.closest('tr').classList.remove('new-record');
             fetch(`${order_modal_url}?order_number=${order_number}`, {
@@ -59,9 +59,9 @@ const orderModal = () => {
             })        
         });
     });
-    modalContainer.on('hidden.bs.modal', function () {
-        modalContainer.html('<div class="modal-dialog"><div class="modal-content content-loading"></div></div>');
-    });   
+    // modalContainer.on('hidden.bs.modal', function () {
+    //     modalContainer.html('<div class="modal-dialog"><div class="modal-content content-loading"></div></div>');
+    // });   
 }
 
 orderModal();

@@ -31,7 +31,6 @@ from oscar.core.utils import datetime_combine, format_datetime
 from oscar.views import sort_queryset
 
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
 
@@ -144,18 +143,19 @@ class OrderStatsView(FormView):
     def get_report(self, orders, start, end, range_type):
 
         start_time = start
-        diff = relativedelta(end, start)
-
         if range_type == 'days':
-            range_time = end.day - start.day + 1
+            range_time = (end - start).days
         elif range_type == 'weeks':
-            range_time = math.ceil((end.day - start.day + 1) / 7)
+            start_time = start - datetime.timedelta(days=start.weekday())
+            end_sunday = end + datetime.timedelta(days=(6 - end.weekday()))
+            range_time = (end_sunday - start_time).days // 7
         elif range_type == 'months':
             start_time = start_time.replace(day=1)
+            diff = relativedelta(end, start)
             range_time = diff.years * 12 + diff.months + (1 if diff.days > 0 else 0)
         elif range_type == 'years':
-            start_time = start_time.replace(month=1, day=1)
-            range_time = diff.years + (1 if diff.months > 0 or diff.days > 0 else 0)
+            start_time = start.replace(month=1, day=1)
+            range_time = end.year - start.year + 1
         else:
             raise ValueError("Invalid range_type. Must be 'days', 'weeks', 'months', or 'years'.")
 
@@ -175,6 +175,8 @@ class OrderStatsView(FormView):
                 end_time = start_time + relativedelta(months=1)
             elif range_type == 'years':
                 end_time = start_time + relativedelta(years=1) 
+            else: 
+                end_time = start_time
 
             report_orders = orders.filter(date_placed__gte=start_time, date_placed__lt=end_time)
             total = report_orders.aggregate(Sum("total"))["total__sum"] or D("0.0")
@@ -215,7 +217,6 @@ class OrderStatsView(FormView):
         return order_data, sum(order_count) > 0
 
     def get_data(self, filters, excludes):
-
         orders = queryset_orders(user=self.request.user).filter(**filters).exclude(**excludes)
         
         if filters.get('date_placed__range') is not None:
@@ -306,7 +307,7 @@ class OrderStatsView(FormView):
             "start_date_months": start_dates["months"],
             "start_date_years": start_dates["years"],
             "start_date": start_date,
-            "end_time": end_date,
+            "end_date": end_date,
             "report_datas": [],
             "top_products_names": [],
             "top_products_quantities": [],
