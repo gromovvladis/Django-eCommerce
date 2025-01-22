@@ -62,7 +62,7 @@ class IndexView(TemplateView):
             "body": "dfgdfgdgdfgdfgdfgdfgdf",
             "icon": static('svg/webpush/new_order.svg'),
         }
-        WebPushSubscription = get_model("user", "WebPushSubscription")
+        WebPushSubscription = get_model("communication", "WebPushSubscription")
         
         subscriptions = WebPushSubscription.objects.filter(user__is_staff=True)
         for subscription in subscriptions:

@@ -1,4 +1,3 @@
-
 if ('serviceWorker' in navigator && 'PushManager' in window) {
   if (Notification.permission != 'denied') {
     subscribe();
@@ -6,7 +5,6 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
 }
 
 function subscribe() {
-
   // Регистрируем Service Worker
   navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
     .then(function (registration) {
@@ -21,17 +19,27 @@ function subscribe() {
       });
     })
     .then(function (subscription) {
+      // Извлекаем токен из endpoint
+      const currentToken = extractToken(subscription.endpoint);
+
       // Отправляем данные подписки на сервер
-      return sendTokenToServer(subscription)
+      return sendTokenToServer(currentToken, subscription);
     })
+    .catch(function (error) {
+      console.error('Ошибка подписки на уведомления:', error);
+    });
 }
 
+// Извлечение токена из endpoint
+function extractToken(endpoint) {
+  return endpoint.split('/').pop(); // Последний сегмент URL — это токен
+}
 
-// отправка ID на сервер
-function sendTokenToServer(subscription) {
-  currentToken = subscription.token
+// Отправка ID на сервер
+function sendTokenToServer(currentToken, subscription) {
   if (!isTokenSentToServer(currentToken)) {
     // Отправляем данные подписки на сервер
+    console.log('Сохранение подписки на сервере:', webpush_save_url);
     fetch(webpush_save_url, {
       method: 'POST',
       headers: {
@@ -46,14 +54,19 @@ function sendTokenToServer(subscription) {
         }
         return response.json();
       })
-    setTokenSentToServer(currentToken);
+      .then(function (data) {
+        console.log('Подписка успешно сохранена:', data);
+        setTokenSentToServer(currentToken);
+      })
+      .catch(function (error) {
+        console.error('Ошибка сохранения подписки на сервере:', error);
+      });
   }
 }
 
-// используем localStorage для отметки того,
-// что пользователь уже подписался на уведомления
+// Используем localStorage для отметки, что пользователь уже подписался на уведомления
 function isTokenSentToServer(currentToken) {
-  return window.localStorage.getItem('sentFirebaseMessagingToken') == currentToken;
+  return window.localStorage.getItem('sentFirebaseMessagingToken') === currentToken;
 }
 
 function setTokenSentToServer(currentToken) {

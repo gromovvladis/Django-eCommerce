@@ -233,3 +233,20 @@ class Notification(models.Model):
     @property
     def is_read(self):
         return self.date_read is not None
+
+
+class WebPushSubscription(models.Model):
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    endpoint = models.URLField()
+    p256dh = models.TextField()
+    auth = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        app_label = "communication"
+        db_table = "communication_webpush"
+        verbose_name = "Подписка на WebPush"
+        verbose_name_plural = "Подписки на WebPush"
+
+    def __str__(self):
+        return f"Subscription for {self.user or 'Anonymous'}"
