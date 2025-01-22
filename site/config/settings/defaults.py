@@ -5,6 +5,11 @@ OSCAR_HOMEPAGE = reverse_lazy("home:index")
 # Dynamic class loading
 OSCAR_DYNAMIC_CLASS_LOADER = "oscar.core.loading.default_class_loader"
 
+OSCAR_DEFAULT_COOKIE_LIFETIME = 7 * 24 * 60 * 60
+
+# Store cookies settings
+OSCAR_STORE_COOKIE_LIFETIME = 7 * 24 * 60 * 60
+
 # Basket settings
 OSCAR_BASKET_COOKIE_LIFETIME = 7 * 24 * 60 * 60
 OSCAR_BASKET_COOKIE_OPEN = "open_basket"

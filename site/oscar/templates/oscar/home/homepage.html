@@ -22,9 +22,7 @@
             <button onclick="openStoreModal()" class="store_select checked text-left d-flex flex-column ml-2 pd-0">
                 {% if store %}
                     <span class="header_store">{{ store }}</span>
-                    {% if store.primary_address %}
-                        <span class="header_address">{{ store.primary_address }}</span>
-                    {% endif %}
+                    <span class="header_address">{{ store.primary_address }}</span>
                 {% endif %}
             </button>
         {% endif %}
