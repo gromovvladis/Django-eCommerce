@@ -82,7 +82,6 @@
                     {% with sources=order.sources.all %}
                         {% if sources %}
                             <p class="text-secondary mb-0 mt-2">Оплата</p>
-
                             {% if order_paid == order.total %}
                                 <span class="badge badge-success my-1"><strong>Заказ оплачен</strong></span>
                             {% elif order_paid == 0 %}
@@ -90,13 +89,12 @@
                             {% else %}
                                 <span class="badge badge-warning my-1"><strong>Оплачено: {{ order_paid|currency:order.currency }}</strong></span>
                             {% endif %}
-
                             {% for source in sources %}
                                 <div class="d-flex align-items-center">
-                                    <span class="spinner-border-sm {% if source.paid %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
+                                    <span class="spinner-border-sm {% if source.paid %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-1">&nbsp;</span>
                                     {{ source.source_type }}
                                     <span class="ml-2"><i class="fa-solid fa-arrow-down text-success"></i> {{ source.amount_debited|currency:order.currency }}</span>&nbsp;
-                                    <span class="ml-1"><i class="fa-solid fa-arrow-up text-danger"></i> {{ source.amount_refunded|currency:order.currency }}</span>
+                                    <span><i class="fa-solid fa-arrow-up text-danger"></i> {{ source.amount_refunded|currency:order.currency }}</span>
                                 </div>
                             {% endfor %}
                         {% endif %}
@@ -144,7 +142,7 @@
                                 <td data-label="Количество" class="quantity">
                                     {{ line.quantity }}
                                 </td>
-                                <td data-label="Итоговая цена" class="text-right">{{ line.line_price|currency:order.currency }}</td>
+                                <td data-label="Цена" class="text-right">{{ line.line_price|currency:order.currency }}</td>
                                 <td class="toggle-row">
                                     <button class="btn btn-secondary" type="button">
                                         <i class="fa-solid fa-chevron-up"></i>

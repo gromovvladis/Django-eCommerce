@@ -1593,15 +1593,16 @@ pre code {
 }
 
 
-@media screen and (max-width:768px) {
+/* @media screen and (max-width:768px) {
   .modal-table{
     margin: 0 -1rem;
     width: calc(100% + 2rem);
   }
-}
+} */
 
 
 .modal-table td,
+.modal-table tr,
 .modal-table th {
   padding: 0.25rem !important;
 }
@@ -6126,6 +6127,7 @@ a.close.disabled {
   justify-content: center;
   align-items: center;
   height: 100%;
+  /* min-height: 100%; */
 }
 .modal.fade .modal-dialog {
   transition: transform 0.15s ease-out;
@@ -6266,7 +6268,7 @@ a.close.disabled {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  padding: 1rem 0;
+  padding: 1rem;
   margin: 0 1rem;
   border-top: 1px solid #dee2e6;
 }

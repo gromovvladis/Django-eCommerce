@@ -134,7 +134,7 @@
                     {% if users %}
                         <thead>
                             <tr>
-                                <th class="title">ФИО</th>
+                                <th class="name">ФИО</th>
                                 <th>Должность</th>
                                 <th>Телефон</th>
                                 <th></th>
@@ -143,9 +143,8 @@
                         <tbody>
                             {% for user in users %}
                                 <tr>
-                                    <td class="title">
-                                        <a class="d-flex align-items-center" href="{% url 'dashboard:staff-detail' pk=user.profile.id %}">
-                                            <span class="spinner-border-sm {% if user.profile.gender == "М" %}badge-primary{% else %}badge-pink{% endif %}  rounded-circle mr-2">&nbsp;</span>
+                                    <td class="name">
+                                        <a href="{% url 'dashboard:staff-detail' pk=user.profile.id %}">
                                             {{ user.profile.get_full_name|default:user.username }}
                                         </a>
                                     </td>

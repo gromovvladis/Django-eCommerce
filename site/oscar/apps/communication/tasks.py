@@ -133,7 +133,16 @@ def _send_push_notification(subscription_info, payload):
             },
         )
     except WebPushException as ex:
-        logger.error(f"Ошибка отправки уведомления: {str(ex)}")
+        if "Push failed: 410 Gone" in str(ex):
+            # Удаляем подписку из базы данных, если она больше не активна
+            subscription = WebPushSubscription.objects.filter(endpoint=subscription_info["endpoint"]).first()
+            if subscription:
+                subscription.delete()
+                logger.info(f"Подписка с endpoint {subscription_info['endpoint']} была удалена из-за ошибки 410 Gone.")
+            else:
+                logger.error(f"Ошибка отправки уведомления и поиска подписки: {str(ex)}")
+        else:
+            logger.error(f"Ошибка отправки уведомления: {str(ex)}")
 
 @shared_task
 def _send_push_notification_new_order_to_staff(ctx):
@@ -163,7 +172,12 @@ def _send_push_notification_new_order_to_staff(ctx):
                 },
             )
         except WebPushException as ex:
-            logger.error(f"Ошибка отправки уведомления: {str(ex)}")
+            if "Push failed: 410 Gone" in str(ex):
+                # Удаляем подписку из базы данных, если она больше не активна
+                subscription.delete()
+                logger.info(f"Подписка с endpoint {subscription.endpoint} была удалена из-за ошибки 410 Gone.")
+            else:
+                logger.error(f"Ошибка отправки уведомления: {str(ex)}")
 
 # ================= Telegram =================
 
