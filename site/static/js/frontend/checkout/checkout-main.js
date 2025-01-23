@@ -35,6 +35,8 @@ const OFFLINE_PAYMENT = ['CASH', 'ELECTRON'];
 const ONLINE_PAYMENT = ['SBP', 'ONLINECARD'];
 const baseURL = window.location.origin;
 
+var deliveryTimeMethod = "now";
+
 // Инициализация адреса
 document.addEventListener('DOMContentLoaded', function () {
     if (line1){
@@ -83,19 +85,16 @@ deliveryTimeBtn.forEach(function(time_btn) {
     time_btn.addEventListener('click', function() {
         let leftPosition = time_btn.getBoundingClientRect().left - time_btn.parentElement.getBoundingClientRect().left;
         timeSwaper.style.left = `${leftPosition}px`;
-
-        var delivery_time_method = time_btn.getAttribute("data-type");
-        if (delivery_time_method === "now") {
+        deliveryTimeMethod = time_btn.getAttribute("data-type");
+        if (deliveryTimeMethod === "now") {
             if (addressFields){
                 GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
                     orderTime.value = result.timeUTC;
-                    // orderTime.value = new Date(result.timeUTC).toISOString();
                     timeCaptured(result);
                 });
             } else {
                 GetTime({shippingMethod: shippingMethod}).then(function(result) {
                     orderTime.value = result.timeUTC;
-                    // orderTime.value = new Date(result.timeUTC).toISOString();
                     timeCaptured(result);
                 });
             }
@@ -282,43 +281,20 @@ submitBtn.addEventListener('click', function() {
 
 // Таймер обновления времени доставки к адресу каждые 2.5 минут
 function updateTimes() {
-    setInterval(function() {
+    if (deliveryTimeMethod === "now" && deliveryTimeLater.classList.contains("hidden")) {
         if (addressFields){
             GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
                 orderTime.value = result.timeUTC;
-                // orderTime.value = new Date(result.timeUTC).toISOString();
                 timeCaptured(result);
             });
         } else {
             GetTime({shippingMethod: shippingMethod}).then(function(result) {
                 orderTime.value = result.timeUTC;
-                // orderTime.value = new Date(result.timeUTC).toISOString();
                 timeCaptured(result);
             });
         }
-    }, 150000);
-}
-updateTimes();
-
-
-function updateTimes() {
-    if (addressFields){
-        GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
-            orderTime.value = result.timeUTC;
-            // orderTime.value = new Date(result.timeUTC).toISOString();
-            timeCaptured(result);
-        });
-    } else {
-        GetTime({shippingMethod: shippingMethod}).then(function(result) {
-            orderTime.value = result.timeUTC;
-            // orderTime.value = new Date(result.timeUTC).toISOString();
-            timeCaptured(result);
-        });
     }
 }
 
-setInterval(function() {
-    updateTimes()
-}, 150000);
-
+setInterval(function() {updateTimes()}, 300000);
 updateTimes();

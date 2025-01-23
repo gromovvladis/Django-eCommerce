@@ -360,8 +360,8 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         # We define a general error message for when an unanticipated payment
         # error occurs.
         error_msg = (
-            "Произошла проблема при обработке платежа"
-            "Оплата не была принята."
+            "Произошла проблема при обработке платежа "
+            "Оплата не была принята. "
             "Пожалуйста обратитесь в службу поддержки клиентов, если проблема не исчезнет"
         )
 

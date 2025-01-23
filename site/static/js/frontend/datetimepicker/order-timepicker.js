@@ -21,8 +21,7 @@ const today = new Date();
 let hoursMore = today.getUTCMinutes() > 20 ? 3 : 2;
 
 let minDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours() + hoursMore, 0, 0);
-let maxDate = new Date();
-maxDate.setUTCDate(minDate.getUTCDate() + 14);
+let maxDate = new Date().setUTCDate(minDate.getUTCDate() + 14);
 let selectedDate = new Date(minDate);
 let selectedTime = minDate.getTime();
 
@@ -30,8 +29,6 @@ datapicker = new AirDatepicker('#delivery_time_later', {
     autoClose: false,
     isMobile: true,
     timepicker: true,
-    altField: "#id_order_time",
-    // altFieldDateFormat: "dd.MM.yyyy HH:mm",
     dateFormat: 'd MMM',
     timeFormat: 'HH:mm',
     minutesStep: 15,
@@ -46,13 +43,11 @@ datapicker = new AirDatepicker('#delivery_time_later', {
     selectedTime: selectedTime,
     minDate: minDate,
     maxDate: maxDate,
-    // onShow(isFinished) {
-    //     if (!isFinished) {
-    //         AirDatepickerTime(updateSelected=false);
-    //     }
-    // },
-    altFieldDateFormat(date) {
-        return new Date(date).toISOString();
+    onShow(isFinished) {
+        AirDatepickerTime();
+    },
+    onSelect({date, formattedDate, datepicker}) {
+        orderTime.value = new Date(date).toISOString();
     },
 });
 
@@ -79,10 +74,8 @@ function AirDatepickerTime() {
             selectedTime: selectedTime,
             minDate: minDate,
             maxDate: maxDate,
-        });
+        }, false);
         
     })
     .catch(error => console.error('Error:', error));
 }
-
-AirDatepickerTime();

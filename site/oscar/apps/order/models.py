@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 from django.utils.timezone import now
-from oscar.apps.order.signals import order_line_status_changed, order_status_changed, active_order_placed
+from oscar.apps.order.signals import order_line_status_changed, order_status_changed
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_model
 from oscar.core.utils import get_default_currency
@@ -173,12 +173,6 @@ class Order(models.Model):
                 
         self.save()
         
-        if not self.evotor_id and new_status in settings.ORDER_STATUS_SEND_TO_EVOTOR:
-            active_order_placed.send(
-                sender=self,
-                order=self,
-            )
-
         # Send signal for handling status changed
         order_status_changed.send(
             sender=self,

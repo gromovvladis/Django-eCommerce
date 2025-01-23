@@ -1,4 +1,5 @@
 from decimal import Decimal as D
+from datetime import datetime
 
 from django import http
 from django.contrib import messages
@@ -325,7 +326,7 @@ class CheckoutSessionMixin(object):
         return self.checkout_session.order_note()
 
     def get_order_time(self, basket, **kwargs):
-        return self.checkout_session.order_time()
+        return datetime.fromisoformat(self.checkout_session.order_time())
 
     def get_email_or_change(self, basket, **kwargs):
         return self.checkout_session.email_or_change()

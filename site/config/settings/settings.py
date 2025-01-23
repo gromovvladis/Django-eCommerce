@@ -36,7 +36,8 @@ STATIC_URL = 'static/'
 # TIME + LANG
 # =============
 
-TIME_ZONE = 'Asia/Krasnoyarsk'
+# TIME_ZONE = 'Asia/Krasnoyarsk'
+TIME_ZONE = 'Etc/GMT-7'
 LANGUAGE_CODE = 'ru'
 USE_I18N = True
 USE_L10N = True

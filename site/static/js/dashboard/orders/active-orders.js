@@ -36,6 +36,7 @@ const updateTable = (force=false) => {
                 if (orderModal){
                     orderModal();
                 }
+                oscar.dashboard.orders.initTable();
             }
         }
     })

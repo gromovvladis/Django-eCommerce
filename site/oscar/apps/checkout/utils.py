@@ -1,6 +1,3 @@
-from django.utils.timezone import make_aware, get_current_timezone
-
-from oscar.apps.shipping.methods import NoShippingRequired
 from oscar.apps.shipping.methods import NoShippingRequired
 
 class CheckoutSessionData(object):
@@ -172,7 +169,6 @@ class CheckoutSessionData(object):
     # ==================
 
     def set_order_time(self, order_time):
-        # order_time = order_time.strftime("%Y-%m-%d %H:%M")
         self._set("submission", "order_time", order_time.isoformat())
 
     def order_time(self):

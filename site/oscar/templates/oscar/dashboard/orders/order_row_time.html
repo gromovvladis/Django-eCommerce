@@ -3,18 +3,9 @@
 {% load dashboard_tags %}
 
 {{ record.order_time|date:"d.m.y H:i" }}
-<br>
 {% if record.before_order %}
-    <span class="badge {% if record.before_order|in_future %}badge-success{% else %}badge-danger{% endif %} mt-1">
-        {% if record.before_order.days %}
-            {{ record.before_order.days }} дн.
-        {% endif %}
-        {% with hours=record.before_order|hours %}
-            {% if hours %}
-                {{ hours }} ч.
-            {% else %}
-                {{ record.before_order|minutes }} мин.
-            {% endif %}
-        {% endwith %}
-    </span>
+    <br>
+    {% with before_order=record|before_order_badge %}
+        <span data-id="order-badge" data-seconds="{{ before_order.2 }}" class="badge {{ before_order.1 }}">{{ before_order.0 }}</span>
+    {% endwith %}
 {% endif %}

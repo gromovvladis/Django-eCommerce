@@ -112,8 +112,7 @@
                         <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
                         <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
                     </div>
-                    <div class="card card-body dropdown-list collapse" id="status-body">
-                        
+                    <div class="card card-body dropdown-list" id="status-body">
                         <h2 class="mb-3">Изменить статус заказа</h2>
                         {% if order_statuses %}
                             <div class="form-inline fill-width justify-space-between">
@@ -169,6 +168,7 @@
 {% block extrascripts %}
     {{ block.super }}
     {% compress js %}
+        <script type="application/javascript" src="{% static "js/dashboard/orders/before-order.js" %}"></script>
         <script type="application/javascript" src="{% static "js/dashboard/orders/order-modal.js" %}"></script>
     {% endcompress %}
 {% endblock %}
