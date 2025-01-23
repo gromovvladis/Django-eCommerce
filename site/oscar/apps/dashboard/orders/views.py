@@ -939,7 +939,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
     def get_object(self, queryset=None):
         order = get_order_or_404(self.request.user, self.kwargs["number"])
         order.open()
-        if not order.date_finish:  # Проверяем, что дата завершения ещё не установлена
+        if not order.date_finish:
             order.before_order = order.order_time - now()
         else:
             order.before_order = None
