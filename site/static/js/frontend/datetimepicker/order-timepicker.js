@@ -14,8 +14,8 @@ const localLang = {
 
 let minHours = 10;
 let maxHours = 22;
-let maxMinutes = 60;
 let minMinutes = 0;
+let maxMinutes = 60;
 
 const today = new Date();
 let hoursMore = today.getUTCMinutes() > 20 ? 3 : 2;

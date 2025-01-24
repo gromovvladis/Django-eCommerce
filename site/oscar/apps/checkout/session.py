@@ -9,6 +9,7 @@ from django.urls import reverse
 from oscar.apps.shipping.methods import NoShippingRequired
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
+from oscar.apps.delivery.utils import is_valid_order_time
 
 from . import exceptions
 
@@ -74,7 +75,7 @@ class CheckoutSessionMixin(object):
         for method_name in pre_conditions:
             if not hasattr(self, method_name):
                 raise ImproperlyConfigured(
-                    "Нет метода '%s' чтобы вызвать как 'pre-condition'" % (method_name)
+                    "Нет метода '%s' чтобы вызвать как 'pre-condition'." % (method_name)
                 )
             getattr(self, method_name)(request)
 
@@ -91,7 +92,7 @@ class CheckoutSessionMixin(object):
         for method_name in skip_conditions:
             if not hasattr(self, method_name):
                 raise ImproperlyConfigured(
-                    "Нет метода '%s' чтобы вызвать как 'skip-condition'"
+                    "Нет метода '%s' чтобы вызвать как 'skip-condition'."
                     % (method_name)
                 )
             getattr(self, method_name)(request)
@@ -110,7 +111,7 @@ class CheckoutSessionMixin(object):
         if request.basket.is_empty:
             raise exceptions.FailedPreCondition(
                 url=reverse("basket:summary"),
-                message="Для оформления заказа вам необходимо добавить товары в корзину",
+                message="Для оформления заказа вам необходимо добавить товары в корзину.",
             )
 
     def delete_non_valid_lines(self, request):
@@ -154,7 +155,7 @@ class CheckoutSessionMixin(object):
         if not request.user.is_authenticated:
             raise exceptions.FailedPreCondition(
                 url=reverse("checkout:index"),
-                message="Пожалуйста, войдите в систему, чтобы разместить заказ",
+                message="Пожалуйста, войдите в систему, чтобы разместить заказ.",
             )
 
     def check_shipping_data_is_captured(self, request):
@@ -162,7 +163,7 @@ class CheckoutSessionMixin(object):
             # Even without shipping being required, we still need to check that
             # a shipping method code has been set.
             if not self.checkout_session.is_shipping_method_set(self.request.basket):
-                messages.error(self.request, "Выберите способ доставки")
+                messages.error(self.request, "Выберите способ доставки.")
                 raise exceptions.FailedPreCondition(
                     url=reverse("checkout:checkoutview"),
                 )
@@ -182,7 +183,7 @@ class CheckoutSessionMixin(object):
         if not self.checkout_session.is_shipping_address_set():
             raise exceptions.FailedPreCondition(
                 url=reverse("checkout:checkoutview"),
-                message="Пожалуйста, укажите адрес доставки",
+                message="Пожалуйста, укажите адрес доставки.",
             )
 
     def check_a_valid_shipping_method_is_captured(self):
@@ -190,23 +191,28 @@ class CheckoutSessionMixin(object):
         if not self.checkout_session.is_shipping_method_set(self.request.basket):
             raise exceptions.FailedPreCondition(
                 url=reverse("checkout:shipping-method"),
-                message="Пожалуйста, выберите способ доставки",
+                message="Пожалуйста, выберите способ доставки.",
             )
 
     def check_payment_method_is_captured(self, request):
         payment_method = self.checkout_session.payment_method()
         if not payment_method:
-            return False
+            raise exceptions.FailedPreCondition(
+                url=reverse("checkout:checkoutview"),
+                message="Пожалуйста, укажите метод оплаты.",
+            )
         
-        return True
-
     def check_order_time_is_captured(self, request):
-        time = self.get_order_time(self.request.basket)
-        if not time:
-            return False
-        
-        return True
+        order_time = self.get_order_time()
+        shipping_method = self.get_shipping_method()
+        is_valid = is_valid_order_time(order_time, shipping_method)
 
+        if not is_valid:
+            raise exceptions.FailedPreCondition(
+                url=reverse("checkout:checkoutview"),
+                message="Данное время заказа более недоступно. Повторите, пожалуйста, оформление заказа.",
+            )
+        
 
     # Helpers
 
@@ -223,9 +229,9 @@ class CheckoutSessionMixin(object):
         basket = kwargs.pop("basket", self.request.basket)
         shipping_address = self.get_shipping_address(basket)
         shipping_method = self.get_shipping_method(basket, shipping_address)
-        order_note = self.get_order_note(basket)
-        order_time = self.get_order_time(basket)
-        email_or_change = self.get_email_or_change(basket)
+        order_note = self.get_order_note()
+        order_time = self.get_order_time()
+        email_or_change = self.get_email_or_change()
 
         if not shipping_method:
             # total = shipping_charge = surcharges = min_order = None
@@ -322,13 +328,13 @@ class CheckoutSessionMixin(object):
 
     # =======================
 
-    def get_order_note(self, basket, **kwargs):
+    def get_order_note(self, **kwargs):
         return self.checkout_session.order_note()
 
-    def get_order_time(self, basket, **kwargs):
+    def get_order_time(self, **kwargs):
         return datetime.fromisoformat(self.checkout_session.order_time())
 
-    def get_email_or_change(self, basket, **kwargs):
+    def get_email_or_change(self, **kwargs):
         return self.checkout_session.email_or_change()
          
     # ========================

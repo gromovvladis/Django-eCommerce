@@ -56,8 +56,8 @@ def before_order_badge(order):
 
 
 @register.simple_tag
-def dashboard_navigation(user):
-    return get_nodes(user)
+def dashboard_navigation(user, request):
+    return get_nodes(user, request)
 
 @register.simple_tag
 def payment_order(description):

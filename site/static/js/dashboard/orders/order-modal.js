@@ -55,12 +55,14 @@ const orderModal = () => {
                         });
                     }
                     toggle_table(modalContainer.find(".toggle-row"));
+                    badgeChanged(document.querySelectorAll('span[data-id="order-badge"]'));
                 }
             })        
         });
     });
     modalContainer.on('hidden.bs.modal', function () {
         modalContainer.html('<div class="modal-dialog"><div class="modal-content content-loading"></div></div>');
+        badgeChanged(document.querySelectorAll('span[data-id="order-badge"]'));
     });   
 }
 

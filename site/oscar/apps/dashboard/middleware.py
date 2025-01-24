@@ -28,7 +28,8 @@ class DashboardMiddleware:
             cache.set("revenue_today", revenue_today, 120)
         
         request.revenue_today = revenue_today
-        request.active_orders = Order.objects.filter(status__in=settings.ORDER_ACTIVE_STATUSES).count()
+        request.no_finish_orders = Order.objects.filter(date_finish__isnull=True)
+        request.active_orders = request.no_finish_orders.filter(status__in=settings.ORDER_ACTIVE_STATUSES).count()
 
         return self.get_response(request)
 

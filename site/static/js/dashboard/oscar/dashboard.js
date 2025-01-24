@@ -372,7 +372,6 @@ var oscar = (function(o, $) {
         },
         orders: {
             initTable: function() {
-                console.log('init table');
                 var table = $('form table'),
                 lines = document.querySelectorAll('[data-id="line-container"]'),
                 checkboxes = document.querySelectorAll('.table input[type="checkbox"]'),

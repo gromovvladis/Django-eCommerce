@@ -14,13 +14,14 @@ OrderReview = get_model("customer", "OrderReview")
 DeliveryOrder = get_model("delivery", "DeliveryOrder")
 
 
-def get_nodes(user):
+def get_nodes(user, request):
     """
     Return the visible navigation nodes for the passed user
     """
     models = {
         "stock_alert": StockAlert.objects.filter(status=StockAlert.OPEN),
-        "orders": Order.objects.filter(date_finish__isnull=True),
+        "orders": request.no_finish_orders,
+        "active_orders": request.active_orders,
         "delivery": DeliveryOrder.objects.filter(pickup_time__gt=timezone.now()),
         "product_review": ProductReview.objects.filter(is_open=False),
         "order_review": OrderReview.objects.filter(is_open=False),
@@ -116,9 +117,7 @@ def stock_alerts(models):
     return stock_alert.count()
 
 def active_orders(models):
-    orders = models['orders']
-    active_statuses = settings.ORDER_ACTIVE_STATUSES
-    return orders.filter(status__in=active_statuses).count()
+    return models['active_orders']
 
 def all_orders(models):
     orders = models['orders']
