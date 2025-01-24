@@ -422,6 +422,7 @@ PHONENUMBER_DEFAULT_REGION = 'RU'
 # want to override the set_status method on the order object to do more
 # sophisticated things.
 OSCAR_FINAL_ORDER_STATUS = 'Завершён'
+OSCAR_FAIL_ORDER_STATUS = 'Отменен'
 OSCAR_INITIAL_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = 'Ожидает оплаты'
 OSCAR_INITIAL_LINE_STATUS = 'Обрабатывается'
@@ -494,6 +495,13 @@ ORDER_ACTIVE_STATUSES = (
     'Оплачен',
     'Готовится',
     'Готов',
+)
+
+ORDER_BUSY_STATUSES = (
+    'Ожидает оплаты',
+    'Обрабатывается',
+    'Оплачен',
+    'Готовится',
 )
 
 ORDER_FINAL_STATUSES = (
