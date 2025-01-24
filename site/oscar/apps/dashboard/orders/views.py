@@ -770,9 +770,6 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
                     "Статус заказа №%(number)s изменился с '%(old_status)s' на '%(new_status)s'"
                 ) % {"old_status": old_status, "new_status": new_status, "number": order.number}
                 messages.info(request, msg)
-                order.notes.create(
-                    user=request.user, message=msg, note_type=OrderNote.SYSTEM
-                )
 
 
 class OrderActiveListView(OrderListView):

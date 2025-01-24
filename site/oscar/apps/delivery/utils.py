@@ -19,7 +19,7 @@ def kitchen_busy(store):
     current_time = datetime.now(tz=timezone)
     active_orders = (
         Order.objects.prefetch_related("lines", "lines__product")
-        .filter(status__in=settings.ORDER_ACTIVE_STATUSES, store=store)
+        .filter(status__in=settings.ORDER_BUSY_STATUSES, store=store)
         .annotate(
             total_cooking_time=F("lines__product__cooking_time") * F("lines__quantity")
         )

@@ -294,7 +294,6 @@
 
     sudo supervisorctl restart all
     redis-cli Flushall
-    
 
 
     source venv/bin/activate
