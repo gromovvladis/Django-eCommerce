@@ -427,8 +427,7 @@ class Yoomoney(PaymentMethod):
             payment_id = transaction.code
             order = transaction.source.order
             if payment_id:
-                if email is None:
-                    email = order.user.email
+                email = order.user.email
 
                 if amount is None:
                     amount = transaction.amount
@@ -466,8 +465,12 @@ class Yoomoney(PaymentMethod):
                 refund_responce = Refund.create(request)
                 transaction.refundable = False
                 transaction.save()
-        except Exception:
-            raise UnableToRefund('Не возможно произвести возврат')
+        except Exception as e:
+            try:
+                error = e.response.content
+            except Exception as e:
+                error = e
+            raise UnableToRefund(f'Невозможно произвести возврат. Причина: {error}')
 
         return refund_responce
     
