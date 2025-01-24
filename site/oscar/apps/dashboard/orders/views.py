@@ -810,6 +810,11 @@ class OrderActiveListView(OrderListView):
         ctx["title"] = "Активные заказы"
         return ctx
 
+    def change_order_statuses(self, request, orders):
+        for order in orders:
+            self.change_order_status(request, order)
+        return redirect("dashboard:order-active-list")
+
 
 class OrderActiveListLookupView(APIView):
 
@@ -941,6 +946,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         order.open()
         if not order.date_finish:
             order.before_order = order.order_time - now()
+            # order.before_order = relativedelta(order.order_time, now())
         else:
             order.before_order = None
         return order

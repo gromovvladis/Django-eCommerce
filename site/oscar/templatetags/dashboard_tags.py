@@ -1,6 +1,7 @@
 import re
 from django import template
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from oscar.core.loading import get_class
 from urllib.parse import urlencode
 from django.utils.timezone import now
@@ -22,27 +23,41 @@ def subtab(text, path):
     return False
 
 @register.filter
-def in_future(value):
-    if isinstance(value, timedelta):
-        return value > timedelta(0)
-    return False
+def before_order_badge(order):
+    if not isinstance(order.before_order, timedelta):
+        return "", "badge-danger", 0  # Если нет данных, возвращаем пустой результат
 
-@register.filter
-def hours(value):
-    if isinstance(value, timedelta):
-        return int(value.total_seconds() // 3600 % 24)
-    return 0
+    # Рассчитываем разницу в секундах один раз
+    total_seconds = int(order.before_order.total_seconds())
+    in_future = total_seconds > 0
+    delta = order.before_order if in_future else -order.before_order
 
-@register.filter
-def minutes(value):
-    if isinstance(value, timedelta):
-        minutes = int(value.total_seconds() // 60 % 60) 
-        return minutes if minutes < 61 else 0
-    return 0
+    # Определяем цвет бейджа
+    if in_future:
+        before_badge = "badge-success"
+    elif 0 < total_seconds < 300:  # Для времени менее 5 минут
+        before_badge = "badge-warning"
+    else:
+        before_badge = "badge-danger"
+
+    # Формируем текст бейджа
+    days = delta.days
+    hours, remainder = divmod(delta.seconds, 3600)
+    minutes = remainder // 60
+
+    if days:
+        before_order = f"{days} дн. {hours} ч."
+    elif hours:
+        before_order = f"{hours} ч. {minutes} мин."
+    else:
+        before_order = f"{minutes} мин."
+
+    return before_order, before_badge, total_seconds
+
 
 @register.simple_tag
-def dashboard_navigation(user):
-    return get_nodes(user)
+def dashboard_navigation(user, request):
+    return get_nodes(user, request)
 
 @register.simple_tag
 def payment_order(description):
@@ -84,8 +99,6 @@ def from_now(value):
         return f"{minutes} мин."
     
     return "-"
-
-
 
 @register.simple_tag
 def filter_table(request, filtres):

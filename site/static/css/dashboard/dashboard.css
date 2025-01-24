@@ -6268,7 +6268,7 @@ a.close.disabled {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  padding: 1rem;
+  padding: 1rem 0;
   margin: 0 1rem;
   border-top: 1px solid #dee2e6;
 }
@@ -20256,10 +20256,6 @@ input[type="number"]:focus {
   min-width: 250px;
 }
 
-.before_order{
-  display: none;
-}
-
 .store-select{
   align-items: center;
 }
@@ -20487,9 +20483,17 @@ input[type="number"]:focus {
       text-align: left;
   }
 
-  .mobile-table tbody td.before_order{
+  .mobile-table tr:not(.mobile-open) td.order_time .time {
+      display: none;
+  }
+
+  /* .mobile-table tbody td.order_time .time{
     display: none;
   }
+
+  .mobile-open.order_time .time{
+    display: block;
+  } */
 
   .mobile-table .table-striped tbody tr td{
     padding: .5rem 1rem;
@@ -20530,7 +20534,7 @@ input[type="number"]:focus {
     left: 50px;
   }
 
-  .mobile-table table tr:not(.mobile-open) .before_order,
+  .mobile-table table tr:not(.mobile-open) .order_time,
   .mobile-table table tr:not(.mobile-open) .handle,
   .mobile-table table tr:not(.mobile-open) .statistic{
     display: block;
@@ -20538,6 +20542,11 @@ input[type="number"]:focus {
     left: 0;
     bottom: 0;
     padding: 1rem !important;
+  }
+
+  
+  .mobile-table table tr:not(.mobile-open) .order_time{
+    padding: 1.5rem 1rem !important;
   }
 
   .table .additionals,
@@ -20567,7 +20576,7 @@ input[type="number"]:focus {
   } 
 
   .statistic-desctop,
-  .mobile-table table tr:not(.mobile-open) td:not(.image):not(.title):not(.name):not(.payment-footer):not(.status):not(.actions):not(.statistic):not(.handle):not(.empty):not(.before_order):not(.toggle-row){
+  .mobile-table table tr:not(.mobile-open) td:not(.image):not(.title):not(.name):not(.payment-footer):not(.status):not(.actions):not(.statistic):not(.handle):not(.empty):not(.order_time):not(.toggle-row){
     display: none;
   }
 

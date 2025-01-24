@@ -1,12 +1,11 @@
 import logging
 
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.urls import NoReverseMatch, reverse
 
 from oscar.apps.checkout.signals import post_checkout
-from oscar.apps.order.signals import active_order_placed
 
-from django.conf import settings
 from oscar.core.loading import get_class, get_model
 
 OrderCreator = get_class("order.utils", "OrderCreator")
@@ -266,12 +265,6 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         setattr(self.request, "cookies_to_delete", ['notes', 'order_note', 'line1', 'line2', 'line3', 'line4'])
  
         self.send_signal(self.request, order)
-        
-        if order.status in settings.ORDER_STATUS_SEND_TO_EVOTOR:
-            active_order_placed.send(
-                sender=self,
-                order=order,
-            )
 
 
     def send_signal(self, request, order):

@@ -21,11 +21,6 @@ class OrderTable(DashboardTable):
         order_by="number",
         attrs = {'th': {'class': 'name'},}
     )
-    # num_products = Column(
-    #     verbose_name="Позиции",
-    #     orderable=True,
-    #     attrs = {'th': {'class': 'num_products'},}
-    # )
     status = TemplateColumn(
         verbose_name="Статус",
         template_name="oscar/dashboard/orders/order_row_status.html",
@@ -62,15 +57,6 @@ class OrderTable(DashboardTable):
         order_by="order_time",
         attrs = {'th': {'class': 'order_time'},}
     )
-    before_order = TemplateColumn(
-        verbose_name="",
-        template_name="oscar/dashboard/orders/order_row_before_order.html",
-        orderable=False,
-        attrs = {
-            'th': {'class': 'before_order'},
-            'td': {'class': lambda record: 'before_order' if record.before_order else 'd-none'},
-        },
-    )
 
     icon = "fas fa-shopping-cart"
     caption = ngettext_lazy("%s Заказ", "%s Заказов")
@@ -96,7 +82,6 @@ class OrderTable(DashboardTable):
             "user",
             "total",
             "order_time",
-            "before_order",
         )
         sequence = (
             "checkbox",

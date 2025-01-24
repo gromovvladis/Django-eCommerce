@@ -567,15 +567,9 @@ if (line1Container){
     // показ балуна и захват или нет времени
     function balloonTime(coords, address, zonaId, captured){
         GetTime({coords:coords, address:address, shippingMethod:"zona-shipping", zonaId:zonaId}).then(function(result) {
-               
-            console.log(result)
-
             if (captured){
                 timeCaptured(result);
             }
-
-            console.log(result)
-    
             placemark.properties.set({
                 'loading': false,
                 'error': result.error,
@@ -598,7 +592,6 @@ if (line1Container){
     // создание зон доставки
     function ZonesInit(json) {
         console.log("ZonesInit");
-        
         // Добавляем зоны на карту.
         deliveryZones = ymaps.geoQuery(json).addToMap(map);
         // Задаём цвет и контент балунов полигонов.
@@ -622,7 +615,6 @@ if (line1Container){
             });
         });
     }
-    
     
     
     // ====================  ADDRESS RESOLVER  ===========================
@@ -702,7 +694,6 @@ if (line1Container){
         validate();
     });
     
-    
     // кнопка открыть карту
     if (open_map){
         open_map.addEventListener('click', function() {
@@ -713,7 +704,6 @@ if (line1Container){
             actionBack = function() {};
         });
     }
-    
 }
 
  // запрос времени доставки на сервере со временем
@@ -750,7 +740,6 @@ if (line1Container){
             deliveryTime.classList.remove('active');
         }
     });
-    
 }
 
 // время можно показывать пользователю на странице и менять в ордер тайм

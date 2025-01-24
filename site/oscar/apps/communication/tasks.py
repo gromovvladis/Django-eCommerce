@@ -78,19 +78,25 @@ def _send_sms_notification_order_status_to_customer(ctx: dict):
         message = None
         if ctx['new_status'] == "Отменен":
             message = f"Заказ №{ctx['number']} отменен." 
+        elif ctx['new_status'] == "Доставляется":
+            message = f"Заказ №{ctx['number']} уже в пути!"
         elif ctx['shipping_method'] == "Самовывоз" and ctx['new_status'] == "Готов":
             message = f"Заказ №{ctx['number']} ожидает получения."
-        elif ctx['new_status'] == "Доставляется":
-            message = f"Заказ №{ctx['number']} уже доставляется."
 
         if message:
-            auth_service = Smsaero(ctx['phone'], message)
-            auth_service.send_sms()
 
+            from bot_loader import staff_bot
+            for admin in settings.TELEGRAM_ADMINS_LIST:
+                try:
+                    staff_bot.send_message(admin, message)
+                except Exception as err:
+                    logging.exception(err)
+
+            # auth_service = Smsaero(ctx['phone'], message)
+            # auth_service.send_sms()
 
 @shared_task()
 def _send_site_notification_order_status_to_customer(ctx: dict):
-    
     subject = "Статус заказа изменен"
     message_tpl = loader.get_template("oscar/customer/alerts/order_status_chenged_message.html")
     description = "Новый статус заказа №%s - %s" % (ctx['number'], ctx['new_status'])

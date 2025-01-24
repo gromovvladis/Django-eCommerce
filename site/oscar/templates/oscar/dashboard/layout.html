@@ -42,7 +42,7 @@
     <div class="dashboard-wrapper">
         <div class="navbar-menu">
             {% block dashboard_nav %}
-                {% dashboard_navigation user as nav_items %}
+                {% dashboard_navigation user request as nav_items %}
                 <div class="navbar-expand-lg navbar-light navbar-primary bg-light flex-column flex-shrink-0" data-id="navbar-primary">
                     <div class="navbar-header py-3 px-1">
                         {% comment %} <a class="navbar-brand" href="{{ homepage_url }}">

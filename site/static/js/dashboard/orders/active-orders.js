@@ -36,6 +36,8 @@ const updateTable = (force=false) => {
                 if (orderModal){
                     orderModal();
                 }
+                oscar.dashboard.orders.initTable();
+                badgeChanged(tableContainer.querySelectorAll('span[data-id="order-badge"]'));
             }
         }
     })

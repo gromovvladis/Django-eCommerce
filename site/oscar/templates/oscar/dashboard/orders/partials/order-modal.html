@@ -30,16 +30,9 @@
                     {% if order.before_order %}
                         <p class="text-secondary mb-0 mt-2">
                             До заказа
-                            <span class="ml-1 badge {% if order.before_order|in_future %}badge-success{% else %}badge-danger{% endif %}">
-                                {% if order.before_order.days %}
-                                    {{ order.before_order.days }} дн.
-                                {% endif %}
-                                {% with hours=order.before_order|hours %}
-                                    {% if hours %}
-                                        {{ hours }} ч.
-                                    {% else %}
-                                        {{ order.before_order|minutes }} мин.
-                                    {% endif %}
+                            <span class="ml-2">
+                                {% with before_order=order|before_order_badge %}
+                                    <span data-id="order-badge" data-seconds="{{ before_order.2 }}" class="badge {{ before_order.1 }}">{{ before_order.0 }}</span>
                                 {% endwith %}
                             </span>
                         </p>
