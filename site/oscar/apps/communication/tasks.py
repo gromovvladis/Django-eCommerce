@@ -84,13 +84,8 @@ def _send_sms_notification_order_status_to_customer(ctx: dict):
             message = f"Заказ №{ctx['number']} ожидает получения."
 
         if message:
-
-            from bot_loader import staff_bot
             for admin in settings.TELEGRAM_ADMINS_LIST:
-                try:
-                    staff_bot.send_message(admin, message)
-                except Exception as err:
-                    logging.exception(err)
+                send_message(int(admin), message)
 
             # auth_service = Smsaero(ctx['phone'], message)
             # auth_service.send_sms()

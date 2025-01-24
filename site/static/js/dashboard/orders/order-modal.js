@@ -44,8 +44,8 @@ const orderModal = () => {
                                     if (data.final) {
                                         button.disabled = true;
                                     }
-                                    if (updateTable){
-                                        updateTable(true)
+                                    if (typeof updateActiveTable === 'function'){
+                                        updateActiveTable(true)
                                     }
                                 })
                                 .catch(error => console.error('Error:', error))
