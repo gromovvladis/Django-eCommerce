@@ -7,7 +7,7 @@ let navbarActiveOrders = document.querySelector('[data-id="Активные за
 let orderNum = parseInt(document.querySelector('caption[data-num]').getAttribute('data-num'), 10);
 const audio = document.getElementById('order-sound');
 
-const updateTable = (force=false) => {
+const updateActiveTable = (force=false) => {
     fetch(`${active_orders_lookup_url}?order_num=${orderNum}&force=${force}`, {
         method: 'GET',
         headers: {
@@ -45,7 +45,7 @@ const updateTable = (force=false) => {
 };
 
 // Устанавливаем таймер и сохраняем его идентификатор
-intervalId = setInterval(updateTable, 5000);
+intervalId = setInterval(updateActiveTable, 5000);
 
 // При выгрузке страницы очищаем таймер
 window.addEventListener('beforeunload', () => {
