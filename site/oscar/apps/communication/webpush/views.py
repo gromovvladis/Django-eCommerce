@@ -23,22 +23,23 @@ class WebpushSaveSubscription(APIView):
     authentication_classes = [SessionAuthentication]
 
     def post(self, request):
-        data = request.data
-        subscription_info = data.get('subscription', {})
-        endpoint = subscription_info.get('endpoint')
-        keys = subscription_info.get('keys', {})
-        p256dh = keys.get('p256dh')
-        auth = keys.get('auth')
-
-        # Сохраняем подписку в базе данных
-        subscription, created = WebPushSubscription.objects.get_or_create(
-            endpoint=endpoint,
-            defaults={
-                'p256dh': p256dh,
-                'auth': auth,
-                'user': request.user if request.user.is_authenticated else None,
-            },
-        )
+        try:
+            data = request.data
+            subscription_info = data.get('subscription', {})
+            endpoint = subscription_info.get('endpoint')
+            keys = subscription_info.get('keys', {})
+            p256dh = keys.get('p256dh')
+            auth = keys.get('auth')
+            subscription, created = WebPushSubscription.objects.get_or_create(
+                endpoint=endpoint,
+                defaults={
+                    'p256dh': p256dh,
+                    'auth': auth,
+                    'user': request.user if request.user.is_authenticated else None,
+                },
+            )
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
 
         return Response({'status': 'success', 'created': created})
 

@@ -152,9 +152,11 @@
             <p class="empty">Заказы не найдены</p>
         {% endif %}
     </form>
-    <div class="order-modal modal fade justify-content-center" data-id="order-modal">
-        <div class="modal-dialog">
-            <div class="modal-content content-loading"></div>
+    <div class="modal fade justify-content-center" data-id="order-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div data-id="order-modal-content" class="order-modal content-loading"></div>
+            </div>
         </div>
     </div>
 {% endblock dashboard_content %}

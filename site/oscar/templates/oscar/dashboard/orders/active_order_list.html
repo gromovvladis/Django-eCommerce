@@ -83,9 +83,11 @@
         </div>
     </form>
     <audio id="order-sound" src="{% static "audio/dashboard/orders/new-order.mp3" %}" preload="auto"></audio>
-    <div class="order-modal modal fade justify-content-center" data-id="order-modal">
+    <div class="modal fade justify-content-center" data-id="order-modal">
         <div class="modal-dialog" role="document">
-            <div class="modal-content content-loading"></div>
+            <div class="modal-content">
+                <div data-id="order-modal-content" class="order-modal content-loading"></div>
+            </div>
         </div>
     </div>
 {% endblock dashboard_content %}
