@@ -93,7 +93,7 @@ class CheckoutSessionData(object):
 
         This can be from a session address or re-using an existing address.
         """
-        shipping_method = self.shipping_method_code(self.request.basket)
+        shipping_method = self.shipping_method_code()
         if shipping_method == NoShippingRequired().code:
             return True
 
@@ -116,17 +116,17 @@ class CheckoutSessionData(object):
         self._set("shipping", "method_code", code)
 
     # pylint: disable=unused-argument
-    def shipping_method_code(self, basket):
+    def shipping_method_code(self):
         """
         Return the shipping method code
         """
         return self._get("shipping", "method_code")
 
-    def is_shipping_method_set(self, basket):
+    def is_shipping_method_set(self):
         """
         Test if a valid shipping method is stored in the session
         """
-        return self.shipping_method_code(basket) is not None
+        return self.shipping_method_code() is not None
 
 
     # Submission methods

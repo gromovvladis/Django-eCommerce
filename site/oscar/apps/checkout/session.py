@@ -162,7 +162,7 @@ class CheckoutSessionMixin(object):
         if not request.basket.is_shipping_required():
             # Even without shipping being required, we still need to check that
             # a shipping method code has been set.
-            if not self.checkout_session.is_shipping_method_set(self.request.basket):
+            if not self.checkout_session.is_shipping_method_set():
                 messages.error(self.request, "Выберите способ доставки.")
                 raise exceptions.FailedPreCondition(
                     url=reverse("checkout:checkoutview"),
@@ -188,7 +188,7 @@ class CheckoutSessionMixin(object):
 
     def check_a_valid_shipping_method_is_captured(self):
         # Check that shipping method has been set
-        if not self.checkout_session.is_shipping_method_set(self.request.basket):
+        if not self.checkout_session.is_shipping_method_set():
             raise exceptions.FailedPreCondition(
                 url=reverse("checkout:shipping-method"),
                 message="Пожалуйста, выберите способ доставки.",
@@ -204,13 +204,13 @@ class CheckoutSessionMixin(object):
         
     def check_order_time_is_captured(self, request):
         order_time = self.get_order_time()
-        shipping_method = self.get_shipping_method()
+        shipping_method = self.checkout_session.shipping_method_code()
         is_valid = is_valid_order_time(order_time, shipping_method)
 
         if not is_valid:
             raise exceptions.FailedPreCondition(
                 url=reverse("checkout:checkoutview"),
-                message="Данное время заказа более недоступно. Повторите, пожалуйста, оформление заказа.",
+                message="Данное время заказа более недоступно. Пожалуйста, повторите оформление заказа.",
             )
         
 
@@ -314,7 +314,7 @@ class CheckoutSessionMixin(object):
         The shipping address is passed as we need to check that the method
         stored in the session is still valid for the shipping address.
         """
-        code = self.checkout_session.shipping_method_code(basket)
+        code = self.checkout_session.shipping_method_code()
         methods = Repository().get_shipping_methods(
             basket=basket,
             user=self.request.user,
