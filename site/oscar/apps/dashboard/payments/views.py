@@ -360,8 +360,8 @@ class RefundTransactionView(DetailView):
 
             logger.info('Транзакция №{0} была отменена пользователем. Деньги вернулись клиенту #{1}'.format(self.object.id ,request.user.id)) 
         except Exception as e:
-            logger.error('Ошибка возврата транзакции #{1}, Пользователь: {2}, Ошибка: {3}'.format(self.object.id ,request.user.id, e)) 
-            messages.error(request, "Возврат не удался")
+            logger.error('Ошибка возврата транзакции №{0}, Пользователь: {1}, Ошибка: {2}'.format(self.object.id, request.user.id, e)) 
+            messages.error(request, "Возврат не удался.")
         else:
             messages.info(request, "Возврат совершен!")
 
