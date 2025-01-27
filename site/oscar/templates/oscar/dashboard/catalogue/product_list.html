@@ -48,7 +48,7 @@
                     </form>
                 {% endif %}
                 <h2 class="mb-4">Поиск</h2>
-                <form method="get" class="form-inline fill-width justify-space-between">
+                <form method="get" class="form-inline justify-space-between">
                     <div class="d-flex form-row">
                         {% for name, value in request.GET.items %}
                             {% if name not in form.fields %}
@@ -58,7 +58,7 @@
                         {% include "oscar/dashboard/partials/form_fields_inline.html" with form=form %}
                     </div>
                     <div class="btn-form d-flex">
-                        <button type="submit" class="btn btn-primary flex-fill" data-loading-text="Поиск..."><i class="fas fa-search"></i><span class="ml-2">Поиск</span></button>
+                        <button type="submit" class="btn btn-primary flex-fill"><i class="fas fa-search"></i><span class="ml-2">Поиск</span></button>
                         {% if searching %}
                             <a class="btn btn-danger ml-2" href="{% url 'dashboard:catalogue-product-list' %}">
                                 <i class="fa-regular fa-circle-xmark"></i>

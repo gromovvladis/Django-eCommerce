@@ -21,13 +21,13 @@ from django.urls import reverse
 from django.utils.timezone import now
 from django.template.loader import render_to_string
 
-from oscar.views.generic import BulkEditMixin
 from oscar.apps.order import exceptions as order_exceptions
 from oscar.apps.payment.exceptions import PaymentError
+from oscar.views.generic import BulkEditMixin
+from oscar.views import sort_queryset
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import datetime_combine, format_datetime
-from oscar.views import sort_queryset
 
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -48,10 +48,8 @@ Basket = get_model("basket", "Basket")
 Store = get_model("store", "Store")
 StockAlert = get_model("store", "StockAlert")
 Product = get_model("catalogue", "Product")
-Category = get_model("catalogue", "Category")
 Transaction = get_model("payment", "Transaction")
 SourceType = get_model("payment", "SourceType")
-Voucher = get_model("voucher", "Voucher")
 
 EventHandlerMixin = get_class("order.mixins", "EventHandlerMixin")
 
@@ -63,7 +61,6 @@ ShippingAddressForm = get_class("dashboard.orders.forms", "ShippingAddressForm")
 OrderStatusForm = get_class("dashboard.orders.forms", "OrderStatusForm")
 
 OrderTable = get_class("dashboard.orders.tables", "OrderTable")
-ProductSearchForm = get_class("dashboard.catalogue.forms", "ProductSearchForm")
 
 
 def queryset_orders(user, product=None, category=None):
@@ -843,7 +840,7 @@ class OrderActiveListLookupView(APIView):
         num_orders = queryset.count()
 
         # Проверяем, требует ли запрос обновления
-        if num_orders <= int(request.GET.get('order_num', 0)) and request.GET.get('force', 'false') == 'false':
+        if num_orders == int(request.GET.get('order_num', 0)) and request.GET.get('force', 'false') == 'false':
             return JsonResponse({'update': False, 'num_orders': num_orders})
         
         # Аннотируем и сортируем queryset
@@ -896,7 +893,7 @@ class OrderModalView(APIView):
             return JsonResponse({'order': None})
         
 
-class OrderNextStatusView(APIView):
+class OrderNextStatusView(EventHandlerMixin, APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [SessionAuthentication]
 
@@ -906,6 +903,8 @@ class OrderNextStatusView(APIView):
             order = Order.objects.get(number=order_number)
             next_status = request.data.get('next_status', order.status)
             order.set_status(next_status)
+            handler = self.get_handler(user=request.user)
+            handler.handle_order_status_change(order, next_status)
             if next_status in settings.ORDER_FINAL_STATUSES:
                 return JsonResponse({"next_status": None, "final": True}, status = 200)
             return JsonResponse({"next_status": order.next_status, "final": False}, status = 200)

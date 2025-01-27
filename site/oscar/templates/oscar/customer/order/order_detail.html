@@ -46,7 +46,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="order_id" value="{{ order.id }}" />
                     <input type="hidden" name="action" value="reorder" />
-                    <button type="submit" class="button button--main justify-center shrink" data-loading-text="Обновляем корзину">Повторить</button>
+                    <button type="submit" class="button button--main justify-center shrink">Повторить</button>
                 </form>
             {% endblock order_actions %}   
         </div>

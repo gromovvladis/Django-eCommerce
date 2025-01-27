@@ -1,38 +1,41 @@
 {% extends 'oscar/dashboard/reports/index.html' %}
 {% load currency_filters %}
-{% load i18n %}
 
 {% block report %}
     <table class="table table-striped table-bordered table-hover">
         {% if objects %}
             <tr>
-                <th>{% trans "Order number" %}</th>
-                <th>{% trans "Name" %}</th>
-                <th>{% trans "Email" %}</th>
-                <th>{% trans "Total" %}</th>
-                <th>{% trans "Date placed" %}</th>
-                <th></th>
+                <th>Номер заказа</th>
+                <th>Номер телефона</th>
+                <th>Состав заказа</th>
+                <th>Статус</th>
+                <th>Доставка</th>
+                <th>Оплата</th>
+                <th>Итого</th>
+                <th>Дата размещения</th>
             </tr>
             {% for order in objects %}
                 <tr>
                     <td><a href="{% url 'dashboard:order-detail' order.number %}">{{ order.number }}</a></td>
                     <td>
                         {% if order.user %}
-                            <a href="{% url 'dashboard:user-detail' order.user.id %}">{{ order.user.get_full_name|default:"-" }}</a>
+                            <a href="{% url 'dashboard:user-detail' order.user.id %}">{{ order.user.username }}</a>
                         {% else %}
                             -
                         {% endif %}
                     </td>
-                    <td>{{ order.email }}</td>
-                    <td>{{ order.total|currency:order.currency }}</td>
-                    <td>{{ order.date_placed }}</td>
                     <td>
-                        <a class="btn btn-secondary" href="{% url 'dashboard:order-detail' number=order.number %}">{% trans "View" %}</a>
+                        {{ order.get_items_name }}
                     </td>
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.shipping_method }}</td>
+                    <td>{{ order.sources.first }}</td>
+                    <td>{{ order.total|currency:order.currency }}</td>
+                    <td>{{ order.date_placed|date:"d.m.y H:i" }}</td>
                 </tr>
             {% endfor %}
         {% else %}
-            <tr><td>{% trans "No results found." %}</td></tr>
+            <tr><td class="empty">Заказы не найдены за заданный период</td></tr>
         {% endif %}
     </table>
     {% include "oscar/dashboard/partials/pagination.html" %}

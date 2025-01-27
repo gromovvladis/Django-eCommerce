@@ -35,7 +35,7 @@ class VoucherReportHTMLFormatter(ReportHTMLFormatter):
 
 class VoucherReportGenerator(ReportGenerator):
     code = "vouchers"
-    description = "Исполнение ваучера"
+    description = "Примененные промокоды"
     model_class = Voucher
 
     formatters = {

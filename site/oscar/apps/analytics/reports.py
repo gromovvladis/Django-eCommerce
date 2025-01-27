@@ -85,7 +85,7 @@ class UserReportHTMLFormatter(ReportHTMLFormatter):
 
 class UserReportGenerator(ReportGenerator):
     code = "user_analytics"
-    description = "Аналитика пользователя"
+    description = "Аналитика клиентов"
     queryset = UserRecord._default_manager.select_related().all()
 
     formatters = {

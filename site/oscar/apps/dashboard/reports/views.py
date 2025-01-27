@@ -41,7 +41,7 @@ class IndexView(ListView):
                 if not generator.is_available_to(request.user):
                     return HttpResponseForbidden("У вас нет доступа к этому отчету")
 
-                report = generator.generate()
+                report = generator.generate(request)
 
                 if form.cleaned_data["download"]:
                     return report
@@ -52,6 +52,7 @@ class IndexView(ListView):
                     context = self.get_context_data(object_list=self.queryset)
                     context["form"] = form
                     context["description"] = generator.report_description()
+                    context["search_filters"] = generator.search_filters()
                     return self.render_to_response(context)
         else:
             form = self.report_form_class()

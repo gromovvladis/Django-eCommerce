@@ -27,7 +27,6 @@
 {% endblock header %}
 
 {% block dashboard_content %}
-
     <div class="table-wrapper mb-4">
         <div class="table-header d-flex justify-space-between" data-target="#search-body" 
         data-toggle="collapse" aria-controls="search-body" aria-expanded="false">
@@ -53,7 +52,7 @@
                         <div class="form-group form-flex-inline date-form">
                             <label for="date_gte">Дата с:</label>
                             <div class="form-inline fill-width">
-                                <div class="input-group datetime-input daterange">
+                                <div class="input-group datetime-input date">
                                     <input type="text" name="date_gte" class="form-control" id="date_gte" data-inputmask="'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy'" inputmode="numeric">
                                     <div class="input-group-append datetime-btn">
                                         <div class="input-group-text">
@@ -63,10 +62,10 @@
                                 </div>  
                             </div>  
                         </div>
-                        <div class="form-group form-flex-inline date-form mb-3">
+                        <div class="form-group form-flex-inline date-form">
                             <label for="date_lte">Дата до:</label>
                             <div class="form-inline fill-width">
-                                <div class="input-group datetime-input daterange">
+                                <div class="input-group datetime-input date">
                                     <input type="text" name="date_lte" class="form-control" id="date_lte" data-inputmask="'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy'" inputmode="numeric">
                                     <div class="input-group-append datetime-btn">
                                         <div class="input-group-text">
@@ -78,9 +77,8 @@
                         </div>
                     </div>                    
                 </div>
-
                 {% if search_filters %}
-                    <div class="search-filter-list mt-4">
+                    <div class="search-filter-list">
                         <label class="mr-2">Фильтры:</label>
                         {% for filter, param in search_filters %}
                             <span class="badge badge-filter mb-2 mr-1">{{ filter }}
@@ -91,9 +89,8 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-
                 <div class="btn-form d-flex">
-                    <button class="btn btn-primary flex-fill" type="submit" data-loading-text="Поиск...">
+                    <button class="btn btn-primary flex-fill" type="submit">
                         <i class="fas fa-search"></i>
                         <span class="ml-2">
                             Поиск
@@ -108,15 +105,12 @@
             </form>
         </div>
     </div>
-
     <div class="mobile-table">
         {% if transactions %} 
             {% render_table transactions %}
         {% endif %}
     </div>
-
     {% if not transactions %}
         <p>Платежи не найдены</p>
     {% endif %}
-
 {% endblock dashboard_content %}

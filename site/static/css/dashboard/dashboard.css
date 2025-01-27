@@ -64,8 +64,8 @@ body {
   line-height: 1.5;
   color: #212529;
   text-align: left;
-  /* background-color: #fff; */
-  background-color: #fcfcfc;
+  /* background-color: #fcfcfc; */
+  background-color: #f8f8f8;
 }
 
 [tabindex="-1"]:focus:not(:focus-visible) {
@@ -3538,6 +3538,7 @@ input[type=button].btn-block {
   align-items: stretch;
   width: 100%;
 }
+/* 
 .input-group > .form-control,
 .input-group > .form-control-plaintext,
 .input-group > .custom-select,
@@ -3561,7 +3562,7 @@ input[type=button].btn-block {
 .input-group > .custom-file + .custom-select,
 .input-group > .custom-file + .custom-file {
   margin-left: -1px;
-}
+} */
 .input-group > .form-control:focus,
 .input-group > .custom-select:focus,
 .input-group > .custom-file .custom-file-input:focus ~ .custom-file-label {
@@ -19065,6 +19066,10 @@ h3.app-ico:before {
   min-width: 250px;
 }
 
+.datetime-input input{
+  min-width: 210px;
+}
+
 .form-inline .select2-container.form-control {
   display: inline-block;
 }
@@ -20667,6 +20672,7 @@ input[type="number"]:focus {
 
 .form-flex-inline{
   margin-right: 1rem;
+  /* width: 100%; */
 }
 
 @media (min-width: 660px) {
@@ -20683,6 +20689,13 @@ input[type="number"]:focus {
   .upload-image .image-input{
     height: 90px;
     width: 90px;
+  }
+
+  .input-group > .form-control,
+  .input-group > .form-control-plaintext,
+  .input-group > .custom-select,
+  .input-group > .custom-file {
+    flex: 1 1 auto;
   }
   
 
@@ -20706,7 +20719,8 @@ input[type="number"]:focus {
     flex: 0 0 100%;
   }
 
-  .form-flex-inline .select2-container{
+  .form-flex-inline .select2-container,
+  .form-flex-inline .form-inline{
     max-width: 100% !important;
     width: 100% !important;
   }

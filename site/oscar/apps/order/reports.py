@@ -12,18 +12,24 @@ class OrderReportCSVFormatter(ReportCSVFormatter):
     def generate_csv(self, response, orders):
         writer = self.get_csv_writer(response)
         header_row = [
-            "Номер заказа",
-            "Имя",
-            "Email",
+            "Номер",
+            "Телефон",
+            "Заказа",
+            "Статус",
+            "Доставка",
+            "Оплата",
             "Итого",
-            "Дата размещения",
+            "Дата",
         ]
         writer.writerow(header_row)
         for order in orders:
             row = [
                 order.number,
-                "-" if order.is_anonymous else order.user.get_full_name(),
-                order.email,
+                order.user.username if order.user else "-",
+                order.get_items_name,
+                order.status,
+                order.shipping_method,
+                order.sources.first(),
                 order.total,
                 self.format_datetime(order.date_placed),
             ]
@@ -39,7 +45,7 @@ class OrderReportHTMLFormatter(ReportHTMLFormatter):
 
 class OrderReportGenerator(ReportGenerator):
     code = "order_report"
-    description = "Заказов размещено"
+    description = "Размещенные заказы"
     date_range_field_name = "date_placed"
     model_class = Order
 
@@ -48,7 +54,7 @@ class OrderReportGenerator(ReportGenerator):
         "HTML_formatter": OrderReportHTMLFormatter,
     }
 
-    def generate(self):
+    def generate(self, *args, **kwargs):
         additional_data = {"start_date": self.start_date, "end_date": self.end_date}
         return self.formatter.generate_response(self.queryset, **additional_data)
 

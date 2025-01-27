@@ -421,7 +421,7 @@ PHONENUMBER_DEFAULT_REGION = 'RU'
 # Sample order/line status settings. This is quite simplistic. It's like you'll
 # want to override the set_status method on the order object to do more
 # sophisticated things.
-OSCAR_FINAL_ORDER_STATUS = 'Завершён'
+OSCAR_SUCCESS_ORDER_STATUS = 'Завершён'
 OSCAR_FAIL_ORDER_STATUS = 'Отменен'
 OSCAR_INITIAL_ORDER_STATUS = 'Обрабатывается'
 OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = 'Ожидает оплаты'

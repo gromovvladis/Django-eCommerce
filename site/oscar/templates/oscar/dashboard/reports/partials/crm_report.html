@@ -1,0 +1,25 @@
+{% extends 'oscar/dashboard/reports/index.html' %}
+
+{% block report %}
+    <table class="table table-striped table-bordered table-hover">
+        {% if objects %}
+            <tr>
+                <th>Дата</th>
+                <th>Общий объем продаж без НДС, руб</th>
+                <th>Количество чеков, шт</th>
+                <th>Кол-во товарных позиций, шт</th>
+            </tr>
+            {% for order in objects %}
+                <tr>
+                    <td>{{ order.day|date:"d.m.y" }}</td>
+                    <td>{{ order.total_sum }}</td>
+                    <td>{{ order.order_count }}</td>
+                    <td>{{ order.line_count }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr><td class="empty">Заказы не найдены</td></tr>
+        {% endif %}
+    </table>
+    {% include "oscar/dashboard/partials/pagination.html" %}
+{% endblock %}
