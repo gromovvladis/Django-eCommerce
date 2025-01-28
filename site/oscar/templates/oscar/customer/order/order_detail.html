@@ -90,7 +90,7 @@
                                 </div>
                                 {% if order.status == "Завершён" %}
                                     {% if product|is_review_permitted:user %}
-                                        <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}#addreview">Оценить</a>
+                                        <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}">Оценить</a>
                                     {% endif %}
                                 {% endif %}
                                 <div role="separator" class="spacer"></div>

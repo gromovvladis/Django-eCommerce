@@ -52,6 +52,12 @@ class CRMReportCSVFormatter(ReportCSVFormatter):
                 ws.cell(row=start_row + i, column=28, value=row_data.get('order_count'))
                 ws.cell(row=start_row + i, column=30, value=row_data.get('line_count'))
 
+                ws.cell(row=start_row + i, column=6, value="-")
+                ws.cell(row=start_row + i, column=11, value="-")
+                ws.cell(row=start_row + i, column=17, value="-")
+                
+                ws.cell(row=start_row + i, column=33, value="не применимо")
+
             # Сохранение измененного файла
             file_name = "site-report.xlsx"
             wb.save(file_name)

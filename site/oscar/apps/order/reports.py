@@ -18,6 +18,7 @@ class OrderReportCSVFormatter(ReportCSVFormatter):
             "Статус",
             "Доставка",
             "Оплата",
+            "Источник",
             "Итого",
             "Дата",
         ]
@@ -29,7 +30,8 @@ class OrderReportCSVFormatter(ReportCSVFormatter):
                 order.get_items_name,
                 order.status,
                 order.shipping_method,
-                order.sources.first(),
+                order.sources.last(),
+                order.site,
                 order.total,
                 self.format_datetime(order.date_placed),
             ]

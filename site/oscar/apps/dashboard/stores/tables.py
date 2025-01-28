@@ -1,4 +1,4 @@
-from django_tables2 import A, Column, LinkColumn, TemplateColumn
+from django_tables2 import Column, TemplateColumn
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
@@ -12,7 +12,6 @@ Staff = get_model("user", "Staff")
 
 
 class StoreListTable(DashboardTable):
-
     name = TemplateColumn(
         verbose_name="Название",
         template_name="oscar/dashboard/stores/store_row_name.html",
@@ -76,7 +75,6 @@ class StoreListTable(DashboardTable):
 
 
 class TerminalListTable(DashboardTable):
-
     name = TemplateColumn(
         verbose_name="Название",
         template_name="oscar/dashboard/stores/terminal_row_name.html",
@@ -147,7 +145,6 @@ class TerminalListTable(DashboardTable):
 
 
 class GroupListTable(DashboardTable):
-
     name = TemplateColumn(
         verbose_name="Название",
         template_name="oscar/dashboard/stores/group_row_name.html",
@@ -183,7 +180,6 @@ class GroupListTable(DashboardTable):
 
 
 class StaffListTable(DashboardTable):
-
     check = TemplateColumn(
         template_name="oscar/dashboard/users/user_row_checkbox.html",
         verbose_name=" ",

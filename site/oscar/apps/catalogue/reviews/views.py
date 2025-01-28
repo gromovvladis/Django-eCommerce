@@ -90,7 +90,7 @@ class ProductReviewList(ListView):
             return redirect(reverse("customer:profile-view"))
 
     def get_queryset(self):
-        qs = self.model.objects.approved().filter(product=self.kwargs["product_pk"])
+        qs = self.model.objects.filter(product=self.kwargs["product_pk"])
         # pylint: disable=attribute-defined-outside-init
         self.form = SortReviewsForm(self.request.GET)
         if self.request.GET and self.form.is_valid():
@@ -108,16 +108,3 @@ class ProductReviewList(ListView):
         context["form"] = self.form
         context["page_title"] = "Отзывы товара " + _product.name
         return context
-
-
-# class ProductReviewDetail(DetailView):
-#     template_name = "oscar/catalogue/reviews/review_detail.html"
-#     context_object_name = "review"
-#     model = ProductReview
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context["product"] = get_object_or_404(
-#             Product, pk=self.kwargs["product_pk"], is_public=True
-#         )
-#         return context

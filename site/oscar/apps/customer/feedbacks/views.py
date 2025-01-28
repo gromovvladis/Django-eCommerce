@@ -1,6 +1,7 @@
 from django.conf import settings
+from django.contrib import messages
 from django.db.models import Q
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView,
@@ -21,7 +22,6 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ListView):
     """
     Customer order history
     """
-
     context_object_name = "orders"
     template_name = "oscar/customer/feedbacks/feedbacks_order_list.html"
     paginate_by = settings.OSCAR_ORDERS_PER_PAGE
@@ -33,9 +33,12 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ListView):
         """
         Return Queryset of :py:class:`Order <oscar.apps.order.models.Order>`
         instances for the currently authenticated user.
-        """        
-        return self.model.objects.filter(Q(user=self.request.user) & Q(status='Завершён') & Q(has_review=False))
-
+        """
+        return self.model.objects.filter(
+            Q(user=self.request.user),
+            Q(status="Завершён"),
+            ~Q(reviews__isnull=False)  # Проверяем, что связанных отзывов нет
+        )
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -48,7 +51,6 @@ class OrderFeedbackListView(PageTitleMixin, ListView):
     """
     Customer order history
     """
-
     context_object_name = "reviews"
     template_name = "oscar/customer/feedbacks/feedbacks_list.html"
     paginate_by = settings.OSCAR_ORDERS_PER_PAGE
@@ -63,7 +65,6 @@ class OrderFeedbackListView(PageTitleMixin, ListView):
         """        
         return self.model.objects.filter(user=self.request.user)
 
-
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["content_open"] = True
@@ -71,8 +72,7 @@ class OrderFeedbackListView(PageTitleMixin, ListView):
         return ctx
 
             
-class AddOrderFeedbackView(PageTitleMixin, CreateView):
-    
+class AddOrderFeedbackView(PageTitleMixin, CreateView): 
     context_object_name = "order_review"
     template_name = "oscar/customer/feedbacks/feedbacks_add.html"
     model = OrderReview
@@ -87,6 +87,14 @@ class AddOrderFeedbackView(PageTitleMixin, CreateView):
         self.order = get_object_or_404(
             self.order_model, number=kwargs["order_number"]
         )
+        if not self.order.is_review_permitted(request.user):
+            if self.order.has_review_by(request.user):
+                message = "Вы уже оставили отзыв об этом заказе!"
+            else:
+                message = "Вы не можете оставить отзыв об этом заказе."
+            messages.warning(self.request, message)
+            return redirect(self.order.get_absolute_url())
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):

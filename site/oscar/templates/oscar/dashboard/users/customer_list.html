@@ -22,7 +22,6 @@
     </div>
 {% endblock header %}
 
-
 {% block dashboard_content %}
     <div class="table-wrapper mb-4">
         <div class="table-header d-flex justify-space-between" data-target="#search-body" 
@@ -37,7 +36,6 @@
                 <div class="d-flex form-row">
                     {% include "oscar/dashboard/partials/form_fields_inline.html" with form=form %}
                 </div>
-
                 {% if search_filters %}
                     <div class="search-filter-list mt-3">
                         <label class="mr-2">Фильтры:</label>
@@ -50,7 +48,6 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-
                 <div class="btn-form d-flex mt-3">
                     <button class="btn btn-primary flex-fill" type="submit" name="search">
                         <i class="fas fa-search"></i>
@@ -67,10 +64,9 @@
             </form>
         </div>
     </div>
-
     {% block users_list %}
         {% if users.data %}
-            <form id="user_list_form" method="post" class="form-inline">
+            <form id="user_list_form" method="post" class="mobile-table">
                 {% csrf_token %}
                 {% render_table users %}
             </form>

@@ -7,8 +7,8 @@ DatePickerInput = get_class("oscar.forms.widgets", "DatePickerInput")
 
 class DashboardProductReviewForm(forms.ModelForm):
     choices = (
-        (ProductReview.APPROVED, "Одобренный"),
-        (ProductReview.REJECTED, "Отклоненный"),
+        (ProductReview.HELPFUL, "Полезный"),
+        (ProductReview.UNHELPFUL, "Неполезный"),
     )
     status = forms.ChoiceField(choices=choices, label="Статус")
 

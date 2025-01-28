@@ -1,17 +1,19 @@
 {% extends 'oscar/dashboard/layout.html' %}
+
+{% load render_table from django_tables2 %}
 {% load currency_filters %}
-{% load i18n %}
+{% load dashboard_tags %}
 
 {% block body_class %}{{ block.super }} users{% endblock %}
 
-{% block title %}{{ customer.email }} | {{ block.super }}{% endblock %}
+{% block title %}Пользователь {{ customer.username }} | {{ block.super }}{% endblock %}
 
 {% block breadcrumbs %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:customer-list' %}">{% trans "Customers" %}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ customer.email }}</li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:customer-list' %}">Пользователи</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ customer.username }}</li>
         </ol>
     </nav>
 {% endblock %}
@@ -21,186 +23,166 @@
 {% endblock %}
 
 {% block dashboard_content %}
-    <div class="row">
-        {% block user_general_info %}
-            <div class="col-md-12">
-                <div class="table-header">
-                    <h2>{% trans "General" %}</h2>
-                </div>
-                <table class="table table-bordered">
-                    <tr>
-                        <th>{% trans "Name" %}</th>
-                        <td>{{ customer.get_full_name|default:"-" }}</td>
-                    </tr>
-                    <tr>
-                        <th>{% trans "Email" %}</th>
-                        <td>{{ customer.email }}</td>
-                    </tr>
-                    <tr>
-                        <th>{% trans "Active" %}?</th>
-                        <td>
-                            {{ customer.is_active|yesno:_("Yes,No") }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>{% trans "Superuser" %}?</th>
-                        <td>{{ customer.is_superuser|yesno:_("True,False") }}</td>
-                    </tr>
-                    <tr>
-                        <th>{% trans "Staff" %}?</th>
-                        <td>{{ customer.is_staff|yesno:_("True,False") }}</td>
-                    </tr>
-                    <tr>
-                        <th>{% trans "Last login" %}</th>
-                        <td>{{ customer.last_login }}</td>
-                    </tr>
-                    <tr>
-                        <th>{% trans "Date joined" %}</th>
-                        <td>{{ customer.date_joined }}</td>
-                    </tr>
-                    {% if customer.userrecord %}
-                        {% with record=customer.userrecord %}
-                            <tr>
-                                <th>{% trans "Products viewed" %}</th>
-                                <td>{{ record.num_product_views|default:0 }}</td>
-                            </tr>
-                            <tr>
-                                <th>{% trans "Number of orders" %}</th>
-                                <td>{{ record.num_orders|default:0 }}</td>
-                            </tr>
-                            <tr>
-                                <th>{% trans "Number of ordered items" %}</th>
-                                <td>{{ record.num_order_items|default:0 }}</td>
-                            </tr>
-                            <tr>
-                                <th>{% trans "Total spent" %}</th>
-                                <td>{{ record.total_spent|default:0|currency }}</td>
-                            </tr>
-                        {% endwith %}
-                    {% endif %}
-                    <tr>
-                        <th>{% trans "Reviews written" %}</th>
-                        <td>{{ customer.reviews.count }}</td>
-                    </tr>
-                    {% if customer.email %}
-                        <tr>
-                            <th>{% trans "Actions" %}</th>
-                            <td>
-                                <form id="password_reset_form" action="{% url 'dashboard:user-password-reset' pk=customer.id %}" method="post">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary" data-loading-text="{% trans 'Sending...' %}">{% trans 'Send password reset email' %}</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </table>
+    {% block user_general_info %}
+        <div class="half-wrapper">
+            <div class="table-header d-flex">
+                <h2>Основное</h2>
+                <span class="badge badge-info ml-2">
+                    {{ customer.date_joined|from_now }} / {{ user_info.order_count|default:"0" }} зак.
+                </span>
             </div>
-        {% endblock %}
-    </div>
-    <div class="row">
-        {% block user_additional_info %}
-            <div class="tabbable dashboard col-md-12">
-                {% block tab_nav %}
-                    <ul class="nav nav-tabs mb-0" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#user_orders" data-toggle="tab">{% trans "Orders" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#user_addresses" data-toggle="tab">{% trans "Addresses" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#user_reviews" data-toggle="tab">{% trans "Reviews" %}</a>
-                        </li>
-                    </ul>
-                {% endblock %}
-
-                <div class="tab-content">
-                    {% block user_orders %}
-                        <div id="user_orders" class="tab-pane fade show active" role="tabpanel">
-                            <table class="table table-striped table-bordered table-hover">
-                                <caption>{% trans "Orders" %}</caption>
-                                {% with orders=customer.orders.all %}
-                                    {% if orders %}
-                                        <tr>
-                                            <th>{% trans "Order Number" %}</th>
-                                            <th>{% trans "Num items" %}</th>
-                                            <th>{% trans "Total value" %}</th>
-                                            <th>{% trans "Date placed" %}</th>
-                                            <th>{% trans "Status" %}</th>
-                                            <th></th>
-                                        </tr>
-                                        {% for order in orders %}
-                                            <tr>
-                                                <td><a href="{% url 'dashboard:order-detail' order.number %}">{{ order.number }}</a></td>
-                                                <td>{{ order.num_items }}</td>
-                                                <td>{{ order.basket_total|currency }}</td>
-                                                <td>{{ order.date_placed|date }}</td>
-                                                <td>{{ order.status|default:"-" }}</td>
-                                                <td><a href="{% url 'dashboard:order-detail' number=order.number %}" class="btn btn-info">{% trans "View" %}</a></td>
-                                            </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        <tr><td>{% trans "This customer has not placed any orders yet." %}</td></tr>
+            <table class="table table-bordered">
+                <tr>
+                    <th>Имя</th>
+                    <td>{{ customer.get_full_name|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>{{ customer.email|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <th>Телеграм</th>
+                    <td>{{ customer.telegram_id|yesno:"✔️,❌" }}</td>
+                </tr>
+                <tr>
+                    <th>Активен</th>
+                    <td>{{ customer.is_active|yesno:"✔️,❌" }}</td>
+                </tr>
+                <tr>
+                    <th>Сотрудник</th>
+                    <td>{{ customer.is_staff|yesno:"✔️,❌" }}</td>
+                </tr>
+                <tr>
+                    <th>Последний вход</th>
+                    <td>{{ customer.last_login|date:"d.m H:i" }}</td>
+                </tr>
+                <tr>
+                    <th>Дата регистрации</th>
+                    <td>{{ customer.date_joined|date:"d.m H:i" }}</td>
+                </tr>
+                {% if customer.userrecord %}
+                    {% with record=customer.userrecord %}
+                        <tr>
+                            <th>Товаров просмотренно</th>
+                            <td>{{ record.num_product_views|default:0 }}</td>
+                        </tr>
+                        <tr>
+                            <th>Количество заказов</th>
+                            <td>{{ record.num_orders|default:0 }}</td>
+                        </tr>
+                        <tr>
+                            <th>Количество заказанных товаров</th>
+                            <td>{{ record.num_order_items|default:0 }}</td>
+                        </tr>
+                        <tr>
+                            <th>Всего потрачено</th>
+                            <td>{{ record.total_spent|default:0|currency }}</td>
+                        </tr>
+                    {% endwith %}
+                {% endif %}
+                <tr>
+                    <th>Написанные отзывы</th>
+                    <td>{{ customer.reviews.count }}</td>
+                </tr>
+            </table>
+        </div>
+    {% endblock %}
+    {% block user_additional_info %}
+        <div class="tabbable dashboard col-md-12">
+            {% block nav_tabs %}
+                <ul class="nav nav-tabs mb-3 mb-lg-4 p-0" role="tablist">
+                    <div class="half-wrapper">
+                        <div class="nav tabs-button d-flex fill">
+                            <div class="tabs-button__active-block" style="width: calc(100% / 3); left: 0px;"><div class="fill-width fill-height"></div></div>
+                            <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_orders' %}active{% endif %}" href="#user_orders" data-toggle="tab">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Заказы</span>
+                                {% if customer.userrecord %}
+                                    {% with num_orders=customer.userrecord.num_orders %}
+                                        {% if num_orders %}
+                                            <div class="dropdown-item-badge">{{ num_orders }}</div>                                    
+                                        {% endif %} 
+                                    {% endwith %}
+                                {% endif %}
+                            </button>
+                            <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_addresses' %}active{% endif %}" href="#user_addresses" data-toggle="tab">
+                                <i class="fa-solid fa-truck-fast"></i>
+                                <span>Адрес доставки</span>
+                                {% with address=customer.addresses.count %}
+                                    {% if address %}
+                                        <div class="dropdown-item-badge">{{ address }}</div>
                                     {% endif %}
                                 {% endwith %}
-                            </table>
-
-                        </div>
-                    {% endblock %}
-
-                    {% block user_addresses %}
-                        <div id="user_addresses" class="tab-pane fade" role="tabpanel">
-                            <h2>{% trans "Addresses" %}</h2>
-                            <div class="row">
-                                {% for address in customer.addresses.all %}
-
-                                    <div class="col-md-3">
-                                        <div class="card card-body bg-info">
-                                            {% for field in address.active_address_fields %}
-                                                {{ field }}<br/>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                    {% if forloop.counter|divisibleby:4 %}
-                                    </div>
-                                    <div class="row">
+                            </button>
+                            <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_reviews' %}active{% endif %}" href="#user_reviews" data-toggle="tab">
+                                <i class="fa-regular fa-note-sticky"></i>
+                                <span>Отзывы</span>
+                                {% with reviews=customer.reviews.count %}
+                                    {% if reviews %}
+                                        <div class="dropdown-item-badge">{{ reviews }}</div>
                                     {% endif %}
-                                {% empty %}
-                                    <p>{% trans "This customer has not saved any addresses." %}</p>
-                                {% endfor %}
-                            </div>
+                                {% endwith %}
+                            </button>
                         </div>
-                    {% endblock %}
-
-                    {% block user_reviews %}
-                        <div id="user_reviews" class="tab-pane fade" role="tabpanel">
-                            <table class="table table-striped table-bordered table-hover">
-                                <caption>{% trans "Reviews" %}</caption>
-                                {% if customer.reviews.count %}
-                                    <tr>
-                                        <th>{% trans "Product ID" %}</th>
-                                        <th>{% trans "Score" %}</th>
-                                        <th>{% trans "Title" context "Product review title" %}</th>
-                                        <th>{% trans "Body" %}</th>
-                                        <th>{% trans "Date created" %}</th>
-                                    </tr>
-                                    {% for review in customer.reviews.all %}
+                    </div>
+                </ul>
+            {% endblock nav_tabs %}
+            <div class="tab-content">
+                {% block user_orders %}
+                    <div id="user_orders" class="tab-pane fade show active" role="tabpanel">
+                        <div class="mobile-table">
+                            {% if tables.0 %}
+                                {% render_table tables.0 %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endblock %}
+                {% block user_addresses %}
+                    <div id="user_addresses" class="tab-pane fade" role="tabpanel">
+                        <table class="table table-striped table-bordered table-hover half-wrapper">
+                            <caption>Адрес доставки</caption>
+                            {% with address=customer.addresses.first %}
+                                {% if address %}
+                                    {% for field in address.active_address_fields_and_labels %}
                                         <tr>
-                                            <td>{{ review.product_id }}</td>
-                                            <td>{{ review.score }}</td>
-                                            <td>{{ review.title }}</td>
-                                            <td>{{ review.body }}</td>
-                                            <td>{{ review.date_created }}</td>
+                                            <th>{{ field.label }}</th>
+                                            <th>{{ field.value }}</th>
                                         </tr>
                                     {% endfor %}
                                 {% else %}
-                                    <tr><td>{% trans "This customer has not written any reviews yet." %}</td></tr>
+                                    <tr><td>Этот клиент не сохранил адрес доставки.</td></tr>
                                 {% endif %}
-                            </table>
-
-                        </div>
-                    {% endblock %}
-                </div>
+                            {% endwith %}
+                        </table>
+                    </div>
+                {% endblock %}
+                {% block user_reviews %}
+                    <div id="user_reviews" class="tab-pane fade" role="tabpanel">
+                        <table class="table table-striped table-bordered table-hover">
+                            <caption>Отзывы</caption>
+                            {% if customer.reviews.count %}
+                                <tr>
+                                    <th>Product ID</th>
+                                    <th>Оценка</th>
+                                    <th>Заголовок</th>
+                                    <th>Отзыв</th>
+                                    <th>Дата создания</th>
+                                </tr>
+                                {% for review in customer.reviews.all %}
+                                    <tr>
+                                        <td>{{ review.product_id }}</td>
+                                        <td>{{ review.score }}</td>
+                                        <td>{{ review.title }}</td>
+                                        <td>{{ review.body }}</td>
+                                        <td>{{ review.date_created }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td>Этот клиент еще не оставил ни одного отзыва</td></tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                {% endblock %}
             </div>
         </div>
     {% endblock %}

@@ -108,8 +108,6 @@ class Order(models.Model):
     # Date and time of finish order
     date_finish = models.DateTimeField(db_index=True, blank=True, null=True)
 
-    has_review = models.BooleanField(default=False)
-
     is_open = models.BooleanField("Заказ просмотрен", default=False, db_index=True)
 
     #: Order status pipeline.  This should be a dict where each (key, value) #:
@@ -222,6 +220,26 @@ class Order(models.Model):
         self.is_open = True
         self.save()
 
+    def has_review_by(self, user):
+        if user.is_anonymous:
+            return False
+        return self.reviews.filter(user=user).exists()
+
+    def is_review_permitted(self, user):
+        """
+        Determines whether a user may add a review on this product.
+
+        Default implementation respects OSCAR_ALLOW_ANON_REVIEWS and only
+        allows leaving one review per user and product.
+
+        Override this if you want to alter the default behaviour; e.g. enforce
+        that a user purchased the product to be allowed to leave a review.
+        """
+        if user.is_authenticated:
+            return not self.has_review_by(user)
+        else:
+            return False
+        
     @property
     def next_status(self):
         pipeline = (

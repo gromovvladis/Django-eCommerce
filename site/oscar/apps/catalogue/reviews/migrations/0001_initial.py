@@ -2,7 +2,6 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import oscar.apps.catalogue.reviews.utils
 
 
 class Migration(migrations.Migration):
@@ -42,7 +41,7 @@ class Migration(migrations.Migration):
                             (1, "Одобренный"),
                             (2, "Отклоненный"),
                         ],
-                        default=oscar.apps.catalogue.reviews.utils.get_default_review_status,
+                        default="gfg",
                         verbose_name="Статус",
                     ),
                 ),

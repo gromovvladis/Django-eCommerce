@@ -1,7 +1,6 @@
 from django.db import models
 from django.urls import reverse
 
-from oscar.apps.catalogue.reviews.utils import get_default_review_status
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_class
 
@@ -29,18 +28,18 @@ class ProductReview(models.Model):
         blank=True,
         null=True,
         on_delete=models.CASCADE,
-        related_name="reviews",
+        related_name="product_reviews",
     )
 
-    FOR_MODERATION, APPROVED, REJECTED = 0, 1, 2
+    UNKNOWN, HELPFUL, UNHELPFUL = 0, 1, 2
     STATUS_CHOICES = (
-        (FOR_MODERATION, "Не просмотрен"),
-        (APPROVED, "Одобренный"),
-        (REJECTED, "Отклоненный"),
+        (UNKNOWN, "Неизвестно"),
+        (HELPFUL, "Полезный"),
+        (UNHELPFUL, "Неполезный"),
     )
 
     status = models.SmallIntegerField(
-        "Статус", choices=STATUS_CHOICES, default=get_default_review_status
+        "Статус", choices=STATUS_CHOICES, default=UNKNOWN
     )
 
     date_created = models.DateTimeField(auto_now_add=True)
@@ -86,87 +85,18 @@ class ProductReview(models.Model):
         return self.user is None
 
     @property
-    def pending_moderation(self):
-        return self.status == self.FOR_MODERATION
+    def pending(self):
+        return self.status == self.UNKNOWN
 
     @property
-    def is_approved(self):
-        return self.status == self.APPROVED
+    def is_helpful(self):
+        return self.status == self.HELPFUL
 
     @property
-    def is_rejected(self):
-        return self.status == self.REJECTED
+    def is_unhelpful(self):
+        return self.status == self.UNHELPFUL
 
     @property
     def reviewer_name(self):
         if self.user:
-            name = self.user.get_full_name()
-
-    # Helpers
-
-    # def update_totals(self):
-    #     """
-    #     Update total and delta votes
-    #     """
-    #     result = self.votes.aggregate(score=Sum("delta"), total_votes=Count("id"))
-    #     self.total_votes = result["total_votes"] or 0
-    #     self.delta_votes = result["score"] or 0
-    #     self.save()
-
-    # def can_user_vote(self, user):
-        # """
-        # Test whether the passed user is allowed to vote on this
-        # review
-        # """
-        # if not user.is_authenticated:
-        #     return False, "Только авторизованные пользователи могут оставлять отзывы"
-        # # pylint: disable=no-member
-        # vote = self.votes.model(review=self, user=user, delta=1)
-        # try:
-        #     vote.full_clean()
-        # except ValidationError as e:
-        #     return False, "%s" % e
-        # return True, ""
-
-
-# class Vote(models.Model):
-#     """
-#     Records user ratings as yes/no vote.
-
-#     * Only signed-in users can vote.
-#     * Each user can vote only once.
-#     """
-
-#     review = models.ForeignKey(
-#         "reviews.ProductReview", on_delete=models.CASCADE, related_name="votes"
-#     )
-#     user = models.ForeignKey(
-#         AUTH_USER_MODEL, related_name="review_votes", on_delete=models.CASCADE
-#     )
-#     UP, DOWN = 1, -1
-#     VOTE_CHOICES = ((UP, "Вверх"), (DOWN, "Вниз"))
-#     delta = models.SmallIntegerField("Разница", choices=VOTE_CHOICES)
-#     date_created = models.DateTimeField(auto_now_add=True)
-
-#     class Meta:
-#         app_label = "reviews"
-#         ordering = ["-date_created"]
-#         unique_together = (("user", "review"),)
-#         verbose_name = "Оценка"
-#         verbose_name_plural = "Оценки"
-
-#     def __str__(self):
-#         return "%s vote for %s" % (self.delta, self.review)
-
-#     def clean(self):
-#         if not self.review.is_anonymous and self.review.user == self.user:
-#             raise ValidationError("Вы не можете голосовать за свои отзывы")
-#         if not self.user.id:
-#             raise ValidationError("Голосовать за отзывы могут только авторизованные пользователи.")
-#         previous_votes = self.review.votes.filter(user=self.user)
-#         if len(previous_votes) > 0:
-#             raise ValidationError("За отзыв можно проголосовать только один раз")
-
-#     def save(self, *args, **kwargs):
-#         super().save(*args, **kwargs)
-#         self.review.update_totals()
+            return self.user.get_full_name()

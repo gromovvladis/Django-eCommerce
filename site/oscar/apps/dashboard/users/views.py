@@ -2,19 +2,23 @@
 import re
 from django.conf import settings
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Sum, F, Max, ExpressionWrapper, DurationField, When, Value, Case, Q
 from django.shortcuts import redirect
 from django.views.generic import DetailView
 from django.views.generic.edit import FormMixin
-from django_tables2 import SingleTableView
+from django_tables2 import MultiTableMixin, SingleTableView
+from django.utils.timezone import now
 
 from oscar.core.compat import get_user_model
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 from oscar.views.generic import BulkEditMixin
 
+Order = get_model("order", "Order")
 UserSearchForm = get_class("dashboard.users.forms","UserSearchForm")
 UserTable = get_class("dashboard.users.tables", "UserTable")
 User = get_user_model()
+
+OrderTable = get_class("dashboard.orders.tables", "OrderTable")
 
 class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
     template_name = "oscar/dashboard/users/customer_list.html"
@@ -125,13 +129,83 @@ class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
         return redirect("dashboard:customer-list")
 
 
-class UserDetailView(DetailView):
+class UserDetailView(MultiTableMixin, DetailView):
     template_name = "oscar/dashboard/users/detail.html"
     model = User
+    context_table_name = "tables"
+    table_prefix = "customer_{}-"
     context_object_name = "customer"
 
+    orders_table = OrderTable
+
     def get_queryset(self):
-        queryset = self.model.objects.prefetch_related(
-            "orders__lines", "orders__surcharges"
+        self.queryset = self.model.objects.prefetch_related(
+            "orders__lines", "orders__surcharges", "orders__sources", "order_reviews", "product_reviews"
         )
-        return queryset
+        return self.queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        user_orders = Order.objects.filter(user=context['customer'])
+        order_amount = 0
+
+        for order in user_orders:
+            order_amount += order.total
+
+        context["user_info"] = {
+            "order_count": user_orders.count(),
+            "order_amount": order_amount,
+        }
+
+        return context
+    
+    def get_tables(self):
+        return [
+            self.get_orders_table(),
+            # self.get_reviews_table(),
+        ]
+
+    def get_table_pagination(self, table):
+        return dict(per_page=settings.OSCAR_EVOTOR_ITEMS_PER_PAGE)
+
+    def get_orders_table(self):
+        user = self.queryset.get(pk=self.kwargs.get(self.pk_url_kwarg))
+        orders = user.orders.annotate(
+            source=Max("sources__reference"),
+            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
+            paid=F("sources__paid"),
+            before_order=Case(
+                When(date_finish__isnull=True, then=ExpressionWrapper(F('order_time') - now(), output_field=DurationField())),
+                default=Value(None),
+                output_field=DurationField()
+            )
+        )
+        return self.orders_table(orders)
+
+    # def get_reviews_table(self):
+    #     evotor_ids = [model_qs['id'] for model_qs in self.queryset]
+    #     correct_ids = [model_qs['id'] for model_qs in self.queryset if model_qs['is_valid'] == True]
+
+    #     site_models = self.model.objects.annotate(
+    #         is_valid=Case(
+    #             When(Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids), then=True),
+    #             default=False,
+    #             output_field=BooleanField()
+    #         ),
+    #         wrong_evotor_id=Case(
+    #             When(
+    #                 Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
+    #                 then=True
+    #             ),
+    #             default=False,
+    #             output_field=BooleanField()
+    #         )
+    #     ).order_by(
+    #         '-wrong_evotor_id',
+    #         'is_valid',
+    #         'evotor_id',
+    #         '-is_valid'
+    #     )
+            
+    #     return self.table_site(site_models)

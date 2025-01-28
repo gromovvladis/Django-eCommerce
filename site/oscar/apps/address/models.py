@@ -138,7 +138,7 @@ class Address(models.Model):
             value = getattr(self, f[0])
             if value:
                 str(value).strip()
-                field_values.append({'label':label, "value":value})
+                field_values.append({'label':label, 'value':value})
                 
         return field_values
 
