@@ -16,14 +16,21 @@ class ReviewsDashboardConfig(OscarDashboardConfig):
     def ready(self):
         self.product_list_view = get_class("dashboard.reviews.views", "ReviewProductListView")
         self.order_list_view = get_class("dashboard.reviews.views", "ReviewOrderListView")
-        self.update_view = get_class("dashboard.reviews.views", "ReviewUpdateView")
-        self.delete_view = get_class("dashboard.reviews.views", "ReviewDeleteView")
+
+        self.product_update_view = get_class("dashboard.reviews.views", "ReviewProductUpdateView")
+        self.product_delete_view = get_class("dashboard.reviews.views", "ReviewProductDeleteView")
+        
+        self.order_update_view = get_class("dashboard.reviews.views", "ReviewOrderUpdateView")
+        self.order_delete_view = get_class("dashboard.reviews.views", "ReviewOrderDeleteView")
 
     def get_urls(self):
         urls = [
-            path("", self.product_list_view.as_view(), name="reviews-product-list"),
-            path("", self.order_list_view.as_view(), name="reviews-order-list"),
-            path("<int:pk>/", self.update_view.as_view(), name="reviews-update"),
-            path("<int:pk>/delete/", self.delete_view.as_view(), name="reviews-delete"),
+            path("products/", self.product_list_view.as_view(), name="reviews-product-list"),
+            path("products/<int:pk>/", self.product_update_view.as_view(), name="reviews-product-update"),
+            path("products/<int:pk>/delete/", self.product_delete_view.as_view(), name="reviews-product-delete"),
+
+            path("orders/", self.order_list_view.as_view(), name="reviews-order-list"),
+            path("orders/<int:pk>/", self.order_update_view.as_view(), name="reviews-order-update"),
+            path("orders/<int:pk>/delete/", self.order_delete_view.as_view(), name="reviews-order-delete"),
         ]
         return self.post_process_urls(urls)

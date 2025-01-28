@@ -219,7 +219,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ]
     },
     {
-        "label": "Пользователи",
+        "label": "Клиенты",
         "icon": "fas fa-users",
         "children": [
             {
@@ -227,12 +227,12 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "url_name": "dashboard:customer-list",
             },
             {
-                "label": "Отзывы к товарам",
+                "label": "Отзывы на товары",
                 "url_name": "dashboard:reviews-product-list",
                 "notification": "feedback_product",
             },
             {
-                "label": "Отзывы к заказам",
+                "label": "Отзывы на заказы",
                 "url_name": "dashboard:reviews-order-list",
                 "notification": "feedback_order",
             },

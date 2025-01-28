@@ -811,7 +811,6 @@ class OrderActiveListView(OrderListView):
 
 
 class OrderActiveListLookupView(APIView):
-
     permission_classes = [IsAuthenticated]
     authentication_classes = [SessionAuthentication]
     table_class = OrderTable

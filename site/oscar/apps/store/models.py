@@ -39,7 +39,7 @@ class Store(models.Model):
     #: A store can have users assigned to it. This is used
     #: for access modelling in the permission-based dashboard
     users = models.ManyToManyField(
-        AUTH_USER_MODEL, related_name="stores", blank=True, verbose_name="Пользователи"
+        AUTH_USER_MODEL, related_name="stores", blank=True, verbose_name="Персонал"
     )
 
     start_worktime = models.TimeField(

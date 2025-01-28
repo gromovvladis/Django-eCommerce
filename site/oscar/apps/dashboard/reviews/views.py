@@ -4,32 +4,33 @@ import datetime
 from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views import generic
+from django_tables2 import SingleTableView
 
 from oscar.core.loading import get_classes, get_model
 from oscar.core.utils import format_datetime
 from oscar.views import sort_queryset
 from oscar.views.generic import BulkEditMixin
 
-ProductReviewSearchForm, DashboardProductReviewForm = get_classes(
-    "dashboard.reviews.forms", ("ProductReviewSearchForm", "DashboardProductReviewForm")
+ProductReviewSearchForm, DashboardProductReviewForm, DashboardOrderReviewForm = get_classes(
+    "dashboard.reviews.forms", ("ProductReviewSearchForm", "DashboardProductReviewForm", "DashboardOrderReviewForm")
 )
 ProductReview = get_model("reviews", "productreview")
+OrderReview = get_model("customer", "OrderReview")
 
+ReviewOrderTable, ReviewProductTable = get_classes(
+    "dashboard.reviews.tables", ("ReviewOrderTable", "ReviewProductTable")
+)
 
-class ReviewProductListView(BulkEditMixin, generic.ListView):
-    model = ProductReview
-    template_name = "oscar/dashboard/reviews/review_list.html"
-    context_object_name = "review_list"
+class BaseReviewListView(BulkEditMixin, SingleTableView):
     form_class = ProductReviewSearchForm
-    review_form_class = DashboardProductReviewForm
     paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
     actions = ("update_selected_review_status",)
-    checkbox_object_name = "review"
+    context_table_name = "reviews"
     desc_template = (
         "%(main_filter)s %(date_filter)s %(status_filter)s"
-        "%(kw_filter)s %(name_filter)s"
+        "%(kw_filter)s %(phone_filter)s"
     )
 
     def get(self, request, *args, **kwargs):
@@ -73,12 +74,11 @@ class ReviewProductListView(BulkEditMixin, generic.ListView):
         return queryset
 
     def get_queryset(self):
-        queryset = self.model.objects.select_related("product", "user").all()
+        queryset = self._get_queryset()
         queryset = sort_queryset(
             queryset,
             self.request,
             ["date_created", "score"],
-            # ["date_created", "score", "total_votes"],
             default="-date_created",
         )
         self.desc_ctx = {
@@ -86,7 +86,7 @@ class ReviewProductListView(BulkEditMixin, generic.ListView):
             "date_filter": "",
             "status_filter": "",
             "kw_filter": "",
-            "name_filter": "",
+            "phone_filter": "",
         }
 
         self.form = self.form_class(self.request.GET)
@@ -97,7 +97,7 @@ class ReviewProductListView(BulkEditMixin, generic.ListView):
 
         queryset = self.add_filter_status(queryset, data["status"])
         queryset = self.add_filter_keyword(queryset, data["keyword"])
-        queryset = self.add_filter_name(queryset, data["name"])
+        queryset = self.add_filter_phone(queryset, data["username"])
 
         queryset = self.get_date_from_to_queryset(
             data["date_from"], data["date_to"], queryset
@@ -122,25 +122,17 @@ class ReviewProductListView(BulkEditMixin, generic.ListView):
             queryset = queryset.filter(
                 Q(product__name__icontains=keyword) | Q(body__icontains=keyword)
             ).distinct()
-            self.desc_ctx["kw_filter"] = " с ключевым словом соответствующим '%s'" % keyword
+            self.desc_ctx["kw_filter"] = (
+                " с ключевым словом соответствующим '%s'" % keyword
+            )
         return queryset
 
-    def add_filter_name(self, queryset, name):
-        if name:
+    def add_filter_phone(self, queryset, phone):
+        if phone:
+            queryset.filter(user__username__istartswith=phone).distinct()
             # If the value is two words, then assume they are first name and
             # last name
-            parts = name.split()
-            if len(parts) >= 2:
-                queryset = queryset.filter(
-                    Q(user__name__istartswith=parts[0]) 
-                    | Q(user__name__istartswith=parts[1])
-                ).distinct()
-            else:
-                queryset = queryset.filter(
-                    Q(user__name__istartswith=parts[0])
-                    | Q(user__name__istartswith=parts[-1])
-                ).distinct()
-            self.desc_ctx["name_filter"] = " - найден пользователь '%s'" % name
+            self.desc_ctx["phone_filter"] = " - найден пользователь '%s'" % phone
 
         return queryset
 
@@ -161,14 +153,32 @@ class ReviewProductListView(BulkEditMixin, generic.ListView):
         for review in reviews:
             review.status = new_status
             review.save()
-        return HttpResponseRedirect(reverse("dashboard:reviews-product-list"))
+        return HttpResponseRedirect(self.success_url)
 
 
-class ReviewOrderListView(BulkEditMixin, generic.ListView):
-    pass
+class ReviewProductListView(BaseReviewListView):
+    table_class = ReviewProductTable
+    model = ProductReview
+    review_form_class = DashboardProductReviewForm
+    success_url = reverse_lazy("dashboard:reviews-product-list")
+    template_name = "oscar/dashboard/reviews/review_list_product.html"
+
+    def _get_queryset(self):
+        return self.model.objects.select_related("product", "user").all()
 
 
-class ReviewUpdateView(generic.UpdateView):
+class ReviewOrderListView(BaseReviewListView):
+    table_class = ReviewOrderTable
+    model = OrderReview
+    review_form_class = DashboardOrderReviewForm
+    success_url = reverse_lazy("dashboard:reviews-order-list")
+    template_name = "oscar/dashboard/reviews/review_list_order.html"
+
+    def _get_queryset(self):
+        return self.model.objects.select_related("order", "user").all()
+
+
+class ReviewProductUpdateView(generic.UpdateView):
     model = ProductReview
     template_name = "oscar/dashboard/reviews/review_update.html"
     form_class = DashboardProductReviewForm
@@ -178,10 +188,29 @@ class ReviewUpdateView(generic.UpdateView):
         return reverse("dashboard:reviews-product-list")
 
 
-class ReviewDeleteView(generic.DeleteView):
+class ReviewProductDeleteView(generic.DeleteView):
     model = ProductReview
     template_name = "oscar/dashboard/reviews/review_delete.html"
     context_object_name = "review"
 
     def get_success_url(self):
         return reverse("dashboard:reviews-product-list")
+
+
+class ReviewOrderUpdateView(generic.UpdateView):
+    model = OrderReview
+    template_name = "oscar/dashboard/reviews/review_update.html"
+    form_class = DashboardProductReviewForm
+    context_object_name = "review"
+
+    def get_success_url(self):
+        return reverse("dashboard:reviews-order-list")
+
+
+class ReviewOrderDeleteView(generic.DeleteView):
+    model = OrderReview
+    template_name = "oscar/dashboard/reviews/review_delete.html"
+    context_object_name = "review"
+
+    def get_success_url(self):
+        return reverse("dashboard:reviews-order-list")

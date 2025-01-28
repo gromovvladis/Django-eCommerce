@@ -2,7 +2,7 @@
 import re
 from django.conf import settings
 from django.contrib import messages
-from django.db.models import Sum, F, Max, ExpressionWrapper, DurationField, When, Value, Case, Q
+from django.db.models import Sum, F, Max, ExpressionWrapper, DurationField, When, Value, Case, Q, Count
 from django.shortcuts import redirect
 from django.views.generic import DetailView
 from django.views.generic.edit import FormMixin
@@ -10,7 +10,7 @@ from django_tables2 import MultiTableMixin, SingleTableView
 from django.utils.timezone import now
 
 from oscar.core.compat import get_user_model
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import BulkEditMixin
 
 Order = get_model("order", "Order")
@@ -19,6 +19,9 @@ UserTable = get_class("dashboard.users.tables", "UserTable")
 User = get_user_model()
 
 OrderTable = get_class("dashboard.orders.tables", "OrderTable")
+ReviewOrderTable, ReviewProductTable = get_classes(
+    "dashboard.reviews.tables", ("ReviewOrderTable", "ReviewProductTable")
+)
 
 class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
     template_name = "oscar/dashboard/users/customer_list.html"
@@ -137,12 +140,17 @@ class UserDetailView(MultiTableMixin, DetailView):
     context_object_name = "customer"
 
     orders_table = OrderTable
+    product_review_table = ReviewProductTable
+    order_review_table = ReviewOrderTable
 
     def get_queryset(self):
         self.queryset = self.model.objects.prefetch_related(
             "orders__lines", "orders__surcharges", "orders__sources", "order_reviews", "product_reviews"
+        ).annotate(
+            total_reviews=Count("order_reviews", distinct=True) + Count("product_reviews", distinct=True),
         )
         return self.queryset
+    
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -161,17 +169,18 @@ class UserDetailView(MultiTableMixin, DetailView):
         return context
     
     def get_tables(self):
+        self.user = self.queryset.get(pk=self.kwargs.get(self.pk_url_kwarg))
         return [
             self.get_orders_table(),
-            # self.get_reviews_table(),
+            self.get_order_reviews_table(),
+            self.get_product_reviews_table(),
         ]
 
     def get_table_pagination(self, table):
         return dict(per_page=settings.OSCAR_EVOTOR_ITEMS_PER_PAGE)
 
     def get_orders_table(self):
-        user = self.queryset.get(pk=self.kwargs.get(self.pk_url_kwarg))
-        orders = user.orders.annotate(
+        orders = self.user.orders.annotate(
             source=Max("sources__reference"),
             amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             paid=F("sources__paid"),
@@ -183,29 +192,10 @@ class UserDetailView(MultiTableMixin, DetailView):
         )
         return self.orders_table(orders)
 
-    # def get_reviews_table(self):
-    #     evotor_ids = [model_qs['id'] for model_qs in self.queryset]
-    #     correct_ids = [model_qs['id'] for model_qs in self.queryset if model_qs['is_valid'] == True]
+    def get_order_reviews_table(self):
+        order_reviews = self.user.order_reviews.all()
+        return self.order_review_table(order_reviews)
 
-    #     site_models = self.model.objects.annotate(
-    #         is_valid=Case(
-    #             When(Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids), then=True),
-    #             default=False,
-    #             output_field=BooleanField()
-    #         ),
-    #         wrong_evotor_id=Case(
-    #             When(
-    #                 Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
-    #                 then=True
-    #             ),
-    #             default=False,
-    #             output_field=BooleanField()
-    #         )
-    #     ).order_by(
-    #         '-wrong_evotor_id',
-    #         'is_valid',
-    #         'evotor_id',
-    #         '-is_valid'
-    #     )
-            
-    #     return self.table_site(site_models)
+    def get_product_reviews_table(self):
+        product_reviews = self.user.product_reviews.all()
+        return self.product_review_table(product_reviews)

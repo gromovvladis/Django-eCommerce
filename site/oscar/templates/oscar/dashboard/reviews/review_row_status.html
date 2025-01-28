@@ -1,0 +1,9 @@
+{% if record.status == 1 %}
+<span class="badge badge-success">
+{% elif record.status == 2 %}
+<span class="badge badge-danger">
+{% else %}
+<span class="badge badge-info">
+{% endif %}
+{{ record.get_status_display }}
+</span>

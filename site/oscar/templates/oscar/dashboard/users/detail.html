@@ -12,7 +12,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:customer-list' %}">Пользователи</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:customer-list' %}">Клиенты</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{ customer.username }}</li>
         </ol>
     </nav>
@@ -82,7 +82,7 @@
                 {% endif %}
                 <tr>
                     <th>Написанные отзывы</th>
-                    <td>{{ customer.reviews.count }}</td>
+                    <td>{{ customer.total_reviews }}</td>
                 </tr>
             </table>
         </div>
@@ -117,11 +117,9 @@
                             <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_reviews' %}active{% endif %}" href="#user_reviews" data-toggle="tab">
                                 <i class="fa-regular fa-note-sticky"></i>
                                 <span>Отзывы</span>
-                                {% with reviews=customer.reviews.count %}
-                                    {% if reviews %}
-                                        <div class="dropdown-item-badge">{{ reviews }}</div>
-                                    {% endif %}
-                                {% endwith %}
+                                {% if customer.total_reviews %}
+                                    <div class="dropdown-item-badge">{{ customer.total_reviews }}</div>
+                                {% endif %}
                             </button>
                         </div>
                     </div>
@@ -158,29 +156,16 @@
                 {% endblock %}
                 {% block user_reviews %}
                     <div id="user_reviews" class="tab-pane fade" role="tabpanel">
-                        <table class="table table-striped table-bordered table-hover">
-                            <caption>Отзывы</caption>
-                            {% if customer.reviews.count %}
-                                <tr>
-                                    <th>Product ID</th>
-                                    <th>Оценка</th>
-                                    <th>Заголовок</th>
-                                    <th>Отзыв</th>
-                                    <th>Дата создания</th>
-                                </tr>
-                                {% for review in customer.reviews.all %}
-                                    <tr>
-                                        <td>{{ review.product_id }}</td>
-                                        <td>{{ review.score }}</td>
-                                        <td>{{ review.title }}</td>
-                                        <td>{{ review.body }}</td>
-                                        <td>{{ review.date_created }}</td>
-                                    </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr><td>Этот клиент еще не оставил ни одного отзыва</td></tr>
+                        <div class="mobile-table">
+                            {% if tables.1 %}
+                                {% render_table tables.1 %}
                             {% endif %}
-                        </table>
+                        </div>
+                        <div class="mobile-table">
+                            {% if tables.2 %}
+                                {% render_table tables.2 %}
+                            {% endif %}
+                        </div>
                     </div>
                 {% endblock %}
             </div>

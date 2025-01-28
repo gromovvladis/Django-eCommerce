@@ -83,9 +83,7 @@
                     {% endif %}
                 </div>
             </form>
-
             {% include "oscar/dashboard/partials/advanced_search_modal.html" with form=form style='horizontal' %}
-
             {% if search_filters %}
                 <div class="search-filter-list mt-4">
                     <label class="mr-2">Фильтры:</label>
@@ -107,7 +105,7 @@
             {% if orders.paginated_rows %}
                 <div class="table-wrapper mb-4 d-none" id="actions_lines">
                     <div class="table-header d-flex justify-space-between" data-target="#status-body" 
-                    data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
+                    data-toggle="collapse" aria-controls="status-body" aria-expanded="true">
                         <h3><i class="fa-solid fa-list-check"></i>Изменить статус заказа и скачать заказы</h3>
                         <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
                         <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
