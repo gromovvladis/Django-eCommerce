@@ -4,7 +4,7 @@
     <div class="carousel-inner">
         <div class="carousel-item">
         {% with image=product.primary_image %}
-            {% oscar_thumbnail image.original "640x640" upscale=False as thumb %}
+            {% oscar_thumbnail image.original "x900" upscale=False as thumb %}
             <img src="{{ thumb.url }}" loading="lazy" class="img-fluid" alt="{{ product.get_name }}"/>
         {% endwith %}
         </div>

@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django_tables2 import Column, TemplateColumn
-
 from django.utils.translation import ngettext_lazy
+
 from oscar.core.loading import get_class, get_model
 
 DashboardTable = get_class("dashboard.tables", "DashboardTable")

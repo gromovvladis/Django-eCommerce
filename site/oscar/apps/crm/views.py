@@ -1,4 +1,6 @@
 import json
+import logging
+
 from django.conf import settings
 from django.http import JsonResponse
 
@@ -7,14 +9,10 @@ from oscar.apps.telegram.models import TelegramMessage
 from oscar.core.loading import get_model
 from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs
 
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-
-
-import logging
 
 logger = logging.getLogger("oscar.crm")
 
@@ -27,9 +25,7 @@ user_token = settings.EVOTOR_SITE_USER_TOKEN
 site_login = settings.EVOTOR_SITE_LOGIN
 site_pass = settings.EVOTOR_SITE_PASS
 
-
 # ========= вспомогательные функции =========
-
 
 def is_valid_site_token(request):
     # Проверка токена сайта
@@ -85,34 +81,21 @@ def is_valid_site_and_user_tokens(request):
 
 # ========= API Endpoints (Уведомления) =========
 
-# сериализаторы
-#  1. Магазин и терминалы +
-#  2. персонал +
-
-#  3. товар
-#  3.1 категории и варианты товаров (схемы и модификации)
-
-#  4. заказ
-
 # новые модели
-#  1. чек
-#  2. документ
 #  3. событие +
 
 # добавь испльзование курсора, если объектов много
 
 
 class CRMInstallationEndpointView(APIView):
+    """ https://mikado-sushi.ru/crm/api/subscription/setup """
 
     permission_classes = [AllowAny]
-
-    """ https://mikado-sushi.ru/crm/api/subscription/setup """
 
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-
         request_info = {
             "method": request.method,
             "path": request.path,
@@ -120,10 +103,6 @@ class CRMInstallationEndpointView(APIView):
             "data": request.data,
         }
         logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
-        send_message_to_staffs(
-            f"request: {json.dumps(request_info, ensure_ascii=False)}",
-            TelegramMessage.TECHNICAL,
-        )
 
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -147,7 +126,6 @@ class CRMLoginEndpointView(APIView):
         return self.post(request, *args, **kwargs)
 
     def post(self, request):
-
         request_info = {
             "method": request.method,
             "path": request.path,
@@ -155,10 +133,6 @@ class CRMLoginEndpointView(APIView):
             "data": request.data,
         }
         logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
-        send_message_to_staffs(
-            f"request: {json.dumps(request_info, ensure_ascii=False)}",
-            TelegramMessage.TECHNICAL,
-        )
 
         not_allowed = is_valid_site_and_user_tokens(request)
         if not_allowed:
@@ -171,16 +145,14 @@ class CRMLoginEndpointView(APIView):
 
 
 class CRMStoreEndpointView(APIView):
+    """ https://mikado-sushi.ru/crm/api/stores """
 
     permission_classes = [AllowAny]
-
-    """ https://mikado-sushi.ru/crm/api/stores """
 
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-
         not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed
@@ -203,16 +175,14 @@ class CRMStoreEndpointView(APIView):
 
 
 class CRMTerminalEndpointView(APIView):
+    """ https://mikado-sushi.ru/crm/api/terminals """
 
     permission_classes = [AllowAny]
-
-    """ https://mikado-sushi.ru/crm/api/terminals """
 
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-
         request_info = {
             "method": request.method,
             "path": request.path,
@@ -220,10 +190,6 @@ class CRMTerminalEndpointView(APIView):
             "data": request.data,
         }
         logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
-        send_message_to_staffs(
-            f"request: {json.dumps(request_info, ensure_ascii=False)}",
-            TelegramMessage.TECHNICAL,
-        )
 
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -247,16 +213,14 @@ class CRMTerminalEndpointView(APIView):
 
 
 class CRMStaffEndpointView(APIView):
+    """ https://mikado-sushi.ru/crm/api/staffs """
 
     permission_classes = [AllowAny]
-
-    """ https://mikado-sushi.ru/crm/api/staffs """
 
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-
         not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed
@@ -279,16 +243,14 @@ class CRMStaffEndpointView(APIView):
 
 
 class CRMRoleEndpointView(APIView):
+    """ https://mikado-sushi.ru/crm/api/roles """
 
     permission_classes = [AllowAny]
-
-    """ https://mikado-sushi.ru/crm/api/roles """
 
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-
         not_allowed = is_valid_user_token(request)
         if not_allowed:
             return not_allowed
@@ -311,16 +273,14 @@ class CRMRoleEndpointView(APIView):
 
 
 class CRMProductEndpointView(APIView):
+    """ https://mikado-sushi.ru/crm/api/stores/<str:store_id>/products/ """
 
     permission_classes = [AllowAny]
-
-    """ https://mikado-sushi.ru/crm/api/stores/<str:store_id>/products/ """
 
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-
         request_info = {
             "method": request.method,
             "path": request.path,
@@ -359,9 +319,6 @@ class CRMProductEndpointView(APIView):
 
 
 class CRMDocsEndpointView(APIView):
-
-    permission_classes = [AllowAny]
-
     """ 
     https://mikado-sushi.ru/crm/api/docs 
 
@@ -376,6 +333,8 @@ class CRMDocsEndpointView(APIView):
     9. Изъятие наличных (CASH_OUTCOME)
     """
 
+    permission_classes = [AllowAny]
+
     def put(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
 
@@ -387,10 +346,6 @@ class CRMDocsEndpointView(APIView):
             "data": request.data,
         }
         logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
-        send_message_to_staffs(
-            f"request: {json.dumps(request_info, ensure_ascii=False)}",
-            TelegramMessage.TECHNICAL,
-        )
 
         not_allowed = is_valid_user_token(request)
         if not_allowed:
@@ -398,6 +353,12 @@ class CRMDocsEndpointView(APIView):
 
         request_type = request.data.get("type")
         # request_type = "SELL"
+
+        if request_type != "SELL":
+            send_message_to_staffs(
+                f"request: {json.dumps(request_info, ensure_ascii=False)}",
+                TelegramMessage.TECHNICAL,
+            )
 
         if request_type == "SELL":
             # self.sell(data, *args, **kwargs)
@@ -435,9 +396,6 @@ class CRMDocsEndpointView(APIView):
 
     def payback(self, data):
         EvatorCloud().refund_site_order(data)
-
-
-
 
     def accept(self, data):
         pass

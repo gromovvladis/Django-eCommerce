@@ -1,7 +1,7 @@
 from django.urls import path
+
 from oscar.core.application import OscarDashboardConfig
 from oscar.core.loading import get_class
-
 
 class ReviewsDashboardConfig(OscarDashboardConfig):
     label = "reviews_dashboard"
