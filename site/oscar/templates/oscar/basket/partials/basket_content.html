@@ -34,7 +34,7 @@
                                                     <div class="image {% if line.warning %}image--unavailable{% endif %}">
                                                         <div class="image__inner" style="padding-bottom: 72.072%;">
                                                             {% with image=product.primary_image %}
-                                                                {% oscar_thumbnail image.original "200x" upscale=False as thumb %}
+                                                                {% oscar_thumbnail image.original "220x" upscale=False as thumb %}
                                                                 <img src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy"/>
                                                             {% endwith %}
                                                         </div>

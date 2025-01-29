@@ -11,7 +11,7 @@
                 {% comment %}------------- картинка товара ---------------{% endcomment %}
                 {% block product_image %}
                     {% with image=product.primary_image %}
-                        {% oscar_thumbnail image.original "x350" upscale=False as thumb %}
+                        {% oscar_thumbnail image.original "x600" upscale=False as thumb %}
                         <a href="{{ product.get_absolute_url }}" class="dish-item-image pos-relative" data-id="dish-item-image-link" aria-label="{{ product.get_name }}">
                             <div class="dish-image dish-image--product fill-width fill-height pos-relative none-select">
                                 <div class="image__inner image__inner--product">

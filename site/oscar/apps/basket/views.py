@@ -25,7 +25,7 @@ SurchargeApplicator = get_class("checkout.applicator", "SurchargeApplicator")
 
 Basket = get_model("basket", "Basket")
 Line = get_model("basket", "Line")
-Product = get_model("catalogue", "product")
+Product = get_model("catalogue", "Product")
 
 
 class BasketView(ModelFormSetView):

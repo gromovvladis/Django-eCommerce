@@ -1,5 +1,6 @@
 from django.apps import apps
 from django.urls import include, path
+
 from oscar.core.application import OscarDashboardConfig
 from oscar.core.loading import get_class
 

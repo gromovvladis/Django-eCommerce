@@ -2,25 +2,23 @@
 import datetime
 
 from django.conf import settings
-from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views import generic
 from django_tables2 import SingleTableView
+from django.db.models import Max, Min, Case, When, DecimalField, Q
 
-from django.db.models import Count, Max, Min, Case, When, DecimalField, F
-
+from oscar.views.generic import BulkEditMixin
+from oscar.views import sort_queryset
 from oscar.core.loading import get_classes, get_model
 from oscar.core.utils import format_datetime
-from oscar.views import sort_queryset
-from oscar.views.generic import BulkEditMixin
+
+ProductReview = get_model("reviews", "productreview")
+OrderReview = get_model("customer", "OrderReview")
 
 ProductReviewSearchForm, DashboardProductReviewForm, DashboardOrderReviewForm = get_classes(
     "dashboard.reviews.forms", ("ProductReviewSearchForm", "DashboardProductReviewForm", "DashboardOrderReviewForm")
 )
-ProductReview = get_model("reviews", "productreview")
-OrderReview = get_model("customer", "OrderReview")
-
 ReviewOrderTable, ReviewProductTable = get_classes(
     "dashboard.reviews.tables", ("ReviewOrderTable", "ReviewProductTable")
 )
