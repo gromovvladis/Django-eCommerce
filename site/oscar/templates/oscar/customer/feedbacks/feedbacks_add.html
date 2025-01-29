@@ -27,13 +27,9 @@
 
 {% block tabcontent %}
     <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
-
         <div class="order__title d-flex justify-start mb-2 align-center">
-            <div class="d-flex">
-                <h1>Отзыв к заказу №{{ order.number }}</h1>
-            </div>
+            <h1>Отзыв на заказ №{{ order.number }}</h1>
         </div>
-        
         {% if order %}
             <div class="fill-width mb-2">
                 <div class="cabinet-orders fill-width grow-1">
@@ -53,7 +49,7 @@
                                                                 <div class="image__inner" style="padding-bottom: 72.072%;">
                                                                     {% if product %}
                                                                         {% with image=product.primary_image %}
-                                                                            {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
+                                                                            {% oscar_thumbnail image.original "250x250" upscale=False as thumb %}
                                                                             {% if product.is_public %}
                                                                                 <a href="{{ product.get_absolute_url }}">
                                                                                     <img class="img-thumbnail" src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy"/>
@@ -68,9 +64,7 @@
                                                         </div>
                                                     </a>
                                                 </div>
-
                                                 <div class="dish-order__content d-flex flex-column fill-width ml-1">
-                                                    
                                                     <div class="dish-order__title s d-flex align-start fill-width">
                                                         <div class="dish-order__name-wrapper d-flex fill-width">
                                                             <a href="{{ product.get_absolute_url }}" aria-current="page"
@@ -87,25 +81,19 @@
                                                             ( {{ line.quantity }} шт. )
                                                         </span>
                                                     </div>
-
                                                     <div class="dish-order__toppings d-flex fill-width">
                                                         <div class="d-flex flex-wrap" data-id="dish-order-toppings">
                                                             <span class="d-flex">{{ line.variants }}</span>
                                                             <span class="d-flex">{{ line.options }}</span>
                                                             <span class="d-flex">{{ line.additions }}</span>
                                                         </div>
-                                                    </div>    
-
+                                                    </div>  
                                                     {% if product|is_review_permitted:user %}
-                                                        <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}#addreview">Оценить</a>
+                                                        <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}">Оценить</a>
                                                     {% endif %}
-                                                
                                                     <div role="separator" class="spacer"></div>
-
                                                     <div class="d-flex fill-width mt-1 pos-relative align-center">
-
                                                         <div role="separator" class="spacer"></div>
-                                                        
                                                         <span class="prices d-flex flex-column align-start">
                                                             <span class="prices__price no-wrap">
                                                                 {% purchase_info_for_product request product as session %}
@@ -126,14 +114,12 @@
                     </div>
                 </div>
             </div>
-
             {% if not order.has_review %}
                 {% block order_review %}
                     <form method="post" class="prodile-feedback__wrapper">
                         {% csrf_token %}
                             <div class="d-flex align-center mb-2">
                                 <div class="controls">
-
                                     <div class="profile-feedback_rating-area d-flex flex-row-reverse">
                                         {% for value, label in form.score.field.choices %}
                                             <input type="radio" name="score" value="{{ value }}" id="id_star_{{ value }}" {% if field.value|default:"" == value %} selected{% endif %}></input>
@@ -142,14 +128,11 @@
                                             {% endif %}
                                         {% endfor %}
                                     </div>
-
                                     {% for error in form.score.errors %}
                                         <div class="error-block mt-2"><i class="fas fa-exclamation"></i> {{ error }}</div>
                                     {% endfor %}
-
                                 </div>
                             </div>
-                            
                             <div class="input text-area input-textarea d-flex align-center mb-3 mb-sm-3 input__padding input__label-active">
                                 <div class="input__wrapper">
                                     <div class="input__control d-flex align-center">
@@ -157,20 +140,17 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="profile-feedback__submit">
-                                <button type="submit" class="button button--main" data-loading-text="Saving...'">Отправить отзыв</button>
+                                <button type="submit" class="button button--main">Отправить отзыв</button>
                             </div>
-
                         </fieldset>
                     </form>
                 {% endblock %}
             {% else %}
                 <p>На этот заказ вы уже оставляли отзыв</p>
             {% endif %}
-
         {% else %}
-            <p>Невозвожно оставить отзыв к заказу</p>
+            <p>Невозвожно оставить отзыв на заказ</p>
         {% endif %}
     </div>
 {% endblock tabcontent %}

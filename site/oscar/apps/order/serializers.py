@@ -291,7 +291,7 @@ class OrderSerializer(serializers.Serializer):
             store=store,
             total=body.get("result_sum", 0),
             shipping_method="Самовывоз",
-            status=settings.OSCAR_FINAL_ORDER_STATUS,
+            status=settings.OSCAR_SUCCESS_ORDER_STATUS,
             date_finish=now(),
             order_time=now(),
         )

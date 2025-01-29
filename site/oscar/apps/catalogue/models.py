@@ -1063,7 +1063,7 @@ class Product(models.Model):
         """
         Calculate rating value
         """
-        result = self.reviews.filter(status=self.reviews.model.APPROVED).aggregate(
+        result = self.reviews.all().aggregate(
             sum=Sum("score"), count=Count("id")
         )
         reviews_sum = result["sum"] or 0
@@ -1094,8 +1094,8 @@ class Product(models.Model):
             return False
 
     @cached_property
-    def num_approved_reviews(self):
-        return self.reviews.approved().count()
+    def num_helpful_reviews(self):
+        return self.reviews.helpful().count()
 
     @property
     def sorted_recommended_products(self):

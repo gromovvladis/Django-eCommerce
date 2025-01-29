@@ -1,0 +1,23 @@
+{% extends "oscar/dashboard/reviews/review_list.html" %}
+{% load currency_filters %}
+{% load sorting_tags %}
+
+{% block body_class %}{{ block.super }} reviews{% endblock %}
+{% block title %}
+    Отзывы на товары | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Отзывы на товары</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block header %}
+    <div class="page-header d-flex justify-content-between">
+        <h1>Отзывы на товары</h1>
+    </div>
+{% endblock header %}

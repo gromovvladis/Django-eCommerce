@@ -76,9 +76,7 @@ class CRMStoreListView(CRMTablesMixin):
     url_redirect = reverse_lazy("dashboard:crm-stores")
 
     def get_queryset(self):
-
         data_json = EvatorCloud().get_stores()
-
         error = data_json.get("error")
         if error:
             self.queryset = []
@@ -155,7 +153,6 @@ class CRMTerminalListView(CRMTablesMixin):
 
     def get_queryset(self):
         data_json = EvatorCloud().get_terminals()
-
         error = data_json.get("error")
         if error:
             self.queryset = []
@@ -232,7 +229,6 @@ class CRMStaffListView(CRMTablesMixin):
 
     def get_queryset(self):
         data_json = EvatorCloud().get_staffs()
-
         error = data_json.get("error")
         if error:
             self.queryset = []
@@ -506,7 +502,6 @@ class CRMProductListView(CRMTablesMixin):
         return self.table_site(site_models)
 
     def get_queryset(self):
-
         self.form = self.form_class(self.request.GET)
         if not self.form.is_valid():
             messages.error(

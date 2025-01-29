@@ -26,7 +26,20 @@ class OrderReview(models.Model):
         blank=True,
         null=True,
         on_delete=models.CASCADE,
+        related_name="order_reviews",
     )
+
+    UNKNOWN, HELPFUL, UNHELPFUL = 0, 1, 2
+    STATUS_CHOICES = (
+        (UNKNOWN, "Неизвестно"),
+        (HELPFUL, "Полезный"),
+        (UNHELPFUL, "Неполезный"),
+    )
+
+    status = models.SmallIntegerField(
+        "Статус", choices=STATUS_CHOICES, default=UNKNOWN
+    )
+
 
     date_created = models.DateTimeField(auto_now_add=True)
 
@@ -36,8 +49,8 @@ class OrderReview(models.Model):
         db_table = "order_review"
         app_label = "customer"
         unique_together = (("order", "user"),)
-        verbose_name ="Отзыв заказа"
-        verbose_name_plural = "Отзывы заказов"
+        verbose_name ="Отзыв на заказ"
+        verbose_name_plural = "Отзывы на заказы"
 
     def get_absolute_url(self):
         kwargs = {

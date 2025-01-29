@@ -1,9 +1,11 @@
 # pylint: disable=E5142, E5141
 import csv
+import io
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
+from django.http import HttpResponse
 
 from oscar.core.loading import get_model
 
@@ -83,7 +85,7 @@ class UnicodeCSVWriter:
     """
 
     def __init__(
-        self, filename=None, open_file=None, dialect=csv.excel, encoding="utf-8", **kw
+        self, filename=None, open_file=None, dialect=csv.excel, encoding="utf-8-sig", **kw
     ):
         if filename is open_file is None:
             raise ImproperlyConfigured(
@@ -114,9 +116,7 @@ class UnicodeCSVWriter:
     def add_bom(self, f):
         # If encoding is UTF-8, insert a Byte Order Mark at the start of the
         # file for compatibility with MS Excel.
-        if self.encoding == "utf-8" and getattr(
-            settings, "OSCAR_CSV_INCLUDE_BOM", False
-        ):
+        if self.encoding == "utf-8-sig":
             self.f.write("\ufeff")
 
     def writerow(self, row):

@@ -1,4 +1,6 @@
 from decimal import Decimal as D
+
+from django.conf import settings
 from oscar.apps.order import exceptions
 
 
@@ -65,8 +67,6 @@ class EventHandler(object):
         viewed as a shipping event affecting all lines.
         """
         order.set_status(new_status)
-        # if note_msg:
-        #     self.create_note(order, note_msg)
 
     # Validation methods
     # ------------------
@@ -204,33 +204,33 @@ class EventHandler(object):
                 return False
         return True
 
-    def consume_stock_allocations(self, order, lines=None, line_quantities=None):
-        """
-        Consume the stock allocations for the passed lines.
+    # def consume_stock_allocations(self, order, lines=None, line_quantities=None):
+    #     """
+    #     Consume the stock allocations for the passed lines.
 
-        If no lines/quantities are passed, do it for all lines.
-        """
-        if not lines:
-            lines = order.lines.all()
-        if not line_quantities:
-            line_quantities = [line.quantity for line in lines]
-        for line, qty in zip(lines, line_quantities):
-            if line.stockrecord:
-                line.stockrecord.consume_allocation(qty)
+    #     If no lines/quantities are passed, do it for all lines.
+    #     """
+    #     if not lines:
+    #         lines = order.lines.all()
+    #     if not line_quantities:
+    #         line_quantities = [line.quantity for line in lines]
+    #     for line, qty in zip(lines, line_quantities):
+    #         if line.stockrecord:
+    #             line.stockrecord.consume_allocation(qty)
 
-    def cancel_stock_allocations(self, order, lines=None, line_quantities=None):
-        """
-        Cancel the stock allocations for the passed lines.
+    # def cancel_stock_allocations(self, order, lines=None, line_quantities=None):
+    #     """
+    #     Cancel the stock allocations for the passed lines.
 
-        If no lines/quantities are passed, do it for all lines.
-        """
-        if not lines:
-            lines = order.lines.all()
-        if not line_quantities:
-            line_quantities = [line.quantity for line in lines]
-        for line, qty in zip(lines, line_quantities):
-            if line.stockrecord:
-                line.stockrecord.cancel_allocation(qty)
+    #     If no lines/quantities are passed, do it for all lines.
+    #     """
+    #     if not lines:
+    #         lines = order.lines.all()
+    #     if not line_quantities:
+    #         line_quantities = [line.quantity for line in lines]
+    #     for line, qty in zip(lines, line_quantities):
+    #         if line.stockrecord:
+    #             line.stockrecord.cancel_allocation(qty)
 
     # Model instance creation
     # -----------------------

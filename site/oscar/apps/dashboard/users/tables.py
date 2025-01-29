@@ -1,6 +1,9 @@
 from django_tables2 import A, Column, LinkColumn, TemplateColumn
-from oscar.core.loading import get_class
 
+from oscar.core.loading import get_class
+from oscar.core.compat import get_user_model
+
+User = get_user_model()
 DashboardTable = get_class("dashboard.tables", "DashboardTable")
 
 
@@ -10,20 +13,69 @@ class UserTable(DashboardTable):
         verbose_name=" ",
         orderable=False,
     )
-    email = LinkColumn("dashboard:user-detail", args=[A("id")], accessor="email")
-    name = Column(accessor="get_full_name", order_by=("last_name", "name"))
-    active = Column(accessor="is_active")
-    staff = Column(accessor="is_staff")
-    date_registered = Column(accessor="date_joined")
+    phone = LinkColumn(
+        "dashboard:user-detail",
+        args=[A("id")],
+        accessor="username",
+        verbose_name="Номер телефона",
+        attrs = {'td': {'class': 'name'},}
+    )
+    email = Column(
+        accessor="email",
+        order_by=("email"),
+        verbose_name="Email",
+    )
+    first_name = Column(
+        accessor="get_full_name", 
+        order_by=("first_name"),
+        verbose_name="Имя клиента",
+    )
+    is_active = TemplateColumn(
+        verbose_name="Активен",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by=("is_active"),
+    )
+    is_staff = TemplateColumn(
+        verbose_name="Сотрудник",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by=("is_staff"),
+    )
+    telegram_id = TemplateColumn(
+        verbose_name="Телеграм",
+        template_name="oscar/dashboard/table/boolean.html",
+        order_by=("telegram_id"),
+    )
     num_orders = Column(
         accessor="userrecord__num_orders", default=0, verbose_name="Количество заказов"
     )
-    actions = TemplateColumn(
-        template_name="oscar/dashboard/users/user_row_actions.html", verbose_name=" "
-    )
+    date_registered = Column(accessor="date_joined")
 
     icon = "fas fa-users"
 
     class Meta(DashboardTable.Meta):
-        pass
-        # template_name = "oscar/dashboard/users/table.html"
+        model = User
+        fields = (
+            "phone",
+            "email",
+            "first_name",
+            "is_active",
+            "is_staff",
+            "telegram_id",
+            "date_registered",
+        )
+        sequence = (
+            "check",
+            "phone",
+            "email",
+            "first_name",
+            "is_active",
+            "is_staff",
+            "telegram_id",
+            "num_orders",
+            "date_registered",
+        )
+        attrs = {
+            'class': 'table table-striped table-bordered table-hover',
+        }
+        empty_text = "Список пользователей пуст"
+

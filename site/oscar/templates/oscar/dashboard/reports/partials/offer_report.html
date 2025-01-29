@@ -1,24 +1,26 @@
 {% extends 'oscar/dashboard/reports/index.html' %}
 {% load currency_filters %}
-{% load i18n %}
 
 {% block report %}
-<table class="table table-striped table-bordered table-hover">
-    {% if objects %}
-        <tr>
-            <th>{% trans "Offer" %}</th>
-            <th>{% trans "Total discount" %}</th>
-        </tr>
-        {% for offer_discount in objects %}
-        <tr>
-            <td><a {% if offer_discount.offer %}href="{% url 'dashboard:offer-detail' offer_discount.offer_id %}"{% endif %}>{{ offer_discount.display_offer_name }}</a></td>
-            <td>{{ offer_discount.total_discount|currency }}</td>
-        </tr>
-    {% endfor %}
-
-    {% else %}
-        <tr><td>{% trans "No results found." %}</td></tr>
-    {% endif %}
-</table>
-{% include "oscar/dashboard/partials/pagination.html" %}
+    <table class="table table-striped table-bordered table-hover">
+        {% if objects %}
+            <thead>
+                <tr>
+                    <th class="name">Предложение</th>
+                    <th class="title">Суммарная скидка</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offer_discount in objects %}
+                    <tr>
+                        <td class="name"><a {% if offer_discount.offer %}href="{% url 'dashboard:offer-detail' offer_discount.offer_id %}"{% endif %}>{{ offer_discount.display_offer_name }}</a></td>
+                        <td class="title">{{ offer_discount.total_discount|currency }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        {% else %}
+            <tr><td class="empty">Нет примененных предложений за заданный период</td></tr>
+        {% endif %}
+    </table>
+    {% include "oscar/dashboard/partials/pagination.html" %}
 {% endblock %}

@@ -35,7 +35,6 @@
             <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
         </div>
         <div class="card card-body bg-light collapse" id="search-body">
-
             <form method="get" class="form-inline fill-width justify-space-between align-items-end">
                 <div class="d-flex form-row">
                     {% include "oscar/dashboard/partials/form_fields_inline.html" with form=form %}
@@ -55,7 +54,7 @@
                 {% endif %}
 
                 <div class="btn-form d-flex mt-3">
-                    <button class="btn btn-primary flex-fill" type="submit" name="search" data-loading-text="Поиск...">
+                    <button class="btn btn-primary flex-fill" type="submit" name="search">
                         <i class="fas fa-search"></i>
                         <span class="ml-2">
                             Поиск
@@ -70,7 +69,6 @@
             </form>
         </div>
     </div>
-
     {% if staffs %}
         <form id="user_list_form" method="post" class="mobile-table">
             {% csrf_token %}
@@ -111,7 +109,6 @@
             <tr><td>Список персонала пуст</td></tr>
         </table>
     {% endif %}
-
 {% endblock dashboard_content %}
 
 {% block onbodyload %}

@@ -47,7 +47,6 @@ class OrderReviewForm(forms.ModelForm):
         }
 
 
-
 class SortReviewsForm(forms.Form):
     SORT_BY_SCORE = "score"
     SORT_BY_RECENCY = "recency"

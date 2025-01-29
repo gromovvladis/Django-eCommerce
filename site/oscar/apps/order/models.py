@@ -11,11 +11,11 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 from django.utils.timezone import now
-from oscar.apps.order.signals import order_line_status_changed, order_status_changed
+from oscar.models.fields import AutoSlugField
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_model
 from oscar.core.utils import get_default_currency
-from oscar.models.fields import AutoSlugField
+from oscar.apps.order.signals import order_line_status_changed, order_status_changed
 
 from . import exceptions
 
@@ -108,8 +108,6 @@ class Order(models.Model):
     # Date and time of finish order
     date_finish = models.DateTimeField(db_index=True, blank=True, null=True)
 
-    has_review = models.BooleanField(default=False)
-
     is_open = models.BooleanField("Заказ просмотрен", default=False, db_index=True)
 
     #: Order status pipeline.  This should be a dict where each (key, value) #:
@@ -170,6 +168,11 @@ class Order(models.Model):
         
         if new_status in settings.ORDER_FINAL_STATUSES:
             self.date_finish = now()
+        
+        if new_status == settings.OSCAR_SUCCESS_ORDER_STATUS:
+            self.consume_stock_allocations()
+        elif new_status == settings.OSCAR_FAIL_ORDER_STATUS:
+            self.cancel_stock_allocations()
                 
         self.save()
         
@@ -185,6 +188,30 @@ class Order(models.Model):
 
     set_status.alters_data = True
 
+    def consume_stock_allocations(self):
+        """
+        Consume the stock allocations for the passed lines.
+
+        If no lines/quantities are passed, do it for all lines.
+        """
+        lines = self.lines.all()
+        line_quantities = [line.quantity for line in lines]
+        for line, qty in zip(lines, line_quantities):
+            if line.stockrecord:
+                line.stockrecord.consume_allocation(qty)
+
+    def cancel_stock_allocations(self):
+        """
+        Cancel the stock allocations for the passed lines.
+
+        If no lines/quantities are passed, do it for all lines.
+        """
+        lines = self.lines.all()
+        line_quantities = [line.quantity for line in lines]
+        for line, qty in zip(lines, line_quantities):
+            if line.stockrecord:
+                line.stockrecord.cancel_allocation(qty)
+
     def _create_order_status_change(self, old_status, new_status):
         # Not setting the status on the order as that should be handled before
         self.status_changes.create(old_status=old_status, new_status=new_status)
@@ -193,6 +220,26 @@ class Order(models.Model):
         self.is_open = True
         self.save()
 
+    def has_review_by(self, user):
+        if user.is_anonymous:
+            return False
+        return self.reviews.filter(user=user).exists()
+
+    def is_review_permitted(self, user):
+        """
+        Determines whether a user may add a review on this product.
+
+        Default implementation respects OSCAR_ALLOW_ANON_REVIEWS and only
+        allows leaving one review per user and product.
+
+        Override this if you want to alter the default behaviour; e.g. enforce
+        that a user purchased the product to be allowed to leave a review.
+        """
+        if user.is_authenticated:
+            return not self.has_review_by(user)
+        else:
+            return False
+        
     @property
     def next_status(self):
         pipeline = (

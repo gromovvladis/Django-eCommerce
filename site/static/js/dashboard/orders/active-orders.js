@@ -18,19 +18,20 @@ const updateActiveTable = (force=false) => {
     .then(data => {
         if (data.update || force){
             if (tableContainer && data.html) {
+                let oldOrderNum = orderNum;
+                orderNum = parseInt(data.num_orders, 10);
                 tableContainer.innerHTML = data.html;
-                orderNum = data.num_orders;
                 activeNavbarNum.innerHTML = orderNum;
                 if (orderNum > 0){
                     navbarOrders.innerHTML = orderNum;
                     navbarActiveOrders.innerHTML = orderNum;
-                    activeNavbar.classList.remove = "d-none";
+                    activeNavbar.classList.remove("d-none");
                 } else {
                     navbarOrders.innerHTML = "";
                     navbarActiveOrders.innerHTML = "";
-                    activeNavbar.classList.add = "d-none";
+                    activeNavbar.classList.add("d-none");
                 }
-                if (audio && !force) {
+                if (audio && !force && oldOrderNum < orderNum) {
                     audio.play();
                 }
                 if (orderModal){

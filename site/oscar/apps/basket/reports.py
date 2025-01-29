@@ -71,7 +71,7 @@ class OpenBasketReportGenerator(ReportGenerator):
         "HTML_formatter": OpenBasketReportHTMLFormatter,
     }
 
-    def generate(self):
+    def generate(self, *args, **kwargs):
         additional_data = {"start_date": self.start_date, "end_date": self.end_date}
         return self.formatter.generate_response(self.queryset, **additional_data)
 
@@ -127,6 +127,6 @@ class SubmittedBasketReportGenerator(ReportGenerator):
         "HTML_formatter": SubmittedBasketReportHTMLFormatter,
     }
 
-    def generate(self):
+    def generate(self, *args, **kwargs):
         additional_data = {"start_date": self.start_date, "end_date": self.end_date}
         return self.formatter.generate_response(self.queryset, **additional_data)

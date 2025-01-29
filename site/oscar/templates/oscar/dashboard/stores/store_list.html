@@ -37,7 +37,7 @@
             <form method="get" class="form-inline fill-width justify-space-between">
                 {% include 'oscar/dashboard/partials/form_fields_inline.html' with form=form %}
                 <div class="btn-form d-flex">
-                    <button type="submit" class="btn btn-primary flex-fill" data-loading-text="Поиск..."><i class="fas fa-search"></i><span class="ml-2">Поиск</span></button>
+                    <button type="submit" class="btn btn-primary flex-fill"><i class="fas fa-search"></i><span class="ml-2">Поиск</span></button>
                     {% if is_filtered %}
                         <a class="btn btn-danger ml-2" href="{% url 'dashboard:store-list' %}">
                             <i class="fa-regular fa-circle-xmark"></i>

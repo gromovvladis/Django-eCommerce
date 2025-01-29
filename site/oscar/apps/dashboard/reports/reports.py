@@ -29,13 +29,38 @@ class ReportGenerator(object):
         self.formatter = self.formatters[formatter_name]()
         self.queryset = self.get_queryset()
         self.queryset = self.filter_with_date_range(self.queryset)
-
+    
     def report_description(self):
-        return "%(report_filter)s между %(start_date)s и %(end_date)s" % {
-            "report_filter": self.description,
-            "start_date": date(self.start_date, "DATE_FORMAT"),
-            "end_date": date(self.end_date, "DATE_FORMAT"),
-        }
+        start_date = date(self.start_date, "DATE_FORMAT")
+        end_date = date(self.end_date, "DATE_FORMAT")
+
+        if self.start_date and self.end_date:
+            date_range = f"между {start_date} и {end_date}"
+        elif self.start_date:
+            date_range = f"с {start_date}"
+        elif self.end_date:
+            date_range = f"до {end_date}"
+        else:
+            date_range = ""
+            
+        return f"{self.description} {date_range}"
+    
+    def search_filters(self):
+        filters = []
+
+        start_date = date(self.start_date, "DATE_FORMAT")
+        end_date = date(self.end_date, "DATE_FORMAT")
+
+        if start_date:
+            filters.append((
+                ("С {start_date}").format(start_date=start_date), (("date_from", start_date),)
+            ))
+        if end_date:
+            filters.append((
+                ("До {end_date}").format(end_date=end_date), (("date_to", end_date),)
+            ))
+
+        return filters
 
     def get_queryset(self):
         if self.queryset is not None:
@@ -48,7 +73,7 @@ class ReportGenerator(object):
             )
         return self.model_class._default_manager.all()
 
-    def generate(self):
+    def generate(self, *args, **kwargs):
         return self.formatter.generate_response(self.queryset)
 
     def filename(self):

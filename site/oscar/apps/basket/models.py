@@ -621,7 +621,8 @@ class Basket(models.Model):
     @property
     def num_lines(self):
         """Return number of lines"""
-        return self.all_lines().count()
+        return len(self.all_lines())
+        # return self.all_lines().count()
 
     @property
     def num_all_items(self):
@@ -650,12 +651,31 @@ class Basket(models.Model):
     @property
     def time_before_submit(self):
         if not self.date_submitted:
-            return None
-        return self.date_submitted - self.date_created
+            return "Не отправлено"
+        
+        delta = self.date_submitted - self.date_created
+        days = delta.days
+        hours, remainder = divmod(delta.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        
+        if days > 0:
+            return f"{days} дней, {hours} часов, {minutes} минут"
+        elif hours > 0:
+            return f"{hours} часов, {minutes} минут"
+        elif minutes > 0:
+            return f"{minutes} минут, {seconds} секунд"
+        else:
+            return f"{seconds} секунд"
+    
+        # if not self.date_submitted:
+        #     return None
+        # return self.date_submitted - self.date_created
 
     @property
     def time_since_creation(self, test_datetime=None):
-        return test_datetime - self.date_created
+        if test_datetime is not None:
+            return test_datetime - self.date_created
+        return now() - self.date_created
 
     @property
     def contains_a_voucher(self):

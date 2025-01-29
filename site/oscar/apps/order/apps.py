@@ -7,11 +7,11 @@ class OrderConfig(OscarConfig):
     name = "oscar.apps.order"
     verbose_name = "Заказ"
 
-    def ready(self):
-            self.callback_komtet = get_class("order.views", "CallbackKomtet")
+    # def ready(self):
+    #         self.callback_komtet = get_class("order.views", "CallbackKomtet")
 
-    def get_urls(self):
-        urls = [
-            path("callback/", self.callback_komtet.as_view(), name="callback"),
-        ]
-        return self.post_process_urls(urls)
+    # def get_urls(self):
+    #     urls = [
+    #         path("callback/", self.callback_komtet.as_view(), name="callback"),
+    #     ]
+    #     return self.post_process_urls(urls)

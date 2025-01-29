@@ -7,25 +7,24 @@ GeneratorRepository = get_class("dashboard.reports.utils", "GeneratorRepository"
 
 class ReportForm(forms.Form):
     generators = GeneratorRepository().get_report_generators()
-
     type_choices = []
     for generator in generators:
         type_choices.append((generator.code, generator.description))
-    report_type = forms.ChoiceField(
-        widget=forms.Select(),
-        choices=type_choices,
-        label="Тип отчета",
-        help_text="Выбранный диапазон дат используется только в отчетах о предложениях и заказах",
-    )
 
     date_from = forms.DateField(
-        label="Дата с", required=False, widget=DatePickerInput
+        label="Дата с", required=False, widget=DatePickerInput(attrs={"class": "dateinput"}),
     )
     date_to = forms.DateField(
         label="Дата до",
         help_text="Отчет включает эту дату",
         required=False,
-        widget=DatePickerInput,
+        widget=DatePickerInput(attrs={"class": "dateinput"}),
+    )
+    report_type = forms.ChoiceField(
+        widget=forms.Select(),
+        choices=type_choices,
+        label="Тип отчета",
+        help_text="Выбранный диапазон дат используется только в отчетах о предложениях и заказах",
     )
     download = forms.BooleanField(label="Скачать", required=False)
 
