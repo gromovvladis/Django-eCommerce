@@ -7,7 +7,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.functions import TruncDate
-from django.db.models import Count, Sum, F, Func
+from django.db.models import Count, Sum
 
 from oscar.core.loading import get_class, get_model
 
@@ -87,12 +87,12 @@ class CRMReportGenerator(ReportGenerator):
         Order._default_manager.select_related()
         .filter(status=settings.OSCAR_SUCCESS_ORDER_STATUS)
         .annotate(
-            # day=TruncDate('date_placed')  # Обрабатываем поле даты, чтобы получить только день
-            day=Func(
-                F("date_placed"),
-                function="DATE",  # SQLite поддерживает DATE функцию
-                template="%(function)s(%(expressions)s)",
-            )
+            day=TruncDate('date_placed')  # Обрабатываем поле даты, чтобы получить только день
+            # day=Func(
+            #     F("date_placed"),
+            #     function="DATE",  # SQLite поддерживает DATE функцию
+            #     template="%(function)s(%(expressions)s)",
+            # )
             # Обрабатываем поле даты, чтобы получить только день
         )
         .values("day")
