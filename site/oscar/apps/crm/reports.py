@@ -47,7 +47,8 @@ class CRMReportCSVFormatter(ReportCSVFormatter):
             ws.cell(row=13, column=19, value=orders.last().get('day').year)
 
             for i, row_data in enumerate(orders):
-                ws.cell(row=start_row + i, column=1, value=row_data.get('day').replace(tzinfo=None))
+                # ws.cell(row=start_row + i, column=1, value=row_data.get('day').replace(tzinfo=None))
+                ws.cell(row=start_row + i, column=1, value=row_data.get('day'))
                 ws.cell(row=start_row + i, column=22, value=row_data.get('total_sum'))
                 ws.cell(row=start_row + i, column=28, value=row_data.get('order_count'))
                 ws.cell(row=start_row + i, column=30, value=row_data.get('line_count'))
