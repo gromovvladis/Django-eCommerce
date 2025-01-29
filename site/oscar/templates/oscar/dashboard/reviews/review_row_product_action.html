@@ -4,6 +4,9 @@
             <i class="fas fa-edit"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+            {% if not record.is_open %}
+                <a class="dropdown-item" href="{% url 'dashboard:reviews-product-read' pk=record.id %}">Прочитано</a>
+            {% endif %}
             <a class="dropdown-item" href="{% url 'dashboard:reviews-product-update' pk=record.id %}">Изменить</a>
             <a class="dropdown-item" href="{% url 'dashboard:reviews-product-delete' pk=record.id %}">Удалить</a>
         </div>

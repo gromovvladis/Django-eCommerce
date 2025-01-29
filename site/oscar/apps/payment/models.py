@@ -142,7 +142,7 @@ class Source(models.Model):
             "type": self.source_type,
         }
         if self.reference:
-            description += " (референс: %s)" % self.reference
+            description += " (%s)" % self.reference
         return description
 
     def save(self, *args, **kwargs):

@@ -8,6 +8,8 @@ from django.urls import reverse, reverse_lazy
 from django.views import generic
 from django_tables2 import SingleTableView
 
+from django.db.models import Count, Max, Min, Case, When, DecimalField, F
+
 from oscar.core.loading import get_classes, get_model
 from oscar.core.utils import format_datetime
 from oscar.views import sort_queryset
@@ -155,6 +157,7 @@ class BaseReviewListView(BulkEditMixin, SingleTableView):
             review.save()
         return HttpResponseRedirect(self.success_url)
 
+# product
 
 class ReviewProductListView(BaseReviewListView):
     table_class = ReviewProductTable
@@ -167,6 +170,63 @@ class ReviewProductListView(BaseReviewListView):
         return self.model.objects.select_related("product", "user").all()
 
 
+class ReviewProductUpdateView(generic.UpdateView):
+    model = ProductReview
+    template_name = "oscar/dashboard/reviews/review_update_product.html"
+    form_class = DashboardProductReviewForm
+    context_object_name = "review"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.is_open = True
+        self.object.save()
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super().get_queryset(*args, **kwargs)
+        qs = qs.annotate(
+            product_min_price=Case(
+                When(product__structure="product__parent", then=Min("product__children__stockrecords__price")),
+                default=Min('product__stockrecords__price'),
+                output_field=DecimalField()
+            ),
+            product_max_price=Case(
+                When(product__structure="product__parent", then=Max("product__children__stockrecords__price")),
+                default=Max('product__stockrecords__price'),
+                output_field=DecimalField()
+            ),
+            product_old_price=Case(
+                When(product__structure="product__parent", then=Max("product__children__stockrecords__old_price")),
+                default=Max('product__stockrecords__old_price'),
+                output_field=DecimalField()
+            ),
+        )
+        return qs
+
+    def get_success_url(self):
+        return reverse("dashboard:reviews-product-list")
+
+
+class ReviewProductReadView(generic.UpdateView):
+    model = ProductReview
+
+    def get(self, request, *args, **kwargs):
+        review = self.get_object()
+        review.is_open = True
+        review.save()
+        return HttpResponseRedirect(reverse("dashboard:reviews-product-list"))
+
+
+class ReviewProductDeleteView(generic.DeleteView):
+    model = ProductReview
+    template_name = "oscar/dashboard/reviews/review_delete.html"
+    context_object_name = "review"
+
+    def get_success_url(self):
+        return reverse("dashboard:reviews-product-list")
+
+# order
+
 class ReviewOrderListView(BaseReviewListView):
     table_class = ReviewOrderTable
     model = OrderReview
@@ -178,34 +238,31 @@ class ReviewOrderListView(BaseReviewListView):
         return self.model.objects.select_related("order", "user").all()
 
 
-class ReviewProductUpdateView(generic.UpdateView):
-    model = ProductReview
-    template_name = "oscar/dashboard/reviews/review_update.html"
-    form_class = DashboardProductReviewForm
-    context_object_name = "review"
-
-    def get_success_url(self):
-        return reverse("dashboard:reviews-product-list")
-
-
-class ReviewProductDeleteView(generic.DeleteView):
-    model = ProductReview
-    template_name = "oscar/dashboard/reviews/review_delete.html"
-    context_object_name = "review"
-
-    def get_success_url(self):
-        return reverse("dashboard:reviews-product-list")
-
-
 class ReviewOrderUpdateView(generic.UpdateView):
     model = OrderReview
-    template_name = "oscar/dashboard/reviews/review_update.html"
+    template_name = "oscar/dashboard/reviews/review_update_order.html"
     form_class = DashboardProductReviewForm
     context_object_name = "review"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.is_open = True
+        self.object.save()
+        return super().get(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse("dashboard:reviews-order-list")
 
+
+class ReviewOrderReadView(generic.UpdateView):
+    model = OrderReview
+
+    def get(self, request, *args, **kwargs):
+        review = self.get_object()
+        review.is_open = True
+        review.save()
+        return HttpResponseRedirect(reverse("dashboard:reviews-order-list"))
+         
 
 class ReviewOrderDeleteView(generic.DeleteView):
     model = OrderReview

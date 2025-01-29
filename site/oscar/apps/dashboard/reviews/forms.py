@@ -16,7 +16,7 @@ class DashboardProductReviewForm(forms.ModelForm):
 
     class Meta:
         model = ProductReview
-        fields = ("body", "score", "status")
+        fields = ("status",)
 
 class DashboardOrderReviewForm(forms.ModelForm):
     choices = (
@@ -27,7 +27,7 @@ class DashboardOrderReviewForm(forms.ModelForm):
 
     class Meta:
         model = OrderReview
-        fields = ("body", "score", "status")
+        fields = ("status",)
 
 
 class ProductReviewSearchForm(forms.Form):

@@ -1,1 +1,13 @@
-{{ record.score }} / 5
+{% if record.score < 3 %}
+<span class="badge badge-danger">
+    {{ record.score }} / 5
+</span>
+{% elif record.score == 3 %}
+<span class="badge badge-warning">
+    {{ record.score }} / 5
+</span>
+{% else %}
+<span class="badge badge-success">
+    {{ record.score }} / 5
+</span>
+{% endif %}
