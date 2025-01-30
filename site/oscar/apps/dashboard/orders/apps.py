@@ -19,11 +19,12 @@ class OrdersDashboardConfig(OscarDashboardConfig):
         "order-active-list-lookup": (["user.full_access"], ["order.full_access"], ["order.read"]),
         "order-detail": (["user.full_access"], ["order.full_access"], ["order.read"]),
         "order-line-detail": (["user.full_access"], ["order.full_access"], ["order.read"]),
+        "order-delete": (["user.full_access"], ["order.full_access"], ["order.remove_order"]),
 
-        "order-detail-note": (["user.full_access"], ["order.full_access"], ["order.change_order"]),
-        "order-shipping-address": (["user.full_access"], ["order.full_access"], ["order.change_order"]),
+        "order-detail-note": (["user.full_access"], ["order.full_access"], ["order.update_order"]),
+        "order-shipping-address": (["user.full_access"], ["order.full_access"], ["order.update_order"]),
 
-        "order-stats": (["user.full_access"], ["order.full_access"]),
+        "order-stats": (["user.full_access"], ["order.full_access"], ["order.read"]),
     }
 
     # pylint: disable=attribute-defined-outside-init
@@ -35,6 +36,8 @@ class OrdersDashboardConfig(OscarDashboardConfig):
             "dashboard.orders.views", "ShippingAddressUpdateView"
         )
         self.line_detail_view = get_class("dashboard.orders.views", "LineDetailView")
+        self.order_delete_view = get_class("dashboard.orders.views", "OrderDeleteView")
+        
         self.order_stats_view = get_class("dashboard.orders.views", "OrderStatsView")
 
         self.order_active_list_lookup_view = get_class("dashboard.orders.views", "OrderActiveListLookupView")
@@ -66,6 +69,11 @@ class OrdersDashboardConfig(OscarDashboardConfig):
                 "all/<str:number>/shipping-address/",
                 self.shipping_address_view.as_view(),
                 name="order-shipping-address",
+            ),
+            path(
+                "all/<str:number>/delete/",
+                self.order_delete_view.as_view(),
+                name="order-delete",
             ),
         ]
         return self.post_process_urls(urls)

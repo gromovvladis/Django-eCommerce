@@ -147,11 +147,6 @@ class ProductClass(models.Model):
     class Meta:
         app_label = "catalogue"
         ordering = ["name"]
-        permissions = (
-            ("full_access", "Полный доступ к товарам"),
-            ("read", "Просматривать товары и категории"),
-            ("update_stockrecord", "Изменять наличие товаров"),
-        )
         verbose_name = "Класс товара"
         verbose_name_plural = "Классы товара"
 
@@ -608,6 +603,11 @@ class Product(models.Model):
     class Meta:
         app_label = "catalogue"
         ordering = ["-order"]
+        permissions = (
+            ("full_access", "Полный доступ к товарам"),
+            ("read", "Просматривать товары и категории"),
+            ("update_stockrecord", "Изменять наличие товаров"),
+        )
         verbose_name = "Товар"
         verbose_name_plural = "Товары"
 

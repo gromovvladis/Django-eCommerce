@@ -26,7 +26,6 @@ class UserSearchForm(forms.Form):
 
 
 class StaffForm(forms.ModelForm):
-    
     username = forms.CharField(
         label="Номер телефона",
         required=True,
@@ -212,9 +211,8 @@ class GroupForm(forms.ModelForm):
     заказы / order +
        полный доступ / order.full_access
        просматривать / order.read
-       изменять / order.change_order
-       изменять статус / order.change_order_status
-       изменять оплату / order.change_order_payment
+       изменять / order.update_order
+       удалять / order.remove_order
 
     доставка / delivery
        полный доступ / delivery.full_access
@@ -270,8 +268,6 @@ class GroupForm(forms.ModelForm):
                 'update_stockrecord',
                 'make_refund',
                 'update_order',
-                'update_order_status',
-                'update_order_payment',
             ]
         )
 

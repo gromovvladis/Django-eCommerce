@@ -28,6 +28,12 @@
         {% endif %} 
         {{ order.store|default:"-" }} | Заказ №{{ order.number }}
     </h1>
+    {% if delete_order %}
+        <a class="btn btn-danger mr-2" href="{% url 'dashboard:order-delete' number=order.number %}">
+            <i class="fa-solid fa-trash"></i>
+            <span>Удалить</span>
+        </a>
+    {% endif %}
 {% endblock  %}
 
 {% block dashboard_content %}

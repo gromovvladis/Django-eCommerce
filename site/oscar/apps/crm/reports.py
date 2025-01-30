@@ -1,16 +1,12 @@
 import openpyxl
 from babel.dates import format_date
 
-from django.contrib import messages
-
 from django.conf import settings
 from django.urls import reverse
+from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.functions import TruncDate
-from django.db.models import Count, Sum, Func, F
-from django.db.models import Sum, Count, Subquery, OuterRef, F, Func
-from django.db.models import Sum, Count, Prefetch, Func, F
-from django.db.models import OuterRef, Subquery
+from django.db.models import Sum, Count, Subquery, OuterRef, Func, F
 
 from oscar.core.loading import get_class, get_model
 
