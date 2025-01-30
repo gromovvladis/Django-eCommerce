@@ -8,6 +8,9 @@ from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.functions import TruncDate
 from django.db.models import Count, Sum, Func, F
+from django.db.models import Sum, Count, Subquery, OuterRef, F, Func
+from django.db.models import Sum, Count, Prefetch, Func, F
+from django.db.models import OuterRef, Subquery
 
 from oscar.core.loading import get_class, get_model
 
@@ -15,6 +18,7 @@ ReportGenerator = get_class("dashboard.reports.reports", "ReportGenerator")
 ReportCSVFormatter = get_class("dashboard.reports.reports", "ReportCSVFormatter")
 ReportHTMLFormatter = get_class("dashboard.reports.reports", "ReportHTMLFormatter")
 Order = get_model("order", "Order")
+Line = get_model("order", "Line")
 
 file_path = settings.STATIC_PRIVATE_ROOT + "/xlsx/ОТЧЕТ!Прованс.xlsx"
 
@@ -88,19 +92,25 @@ class CRMReportGenerator(ReportGenerator):
         Order._default_manager.prefetch_related("lines")
         .filter(status=settings.OSCAR_SUCCESS_ORDER_STATUS)
         .annotate(
-            day=TruncDate('date_placed')  # Обрабатываем поле даты, чтобы получить только день
+            day=TruncDate('date_placed'),  # Обрабатываем поле даты, чтобы получить только день
             # day=Func(
             #     F("date_placed"),
             #     function="DATE",  # SQLite поддерживает DATE функцию
             #     template="%(function)s(%(expressions)s)",
-            # )
+            # ),
+            line_quantity=Subquery(
+                Line.objects.filter(order=OuterRef('pk'))
+                .values('order')
+                .annotate(total_quantity=Sum('quantity'))
+                .values('total_quantity')[:1]
+            ),
             # Обрабатываем поле даты, чтобы получить только день
         )
         .values("day")
         .annotate(
             order_count=Count("id", distinct=True),  # Количество заказов
-            total_sum=Sum("total", distinct=True),  # Сумма по полю total
-            line_count=Sum("lines__quantity"),  # Количество позиций по связанному объекту
+            total_sum=Sum("total"),  # Сумма по полю total
+            line_count=Sum("line_quantity"),
         )
         .order_by("day")
     )
