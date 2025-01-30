@@ -88,12 +88,12 @@
         </div>
     {% endblock %}
     {% block user_additional_info %}
-        <div class="tabbable dashboard col-md-12">
+        <div class="tabbable dashboard">
             {% block nav_tabs %}
                 <ul class="nav nav-tabs mb-3 mb-lg-4 p-0" role="tablist">
                     <div class="half-wrapper">
                         <div class="nav tabs-button d-flex fill">
-                            <div class="tabs-button__active-block" style="width: calc(100% / 3); left: 0px;"><div class="fill-width fill-height"></div></div>
+                            <div class="tabs-button__active-block" style="width: calc(100% / 3); min-width: 130px; left: 0px;"><div class="fill-width fill-height"></div></div>
                             <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_orders' %}active{% endif %}" href="#user_orders" data-toggle="tab">
                                 <i class="fas fa-shopping-cart"></i>
                                 <span>Заказы</span>
@@ -107,7 +107,7 @@
                             </button>
                             <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_addresses' %}active{% endif %}" href="#user_addresses" data-toggle="tab">
                                 <i class="fa-solid fa-truck-fast"></i>
-                                <span>Адрес доставки</span>
+                                <span>Доставка</span>
                                 {% with address=customer.addresses.count %}
                                     {% if address %}
                                         <div class="dropdown-item-badge">{{ address }}</div>

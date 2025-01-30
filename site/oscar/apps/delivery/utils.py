@@ -80,8 +80,8 @@ def pickup_now(basket):
             if start.date() == earliest_start_time.date() or end.date() == earliest_start_time.date()
         ]
         work_day_start_end = current_time if current_time > work_day_start else work_day_start
-        day_busy_periods.append((work_day_start - timedelta(hours=1), work_day_start_end))  # Начало рабочего дня
-        day_busy_periods.append((work_day_end, work_day_end + timedelta(hours=1)))  # Конец рабочего дня
+        day_busy_periods.append((work_day_start, work_day_start_end))  # Начало рабочего дня
+        day_busy_periods.append((work_day_end, work_day_end))  # Конец рабочего дня
         day_busy_periods.sort(key=lambda x: x[0])
 
         # Проверяем свободные промежутки
