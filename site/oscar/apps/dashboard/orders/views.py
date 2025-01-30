@@ -367,6 +367,10 @@ class OrderStatsView(FormView):
                 f"customers_2orders_{period}": count_customers_with_orders(customers, 2),
                 f"customers_5orders_{period}": count_customers_with_orders(customers, 5),
 
+                f"items_{period}": lines_period.aggregate(items=Sum('quantity'))['items'] or 0,
+                f"items_offline_{period}": lines_period.filter(order__site="Эвотор").aggregate(items=Sum('quantity'))['items'] or 0,
+                f"items_online_{period}": lines_period.exclude(order__site="Эвотор").aggregate(items=Sum('quantity'))['items'] or 0,
+
                 f"lines_{period}": lines_period.count(),
                 f"lines_offline_{period}": lines_period.filter(order__site="Эвотор").count(),
                 f"lines_online_{period}": lines_period.exclude(order__site="Эвотор").count(),

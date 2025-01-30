@@ -96,7 +96,7 @@
         {% block nav_tabs %}
             <div class="half-wrapper">
                 <div class="nav tabs-button d-flex fill">
-                    <div class="tabs-button__active-block" style="width: calc(100% / 4); left: 0px;"><div class="fill-width fill-height"></div></div>
+                    <div class="tabs-button__active-block" style="width: 25%; min-width: 130px; left: 0px;"><div class="fill-width fill-height"></div></div>
                     <button role="button" class="tabs-button__button {% if active_tab == 'day' %}active{% endif %}" href="#statistic_day" data-toggle="tab">
                         День
                     </button>
@@ -166,6 +166,10 @@
                             <td class="col-md-2" >{{ lines_days }}</td>
                         </tr>
                         <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_days }}</td>
+                        </tr>
+                        <tr>
                             <th class="col-md-10">Заказы со скидками</th>
                             <td class="col-md-2" >{{ orders_discount_days }}</td>
                         </tr>
@@ -199,6 +203,10 @@
                             <td class="col-md-2" >{{ lines_offline_days }}</td>
                         </tr>
                         <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_offline_days }}</td>
+                        </tr>
+                        <tr>
                             <th class="col-md-10">Заказы со скидками</th>
                             <td class="col-md-2" >{{ orders_offline_discount_days }}</td>
                         </tr>
@@ -230,6 +238,10 @@
                         <tr>
                             <th class="col-md-10">Всего позиций</th>
                             <td class="col-md-2" >{{ lines_online_days }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_online_days }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Заказы со скидками</th>
@@ -342,7 +354,7 @@
                         <div class="content-block rounded tab-content d-flex flex-column align-items-center">
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
-                                    <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
+                                    <div class="tabs-button__active-block" style="width: 50%; left: 0px;"><div class="fill-width fill-height"></div></div>
                                     <button role="button" class="tabs-button__button active" href="#top_product_price_day" data-toggle="tab">
                                         По стоимости
                                     </button>
@@ -422,6 +434,10 @@
                             <td class="col-md-2" >{{ lines_weeks }}</td>
                         </tr>
                         <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_weeks }}</td>
+                        </tr>
+                        <tr>
                             <th class="col-md-10">Заказы со скидками</th>
                             <td class="col-md-2" >{{ orders_discount_weeks }}</td>
                         </tr>
@@ -455,6 +471,10 @@
                             <td class="col-md-2" >{{ lines_offline_weeks }}</td>
                         </tr>
                         <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_offline_weeks }}</td>
+                        </tr>
+                        <tr>
                             <th class="col-md-10">Заказы со скидками</th>
                             <td class="col-md-2" >{{ orders_offline_discount_weeks }}</td>
                         </tr>
@@ -486,6 +506,10 @@
                         <tr>
                             <th class="col-md-10">Всего позиций</th>
                             <td class="col-md-2" >{{ lines_online_weeks }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_online_weeks }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Заказы со скидками</th>
@@ -598,7 +622,7 @@
                         <div class="content-block rounded tab-content d-flex flex-column align-items-center">
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
-                                    <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
+                                    <div class="tabs-button__active-block" style="width: 50%; left: 0px;"><div class="fill-width fill-height"></div></div>
                                     <button role="button" class="tabs-button__button active" href="#top_product_price_week" data-toggle="tab">
                                         По стоимости
                                     </button>
@@ -677,6 +701,10 @@
                             <td class="col-md-2" >{{ lines_months }}</td>
                         </tr>
                         <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_months }}</td>
+                        </tr>
+                        <tr>
                             <th class="col-md-10">Заказы со скидками</th>
                             <td class="col-md-2" >{{ orders_discount_months }}</td>
                         </tr>
@@ -710,6 +738,10 @@
                             <td class="col-md-2" >{{ lines_offline_months }}</td>
                         </tr>
                         <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_offline_months }}</td>
+                        </tr>
+                        <tr>
                             <th class="col-md-10">Заказы со скидками</th>
                             <td class="col-md-2" >{{ orders_offline_discount_months }}</td>
                         </tr>
@@ -741,6 +773,10 @@
                         <tr>
                             <th class="col-md-10">Всего позиций</th>
                             <td class="col-md-2" >{{ lines_online_months }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_online_months }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Заказы со скидками</th>
@@ -853,7 +889,7 @@
                         <div class="content-block rounded tab-content d-flex flex-column align-items-center">
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
-                                    <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
+                                    <div class="tabs-button__active-block" style="width: 50%; left: 0px;"><div class="fill-width fill-height"></div></div>
                                     <button role="button" class="tabs-button__button active" href="#top_product_price_month" data-toggle="tab">
                                         По стоимости
                                     </button>
@@ -931,6 +967,10 @@
                             <td class="col-md-2" >{{ lines_years }}</td>
                         </tr>
                         <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_years }}</td>
+                        </tr>
+                        <tr>
                             <th class="col-md-10">Заказы со скидками</th>
                             <td class="col-md-2" >{{ orders_discount_years }}</td>
                         </tr>
@@ -964,6 +1004,10 @@
                             <td class="col-md-2" >{{ lines_offline_years }}</td>
                         </tr>
                         <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_offline_years }}</td>
+                        </tr>
+                        <tr>
                             <th class="col-md-10">Заказы со скидками</th>
                             <td class="col-md-2" >{{ orders_offline_discount_years }}</td>
                         </tr>
@@ -995,6 +1039,10 @@
                         <tr>
                             <th class="col-md-10">Всего позиций</th>
                             <td class="col-md-2" >{{ lines_online_years }}</td>
+                        </tr>
+                        <tr>
+                            <th class="col-md-10">Всего товаров</th>
+                            <td class="col-md-2" >{{ items_online_years }}</td>
                         </tr>
                         <tr>
                             <th class="col-md-10">Заказы со скидками</th>
@@ -1107,7 +1155,7 @@
                         <div class="content-block rounded tab-content d-flex flex-column align-items-center">
                             <div class="half-wrapper">
                                 <div class="nav tabs-button d-flex fill" role="tablist">
-                                    <div class="tabs-button__active-block" style="width: calc(100% / 2); left: 0px;"><div class="fill-width fill-height"></div></div>
+                                    <div class="tabs-button__active-block" style="width: 50%; left: 0px;"><div class="fill-width fill-height"></div></div>
                                     <button role="button" class="tabs-button__button active" href="#top_product_price_year" data-toggle="tab">
                                         По стоимости
                                     </button>

@@ -7,7 +7,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.functions import TruncDate
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Func, F
 
 from oscar.core.loading import get_class, get_model
 
@@ -85,7 +85,7 @@ class CRMReportGenerator(ReportGenerator):
     description = "Отчет ТРЦ Планета"
     date_range_field_name = "day"
     queryset = (
-        Order._default_manager.select_related()
+        Order._default_manager.prefetch_related("lines")
         .filter(status=settings.OSCAR_SUCCESS_ORDER_STATUS)
         .annotate(
             day=TruncDate('date_placed')  # Обрабатываем поле даты, чтобы получить только день
@@ -98,9 +98,9 @@ class CRMReportGenerator(ReportGenerator):
         )
         .values("day")
         .annotate(
-            order_count=Count("id"),  # Количество заказов
+            order_count=Count("id", distinct=True),  # Количество заказов
+            total_sum=Sum("total", distinct=True),  # Сумма по полю total
             line_count=Sum("lines__quantity"),  # Количество позиций по связанному объекту
-            total_sum=Sum("total"),  # Сумма по полю total
         )
         .order_by("day")
     )

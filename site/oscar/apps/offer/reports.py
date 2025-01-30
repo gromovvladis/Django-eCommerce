@@ -1,4 +1,6 @@
-from django.db.models import OuterRef, Subquery, Sum
+from django.db.models import OuterRef, Subquery, Sum, Value, CharField, Case, When, F, Q
+from django.db.models.functions import Coalesce, Concat
+
 from django.db.models.functions import Coalesce
 from oscar.core.loading import get_class, get_model
 
@@ -39,6 +41,7 @@ class OfferReportGenerator(ReportGenerator):
 
     def get_queryset(self):
         offers = ConditionalOffer.objects.filter(pk=OuterRef("offer_id"))
+        order_discounts = OrderDiscount.objects.filter(pk=OuterRef("pk"))
         return (
             super()
             .get_queryset()
@@ -50,13 +53,17 @@ class OfferReportGenerator(ReportGenerator):
                 offer=Subquery(offers.values("pk")[:1]),
                 # Find the name of the attached offer if it exists, otherwise the offer_name on a matching OrderDiscount
                 # This is used to display the most appropriate name in the report template.
-                display_offer_name=Coalesce(
+                offer_name=Coalesce(
                     Subquery(offers.values("name")[:1]),
-                    Subquery(
-                        OrderDiscount.objects.filter(pk=OuterRef("pk")).values(
-                            "offer_name"
-                        )[:1]
-                    ),
+                    Subquery(order_discounts.values("offer_name")[:1]),
+                    output_field=CharField()
+                ),      
+                message=Subquery(order_discounts.values("message")[:1], output_field=CharField()),
+                display_offer_name=Case(
+                    When(message="", then=F("offer_name")),
+                    When(message__isnull=True, then=F("offer_name")),
+                    default=Concat(F("offer_name"), Value(" ("), F("message"), Value(")"), output_field=CharField()),
+                    output_field=CharField()
                 ),
             )
             .values("offer_id", "offer", "total_discount", "display_offer_name")

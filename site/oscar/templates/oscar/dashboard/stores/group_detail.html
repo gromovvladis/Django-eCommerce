@@ -50,11 +50,10 @@
                                 <ul class="nav nav-tabs mb-3 mb-lg-4 p-0 fill-width" role="tablist">
                                     <div class="half-wrapper">
                                         <div class="nav tabs-button d-flex fill">
-                                            <div class="tabs-button__active-block" style="width: 130px; left: 0px;"><div class="fill-width fill-height"></div></div>
+                                            <div class="tabs-button__active-block" style="width: 20%; min-width: 130px; left: 0px;"><div class="fill-width fill-height"></div></div>
                                             {% for app_label, permissions in form.permissions.field.choices %}
                                                 <button role="button" class="tabs-button__button tabs-button__icon {% if forloop.first %}active{% endif %}" href="#app_label_{{ forloop.counter }}" data-toggle="tab">
                                                     <div class="no-wrap">
-                                                        {% comment %} <i class="fa-regular fa-diamond"></i> {% endcomment %}
                                                         <i class="fa-regular fa-circle-check"></i>
                                                         <span>
                                                             {{ app_label }}
