@@ -23,31 +23,31 @@ class PaymentsDashboardConfig(OscarDashboardConfig):
             ["user.full_access"], 
             ["payment.full_access"], 
             ["payment.make_refund"],
-            ["order.change_order_payment"],
+            ["order.update_order"],
         ),
         "update-source": (
             ["user.full_access"], 
             ["payment.full_access"], 
             ["payment.make_refund"],
-            ["order.change_order_payment"],
+            ["order.update_order"],
         ),
         "delete-source": (
             ["user.full_access"], 
             ["payment.full_access"], 
             ["payment.make_refund"],
-            ["order.change_order_payment"],
+            ["order.update_order"],
         ),
         "add-source": (
             ["user.full_access"], 
             ["payment.full_access"], 
             ["payment.make_refund"],
-            ["order.change_order_payment"],
+            ["order.update_order"],
         ),
         "add-transaction": (
             ["user.full_access"], 
             ["payment.full_access"], 
             ["payment.make_refund"],
-            ["order.change_order_payment"],
+            ["order.update_order"],
         ),
     }
 
@@ -70,7 +70,6 @@ class PaymentsDashboardConfig(OscarDashboardConfig):
             path("refunds/", self.refunds_list_view.as_view(), name="refunds-list"),
             path("payments/<str:pk>/", self.payment_detail_view.as_view(), name="payment-detail"),
             path("refunds/<str:pk>/", self.refund_detail_view.as_view(), name="refund-detail"),
-            #vlad
             path(
                 "payments/<int:pk>/refund/",
                 self.refund_transaction_view.as_view(), 

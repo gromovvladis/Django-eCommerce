@@ -369,6 +369,12 @@ class Order(models.Model):
     class Meta:
         app_label = "order"
         ordering = ["-date_placed"]
+        permissions = (
+            ("full_access", "Полный доступ к заказам"),
+            ("read", "Просматривать заказы"),
+            ("update_order", "Изменять заказ"),
+            ("remove_order", "Удалять заказ"),
+        )
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
 
@@ -489,13 +495,6 @@ class OrderNote(models.Model):
     class Meta:
         app_label = "order"
         ordering = ["-date_updated"]
-        permissions = (
-            ("full_access", "Полный доступ к заказам"),
-            ("read", "Просматривать заказы"),
-            ("update_order", "Изменять состав заказа"),
-            ("update_order_status", "Изменять статус заказа"),
-            ("update_order_payment", "Изменять оплату заказа"),    
-        )
         verbose_name = "Примечание к заказу"
         verbose_name_plural = "Примечания к заказам"
 

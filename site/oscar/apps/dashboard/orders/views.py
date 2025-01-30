@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django_tables2 import SingleTableView, RequestConfig
 from django.db.models import Count, Sum, fields, F, Max, ExpressionWrapper, DurationField, When, Value, Case, Avg, Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.views.generic import DetailView, FormView, UpdateView
+from django.views.generic import DetailView, FormView, UpdateView, DeleteView
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.timezone import now
@@ -1059,6 +1059,9 @@ class OrderDetailView(EventHandlerMixin, DetailView):
             transactions_source_id.append(trans.source_id)
         ctx["payment_transactions_source_id"] = transactions_source_id
 
+        access = ["user.full_access", "order.full_access", "order.remove_order"]
+        ctx["delete_order"] = any(self.request.user.has_perm(perm) for perm in access)
+
         return ctx
 
     # Data fetching methods for template context
@@ -1276,6 +1279,64 @@ class LineDetailView(DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx["order"] = self.object.order
         return ctx
+
+
+class OrderDeleteView(DeleteView):
+    """
+    Dashboard view to delete a product. Has special logic for deleting the
+    last child product.
+    Supports the permission-based dashboard.
+    """
+    template_name = "oscar/dashboard/orders/order_delete.html"
+    model = Order
+    context_object_name = "order"
+
+    def get_object(self, queryset=None):
+        return get_order_or_404(self.request.user, self.kwargs["number"])
+
+    def post(self, request, *args, **kwargs):
+        # Set self.object before the usual form processing flow.
+        # Inlined because having DeletionMixin as the first base, for
+        # get_success_url(), makes leveraging super() with ProcessFormView
+        # overly complex.
+        self.object = self.get_object()
+        form = self.get_form()
+
+        deletion_denied = self.deletion_denied(self.object)
+        if deletion_denied:
+            return deletion_denied
+        
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def deletion_denied(self, order):
+        """
+        Perform custom deletion logic.
+        """
+        amount_paid = 0
+        for source in order.sources.all():
+            amount_paid += source.amount_debited - source.amount_refunded
+
+        if amount_paid > 0:
+            messages.error(self.request, "Верните оплату и переведите заказ в статус 'Отменен' перед удалением.")
+            return HttpResponseRedirect(reverse("dashboard:order-detail", kwargs={"number": order.number}))
+        elif order.status != "Отменен":
+            messages.error(self.request, "Переведите заказ в статус 'Отменен' перед удалением.")
+            return HttpResponseRedirect(reverse("dashboard:order-detail", kwargs={"number": order.number}))
+        else: 
+            return False
+
+    def get_success_url(self):
+        """
+        When deleting child products, this view redirects to editing the
+        parent product. When deleting any other product, it redirects to the
+        product list view.
+        """
+        msg = "Удаленный заказ '№%s'" % self.object.number
+        messages.success(self.request, msg)
+        return reverse("dashboard:order-list")
 
 
 def get_changes_between_models(model1, model2, excludes=None):

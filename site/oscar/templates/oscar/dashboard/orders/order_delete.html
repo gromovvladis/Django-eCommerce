@@ -1,0 +1,50 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% block title %}
+    Удалить заказ №{{ order.number }} | {{ block.super }}
+{% endblock %}
+
+{% block body_class %}{{ block.super }} delete-page{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-list' %}">Заказы</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:order-detail' number=order.number %}">№{{ order.number }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Удалить заказ №{{ order.number }}</li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block navtext %}
+    <h1>Заказ №{{ order.number }} | Удаление</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+    <form method="post" class="confirm-content">
+        <div class="table-header">
+            <h2>Удаление заказа №{{ order.number }}</h2>
+        </div>
+        <div class="card card-body card-confirm bg-light">
+            {% csrf_token %}
+            <p>Удалить заказ <strong>№{{ order.number }}</strong> - вы уверены?</p>
+            <br>
+            <p>Перед удалением заказ должен иметь статус "Отменен" и не иметь оплаченых транзакций.</p>
+        </div>
+        <div class="table-footer">
+            <div class="form-actions d-flex justify-content-end flex-wrap align-items-end fill-width">
+                <div class="d-flex justify-content-end mt-3">
+                    <a class="btn btn-secondary" href="{% url 'dashboard:order-detail' number=order.number %}">
+                        <i class="fa-solid fa-ban"></i>
+                        Отмена
+                    </a>
+                    <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+                        <i class="fa-solid fa-trash"></i>
+                        Удалить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
