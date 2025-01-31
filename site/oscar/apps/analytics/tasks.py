@@ -2,13 +2,11 @@ import logging
 from celery import shared_task
 
 from django.conf import settings
-from django.db import IntegrityError
-from django.db.models import F
+from django.db.models import F, Count, Sum
 from django.apps import apps
 
 from oscar.core.loading import get_model
 from oscar.core.compat import get_user_model
-
 
 ProductRecord = get_model("analytics", "ProductRecord")
 UserProductView = get_model("analytics", "UserProductView")
@@ -44,8 +42,8 @@ def update_counter_task(model_name, field_name, filter_kwargs, increment=1):
         if not affected:
             filter_kwargs[field_name] = increment
             model.objects.create(**filter_kwargs)
-    except IntegrityError:
-        logger.error(f"IntegrityError при обновлении {model_name}")
+    except Exception as e:
+        logger.error(f"{e} update_counter_task при обновлении {model_name}")
 
 
 @shared_task
@@ -77,30 +75,34 @@ def record_user_order_task(user_id, order_id):
     """
     try:
         order = (
-            Order.objects.prefetch_related("lines")
-            .only("lines", "total", "date_placed")
+            Order.objects.annotate(
+                _num_lines=Count("lines"),
+                _num_items=Sum("lines__quantity"),
+            )
+            .values("total", "date_placed", "_num_lines", "_num_items")
             .get(id=order_id)
         )
         record = UserRecord.objects.filter(user_id=user_id)
         affected = record.update(
             num_orders=F("num_orders") + 1,
-            num_order_lines=F("num_order_lines") + order.num_lines,
-            num_order_items=F("num_order_items") + order.num_items,
-            total_spent=F("total_spent") + order.total,
-            date_last_order=order.date_placed,
+            num_order_lines=F("num_order_lines") + order["_num_lines"],
+            num_order_items=F("num_order_items") + order["_num_items"],
+            total_spent=F("total_spent") + order["total"],
+            date_last_order=order["date_placed"],
         )
         if not affected:
             UserRecord.objects.create(
                 user_id=user_id,
                 num_orders=1,
-                num_order_lines=order.num_lines,
-                num_order_items=order.num_items,
-                total_spent=order.total,
-                date_last_order=order.date_placed,
+                num_order_lines=order["_num_lines"],
+                num_order_items=order["_num_items"],
+                total_spent=order["total"],
+                date_last_order=order["date_placed"],
             )
-
-    except IntegrityError:
-        logger.error("IntegrityError при записи заказа пользователя")
+    except Exception as e:
+        logger.error(
+            f"{e} при записи заказа пользователя (order_id={order_id}, user_id={user_id})"
+        )
 
 
 @shared_task
@@ -111,7 +113,9 @@ def user_viewed_product_task(product_id, user_id):
     try:
         UserProductView.objects.create(product_id=product_id, user_id=user_id)
     except Exception as e:
-        logger.error(f"Ошибка user_viewed_product_task при записи заказа пользователя {e}")
+        logger.error(
+            f"Ошибка user_viewed_product_task при записи заказа пользователя {e}"
+        )
 
 
 @shared_task
@@ -122,4 +126,6 @@ def user_searched_product_task(user_id, query):
     try:
         UserSearch.objects.create(user_id=user_id, query=query)
     except Exception as e:
-        logger.error(f"Ошибка user_searched_product_task при записи заказа пользователя {e}")
+        logger.error(
+            f"Ошибка user_searched_product_task при записи заказа пользователя {e}"
+        )
