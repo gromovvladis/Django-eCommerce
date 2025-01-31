@@ -1,6 +1,6 @@
 from collections import namedtuple
 from decimal import Decimal as D
-from django.db.models import Q
+from django.db.models import Q, F
 
 from oscar.core.loading import get_class, get_model
 
@@ -234,16 +234,15 @@ class UseStoreStockRecord:
         return self.request.store.id
 
     def get_uid(self, product):
-        product_id = product.id
         store_id = self.get_store_id()
         stockrecords_ids = self.available_stockrecords(product).values_list(
             "id", flat=True
         )
-        return f"{product_id}-{store_id}-{'-'.join(map(str, stockrecords_ids))}"
+        return f"{product.id}-{store_id}-{'-'.join(map(str, stockrecords_ids))}"
 
     def available_stockrecords(self, product):
         is_public_filter = Q(is_public=True)
-        num_in_stock_filter = Q(num_in_stock__isnull=False) & Q(num_in_stock__gt=0)
+        num_in_stock_filter = Q(num_in_stock__gt=F("num_allocated"))
         product_filter = Q(product_id=product.id) if not product.is_parent else Q(product__in=product.children.all())
 
         if product.get_product_class().track_stock:
