@@ -1,5 +1,3 @@
-import logging
-
 from django.conf import settings
 from django.dispatch import receiver
 
@@ -14,10 +12,6 @@ from oscar.apps.basket.signals import basket_addition
 from oscar.apps.catalogue.signals import product_viewed
 from oscar.apps.order.signals import order_placed
 from oscar.apps.search.signals import user_search
-
-# Helpers
-
-logger = logging.getLogger("oscar.analytics")
 
 
 # pylint: disable=unused-argument
@@ -37,7 +31,6 @@ def receive_product_view(sender, product, user, **kwargs):
             update_counter_task("UserRecord", "num_product_views", {"user_id": user.id})
             user_viewed_product_task(product.id, user.id)
         else:
-            logger.info(f"Отправка задачи user_viewed_product_task")
             update_counter_task.delay(
                 "UserRecord", "num_product_views", {"user_id": user.id}
             )
@@ -51,7 +44,6 @@ def receive_product_search(sender, query, user, **kwargs):
         if settings.DEBUG:
             user_searched_product_task(user.id, query)
         else:
-            logger.info(f"Отправка задачи receive_product_search")
             user_searched_product_task.delay(user.id, query)
 
 
@@ -65,7 +57,6 @@ def receive_basket_addition(sender, product, user, **kwargs):
             "ProductRecord", "num_basket_additions", {"product_id": product.id}
         )
     else:
-        logger.info(f"Отправка задачи receive_basket_addition")
         update_counter_task.delay(
             "ProductRecord", "num_basket_additions", {"product_id": product.id}
         )

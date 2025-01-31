@@ -27,14 +27,10 @@
     </div>
 {% endblock %}
 
-
 {% block content %}
-
-    {% comment %}------------- название категории ---------------{% endcomment %}
     <div class="d-none d-sm-flex mb-2">
         <h1>{{ category.name }}</h1>
     </div>
-
     {% subcategory_tree category as child_categories %}
     {% if child_categories %}
         <div class="child-cats no-scroll mb-2 mb-sm-3">
@@ -49,8 +45,6 @@
             </ul>
         </div>
     {% endif %}
-  
-    {% comment %}------------- содержимое категории ---------------{% endcomment %}
     {% if products %}
     <div class="dishes row">
         {% for product in products %}
@@ -63,5 +57,4 @@
     {% else %}
         <p class="py-2">Ничего не найдено</p>
     {% endif %}
- 
 {% endblock %}
