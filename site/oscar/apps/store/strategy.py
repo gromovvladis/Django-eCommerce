@@ -235,24 +235,28 @@ class UseStoreStockRecord:
 
     def get_uid(self, product):
         store_id = self.get_store_id()
-        stockrecords_ids = self.available_stockrecords(product).values_list(
-            "id", flat=True
+        stockrecords_num_in_stock = (
+            self.available_stockrecords(product)
+            .annotate(in_stock=Q(num_in_stock__gt=F("num_allocated")))
+            .values_list("in_stock", flat=True)
         )
-        return f"{product.id}-{store_id}-{'-'.join(map(str, stockrecords_ids))}"
+        return f"{product.id}-{store_id}-{ '-'.join(str(num) for num in stockrecords_num_in_stock)}"
 
     def available_stockrecords(self, product):
         is_public_filter = Q(is_public=True)
         num_in_stock_filter = Q(num_in_stock__gt=F("num_allocated"))
-        product_filter = Q(product_id=product.id) if not product.is_parent else Q(product__in=product.children.all())
+        product_filter = (
+            Q(product_id=product.id)
+            if not product.is_parent
+            else Q(product__in=product.children.all())
+        )
 
         if product.get_product_class().track_stock:
             return StockRecord.objects.filter(
                 is_public_filter & num_in_stock_filter & product_filter
             )
         else:
-            return StockRecord.objects.filter(
-                is_public_filter & product_filter
-            )
+            return StockRecord.objects.filter(is_public_filter & product_filter)
 
     def is_available(self, product):
         return self.available_stockrecords(product).exists()

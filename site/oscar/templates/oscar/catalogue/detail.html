@@ -16,7 +16,7 @@
 {% block nav_class %}app__nav--dish{% endblock %}
 
 {% block breadcrumbs %}
-    {% cache 3600 product_bread product.id %}
+    {% cache 3600 product_bread product %}
         <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3">
             <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
                 {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
@@ -36,14 +36,12 @@
 
 {% block content %}
     {% purchase_info_for_product request product as session %}
-    {% cache 1800 product_detail session.uid %}
-        <div class="menu__wrapper d-flex flex-column">
-            {% comment %}------------- страница товара ---------------{% endcomment %}
-            <div class="dish-page pb-sm-2 pt-md-0">
-                <div itemscope="itemscope" itemtype="http://schema.org/Product" class="dish-page__wrapper d-flex flex-column flex-md-row pd-0">
-                    <div class="dish-page__image pos-relative">
-                        {% currency_symbol session.price.currency as currency_symbol %}
-                        {% comment %}------------- изображения товара ---------------{% endcomment %}
+    {% currency_symbol session.price.currency as currency_symbol %}
+    <div class="menu__wrapper d-flex flex-column">
+        <div class="dish-page pb-sm-2 pt-md-0">
+            <div itemscope="itemscope" itemtype="http://schema.org/Product" class="dish-page__wrapper d-flex flex-column flex-md-row pd-0">
+                <div class="dish-page__image pos-relative">
+                    {% cache 3600 product_detail_img product %}
                         <div class="carousel__wrap fill-width fill-height pos-relative">
                             <div class="carousel">
                                 <div class="carousel__inner d-flex">
@@ -61,11 +59,12 @@
                                 </div>
                             </div>
                         </div>
-                        {% include "oscar/catalogue/partials/add_to_wishlist.html" %}
-                    </div>
-                    <div class="dish-page__content d-flex flex-column shrink px-2 mt-2 px-sm-0 mt-sm-0 pl-md-2">
-                        <div class="dish-page__content-wrapper d-flex flex-column fill-width fill-height">
-                            {% comment %}------------- заголовок + вес ---------------{% endcomment %}
+                    {% endcache %}
+                    {% include "oscar/catalogue/partials/add_to_wishlist.html" %}
+                </div>
+                <div class="dish-page__content d-flex flex-column shrink px-2 mt-2 px-sm-0 mt-sm-0 pl-md-2">
+                    <div class="dish-page__content-wrapper d-flex flex-column fill-width fill-height">
+                        {% cache 3600 product_detail_desc product %}
                             <header class="dish-page__header d-flex shrink align-end align-md-end pt-sm-1">
                                 <h1>{{ product.get_name }}</h1>
                                 <meta itemprop="description" content="{{ product.get_meta_description }}"/>
@@ -82,12 +81,13 @@
                                     {% endif %}
                                 </span>
                             </header>
+                        {% endcache %}
+                        {% cache 1800 product_detail_price session.uid %}
                             {% if not session.availability.is_available_to_buy %}
                                 <div class="my-2">
                                     <span class="error-mark">Временно не доступно</span>
                                 </div>
                             {% endif %}
-                            {% comment %}------------- если есть скидка ---------------{% endcomment %}
                             {% if session.availability.is_available_to_buy %}
                                 <div class="d-flex mt-1 align-end mb-md-1">
                                     <div class="dish-page__price{% if session.price.old_price %} new-price{% endif %}{% if not session.price.money %} d-none{% endif %} mr-1">
@@ -126,7 +126,7 @@
                                     </div>
                                 </div>
                                 {% endif %}
-                                {% include "oscar/catalogue/partials/add_to_basket_form.html" with currency_symbol=currency_symbol %}
+                                {% include "oscar/catalogue/partials/add_to_basket_form.html" with currency_symbol=currency_symbol session=session %}
                             </div>
                             {% comment %}------------- добавить в корзину + цена ---------------{% endcomment %}
                             {% if session.availability.is_available_to_buy %}
@@ -163,27 +163,27 @@
                                     </span>
                                 </div>    
                             {% endif %}
-                        </div>
+                        {% endcache %}
                     </div>
                 </div>
             </div>
-            {% with recommended_products=product.sorted_recommended_products|slice:":6" %}
-                {% if recommended_products %}
-                    <div class="dish-page__related mt-2 mb-1 px-2 px-sm-0 mt-md-4">
-                        <h2>C этим товаром часто покупают</h2>
-                        <div class="dishes mt-2 row">
-                            {% for product in recommended_products %}
-                                <div class="dishes--item col col-6 col-xs-6 col-sm-4 col-md-3 col-lg-3">
-                                    {% render_product product %}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endif %}
-            {% endwith %}
-            {% recently_viewed_products current_product=product %}
         </div>
-    {% endcache %}
+        {% with recommended_products=product.sorted_recommended_products|slice:":6" %}
+            {% if recommended_products %}
+                <div class="dish-page__related mt-2 mb-1 px-2 px-sm-0 mt-md-4">
+                    <h2>C этим товаром часто покупают</h2>
+                    <div class="dishes mt-2 row">
+                        {% for product in recommended_products %}
+                            <div class="dishes--item col col-6 col-xs-6 col-sm-4 col-md-3 col-lg-3">
+                                {% render_product product %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% recently_viewed_products current_product=product %}
+    </div>
 {% endblock content %}
 
 {% block SVG %}

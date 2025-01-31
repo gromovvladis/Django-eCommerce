@@ -92,7 +92,7 @@
                     </div>
                 </div>
             </main>
-            {% cache 3600 footer store.id %}
+            {% cache 3600 footer store %}
                 {% block main_footer %}
                     {% include 'oscar/includes/footer.html' %}
                 {% endblock %}

@@ -4,11 +4,9 @@
 
 {% block product %}
     {% purchase_info_for_product request product as session %}
-    {% cache 1800 product_compact session.uid %}
-        {% comment %}------------- категории item ---------------{% endcomment %}
-        <div class="dish d-flex flex-column card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
-            <div class="dish-wrapper grow-1">            
-                {% comment %}------------- картинка товара ---------------{% endcomment %}
+    <div class="dish d-flex flex-column card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
+        <div class="dish-wrapper grow-1">            
+            {% cache 3600 product_compact_img product %}
                 {% block product_image %}
                     {% with image=product.primary_image %}
                         {% oscar_thumbnail image.original "x600" upscale=False as thumb %}
@@ -21,8 +19,9 @@
                         </a>
                     {% endwith %}
                 {% endblock %}
-                <div class="pos-relative product-description d-flex flex-column">
-                    {% comment %} ------------- название категории --------------- {% endcomment %}
+            {% endcache %}
+            <div class="pos-relative product-description d-flex flex-column">
+                {% cache 3600 product_compact_desc product %}
                     <div class="grow-1 pd-0 card__text mt-2">
                         <div class="d-flex fill-height fill-width">
                             <a href="{{ product.get_absolute_url }}" title="{{ product.get_name }}" class="d-flex flex-column fill-height fill-width px-2 py-0 px-sm-2" data-id="dish-item-link">
@@ -42,12 +41,12 @@
                             </a>
                         </div>
                     </div>
-                    {% comment %} ------------- цена --------------- {% endcomment %}
+                {% endcache %}
+                {% cache 1200 product_compact_price session.uid %}
                     <div class="align-center fill-width px-sm-2 pb-sm-2 card__actions d-flex align-end">
                         {% if session.availability.is_available_to_buy and session.price.exists %}
                             {% include "oscar/catalogue/partials/product_price.html" %}
                             <div role="separator" class="spacer"></div>
-                            {% comment %} ------------- кнопка добавить --------------- {% endcomment %}
                             {% if not product.is_parent and not product.has_options %}
                                 {% include "oscar/catalogue/partials/add_to_basket_form_compact.html" %}
                             {% else %}
@@ -66,8 +65,8 @@
                         {% endif %}
                     </div>
                     <span class="add-to-cart-error" data-id="add-to-cart-error-compact"></span>
-                </div>
-            </div>
+                {% endcache %}
+            </div> 
         </div>
-    {% endcache %}
+    </div>
 {% endblock %}
