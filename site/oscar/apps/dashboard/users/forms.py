@@ -1,5 +1,7 @@
 import logging
+
 import phonenumbers
+from phonenumber_field.phonenumber import PhoneNumber
 
 from django import forms
 from django.conf import settings
@@ -8,8 +10,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.apps import apps
 from django.contrib import messages
 
-from phonenumber_field.phonenumber import PhoneNumber
-
+from oscar.forms.widgets import DatePickerInput
 from oscar.apps.crm.client import EvatorCloud
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_model
@@ -63,15 +64,17 @@ class StaffForm(forms.ModelForm):
         required=True,
         help_text="Активен сотрудник или нет",
     )
-    age = forms.IntegerField(label="Возраст", required=False)
-
-    evotor_update = forms.BooleanField(
-        label="Эвотор", 
-        required=False, 
-        initial=True,
-        help_text="Синхронизировать с Эвотор", 
+    date_of_birth = forms.DateField(
+        label="Дата рождения",
+        required=False,
+        widget=DatePickerInput
     )
-
+    # evotor_update = forms.BooleanField(
+    #     label="Эвотор", 
+    #     required=False, 
+    #     initial=True,
+    #     help_text="Синхронизировать с Эвотор", 
+    # )
     error_messages = {
         "invalid_login": "Пожалуйста, введите корректный номер телефона.",
         "inactive": "Этот аккаунт не активен.",
@@ -80,7 +83,7 @@ class StaffForm(forms.ModelForm):
 
     class Meta:
         model = Staff
-        fields = ('username', 'last_name', 'first_name', 'middle_name', 'role', 'gender', 'age', 'is_active')
+        fields = ('username', 'last_name', 'first_name', 'middle_name', 'role', 'gender', 'date_of_birth', 'is_active')
         sequence = (
             "username",
             "last_name",
@@ -88,21 +91,21 @@ class StaffForm(forms.ModelForm):
             "middle_name",
             "role",
             "gender",
-            "age",
+            "date_of_birth",
             "is_active",
         )
-        widgets = {
-            'evotor_update': forms.CheckboxInput(attrs={
-                'class' : 'checkbox-ios-switch',
-            }),
-        }
+        # widgets = {
+        #     'evotor_update': forms.CheckboxInput(attrs={
+        #         'class' : 'checkbox-ios-switch',
+        #     }),
+        # }
 
     def __init__(self, store=None, *args, **kwargs):
         self.store = store
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.fields['role'].choices = Staff.get_role_choices()
-        self.fields["evotor_update"].initial = self.request.COOKIES.get("evotor_update", True) == "True"
+        # self.fields["evotor_update"].initial = self.request.COOKIES.get("evotor_update", True) == "True"
         staff = kwargs['instance']
         if staff and staff.user:
             self.fields['username'].initial = staff.user.username
@@ -158,7 +161,7 @@ class StaffForm(forms.ModelForm):
             staff.role = role
             staff.gender = self.cleaned_data.get('gender', staff.gender)
             staff.is_active = self.cleaned_data.get('is_active', staff.is_active)
-            staff.age = self.cleaned_data.get('age', staff.age)
+            staff.date_of_birth = self.cleaned_data.get('date_of_birth', staff.date_of_birth)
             staff.save()
 
             if role:
@@ -177,7 +180,7 @@ class StaffForm(forms.ModelForm):
                 role=role,
                 gender=self.cleaned_data.get('gender', ''),
                 is_active=self.cleaned_data.get('is_active', False),
-                age=self.cleaned_data.get('age', None),
+                date_of_birth=self.cleaned_data.get('date_of_birth', None),
             )
 
             if role:
@@ -266,8 +269,9 @@ class GroupForm(forms.ModelForm):
                 'read',
                 'update_delivery',
                 'update_stockrecord',
-                'make_refund',
                 'update_order',
+                'make_refund',
+                'remove_order',
             ]
         )
 

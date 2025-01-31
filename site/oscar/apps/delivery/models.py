@@ -119,7 +119,7 @@ class Courier(models.Model):
     ]
         
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile = models.OneToOneField("user.Staff", on_delete=models.CASCADE)
+    staff_profile = models.OneToOneField("user.Staff", on_delete=models.CASCADE)
     type = models.CharField(max_length=50, choices=STATUS_CHOICES, default='driving')
 
     def __str__(self):
@@ -129,7 +129,7 @@ class Courier(models.Model):
     class Meta:
         verbose_name = "Курьер"
         verbose_name_plural = "Курьеры"
-        ordering = ['user', 'profile']
+        ordering = ['user', 'staff_profile']
         unique_together = ('user', 'type')
         get_latest_by = 'user_username'
 

@@ -7,7 +7,7 @@
             {% if not record.is_open %}
                 <a class="dropdown-item" href="{% url 'dashboard:reviews-order-read' pk=record.id %}">Прочитано</a>
             {% endif %}
-            <a class="dropdown-item" href="{% url 'dashboard:reviews-order-update' pk=record.id %}">Изменить</a>
+            <a class="dropdown-item" href="{% url 'dashboard:reviews-order-update' pk=record.id %}">Открыть</a>
             <a class="dropdown-item" href="{% url 'dashboard:reviews-order-delete' pk=record.id %}">Удалить</a>
         </div>
     </div>

@@ -233,7 +233,7 @@
     <div class="d-flex fill-width justify-content-between align-items-center">
         {% if order.next_status %}
             <button role="button" data-id="next-status" data-status="{{ order.next_status }}" 
-            data-number={{ order.number }} class="btn btn-outline-success">
+            data-number={{ order.number }} class="btn btn-success">
                 {{ order.next_status }}
             </button>
         {% else %}
@@ -241,6 +241,9 @@
                 {{ order.status }}
             </span>    
         {% endif %}
-        <a href="{% url 'dashboard:order-detail' number=order.number %}" class="btn btn-primary">Изменить</a>
+        <a href="{% url 'dashboard:order-detail' number=order.number %}" class="btn btn-outline-primary">
+            <i class="fas fa-edit"></i>
+            Изменить
+        </a>
     </div>
 </div>

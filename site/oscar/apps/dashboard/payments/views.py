@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal as D
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib import messages
@@ -34,7 +35,6 @@ class TransactionsListView(SingleTableView):
     paginate_by = settings.OSCAR_DASHBOARD_PAYMENTS_PER_PAGE
 
     def get_queryset(self):
-
         self.search_filters = []
         status = self.request.GET.get('status')
         date_gte = self.request.GET.get('date_gte')
@@ -44,17 +44,19 @@ class TransactionsListView(SingleTableView):
         
         if status:
             params['status'] = status
-            self.search_filters.append((('Статус соответствует "%s"' % status), (("status", status),)))
+            statuses = {'succeeded': ' Успешно', 'canceled': 'Отменен', 'pending': 'Обрабатывается', 'waiting_for_capture': 'Требует действий'}
+            self.search_filters.append((('Статус соответствует "%s"' % statuses.get(status)), (("status", status),)))
+
+        if date_gte:
+            params['created_at.gte'] = datetime.strptime(date_gte, "%d.%m.%Y").date().isoformat()
+            self.search_filters.append((
+                ("Размещено после {start_date}").format(start_date=date_gte), (("date_gte", date_gte),)
+            ))
 
         if date_lte:
-            params['created_at.lte'] = date_lte
+            params['created_at.lte'] = datetime.strptime(date_lte, "%d.%m.%Y").date().isoformat()
             self.search_filters.append((
-                ("Размещено до {end_date}").format(end_date=date_lte), (("date_to", date_lte),)
-            ))
-        if date_gte:
-            params['created_at.gte'] = date_gte
-            self.search_filters.append((
-                ("Размещено после {start_date}").format(start_date=date_gte), (("date_from", date_gte),)
+                ("Размещено до {end_date}").format(end_date=date_lte), (("date_lte", date_lte),)
             ))
 
         try: 
@@ -85,7 +87,7 @@ class RefundsListView(TransactionsListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_filters'] = self.search_filters
-        context['title'] = 'Список возвратов Yookassa'
+        context['title'] = 'Список возвратов Юкасса'
         context['status_options'] = [('succeeded', 'Возврат успешно завершён'), ('canceled', 'Возврат отменен'), ('pending', 'Возврат в процессе обработки')]
         return context
    
@@ -238,7 +240,6 @@ class AddSourceView(FormView):
 
 
 class AddTransactionView(CreateView):
-
     template_name = "oscar/dashboard/orders/add_transaction.html"
     model = Transaction
     order_model = Order
@@ -262,7 +263,6 @@ class AddTransactionView(CreateView):
         return kwargs
 
     def form_valid(self, form):
-
         try:
             source = form.cleaned_data.get('source')
             amount = form.cleaned_data.get('amount')
@@ -292,7 +292,6 @@ class RefundTransactionView(DetailView):
     """
     Отменить транзакцию и подать на возврат
     """
-
     model = Transaction
     template_name_suffix = "_confirm_refund"
     template_name = 'oscar/dashboard/orders/confirm_refund.html'

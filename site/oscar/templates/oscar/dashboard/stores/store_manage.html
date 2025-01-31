@@ -1,4 +1,5 @@
 {% extends 'oscar/dashboard/layout.html' %}
+
 {% load compress %}
 {% load static %}
 
@@ -32,7 +33,6 @@
 {% endblock header %}
 
 {% block dashboard_content %}
-
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="table-header">
@@ -46,7 +46,6 @@
             {% include "oscar/dashboard/partials/form.html" with form=form class="card card-body" %}
         </div>
     </div>
-
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="table-header">
@@ -105,7 +104,6 @@
             </div>
         </div>
     </div>
-
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="table-header">
@@ -116,7 +114,7 @@
                             <a class="btn btn-primary mr-2" href="{% url 'dashboard:store-user-select' store_pk=store.pk %}">
                                 <i class="fa-solid fa-link"></i>
                                 <span class="caption-button">
-                                    Добавить сотрудника
+                                    Прикрепить сотрудника
                                 </span>
                             </a>
                             <a class="btn btn-info" href="{% url 'dashboard:store-user-create' store_pk=store.pk %}">
@@ -134,7 +132,7 @@
                     {% if users %}
                         <thead>
                             <tr>
-                                <th class="name">ФИО</th>
+                                <th class="name">Сотрудник</th>
                                 <th>Должность</th>
                                 <th>Телефон</th>
                                 <th></th>
@@ -144,12 +142,12 @@
                             {% for user in users %}
                                 <tr>
                                     <td class="name">
-                                        <a href="{% url 'dashboard:staff-detail' pk=user.profile.id %}">
-                                            {{ user.profile.get_full_name|default:user.username }}
+                                        <a href="{% url 'dashboard:staff-detail' pk=user.staff_profile.id %}">
+                                            {{ user.staff_profile.get_full_name|default:user.username }}
                                         </a>
                                     </td>
                                     <td data-label="Должность">
-                                        {{ user.profile.role }}
+                                        {{ user.staff_profile.role }}
                                     </td>
                                     <td data-label="Телефон">{{ user.username }}</td>
                                     <td class="d-flex justify-content-end actions">

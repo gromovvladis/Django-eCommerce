@@ -92,7 +92,7 @@
                             <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.username }}</span>
                         </button>
                         <ul class="dropdown-menu text-small actions mb-2" aria-labelledby="nav-account">
-                            <li><a class="dropdown-item" href="#">Задачи: 0</a></li>
+                            {% comment %} <li><a class="dropdown-item" href="#">Задачи: 0</a></li> {% endcomment %}
                             <li><a class="dropdown-item" href="{% url 'customer:summary' %}">Аккаунт</a></li>
                             <li><a class="dropdown-item" href="{{ homepage_url }}">Магазин</a></li>
                             <li><hr class="dropdown-divider"></li>

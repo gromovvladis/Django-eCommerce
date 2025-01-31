@@ -16,7 +16,7 @@
 {% block nav_class %}app__nav--dish{% endblock %}
 
 {% block breadcrumbs %}
-    {% cache 1800 product_bread product.id %}
+    {% cache 3600 product_bread product.id %}
         <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3">
             <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
                 {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}

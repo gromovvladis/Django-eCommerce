@@ -47,22 +47,22 @@ class StoresDashboardConfig(OscarDashboardConfig):
             path("all/<int:pk>/delete/", self.store_delete_view.as_view(), name="store-delete"),
             
             path(
-                "all/<int:store_pk>/users/add/",
+                "all/<int:store_pk>/staff/add/",
                 self.store_staff_create_view.as_view(),
                 name="store-user-create",
             ),
             path(
-                "all/<int:store_pk>/users/select/",
+                "all/<int:store_pk>/staff/select/",
                 self.store_staff_select_view.as_view(),
                 name="store-user-select",
             ),
             path(
-                "all/<int:store_pk>/users/<int:user_pk>/link/",
+                "all/<int:store_pk>/staff/<int:user_pk>/link/",
                 self.store_staff_link_view.as_view(),
                 name="store-user-link",
             ),
             path(
-                "all/<int:store_pk>/users/<int:user_pk>/unlink/",
+                "all/<int:store_pk>/staff/<int:user_pk>/unlink/",
                 self.store_staff_unlink_view.as_view(),
                 name="store-user-unlink",
             ),

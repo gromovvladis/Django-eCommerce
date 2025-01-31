@@ -58,23 +58,12 @@ class CustomerConfig(OscarConfig):
             path("api/login/", self.login_api_view.as_view(), name="api-login"),
             path("logout/", self.logout_view.as_view(), name="logout"),
             path("", login_required(self.summary_view.as_view()), name="summary"),
-            # path(
-            #     "change-password/",
-            #     login_required(self.change_password_view.as_view()),
-            #     name="change-password",
-            # ),
             # Profile
             path(
                 "profile/",
                 login_required(self.profile_view.as_view()),
                 name="profile-view",
             ),
-            # path(
-            #     "profile/delete/",
-            #     login_required(self.profile_delete_view.as_view()),
-            #     name="profile-delete",
-            # ),
-
             # Order history
             path(
                 "orders/",
@@ -86,11 +75,6 @@ class CustomerConfig(OscarConfig):
                 login_required(self.order_detail_view.as_view()),
                 name="order",
             ),
-            # path(
-            #     "orders/<str:order_number>/<int:line_id>/",
-            #     login_required(self.order_line_view.as_view()),
-            #     name="order-line",
-            # ),
             # Address book
             path(
                 "addresses/",

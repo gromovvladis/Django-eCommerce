@@ -27,18 +27,15 @@
         <form method="post">
             {% csrf_token %}
             <div class="delivery mb-3 mb-sm-4" id="address_fields">
-
                 <div class="d-none d-sm-flex mb-2">
                     <h1>Вы уверены, что хотите удалить этот адрес?</h1>
                 </div>
-
                 <p>
                     {% for field in object.active_address_fields_and_labels %}
                         {{ field.label }}: {{ field.value }}{% if not forloop.last %},{% endif %}
                         <br>
                     {% endfor %}
                 </p>
-
                 <div class="d-flex align-center justify-space-between mt-2 mt-sm-3">
                     <div class="confirm__button">
                         <button type="submit" class="button fill-width button--outline justify-center shrink">
@@ -47,7 +44,6 @@
                             </span>
                         </button>
                     </div>
-
                     <div class="confirm__button">
                         <button onclick="window.location.href='{% url 'customer:address-list' %}" type="button" class="button fill-width button--white justify-center shrink">
                             <span class="button__wrapper">
@@ -56,7 +52,6 @@
                         </button>
                     </div>
                 </div>
-
             </div>
         </form>
     </div>

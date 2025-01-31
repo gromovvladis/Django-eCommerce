@@ -8,7 +8,7 @@
     {% elif record.status == "canceled" %}
         <span class="badge badge-danger">Отменен</span>
     {% elif record.status == "pending"  %}
-        <span class="badge badge-pending">Обрабатывается</span>
+        <span class="badge badge-info">Обрабатывается</span>
     {% elif record.status == "waiting_for_capture"  %}
         <span class="badge badge-warning">Требует действия</span>
     {% endif %}

@@ -1,7 +1,8 @@
 from collections import namedtuple
 from decimal import Decimal as D
+from django.db.models import Q
 
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 
 Unavailable = get_class("store.availability", "Unavailable")
 Available = get_class("store.availability", "Available")
@@ -10,8 +11,13 @@ UnavailablePrice = get_class("store.prices", "Unavailable")
 FixedPrice = get_class("store.prices", "FixedPrice")
 TaxInclusiveFixedPrice = get_class("store.prices", "TaxInclusiveFixedPrice")
 
+StockRecord = get_model("store", "StockRecord")
+
 # A container for policies
-PurchaseInfo = namedtuple("PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords", "uid"])
+PurchaseInfo = namedtuple(
+    "PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords", "uid"]
+)
+
 
 class Selector(object):
     """
@@ -155,7 +161,7 @@ class Structured(Base):
         Select appropriate stock record for all children of a product
         """
         records = []
-        for child in product.children.order_by('-order').public():
+        for child in product.children.order_by("-order").public():
             # Use tuples of (child product, stockrecord)
             records.append((child, self.select_stockrecord(child)))
         return records
@@ -187,23 +193,21 @@ class Structured(Base):
             "A structured strategy class must define a "
             "'parent_availability_policy' method"
         )
-    
+
     def get_uid(self, product):
         raise NotImplementedError(
-            "A structured strategy class must define a "
-            "'get_uid' method"
+            "A structured strategy class must define a " "'get_uid' method"
         )
-    
+
     def available_stockrecords(self, product):
         raise NotImplementedError(
             "A structured strategy class must define a "
             "'available_stockrecords' method"
         )
-    
+
     def is_available(self, product):
         raise NotImplementedError(
-            "A structured strategy class must define a "
-            "'is_available' method"
+            "A structured strategy class must define a " "'is_available' method"
         )
 
 
@@ -228,26 +232,32 @@ class UseStoreStockRecord:
 
     def get_store_id(self):
         return self.request.store.id
-    
+
     def get_uid(self, product):
         product_id = product.id
         store_id = self.get_store_id()
-        stockrecords_ids = self.available_stockrecords(product).values_list('id', flat=True)
+        stockrecords_ids = self.available_stockrecords(product).values_list(
+            "id", flat=True
+        )
         return f"{product_id}-{store_id}-{'-'.join(map(str, stockrecords_ids))}"
 
     def available_stockrecords(self, product):
+        is_public_filter = Q(is_public=True)
+        num_in_stock_filter = Q(num_in_stock__isnull=False) & Q(num_in_stock__gt=0)
+        product_filter = Q(product_id=product.id) if not product.is_parent else Q(product__in=product.children.all())
+
         if product.get_product_class().track_stock:
-            return product.stockrecords.filter(
-                is_public=True,
-                num_in_stock__isnull=False,
-                num_in_stock__gt=0,
+            return StockRecord.objects.filter(
+                is_public_filter & num_in_stock_filter & product_filter
             )
         else:
-            return product.stockrecords.filter(is_public=True)
+            return StockRecord.objects.filter(
+                is_public_filter & product_filter
+            )
 
     def is_available(self, product):
         return self.available_stockrecords(product).exists()
-            
+
 
 class StockRequired(object):
     """
@@ -284,7 +294,7 @@ class PricingPolicy(object):
         # Check stockrecord has the appropriate data
         if not stockrecord or stockrecord.price is None:
             return UnavailablePrice()
-        
+
         return FixedPrice(
             currency=stockrecord.price_currency,
             money=stockrecord.price,
@@ -295,22 +305,23 @@ class PricingPolicy(object):
         stockrecords = [x[1] for x in children_stock]
         if not stockrecords:
             return UnavailablePrice()
-        
+
         sorted_stockrecords = sorted(
-            (stc for stc in stockrecords if stc is not None),
-            key=lambda stc: stc.price
+            (stc for stc in stockrecords if stc is not None), key=lambda stc: stc.price
         )
 
         if sorted_stockrecords:
             return FixedPrice(
                 currency=sorted_stockrecords[0].price_currency,
                 money=stockrecords[0].price if stockrecords[0] is not None else None,
-                old_price=stockrecords[0].old_price if stockrecords[0] is not None else None,
+                old_price=(
+                    stockrecords[0].old_price if stockrecords[0] is not None else None
+                ),
                 min_price=sorted_stockrecords[0].price,
             )
-        
+
         return UnavailablePrice()
-    
+
 
 class Default(UseStoreStockRecord, StockRequired, PricingPolicy, Structured):
     """
@@ -318,4 +329,5 @@ class Default(UseStoreStockRecord, StockRequired, PricingPolicy, Structured):
     product, ensures that stock is available (unless the product class
     indicates that we don't need to track stock) and charges zero tax.
     """
+
     rate = D(0)

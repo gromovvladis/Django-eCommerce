@@ -1,10 +1,11 @@
 import logging
-from rest_framework import serializers
-from oscar.apps.search.search_indexes import ProductIndex
+
 from decimal import Decimal as D
-from oscar.core.loading import get_model
 from haystack import connections
-from oscar.core.utils import slugify
+from rest_framework import serializers
+
+from oscar.core.loading import get_model
+from oscar.apps.search.search_indexes import ProductIndex
 
 logger = logging.getLogger("oscar.customer")
 
@@ -23,7 +24,7 @@ Additional = get_model("catalogue", "Additional")
 class ProductSerializer(serializers.ModelSerializer):
     # товар
     id = serializers.CharField(source="evotor_id")
-    name = serializers.CharField()
+    name = serializers.CharField(required=False)
     article_number = serializers.CharField(source="article", required=False, allow_blank=True)
     description = serializers.CharField(source="short_description", required=False, allow_blank=True)
     parent_id = serializers.CharField(required=False, allow_blank=True, write_only=True)
@@ -263,8 +264,9 @@ class ProductSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         try:     
             store_id = self.context.get("store_id", None)
-            
             representation["measure_name"] = instance.get_product_class().measure_name
+
+            representation["name"] = instance.get_name()
 
             parent_id = instance.get_evotor_parent_id()
             if parent_id:

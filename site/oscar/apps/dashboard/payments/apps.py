@@ -7,7 +7,7 @@ from oscar.core.loading import get_class
 class PaymentsDashboardConfig(OscarDashboardConfig):
     label = "payments_dashboard"
     name = "oscar.apps.dashboard.payments"
-    verbose_name = "Панель управления - Онлайн-оплата Yookassa"
+    verbose_name = "Панель управления - Онлайн-оплата Юкасса"
 
     default_permissions = [
         "user.full_access",

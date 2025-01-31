@@ -12,7 +12,7 @@ from .tasks import send_sms_async
 
 
 class Staff(models.Model):
-    user = models.OneToOneField(compat.AUTH_USER_MODEL, related_name="profile",
+    user = models.OneToOneField(compat.AUTH_USER_MODEL, related_name="staff_profile",
                                 on_delete=models.CASCADE, null=True)
     first_name = models.CharField("Имя", blank=False, null=True, max_length=255)
     last_name = models.CharField("Фамилия", blank=True, null=True, max_length=255)
@@ -31,7 +31,7 @@ class Staff(models.Model):
         (FEMALE, 'Женщина'))
     gender = models.CharField(max_length=1, choices=gender_choices,
                               verbose_name='Пол', null=True, blank=True)
-    age = models.PositiveIntegerField(verbose_name='Возраст', null=True, blank=True)
+    date_of_birth = models.DateField(verbose_name='Дата рождения', null=True, blank=True)
     telegram_id = models.CharField("ID Телеграм чата", max_length=128, null=True, blank=True)
     evotor_id = models.CharField("ID Эвотор", max_length=128, null=True, blank=True)
     is_active = models.BooleanField(
@@ -226,7 +226,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return "%s" % self.username 
     
     def get_staff_name(self):
-        staff_profile = self.profile
+        staff_profile = self.staff_profile
         if staff_profile:
             staff_name = staff_profile.get_full_name
             staff_role = staff_profile.role.name if staff_profile.role else " - "

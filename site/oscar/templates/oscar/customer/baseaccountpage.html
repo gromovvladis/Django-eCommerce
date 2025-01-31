@@ -11,17 +11,14 @@
         <div class="profile__wrapper d-flex flex-column fill-width grow-1">
             <div data-id="profile-wrapper" class="profile-wrapper{% if content_open %} open{% endif %} d-flex fill-width pt-0 pt-sm-3">
                 <div class="profile__menu fill-width">
-
                     <div class="d-flex flex-column fill-width pb-sm-3 ml-sm-2">
                         <p class="profile__user-name"> Привет{% if request.user.name %}, {{ request.user.name }}{% endif %}!</p>
                         <p class="profile__user-phone mt-1">{{ request.user.username }}</p>
                     </div>
-
                     {% block standard_tabs %}
                         {% include 'oscar/customer/partials/standard_tabs.html' %}
                     {% endblock %}
                 </div>
-
                 <div class="profile__content fill-width pl-0 pl-sm-4">
                     {% block tabcontent %}{% endblock tabcontent %}
                 </div>
