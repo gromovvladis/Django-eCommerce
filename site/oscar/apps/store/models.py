@@ -63,11 +63,11 @@ class Store(models.Model):
     def display_name(self):
         return self.name or self.code
 
-    @property
+    @cached_property
     def work_time(self):
         return f"{self.start_worktime.strftime('%H:%M')}-{self.end_worktime.strftime('%H:%M')}"
 
-    @property
+    @cached_property
     def primary_address(self):
         """
         Returns a stores primary address. Usually that will be the
@@ -90,7 +90,7 @@ class Store(models.Model):
                 "primary_address to look up the right address"
             )
         
-    @property
+    @cached_property
     def address(self):
         """
         Returns a stores primary address. Usually that will be the

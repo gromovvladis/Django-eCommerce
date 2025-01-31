@@ -356,8 +356,6 @@ class Category(MP_Node):
         return self.get_tree(self)
 
     def get_url_cache_key(self):
-        # current_locale = get_language()
-        # cache_key = "CATEGORY_URL_%s_%s" % (current_locale, self.pk)
         cache_key = "CATEGORY_URL_%s" % (self.pk)
         return cache_key
 
@@ -622,7 +620,6 @@ class Product(models.Model):
         """
         Return a product's variant absolute URL
         """
-
         if self.is_child:
             slug = self.parent.slug
             cat = self.parent.categories.first()
@@ -749,7 +746,6 @@ class Product(models.Model):
         self.attr.invalidate()
 
     # Properties
-
     @cached_property
     def is_standalone(self):
         return self.structure == self.STANDALONE
@@ -780,7 +776,7 @@ class Product(models.Model):
         else:
             return is_valid
 
-    @property
+    @cached_property
     def options(self):
         """
         Returns a set of all valid options for this product.
@@ -788,7 +784,7 @@ class Product(models.Model):
         """
         return self.get_product_class().options.all() | self.product_options.all()
 
-    @property
+    @cached_property
     def additionals(self):
         """
         Returns a set of all additionals for this product.
@@ -841,11 +837,11 @@ class Product(models.Model):
     def has_weight(self):
         return bool(self.weight)
 
-    @property
+    @cached_property
     def is_shipping_required(self):
         return self.get_product_class().requires_shipping
 
-    @property
+    @cached_property
     def has_stockrecords(self):
         """
         Test if this product has any stockrecords
@@ -858,7 +854,7 @@ class Product(models.Model):
     def num_stockrecords(self):
         return self.stockrecords.count()
 
-    @property
+    @cached_property
     def attribute_summary(self):
         """
         Return a string of all of a product's attributes
@@ -867,7 +863,7 @@ class Product(models.Model):
         pairs = [attribute.summary() for attribute in attributes]
         return ", ".join(pairs)
 
-    @property
+    @cached_property
     def attributes_variants(self):
         """
         Return a string of all of a product's attributes
@@ -1097,7 +1093,7 @@ class Product(models.Model):
     def num_helpful_reviews(self):
         return self.reviews.helpful().count()
 
-    @property
+    @cached_property
     def sorted_recommended_products(self):
         """Keeping order by recommendation ranking."""
         return [

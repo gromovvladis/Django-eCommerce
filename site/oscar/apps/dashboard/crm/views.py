@@ -561,7 +561,6 @@ class CRMProductListView(CRMTablesMixin):
                     data_item["is_created"] = True
                     if store:
                         stockrecord = model_instance.stockrecords.filter(store__evotor_id=store_id).first()
-
                         stockrecord_match = (
                             stockrecord
                             # and stockrecord.evotor_code == data_item.get("code")

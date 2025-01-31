@@ -39,13 +39,13 @@ def update_counter_task(model_name, field_name, filter_kwargs, increment=1):
     correct instance
     """
     try:
+        logger.info(f"UPDATE COUNTER {model_name}, {field_name}, {filter_kwargs}")
         model = apps.get_model("analytics", model_name)
         record = model.objects.filter(**filter_kwargs)
         affected = record.update(**{field_name: F(field_name) + increment})
         if not affected:
             filter_kwargs[field_name] = increment
             model.objects.create(**filter_kwargs)
-
     except IntegrityError:
         logger.error(f"IntegrityError при обновлении {model_name}")
 
@@ -56,7 +56,6 @@ def record_products_in_order_task(order_id):
     Записывает данные о товарах в заказе.
     """
     order = Order.objects.prefetch_related("lines", "lines__product").get(id=order_id)
-
     updates = [
         update_counter_task.s(
             "ProductRecord",

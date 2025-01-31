@@ -108,18 +108,13 @@ class PhoneAuthenticationForm(forms.Form):
             )
 
     def get_user(self):
-
         phone_number = self.cleaned_data.get("username")
         code = self.cleaned_data.get("password")
-
         if phone_number is not None and code is not None:
-
             backend = import_string(settings.PHONE_BACKEND)()
-
             self.user_cache = backend.authenticate(
                 request=self.request, username=phone_number, password=code
             )
-            
             if self.user_cache is None:
                 return
             else:
