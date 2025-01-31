@@ -3,24 +3,19 @@
 {% block tabcontent %}
     <div class="profile wrapper--small d-flex flex-column fill-width fill-height">
         <div class="profile__wrapper d-flex flex-column fill-width grow-1">
-            
             <div class="d-flex flex-column fill-width pt-sm-4 ml-2">
                 <p class="profile__user-name"> Привет! {% if request.user.name %}{{ request.user.name }}{% endif %}</p>
                 <p class="profile__user-phone mt-1">{{ request.user.username }}</p>
             </div>
-            
             <div class="d-flex fill-width pt-0 pt-sm-3">
-                
                 <div class="profile__menu fill-width pt-3 pt-sm-0 pb-sm-0">
                     {% block standard_tabs %}
                         {% include 'oscar/customer/partials/standard_tabs.html' %}
                     {% endblock %}
                 </div>
-
                 <div class="fill-width pl-0 pl-sm-4 d-none d-sm-block">
                     <form class="profile-personal d-flex flex-column fill-height fill-width grow-1">
-                        <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
-                            
+                        <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">      
                             <div class="input d-flex align-center input__label-active input__padding">
                                 <div class="input__wrapper">
                                     <div class="input__label">Имя</div>
@@ -31,7 +26,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="input d-flex align-center mt-2 input__label-active input__padding readonly">
                                 <div class="input__wrapper">
                                     <div class="input__label">Телефон</div>
@@ -42,7 +36,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="input d-flex align-center mt-2 input__padding">
                                 <div class="input__wrapper">
                                     <div class="input__label">Дата рождения</div>
@@ -53,7 +46,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="input d-flex align-center mt-2 input__label-active input__padding">
                                 <div class="input__wrapper">
                                     <div class="input__label">Почта</div>
@@ -65,7 +57,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="d-none d-sm-flex justify-end mt-4">
                             <div class="profile-personal__button-wrap d-flex mr-2">
                                 <a data-id="profile-logout-btn" href="{% url 'dashboard:logout' %}"

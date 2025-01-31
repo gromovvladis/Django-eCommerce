@@ -35,7 +35,7 @@
                         <div class="app-nav__title d-flex d-sm-none text-center d-flex">
                             {% block nav_title %}{% endblock %}
                         </div>
-                        {% cache 3600 root_category category.pk %}
+                        {% cache 3600 root_category %}
                             <ul class="d-flex align-center fill-height">
                                 {% root_categories as root_categories %}
                                 {% if root_categories %}
@@ -85,7 +85,7 @@
                     <div class="{% block wrapper_class %}{% endblock %}">
                         {% include "oscar/partials/alert_messages.html" %}
                         {% block breadcrumbs %}{% endblock %}
-                        {% if delivety_available %}
+                        {% if delivery_available %}
                             {% block sticky_address %}{% endblock %}
                         {% endif %}
                         {% block content %}{% endblock %}

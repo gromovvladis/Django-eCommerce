@@ -28,7 +28,6 @@
         <div class="d-none d-sm-flex mb-2">
             <h1>Избранное</h1>
         </div>
-        
         {% if products %}
             <div class="fill-width mb-2">
                 <div class="cabinet-orders fill-width grow-1">
@@ -63,9 +62,7 @@
                                                         </div>
                                                     </a>
                                                 </div>
-
                                                 <div class="dish-order__content d-flex flex-column fill-width ml-1">
-                                                    
                                                     <div class="dish-order__title s d-flex align-start fill-width">
                                                         <div class="dish-order__name-wrapper d-flex fill-width">
                                                             <a href="{{ product.get_absolute_url }}" aria-current="page"
@@ -78,7 +75,6 @@
                                                                 {% endif %}
                                                             </a>
                                                         </div>
-
                                                         <form id="wishlist_form" action="{% url 'customer:wishlist-remove-product' product_pk=product.pk %}" method="post" class="dish-order__delete d-flex shrink pd-0">
                                                             {% csrf_token %}
                                                             <button id="wishlist_btn" type="submit" class="pr-0 pt-0 pl-1 pb-1">
@@ -86,9 +82,7 @@
                                                             </button>
                                                         </form>
                                                     </div>
-
                                                     <div role="separator" class="spacer"></div>
-
                                                     <div class="d-flex fill-width mt-1 pos-relative align-center">
                                                         <div role="separator" class="spacer"></div>
                                                         <span class="prices d-flex flex-column align-start">
@@ -113,7 +107,6 @@
         {% else %}
             <p class="text--info">Список избранного пуст</p>
         {% endif %}
-
     </div>
 {% endblock tabcontent %}
 

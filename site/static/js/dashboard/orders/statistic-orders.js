@@ -10,7 +10,7 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
     
     i++;
 
-    if (products_name) {
+    if (Array.isArray(products_name) && products_name.length > 0) {
         const getOrCreateLegendList = (chart, DataID) => {
             console.log(DataID)
             const legendContainer = tab.querySelector(DataID);

@@ -19,11 +19,17 @@ def get_nodes(user, request):
     Return the visible navigation nodes for the passed user
     """
     models = {
-        "stock_alert": StockAlert.objects.filter(status=StockAlert.OPEN),
+        "stock_alert": StockAlert.objects.filter(
+            status=StockAlert.OPEN, stockrecord__store__in=request.staff_stores
+        ),
         "orders": request.no_finish_orders,
         "active_orders": request.active_orders,
-        "delivery": DeliveryOrder.objects.filter(pickup_time__gt=timezone.now()),
-        "product_review": ProductReview.objects.filter(is_open=False),
+        "delivery": DeliveryOrder.objects.filter(
+            pickup_time__gt=timezone.now(), store__in=request.staff_stores
+        ),
+        "product_review": ProductReview.objects.filter(
+            is_open=False,
+        ),
         "order_review": OrderReview.objects.filter(is_open=False),
     }
     all_nodes = create_menu(settings.OSCAR_DASHBOARD_NAVIGATION, models)
@@ -96,49 +102,56 @@ def get_parent_notif(children, models):
 def get_notif(child, models):
     if child.get("notification"):
         function_map = {
-            'stock_alerts': stock_alerts,
-            'active_orders': active_orders,
-            'all_orders': all_orders,
-            'feedback_product': feedback_product,
-            'feedback_order': feedback_order,
-            'delivery_active': delivery_active,
-            'delivery_store': delivery_store,
-            'delivery_couriers': delivery_couriers,
+            "stock_alerts": stock_alerts,
+            "active_orders": active_orders,
+            "all_orders": all_orders,
+            "feedback_product": feedback_product,
+            "feedback_order": feedback_order,
+            "delivery_active": delivery_active,
+            "delivery_store": delivery_store,
+            "delivery_couriers": delivery_couriers,
         }
         function_to_call = function_map.get(child["notification"])
         if function_to_call:
             return function_to_call(models)
-        
+
     return 0
 
 
 def stock_alerts(models):
-    stock_alert = models['stock_alert']
+    stock_alert = models["stock_alert"]
     return stock_alert.count()
 
+
 def active_orders(models):
-    return models['active_orders']
+    return models["active_orders"]
+
 
 def all_orders(models):
-    orders = models['orders']
+    orders = models["orders"]
     return orders.filter(is_open=False).count()
 
+
 def feedback_product(models):
-    product_review = models['product_review']
+    product_review = models["product_review"]
     return product_review.count()
 
+
 def feedback_order(models):
-    order_review = models['order_review']
+    order_review = models["order_review"]
     return order_review.count()
 
+
 def delivery_active(models):
-    delivery = models['delivery']
+    delivery = models["delivery"]
     return delivery.count()
+
 
 def delivery_store(models):
-    delivery = models['delivery']
+    delivery = models["delivery"]
     return delivery.count()
 
+
 def delivery_couriers(models):
-    delivery = models['delivery']
+    delivery = models["delivery"]
     return delivery.count()

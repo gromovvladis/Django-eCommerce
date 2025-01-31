@@ -35,11 +35,10 @@ class Order(models.Model):
         max_length=128,
         blank=True,
         null=True,
+        db_index=True,
     )
-    
     # We track the site that each order is placed within
     site = models.CharField(verbose_name="Источник заказа", null=True, blank=True, db_index=True, max_length=128)
-
     basket = models.ForeignKey(
         "basket.Basket",
         verbose_name="Корзина",
@@ -47,7 +46,6 @@ class Order(models.Model):
         blank=True,
         on_delete=models.SET_NULL,
     )
-
     store = models.ForeignKey(
         "store.Store",
         related_name="orders",
@@ -57,7 +55,6 @@ class Order(models.Model):
         verbose_name="Магазин",
         on_delete=models.SET_NULL,
     )
-
     # Orders can be placed without the user authenticating so we don't always
     # have a customer ID.
     user = models.ForeignKey(
@@ -68,7 +65,6 @@ class Order(models.Model):
         verbose_name="Пользователь",
         on_delete=models.SET_NULL,
     )
-
     # Total price looks like it could be calculated by adding up the
     # prices of the associated lines, but in some circumstances extra
     # order-level charges are added and so we need to store it separately
@@ -78,12 +74,10 @@ class Order(models.Model):
     total = models.DecimalField(
         "Сумма заказа", decimal_places=2, max_digits=12
     )
-
     # Shipping charges
     shipping = models.DecimalField(
         "Плата за доставку", decimal_places=2, max_digits=12, default=0
     )
-
     # Not all lines are actually shipped (such as downloads), hence shipping
     # address is not mandatory.
     shipping_address = models.ForeignKey(
@@ -93,7 +87,6 @@ class Order(models.Model):
         verbose_name="Адрес доставки",
         on_delete=models.SET_NULL,
     )
-
     shipping_method = models.CharField("Способ доставки", max_length=128, blank=True, db_index=True)
 
     # Use this field to indicate that an order is on hold / awaiting payment
@@ -103,13 +96,12 @@ class Order(models.Model):
     date_placed = models.DateTimeField(db_index=True, editable=False)
 
     # Date and time of order
-    order_time = models.DateTimeField(blank=True)
+    order_time = models.DateTimeField(db_index=True, blank=True)
 
     # Date and time of finish order
     date_finish = models.DateTimeField(db_index=True, blank=True, null=True)
 
     is_open = models.BooleanField("Заказ просмотрен", default=False, db_index=True)
-
     #: Order status pipeline.  This should be a dict where each (key, value) #:
     #: corresponds to a status and a list of possible statuses that can follow
     #: that one.

@@ -29,7 +29,7 @@
 
 {% block navtext %}
     <h1>{{ title }}</h1>
-    {% if product %}
+    {% if product and full_access %}
         <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-product-delete' pk=product.id %}">
             <i class="fa-solid fa-trash"></i>
             <span>Удалить</span>

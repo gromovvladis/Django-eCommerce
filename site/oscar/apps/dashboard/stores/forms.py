@@ -8,31 +8,27 @@ StoreAddress = get_model("store", "StoreAddress")
 
 
 class StoreSearchForm(forms.Form):
-    name = forms.CharField(
-        required=False, label="Название"
-    )
+    name = forms.CharField(required=False, label="Название")
+
 
 class StoreForm(forms.ModelForm):
-
     line1 = forms.CharField(
-        required=False, max_length=128, label="Улица, дом"
-    )
-    start_worktime = forms.TimeField(
-        required=False, label="Время открытия магазина"
-    )
-    end_worktime = forms.TimeField(
-        required=False, label="Время закрытия магазина"
+        required=False,
+        max_length=128,
+        label="Улица, дом",
+        widget=forms.TextInput(attrs={"readonly": "true"}),
     )
     coords_long = forms.CharField(
-        required=False, max_length=128, label="Координаты долгота"
+        required=False,
+        max_length=128,
+        label="Координаты долгота",
+        widget=forms.HiddenInput(),
     )
     coords_lat = forms.CharField(
-        required=False, max_length=128, label="Координаты широта"
-    )
-    is_active = forms.BooleanField(
-        label="Магазин активен",
         required=False,
-        initial=True,
+        max_length=128,
+        label="Координаты широта",
+        widget=forms.HiddenInput,
     )
 
     def __init__(self, *args, **kwargs):
@@ -62,14 +58,3 @@ class StoreForm(forms.ModelForm):
             "end_worktime",
             "is_active",
         )
-        widgets = {
-            'line1': forms.TextInput(attrs={
-                'readonly': "true"
-            }),
-            'coords_long': forms.TextInput(attrs={
-                'readonly': "true"
-            }),
-            'coords_lat': forms.TextInput(attrs={
-                'readonly': "true"
-            }),
-        }

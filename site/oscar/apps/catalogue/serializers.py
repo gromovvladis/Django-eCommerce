@@ -4,7 +4,6 @@ from oscar.apps.search.search_indexes import ProductIndex
 from decimal import Decimal as D
 from oscar.core.loading import get_model
 from haystack import connections
-from oscar.core.utils import slugify
 
 logger = logging.getLogger("oscar.customer")
 

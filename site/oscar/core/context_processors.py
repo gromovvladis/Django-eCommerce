@@ -8,7 +8,7 @@ def metadata(request):
         "homepage_url": settings.OSCAR_HOMEPAGE,
         "primary_title": settings.PRIMARY_TITLE,
         "stores_select": settings.STORE_SELECT,
-        "delivety_available": settings.DELIVERY_AVAILABLE,
+        "delivery_available": settings.DELIVERY_AVAILABLE,
         "support_link": settings.SUPPORT_LINK,
         # Fallback to old settings name for backwards compatibility
         "google_analytics_id": (

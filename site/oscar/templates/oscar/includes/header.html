@@ -19,19 +19,21 @@
     {% endcache %}
 </div>
 <div class="app__header-right d-flex">
-    {% cache 3600 header_right %}
+    {% cache 3600 header_right delivery_available %}
         <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button" class="app-header__button d-flex flex-column mr-4 align-center">
             <span class="app-header__button-picture">  
                 {% icon file_name='header/search' size=26 fill='#111'%}
             </span>
             Поиск
         </a>
-        <a href="{% url 'address:delivery-address' %}" data-id="address-button" class="app-header__button d-flex flex-column mr-4 align-center">
-            <span class="app-header__button-picture">  
-                {% icon file_name='map/delivery' size=26 stroke='#111'%}
-            </span>
-            Доставка
-        </a>
+        {% if delivery_available %}
+            <a href="{% url 'address:delivery-address' %}" data-id="address-button" class="app-header__button d-flex flex-column mr-4 align-center">
+                <span class="app-header__button-picture">  
+                    {% icon file_name='map/delivery' size=26 stroke='#111'%}
+                </span>
+                Доставка
+            </a>
+        {% endif %}
         <a href="{% url 'home:actions' %}" data-id="header-actions-button" class="app-header__button d-flex flex-column mr-4 align-center">
             <span class="app-header__button-picture">
                 {% icon file_name='app_mobile_sticker/actions' size=26 stroke='#111'%}

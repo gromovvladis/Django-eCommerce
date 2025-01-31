@@ -1,9 +1,11 @@
 import datetime
+
 from django.db import models, router
 from django.db.models import F, signals
 from django.db.models.functions import Coalesce, Least
 from django.utils.functional import cached_property
 from django.utils.timezone import now
+
 from oscar.apps.store.exceptions import InvalidStockAdjustment
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.utils import get_default_currency
@@ -34,30 +36,26 @@ class Store(models.Model):
         max_length=128,
         blank=True,
         null=True,
+        db_index=True,
     )
-
     #: A store can have users assigned to it. This is used
     #: for access modelling in the permission-based dashboard
     users = models.ManyToManyField(
-        AUTH_USER_MODEL, related_name="stores", blank=True, verbose_name="Персонал"
+        AUTH_USER_MODEL, related_name="stores", blank=True, verbose_name="Персонал", db_index=True
     )
-
     start_worktime = models.TimeField(
-        "Время начала смены", default=datetime.time(9, 0)  
+        "Время начала смены", default=datetime.time(10, 0)  
     )
     end_worktime = models.TimeField(
-        "Время окончания смены", default=datetime.time(21, 0)
+        "Время окончания смены", default=datetime.time(22, 0)
     )
-
     terminals = models.ManyToManyField("store.Terminal", related_name="stores", verbose_name="Терминал", blank=True)
-    
     is_active = models.BooleanField(
         "Активен",
         default=True,
         db_index=True,
         help_text="Магазин доступен для клиентов?",
     )
-
     date_created = models.DateTimeField("Дата создания", auto_now_add=True, db_index=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
@@ -84,9 +82,7 @@ class Store(models.Model):
         if len(addresses) == 0:
             return ""
         elif len(addresses) == 1:
-            if addresses[0].line1:
-                return addresses[0]
-            return ""
+            return addresses[0].line1
         else:
             raise NotImplementedError(
                 "Oscar's default implementation of primary_address only "

@@ -68,7 +68,7 @@ class StoreListView(SingleTableView):
         return ctx  
 
     def get_queryset(self):
-        qs = Store._default_manager.prefetch_related("addresses", "users", "users__profile").all()
+        qs = Store._default_manager.prefetch_related("addresses", "users", "users__staff_profile").all()
 
         self.description = "Все магазины"
 
@@ -125,11 +125,13 @@ class StoreCreateView(CreateView):
         
     def form_valid(self, form):
         self.object = form.save()
-        self.object.address = self.object.addresses.model(store=self.object)
-        self.object.address.line1 = form.cleaned_data["line1"]
-        self.object.address.coords_long = form.cleaned_data["coords_long"]
-        self.object.address.coords_lat = form.cleaned_data["coords_lat"]
-        self.object.address.save()
+        address = self.object.addresses.model(
+            store=self.object,
+            line1=form.cleaned_data["line1"],
+            coords_long=form.cleaned_data["coords_long"],
+            coords_lat=form.cleaned_data["coords_lat"],
+        )
+        address.save()
         return super().form_valid(form)
 
 

@@ -98,7 +98,6 @@ class ActionsView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        
         actions = cache.get('actions_all')
 
         if not actions:

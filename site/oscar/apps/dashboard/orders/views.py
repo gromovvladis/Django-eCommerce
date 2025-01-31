@@ -63,7 +63,7 @@ OrderStatusForm = get_class("dashboard.orders.forms", "OrderStatusForm")
 OrderTable = get_class("dashboard.orders.tables", "OrderTable")
 
 
-def queryset_orders(user, product=None, category=None):
+def queryset_orders(request, product=None, category=None):
     """
     Returns a queryset of all orders that a user is allowed to access.
     A staff user may access all orders.
@@ -82,15 +82,14 @@ def queryset_orders(user, product=None, category=None):
     if category:
         queryset = queryset.filter(lines__product__categories=category)
 
-    if user.is_superuser:
+    if request.user.is_superuser:
         return queryset
     else:
-        stores = Store._default_manager.filter(users=user)
-        return queryset.filter(lines__store__in=stores).distinct()
+        return queryset.filter(store__in=request.staff_stores).distinct()
 
-def get_order_or_404(user, number):
+def get_order_or_404(request, number):
     try:
-        return queryset_orders(user=user).get(number=number)
+        return queryset_orders(request=request).get(number=number)
     except ObjectDoesNotExist:
         raise Http404()
 
@@ -213,33 +212,33 @@ class OrderStatsView(FormView):
         return order_data, sum(order_count) > 0
 
     def get_data(self, filters, excludes):
-        orders = queryset_orders(user=self.request.user).filter(**filters).exclude(**excludes)
+        orders = queryset_orders(request=self.request).filter(**filters).exclude(**excludes)
         
         if filters.get('date_placed__range') is not None:
             start_date, end_date = filters['date_placed__range']
             users = User.objects.filter(date_joined__range=[start_date, end_date])
-            alerts = StockAlert.objects.filter(date_created__range=[start_date, end_date])
-            baskets = Basket.objects.filter(status=Basket.OPEN, date_created__range=[start_date, end_date])
+            alerts = StockAlert.objects.filter(date_created__range=[start_date, end_date], stockrecord__store__in=self.request.staff_stores)
+            baskets = Basket.objects.filter(status=Basket.OPEN, date_created__range=[start_date, end_date], store__in=self.request.staff_stores)
             products = Product.objects.filter(date_created__range=[start_date, end_date])
             lines = Line.objects.filter(order__in=orders)
         elif filters.get('date_placed__gte') is not None:
             start_date = filters['date_placed__gte']
             users = User.objects.filter(date_joined__gte=start_date)
-            alerts = StockAlert.objects.filter(date_created__gte=start_date)
-            baskets = Basket.objects.filter(status=Basket.OPEN, date_created__gte=start_date)
+            alerts = StockAlert.objects.filter(date_created__gte=start_date, stockrecord__store__in=self.request.staff_stores)
+            baskets = Basket.objects.filter(status=Basket.OPEN, date_created__gte=start_date, store__in=self.request.staff_stores)
             products = Product.objects.filter(date_created__gte=start_date)
             lines = Line.objects.filter(order__in=orders)
         elif filters.get('date_placed__lte') is not None:
             end_date = filters['date_placed__lte']
             users = User.objects.filter(date_joined__lte=end_date)
-            alerts = StockAlert.objects.filter(date_created__lte=end_date)
-            baskets = Basket.objects.filter(status=Basket.OPEN, date_created__lte=end_date)
+            alerts = StockAlert.objects.filter(date_created__lte=end_date, stockrecord__store__in=self.request.staff_stores)
+            baskets = Basket.objects.filter(status=Basket.OPEN, date_created__lte=end_date, store__in=self.request.staff_stores)
             products = Product.objects.filter(date_created__lte=end_date)
             lines = Line.objects.filter(order__in=orders)
         else:     
             users = User.objects.all()
-            alerts = StockAlert.objects.all()
-            baskets = Basket.objects.filter(status=Basket.OPEN)
+            alerts = StockAlert.objects.filter(stockrecord__store__in=self.request.staff_stores)
+            baskets = Basket.objects.filter(status=Basket.OPEN, store__in=self.request.staff_stores)
             products = Product.objects.all()
             lines = Line.objects.filter(order__in=orders)
 
@@ -248,7 +247,7 @@ class OrderStatsView(FormView):
             "alerts": alerts,
             "baskets": baskets,
             "users": users,
-            "customers": users.filter(orders__isnull=False).distinct(),
+            "customers": users.filter(orders__store__in=self.request.staff_stores).distinct(),
             "lines": lines,
             "products": products,
         }
@@ -432,7 +431,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
     def dispatch(self, request, *args, **kwargs):
         # base_queryset is equal to all orders the user is allowed to access
-        self.base_queryset = queryset_orders(user=request.user).annotate(
+        self.base_queryset = queryset_orders(request=request).annotate(
             source=Max("sources__reference"),
             amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             paid=F("sources__paid"),
@@ -833,7 +832,7 @@ class OrderActiveListLookupView(APIView):
             return JsonResponse({'update': False})
         
         # Построение базового queryset с фильтрацией
-        queryset = queryset_orders(user=user).filter(status__in=active_statuses)
+        queryset = queryset_orders(request=request).filter(status__in=active_statuses)
 
         # Применяем фильтрацию по store только если store существует
         store_code = self.form.cleaned_data.get("store")
@@ -941,7 +940,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
     )
 
     def get_object(self, queryset=None):
-        order = get_order_or_404(self.request.user, self.kwargs["number"])
+        order = get_order_or_404(self.request, self.kwargs["number"])
         order.open()
         if not order.date_finish:
             order.before_order = order.order_time - now()
@@ -1269,7 +1268,7 @@ class LineDetailView(DetailView):
     template_name = "oscar/dashboard/orders/line_detail.html"
 
     def get_object(self, queryset=None):
-        order = get_order_or_404(self.request.user, self.kwargs["number"])
+        order = get_order_or_404(self.request, self.kwargs["number"])
         try:
             return order.lines.get(pk=self.kwargs["line_id"])
         except self.model.DoesNotExist:
@@ -1292,7 +1291,7 @@ class OrderDeleteView(DeleteView):
     context_object_name = "order"
 
     def get_object(self, queryset=None):
-        return get_order_or_404(self.request.user, self.kwargs["number"])
+        return get_order_or_404(self.request, self.kwargs["number"])
 
     def post(self, request, *args, **kwargs):
         # Set self.object before the usual form processing flow.
@@ -1386,7 +1385,7 @@ class ShippingAddressUpdateView(UpdateView):
     form_class = ShippingAddressForm
 
     def get_object(self, queryset=None):
-        order = get_order_or_404(self.request.user, self.kwargs["number"])
+        order = get_order_or_404(self.request, self.kwargs["number"])
         return get_object_or_404(self.model, order=order)
 
     def get_context_data(self, **kwargs):

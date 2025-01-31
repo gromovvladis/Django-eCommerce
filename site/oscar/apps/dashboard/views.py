@@ -1,5 +1,6 @@
 import json
 import datetime as datetime_min
+
 from datetime import datetime, timedelta
 from decimal import ROUND_UP
 from decimal import Decimal as D
@@ -77,9 +78,7 @@ class IndexView(TemplateView):
             hourly_orders = orders.filter(
                 date_placed__gte=start_time, date_placed__lt=end_time
             )
-            total = hourly_orders.aggregate(Sum("total"))[
-                "total__sum"
-            ] or D("0.0")
+            total = hourly_orders.aggregate(Sum("total"))["total__sum"] or D("0.0")
             order_total_hourly.append({"end_time": end_time, "total": total})
             start_time = end_time
 
@@ -120,7 +119,9 @@ class IndexView(TemplateView):
         *segments* defines the number of labelling segments used for the y-axis
         when generating the y-axis labels (default=10).
         """
-        start_time = datetime_combine(now(), datetime_min.time.max) - timedelta(days=days)
+        start_time = datetime_combine(now(), datetime_min.time.max) - timedelta(
+            days=days
+        )
 
         order_total_days = []
         for _ in range(0, days, 1):
@@ -128,9 +129,7 @@ class IndexView(TemplateView):
             days_orders = orders.filter(
                 date_placed__gte=start_time, date_placed__lt=end_time
             )
-            total = days_orders.aggregate(Sum("total"))[
-                "total__sum"
-            ] or D("0.0")
+            total = days_orders.aggregate(Sum("total"))["total__sum"] or D("0.0")
             order_total_days.append({"end_time": end_time, "total": total})
             start_time = end_time
 
@@ -162,57 +161,62 @@ class IndexView(TemplateView):
         return ctx
 
     def get_data(self):
-
-        prod_slug = self.request.GET.get('product')
-        cat_slug = self.request.GET.get('category')
+        request = self.request
+        prod_slug, cat_slug = request.GET.get("product"), request.GET.get("category")
         users = User.objects.all()
+        staff_stores = request.staff_stores
 
         if prod_slug:
             prods = Product.objects.filter(slug=prod_slug)
             prod = prods.first()
-            data = {
-                "title": "Статистика для товара '%s'" % prod.get_name(),
-                "orders": queryset_orders(user=self.request.user, product=prod),
-                "alerts": StockAlert.objects.filter(stockrecord__product_id=prod.id),
-                "baskets": Basket.objects.filter(lines__product_id=prod.id).filter(status=Basket.OPEN),
-                "users": users.filter(baskets__lines__product_id=prod.id).distinct(),
-                "customers": users.filter(orders__lines__product_id=prod.id).distinct(),
-                "lines": Line.objects.filter(product_id=prod.id),
-                "products": prods,
-            }
+            title = f"Статистика для товара '{prod.get_name()}'"
+            ids = [prod.id]
         elif cat_slug:
             cat = Category.objects.get(slug=cat_slug)
-            prod_cat = Product.objects.filter(categories=cat)
-            ids = [prod.id for prod in prod_cat]
-            data = {
-                "title": "Статистика для категории '%s'" % cat.name,
-                "orders": queryset_orders(user=self.request.user, category=cat),
-                "alerts": StockAlert.objects.filter(stockrecord__product_id__in=ids),
-                "baskets": Basket.objects.filter(lines__product_id__in=ids).filter(status=Basket.OPEN),
-                "users": users.filter(baskets__lines__product_id__in=ids).distinct(),
-                "customers": users.filter(orders__lines__product_id__in=ids).distinct(),
-                "lines": Line.objects.filter(product_id__in=ids),
-                "products": prod_cat,
-            }
+            prods = Product.objects.filter(categories=cat)
+            title = f"Статистика для категории '{cat.name}'"
+            ids = list(prods.values_list("id", flat=True))
         else:
-            data = {
-                "title": "Статистика",
-                "orders": queryset_orders(user=self.request.user),
-                "alerts": StockAlert.objects.all(),
-                "baskets": Basket.objects.filter(status=Basket.OPEN),
-                "users": users,
-                "customers": users.filter(orders__isnull=False).distinct(),
-                "lines": Line.objects.all(),
-                "products": Product.objects.all(),
-            }
+            prods, ids, title = Product.objects.all(), [], "Статистика"
 
-        return data
+        return {
+            "title": title,
+            "orders": queryset_orders(
+                request=request,
+                **(
+                    {"product": prod}
+                    if prod_slug
+                    else {"category": cat} if cat_slug else {}
+                ),
+            ),
+            "alerts": StockAlert.objects.filter(
+                stockrecord__product_id__in=ids, stockrecord__store__in=staff_stores
+            ),
+            "baskets": Basket.objects.filter(
+                lines__product_id__in=ids, status=Basket.OPEN, store__in=staff_stores
+            ),
+            "users": users.filter(
+                baskets__lines__product_id__in=ids, baskets__store__in=staff_stores
+            ).distinct(),
+            "customers": users.filter(
+                orders__lines__product_id__in=ids, orders__store__in=staff_stores
+            ).distinct(),
+            "lines": Line.objects.filter(
+                product_id__in=ids, order__store__in=staff_stores
+            ),
+            "products": prods,
+        }
 
     def get_stats(self):
         current_time = datetime_combine(now(), datetime_min.time.min)
         start_of_week = current_time.weekday()
-        start_of_month = datetime(year=current_time.year, month=current_time.month, day=1, tzinfo=current_time.tzinfo)
-        
+        start_of_month = datetime(
+            year=current_time.year,
+            month=current_time.month,
+            day=1,
+            tzinfo=current_time.tzinfo,
+        )
+
         datetime_day_ago = current_time
         datetime_week_ago = current_time - timedelta(days=start_of_week)
         datetime_month_ago = current_time - (current_time - start_of_month)
@@ -221,20 +225,20 @@ class IndexView(TemplateView):
 
         data = self.get_data()
 
-        orders = data['orders']
-        alerts = data['alerts']
-        baskets = data['baskets']
-        users = data['users']
-        customers = data['customers']
-        lines = data['lines']
-        products = data['products']
+        orders = data["orders"]
+        alerts = data["alerts"]
+        baskets = data["baskets"]
+        users = data["users"]
+        customers = data["customers"]
+        lines = data["lines"]
+        products = data["products"]
 
         orders_last_day = orders.filter(date_placed__gt=datetime_day_ago)
         orders_last_week = orders.filter(date_placed__gt=datetime_week_ago)
         orders_last_month = orders.filter(date_placed__gt=datetime_month_ago)
 
         orders_last_7days = orders.filter(date_placed__gt=datetime_7days_ago)
-        orders_last_30days= orders.filter(date_placed__gt=datetime_30days_ago)
+        orders_last_30days = orders.filter(date_placed__gt=datetime_30days_ago)
 
         open_alerts = alerts.filter(status=StockAlert.OPEN)
         closed_alerts = alerts.filter(status=StockAlert.CLOSED)
@@ -253,11 +257,9 @@ class IndexView(TemplateView):
             "start_of_month": start_of_month,
             "time_7days_ago": datetime_7days_ago,
             "time_30days_ago": datetime_30days_ago,
-
             "hourly_report_dict": self.get_hourly_report(orders),
             "week_report_dict": self.get_days_report(orders, 7),
             "month_report_dict": self.get_days_report(orders, 30),
-
             "total_orders_last_day": orders_last_day.count(),
             "total_lines_last_day": total_lines_last_day,
             "average_order_costs_day": orders_last_day.aggregate(Avg("total"))[
@@ -277,7 +279,6 @@ class IndexView(TemplateView):
             "total_open_baskets_last_day": baskets.filter(
                 date_created__gt=datetime_day_ago
             ).count(),
-
             "total_open_baskets_last_week": baskets.filter(
                 date_created__gt=datetime_week_ago
             ).count(),
@@ -297,7 +298,6 @@ class IndexView(TemplateView):
             "total_users_last_week": users.filter(
                 date_joined__gt=datetime_week_ago,
             ).count(),
-
             "total_lines_last_7days": total_lines_last_7days,
             "total_orders_last_7days": orders_last_7days.count(),
             "average_order_costs_7days": orders_last_7days.aggregate(Avg("total"))[
@@ -314,7 +314,6 @@ class IndexView(TemplateView):
             "total_open_baskets_last_7days": baskets.filter(
                 date_created__gt=datetime_7days_ago
             ).count(),
-
             "total_orders_last_month": orders_last_month.count(),
             "total_lines_last_month": total_lines_last_month,
             "average_order_costs_month": orders_last_month.aggregate(Avg("total"))[
@@ -334,7 +333,6 @@ class IndexView(TemplateView):
             "total_open_baskets_last_month": baskets.filter(
                 date_created__gt=datetime_month_ago
             ).count(),
-
             "total_orders_last_30days": orders_last_30days.count(),
             "total_lines_last_30days": total_lines_last_30days,
             "average_order_costs_30days": orders_last_30days.aggregate(Avg("total"))[
@@ -348,27 +346,26 @@ class IndexView(TemplateView):
             "total_customers_last_30days": customers.filter(
                 date_joined__gt=datetime_30days_ago,
             ).count(),
-
             "total_open_baskets_last_30days": baskets.filter(
                 date_created__gt=datetime_30days_ago
             ).count(),
-
             "total_products": products.count(),
             "total_open_stock_alerts": open_alerts.count(),
             "total_closed_stock_alerts": closed_alerts.count(),
             "total_users": users.count(),
-            "total_customers_2orders": customers.annotate(order_count=Count('orders')).filter(order_count__gte=2).count(),
-            "total_customers_5orders": customers.annotate(order_count=Count('orders')).filter(order_count__gte=5).count(),
+            "total_customers_2orders": customers.annotate(order_count=Count("orders"))
+            .filter(order_count__gte=2)
+            .count(),
+            "total_customers_5orders": customers.annotate(order_count=Count("orders"))
+            .filter(order_count__gte=5)
+            .count(),
             "total_customers": customers.count(),
             "guest_baskets": baskets.filter(owner__isnull=True).count(),
             "customers_baskets": baskets.filter(owner__isnull=False).count(),
             "total_open_baskets": baskets.count(),
             "total_orders": orders.count(),
             "total_lines": lines.count(),
-            "total_revenue": orders.aggregate(Sum("total"))[
-                "total__sum"
-            ]
-            or D("0.00"),
+            "total_revenue": orders.aggregate(Sum("total"))["total__sum"] or D("0.00"),
             "order_status_breakdown": orders.order_by("status")
             .values("status")
             .annotate(freq=Count("id")),
@@ -525,9 +522,9 @@ class PopUpWindowDeleteMixin(PopUpWindowMixin):
 class LoginView(AccountAuthView):
     template_name = "oscar/dashboard/login.html"
 
-    def get_auth_success_url(self, form):    
-        redirect_url = self.request.POST.get('redirect_url')
+    def get_auth_success_url(self, form):
+        redirect_url = self.request.POST.get("redirect_url")
         if redirect_url:
             return redirect_url
-        
+
         return reverse_lazy("dashboard:index")
