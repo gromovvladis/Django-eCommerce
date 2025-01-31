@@ -53,7 +53,8 @@
                             <label for="date_gte">Дата с:</label>
                             <div class="form-inline fill-width">
                                 <div class="input-group datetime-input date">
-                                    <input type="text" name="date_gte" class="form-control" id="date_gte" data-inputmask="'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy'" inputmode="numeric">
+                                    <input type="text" name="date_gte" class="form-control" value="{{ request.GET.date_gte|default:'' }}"
+                                     id="date_gte" data-inputmask="'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy'" inputmode="numeric">
                                     <div class="input-group-append datetime-btn">
                                         <div class="input-group-text">
                                             <i class="far fa-calendar-minus"></i>
@@ -66,7 +67,8 @@
                             <label for="date_lte">Дата до:</label>
                             <div class="form-inline fill-width">
                                 <div class="input-group datetime-input date">
-                                    <input type="text" name="date_lte" class="form-control" id="date_lte" data-inputmask="'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy'" inputmode="numeric">
+                                    <input type="text" name="date_lte" class="form-control" value="{{ request.GET.date_lte|default:'' }}" 
+                                    id="date_lte" data-inputmask="'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy'" inputmode="numeric">
                                     <div class="input-group-append datetime-btn">
                                         <div class="input-group-text">
                                             <i class="far fa-calendar-minus"></i>
@@ -76,19 +78,19 @@
                             </div>  
                         </div>
                     </div>                    
+                    {% if search_filters %}
+                        <div class="search-filter-list">
+                            <label class="mr-2">Фильтры:</label>
+                            {% for filter, param in search_filters %}
+                                <span class="badge badge-filter mb-2 mr-1">{{ filter }}
+                                    <a class="delete-filter text-danger ml-1" href="{% delete_filter request param %}">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </a>    
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
-                {% if search_filters %}
-                    <div class="search-filter-list">
-                        <label class="mr-2">Фильтры:</label>
-                        {% for filter, param in search_filters %}
-                            <span class="badge badge-filter mb-2 mr-1">{{ filter }}
-                                <a class="delete-filter text-danger ml-1" href="{% delete_filter request param %}">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </a>    
-                            </span>
-                        {% endfor %}
-                    </div>
-                {% endif %}
                 <div class="btn-form d-flex">
                     <button class="btn btn-primary flex-fill" type="submit">
                         <i class="fas fa-search"></i>
@@ -96,8 +98,8 @@
                             Поиск
                         </span>
                     </button>
-                    {% if request.GET %}
-                        <a href="{% url 'dashboard:order-list' %}" class="btn btn-danger ml-2">
+                    {% if search_filters %}
+                        <a href="{{ request.path }}" class="btn btn-danger ml-2">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     {% endif %}

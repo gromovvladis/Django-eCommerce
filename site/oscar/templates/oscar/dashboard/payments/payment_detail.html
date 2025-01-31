@@ -32,17 +32,14 @@
 {% endblock header %}
 
 {% block dashboard_content %}
-
     {% payment_date payment.created_at as date %}
     {% payment_order payment.description as number %}
     <div class="mobile-table">
         <div class="table-container">
-
             <table class="table table-bordered table-hover">
                 <caption><i class="fas fa-payments"></i>Информация о платеже</caption>
                 <thead>
                     <tr>
-                        {% comment %} <th class="name">ID Платежа</th> {% endcomment %}
                         <th class="order">Заказ</th>
                         <th class="customer">Клиент</th>
                         <th class="amount">Сумма</th>
@@ -54,7 +51,6 @@
                 </thead>
                 <tbody>
                     <tr class="mobile-open pt-0">
-                        {% comment %} <td class="name" data-label="ID">{{ payment.id }}</td> {% endcomment %}
                         <td class="title" data-label="Заказ">
                             <div class="d-flex align-items-center">
                                 <span class="spinner-border-sm {% if payment.paid and payment.refundable %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
@@ -96,5 +92,4 @@
             </table>
         </div>
     </div>
-
 {% endblock dashboard_content %}

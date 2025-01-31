@@ -67,7 +67,7 @@
                     <a data-toggle="modal" class="btn btn-third ml-2" data-target="#SearchModal" href="#">
                         <i class="fa-solid fa-bars"></i>
                     </a>
-                    {% if request.GET %}
+                    {% if search_filters %}
                         <a href="{% url 'dashboard:order-stats' %}" class="btn btn-danger ml-2">
                             <i class="fa-solid fa-trash"></i>
                         </a>

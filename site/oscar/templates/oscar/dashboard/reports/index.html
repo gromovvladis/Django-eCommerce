@@ -46,7 +46,7 @@
                                 Создать отчет
                             </span>
                         </button>
-                        {% if request.GET %}
+                        {% if search_filters %}
                             <a href="{% url 'dashboard:reports-index' %}" class="btn btn-danger ml-2">
                                 <i class="fa-solid fa-trash"></i>
                             </a>

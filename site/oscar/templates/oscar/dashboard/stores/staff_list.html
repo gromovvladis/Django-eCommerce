@@ -39,7 +39,6 @@
                 <div class="d-flex form-row">
                     {% include "oscar/dashboard/partials/form_fields_inline.html" with form=form %}
                 </div>
-
                 {% if search_filters %}
                     <div class="search-filter-list mt-3">
                         <label class="mr-2">Фильтры:</label>
@@ -52,7 +51,6 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-
                 <div class="btn-form d-flex mt-3">
                     <button class="btn btn-primary flex-fill" type="submit" name="search">
                         <i class="fas fa-search"></i>
@@ -60,7 +58,7 @@
                             Поиск
                         </span>
                     </button>
-                    {% if request.GET %}
+                    {% if search_filters %}
                         <a href="{% url 'dashboard:staff-list' %}" class="btn btn-danger ml-2">
                             <i class="fa-solid fa-trash"></i>
                         </a>
