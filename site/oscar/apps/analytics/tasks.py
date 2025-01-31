@@ -38,8 +38,8 @@ def update_counter_task(model_name, field_name, filter_kwargs, increment=1):
     :param filter_kwargs: Parameters to the ORM's filter() function to get the
     correct instance
     """
+    logger.info(f"UPDATE COUNTER {model_name}, {field_name}, {filter_kwargs}")
     try:
-        logger.info(f"UPDATE COUNTER {model_name}, {field_name}, {filter_kwargs}")
         model = apps.get_model("analytics", model_name)
         record = model.objects.filter(**filter_kwargs)
         affected = record.update(**{field_name: F(field_name) + increment})
@@ -55,6 +55,7 @@ def record_products_in_order_task(order_id):
     """
     Записывает данные о товарах в заказе.
     """
+    logger.info(f"UPDATE record_products_in_order_task")
     order = Order.objects.prefetch_related("lines", "lines__product").get(id=order_id)
     updates = [
         update_counter_task.s(
@@ -110,6 +111,7 @@ def user_viewed_product_task(product_id, user_id):
     """
     Записывает факт просмотра товара пользователем.
     """
+    logger.info(f"UPDATE user_viewed_product_task")
     UserProductView.objects.create(product_id=product_id, user_id=user_id)
 
 
