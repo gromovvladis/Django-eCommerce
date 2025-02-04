@@ -13,7 +13,7 @@ TaxInclusiveFixedPrice = get_class("store.prices", "TaxInclusiveFixedPrice")
 
 StockRecord = get_model("store", "StockRecord")
 PurchaseInfo = namedtuple(
-    "PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords"]
+    "PurchaseInfo", ["price", "min_price", "availability", "stockrecord", "stockrecords"]
 )
 
 
@@ -124,8 +124,10 @@ class Structured(Base):
         """
         stockrecords = self.available_stockrecords(product)
         stockrecord = stockrecord or self.select_stockrecord(stockrecords)
+        price = self.pricing_policy(stockrecord)
         return PurchaseInfo(
-            price=self.pricing_policy(product, stockrecord),
+            price=price,
+            min_price=price,
             availability=self.availability_policy(product, stockrecord),
             stockrecord=stockrecord,
             stockrecords=stockrecords,
@@ -135,7 +137,8 @@ class Structured(Base):
         # Select children and associated stockrecords
         stockrecords = self.available_stockrecords(product)
         return PurchaseInfo(
-            price=self.parent_pricing_policy(product, stockrecords),
+            price=self.parent_pricing_policy(stockrecords),
+            min_price=self.parent_min_pricing_policy(stockrecords),
             availability=self.parent_availability_policy(product, stockrecords),
             stockrecord=None,
             stockrecords=stockrecords,
@@ -149,7 +152,7 @@ class Structured(Base):
             "A structured strategy class must define a 'select_stockrecord' method"
         )
 
-    def pricing_policy(self, product, stockrecord):
+    def pricing_policy(self, stockrecord):
         """
         Return the appropriate pricing policy
         """
@@ -157,10 +160,16 @@ class Structured(Base):
             "A structured strategy class must define a 'pricing_policy' method"
         )
 
-    def parent_pricing_policy(self, product, children_stock):
+    def parent_pricing_policy(self, children_stock):
         raise NotImplementedError(
             "A structured strategy class must define a "
             "'parent_pricing_policy' method"
+        )
+
+    def parent_min_pricing_policy(self, children_stock):
+        raise NotImplementedError(
+            "A structured strategy class must define a "
+            "'parent_min_pricing_policy' method"
         )
 
     def availability_policy(self, product, stockrecord):
@@ -235,7 +244,7 @@ class StockRequired(object):
     def parent_availability_policy(self, product, stockrecords):
         # A parent product is available if one of its children is
         for stockrecord in stockrecords:
-            policy = self.availability_policy(stockrecord.product, stockrecord)
+            policy = self.availability_policy(product, stockrecord)
             if policy.is_available_to_buy:
                 return Available()
         return Unavailable()
@@ -248,7 +257,7 @@ class PricingPolicy(object):
     stockrecord.
     """
 
-    def pricing_policy(self, product, stockrecord):
+    def pricing_policy(self, stockrecord):
         # Check stockrecord has the appropriate data
         if not stockrecord or stockrecord.price is None:
             return UnavailablePrice()
@@ -259,11 +268,25 @@ class PricingPolicy(object):
             old_price=stockrecord.old_price,
         )
 
-    def parent_pricing_policy(self, product, stockrecords):
+    def parent_pricing_policy(self, stockrecords):
         if not stockrecords:
             return UnavailablePrice()
 
         stockrecord = stockrecords.order_by("price").first()
+        if stockrecord:
+            return FixedPrice(
+                currency=stockrecord.price_currency,
+                money=stockrecord.price,
+                old_price=stockrecord.old_price,
+            )
+
+        return UnavailablePrice()
+
+    def parent_min_pricing_policy(self, stockrecords):
+        if not stockrecords:
+            return UnavailablePrice()
+
+        stockrecord = stockrecords.first()
         if stockrecord:
             return FixedPrice(
                 currency=stockrecord.price_currency,
