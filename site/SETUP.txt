@@ -315,6 +315,9 @@
     redis-cli Flushall
 
 
+    git pull https://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@github.com/gromovvladis/mikado.git
+    sudo supervisorctl restart all
+    redis-cli Flushall
 
     sudo supervisorctl stop all
     sudo systemctl stop redis-server

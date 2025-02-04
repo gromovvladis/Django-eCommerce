@@ -81,6 +81,7 @@ def receive_order_placed(sender, order, user, **kwargs):
     if kwargs.get("raw", False):
         return
     
+    logger.info("receive_order_placed")
     def execute_tasks():
         logger.info("Запускаем execute_tasks")
         if settings.DEBUG:
