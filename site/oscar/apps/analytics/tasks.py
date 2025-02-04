@@ -12,11 +12,10 @@ ProductRecord = get_model("analytics", "ProductRecord")
 UserProductView = get_model("analytics", "UserProductView")
 UserRecord = get_model("analytics", "UserRecord")
 UserSearch = get_model("analytics", "UserSearch")
-
-User = get_user_model()
 Order = get_model("order", "Order")
 Product = get_model("catalogue", "Product")
-import logging
+User = get_user_model()
+
 logger = logging.getLogger("oscar.analytics")
 
 
@@ -35,7 +34,6 @@ def update_counter_task(model_name, field_name, filter_kwargs, increment=1):
     :param filter_kwargs: Parameters to the ORM's filter() function to get the
     correct instance
     """
-    logger.error("Запускаем update_counter_task")
     try:
         model = apps.get_model("analytics", model_name)
         record = model.objects.filter(**filter_kwargs)
@@ -52,25 +50,31 @@ def record_products_in_order_task(order_id):
     """
     Записывает данные о товарах в заказе.
     """
-    logger.error("Запускаем record_products_in_order_task 1")
-    order = Order.objects.prefetch_related("lines", "lines__product").get(id=order_id)
-    logger.error("Запускаем record_products_in_order_task 2")
-    updates = [
-        update_counter_task.s(
-            "ProductRecord",
-            "num_purchases",
-            {"product_id": line.product.id},
-            line.quantity,
+    logger.error("Запускаем record_products_in_order_task 0")
+    try:
+        logger.error("Запускаем record_products_in_order_task 1")
+        order = Order.objects.prefetch_related("lines", "lines__product").get(id=order_id)
+        logger.error("Запускаем record_products_in_order_task 2")
+        updates = [
+            update_counter_task.s(
+                "ProductRecord",
+                "num_purchases",
+                {"product_id": line.product.id},
+                line.quantity,
+            )
+            for line in order.lines.all()
+        ]
+        logger.error("Запускаем record_products_in_order_task 3")
+        for task in updates:
+            if settings.DEBUG:
+                task()
+            else:
+                logger.error("Запускаем record_products_in_order_task 4")
+                task.delay()
+    except Exception as e:
+        logger.error(
+            f"{e} при записи продуктов в заказе пользователя (order_id={order_id})"
         )
-        for line in order.lines.all()
-    ]
-    logger.error("Запускаем record_products_in_order_task 3")
-    for task in updates:
-        if settings.DEBUG:
-            task()
-        else:
-            logger.error("Запускаем record_products_in_order_task 4")
-            task.delay()
 
 
 @shared_task
@@ -78,8 +82,9 @@ def record_user_order_task(user_id, order_id):
     """
     Записывает данные о заказе пользователя.
     """
-    logger.error("Запускаем record_user_order_task 1")
+    logger.error("Запускаем record_user_order_task 0")
     try:
+        logger.error("Запускаем record_user_order_task 1")
         order = (
             Order.objects.annotate(
                 _num_lines=Count("lines"),
@@ -121,10 +126,8 @@ def user_viewed_product_task(product_id, user_id):
     """
     Записывает факт просмотра товара пользователем.
     """
-    logger.error("Запускаем user_viewed_product_task 1")
     try:
         UserProductView.objects.create(product_id=product_id, user_id=user_id)
-        logger.error("Запускаем user_viewed_product_task 2")
     except Exception as e:
         logger.error(
             f"Ошибка user_viewed_product_task при записи заказа пользователя {e}"
@@ -136,10 +139,8 @@ def user_searched_product_task(user_id, query):
     """
     Записывает факт поиска пользователем.
     """
-    logger.error("Запускаем user_searched_product_task 1")
     try:
         UserSearch.objects.create(user_id=user_id, query=query)
-        logger.error("Запускаем user_searched_product_task 2")
     except Exception as e:
         logger.error(
             f"Ошибка user_searched_product_task при записи заказа пользователя {e}"
