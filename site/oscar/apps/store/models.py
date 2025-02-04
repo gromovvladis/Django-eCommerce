@@ -4,7 +4,7 @@ from django.db import models, router
 from django.db.models import F, signals
 from django.db.models.functions import Coalesce, Least
 from django.utils.functional import cached_property
-from django.utils.timezone import now
+from django.utils import timezone
 
 from oscar.apps.store.exceptions import InvalidStockAdjustment
 from oscar.core.compat import AUTH_USER_MODEL
@@ -41,22 +41,30 @@ class Store(models.Model):
     #: A store can have users assigned to it. This is used
     #: for access modelling in the permission-based dashboard
     users = models.ManyToManyField(
-        AUTH_USER_MODEL, related_name="stores", blank=True, verbose_name="Персонал", db_index=True
+        AUTH_USER_MODEL,
+        related_name="stores",
+        blank=True,
+        verbose_name="Персонал",
+        db_index=True,
     )
     start_worktime = models.TimeField(
-        "Время начала смены", default=datetime.time(10, 0)  
+        "Время начала смены", default=datetime.time(10, 0)
     )
     end_worktime = models.TimeField(
         "Время окончания смены", default=datetime.time(22, 0)
     )
-    terminals = models.ManyToManyField("store.Terminal", related_name="stores", verbose_name="Терминал", blank=True)
+    terminals = models.ManyToManyField(
+        "store.Terminal", related_name="stores", verbose_name="Терминал", blank=True
+    )
     is_active = models.BooleanField(
         "Активен",
         default=True,
         db_index=True,
         help_text="Магазин доступен для клиентов?",
     )
-    date_created = models.DateTimeField("Дата создания", auto_now_add=True, db_index=True)
+    date_created = models.DateTimeField(
+        "Дата создания", auto_now_add=True, db_index=True
+    )
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
     @property
@@ -89,7 +97,7 @@ class Store(models.Model):
                 "supports one StoreAddress.  You need to override the "
                 "primary_address to look up the right address"
             )
-        
+
     @cached_property
     def address(self):
         """
@@ -147,20 +155,26 @@ class Terminal(models.Model):
         max_length=128,
         blank=True,
     )
-    model = models.CharField(
-        "Модель терминала", max_length=128, blank=True, null=True
-    )
+    model = models.CharField("Модель терминала", max_length=128, blank=True, null=True)
     imei = models.CharField(
         "Код imei", max_length=128, unique=True, blank=True, null=True
     )
     serial_number = models.CharField(
-        "Серийный номер", max_length=128, unique=True,
+        "Серийный номер",
+        max_length=128,
+        unique=True,
     )
 
-    coords_long = models.CharField("Координаты долгота", max_length=255, blank=True, null=True)
-    coords_lat = models.CharField("Координаты широта", max_length=255, blank=True, null=True)
+    coords_long = models.CharField(
+        "Координаты долгота", max_length=255, blank=True, null=True
+    )
+    coords_lat = models.CharField(
+        "Координаты широта", max_length=255, blank=True, null=True
+    )
 
-    date_created = models.DateTimeField("Дата создания", auto_now_add=True, db_index=True)
+    date_created = models.DateTimeField(
+        "Дата создания", auto_now_add=True, db_index=True
+    )
     date_updated = models.DateTimeField("Дата изменения", auto_now=True, db_index=True)
 
     @property
@@ -179,8 +193,12 @@ class Terminal(models.Model):
 
 class BarCode(models.Model):
 
-    code = models.CharField("Штрих-код", max_length=128, unique=True,)
-    
+    code = models.CharField(
+        "Штрих-код",
+        max_length=128,
+        unique=True,
+    )
+
     class Meta:
         app_label = "store"
         ordering = ("code",)
@@ -202,7 +220,7 @@ class StockRecord(models.Model):
     product = models.ForeignKey(
         "catalogue.Product",
         on_delete=models.CASCADE,
-        verbose_name="товар",
+        verbose_name="Товар",
         related_name="stockrecords",
     )
     store = models.ForeignKey(
@@ -217,22 +235,22 @@ class StockRecord(models.Model):
     #: but not always.  It should be unique per store.
     #: See also http://en.wikipedia.org/wiki/Stock-keeping_unit
     evotor_code = models.CharField(
-        "Эвотор Code", 
+        "Эвотор Code",
         max_length=25,
-        blank=True,  
-        help_text="Эвотор код, для связи товара и товарной записи"
+        blank=True,
+        help_text="Эвотор код, для связи товара и товарной записи",
     )
-    
+
     # Price info:
     price_currency = models.CharField(
-        "Валюта", max_length=12, default=get_default_currency, help_text="Валюта. Рубли = RUB",
+        "Валюта",
+        max_length=12,
+        default=get_default_currency,
+        help_text="Валюта. Рубли = RUB",
     )
 
     bar_codes = models.ManyToManyField(
-        "store.BarCode", 
-        related_name="bars", 
-        verbose_name="Штрих-коды", 
-        blank=True
+        "store.BarCode", related_name="bars", verbose_name="Штрих-коды", blank=True
     )
 
     # This is the base price for calculations - whether this is inclusive or exclusive of
@@ -242,7 +260,7 @@ class StockRecord(models.Model):
     price = models.DecimalField(
         "Цена",
         decimal_places=2,
-        max_digits=12, 
+        max_digits=12,
         blank=True,
         null=True,
         help_text="Цена продажи",
@@ -250,7 +268,7 @@ class StockRecord(models.Model):
     old_price = models.DecimalField(
         "Цена до скидки",
         decimal_places=2,
-        max_digits=12, 
+        max_digits=12,
         blank=True,
         null=True,
         help_text="Цена до скидки. Оставить пустым, если скидки нет",
@@ -258,19 +276,32 @@ class StockRecord(models.Model):
     cost_price = models.DecimalField(
         "Цена закупки",
         decimal_places=2,
-        max_digits=12, 
+        max_digits=12,
         blank=True,
         null=True,
         help_text="Цена закупки товара",
     )
-    NO_VAT, VAT_10, VAT_18, VAT_0, VAT_18_118, VAT_10_110 = "NO_VAT", "VAT_10", "VAT_18", "VAT_0", "VAT_18_118", "VAT_10_110"
+    NO_VAT, VAT_10, VAT_18, VAT_0, VAT_18_118, VAT_10_110 = (
+        "NO_VAT",
+        "VAT_10",
+        "VAT_18",
+        "VAT_0",
+        "VAT_18_118",
+        "VAT_10_110",
+    )
     VAT_CHOICES = (
         (NO_VAT, "Без НДС."),
         (VAT_0, "Основная ставка 0%"),
         (VAT_10, "Основная ставка 10%."),
         (VAT_10_110, "Расчётная ставка 10%."),
-        (VAT_18, "Основная ставка 18%. С первого января 2019 года может указывать как на 18%, так и на 20% ставку."),
-        (VAT_18_118, "Расчётная ставка 18%. С первого января 2019 года может указывать как на 18%, так и на 20% ставку."),
+        (
+            VAT_18,
+            "Основная ставка 18%. С первого января 2019 года может указывать как на 18%, так и на 20% ставку.",
+        ),
+        (
+            VAT_18_118,
+            "Расчётная ставка 18%. С первого января 2019 года может указывать как на 18%, так и на 20% ставку.",
+        ),
     )
     tax = models.CharField(
         "Налог в процентах", default=NO_VAT, choices=VAT_CHOICES, max_length=128
@@ -278,19 +309,30 @@ class StockRecord(models.Model):
 
     #: Number of items in stock
     num_in_stock = models.PositiveIntegerField(
-        "Количество в наличии", blank=True, null=True, help_text="В наличии",
+        "Количество в наличии",
+        blank=True,
+        null=True,
+        help_text="В наличии",
     )
 
     #: The amount of stock allocated to orders but not fed back to the master
     #: stock system.  A typical stock update process will set the
     #: :py:attr:`.num_in_stock` variable to a new value and reset
     #: :py:attr:`.num_allocated` to zero.
-    num_allocated = models.IntegerField("Количество заказано", blank=True, null=True, help_text="Заказано",)
+    num_allocated = models.IntegerField(
+        "Количество заказано",
+        blank=True,
+        null=True,
+        help_text="Заказано",
+    )
 
     #: Threshold for low-stock alerts.  When stock goes beneath this threshold,
     #: an alert is triggered so warehouse managers can order more.
     low_stock_threshold = models.PositiveIntegerField(
-        "Граница малых запасов", blank=True, null=True, help_text="Граница малых запасов",
+        "Граница малых запасов",
+        blank=True,
+        null=True,
+        help_text="Граница малых запасов",
     )
 
     is_public = models.BooleanField(
@@ -467,6 +509,76 @@ class StockRecord(models.Model):
         return self.net_stock_level < self.low_stock_threshold
 
 
+class StockRecordOperation(models.Model):
+    """
+    A stock record.
+
+    This records information about a product from a fulfilment store, such as
+    their SKU, the number they have in stock and price information.
+
+    Stockrecords are used by 'strategies' to determine availability and pricing
+    information for the customer.
+    """
+    stockrecord = models.ForeignKey(
+        "store.StockRecord",
+        on_delete=models.CASCADE,
+        verbose_name="Товарная запись",
+        related_name="operations",
+    )
+    ACCEPT, WRITE_OFF, CORRECTION, INVENTORY = (
+        "Приемка",
+        "Списание",
+        "Коррекция",
+        "Инвентаризация",
+    )
+    VAT_CHOICES = (
+        (ACCEPT, "Приемка"),
+        (WRITE_OFF, "Списание"),
+        (CORRECTION, "Коррекция"),
+        (INVENTORY, "Инвентаризация"),
+    )
+    type = models.CharField(
+        "Налог в процентах", default=ACCEPT, choices=VAT_CHOICES, max_length=128
+    )
+    user = models.ForeignKey(
+        AUTH_USER_MODEL,
+        related_name="stockrecord_operations",
+        verbose_name="Сотрудник",
+        db_index=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    num = models.PositiveIntegerField(
+        "Количество",
+        blank=True,
+        null=True,
+        help_text="Количество товара",
+    )
+
+    # Date information
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True)
+
+    # Notes can only be edited for 5 minutes after being created
+    editable_lifetime = 300
+
+    def is_editable(self):
+        delta = timezone.now() - self.date_created
+        return delta.seconds < self.editable_lifetime
+
+    def __str__(self):
+        return "Товарная запись: %s, Операция: %s, Количество: %s" % (
+            self.stockrecord,
+            self.type,
+            self.num,
+        )
+
+    class Meta:
+        app_label = "store"
+        verbose_name = "Изменение товарной записи"
+        verbose_name_plural = "Изменение товарных записей"
+
+
 class StockAlert(models.Model):
     """
     A stock alert. E.g. used to notify users when a product is 'back in stock'.
@@ -495,7 +607,7 @@ class StockAlert(models.Model):
 
     def close(self):
         self.status = self.CLOSED
-        self.date_closed = now()
+        self.date_closed = timezone.now()
         self.save()
 
     close.alters_data = True

@@ -248,10 +248,8 @@
                             {% if image_formset %}
                                 <div class="tab-pane" id="product_images">
                                     {% block product_images_content %}
-                                        
                                         {{ image_formset.management_form }}
                                         {{ image_formset.non_form_errors }}
-                                                    
                                         <div class="mobile-table">
                                         <table class="table table-striped table-bordered">
                                             <caption>Загрузить, изменить или удалить изображения</caption>
@@ -343,16 +341,23 @@
                                                         </td>
                                                         {% if product_class.track_stock %}
                                                             <td data-label="Запасы">
-                                                                {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.num_in_stock nolabel=True %}
+                                                                <div class="form-group fill-width">
+                                                                    <input type="number" readonly value="{{ stockrecord_form.instance.num_in_stock|default:"0" }}" class="form-control">
+                                                                    <small class="form-text text-muted">
+                                                                        В наличии
+                                                                    </small>
+                                                                </div>
+                                                                <br>
+                                                                <div class="form-group fill-width">
+                                                                    <input type="number" readonly value="{{ stockrecord_form.instance.num_allocated|default:"0" }}" class="form-control">
+                                                                    <small class="form-text text-muted">
+                                                                        Заказано
+                                                                    </small>
+                                                                </div>
                                                                 <br>
                                                                 {% if full_access %}
                                                                     {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_form.low_stock_threshold nolabel=True %}
-                                                                    <br>
                                                                 {% endif %}
-                                                                <input type="number" readonly value="{{ stockrecord_form.instance.num_allocated|default:"0" }}" class="form-control">
-                                                                <small class="form-text text-muted">
-                                                                    Заказано
-                                                                </small>
                                                             </td>
                                                         {% endif %}
                                                         <td data-label="Цена">
@@ -395,6 +400,82 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    {% if product_class.track_stock %}
+                                        <div class="mobile-table mt-2">
+                                            <table class="table table-striped table-bordered">
+                                                <caption>Изменить количество</caption>
+                                                <thead>
+                                                    <tr>
+                                                        <th class="name">Магазин</th>
+                                                        <th class="title">Операция</th>
+                                                        <th>Количество</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {{ stockrecord_operation_form.non_form_errors }}
+                                                    {% if stockrecord_operation_form.non_field_errors %}
+                                                        <tr>
+                                                            <td colspan="3">
+                                                                {% for error in stockrecord_form.non_field_errors  %}
+                                                                    <span class="error-block errorlist"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                                                                {% endfor %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    <tr>
+                                                        <td class="name">
+                                                            {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_operation_form.stockrecord nolabel=True %}                                           
+                                                        </td>
+                                                        <td aria-label="Операция" class="title">
+                                                            {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_operation_form.type nolabel=True %}                                           
+                                                        </td>
+                                                        <td aria-label="Количество" class="title">
+                                                            {% include "oscar/dashboard/partials/form_field.html" with field=stockrecord_operation_form.num nolabel=True %}                                           
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="mobile-table mt-2">
+                                            <table class="table table-striped table-bordered">
+                                                <caption>История изменений</caption>
+                                                <thead>
+                                                    <tr>
+                                                        <th class="name">Магазин</th>
+                                                        <th class="title">Операция</th>
+                                                        <th>Пользователь</th>
+                                                        <th>Время</th>
+                                                        <th>Количество</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% if stockrecord_operations %}
+                                                        {% for stockrecord_operation in stockrecord_operations %}
+                                                            <tr>
+                                                                <td class="name">{{ stockrecord_operation.stockrecord.store }}</td>
+                                                                <td aria-label="Операция" class="title">{{ stockrecord_operation.type }}</td>
+                                                                <td aria-label="Пользователь">{{ stockrecord_operation.user }}</td>
+                                                                <td aria-label="Время">{{ stockrecord_operation.date_created }}</td>
+                                                                <td aria-label="Количество">{{ stockrecord_operation.num }}</td>
+                                                                <td class="toggle-row">
+                                                                    <button class="btn btn-secondary" type="button">
+                                                                        <i class="fa-solid fa-chevron-up"></i>
+                                                                        <i class="fa-solid fa-chevron-down"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                    <tr>
+                                                        <td colspan="6">
+                                                            Нет истории изменений.
+                                                        </td>
+                                                    </tr>
+                                                    {% endif %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% endif %}
                                 {% endblock stockrecords_content %}
                             </div>
                         {% endblock stockrecords %}

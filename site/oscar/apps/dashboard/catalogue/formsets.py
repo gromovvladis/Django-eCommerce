@@ -1,10 +1,11 @@
 import logging
 
 from oscar.apps.crm.client import EvatorCloud
+
 logger = logging.getLogger("oscar.catalogue")
 
 from django import forms
-from django.forms.models import inlineformset_factory
+from django.forms.models import inlineformset_factory, modelformset_factory
 
 from oscar.core.loading import get_classes, get_model
 
@@ -12,6 +13,7 @@ Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 StockRecord = get_model("store", "StockRecord")
+StockRecordOperation = get_model("store", "StockRecordOperation")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductImage = get_model("catalogue", "ProductImage")
 ProductRecommendation = get_model("catalogue", "ProductRecommendation")
@@ -23,6 +25,7 @@ AttributeOption = get_model("catalogue", "AttributeOption")
 (
     StockRecordForm,
     StockRecordStockForm,
+    StockRecordOperationForm,
     ProductCategoryForm,
     ProductImageForm,
     ProductRecommendationForm,
@@ -36,6 +39,7 @@ AttributeOption = get_model("catalogue", "AttributeOption")
     (
         "StockRecordForm",
         "StockRecordStockForm",
+        "StockRecordOperationForm",
         "ProductCategoryForm",
         "ProductImageForm",
         "ProductRecommendationForm",
@@ -77,7 +81,10 @@ class StockRecordFormSet(BaseStockRecordFormSet):
         try:
             return EvatorCloud().update_evotor_stockrecord(product)
         except Exception as e:
-            error = "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s", e
+            error = (
+                "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
+                e,
+            )
             logger.error(error)
             return error
 
@@ -85,7 +92,10 @@ class StockRecordFormSet(BaseStockRecordFormSet):
         try:
             return EvatorCloud().delete_evotor_product_by_store(product, store_id)
         except Exception as e:
-            error = "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s", e
+            error = (
+                "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
+                e,
+            )
             logger.error(error)
             return error
 
@@ -127,9 +137,7 @@ class ProductCategoryFormSet(BaseProductCategoryFormSet):
 
     def clean(self):
         if not self.instance.is_child and self.get_num_categories() == 0:
-            raise forms.ValidationError(
-                "товары должны иметь хотя бы одну категорию."
-            )
+            raise forms.ValidationError("товары должны иметь хотя бы одну категорию.")
         if self.instance.is_child and self.get_num_categories() > 0:
             raise forms.ValidationError("Дочерний товар не должен иметь категорий")
 
@@ -180,15 +188,20 @@ BaseProductAdditionalFormSet = inlineformset_factory(
     fk_name="primary_product",
 )
 
+
 class ProductAdditionalFormSet(BaseProductAdditionalFormSet):
     # pylint: disable=unused-argument
     def __init__(self, product_class, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         try:
-            product_id = kwargs.get("instance").id 
+            product_id = kwargs.get("instance").id
             for form in self.forms:
-                form.fields["additional_product"].widget.attrs["data-product-id"] = product_id 
-                form.fields["additional_product"].widget.attrs["data-class-id"] = product_class.id 
+                form.fields["additional_product"].widget.attrs[
+                    "data-product-id"
+                ] = product_id
+                form.fields["additional_product"].widget.attrs[
+                    "data-class-id"
+                ] = product_class.id
         except AttributeError:
             pass
 
@@ -209,9 +222,9 @@ class ProductClassAdditionalFormSet(BaseProductClassAdditionalFormSet):
 
 
 BaseProductAttributeFormSet = inlineformset_factory(
-    Product, 
-    ProductAttribute, 
-    form=ProductAttributesForm, 
+    Product,
+    ProductAttribute,
+    form=ProductAttributesForm,
     extra=3,
     fk_name="product",
     # can_delete=False,
@@ -222,18 +235,20 @@ class ProductAttributeFormSet(BaseProductAttributeFormSet):
     def __init__(self, product_class, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         try:
-            product_id = kwargs.get("instance").id 
+            product_id = kwargs.get("instance").id
             for form in self.forms:
-                form.fields["attribute"].widget.attrs["data-product-id"] = product_id 
-                form.fields["attribute"].widget.attrs["data-class-id"] = product_class.id 
+                form.fields["attribute"].widget.attrs["data-product-id"] = product_id
+                form.fields["attribute"].widget.attrs[
+                    "data-class-id"
+                ] = product_class.id
         except AttributeError:
             pass
 
 
 BaseProductClassAttributeFormSet = inlineformset_factory(
-    ProductClass, 
-    ProductAttribute, 
-    form=ProductClassAttributesForm, 
+    ProductClass,
+    ProductAttribute,
+    form=ProductClassAttributesForm,
     extra=3,
     fk_name="product_class",
 )

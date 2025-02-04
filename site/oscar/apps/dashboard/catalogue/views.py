@@ -23,6 +23,7 @@ from oscar.views.generic import ObjectLookupView
     ProductClassForm,
     CategoryForm,
     StockAlertSearchForm,
+    StockRecordOperationForm,
     AttributeOptionGroupForm,
     OptionForm,
     AdditionalForm,
@@ -36,6 +37,7 @@ from oscar.views.generic import ObjectLookupView
         "ProductClassForm",
         "CategoryForm",
         "StockAlertSearchForm",
+        "StockRecordOperationForm",
         "AttributeOptionGroupForm",
         "OptionForm",
         "AdditionalForm",
@@ -301,6 +303,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
     context_object_name = "product"
 
     form_class = ProductForm
+    stockrecord_operation_form_class = StockRecordOperationForm
 
     category_formset = ProductCategoryFormSet
     image_formset = ProductImageFormSet
@@ -312,6 +315,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
 
     creating = False
     parent = None
+    _object = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -320,8 +324,14 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
 
     def dispatch(self, request, *args, **kwargs):
         self.get_formsets(request)
+        self.get_stockrecord_operation_form(request)
         resp = super().dispatch(request, *args, **kwargs)
         return self.check_objects_or_redirect() or resp
+
+    def get_stockrecord_operation_form(self, request):
+        self.stockrecord_operation_form = self.stockrecord_operation_form_class(
+            self.get_object(), request.user
+        )
 
     def get_formsets(self, request):
         full_access = ["user.full_access", "catalogue.full_access"]
@@ -342,6 +352,14 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                 "stockrecord_formset": self.stockrecordstock_formset,
             }
         return self.formsets
+
+    # def post(self, request, *args, **kwargs):
+    #     self.object = self.get_object()
+    #     form = self.get_form()
+    #     stockrecord_operation_form = self.stockrecord_operation_form_class(
+    #         self.object, request.user, data=request.POST
+    #     )
+    #     return self.process_all_forms(form, stockrecord_operation_form)
 
     def check_objects_or_redirect(self):
         """
@@ -371,29 +389,31 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         This method is also responsible for setting self.product_class and
         self.parent.
         """
-        self.creating = "pk" not in self.kwargs
-        if self.creating:
-            # Specifying a parent product is only done when creating a child
-            # product.
-            parent_pk = self.kwargs.get("parent_pk")
-            if parent_pk is None:
-                self.parent = None
-                # A product class needs to be specified when creating a
-                # standalone product.
-                product_class_slug = self.kwargs.get("product_class_slug")
-                self.product_class = get_object_or_404(
-                    ProductClass, slug=product_class_slug
-                )
-            else:
-                self.parent = get_object_or_404(Product, pk=parent_pk)
-                self.product_class = self.parent.product_class
+        if self._object is None:
+            self.creating = "pk" not in self.kwargs
+            if self.creating:
+                # Specifying a parent product is only done when creating a child
+                # product.
+                parent_pk = self.kwargs.get("parent_pk")
+                if parent_pk is None:
+                    self.parent = None
+                    # A product class needs to be specified when creating a
+                    # standalone product.
+                    product_class_slug = self.kwargs.get("product_class_slug")
+                    self.product_class = get_object_or_404(
+                        ProductClass, slug=product_class_slug
+                    )
+                else:
+                    self.parent = get_object_or_404(Product, pk=parent_pk)
+                    self.product_class = self.parent.product_class
 
-            return None  # success
-        else:
-            product = super().get_object(queryset)
-            self.product_class = product.get_product_class()
-            self.parent = product.parent
-            return product
+                return None  # success
+            else:
+                self._object = super().get_object(queryset)
+                self.product_class = self._object.get_product_class()
+                self.parent = self._object.parent
+
+        return self._object
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -402,6 +422,8 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         ctx["parent"] = self.parent
         ctx["title"] = self.get_page_title()
         ctx["full_access"] = self.full_access
+        ctx["stockrecord_operation_form"] = self.stockrecord_operation_form
+        # напиши здесь вывод списка История изменений
 
         for ctx_name, formset_class in self.formsets.items():
             if ctx_name not in ctx:
@@ -442,9 +464,12 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         """
         # Need to create the product here because the inline forms need it
         # can't use commit=False because ProductForm does not support it
-
         full_access = ["user.full_access", "catalogue.full_access"]
-
+        stock_access = [
+            "user.full_access",
+            "catalogue.full_access",
+            "catalogue.update_stockrecord",
+        ]
         is_valid, reason = self.is_valid_form_attributes(form)
 
         if not is_valid:
@@ -452,11 +477,14 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                 self.object.delete()
                 self.object = None
 
-            messages.error(self.request, reason)
-
             self.object = self.get_object()
             self.get_formsets(self.request)
+            self.get_stockrecord_operation_form(self.request)
+
             ctx = self.get_context_data(form=form)
+
+            messages.error(self.request, reason)
+
             return self.render_to_response(ctx)
 
         if self.creating:
@@ -476,6 +504,11 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         ):
             self.object = form.save()
 
+        if self.stockrecord_operation_form.is_valid() and any(
+            self.request.user.has_perm(perm) for perm in stock_access
+        ):
+            self.stockrecord_operation_form.save()
+
         formsets = {}
         for ctx_name, formset_class in self.formsets.items():
             formsets[ctx_name] = formset_class(
@@ -486,24 +519,31 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                 instance=self.object,
             )
 
+        stockrecord_operation_form = self.stockrecord_operation_form_class(
+            self.object, self.request.user, data=self.request.POST
+        )
+        
         if any(self.request.user.has_perm(perm) for perm in full_access):
-
-            is_valid = form.is_valid() and all(
-                [formset.is_valid() for formset in formsets.values()]
+            is_valid = (
+                form.is_valid()
+                and stockrecord_operation_form.is_valid()
+                and all([formset.is_valid() for formset in formsets.values()])
             )
-
-            cross_form_validation_result = self.clean(form, formsets)
-            if is_valid and cross_form_validation_result:
-                return self.forms_valid(formsets, form)
+            if is_valid:
+                return self.forms_valid(formsets, form, stockrecord_operation_form)
             else:
-                return self.forms_invalid(formsets, form)
+                return self.forms_invalid(
+                    formsets, form, stockrecord_operation_form
+                )
         else:
             is_valid = all([formset.is_valid() for formset in formsets.values()])
 
             if is_valid:
                 return self.forms_valid(formsets)
             else:
-                return self.forms_invalid(formsets, form)
+                return self.forms_invalid(
+                    formsets, form, stockrecord_operation_form
+                )
 
     def is_valid_form_attributes(self, form):
         form_attrs = {
@@ -516,7 +556,6 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         return self.is_valid_child(form_attrs)
 
     def is_valid_child(self, parent_attrs):
-
         def is_valid_child_attrs(dict1, dict2):
             for key, value in dict1.items():
                 if key not in dict2:
@@ -571,7 +610,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         """
         return True
 
-    def forms_valid(self, formsets, form=None):
+    def forms_valid(self, formsets, form=None, stockrecord_operation_form=None):
         """
         Save all changes and display a success url.
         When creating the first child product, this method also sets the new
@@ -583,6 +622,9 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         if form is not None:
             # a just created product was already saved in process_all_forms()
             self.object = form.save()
+
+        if stockrecord_operation_form is not None:
+            stockrecord_operation_form.save()
 
         # Save formsets
         for formset in formsets.values():
@@ -607,11 +649,6 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
             )
             if evotor_update:
                 stockrecord_formset = formsets["stockrecord_formset"]
-                stock_update = (
-                    not form.changed_data
-                    and bool(stockrecord_formset.changed_objects)
-                    and self.object.evotor_id
-                )
                 stores_to_delete = [
                     form.cleaned_data.get("store")
                     for form in stockrecord_formset.forms
@@ -638,10 +675,10 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                         if error:
                             messages.warning(self.request, error)
 
-                if stock_update:
-                    error = stockrecord_formset.update_evotor_stockrecord(self.object)
-                elif product_updated:
+                if product_updated:
                     error = form.update_or_create_evotor_product(self.object)
+                elif stockrecord_operation_form.is_bound:
+                    stockrecord_formset.update_evotor_stockrecord(self.object)
 
                 if error:
                     messages.warning(self.request, error)
@@ -649,7 +686,6 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         return response
 
     def create_all_child(self):
-
         created = False
         product = self.parent = self.object
         product_attributes = product.attribute_values.filter(is_variant=True)
@@ -714,7 +750,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
             parent.structure = Product.PARENT
             parent.save()
 
-    def forms_invalid(self, formsets, form):
+    def forms_invalid(self, formsets, form, stockrecord_operation_form):
         # delete the temporary product again
         if self.creating and self.object and self.object.pk is not None:
             self.object.delete()
@@ -727,6 +763,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
 
         self.object = self.get_object()
         self.get_formsets(self.request)
+        self.get_stockrecord_operation_form(self.request)
 
         ctx = self.get_context_data(form=form, **formsets)
         return self.render_to_response(ctx)

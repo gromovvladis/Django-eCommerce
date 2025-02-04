@@ -19,7 +19,9 @@ Attribute = get_model("catalogue", "Attribute")
 AttributeSelect = get_class("dashboard.catalogue.widgets", "AttributeSelect")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
+Store = get_model("store", "Store")
 StockRecord = get_model("store", "StockRecord")
+StockRecordOperation = get_model("store", "StockRecordOperation")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductImage = get_model("catalogue", "ProductImage")
 ProductRecommendation = get_model("catalogue", "ProductRecommendation")
@@ -52,7 +54,7 @@ BaseCategoryForm = movenodeform_factory(
     widgets={
         "meta_description": forms.Textarea(attrs={"class": "no-widget-init"}),
         "image": ThumbnailInput(),
-        },
+    },
 )
 
 
@@ -66,7 +68,6 @@ class SEOFormMixin:
             if not field.is_hidden and not self.is_seo_field(field)
         ]
 
-
     def seo_form_fields(self):
         return [field for field in self if self.is_seo_field(field)]
 
@@ -76,10 +77,10 @@ class SEOFormMixin:
 
 class CategoryForm(SEOFormMixin, BaseCategoryForm):
     evotor_update = forms.BooleanField(
-        label="Эвотор", 
-        required=False, 
+        label="Эвотор",
+        required=False,
         initial=True,
-        help_text="Синхронизировать с Эвотор", 
+        help_text="Синхронизировать с Эвотор",
     )
 
     class Meta:
@@ -98,7 +99,7 @@ class CategoryForm(SEOFormMixin, BaseCategoryForm):
         widgets = {
             "image": ThumbnailInput(),
         }
-        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "slug" in self.fields:
@@ -111,7 +112,10 @@ class CategoryForm(SEOFormMixin, BaseCategoryForm):
         try:
             return EvatorCloud().update_or_create_evotor_group(category)
         except Exception as e:
-            error = "Ошибка при отправке созданной / измененной категории в Эвотор. Ошибка %s", e
+            error = (
+                "Ошибка при отправке созданной / измененной категории в Эвотор. Ошибка %s",
+                e,
+            )
             logger.error(error)
             return error
 
@@ -125,9 +129,11 @@ class ProductClassSelectForm(forms.Form):
         label="Создать товар",
         empty_label="Выберите тип товара",
         queryset=ProductClass.objects.all(),
-        widget=forms.Select(attrs={
-            'class': 'select-field',
-        })
+        widget=forms.Select(
+            attrs={
+                "class": "select-field",
+            }
+        ),
     )
 
     def __init__(self, *args, **kwargs):
@@ -156,9 +162,7 @@ class ProductSearchForm(forms.Form):
     is_public = forms.BooleanField(
         label="Доступен",
         required=False,
-        widget=forms.widgets.CheckboxInput(
-            attrs={'checked': True}
-        )
+        widget=forms.widgets.CheckboxInput(attrs={"checked": True}),
     )
 
     def clean(self):
@@ -175,15 +179,12 @@ class StockRecordForm(forms.ModelForm):
         self.user = user
         super().__init__(*args, **kwargs)
 
-        # If not tracking stock, we hide the fields
         if not product_class.track_stock:
-            for field_name in ["num_in_stock", "low_stock_threshold"]:
-                if field_name in self.fields:
-                    del self.fields[field_name]
+            if "low_stock_threshold" in self.fields:
+                del self.fields["low_stock_threshold"]
         else:
-            for field_name in ["price", "num_in_stock"]:
-                if field_name in self.fields:
-                    self.fields[field_name].required = True
+            if "price" in self.fields:
+                self.fields["price"].required = True
 
     class Meta:
         model = StockRecord
@@ -194,7 +195,6 @@ class StockRecordForm(forms.ModelForm):
             "price",
             "price_currency",
             "tax",
-            "num_in_stock",
             "low_stock_threshold",
             "is_public",
         ]
@@ -207,22 +207,45 @@ class StockRecordStockForm(forms.ModelForm):
         self.user = user
         super().__init__(*args, **kwargs)
 
-        # If not tracking stock, we hide the fields
-        if not product_class.track_stock:
-            for field_name in ["num_in_stock"]:
-                if field_name in self.fields:
-                    del self.fields[field_name]
-        else:
-            for field_name in ["num_in_stock"]:
-                if field_name in self.fields:
-                    self.fields[field_name].required = True
-
     class Meta:
         model = StockRecord
         fields = [
-            "num_in_stock",
             "is_public",
         ]
+
+
+class StockRecordOperationForm(forms.ModelForm):
+    def __init__(self, product, user, *args, **kwargs):
+        self.product = product
+        self.user = user
+        super().__init__(*args, **kwargs)
+        self.set_initial_data()
+
+    def set_initial_data(self):
+        stockrecords = StockRecord.objects.filter(product=self.product)
+        stockrecord_choices = [(sr.id, sr.store) for sr in stockrecords]
+        store_field = self.fields.get("stockrecord")
+        if store_field:
+            store_field.initial = stockrecords.first()
+            store_field.choices = stockrecord_choices
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.user = self.user
+        # напиши здесь логику для изменения stockrecord
+        if commit:
+            instance.save()
+        return instance
+
+    class Meta:
+        model = StockRecordOperation
+        fields = [
+            "stockrecord",
+            "type",
+            "num",
+            "user",
+        ]
+        exclude = ["user"]
 
 
 class StockAlertSearchForm(forms.Form):
@@ -272,6 +295,7 @@ def _attr_option_field(attribute):
         queryset=attribute.option_group.options.all(),
     )
 
+
 def _attr_variant_field(attribute, value):
     return forms.ModelChoiceField(
         label=attribute.name,
@@ -285,7 +309,7 @@ def _attr_multi_option_field(attribute):
     return forms.ModelMultipleChoiceField(
         label=attribute.name,
         required=attribute.required,
-        queryset=attribute.option_group.options.all(),   
+        queryset=attribute.option_group.options.all(),
     )
 
 
@@ -311,7 +335,7 @@ def _attr_image_field(attribute):
 
 
 class ProductClassForm(forms.ModelForm):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # pylint: disable=no-member
@@ -342,10 +366,10 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         "image": _attr_image_field,
     }
     evotor_update = forms.BooleanField(
-        label="Эвотор", 
-        required=False, 
+        label="Эвотор",
+        required=False,
         initial=True,
-        help_text="Синхронизировать с Эвотор", 
+        help_text="Синхронизировать с Эвотор",
     )
 
     class Meta:
@@ -373,7 +397,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         }
 
     def __init__(self, product_class, *args, data=None, parent=None, **kwargs):
-        self.request = kwargs.pop('request', None)
+        self.request = kwargs.pop("request", None)
         self.set_initial(product_class, parent, kwargs)
         super().__init__(data, *args, **kwargs)
         if parent:
@@ -388,7 +412,7 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
             self.add_variant_fields()
         else:
             # Only set product class for non-child products
-            self.fields['product_class'].empty_label = None
+            self.fields["product_class"].empty_label = None
             self.instance.product_class = product_class
             self.add_attribute_fields(product_class, self.instance.is_parent)
 
@@ -412,7 +436,9 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         self.set_initial_attribute_values(product_class, kwargs)
         if parent:
             kwargs["initial"]["structure"] = Product.CHILD
-        kwargs["initial"]["evotor_update"] = self.request.COOKIES.get("evotor_update", True) == "True"
+        kwargs["initial"]["evotor_update"] = (
+            self.request.COOKIES.get("evotor_update", True) == "True"
+        )
 
     def set_initial_attribute_values(self, product_class, kwargs):
         """
@@ -422,7 +448,9 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         instance = kwargs.get("instance")
         if instance is None:
             return
-        for attribute in (product_class.class_attributes.all() | instance.attributes.all()):
+        for attribute in (
+            product_class.class_attributes.all() | instance.attributes.all()
+        ):
             try:
                 attr = instance.attribute_values.get(attribute=attribute)
                 value = attr.value
@@ -444,7 +472,9 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         attribute_values = self.instance.parent.get_variant_attributes()
 
         for attribute_value in attribute_values:
-            field = _attr_variant_field(attribute_value.attribute, attribute_value.value)
+            field = _attr_variant_field(
+                attribute_value.attribute, attribute_value.value
+            )
             if field:
                 field.required = True
                 self.fields["attr_%s" % attribute_value.attribute.code] = field
@@ -455,7 +485,9 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         dynamically adds form fields to the product form.
         """
         if self.instance.id:
-            attributes = product_class.class_attributes.all() | self.instance.attributes.all()
+            attributes = (
+                product_class.class_attributes.all() | self.instance.attributes.all()
+            )
         else:
             attributes = product_class.class_attributes.all()
 
@@ -467,11 +499,12 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
                 self.fields["attr_%s" % attribute.code] = field
                 if attribute.type == "multi_option":
-                    self.fields["attr_is_variant_%s" % attribute.code] = forms.BooleanField(
-                        required=False,
-                        label="Используется для вариаций?",
-                        help_text="Данный атрибут можно использовать при создании вариативного товара.",
-
+                    self.fields["attr_is_variant_%s" % attribute.code] = (
+                        forms.BooleanField(
+                            required=False,
+                            label="Используется для вариаций?",
+                            help_text="Данный атрибут можно использовать при создании вариативного товара.",
+                        )
                     )
 
     def get_attribute_field(self, attribute):
@@ -485,10 +518,18 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         Deletes any fields not needed for child products. Override this if
         you want to e.g. keep the description field.
         """
-        for field_name in ["description", "short_description", "product_class", "weight", "is_discountable", "meta_title", "meta_description"]:
+        for field_name in [
+            "description",
+            "short_description",
+            "product_class",
+            "weight",
+            "is_discountable",
+            "meta_title",
+            "meta_description",
+        ]:
             if field_name in self.fields:
-                del self.fields[field_name]            
-   
+                del self.fields[field_name]
+
     def _post_clean(self):
         """
         Set attributes before ModelForm calls the product's clean method
@@ -500,15 +541,17 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
             # An empty text field won't show up in cleaned_data.
             if field_name in self.cleaned_data:
                 value = self.cleaned_data[field_name]
-                if attribute.type == 'multi_option' and not isinstance(value, QuerySet):
-                    value = [value] 
+                if attribute.type == "multi_option" and not isinstance(value, QuerySet):
+                    value = [value]
 
                 setattr(self.instance.attr, attribute.code, value)
-            
+
             if self.instance.id:
                 if is_variant_name in self.cleaned_data:
                     value = self.cleaned_data[is_variant_name]
-                    attribute_obj = self.instance.attribute_values.filter(attribute=attribute).first()
+                    attribute_obj = self.instance.attribute_values.filter(
+                        attribute=attribute
+                    ).first()
                     if attribute_obj:
                         attribute_obj.is_variant = value
                         attribute_obj.save()
@@ -519,7 +562,10 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
         try:
             return EvatorCloud().update_or_create_evotor_product(product)
         except Exception as e:
-            error = "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e
+            error = (
+                "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s",
+                e,
+            )
             logger.error(error)
             return error
 
@@ -566,10 +612,10 @@ class ProductRecommendationForm(forms.ModelForm):
 
 class AdditionalForm(forms.ModelForm):
     evotor_update = forms.BooleanField(
-        label="Эвотор", 
-        required=False, 
+        label="Эвотор",
+        required=False,
         initial=True,
-        help_text="Синхронизировать с Эвотор", 
+        help_text="Синхронизировать с Эвотор",
     )
 
     class Meta:
@@ -595,12 +641,13 @@ class AdditionalForm(forms.ModelForm):
         }
 
     def update_or_create_evotor_additional(self, additional):
-        return EvatorCloud().update_or_create_evotor_additional(additional)
-        
         try:
             return EvatorCloud().update_or_create_evotor_additional(additional)
         except Exception as e:
-            error = "Ошибка при отправке созданного / измененного дополнительного товара в Эвотор. Ошибка %s", e
+            error = (
+                "Ошибка при отправке созданного / измененного дополнительного товара в Эвотор. Ошибка %s",
+                e,
+            )
             logger.error(error)
             return error
 
@@ -635,7 +682,7 @@ class AttributeForm(forms.ModelForm):
         remote_field = self._meta.model._meta.get_field("option_group").remote_field
         self.fields["option_group"].widget = RelatedFieldWidgetWrapper(
             self.fields["option_group"].widget, remote_field
-        ) 
+        )
 
     def clean_code(self):
         code = self.cleaned_data.get("code")
@@ -649,10 +696,7 @@ class AttributeForm(forms.ModelForm):
     def clean(self):
         attr_type = self.cleaned_data.get("type")
         option_group = self.cleaned_data.get("option_group")
-        if (
-            attr_type in [Attribute.OPTION, Attribute.MULTI_OPTION]
-            and not option_group
-        ):
+        if attr_type in [Attribute.OPTION, Attribute.MULTI_OPTION] and not option_group:
             self.add_error("option_group", "Требуется группа опций.")
 
     class Meta:
