@@ -12,5 +12,13 @@ def purchase_info_for_product(request, product):
 
 
 @register.simple_tag
+def purchase_info_for_product_detail(request, product):
+    if product.is_parent:
+        return request.strategy.fetch_for_parent_detail(product)
+
+    return request.strategy.fetch_for_product(product)
+
+
+@register.simple_tag
 def purchase_info_for_line(request, line):
     return request.strategy.fetch_for_line(line)

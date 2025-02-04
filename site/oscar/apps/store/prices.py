@@ -1,7 +1,3 @@
-from oscar.core import prices
-from django.conf import settings
-
-
 class Base(object):
     """
     The interface that any pricing policy must support
@@ -54,7 +50,6 @@ class FixedPrice(Base):
 
     exists = True
 
-    #vlad
     def __init__(self, currency, money, old_price=None, min_price=None, tax_code=None):
         super().__init__()
         self.currency = currency

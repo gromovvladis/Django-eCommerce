@@ -1,24 +1,15 @@
 {% load basket_tags %}
 
-{% if session.availability.is_available_to_buy and session.price.exists %}
-    {% comment %}------------- вариации + доп опции ---------------{% endcomment %}
+{% if session.availability.is_available_to_buy %}
     <form id="add_to_basket_form" action="{% url 'basket:add' slug=product.slug  %}" method="post">
         {% basket_form request product as basket_form %}
-        {% if form.is_bound and not form.is_valid %}
-            <div class="alert alert-danger">
-                <strong>Упс! Что-то пошло не так</strong> - пожалуйста, проверьте ошибки ниже и поторите снова
-            </div>
-        {% endif %}
         <div class="dish-actions fill-width d-flex flex-column">
-            {% comment %}------------- вариации + поля опций---------------{% endcomment %}
             {% if product.is_parent %}
                 {% include "oscar/catalogue/partials/variants.html" with form=basket_form %}
             {% endif %}
-            {% comment %}------------- поля опций ---------------{% endcomment %}
             {% if product.has_options %}
                 {% include "oscar/catalogue/partials/options.html" with form=basket_form %}
             {% endif %}
-            {% comment %}------------- дополнительные ингридиенты ---------------{% endcomment %}
             {% if basket_form.has_additions %}
                 {% include "oscar/catalogue/partials/additinal_products.html" with form=basket_form currency_symbol=currency_symbol %}
             {% endif %}

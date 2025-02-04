@@ -9,6 +9,7 @@ from oscar.core.loading import get_class, get_model
 Product = get_model("catalogue", "product")
 Category = get_model("catalogue", "category")
 
+
 class ProductDetailView(DetailView):
     context_object_name = "product"
     model = Product
@@ -52,7 +53,11 @@ class ProductDetailView(DetailView):
             return self._get_object(self.kwargs.get("product_slug"))
 
     def _get_object(self, product_slug):
-        return self.model.objects.select_related("product_class").get(slug=product_slug)
+        return (
+            self.model.objects.select_related("product_class")
+            .prefetch_related("categories")
+            .get(slug=product_slug)
+        )
 
     def redirect_if_necessary(self, current_path, product):
         if self.enforce_parent and product.is_child:
@@ -62,7 +67,7 @@ class ProductDetailView(DetailView):
             expected_path = product.get_absolute_url()
             if quote(expected_path) != quote(current_path):
                 return HttpResponsePermanentRedirect(expected_path)
-  
+
     def send_signal(self, request, response, product):
         self.view_signal.send(
             sender=self,
@@ -89,10 +94,12 @@ class ProductDetailView(DetailView):
             return [self.template_name]
 
         return [
-            "oscar/%s/detail-for-article-%s.html" % (self.template_folder, self.object.article),
+            "oscar/%s/detail-for-article-%s.html"
+            % (self.template_folder, self.object.article),
             "oscar/%s/detail-for-class-%s.html"
             % (self.template_folder, self.object.get_product_class().slug),
             "oscar/%s/detail.html" % self.template_folder,
         ]
+
 
 ProductCategoryView = get_class("search.views", "ProductCategoryView")

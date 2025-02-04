@@ -39,6 +39,7 @@ if (addBasketForm) {
                     cartNums.forEach(element => {
                         element.innerHTML = data.cart_nums; // Вставляем HTML в каждый элемент
                     });
+                    addBasketErrors.innerHTML = ""
                     cartAdded();
                 } else if (data.errors) {
                     addBasketErrors.innerHTML = `<div class="error-badge mt-1 border-r15">${data.errors}</div>`;

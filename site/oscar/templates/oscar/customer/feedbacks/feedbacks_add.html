@@ -97,12 +97,9 @@
                                                         <span class="prices d-flex flex-column align-start">
                                                             <span class="prices__price no-wrap">
                                                                 {% purchase_info_for_product request product as session %}
-                                                                {% if session.price.exists %}
-                                                                    {{ session.price.money|currency:session.price.currency }}
-                                                                {% endif %}
+                                                                {% include "oscar/catalogue/partials/product_price.html" %}
                                                             </span>
                                                         </span>
-
                                                     </div>
                                                 </div>
                                             </div>

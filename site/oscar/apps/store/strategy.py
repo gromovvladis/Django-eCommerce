@@ -13,7 +13,7 @@ TaxInclusiveFixedPrice = get_class("store.prices", "TaxInclusiveFixedPrice")
 
 StockRecord = get_model("store", "StockRecord")
 PurchaseInfo = namedtuple(
-    "PurchaseInfo", ["price", "min_price", "availability", "stockrecord", "stockrecords"]
+    "PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords"]
 )
 
 
@@ -92,6 +92,16 @@ class Base(object):
             "information."
         )
 
+    def fetch_for_parent_detail(self, product):
+        """
+        Given a parent product, fetch a ``StockInfo`` instance
+        """
+        raise NotImplementedError(
+            "A strategy class must define a fetch_for_parent_detail method "
+            "for returning the availability and pricing "
+            "information."
+        )
+
     def fetch_for_line(self, line, stockrecord=None):
         """
         Given a basket line instance, fetch a ``PurchaseInfo`` instance.
@@ -127,7 +137,6 @@ class Structured(Base):
         price = self.pricing_policy(stockrecord)
         return PurchaseInfo(
             price=price,
-            min_price=price,
             availability=self.availability_policy(product, stockrecord),
             stockrecord=stockrecord,
             stockrecords=stockrecords,
@@ -137,8 +146,17 @@ class Structured(Base):
         # Select children and associated stockrecords
         stockrecords = self.available_stockrecords(product)
         return PurchaseInfo(
-            price=self.parent_pricing_policy(stockrecords),
-            min_price=self.parent_min_pricing_policy(stockrecords),
+            price=self.parent_min_pricing_policy(stockrecords),
+            availability=self.parent_availability_policy(product, stockrecords),
+            stockrecord=None,
+            stockrecords=stockrecords,
+        )
+
+    def fetch_for_parent_detail(self, product):
+        # Select children and associated stockrecords
+        stockrecords = self.available_stockrecords(product)
+        return PurchaseInfo(
+            price=self.parent_pricing_policy(product, stockrecords),
             availability=self.parent_availability_policy(product, stockrecords),
             stockrecord=None,
             stockrecords=stockrecords,
@@ -160,7 +178,7 @@ class Structured(Base):
             "A structured strategy class must define a 'pricing_policy' method"
         )
 
-    def parent_pricing_policy(self, children_stock):
+    def parent_pricing_policy(self, product, children_stock):
         raise NotImplementedError(
             "A structured strategy class must define a "
             "'parent_pricing_policy' method"
@@ -268,11 +286,13 @@ class PricingPolicy(object):
             old_price=stockrecord.old_price,
         )
 
-    def parent_pricing_policy(self, stockrecords):
+    def parent_pricing_policy(self, product, stockrecords):
         if not stockrecords:
             return UnavailablePrice()
 
-        stockrecord = stockrecords.order_by("price").first()
+        first_child = product.children.order_by('-order').first()
+        stockrecord = next((sr for sr in stockrecords if sr.product == first_child), None)
+        
         if stockrecord:
             return FixedPrice(
                 currency=stockrecord.price_currency,
@@ -280,13 +300,18 @@ class PricingPolicy(object):
                 old_price=stockrecord.old_price,
             )
 
-        return UnavailablePrice()
+        stockrecord = stockrecords[0]
+        return FixedPrice(
+            currency=stockrecord.price_currency,
+            money=None,
+            old_price=None,
+        )
 
     def parent_min_pricing_policy(self, stockrecords):
         if not stockrecords:
             return UnavailablePrice()
 
-        stockrecord = stockrecords.first()
+        stockrecord = stockrecords.order_by("price").first()
         if stockrecord:
             return FixedPrice(
                 currency=stockrecord.price_currency,
