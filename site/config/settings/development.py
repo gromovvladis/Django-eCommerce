@@ -40,7 +40,7 @@ DATABASES = {
         "PASSWORD": None,
         "HOST": None,
         "PORT": None,
-        'ATOMIC_REQUESTS': True,
+        "ATOMIC_REQUESTS": True,
     }
 }
 
@@ -48,19 +48,19 @@ DATABASES = {
 # MIDDLEWARE
 # =============
 
-MIDDLEWARE += ['whitenoise.middleware.WhiteNoiseMiddleware']
+MIDDLEWARE += ["whitenoise.middleware.WhiteNoiseMiddleware"]
 
 # =============
 # MEDIA
 # =============
 
-MEDIA_ROOT = location('public/media')
+MEDIA_ROOT = location("public/media")
 
 # =============
 # COMPRESSOR
 # =============
 
-COMPRESS_ROOT = location('public/static/cache')
+COMPRESS_ROOT = location("public/static/cache")
 COMPRESS_ENABLED = False
 COMPRESS_OFFLINE = True
 
@@ -68,15 +68,13 @@ COMPRESS_OFFLINE = True
 # STATIC
 # =============
 
-STATIC_PRIVATE_ROOT = location('static')
-ICON_DIR = location('static/svg')
-STATICFILES_DIRS = (
-    location('static'),
-)
+STATIC_PRIVATE_ROOT = location("static")
+ICON_DIR = location("static/svg")
+STATICFILES_DIRS = (location("static"),)
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
 )
 
 # =============
@@ -91,15 +89,15 @@ CSRF_COOKIE_SECURE = False
 CORS_REPLACE_HTTPS_REFERER = False
 HOST_SCHEME = "http://"
 
-SECRET_KEY='UtjFCuyjDKmWHe15neauXzHi2rZoRTg6RMbT5JyAdPiAcBP6Rra1'
+SECRET_KEY = "UtjFCuyjDKmWHe15neauXzHi2rZoRTg6RMbT5JyAdPiAcBP6Rra1"
 
 # =============
 # CACHES
 # =============
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
     }
 }
 
@@ -131,7 +129,7 @@ SMS_AUTH_SETTINGS = {
 # =============
 
 Configuration.account_id = 1017790
-Configuration.secret_key = 'test_edf_VEetjIP5Yi4JDjvOsgzItD1whJpET4Px3nLIa6U'
+Configuration.secret_key = "test_edf_VEetjIP5Yi4JDjvOsgzItD1whJpET4Px3nLIa6U"
 
 # =============
 # MAP settings
@@ -182,7 +180,7 @@ WEBPUSH_ADMIN_EMAIL = "s.gromovvladis@gmail.com"
 # =============
 
 # Registration
-EMAIL_SUBJECT_PREFIX = 'Mikado'
+EMAIL_SUBJECT_PREFIX = "Mikado"
 OSCAR_FROM_EMAIL = "info@mikado-sushi.ru"
 OSCAR_SEND_ORDER_PLACED_EMAIL = False
 OSCAR_SEND_REGISTRATION_EMAIL = False

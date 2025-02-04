@@ -447,14 +447,13 @@ class CRMStaffSiteTable(DashboardTable):
 # ===========================================
 
 class CRMProductEvotorTable(DashboardTable):
-
     check = TemplateColumn(
         template_name="oscar/dashboard/crm/products/evotor_table/product_row_checkbox.html",
         verbose_name="",
         orderable=False,
     )
     name = TemplateColumn(
-        verbose_name="Имя",
+        verbose_name="Товар",
         template_name="oscar/dashboard/crm/products/evotor_table/product_row_name.html",
         order_by="name",
         attrs = {'th': {'class': 'name'},}

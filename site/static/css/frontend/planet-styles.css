@@ -13243,7 +13243,6 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .tabs-button__button {
-    
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -13252,7 +13251,8 @@ ymaps[class*="search__suggest-item_selected"] {
     padding: 0;
     color: #111;
     position: relative;
-    z-index: 1
+    text-align: center;
+    z-index: 1;
 }
 
 /* .tabs-button__button.active{

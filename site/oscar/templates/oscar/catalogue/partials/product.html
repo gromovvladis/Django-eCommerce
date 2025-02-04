@@ -42,7 +42,7 @@
                         </div>
                     </div>
                 {% endcache %}
-                {% cache 1200 product_compact_price session.uid %}
+                {% cache 1200 product_compact_price product.date_updated session.stockrecords.latest.date_updated %}
                     <div class="align-center fill-width px-sm-2 pb-sm-2 card__actions d-flex align-end">
                         {% if session.availability.is_available_to_buy and session.price.exists %}
                             {% include "oscar/catalogue/partials/product_price.html" %}

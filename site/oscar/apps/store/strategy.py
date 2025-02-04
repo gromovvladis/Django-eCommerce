@@ -12,10 +12,8 @@ FixedPrice = get_class("store.prices", "FixedPrice")
 TaxInclusiveFixedPrice = get_class("store.prices", "TaxInclusiveFixedPrice")
 
 StockRecord = get_model("store", "StockRecord")
-
-# A container for policies
 PurchaseInfo = namedtuple(
-    "PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords", "uid"]
+    "PurchaseInfo", ["price", "availability", "stockrecord", "stockrecords"]
 )
 
 
@@ -63,9 +61,7 @@ class Base(object):
 
     def __init__(self, request=None, user=None):
         self.request = request
-        self.user = user
-        if request and request.user.is_authenticated:
-            self.user = request.user
+        self.user = request.user if request and request.user.is_authenticated else user
 
     def fetch_for_product(self, product, stockrecord=None):
         """
@@ -124,47 +120,34 @@ class Structured(Base):
     def fetch_for_product(self, product, stockrecord=None):
         """
         Return the appropriate ``PurchaseInfo`` instance.
-
         This method is not intended to be overridden.
         """
-        if stockrecord is None:
-            stockrecord = self.select_stockrecord(product)
+        stockrecords = self.available_stockrecords(product)
+        stockrecord = stockrecord or self.select_stockrecord(stockrecords)
         return PurchaseInfo(
             price=self.pricing_policy(product, stockrecord),
             availability=self.availability_policy(product, stockrecord),
             stockrecord=stockrecord,
-            stockrecords=self.available_stockrecords(product),
-            uid=self.get_uid(product),
+            stockrecords=stockrecords,
         )
 
     def fetch_for_parent(self, product):
         # Select children and associated stockrecords
-        children_stock = self.select_children_stockrecords(product)
+        stockrecords = self.available_stockrecords(product)
         return PurchaseInfo(
-            price=self.parent_pricing_policy(product, children_stock),
-            availability=self.parent_availability_policy(product, children_stock),
+            price=self.parent_pricing_policy(product, stockrecords),
+            availability=self.parent_availability_policy(product, stockrecords),
             stockrecord=None,
-            stockrecords=None,
-            uid=self.get_uid(product),
+            stockrecords=stockrecords,
         )
 
-    def select_stockrecord(self, product):
+    def select_stockrecord(self, stockrecords):
         """
         Select the appropriate stockrecord
         """
         raise NotImplementedError(
             "A structured strategy class must define a 'select_stockrecord' method"
         )
-
-    def select_children_stockrecords(self, product):
-        """
-        Select appropriate stock record for all children of a product
-        """
-        records = []
-        for child in product.children.order_by("-order").public():
-            # Use tuples of (child product, stockrecord)
-            records.append((child, self.select_stockrecord(child)))
-        return records
 
     def pricing_policy(self, product, stockrecord):
         """
@@ -194,11 +177,6 @@ class Structured(Base):
             "'parent_availability_policy' method"
         )
 
-    def get_uid(self, product):
-        raise NotImplementedError(
-            "A structured strategy class must define a " "'get_uid' method"
-        )
-
     def available_stockrecords(self, product):
         raise NotImplementedError(
             "A structured strategy class must define a "
@@ -211,55 +189,32 @@ class Structured(Base):
         )
 
 
-# Mixins - these can be used to construct the appropriate strategy class
-
-
 class UseStoreStockRecord:
     """
     Stockrecord selection mixin for use with the ``Structured`` base strategy.
     This mixin picks the first (normally only) stockrecord to fulfil a product.
     """
 
-    _cached_store_id = None
-    _cached_available_stocks = None
-
-    def select_stockrecord(self, product, stockrecords=None):
-        try:
-            store_id = self.get_store_id()
-            return product.stockrecords.filter(store_id=store_id, is_public=True)[0]
-        except IndexError:
-            pass
+    def select_stockrecord(self, stockrecords):
+        return stockrecords.filter(store_id=self.get_store_id()).first()
 
     def get_store_id(self):
-        return self.request.store.id
-
-    def get_uid(self, product):
-        store_id = self.get_store_id()
-        stockrecords_num_in_stock = (
-            self.available_stockrecords(product)
-            .annotate(in_stock=Q(num_in_stock__gt=F("num_allocated")))
-            .values_list("in_stock", flat=True)
-        )
-        return f"{product.id}-{store_id}-{ '-'.join(str(num) for num in stockrecords_num_in_stock)}"
+        if not hasattr(self, "_cached_store_id"):
+            self._cached_store_id = self.request.store.id
+        return self._cached_store_id
 
     def available_stockrecords(self, product):
-        is_public_filter = Q(is_public=True)
-        num_in_stock_filter = Q(num_in_stock__gt=F("num_allocated"))
-        product_filter = (
-            Q(product_id=product.id)
-            if not product.is_parent
-            else Q(product__in=product.children.all())
-        )
-
+        filter_field = "product__parent_id" if product.is_parent else "product_id"
+        base_query = Q(**{filter_field: product.id, "is_public": True})
         if product.get_product_class().track_stock:
-            return StockRecord.objects.filter(
-                is_public_filter & num_in_stock_filter & product_filter
-            )
-        else:
-            return StockRecord.objects.filter(is_public_filter & product_filter)
+            base_query &= Q(num_in_stock__gt=F("num_allocated"))
+
+        return StockRecord.objects.filter(base_query)
 
     def is_available(self, product):
-        return self.available_stockrecords(product).exists()
+        if not hasattr(self, "_cached_availability"):
+            self._cached_availability = self.available_stockrecords(product).exists()
+        return self._cached_availability
 
 
 class StockRequired(object):
@@ -277,10 +232,10 @@ class StockRequired(object):
         else:
             return StockRequiredAvailability(stockrecord.net_stock_level)
 
-    def parent_availability_policy(self, product, children_stock):
+    def parent_availability_policy(self, product, stockrecords):
         # A parent product is available if one of its children is
-        for child, stockrecord in children_stock:
-            policy = self.availability_policy(child, stockrecord)
+        for stockrecord in stockrecords:
+            policy = self.availability_policy(stockrecord.product, stockrecord)
             if policy.is_available_to_buy:
                 return Available()
         return Unavailable()
@@ -304,23 +259,16 @@ class PricingPolicy(object):
             old_price=stockrecord.old_price,
         )
 
-    def parent_pricing_policy(self, product, children_stock):
-        stockrecords = [x[1] for x in children_stock]
+    def parent_pricing_policy(self, product, stockrecords):
         if not stockrecords:
             return UnavailablePrice()
 
-        sorted_stockrecords = sorted(
-            (stc for stc in stockrecords if stc is not None), key=lambda stc: stc.price
-        )
-
-        if sorted_stockrecords:
+        stockrecord = stockrecords.order_by("price").first()
+        if stockrecord:
             return FixedPrice(
-                currency=sorted_stockrecords[0].price_currency,
-                money=stockrecords[0].price if stockrecords[0] is not None else None,
-                old_price=(
-                    stockrecords[0].old_price if stockrecords[0] is not None else None
-                ),
-                min_price=sorted_stockrecords[0].price,
+                currency=stockrecord.price_currency,
+                money=stockrecord.price,
+                old_price=stockrecord.old_price,
             )
 
         return UnavailablePrice()

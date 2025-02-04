@@ -166,6 +166,8 @@ class UserDetailView(MultiTableMixin, DetailView):
             "order_amount": order_amount,
         }
 
+        context["active_tab"] = 'user_orders'
+
         return context
     
     def get_tables(self):

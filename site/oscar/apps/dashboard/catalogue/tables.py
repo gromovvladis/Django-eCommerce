@@ -18,7 +18,6 @@ StockAlert = get_model("store", "StockAlert")
 
 
 class ProductClassTable(DashboardTable):
-
     name = LinkColumn(
         "dashboard:catalogue-class-update", 
         args=[A("pk")], 
@@ -419,7 +418,7 @@ class AdditionalTable(DashboardTable):
 
 class StockAlertTable(DashboardTable):
     name = TemplateColumn( 
-        verbose_name="товар",
+        verbose_name="Товар",
         template_name="oscar/dashboard/catalogue/stock_alert_row_name.html",
         orderable=True,
         order_by="name",
