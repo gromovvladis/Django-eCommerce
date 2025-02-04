@@ -82,9 +82,7 @@ def record_user_order_task(user_id, order_id):
     """
     Записывает данные о заказе пользователя.
     """
-    logger.error("Запускаем record_user_order_task 0")
     try:
-        logger.error("Запускаем record_user_order_task 1")
         order = (
             Order.objects.annotate(
                 _num_lines=Count("lines"),
@@ -93,9 +91,7 @@ def record_user_order_task(user_id, order_id):
             .values("total", "date_placed", "_num_lines", "_num_items")
             .get(id=order_id)
         )
-        logger.error("Запускаем record_user_order_task 2")
         record = UserRecord.objects.filter(user_id=user_id)
-        logger.error("Запускаем record_user_order_task 3")
         affected = record.update(
             num_orders=F("num_orders") + 1,
             num_order_lines=F("num_order_lines") + order["_num_lines"],
@@ -103,9 +99,7 @@ def record_user_order_task(user_id, order_id):
             total_spent=F("total_spent") + order["total"],
             date_last_order=order["date_placed"],
         )
-        logger.error("Запускаем record_user_order_task 4")
         if not affected:
-            logger.error("Запускаем record_user_order_task 5")
             UserRecord.objects.create(
                 user_id=user_id,
                 num_orders=1,
@@ -114,7 +108,6 @@ def record_user_order_task(user_id, order_id):
                 total_spent=order["total"],
                 date_last_order=order["date_placed"],
             )
-            logger.error("Запускаем record_user_order_task 6")
     except Exception as e:
         logger.error(
             f"{e} при записи заказа пользователя (order_id={order_id}, user_id={user_id})"
