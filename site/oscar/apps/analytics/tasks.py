@@ -50,11 +50,8 @@ def record_products_in_order_task(order_id):
     """
     Записывает данные о товарах в заказе.
     """
-    logger.error("Запускаем record_products_in_order_task 0")
     try:
-        logger.error("Запускаем record_products_in_order_task 1")
         order = Order.objects.prefetch_related("lines", "lines__product").get(id=order_id)
-        logger.error("Запускаем record_products_in_order_task 2")
         updates = [
             update_counter_task.s(
                 "ProductRecord",
@@ -64,12 +61,10 @@ def record_products_in_order_task(order_id):
             )
             for line in order.lines.all()
         ]
-        logger.error("Запускаем record_products_in_order_task 3")
         for task in updates:
             if settings.DEBUG:
                 task()
             else:
-                logger.error("Запускаем record_products_in_order_task 4")
                 task.delay()
     except Exception as e:
         logger.error(

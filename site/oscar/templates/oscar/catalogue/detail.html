@@ -106,13 +106,11 @@
                                 {% endif %}
                             {% endif %}
                             <div class="dish-page__scroll-block d-flex flex-column grow-1 scrollbar--white">
-                                {% comment %}------------- описание ---------------{% endcomment %}
                                 {% if product.description %}
                                     <div class="dish-page__consist mt-2">
                                         <p>{{ product.description|safe }}</p>
                                     </div>
                                 {% endif %}
-                                {% comment %}------------- состав ---------------{% endcomment %}
                                 {% if product.has_compound %}
                                 <div class="dish-page__ingredients mt-2">
                                     <h2>Состав:</h2>
@@ -125,18 +123,18 @@
                             </div>
                             {% if session.availability.is_available_to_buy %}
                                 <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/Offer" class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
-                                    {% with price_exists=session.price.money %}
-                                        <button id="add_to_cart_btn" type="submit" form="add_to_basket_form" data-id="dish-submit-button" class="button fill-width button--main justify-center shrink" {% if not price_exists %}disabled{% endif %}>
+                                    {% with price=session.price.money %}
+                                        <button id="add_to_cart_btn" type="submit" form="add_to_basket_form" data-id="dish-submit-button" class="button fill-width button--main justify-center shrink" {% if not price %}disabled{% endif %}>
                                             <span class="button__wrapper">
-                                                <span class="button__value {% if not price_exists %}d-none{% endif %}" data-id="dish-price-value">В корзину за 
+                                                <span class="button__value {% if not price %}d-none{% endif %}" data-id="dish-price-value">В корзину за 
                                                     <span data-id="dish-price-button">
-                                                        {% if price_exists %}
-                                                            {{ session.price.money|formate_price }}
+                                                        {% if price %}
+                                                            {{ price|formate_price }}
                                                         {% endif %}
                                                     </span>
                                                     <span>{{ currency_symbol }}</span>
                                                 </span>
-                                                <span class="{% if price_exists %}d-none{% endif %}" data-id="dish-price-unavailable">
+                                                <span class="{% if price %}d-none{% endif %}" data-id="dish-price-unavailable">
                                                     Временно недоступно
                                                 </span>
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="add_to_cart_line_mark mr-1">
