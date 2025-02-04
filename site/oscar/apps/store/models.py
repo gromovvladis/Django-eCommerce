@@ -316,6 +316,7 @@ class StockRecord(models.Model):
     class Meta:
         app_label = "store"
         unique_together = ("store", "product")
+        get_latest_by = "date_updated"
         verbose_name = "Товарная запись"
         verbose_name_plural = "Товарные записи"
 

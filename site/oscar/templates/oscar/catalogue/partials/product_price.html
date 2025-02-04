@@ -3,11 +3,11 @@
 
 {% if session.price.exists %}
     {% if product.is_parent %}
-        {% if session.price.min_price  %}
+        {% if session.price.money  %}
             <div class="py-1 mr-1">
                 <span class="prices d-flex flex-column align-start">
                     <span class="prices__price no-wrap">
-                        от {{ session.price.min_price|currency:session.price.currency }}
+                        от {{ session.price.money|currency:session.price.currency }}
                     </span>
                 </span>
             </div> 

@@ -69,11 +69,6 @@
                                 <h1>{{ product.get_name }}</h1>
                                 <meta itemprop="description" content="{{ product.get_meta_description }}"/>
                                 <div role="separator" class="spacer"></div>
-                                {% if user.is_staff %}
-                                    <a href="{% url 'dashboard:catalogue-product' pk=product.id %}" class="float-right d-none d-md-block">
-                                        {% icon file_name='interface/edit' size=22 stroke="#111"%}
-                                    </a>
-                                {% endif %}
                                 <span class="weight ml-2 shrink">
                                     {% if product.has_weight %}
                                         <span>{{ product.weight }}</span>
@@ -82,12 +77,7 @@
                                 </span>
                             </header>
                         {% endcache %}
-                        {% cache 1800 product_detail_price session.uid %}
-                            {% if not session.availability.is_available_to_buy %}
-                                <div class="my-2">
-                                    <span class="error-mark">Временно не доступно</span>
-                                </div>
-                            {% endif %}
+                        {% cache 1800 product_detail_price product.date_updated session.stockrecords.latest.date_updated %}
                             {% if session.availability.is_available_to_buy %}
                                 <div class="d-flex mt-1 align-end mb-md-1">
                                     <div class="dish-page__price{% if session.price.old_price %} new-price{% endif %}{% if not session.price.money %} d-none{% endif %} mr-1">
@@ -102,13 +92,18 @@
                                         Временно недоступно
                                     </span>
                                 </div>
-                            {% elif session.stockrecords %}
-                                <div class="mt-2 mb-1">
-                                    <h2 class="mb-1">Доступно:</h2>
-                                    {% for rec in session.stockrecords %}
-                                        <p class="mb-1 text--green">{{ rec.store }}</p>
-                                    {% endfor %}
+                            {% else %}
+                                <div class="my-2">
+                                    <span class="error-mark">Временно не доступно</span>
                                 </div>
+                                {% if session.stockrecords %}
+                                    <div class="mt-2 mb-1">
+                                        <h2 class="mb-1">Доступно:</h2>
+                                        {% for rec in session.stockrecords %}
+                                            <p class="mb-1 text--green">{{ rec.store }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             {% endif %}
                             <div class="dish-page__scroll-block d-flex flex-column grow-1 scrollbar--white">
                                 {% comment %}------------- описание ---------------{% endcomment %}
@@ -128,7 +123,6 @@
                                 {% endif %}
                                 {% include "oscar/catalogue/partials/add_to_basket_form.html" with currency_symbol=currency_symbol session=session %}
                             </div>
-                            {% comment %}------------- добавить в корзину + цена ---------------{% endcomment %}
                             {% if session.availability.is_available_to_buy %}
                                 <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/Offer" class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
                                     {% with price_exists=session.price.money %}

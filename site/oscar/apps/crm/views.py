@@ -305,10 +305,10 @@ class CRMProductEndpointView(APIView):
 
         products = []
         for product_json in products_json:
-            products.append(product_json.get("name", "Продукт без имени"))
+            products.append(product_json.get("name", "Товар без имени"))
 
         CRMEvent.objects.create(
-            body=f"Добавлены или изменены продукты: {', '.join(products)}",
+            body=f"Добавлены или изменены товары: {', '.join(products)}",
             sender=CRMEvent.PRODUCT,
             event_type=CRMEvent.UPDATE,
         )

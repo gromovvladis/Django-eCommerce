@@ -20,15 +20,18 @@ if (cartWrapper){
             var less = form_item.querySelector('[data-id="order-button-minus"]');
             if (quantity.value == quantity.getAttribute('max')) {
                 more.disabled = true;
+                console.log('1');
             }
     
             more.addEventListener('click', function() {
                 if (parseInt(quantity.value) < parseInt(quantity.getAttribute('max'))) {
                     quantity.value = parseInt(quantity.value) + 1;
                     less.disabled = false;
+                    console.log('2')
                 }
                 if (parseInt(quantity.value) == parseInt(quantity.getAttribute('max'))) {
                     this.disabled = true;
+                    console.log('3');
                 }
                 form_item.classList.remove('empty');
                 basketForm();
@@ -48,6 +51,7 @@ if (cartWrapper){
 
             clean.addEventListener('click', function() {
                 less.disabled = true;
+                more.disabled = false;
                 form_item.classList.add('empty');
                 quantity.value = 0;
                 basketForm();

@@ -60,7 +60,6 @@ class FixedPrice(Base):
         self.currency = currency
         self.money = money
         self.old_price = old_price
-        self.min_price = min_price
         self.tax_code = tax_code
 
 

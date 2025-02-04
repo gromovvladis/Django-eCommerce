@@ -4916,7 +4916,6 @@ input[type=button].btn-block {
 }
 
 .tabs-button__button {
-  
   font-size: .9rem;
   line-height: 1.125rem;
   font-weight: 400;
@@ -4929,6 +4928,7 @@ input[type=button].btn-block {
   border-style: none;
   background: transparent;
   text-wrap: nowrap;
+  text-align: center;
   padding: .5rem;
 }
 
