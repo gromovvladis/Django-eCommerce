@@ -14,6 +14,8 @@ from oscar.apps.catalogue.signals import product_viewed
 from oscar.apps.order.signals import order_placed
 from oscar.apps.search.signals import user_search
 
+import logging
+logger = logging.getLogger("oscar.analytics")
 
 # pylint: disable=unused-argument
 @receiver(product_viewed)
@@ -80,15 +82,18 @@ def receive_order_placed(sender, order, user, **kwargs):
         return
     
     def execute_tasks():
+        logger.info("Запускаем execute_tasks")
         if settings.DEBUG:
             record_products_in_order_task(order.id)
         else:
+            logger.info("Запускаем record_products_in_order_task.delay")
             record_products_in_order_task.delay(order.id)
 
         if user and user.is_authenticated:
             if settings.DEBUG:
                 record_user_order_task(user.id, order.id)
             else:
+                logger.info("Запускаем record_user_order_task.delay")
                 record_user_order_task.delay(user.id, order.id)
     
     transaction.on_commit(execute_tasks)
