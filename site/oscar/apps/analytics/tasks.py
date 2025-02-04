@@ -82,7 +82,6 @@ def record_user_order_task(user_id, order_id):
     """
     Записывает данные о заказе пользователя.
     """
-    logger.error("Запускаем record_user_order_task")
     try:
         order = (
             Order.objects.annotate(

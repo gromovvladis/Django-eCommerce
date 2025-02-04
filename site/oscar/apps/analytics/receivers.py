@@ -78,6 +78,7 @@ def receive_basket_addition(sender, product, user, **kwargs):
 # pylint: disable=unused-argument
 @receiver(order_placed)
 def receive_order_placed(sender, order, user, **kwargs):
+    logger.info("receive_order_placed before raw")
     if kwargs.get("raw", False):
         return
     
