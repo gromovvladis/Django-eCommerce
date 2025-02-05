@@ -519,6 +519,7 @@ class StockRecordOperation(models.Model):
     Stockrecords are used by 'strategies' to determine availability and pricing
     information for the customer.
     """
+
     stockrecord = models.ForeignKey(
         "store.StockRecord",
         on_delete=models.CASCADE,
@@ -531,14 +532,21 @@ class StockRecordOperation(models.Model):
         "Коррекция",
         "Инвентаризация",
     )
-    VAT_CHOICES = (
+    TYPE_CHOICES = (
         (ACCEPT, "Приемка"),
         (WRITE_OFF, "Списание"),
         (CORRECTION, "Коррекция"),
         (INVENTORY, "Инвентаризация"),
     )
     type = models.CharField(
-        "Налог в процентах", default=ACCEPT, choices=VAT_CHOICES, max_length=128
+        "Тип операции", default=ACCEPT, choices=TYPE_CHOICES, max_length=128
+    )
+    message = models.CharField(
+        "Сообщение",
+        blank=True,
+        null=True,
+        max_length=255,
+        help_text="Комментарий к операции",
     )
     user = models.ForeignKey(
         AUTH_USER_MODEL,
@@ -548,23 +556,15 @@ class StockRecordOperation(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    num = models.PositiveIntegerField(
+    num = models.IntegerField(
         "Количество",
-        blank=True,
-        null=True,
+        blank=False,
+        null=False,
         help_text="Количество товара",
     )
 
     # Date information
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
-    date_updated = models.DateTimeField("Дата изменения", auto_now=True)
-
-    # Notes can only be edited for 5 minutes after being created
-    editable_lifetime = 300
-
-    def is_editable(self):
-        delta = timezone.now() - self.date_created
-        return delta.seconds < self.editable_lifetime
 
     def __str__(self):
         return "Товарная запись: %s, Операция: %s, Количество: %s" % (
@@ -577,6 +577,37 @@ class StockRecordOperation(models.Model):
         app_label = "store"
         verbose_name = "Изменение товарной записи"
         verbose_name_plural = "Изменение товарных записей"
+
+    def create_operation(self):
+        operation_methods = {
+            self.ACCEPT: self.accept,
+            self.WRITE_OFF: self.write_off,
+            self.CORRECTION: self.correction,
+            self.INVENTORY: self.inventory,
+        }
+        return operation_methods.get(self.type, lambda: None)()
+
+    def accept(self):
+        return self._update_stock(abs(self.num))
+
+    def write_off(self):
+        return self._update_stock(-abs(self.num))
+
+    def correction(self):
+        return self._update_stock(self.num)
+
+    def inventory(self):
+        old_num = self.stockrecord.num_in_stock
+        self.stockrecord.num_in_stock = abs(self.num)
+        self.stockrecord.save()
+        self.num = abs(self.num) - old_num
+        self.save()
+        return self.stockrecord.num_in_stock
+
+    def _update_stock(self, delta):
+        self.stockrecord.num_in_stock += delta
+        self.stockrecord.save()
+        return self.stockrecord.num_in_stock
 
 
 class StockAlert(models.Model):

@@ -232,9 +232,9 @@ class StockRecordOperationForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.user = self.user
-        # напиши здесь логику для изменения stockrecord
         if commit:
             instance.save()
+        instance.create_operation()
         return instance
 
     class Meta:
@@ -242,6 +242,7 @@ class StockRecordOperationForm(forms.ModelForm):
         fields = [
             "stockrecord",
             "type",
+            "message",
             "num",
             "user",
         ]

@@ -20172,8 +20172,10 @@ input[type="number"]:focus {
       display: block;
       text-align: right !important;
       padding-left: 180px !important;
-      /* position: relative; */
-      /* white-space: nowrap; */
+  }
+
+  .mobile-table-xl tbody .empty {
+      text-align: start !important;
   }
 
   .mobile-table-xl tbody td::before {
