@@ -35,7 +35,7 @@
 {% endblock %}
 
 {% block content %}
-    {% purchase_info_for_product request product as session %}
+    {% purchase_info_for_product_detail request product as session %}
     {% currency_symbol session.price.currency as currency_symbol %}
     <div class="menu__wrapper d-flex flex-column">
         <div class="dish-page pb-sm-2 pt-md-0">

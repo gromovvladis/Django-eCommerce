@@ -167,43 +167,43 @@ OSCAR_DASHBOARD_NAVIGATION = [
             },
         ],
     },
-    {
-        "label": "Доставка",
-        "icon": "fas fa-delivery",
-        "children": [
-            {
-                "label": "Текущие",
-                "url_name": "dashboard:delivery-active",
-                "notification": "delivery_active",
-            },
-            {
-                "label": "Все доставки",
-                "url_name": "dashboard:delivery-list",
-            },
-            {
-                "label": "Заказы на кухне",
-                "url_name": "dashboard:delivery-stores",
-                "notification": "delivery_store",
-            },
-            {
-                "label": "Заказы в доставке",
-                "url_name": "dashboard:delivery-couriers",
-                "notification": "delivery_couriers",
-            },
-            {
-                "label": "Статистика",
-                "url_name": "dashboard:delivery-stats",
-            },
-            {
-                "label": "Зоны доставки",
-                "url_name": "dashboard:delivery-zones",
-            },
-            {
-                "label": "Курьеры",
-                "url_name": "dashboard:delivery-couriers-list",
-            },
-        ],
-    },
+    # {
+    #     "label": "Доставка",
+    #     "icon": "fas fa-delivery",
+    #     "children": [
+    #         {
+    #             "label": "Текущие",
+    #             "url_name": "dashboard:delivery-active",
+    #             "notification": "delivery_active",
+    #         },
+    #         {
+    #             "label": "Все доставки",
+    #             "url_name": "dashboard:delivery-list",
+    #         },
+    #         {
+    #             "label": "Заказы на кухне",
+    #             "url_name": "dashboard:delivery-stores",
+    #             "notification": "delivery_store",
+    #         },
+    #         {
+    #             "label": "Заказы в доставке",
+    #             "url_name": "dashboard:delivery-couriers",
+    #             "notification": "delivery_couriers",
+    #         },
+    #         {
+    #             "label": "Статистика",
+    #             "url_name": "dashboard:delivery-stats",
+    #         },
+    #         {
+    #             "label": "Зоны доставки",
+    #             "url_name": "dashboard:delivery-zones",
+    #         },
+    #         {
+    #             "label": "Курьеры",
+    #             "url_name": "dashboard:delivery-couriers-list",
+    #         },
+    #     ],
+    # },
     {
         "label": "Оплата",
         "icon": "fas fa-credit-card",
@@ -284,73 +284,72 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Дополнительные товары",
                 "url_name": "dashboard:crm-additionals",
             },
-            {
-                "label": "Документы",
-                "url_name": "dashboard:crm-docs",
-            },
-            
+            # {
+            #     "label": "Документы",
+            #     "url_name": "dashboard:crm-docs",
+            # },
         ],
     },
-    {
-        "label": "Эвотор история",
-        "icon": "fas fa-server",
-        "children": [
-            {
-                "label": "Приёмка товаров",
-                "url_name": "dashboard:crm-accept",
-            },
-            {
-                "label": "Переоценка товаров",
-                "url_name": "dashboard:crm-revaluation",
-            },
-            {
-                "label": "Списание товара",
-                "url_name": "dashboard:crm-write-off",
-            },
-            {
-                "label": "Инвентаризация",
-                "url_name": "dashboard:crm-inventory",
-            },
-            {
-                "label": "Смены",
-                "url_name": "dashboard:crm-sessions",
-            },
-            {
-                "label": "Внесение и изъятие наличных",
-                "url_name": "dashboard:crm-cash",
-            },
-            {
-                "label": "Z-отчёт",
-                "url_name": "dashboard:crm-report",
-            },
-            {
-                "label": "История уведомлений",
-                "url_name": "dashboard:crm-events",
-            },
-        ],
-    },
-    {
-        "label": "Телеграм",
-        "icon": "fas fa-telegram",
-        "children": [
-            {
-                "label": "Персонал",
-                "url_name": "dashboard:telegram-admin",
-            },
-            {
-                "label": "Клиенты",
-                "url_name": "dashboard:telegram-admin",
-            },
-            {
-                "label": "Сообщения",
-                "url_name": "dashboard:telegram-errors",
-            },
-            {
-                "label": "Статистика",
-                "url_name": "dashboard:telegram-errors",
-            },
-        ],
-    },
+    # {
+    #     "label": "Эвотор история",
+    #     "icon": "fas fa-server",
+    #     "children": [
+    #         {
+    #             "label": "Приёмка товаров",
+    #             "url_name": "dashboard:crm-accept",
+    #         },
+    #         {
+    #             "label": "Переоценка товаров",
+    #             "url_name": "dashboard:crm-revaluation",
+    #         },
+    #         {
+    #             "label": "Списание товара",
+    #             "url_name": "dashboard:crm-write-off",
+    #         },
+    #         {
+    #             "label": "Инвентаризация",
+    #             "url_name": "dashboard:crm-inventory",
+    #         },
+    #         {
+    #             "label": "Смены",
+    #             "url_name": "dashboard:crm-sessions",
+    #         },
+    #         {
+    #             "label": "Внесение и изъятие наличных",
+    #             "url_name": "dashboard:crm-cash",
+    #         },
+    #         {
+    #             "label": "Z-отчёт",
+    #             "url_name": "dashboard:crm-report",
+    #         },
+    #         {
+    #             "label": "История уведомлений",
+    #             "url_name": "dashboard:crm-events",
+    #         },
+    #     ],
+    # },
+    # {
+    #     "label": "Телеграм",
+    #     "icon": "fas fa-telegram",
+    #     "children": [
+    #         {
+    #             "label": "Персонал",
+    #             "url_name": "dashboard:telegram-admin",
+    #         },
+    #         {
+    #             "label": "Клиенты",
+    #             "url_name": "dashboard:telegram-admin",
+    #         },
+    #         {
+    #             "label": "Сообщения",
+    #             "url_name": "dashboard:telegram-errors",
+    #         },
+    #         {
+    #             "label": "Статистика",
+    #             "url_name": "dashboard:telegram-errors",
+    #         },
+    #     ],
+    # },
     {
         "label": "Контент",
         "icon": "fas fa-newspaper",
@@ -363,14 +362,14 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Шаблоны Email",
                 "url_name": "dashboard:email-list",
             },
-            {
-                "label": "Шаблоны SMS",
-                "url_name": "dashboard:sms-list",
-            },
-            {
-                "label": "Отправленные СМС",
-                "url_name": "dashboard:sended-sms",
-            },
+            # {
+            #     "label": "Шаблоны SMS",
+            #     "url_name": "dashboard:sms-list",
+            # },
+            # {
+            #     "label": "Отправленные СМС",
+            #     "url_name": "dashboard:sended-sms",
+            # },
         ],
     },
     {

@@ -2,15 +2,13 @@
 {% load purchase_info_tags %}
 
 {% if product.is_parent %}
-    {% if session.min_price.money %}
-        <div class="py-1 mr-1">
-            <span class="prices d-flex flex-column align-start">
-                <span class="prices__price no-wrap">
-                    от {{ session.min_price.money|currency:session.min_price.currency }}
-                </span>
+    <div class="py-1 mr-1">
+        <span class="prices d-flex flex-column align-start">
+            <span class="prices__price no-wrap">
+                от {{ session.price.money|currency:session.price.currency }}
             </span>
-        </div> 
-    {% endif %}
+        </span>
+    </div> 
 {% else %}
     <span class="prices d-flex flex-column align-start mr-1">
         {% if session.price.old_price %}

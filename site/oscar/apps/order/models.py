@@ -10,7 +10,6 @@ from django.db.models import Sum
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
-from django.utils.timezone import now
 from oscar.models.fields import AutoSlugField
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_model
@@ -159,7 +158,7 @@ class Order(models.Model):
                     line.save()
         
         if new_status in settings.ORDER_FINAL_STATUSES:
-            self.date_finish = now()
+            self.date_finish = timezone.now()
         
         if new_status == settings.OSCAR_SUCCESS_ORDER_STATUS:
             self.consume_stock_allocations()
@@ -417,7 +416,7 @@ class Order(models.Model):
 
     def set_date_placed_default(self):
         if self.date_placed is None:
-            self.date_placed = now()
+            self.date_placed = timezone.now()
 
     def save(self, *args, **kwargs):
         # Ensure the date_placed field works as it auto_now_add was set. But
@@ -496,7 +495,7 @@ class OrderNote(models.Model):
     def is_editable(self):
         if self.note_type == self.SYSTEM:
             return False
-        delta = timezone.now() - self.date_updated
+        delta = timezone.now() - self.date_created
         return delta.seconds < self.editable_lifetime
 
 

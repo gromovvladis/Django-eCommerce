@@ -738,6 +738,7 @@ class Product(models.Model):
             self.slug = f"{original_slug}-{counter}"
             counter += 1
 
+        self.article = self.slug
         super().save(*args, **kwargs)
         self.attr.save()
 
