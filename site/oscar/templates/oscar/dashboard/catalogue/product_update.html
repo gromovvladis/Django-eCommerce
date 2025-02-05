@@ -463,10 +463,6 @@
                                                                     <br>
                                                                     Поле "Количество" положительное. Поле "В наличии" уменьшится на данную величину.
                                                                     <br><br>
-                                                                    <span class="text-primary">Коррекция - величина расхождения между фактическим наличием и учетным.</span>
-                                                                    <br>
-                                                                    Поле "Количество" может быть положительным или отрицательным, взависимсоти от расхождения.
-                                                                    <br><br>
                                                                     <span class="text-primary">Инвентаризация - актуальное количество товара.</span>
                                                                     <br>
                                                                     Поле "Количество" положительное.
@@ -502,10 +498,6 @@
                                                                             </span>
                                                                         {% elif stockrecord_operation.type == "Списание" %}
                                                                             <span class="badge badge-danger">
-                                                                                {{ stockrecord_operation.type }}
-                                                                            </span>
-                                                                        {% elif stockrecord_operation.type == "Коррекция"  %}
-                                                                            <span class="badge badge-warning">
                                                                                 {{ stockrecord_operation.type }}
                                                                             </span>
                                                                         {% else %}

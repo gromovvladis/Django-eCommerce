@@ -1,5 +1,6 @@
 # pylint: disable=attribute-defined-outside-init
 from typing import Any
+
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -424,7 +425,9 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         ctx["full_access"] = self.full_access
         ctx["stockrecord_operation_form"] = self.stockrecord_form
 
-        stockrecord_operations = StockRecordOperation.objects.filter(stockrecord__product=self.object).order_by("-date_created")
+        stockrecord_operations = StockRecordOperation.objects.filter(
+            stockrecord__product=self.object
+        ).order_by("-date_created")
         paginator = Paginator(stockrecord_operations, self.paginate_by)
         page = self.request.GET.get("page")
         ctx["paginator"] = paginator
@@ -527,11 +530,17 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
 
         if formset_is_valid:
             return self.forms_valid(
-                formsets, 
-                **{k: v for k, v in {
-                    "form": form if form_valid else None,
-                    "stockrecord_form": stockrecord_form if stockrecord_form_valid else None
-                }.items() if v}
+                formsets,
+                **{
+                    k: v
+                    for k, v in {
+                        "form": form if form_valid else None,
+                        "stockrecord_form": (
+                            stockrecord_form if stockrecord_form_valid else None
+                        ),
+                    }.items()
+                    if v
+                }
             )
 
         return self.forms_invalid(formsets, form, stockrecord_form)
@@ -641,6 +650,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
             updated_formsets = [
                 "category_formset",
                 "attribute_formset",
+                "stockrecord_formset",
             ]
             product_updated = bool(form.changed_data) or any(
                 bool(formsets[name].changed_objects)

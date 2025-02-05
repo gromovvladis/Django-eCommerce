@@ -1,10 +1,11 @@
-from django.conf import settings
-from datetime import datetime
-from django.urls import reverse_lazy
-from rest_framework import serializers
 from decimal import Decimal as D
-from oscar.core.loading import get_model
+
+from django.conf import settings
 from django.utils.timezone import now
+
+from rest_framework import serializers
+
+from oscar.core.loading import get_model
 
 User = get_model("user", "User")
 Store = get_model("store", "Store")
@@ -32,15 +33,31 @@ class LineSerializer(serializers.Serializer):
     product_id = serializers.CharField()
     code = serializers.CharField(source="evotor_code")
     quantity = serializers.IntegerField()
-    result_sum = serializers.DecimalField(source="line_price", max_digits=12, decimal_places=2)
-    sum = serializers.DecimalField(source="line_price_before_discounts", max_digits=12, decimal_places=2)
-    price = serializers.DecimalField(source="unit_price", max_digits=12, decimal_places=2)
+    result_sum = serializers.DecimalField(
+        source="line_price", max_digits=12, decimal_places=2
+    )
+    sum = serializers.DecimalField(
+        source="line_price_before_discounts", max_digits=12, decimal_places=2
+    )
+    price = serializers.DecimalField(
+        source="unit_price", max_digits=12, decimal_places=2
+    )
     tax = serializers.DictField()
     position_discount = serializers.DictField(required=False)
 
     class Meta:
         model = Line
-        fields = ( "id", "product_id", "code", "quantity", "result_sum", "sum", "price", "tax", "position_discount")
+        fields = (
+            "id",
+            "product_id",
+            "code",
+            "quantity",
+            "result_sum",
+            "sum",
+            "price",
+            "tax",
+            "position_discount",
+        )
 
     def create(self, validated_data, order, store):
         product = Product.objects.get_or_create(
@@ -112,23 +129,6 @@ class LineSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         return {
-            # attribute_values = instance.attribute_values.filter(is_variant=True)
-            # "settlement_method_type": "FULL",
-            # "attributes_choices": [
-            #     {
-            #         "id": attribute_value.attribute.option_group.evotor_id,
-            #         "name": attribute_value.attribute.option_group.name,
-            #         "choices": [
-            #             {
-            #                 "id": choice.evotor_id,
-            #                 "name": choice.option
-            #             }
-            #             for choice in attribute_value.value.all() if choice.evotor_id
-            #         ]
-            #     }
-            #     for attribute_value in attribute_values
-            #     if attribute_value.attribute.option_group and attribute_value.attribute.option_group.evotor_id
-            # ],
             "type": "NORMAL",
             "code": instance.evotor_code,
             "commodity_id": instance.product.evotor_id,
@@ -147,12 +147,16 @@ class LineSerializer(serializers.Serializer):
                     "quantity": additional.value,
                     "tax": additional.additional.tax,
                     "price": additional.additional.price,
-                } for additional in instance.attributes.filter(additional__isnull=False)]
+                }
+                for additional in instance.attributes.filter(additional__isnull=False)
+            ],
         }
-     
+
 
 class OrderDiscountSerializer(serializers.Serializer):
-    discount_sum = serializers.DecimalField(source="amount", max_digits=12, decimal_places=2)
+    discount_sum = serializers.DecimalField(
+        source="amount", max_digits=12, decimal_places=2
+    )
     coupon = serializers.CharField(source="voucher_code", required=False)
 
     class Meta:
@@ -180,7 +184,9 @@ class PaymentSerializer(serializers.Serializer):
         fields = ("id", "type", "sum", "app_info", "parts")
 
     def create(self, validated_data, order):
-        source_type, _ = SourceType.objects.get_or_create(name=validated_data["app_info"]["name"])
+        source_type, _ = SourceType.objects.get_or_create(
+            name=validated_data["app_info"]["name"]
+        )
         amount_debited = sum(
             D(part["part_sum"]) - D(part["change"])
             for part in validated_data.get("parts", [])
@@ -207,7 +213,9 @@ class PaymentSerializer(serializers.Serializer):
         )
 
     def update(self, validated_data, order, target):
-        source_type, _ = SourceType.objects.get_or_create(name=validated_data["app_info"]["name"])
+        source_type, _ = SourceType.objects.get_or_create(
+            name=validated_data["app_info"]["name"]
+        )
 
         amount_debited = D(0)
         amount_refunded = D(0)
@@ -232,7 +240,7 @@ class PaymentSerializer(serializers.Serializer):
                 "reference": validated_data["type"],
                 "refundable": False,
                 "paid": True if amount_debited > 0 and amount_refunded == 0 else False,
-            }
+            },
         )
 
         if target == "SELL":
@@ -255,7 +263,7 @@ class PaymentSerializer(serializers.Serializer):
                 "refundable": False,
                 "code": validated_data["id"],
                 "receipt": True,
-            }
+            },
         )
 
         transaction.amount = D(validated_data["sum"])
@@ -322,10 +330,9 @@ class OrderSerializer(serializers.Serializer):
                     product = line.product
                     if additional in product.get_product_additionals():
                         line.attributes.create(
-                            additional=additional, 
-                            value=position.get("quantity")
+                            additional=additional, value=position.get("quantity")
                         )
-        
+
         discounts = body.get("doc_discounts", [])
         for discount in discounts:
             OrderDiscountSerializer().create(discount, order)
@@ -335,7 +342,7 @@ class OrderSerializer(serializers.Serializer):
             PaymentSerializer().create(payment, order)
 
         return order
-    
+
     def update(self, instance, validated_data):
         store_id = validated_data.get("store_id")
         body = validated_data.get("body")
@@ -343,7 +350,12 @@ class OrderSerializer(serializers.Serializer):
         store = Store.objects.get(evotor_id=store_id)
 
         target = validated_data.get("target", None)
-        msg = "Коррекция продажи" if target == "SELL" else "Коррекция возврата"
+        msg = "Коррекция продажи"
+
+        if target == "PAYBACK":
+            msg = "Коррекция возврата"
+            instance.status = settings.OSCAR_FAIL_ORDER_STATUS
+
         OrderNote.objects.create(
             order=instance,
             note_type=OrderNote.SYSTEM,
@@ -371,10 +383,9 @@ class OrderSerializer(serializers.Serializer):
                     product = line.product
                     if additional in product.get_product_additionals():
                         line.attributes.create(
-                            additional=additional, 
-                            value=position.get("quantity")
+                            additional=additional, value=position.get("quantity")
                         )
-        
+
         discounts = body.get("doc_discounts", [])
         for discount in discounts:
             OrderDiscountSerializer().create(discount, instance)
@@ -395,8 +406,8 @@ class OrderSerializer(serializers.Serializer):
         )
         for old_discount in old_discounts:
             old_discount.delete()
-    
-    def to_representation(self, instance):        
+
+    def to_representation(self, instance):
         paid = 0
         for src in instance.sources.all():
             paid += src.amount_debited - src.amount_refunded
@@ -406,19 +417,23 @@ class OrderSerializer(serializers.Serializer):
             "client_email": instance.user.email if instance.user else "",
             "should_print_receipt": False,
             "editable": False if paid else True,
-            "payment_type": instance.sources.last().reference if instance.sources.exists() else None,
+            "payment_type": (
+                instance.sources.last().reference if instance.sources.exists() else None
+            ),
             "receiptDiscount": instance.total_discount,
             "extra": {
                 "Номер заказа": instance.number,
                 "Время заказа": instance.order_time,
                 "Оплата": f"{paid}₽" if paid > 0 else "Нет",
                 "Доставка": instance.shipping_method,
-                },
+            },
             "positions": [LineSerializer(line).data for line in instance.lines.all()],
         }
 
         notes = instance.notes.values_list("note_type", "message")
         if notes.exists():
-            representation["note"] = ", ".join(f"{note_type}: {message}" for note_type, message in notes)
+            representation["note"] = ", ".join(
+                f"{note_type}: {message}" for note_type, message in notes
+            )
 
         return representation

@@ -27,6 +27,7 @@ site_pass = settings.EVOTOR_SITE_PASS
 
 # ========= вспомогательные функции =========
 
+
 def is_valid_site_token(request):
     # Проверка токена сайта
     auth_header = request.headers.get("Authorization")
@@ -88,7 +89,7 @@ def is_valid_site_and_user_tokens(request):
 
 
 class CRMInstallationEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/subscription/setup """
+    """https://mikado-sushi.ru/crm/api/subscription/setup"""
 
     permission_classes = [AllowAny]
 
@@ -145,7 +146,7 @@ class CRMLoginEndpointView(APIView):
 
 
 class CRMStoreEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/stores """
+    """https://mikado-sushi.ru/crm/api/stores"""
 
     permission_classes = [AllowAny]
 
@@ -175,7 +176,7 @@ class CRMStoreEndpointView(APIView):
 
 
 class CRMTerminalEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/terminals """
+    """https://mikado-sushi.ru/crm/api/terminals"""
 
     permission_classes = [AllowAny]
 
@@ -213,7 +214,7 @@ class CRMTerminalEndpointView(APIView):
 
 
 class CRMStaffEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/staffs """
+    """https://mikado-sushi.ru/crm/api/staffs"""
 
     permission_classes = [AllowAny]
 
@@ -243,7 +244,7 @@ class CRMStaffEndpointView(APIView):
 
 
 class CRMRoleEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/roles """
+    """https://mikado-sushi.ru/crm/api/roles"""
 
     permission_classes = [AllowAny]
 
@@ -273,7 +274,7 @@ class CRMRoleEndpointView(APIView):
 
 
 class CRMProductEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/stores/<str:store_id>/products/ """
+    """https://mikado-sushi.ru/crm/api/stores/<str:store_id>/products/"""
 
     permission_classes = [AllowAny]
 
@@ -319,18 +320,21 @@ class CRMProductEndpointView(APIView):
 
 
 class CRMDocsEndpointView(APIView):
-    """ 
-    https://mikado-sushi.ru/crm/api/docs 
+    """
+    https://mikado-sushi.ru/crm/api/docs
 
-    1. Продажа (SELL)
-    2. Возврат (PAYBACK)
-    3. Коррекция (CORRECTION)
-    4. Приемка (ACCEPT)
-    5. Списание (WRITE_OFF)
-    6. Инвентаризация (INVENTORY)
+    1. Продажа (SELL) +
+    2. Возврат (PAYBACK) +
+    3. Коррекция (CORRECTION) +
+
+    4. Приемка (ACCEPT) +
+    5. Списание (WRITE_OFF) +
+    6. Инвентаризация (INVENTORY) +
+
     7. Переоценка (REVALUATION)
-    8. Внесение наличных (CASH_INCOME)
-    9. Изъятие наличных (CASH_OUTCOME)
+
+    8. Внесение наличных (CASH_INCOME) +
+    9. Изъятие наличных (CASH_OUTCOME) +
     """
 
     permission_classes = [AllowAny]
@@ -352,7 +356,6 @@ class CRMDocsEndpointView(APIView):
             return not_allowed
 
         request_type = request.data.get("type")
-        # request_type = "SELL"
 
         if request_type != "SELL":
             send_message_to_staffs(
@@ -361,24 +364,17 @@ class CRMDocsEndpointView(APIView):
             )
 
         if request_type == "SELL":
-            # self.sell(data, *args, **kwargs)
             self.sell(request.data, *args, **kwargs)
         elif request_type == "PAYBACK":
             self.payback(request.data, *args, **kwargs)
         elif request_type == "CORRECTION":
             self.correction(request.data, *args, **kwargs)
-        elif request_type == "ACCEPT":
-            self.accept(request.data, *args, **kwargs)
-        elif request_type == "WRITE_OFF":
-            self.write_off(request.data, *args, **kwargs)
-        elif request_type == "INVENTORY":
-            self.inventory(request.data, *args, **kwargs)
+        elif request_type in ["ACCEPT", "WRITE_OFF", "INVENTORY"]:
+            self.stockrecord_operation(request.data, *args, **kwargs)
+        elif request_type in ["CASH_INCOME", "CASH_OUTCOME"]:
+            self.cash_transaction(request.data, *args, **kwargs)
         elif request_type == "REVALUATION":
             self.revaluation(request.data, *args, **kwargs)
-        elif request_type == "CASH_INCOME":
-            self.cash_income(request.data, *args, **kwargs)
-        elif request_type == "CASH_OUTCOME":
-            self.cash_outcome(request.data, *args, **kwargs)
         else:
             CRMEvent.objects.create(
                 body="Error: Неподдерживаемый тип документа.",
@@ -397,22 +393,13 @@ class CRMDocsEndpointView(APIView):
     def payback(self, data):
         EvatorCloud().refund_site_order(data)
 
-    def accept(self, data):
-        pass
+    def stockrecord_operation(self, data):
+        EvatorCloud().stockrecord_operation(data)
 
-    def write_off(self, data):
-        pass
-
-    def inventory(self, data):
-        pass
+    def cash_transaction(self, data):
+        EvatorCloud().cash_transaction(data)
 
     def revaluation(self, data):
-        pass
-
-    def cash_income(self, data):
-        pass
-
-    def cash_outcome(self, data):
         pass
 
         # data = {

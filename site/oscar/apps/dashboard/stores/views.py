@@ -16,31 +16,37 @@ from oscar.apps.dashboard.users.views import CustomerListView
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 
-from django.views.generic import CreateView, UpdateView, DeleteView, View
+from django.views.generic import CreateView, UpdateView, DeleteView, View, ListView
 from django_tables2 import SingleTableView
 from django.db.models import Exists, OuterRef, BooleanField
 
 User = get_user_model()
 Staff = get_model("user", "Staff")
 Store = get_model("store", "Store")
+StoreCashTransaction = get_model("store", "StoreCashTransaction")
 Terminal = get_model("store", "Terminal")
 (
     StoreSearchForm,
+    StoreCashTransactionForm,
     StoreForm,
 ) = get_classes(
     "dashboard.stores.forms",
     [
         "StoreSearchForm",
+        "StoreCashTransactionForm",
         "StoreForm",
     ],
 )
-StaffForm = get_class("dashboard.users.forms","StaffForm")
-GroupForm = get_class("dashboard.users.forms","GroupForm")
+StaffForm = get_class("dashboard.users.forms", "StaffForm")
+GroupForm = get_class("dashboard.users.forms", "GroupForm")
 StoreListTable = get_class("dashboard.stores.tables", "StoreListTable")
 GroupListTable = get_class("dashboard.stores.tables", "GroupListTable")
 StaffListTable = get_class("dashboard.stores.tables", "StaffListTable")
 TerminalListTable = get_class("dashboard.stores.tables", "TerminalListTable")
 StoreStaffListTable = get_class("dashboard.stores.tables", "StoreStaffListTable")
+StoreCashTransactionListTable = get_class(
+    "dashboard.stores.tables", "StoreCashTransactionListTable"
+)
 
 
 class StoreListView(SingleTableView):
@@ -56,7 +62,7 @@ class StoreListView(SingleTableView):
             table.caption = "Результаты поиска: %s" % self.object_list.count()
 
         return table
-    
+
     def get_table_pagination(self, table):
         return dict(per_page=settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE)
 
@@ -65,10 +71,12 @@ class StoreListView(SingleTableView):
         ctx["queryset_description"] = self.description
         ctx["form"] = self.form
         ctx["is_filtered"] = self.is_filtered
-        return ctx  
+        return ctx
 
     def get_queryset(self):
-        qs = Store._default_manager.prefetch_related("addresses", "users", "users__staff_profile").all()
+        qs = Store._default_manager.prefetch_related(
+            "addresses", "users", "users__staff_profile"
+        ).all()
 
         self.description = "Все магазины"
 
@@ -118,11 +126,13 @@ class StoreCreateView(CreateView):
 
     def get_success_url(self):
         messages.success(
-            self.request, "Магазин '%s' успешно создан. Доступно добавление персонала." % self.object.name
+            self.request,
+            "Магазин '%s' успешно создан. Доступно добавление персонала."
+            % self.object.name,
         )
         # Используем reverse для получения строки URL
         return reverse("dashboard:store-manage", kwargs={"pk": self.object.id})
-        
+
     def form_valid(self, form):
         self.object = form.save()
         address = self.object.addresses.model(
@@ -140,6 +150,7 @@ class StoreManageView(UpdateView):
     This multi-purpose view renders out a form to edit the store's details,
     the associated address and a list of all associated users.
     """
+
     model = Store
     template_name = "oscar/dashboard/stores/store_manage.html"
     form_class = StoreForm
@@ -159,7 +170,7 @@ class StoreManageView(UpdateView):
         ctx["users"] = self.store.users.all()
         ctx["terminals"] = self.store.terminals.all()
         if self.address and self.address.line1:
-            ctx['line1'] = self.address.line1
+            ctx["line1"] = self.address.line1
         return ctx
 
     def form_valid(self, form):
@@ -186,6 +197,70 @@ class StoreDeleteView(DeleteView):
         return reverse("dashboard:store-list")
 
 
+class StoreCashTransactionListView(SingleTableView):
+    context_table_name = "cash_transactions"
+    template_name = "oscar/dashboard/stores/store_cash_transaction_list.html"
+    table_class = StoreCashTransactionListTable
+
+    def dispatch(self, request, *args, **kwargs):
+        self.store = Store.objects.get(id=kwargs["store_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_table_pagination(self, table):
+        return dict(per_page=settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["store"] = self.store
+        return ctx
+
+    def get_queryset(self):
+        return StoreCashTransaction.objects.filter(store=self.store)
+
+
+class StoreCashTransactionCreateView(CreateView):
+    model = StoreCashTransaction
+    form_class = StoreCashTransactionForm
+    template_name = "oscar/dashboard/stores/store_cash_transaction_create.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.store = Store.objects.get(id=kwargs["store_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        """Return the keyword arguments for instantiating the form."""
+        kwargs = super().get_form_kwargs()
+        kwargs.update(
+            {
+                "store": self.store,
+                "user": self.request.user,
+            }
+        )
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["store"] = self.store
+        return ctx
+
+    def form_valid(self, form):
+        messages.success(
+            self.request, "Транзакция внесений / изъятий наличных успешно создана!"
+        )
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(
+            self.request,
+            "Ошибка при создании транзакции внесения / изъятия наличных. Проверьте введенные данные.",
+        )
+        return super().form_invalid(form)
+
+    def get_success_url(self):
+        return reverse(
+            "dashboard:store-cash-transaction-list", kwargs={"store_id": self.store.id}
+        )
+
 
 # =====
 # Terminals
@@ -196,17 +271,23 @@ class TerminalListView(SingleTableView):
     context_table_name = "terminals"
     template_name = "oscar/dashboard/stores/terminal_list.html"
     table_class = TerminalListTable
-    
+
     def get_table_pagination(self, table):
         return dict(per_page=settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["queryset_description"] = self.description
-        return ctx  
+        return ctx
 
     def get_queryset(self):
-        qs = Terminal._default_manager.prefetch_related("stores").annotate(store=F("stores"),).all()
+        qs = (
+            Terminal._default_manager.prefetch_related("stores")
+            .annotate(
+                store=F("stores"),
+            )
+            .all()
+        )
         self.description = "Все платежные терминалы"
         return qs
 
@@ -232,10 +313,8 @@ class TerminalDetailView(DetailView):
         else:
             return self._get_object(self.kwargs.get("pk"))
 
-
     def _get_object(self, terminal_id):
         return self.model.objects.get(id=terminal_id)
-
 
 
 # =====
@@ -274,10 +353,17 @@ class StaffListView(CustomerListView):
         """
         if data["username"]:
             # username = data["username"]
-            username = re.sub(r'[^\d+]', '', data["username"])
+            username = re.sub(r"[^\d+]", "", data["username"])
             queryset = queryset.filter(user__username__istartswith=username)
-            self.desc_ctx["phone_filter"] = " с телефоном соответствующим '%s'" % username
-            self.search_filters.append((('Телефон начинается с "%s"' % username), (("username", data["username"]),)))
+            self.desc_ctx["phone_filter"] = (
+                " с телефоном соответствующим '%s'" % username
+            )
+            self.search_filters.append(
+                (
+                    ('Телефон начинается с "%s"' % username),
+                    (("username", data["username"]),),
+                )
+            )
         if data["name"]:
             # If the value is two words, then assume they are first name and
             # last name
@@ -286,13 +372,17 @@ class StaffListView(CustomerListView):
             condition = Q()
             for part in parts:
                 condition |= (
-                    Q(first_name__icontains=part) |
-                    Q(last_name__icontains=part) |
-                    Q(middle_name__icontains=part)
+                    Q(first_name__icontains=part)
+                    | Q(last_name__icontains=part)
+                    | Q(middle_name__icontains=part)
                 )
             queryset = queryset.filter(condition).distinct()
-            self.desc_ctx["name_filter"] = " с именем соответствующим '%s'" % data["name"]
-            self.search_filters.append((('Имя соответствует "%s"' % data["name"]), (("name", data["name"]),)))
+            self.desc_ctx["name_filter"] = (
+                " с именем соответствующим '%s'" % data["name"]
+            )
+            self.search_filters.append(
+                (('Имя соответствует "%s"' % data["name"]), (("name", data["name"]),))
+            )
 
         return queryset
 
@@ -317,7 +407,7 @@ class StaffStatusView(UpdateView):
 
     def post(self, request, *args, **kwargs):
         try:
-            staff_id = kwargs.get('pk')
+            staff_id = kwargs.get("pk")
             staff = self.model.objects.get(id=staff_id)
             staff.is_active = not staff.is_active
             staff.save()
@@ -338,19 +428,21 @@ class StaffDetailView(UpdateView):
     model = Staff
     form_class = StaffForm
     template_name = "oscar/dashboard/stores/staff_detail.html"
-    success_url = reverse_lazy('dashboard:staff-list')
+    success_url = reverse_lazy("dashboard:staff-list")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request  # Добавляем request в kwargs
+        kwargs["request"] = self.request  # Добавляем request в kwargs
         return kwargs
 
     def form_valid(self, form):
-        messages.success(self.request, 'Сотрудник успешно изменен!')
+        messages.success(self.request, "Сотрудник успешно изменен!")
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Ошибка при изменении группы. Проверьте введенные данные.')
+        messages.error(
+            self.request, "Ошибка при изменении группы. Проверьте введенные данные."
+        )
         return super().form_invalid(form)
 
 
@@ -358,18 +450,21 @@ class StaffCreateView(CreateView):
     model = Staff
     form_class = StaffForm
     template_name = "oscar/dashboard/stores/staff_create.html"
-    success_url = reverse_lazy('dashboard:staff-list')
+    success_url = reverse_lazy("dashboard:staff-list")
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request  # Добавляем request в kwargs
+        kwargs["request"] = self.request  # Добавляем request в kwargs
         return kwargs
 
     def form_valid(self, form):
-        messages.success(self.request, 'Сотрудник успешно создан!')
+        messages.success(self.request, "Сотрудник успешно создан!")
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Ошибка при создании сотрудника. Проверьте введенные данные.')
+        messages.error(
+            self.request, "Ошибка при создании сотрудника. Проверьте введенные данные."
+        )
         return super().form_invalid(form)
 
 
@@ -389,7 +484,7 @@ class StaffDeleteView(DeleteView):
 
 
 class StoreStaffCreateView(StaffCreateView):
-    success_url = reverse_lazy('dashboard:store-list')
+    success_url = reverse_lazy("dashboard:store-list")
 
     def dispatch(self, request, *args, **kwargs):
         self.store = get_object_or_404(Store, pk=kwargs.get("store_pk", None))
@@ -404,7 +499,7 @@ class StoreStaffCreateView(StaffCreateView):
         kwargs = super().get_form_kwargs()
         kwargs["store"] = self.store
         return kwargs
-    
+
 
 class StoreStaffSelectView(StaffListView):
     template_name = "oscar/dashboard/stores/store_user_select.html"
@@ -422,10 +517,14 @@ class StoreStaffSelectView(StaffListView):
 
     def get_queryset(self):
         self.search_filters = []
-        store_exists = Store.objects.filter(users=OuterRef('user'), id=self.store.id)
-        queryset = Staff._default_manager.prefetch_related("user", "user__stores").annotate(
-            is_related_to_store=Exists(store_exists, output_field=BooleanField())
-        ).all()
+        store_exists = Store.objects.filter(users=OuterRef("user"), id=self.store.id)
+        queryset = (
+            Staff._default_manager.prefetch_related("user", "user__stores")
+            .annotate(
+                is_related_to_store=Exists(store_exists, output_field=BooleanField())
+            )
+            .all()
+        )
         return self.apply_search(queryset)
 
 
@@ -462,10 +561,10 @@ class StoreStaffLinkView(View):
             return False
         store.users.add(user)
         # if not user.is_staff:
-            # dashboard_access_perm = Permission.objects.get(
-            #     codename="dashboard_access", content_type__app_label="store"
-            # )
-            # user.user_permissions.add(dashboard_access_perm)
+        # dashboard_access_perm = Permission.objects.get(
+        #     codename="dashboard_access", content_type__app_label="store"
+        # )
+        # user.user_permissions.add(dashboard_access_perm)
         return True
 
 
@@ -487,7 +586,7 @@ class StoreStaffUnlinkView(View):
         #     )
         #     user.user_permissions.remove(dashboard_access_perm)
         return True
-    
+
     def get(self, request, user_pk, store_pk):
         # need to allow GET to make Undo link in StoreUserUnlinkView work
         return self.post(request, user_pk, store_pk)
@@ -516,7 +615,6 @@ class StoreStaffUnlinkView(View):
         return redirect("dashboard:store-user-select", store_pk=store_pk)
 
 
-
 # =====
 # Groups
 # =====
@@ -538,20 +636,21 @@ class GroupDetailView(UpdateView):
     model = Group
     form_class = GroupForm
     template_name = "oscar/dashboard/stores/group_detail.html"
-    success_url = reverse_lazy('dashboard:group-list')
-
+    success_url = reverse_lazy("dashboard:group-list")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = self.get_object().name
+        context["title"] = self.get_object().name
         return context
 
     def form_valid(self, form):
-        messages.success(self.request, 'Группа успешно изменена!')
+        messages.success(self.request, "Группа успешно изменена!")
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Ошибка при изменении группы. Проверьте введенные данные.')
+        messages.error(
+            self.request, "Ошибка при изменении группы. Проверьте введенные данные."
+        )
         return super().form_invalid(form)
 
 
@@ -559,15 +658,16 @@ class GroupCreateView(CreateView):
     model = Group
     form_class = GroupForm
     template_name = "oscar/dashboard/stores/group_create.html"
-    success_url = reverse_lazy('dashboard:group-list')
-    # permission_required = 'auth.add_group'
+    success_url = reverse_lazy("dashboard:group-list")
 
     def form_valid(self, form):
-        messages.success(self.request, 'Группа успешно создана!')
+        messages.success(self.request, "Группа успешно создана!")
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Ошибка при создании группы. Проверьте введенные данные.')
+        messages.error(
+            self.request, "Ошибка при создании группы. Проверьте введенные данные."
+        )
         return super().form_invalid(form)
 
 

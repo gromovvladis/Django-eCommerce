@@ -526,16 +526,14 @@ class StockRecordOperation(models.Model):
         verbose_name="Товарная запись",
         related_name="operations",
     )
-    ACCEPT, WRITE_OFF, CORRECTION, INVENTORY = (
+    ACCEPT, WRITE_OFF, INVENTORY = (
         "Приемка",
         "Списание",
-        "Коррекция",
         "Инвентаризация",
     )
     TYPE_CHOICES = (
         (ACCEPT, "Приемка"),
         (WRITE_OFF, "Списание"),
-        (CORRECTION, "Коррекция"),
         (INVENTORY, "Инвентаризация"),
     )
     type = models.CharField(
@@ -556,7 +554,7 @@ class StockRecordOperation(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    num = models.IntegerField(
+    num = models.PositiveIntegerField(
         "Количество",
         blank=False,
         null=False,
@@ -582,7 +580,6 @@ class StockRecordOperation(models.Model):
         operation_methods = {
             self.ACCEPT: self.accept,
             self.WRITE_OFF: self.write_off,
-            self.CORRECTION: self.correction,
             self.INVENTORY: self.inventory,
         }
         return operation_methods.get(self.type, lambda: None)()
@@ -592,9 +589,6 @@ class StockRecordOperation(models.Model):
 
     def write_off(self):
         return self._update_stock(-abs(self.num))
-
-    def correction(self):
-        return self._update_stock(self.num)
 
     def inventory(self):
         old_num = self.stockrecord.num_in_stock
@@ -654,3 +648,92 @@ class StockAlert(models.Model):
         ordering = ("-date_created",)
         verbose_name = "Уведомление товарного запаса"
         verbose_name_plural = "Уведомления товарных запасов"
+
+
+class StoreCash(models.Model):
+    store = models.OneToOneField(
+        "store.Store",
+        on_delete=models.CASCADE,
+        verbose_name="Магазин",
+        related_name="cash",
+    )
+    sum = models.IntegerField(
+        "Наличные",
+        blank=False,
+        null=False,
+        default=0,
+        help_text="Сумма наличных в магазине",
+    )
+    date_updated = models.DateTimeField("Дата изменения", auto_now=True)
+
+    def __str__(self):
+        return "Магазин: %s, Наличные: %s" % (
+            self.store,
+            self.sum,
+        )
+
+    class Meta:
+        app_label = "store"
+        verbose_name = "Наличные в магазине"
+        verbose_name_plural = "Наличные в магазинах"
+
+
+class StoreCashTransaction(models.Model):
+    store = models.OneToOneField(
+        "store.Store",
+        on_delete=models.CASCADE,
+        verbose_name="Магазин",
+        related_name="transactions",
+    )
+    CASH_INCOME, CASH_OUTCOME = "Внесение наличных", "Изъятие наличных"
+    TYPE_CHOICES = (
+        (CASH_INCOME, "Внесение наличных"),
+        (CASH_OUTCOME, "Изъятие наличных"),
+    )
+    type = models.CharField(
+        "Тип операции", default=CASH_INCOME, choices=TYPE_CHOICES, max_length=128
+    )
+    description = models.CharField(
+        "Сообщение",
+        blank=True,
+        null=True,
+        max_length=255,
+        help_text="Комментарий к операции",
+    )
+    user = models.ForeignKey(
+        AUTH_USER_MODEL,
+        related_name="cash_transactions",
+        verbose_name="Сотрудник",
+        db_index=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    sum = models.IntegerField(
+        "Наличные",
+        blank=False,
+        null=False,
+        help_text="Сумма наличных в магазине",
+    )
+
+    # Date information
+    date_created = models.DateTimeField(
+        "Дата создания", auto_now_add=True, db_index=True
+    )
+
+    def __str__(self):
+        return "Транзакция %s, Магазин: %s, Сумма: %s" % (
+            self.type,
+            self.store,
+            self.sum,
+        )
+
+    class Meta:
+        app_label = "store"
+        verbose_name = "Внесение / Изъятие наличных"
+        verbose_name_plural = "Внесения и изъятия наличных"
+
+    def create_transaction(self):
+        cash, _ = StoreCash.objects.get_or_create(store=self.store)
+        cash.sum += self.sum if self.type == self.CASH_INCOME else -self.sum
+        cash.save()
+        return cash.sum

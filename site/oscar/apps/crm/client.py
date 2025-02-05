@@ -27,7 +27,6 @@ logger = logging.getLogger("oscar.crm")
 
 CRMEvent = get_model("crm", "CRMEvent")
 CRMBulk = get_model("crm", "CRMBulk")
-CRMMobileCashierToken = get_model("crm", "CRMMobileCashierToken")
 Store = get_model("store", "Store")
 Terminal = get_model("store", "Terminal")
 Staff = get_model("user", "Staff")
@@ -1841,12 +1840,6 @@ class EvotorDocClient(EvotorAPICloud):
 
             if serializer.is_valid():
                 order = serializer.save()
-                event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
-                CRMEvent.objects.create(
-                    body=f"Order created / updated - { order.number }",
-                    sender=CRMEvent.ORDER,
-                    event_type=event_type,
-                )
 
                 for line in order.lines.all():
                     if line.product.get_product_class().track_stock:
@@ -1886,11 +1879,6 @@ class EvotorDocClient(EvotorAPICloud):
 
                 if serializer.is_valid():
                     order = serializer.save()
-                    CRMEvent.objects.create(
-                        body=f"Order refunded - { order.number }",
-                        sender=CRMEvent.ORDER,
-                        event_type=CRMEvent.UPDATE,
-                    )
 
                     for line in order.lines.all():
                         if line.product.get_product_class().track_stock:
@@ -1925,6 +1913,71 @@ class EvotorDocClient(EvotorAPICloud):
 
         return "Заказ был успешно обновлен", True
 
+    def cash_transaction(self, trs_json):
+
+        """"
+            {
+            store_id
+            id
+            "body": {
+                "sum": null,
+                "description": null,
+                "contributor": null
+            }
+            }
+
+            {
+            "body": {
+                "description": null,
+                "sum": null,
+                "payment_category_name": "Инкассация",
+                "receiver": "string"
+            }
+            }
+
+        """
+        error_msgs = []
+        try:
+            json_valid = True
+            created = False
+            try:
+                evotor_id = trs_json.get("id")
+                order = Order.objects.get(evotor_id=evotor_id)
+                serializer = OrderSerializer(order, data=order_json)
+            except Order.DoesNotExist:
+                created = True
+                serializer = OrderSerializer(data=order_json)
+
+            if serializer.is_valid():
+                order = serializer.save()
+
+                for line in order.lines.all():
+                    if line.product.get_product_class().track_stock:
+                        if line.stockrecord and line.stockrecord.num_in_stock > 0:
+                            line.stockrecord.update(
+                                num_in_stock=Greatest(
+                                    (Coalesce(F("num_in_stock"), 0) - line.quantity), 0
+                                ),
+                            )
+                            line.stockrecord.refresh_from_db(field="num_in_stock")
+
+            else:
+                json_valid = False
+                logger.error("Ошибка при сериализации %s" % serializer.errors)
+                error_msgs.append(f"Ошибка сериализации заказа: {serializer.errors}")
+
+            if not json_valid:
+                return ", ".join(error_msgs), False
+
+        except Exception as e:
+            logger.error(f"Ошибка при создании / обновлении заказа: {e}", exc_info=True)
+            return f"Ошибка при создании / обновлении заказа: {e}", False
+
+        return "Заказ был успешно обновлен", True
+
+
+    def stockrecord_operation(self, sro_json):
+        pass
 
 class EvotorPushNotifClient(EvotorAPICloud):
 

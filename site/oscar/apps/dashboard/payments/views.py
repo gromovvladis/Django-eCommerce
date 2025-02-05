@@ -123,7 +123,7 @@ class RefundDetailView(DetailView):
 
 class UpdateSourceView(UpdateView):
     """
-    Обновить информацию о транзациях для конкретного СОРСА
+    Обновить информацию о транзакциях для конкретного СОРСА
     """
     model = Source
 
