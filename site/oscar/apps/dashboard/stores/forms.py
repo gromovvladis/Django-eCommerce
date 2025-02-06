@@ -73,7 +73,6 @@ class StoreCashTransactionForm(forms.ModelForm):
         instance.store = self.store
         if commit:
             instance.save()
-        instance.create_transaction()
         return instance
 
     class Meta:

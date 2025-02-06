@@ -1,5 +1,7 @@
 {% extends 'oscar/dashboard/layout.html' %}
+
 {% load render_table from django_tables2 %}
+{% load currency_filters %}
 
 {% block title %}
     Магазин {{ store }} | {{ block.super }}
@@ -17,7 +19,12 @@
 
 {% block header %}
     <div class="page-header d-flex justify-content-between">
-        <h1>{{ store }}</h1>
+        <div class="d-flex align-items-center">
+            <h1>{{ store.name|default:"Магазин" }}</h1>
+            <a href="{% url 'dashboard:store-cash-transaction-list' store_id=store.id %}" class="fa-1x ml-2 badge badge-info">
+                Наличные: {{ store.cash.sum|default:"0"|currency:"RUB" }}
+            </a>
+        </div>
         <a class="btn btn-success ml-2" href="{% url 'dashboard:store-cash-transaction-create' store_id=store.id %}">
             <i class="fa-solid fa-plus"></i>
             <span>Создать</span>

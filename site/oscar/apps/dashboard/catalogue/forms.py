@@ -234,7 +234,6 @@ class StockRecordOperationForm(forms.ModelForm):
         instance.user = self.user
         if commit:
             instance.save()
-        instance.create_operation()
         return instance
 
     class Meta:

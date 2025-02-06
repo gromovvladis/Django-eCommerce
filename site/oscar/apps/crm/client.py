@@ -19,7 +19,12 @@ from oscar.apps.catalogue.serializers import (
 )
 from oscar.apps.customer.serializers import UserGroupSerializer, StaffSerializer
 from oscar.apps.order.serializers import OrderSerializer
-from oscar.apps.store.serializers import StoreSerializer, TerminalSerializer
+from oscar.apps.store.serializers import (
+    StoreSerializer,
+    TerminalSerializer,
+    StoreCashTransactionSerializer,
+    StockRecordOperationSerializer,
+)
 from oscar.core.loading import get_model
 from .tasks import process_bulk_task
 
@@ -28,6 +33,8 @@ logger = logging.getLogger("oscar.crm")
 CRMEvent = get_model("crm", "CRMEvent")
 CRMBulk = get_model("crm", "CRMBulk")
 Store = get_model("store", "Store")
+StockRecordOperation = get_model("store", "StockRecordOperation")
+StoreCashTransaction = get_model("store", "StoreCashTransaction")
 Terminal = get_model("store", "Terminal")
 Staff = get_model("user", "Staff")
 GroupEvotor = get_model("auth", "GroupEvotor")
@@ -1412,7 +1419,6 @@ class EvotorProductClient(EvotorGroupClient):
 
     def create_or_update_site_products(self, products_json, is_filtered=False):
         error_msgs = []
-        products = Product.objects.all()
         try:
             evotor_ids = []
             json_valid = True
@@ -1421,7 +1427,7 @@ class EvotorProductClient(EvotorGroupClient):
                 evotor_id = product_json.get("id")
                 evotor_ids.append(evotor_id)
                 try:
-                    prd = products.get(evotor_id=evotor_id)
+                    prd = Product.objects.get(evotor_id=evotor_id)
                     serializer = ProductSerializer(prd, data=product_json)
                 except Product.DoesNotExist:
                     created = True
@@ -1711,9 +1717,6 @@ class EvotorAdditionalClient(EvotorProductClient):
         return "Дополнительные товары были успешно обновлены", True
 
 
-# делаем EvotorDocClient и EvotorPushNotifClient
-
-
 class EvotorDocClient(EvotorAPICloud):
 
     # ========= ПОЛУЧЕНИЕ ДАННЫХ
@@ -1849,7 +1852,7 @@ class EvotorDocClient(EvotorAPICloud):
                                     (Coalesce(F("num_in_stock"), 0) - line.quantity), 0
                                 ),
                             )
-                            line.stockrecord.refresh_from_db(field="num_in_stock")
+                            line.stockrecord.refresh_from_db(fields=["num_allocated", "num_in_stock"])
 
             else:
                 json_valid = False
@@ -1870,8 +1873,8 @@ class EvotorDocClient(EvotorAPICloud):
         try:
             json_valid = True
             try:
-                evotor_id = order_json.get("id")
-                order = Order.objects.get(evotor_id=evotor_id)
+                base_document_id = order_json.get("body").get("base_document_id")
+                order = Order.objects.get(evotor_id=base_document_id)
                 order_json["target"] = "RETURN"
                 order_json["reason"] = "Возврат заказа"
 
@@ -1882,12 +1885,8 @@ class EvotorDocClient(EvotorAPICloud):
 
                     for line in order.lines.all():
                         if line.product.get_product_class().track_stock:
-                            line.stockrecord.update(
-                                num_in_stock=(
-                                    Coalesce(F("num_in_stock"), 0) + line.quantity
-                                ),
-                            )
-                            line.stockrecord.refresh_from_db(field="num_in_stock")
+                            line.stockrecord.num_in_stock += line.quantity
+                            line.stockrecord.refresh_from_db(fields=["num_allocated", "num_in_stock"])
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
@@ -1897,8 +1896,7 @@ class EvotorDocClient(EvotorAPICloud):
 
             except Order.DoesNotExist:
                 logger.error(
-                    "Ошибка при создании возврата. Заказ не найден %s"
-                    % order_json
+                    "Ошибка при создании возврата. Заказ не найден %s" % order_json
                 )
                 error_msgs.append(
                     f"Ошибка при создании возврата. Заказ не найден: {order_json}"
@@ -1914,70 +1912,71 @@ class EvotorDocClient(EvotorAPICloud):
         return "Заказ был успешно обновлен", True
 
     def cash_transaction(self, trs_json):
-
-        """"
-            {
-            store_id
-            id
-            "body": {
-                "sum": null,
-                "description": null,
-                "contributor": null
-            }
-            }
-
-            {
-            "body": {
-                "description": null,
-                "sum": null,
-                "payment_category_name": "Инкассация",
-                "receiver": "string"
-            }
-            }
-
-        """
-        error_msgs = []
         try:
-            json_valid = True
-            created = False
             try:
                 evotor_id = trs_json.get("id")
-                order = Order.objects.get(evotor_id=evotor_id)
-                serializer = OrderSerializer(order, data=order_json)
-            except Order.DoesNotExist:
-                created = True
-                serializer = OrderSerializer(data=order_json)
+                store_transaction = StoreCashTransaction.objects.get(
+                    evotor_id=evotor_id
+                )
+                serializer = StoreCashTransactionSerializer(
+                    store_transaction, data=trs_json
+                )
+            except StoreCashTransaction.DoesNotExist:
+                serializer = StoreCashTransactionSerializer(data=trs_json)
 
             if serializer.is_valid():
-                order = serializer.save()
-
-                for line in order.lines.all():
-                    if line.product.get_product_class().track_stock:
-                        if line.stockrecord and line.stockrecord.num_in_stock > 0:
-                            line.stockrecord.update(
-                                num_in_stock=Greatest(
-                                    (Coalesce(F("num_in_stock"), 0) - line.quantity), 0
-                                ),
-                            )
-                            line.stockrecord.refresh_from_db(field="num_in_stock")
+                serializer.save()
 
             else:
-                json_valid = False
                 logger.error("Ошибка при сериализации %s" % serializer.errors)
-                error_msgs.append(f"Ошибка сериализации заказа: {serializer.errors}")
-
-            if not json_valid:
-                return ", ".join(error_msgs), False
+                error_msg = f"Ошибка сериализации внесения / изъятия наличных: {serializer.errors}"
+                return error_msg, False
 
         except Exception as e:
-            logger.error(f"Ошибка при создании / обновлении заказа: {e}", exc_info=True)
-            return f"Ошибка при создании / обновлении заказа: {e}", False
+            logger.error(
+                f"Ошибка при создании / обновлении внесения / изъятия наличных: {e}",
+                exc_info=True,
+            )
+            return (
+                f"Ошибка при создании / обновлении внесения / изъятия наличных: {e}",
+                False,
+            )
 
-        return "Заказ был успешно обновлен", True
-
+        return "Внесение / изъятие наличных было успешно обновлено", True
 
     def stockrecord_operation(self, sro_json):
-        pass
+        try:
+            try:
+                evotor_id = sro_json.get("id")
+                stocrecord_operation = StockRecordOperation.objects.get(
+                    evotor_id=evotor_id
+                )
+                serializer = StockRecordOperationSerializer(
+                    stocrecord_operation, data=sro_json
+                )
+            except StockRecordOperation.DoesNotExist:
+                serializer = StockRecordOperationSerializer(data=sro_json)
+
+            if serializer.is_valid():
+                serializer.save()
+
+            else:
+                logger.error("Ошибка при сериализации %s" % serializer.errors)
+                error_msg = f"Ошибка сериализации события инвентаризации наличных: {serializer.errors}"
+                return error_msg, False
+
+        except Exception as e:
+            logger.error(
+                f"Ошибка при создании / обновлении события инвентаризации: {e}",
+                exc_info=True,
+            )
+            return (
+                f"Ошибка при создании / обновлении события инвентаризации: {e}",
+                False,
+            )
+
+        return "Событие инвентаризации было успешно обновлено", True
+
 
 class EvotorPushNotifClient(EvotorAPICloud):
 

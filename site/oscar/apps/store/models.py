@@ -510,16 +510,12 @@ class StockRecord(models.Model):
 
 
 class StockRecordOperation(models.Model):
-    """
-    A stock record.
-
-    This records information about a product from a fulfilment store, such as
-    their SKU, the number they have in stock and price information.
-
-    Stockrecords are used by 'strategies' to determine availability and pricing
-    information for the customer.
-    """
-
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+        null=True,
+    )
     stockrecord = models.ForeignKey(
         "store.StockRecord",
         on_delete=models.CASCADE,
@@ -575,6 +571,10 @@ class StockRecordOperation(models.Model):
         app_label = "store"
         verbose_name = "Изменение товарной записи"
         verbose_name_plural = "Изменение товарных записей"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.create_operation()
 
     def create_operation(self):
         operation_methods = {
@@ -679,16 +679,35 @@ class StoreCash(models.Model):
 
 
 class StoreCashTransaction(models.Model):
-    store = models.OneToOneField(
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+        null=True,
+    )
+    store = models.ForeignKey(
         "store.Store",
         on_delete=models.CASCADE,
         verbose_name="Магазин",
         related_name="transactions",
     )
-    CASH_INCOME, CASH_OUTCOME = "Внесение наличных", "Изъятие наличных"
+    order = models.ForeignKey(
+        "order.Order",
+        related_name="cash_transactions",
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    CASH_INCOME, CASH_OUTCOME, PAYMENT, REFUND = (
+        "Внесение наличных",
+        "Изъятие наличных",
+        "Оплата заказа",
+        "Возврат заказа",
+    )
     TYPE_CHOICES = (
         (CASH_INCOME, "Внесение наличных"),
         (CASH_OUTCOME, "Изъятие наличных"),
+        (PAYMENT, "Оплата заказа"),
+        (REFUND, "Возврат заказа"),
     )
     type = models.CharField(
         "Тип операции", default=CASH_INCOME, choices=TYPE_CHOICES, max_length=128
@@ -714,8 +733,6 @@ class StoreCashTransaction(models.Model):
         null=False,
         help_text="Сумма наличных в магазине",
     )
-
-    # Date information
     date_created = models.DateTimeField(
         "Дата создания", auto_now_add=True, db_index=True
     )
@@ -727,6 +744,10 @@ class StoreCashTransaction(models.Model):
             self.sum,
         )
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.create_transaction()
+
     class Meta:
         app_label = "store"
         verbose_name = "Внесение / Изъятие наличных"
@@ -734,6 +755,8 @@ class StoreCashTransaction(models.Model):
 
     def create_transaction(self):
         cash, _ = StoreCash.objects.get_or_create(store=self.store)
-        cash.sum += self.sum if self.type == self.CASH_INCOME else -self.sum
+        cash.sum += (
+            self.sum if self.type in [self.CASH_INCOME, self.PAYMENT] else -self.sum
+        )
         cash.save()
         return cash.sum

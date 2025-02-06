@@ -1,4 +1,4 @@
-from django_tables2 import Column, TemplateColumn
+from django_tables2 import A, Column, LinkColumn, TemplateColumn
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
@@ -106,6 +106,12 @@ class StoreCashTransactionListTable(DashboardTable):
             "td": {"class": "name"},
         },
     )
+    order = LinkColumn(
+        "dashboard:order-detail", 
+        args=[A("order.number")], 
+        order_by="order__number",
+        verbose_name="Заказ",
+    )
     description = Column(
         verbose_name="Описание",
         order_by="description",
@@ -130,6 +136,7 @@ class StoreCashTransactionListTable(DashboardTable):
             "type",
             "sum",
             "description",
+            "order",
             "user",
             "date_created",
         )

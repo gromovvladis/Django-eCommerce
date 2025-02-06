@@ -2,11 +2,13 @@
 
 {% if record.type == "Внесение наличных" %}
     <span class="badge badge-success">
-        {{ record.type }}
-    </span>
+{% elif record.type == "Оплата заказа" %}
+    <span class="badge badge-info">
+{% elif record.type == "Возврат заказа" %}
+    <span class="badge badge-warning">
 {% else %}
     <span class="badge badge-danger">
-        {{ record.type }}
-    </span>
 {% endif %}
+    {{ record.type }}
+</span>
 

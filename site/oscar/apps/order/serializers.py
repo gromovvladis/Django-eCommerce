@@ -203,16 +203,15 @@ class PaymentSerializer(serializers.Serializer):
         Transaction.objects.create(
             source=source,
             txn_type="Payment",
-            amount=D(validated_data["sum"]),
+            amount=amount_debited,
             reference="Эвотор",
             status="succeeded",
             paid=True,
             refundable=False,
-            code=validated_data["id"],
             receipt=True,
         )
 
-    def update(self, validated_data, order, target):
+    def update(self, validated_data, order, type):
         source_type, _ = SourceType.objects.get_or_create(
             name=validated_data["app_info"]["name"]
         )
@@ -220,7 +219,7 @@ class PaymentSerializer(serializers.Serializer):
         amount_debited = D(0)
         amount_refunded = D(0)
 
-        if target == "SELL":
+        if type == "SELL":
             amount_debited = sum(
                 D(part["part_sum"]) - D(part["change"])
                 for part in validated_data.get("parts", [])
@@ -231,48 +230,49 @@ class PaymentSerializer(serializers.Serializer):
                 for part in validated_data.get("parts", [])
             )
 
-        source = Source.objects.get_or_create(
+        source, _ = Source.objects.get_or_create(
             order=order,
             source_type=source_type,
             defaults={
                 "amount_debited": amount_debited,
                 "amount_refunded": amount_refunded,
                 "reference": validated_data["type"],
-                "refundable": False,
-                "paid": True if amount_debited > 0 and amount_refunded == 0 else False,
             },
         )
 
-        if target == "SELL":
-            source.amount_debited = amount_debited
+        if type == "SELL":
+            source.amount_debited += amount_debited
         else:
-            source.amount_refunded = amount_refunded
+            source.amount_refunded += amount_refunded
+
+        source.paid = source.balance >= source.amount_allocated
+        source.refundable = source.transactions.filter(refundable=True).exists()
 
         source.save()
 
-        txn_type = "Payment" if target == "SELL" else "Refund"
+        txn_type = "Payment" if type == "SELL" else "Refund"
 
-        transaction = Transaction.objects.get_or_create(
+        transaction, _ = Transaction.objects.get_or_create(
             source=source,
             txn_type=txn_type,
             defaults={
-                "amount": D(validated_data["sum"]),
+                "amount": amount_debited if type == "SELL" else amount_refunded,
                 "reference": "Эвотор",
                 "status": "succeeded",
-                "paid": True if target == "SELL" else False,
+                "paid": True if type == "SELL" else False,
                 "refundable": False,
-                "code": validated_data["id"],
                 "receipt": True,
             },
         )
 
-        transaction.amount = D(validated_data["sum"])
-        transaction.paid = True if target == "SELL" else False
+        transaction.amount = amount_debited if type == "SELL" else amount_refunded
+        transaction.paid = True if type == "SELL" else False
         transaction.save()
 
 
 class OrderSerializer(serializers.Serializer):
     id = serializers.CharField(source="evotor_id")
+    type = serializers.CharField(write_only=True)
     number = serializers.IntegerField(write_only=True)
     store_id = serializers.CharField(write_only=True)
     created_at = serializers.DateTimeField(write_only=True)
@@ -289,6 +289,7 @@ class OrderSerializer(serializers.Serializer):
         store_id = validated_data.get("store_id")
         body = validated_data.get("body")
         extras = validated_data.get("extras", None)
+        type = validated_data.pop("type", None)
 
         store = Store.objects.get(evotor_id=store_id)
 
@@ -299,7 +300,11 @@ class OrderSerializer(serializers.Serializer):
             store=store,
             total=body.get("result_sum", 0),
             shipping_method="Самовывоз",
-            status=settings.OSCAR_SUCCESS_ORDER_STATUS,
+            status=(
+                settings.OSCAR_SUCCESS_ORDER_STATUS
+                if type == "SELL"
+                else settings.OSCAR_FAIL_ORDER_STATUS
+            ),
             date_finish=now(),
             order_time=now(),
         )
@@ -346,15 +351,15 @@ class OrderSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         store_id = validated_data.get("store_id")
         body = validated_data.get("body")
+        type = validated_data.pop("type", None)
 
         store = Store.objects.get(evotor_id=store_id)
 
-        target = validated_data.get("target", None)
         msg = "Коррекция продажи"
 
-        if target == "PAYBACK":
+        if type == "PAYBACK":
             msg = "Коррекция возврата"
-            instance.status = settings.OSCAR_FAIL_ORDER_STATUS
+            instance.set_status(settings.OSCAR_FAIL_ORDER_STATUS)
 
         OrderNote.objects.create(
             order=instance,
@@ -392,7 +397,7 @@ class OrderSerializer(serializers.Serializer):
 
         payments = body.get("payments", [])
         for payment in payments:
-            PaymentSerializer().update(payment, instance, target)
+            PaymentSerializer().update(payment, instance, type)
 
         return instance
 
