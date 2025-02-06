@@ -10,8 +10,8 @@ from oscar.apps.search.search_indexes import ProductIndex
 logger = logging.getLogger("oscar.customer")
 
 Store = get_model("store", "Store")
-Product = get_model('catalogue', 'Product')
-ProductClass = get_model('catalogue', 'ProductClass')
+Product = get_model("catalogue", "Product")
+ProductClass = get_model("catalogue", "ProductClass")
 StockRecord = get_model("store", "StockRecord")
 Category = get_model("catalogue", "Category")
 Attribute = get_model("catalogue", "Attribute")
@@ -25,8 +25,12 @@ class ProductSerializer(serializers.ModelSerializer):
     # товар
     id = serializers.CharField(source="evotor_id")
     name = serializers.CharField(required=False)
-    article_number = serializers.CharField(source="article", required=False, allow_blank=True)
-    description = serializers.CharField(source="short_description", required=False, allow_blank=True)
+    article_number = serializers.CharField(
+        source="article", required=False, allow_blank=True
+    )
+    description = serializers.CharField(
+        source="short_description", required=False, allow_blank=True
+    )
     parent_id = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     # класс товара
@@ -93,7 +97,9 @@ class ProductSerializer(serializers.ModelSerializer):
         product_class = self._get_or_create_product_class(measure_name, quantity)
 
         # Создание или извлечение товара
-        product = self._get_or_create_product(evotor_id, validated_data, parent_product, product_class)
+        product = self._get_or_create_product(
+            evotor_id, validated_data, parent_product, product_class
+        )
 
         # Добавление категории, если она не существует
         if category:
@@ -111,7 +117,9 @@ class ProductSerializer(serializers.ModelSerializer):
         store = self._get_or_create_store(store_id)
 
         # Обработка товарной записи
-        self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
+        self._create_or_update_stock_record(
+            product, store, code, price, cost_price, quantity, tax, allow_to_sell
+        )
 
         return product
 
@@ -134,7 +142,7 @@ class ProductSerializer(serializers.ModelSerializer):
         if parent_id:
             parent_product = self._get_parent_product(parent_id)
             category = self._get_or_create_category(parent_id)
-        
+
         product.name = validated_data.get("name")
         product.short_description = validated_data.get("short_description")
 
@@ -156,21 +164,24 @@ class ProductSerializer(serializers.ModelSerializer):
         store = self._get_or_create_store(store_id)
 
         # Обработка товарной записи
-        self._create_or_update_stock_record(product, store, code, price, cost_price, quantity, tax, allow_to_sell)
+        self._create_or_update_stock_record(
+            product, store, code, price, cost_price, quantity, tax, allow_to_sell
+        )
 
         return product
-    
+
     def _save(self, product):
         product.save()
-        search_backend = connections['default'].get_backend()
+        search_backend = connections["default"].get_backend()
         search_backend.update(ProductIndex(), [product])
-
 
     def _update_article(self, product, article):
         product.article = article
         counter = 1
         while (
-            product.__class__.objects.filter(article=product.article).exclude(id=product.id).exists()
+            product.__class__.objects.filter(article=product.article)
+            .exclude(id=product.id)
+            .exists()
         ):
             product.article = f"{article}-{counter}"
             counter += 1
@@ -193,22 +204,26 @@ class ProductSerializer(serializers.ModelSerializer):
                 "track_stock": bool(quantity),
                 "requires_shipping": False,
                 "measure_name": measure_name,
-            }
+            },
         )[0]
 
-    def _get_or_create_product(self, evotor_id, validated_data, parent_product, product_class):
+    def _get_or_create_product(
+        self, evotor_id, validated_data, parent_product, product_class
+    ):
         """Создание или извлечение товара"""
         return Product.objects.get_or_create(
             evotor_id=evotor_id,
             defaults={
-                "structure": Product.STANDALONE if not parent_product else Product.CHILD,
+                "structure": (
+                    Product.STANDALONE if not parent_product else Product.CHILD
+                ),
                 "product_class": product_class,
                 "is_public": True,
                 "parent": parent_product,
-                **validated_data
-            }
+                **validated_data,
+            },
         )[0]
-    
+
     def _get_or_create_category(self, evotor_id):
         """Создание или извлечение категории"""
         try:
@@ -233,7 +248,9 @@ class ProductSerializer(serializers.ModelSerializer):
         """Создание или извлечение партнера"""
         return Store.objects.get_or_create(evotor_id=store_id)[0]
 
-    def _create_or_update_stock_record(self, product, store, code, price, cost_price, quantity, tax, allow_to_sell):
+    def _create_or_update_stock_record(
+        self, product, store, code, price, cost_price, quantity, tax, allow_to_sell
+    ):
         """Создание или обновление товарной записи"""
         stockrecord, created = StockRecord.objects.get_or_create(
             product=product,
@@ -262,7 +279,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        try:     
+        try:
             store_id = self.context.get("store_id", None)
             representation["measure_name"] = instance.get_product_class().measure_name
 
@@ -271,9 +288,11 @@ class ProductSerializer(serializers.ModelSerializer):
             parent_id = instance.get_evotor_parent_id()
             if parent_id:
                 representation["parent_id"] = parent_id
-            
-            stc = StockRecord.objects.filter(product=instance, store__evotor_id=store_id).first()
-            
+
+            stc = StockRecord.objects.filter(
+                product=instance, store__evotor_id=store_id
+            ).first()
+
             if stc:
                 representation["code"] = stc.evotor_code
                 representation["price"] = stc.price
@@ -288,7 +307,8 @@ class ProductSerializer(serializers.ModelSerializer):
                     attribute_value.attribute.option_group.evotor_id: value.evotor_id
                     for attribute_value in attribute_values
                     if (value := attribute_value.value.first())
-                    and attribute_value.attribute.option_group and attribute_value.attribute.option_group.evotor_id
+                    and attribute_value.attribute.option_group
+                    and attribute_value.attribute.option_group.evotor_id
                     and value.evotor_id
                 }
 
@@ -316,27 +336,34 @@ class ProductsSerializer(serializers.ModelSerializer):
         model = Product
         fields = ["items"]
 
-    def create(self, validated_data):    
+    def create(self, validated_data):
         items_data = validated_data.get("items", [])
         store_id = self.context.get("store_id", None)
-        return [ProductSerializer(context={"store_id": store_id}).create(item_data) for item_data in items_data]
+        return [
+            ProductSerializer(context={"store_id": store_id}).create(item_data)
+            for item_data in items_data
+        ]
 
     def update(self, instances, validated_data):
-        items_data = validated_data.get('items', [])
+        items_data = validated_data.get("items", [])
         store_id = self.context.get("store_id", None)
         products = []
 
         for item_data in items_data:
             try:
-                product_instance = instances.get(evotor_id=item_data['id'])  # `instance` — это QuerySet
-                product = ProductSerializer(context={"store_id": store_id}).update(product_instance, item_data)
+                product_instance = instances.get(
+                    evotor_id=item_data["id"]
+                )  # `instance` — это QuerySet
+                product = ProductSerializer(context={"store_id": store_id}).update(
+                    product_instance, item_data
+                )
             except Product.DoesNotExist:
                 continue  # Пропускаем, если объект не найден
 
             products.append(product)
 
         return products
-    
+
 
 class AttributeOptionSerializer(serializers.Serializer):
     id = serializers.CharField()
@@ -362,7 +389,9 @@ class ProductGroupSerializer(serializers.ModelSerializer):
     parent_id = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     # только у родительского товара
-    attributes = serializers.ListField(child=AttributeOptionGroupSerializer(), write_only=True, required=False)
+    attributes = serializers.ListField(
+        child=AttributeOptionGroupSerializer(), write_only=True, required=False
+    )
 
     updated_at = serializers.DateTimeField(write_only=True)
 
@@ -378,32 +407,32 @@ class ProductGroupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
+        {
+        "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
+        "name": "Группа",
+        "barcodes": [
+            "2000000000060"
+        ],
+        "attributes": [
             {
-            "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-            "name": "Группа",
-            "barcodes": [
-                "2000000000060"
-            ],
-            "attributes": [
+            "id": "36755a25-8f56-11e8-96a6-85f64fd5f8e3",
+            "name": "Цвет",
+            "choices": [
                 {
-                "id": "36755a25-8f56-11e8-96a6-85f64fd5f8e3",
-                "name": "Цвет",
-                "choices": [
-                    {
-                    "id": "36755a27-8f56-11e8-96a6-85f64fd5f8e3",
-                    "name": "Зелёный"
-                    }
-                ]
+                "id": "36755a27-8f56-11e8-96a6-85f64fd5f8e3",
+                "name": "Зелёный"
                 }
             ]
             }
+        ]
+        }
         """
         evotor_id = validated_data.get("evotor_id")
 
         attributes = validated_data.pop("attributes", None)
         parent_id = validated_data.pop("parent_id", None)
         updated_at = validated_data.pop("updated_at", None)
-        
+
         if attributes:
             self.Meta.model = Product
             instance = Product.objects.get_or_create(
@@ -412,8 +441,8 @@ class ProductGroupSerializer(serializers.ModelSerializer):
                     "structure": Product.PARENT,
                     "product_class": self._get_or_create_product_class(),
                     "is_public": True,
-                    **validated_data
-                }
+                    **validated_data,
+                },
             )[0]
 
             category = self._get_or_create_category(parent_id)
@@ -426,10 +455,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             self.Meta.model = Category
             if parent_id:
                 parent = self._get_or_create_category(parent_id)
-                instance = parent.add_child(
-                    evotor_id=evotor_id,
-                    **validated_data
-                )
+                instance = parent.add_child(evotor_id=evotor_id, **validated_data)
             else:
                 name = validated_data.get("name")
                 instance = self._get_or_create_category(evotor_id, name)
@@ -438,31 +464,31 @@ class ProductGroupSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """
+        {
+        "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
+        "name": "Группа",
+        "barcodes": [
+            "2000000000060"
+        ],
+        "attributes": [
             {
-            "parent_id": "1ddea16b-971b-dee5-3798-1b29a7aa2e27",
-            "name": "Группа",
-            "barcodes": [
-                "2000000000060"
-            ],
-            "attributes": [
+            "id": "36755a25-8f56-11e8-96a6-85f64fd5f8e3",
+            "name": "Цвет",
+            "choices": [
                 {
-                "id": "36755a25-8f56-11e8-96a6-85f64fd5f8e3",
-                "name": "Цвет",
-                "choices": [
-                    {
-                    "id": "36755a27-8f56-11e8-96a6-85f64fd5f8e3",
-                    "name": "Зелёный"
-                    }
-                ]
+                "id": "36755a27-8f56-11e8-96a6-85f64fd5f8e3",
+                "name": "Зелёный"
                 }
             ]
             }
+        ]
+        }
         """
         name = validated_data.get("name", None)
         attributes = validated_data.pop("attributes", None)
         parent_id = validated_data.pop("parent_id", None)
         updated_at = validated_data.pop("updated_at", None)
-        
+
         if attributes:
             self.Meta.model = Product
             instance.name = name
@@ -503,15 +529,14 @@ class ProductGroupSerializer(serializers.ModelSerializer):
                     "id": attribute_value.attribute.option_group.evotor_id,
                     "name": attribute_value.attribute.option_group.name,
                     "choices": [
-                        {
-                            "id": choice.evotor_id,
-                            "name": choice.option
-                        }
-                        for choice in attribute_value.value.all() if choice.evotor_id
-                    ]
+                        {"id": choice.evotor_id, "name": choice.option}
+                        for choice in attribute_value.value.all()
+                        if choice.evotor_id
+                    ],
                 }
                 for attribute_value in attribute_values
-                if attribute_value.attribute.option_group and attribute_value.attribute.option_group.evotor_id
+                if attribute_value.attribute.option_group
+                and attribute_value.attribute.option_group.evotor_id
             ]
         else:
             self.Meta.model = Category
@@ -533,9 +558,9 @@ class ProductGroupSerializer(serializers.ModelSerializer):
                 "track_stock": True,
                 "requires_shipping": False,
                 "measure_name": "шт",
-            }
+            },
         )[0]
-    
+
     def _get_or_create_category(self, evotor_id, name=None):
         """Создание или извлечение категории"""
         try:
@@ -544,7 +569,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             )
         except Category.DoesNotExist:
             if name is None:
-                name=f"Категория {evotor_id}"
+                name = f"Категория {evotor_id}"
 
             base_name = name
             counter = 1
@@ -555,7 +580,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             cat = Category.add_root(name=name, evotor_id=evotor_id)
 
         return cat
-    
+
     def _get_or_create_attrs(self, instance, attributes):
         """
         "attributes": [
@@ -576,8 +601,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         for attribute in attributes:
 
             group = AttributeOptionGroup.objects.get_or_create(
-                evotor_id=attribute["id"],
-                defaults={"name": attribute["name"]}
+                evotor_id=attribute["id"], defaults={"name": attribute["name"]}
             )[0]
             group.name = attribute["name"]
             group.save()
@@ -588,7 +612,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
                     defaults={
                         "option": choice["name"],
                         "group": group,
-                        }
+                    },
                 )[0]
                 attr_option.option = choice["name"]
                 attr_option.group = group
@@ -596,19 +620,20 @@ class ProductGroupSerializer(serializers.ModelSerializer):
                 choices.append(attr_option)
 
                 attr = Attribute.objects.get_or_create(
-                    name=attribute["name"],
-                    defaults={"type": "multi_option"}
+                    name=attribute["name"], defaults={"type": "multi_option"}
                 )[0]
 
                 attr.option_group = group
                 attr.save()
 
-        prd_attr = ProductAttribute.objects.get_or_create(product=instance, attribute=attr)[0]
-        prd_attr.is_variant=True
-        
+        prd_attr = ProductAttribute.objects.get_or_create(
+            product=instance, attribute=attr
+        )[0]
+        prd_attr.is_variant = True
+
         for choice in choices:
             prd_attr.value_multi_option.add(choice)
-        
+
         prd_attr.save()
 
         return attr
@@ -620,38 +645,47 @@ class ProductGroupsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ["items"]
-    
-    def create(self, validated_data):    
+
+    def create(self, validated_data):
         items_data = validated_data.get("items", [])
         store_id = self.context.get("store_id", None)
-        return [ProductGroupSerializer(context={"store_id": store_id}).create(item_data) for item_data in items_data]
+        return [
+            ProductGroupSerializer(context={"store_id": store_id}).create(item_data)
+            for item_data in items_data
+        ]
 
     def update(self, instances, validated_data):
-        items_data = validated_data.get('items', [])
+        items_data = validated_data.get("items", [])
         store_id = self.context.get("store_id", None)
         product_groups = []
 
         for item_data in items_data:
             try:
-                product_group_instance = instances.get(evotor_id=item_data['id'])  # `instance` — это QuerySet
-                product_group = ProductGroupSerializer(context={"store_id": store_id}).update(product_group_instance, item_data)
+                product_group_instance = instances.get(
+                    evotor_id=item_data["id"]
+                )  # `instance` — это QuerySet
+                product_group = ProductGroupSerializer(
+                    context={"store_id": store_id}
+                ).update(product_group_instance, item_data)
             except Product.DoesNotExist:
                 continue  # Пропускаем, если объект не найден
 
             product_groups.append(product_group)
 
         return product_groups
-    
+
 
 class AdditionalSerializer(serializers.ModelSerializer):
     # товар
     id = serializers.CharField(source="evotor_id")
     name = serializers.CharField()
     description = serializers.CharField(required=False, allow_blank=True)
-    article_number = serializers.CharField(source="article", required=False, allow_blank=True)
-    
+    article_number = serializers.CharField(
+        source="article", required=False, allow_blank=True
+    )
+
     parent_id = serializers.CharField(required=False, allow_blank=True, write_only=True)
-    
+
     price = serializers.CharField(write_only=True, required=False)
     cost_price = serializers.CharField(write_only=True, required=False)
     store_id = serializers.CharField(write_only=True, required=False)
@@ -698,7 +732,7 @@ class AdditionalSerializer(serializers.ModelSerializer):
                 "price": price,
                 "cost_price": cost_price,
                 "tax": tax,
-            }
+            },
         )[0]
 
         additional.stores.add(*Store.objects.filter(evotor_id=store_id))
@@ -729,16 +763,16 @@ class AdditionalSerializer(serializers.ModelSerializer):
         additional.save()
 
         return additional
-    
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        try:     
+        try:
             representation["tax"] = instance.tax
             representation["allow_to_sell"] = instance.is_public
             representation["article_number"] = instance.article
             representation["price"] = instance.price
             representation["cost_price"] = instance.cost_price
-            
+
             store_id = self.context.get("store_id", None)
             if store_id:
                 store = Store.objects.filter(evotor_id=store_id).first()
@@ -769,20 +803,27 @@ class AdditionalsSerializer(serializers.ModelSerializer):
         model = Additional
         fields = ["items"]
 
-    def create(self, validated_data):    
+    def create(self, validated_data):
         items_data = validated_data.get("items", [])
         store_id = self.context.get("store_id", None)
-        return [AdditionalSerializer(context={"store_id": store_id}).create(item_data) for item_data in items_data]
+        return [
+            AdditionalSerializer(context={"store_id": store_id}).create(item_data)
+            for item_data in items_data
+        ]
 
     def update(self, instances, validated_data):
-        items_data = validated_data.get('items', [])
+        items_data = validated_data.get("items", [])
         store_id = self.context.get("store_id", None)
         products = []
 
         for item_data in items_data:
             try:
-                product_instance = instances.get(evotor_id=item_data['id'])  # `instance` — это QuerySet
-                product = AdditionalSerializer(context={"store_id": store_id}).update(product_instance, item_data)
+                product_instance = instances.get(
+                    evotor_id=item_data["id"]
+                )  # `instance` — это QuerySet
+                product = AdditionalSerializer(context={"store_id": store_id}).update(
+                    product_instance, item_data
+                )
             except Additional.DoesNotExist:
                 continue  # Пропускаем, если объект не найден
 

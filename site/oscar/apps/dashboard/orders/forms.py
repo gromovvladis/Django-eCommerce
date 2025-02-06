@@ -506,8 +506,6 @@ class NewSourceForm(forms.Form):
     amount_allocated = forms.DecimalField(
         label="Сумма", min_value=0, required=True, help_text='Сумма к оплате'
     )
-    payment_id = forms.CharField(max_length=128, label="Код платежа", required=False, help_text='Код оплаты (для интернет транзакций)')
-    refund_id = forms.CharField(max_length=128, label="Код возврата", required=False, help_text='Код возврата (для интернет транзакций)')
 
 
 class NewTransactionForm(forms.ModelForm):

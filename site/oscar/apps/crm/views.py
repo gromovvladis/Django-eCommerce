@@ -27,6 +27,7 @@ site_pass = settings.EVOTOR_SITE_PASS
 
 # ========= вспомогательные функции =========
 
+
 def is_valid_site_token(request):
     # Проверка токена сайта
     auth_header = request.headers.get("Authorization")
@@ -88,7 +89,7 @@ def is_valid_site_and_user_tokens(request):
 
 
 class CRMInstallationEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/subscription/setup """
+    """https://mikado-sushi.ru/crm/api/subscription/setup"""
 
     permission_classes = [AllowAny]
 
@@ -145,7 +146,7 @@ class CRMLoginEndpointView(APIView):
 
 
 class CRMStoreEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/stores """
+    """https://mikado-sushi.ru/crm/api/stores"""
 
     permission_classes = [AllowAny]
 
@@ -175,7 +176,7 @@ class CRMStoreEndpointView(APIView):
 
 
 class CRMTerminalEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/terminals """
+    """https://mikado-sushi.ru/crm/api/terminals"""
 
     permission_classes = [AllowAny]
 
@@ -213,7 +214,7 @@ class CRMTerminalEndpointView(APIView):
 
 
 class CRMStaffEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/staffs """
+    """https://mikado-sushi.ru/crm/api/staffs"""
 
     permission_classes = [AllowAny]
 
@@ -243,7 +244,7 @@ class CRMStaffEndpointView(APIView):
 
 
 class CRMRoleEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/roles """
+    """https://mikado-sushi.ru/crm/api/roles"""
 
     permission_classes = [AllowAny]
 
@@ -273,7 +274,7 @@ class CRMRoleEndpointView(APIView):
 
 
 class CRMProductEndpointView(APIView):
-    """ https://mikado-sushi.ru/crm/api/stores/<str:store_id>/products/ """
+    """https://mikado-sushi.ru/crm/api/stores/<str:store_id>/products/"""
 
     permission_classes = [AllowAny]
 
@@ -319,18 +320,21 @@ class CRMProductEndpointView(APIView):
 
 
 class CRMDocsEndpointView(APIView):
-    """ 
-    https://mikado-sushi.ru/crm/api/docs 
+    """
+    https://mikado-sushi.ru/crm/api/docs
 
-    1. Продажа (SELL)
-    2. Возврат (PAYBACK)
-    3. Коррекция (CORRECTION)
-    4. Приемка (ACCEPT)
-    5. Списание (WRITE_OFF)
-    6. Инвентаризация (INVENTORY)
+    1. Продажа (SELL) +
+    2. Возврат (PAYBACK) +
+    3. Коррекция (CORRECTION) +
+
+    4. Приемка (ACCEPT) +
+    5. Списание (WRITE_OFF) +
+    6. Инвентаризация (INVENTORY) +
+
     7. Переоценка (REVALUATION)
-    8. Внесение наличных (CASH_INCOME)
-    9. Изъятие наличных (CASH_OUTCOME)
+
+    8. Внесение наличных (CASH_INCOME) +
+    9. Изъятие наличных (CASH_OUTCOME) +
     """
 
     permission_classes = [AllowAny]
@@ -352,7 +356,6 @@ class CRMDocsEndpointView(APIView):
             return not_allowed
 
         request_type = request.data.get("type")
-        # request_type = "SELL"
 
         if request_type != "SELL":
             send_message_to_staffs(
@@ -361,24 +364,17 @@ class CRMDocsEndpointView(APIView):
             )
 
         if request_type == "SELL":
-            # self.sell(data, *args, **kwargs)
             self.sell(request.data, *args, **kwargs)
         elif request_type == "PAYBACK":
             self.payback(request.data, *args, **kwargs)
         elif request_type == "CORRECTION":
             self.correction(request.data, *args, **kwargs)
-        elif request_type == "ACCEPT":
-            self.accept(request.data, *args, **kwargs)
-        elif request_type == "WRITE_OFF":
-            self.write_off(request.data, *args, **kwargs)
-        elif request_type == "INVENTORY":
-            self.inventory(request.data, *args, **kwargs)
+        elif request_type in ["ACCEPT", "WRITE_OFF", "INVENTORY"]:
+            self.stockrecord_operation(request.data, *args, **kwargs)
+        elif request_type in ["CASH_INCOME", "CASH_OUTCOME"]:
+            self.cash_transaction(request.data, *args, **kwargs)
         elif request_type == "REVALUATION":
             self.revaluation(request.data, *args, **kwargs)
-        elif request_type == "CASH_INCOME":
-            self.cash_income(request.data, *args, **kwargs)
-        elif request_type == "CASH_OUTCOME":
-            self.cash_outcome(request.data, *args, **kwargs)
         else:
             CRMEvent.objects.create(
                 body="Error: Неподдерживаемый тип документа.",
@@ -397,22 +393,13 @@ class CRMDocsEndpointView(APIView):
     def payback(self, data):
         EvatorCloud().refund_site_order(data)
 
-    def accept(self, data):
-        pass
+    def stockrecord_operation(self, data):
+        EvatorCloud().stockrecord_operation(data)
 
-    def write_off(self, data):
-        pass
-
-    def inventory(self, data):
-        pass
+    def cash_transaction(self, data):
+        EvatorCloud().cash_transaction(data)
 
     def revaluation(self, data):
-        pass
-
-    def cash_income(self, data):
-        pass
-
-    def cash_outcome(self, data):
         pass
 
         # data = {
@@ -852,3 +839,335 @@ class CRMDocsEndpointView(APIView):
         #         "created_at": "2024-12-06T05:57:45.228+0000",
         #         "version": "V2",
         #     }
+
+
+# {
+#     "method": "PUT",
+#     "path": "/crm/api/docs/",
+#     "headers": {
+#         "Host": "provence-coffee.ru",
+#         "X-Real-Ip": "185.170.204.77",
+#         "X-Forwarded-For": "185.170.204.77",
+#         "Connection": "close",
+#         "Content-Length": "2450",
+#         "Accept": "application/json, application/*+json",
+#         "Content-Type": "application/json",
+#         "Authorization": "Bearer 9179d780-56a4-49ea-b042-435e3257eaf8",
+#         "X-Evotor-User-Id": "01-000000010409029",
+#         "X-B3-Traceid": "68aa3bda4cc5572b",
+#         "X-B3-Spanid": "0f5eb3fc52acab73",
+#         "X-B3-Parentspanid": "68aa3bda4cc5572b",
+#         "X-B3-Sampled": "0",
+#         "User-Agent": "Java/1.8.0_151",
+#     },
+#     "data": {
+#         "type": "PAYBACK",
+#         "id": "d7a11cd2-fb23-4999-9dc2-5a97c8227dd5",
+#         "extras": {},
+#         "number": 45376,
+#         "close_date": "2025-02-02T10:18:08.000+0000",
+#         "time_zone_offset": 25200000,
+#         "session_id": "6580cf44-739d-476e-aa37-49385bfdabcc",
+#         "session_number": 208,
+#         "close_user_id": "20240713-4403-40BB-80DA-F84959820434",
+#         "device_id": "20240713-6F49-40AC-803B-E020F9D50BEF",
+#         "store_id": "20240713-774A-4038-8037-E66BF3AA7552",
+#         "user_id": "01-000000010409029",
+#         "body": {
+#             "positions": [
+#                 {
+#                     "product_id": "14ffc31e-8ea3-4e58-98c3-d3ef8a98a26c",
+#                     "quantity": 1,
+#                     "initial_quantity": -1941,
+#                     "quantity_in_package": null,
+#                     "bar_code": null,
+#                     "product_type": "NORMAL",
+#                     "mark": null,
+#                     "mark_data": null,
+#                     "alcohol_by_volume": 0,
+#                     "alcohol_product_kind_code": 0,
+#                     "tare_volume": 0,
+#                     "code": "3",
+#                     "product_name": "Американо",
+#                     "measure_name": "шт",
+#                     "id": 364308,
+#                     "uuid": "f874447a-c57b-4a46-b363-571941817b38",
+#                     "extra_keys": [],
+#                     "sub_positions": [],
+#                     "measure_precision": 0,
+#                     "price": 190,
+#                     "cost_price": 0,
+#                     "result_price": 190,
+#                     "sum": 190,
+#                     "tax": {"type": "NO_VAT", "sum": 0, "result_sum": 0},
+#                     "result_sum": 190,
+#                     "position_discount": null,
+#                     "doc_distributed_discount": null,
+#                     "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                     "splitted_positions": null,
+#                     "attributes_choices": null,
+#                     "settlement_method": {"type": "CHECKOUT_FULL", "amount": null},
+#                     "agent_requisites": null,
+#                 }
+#             ],
+#             "doc_discounts": [],
+#             "payments": [
+#                 {
+#                     "id": "f55a31f4-3564-465c-b98d-d75a35fedcfc",
+#                     "parent_id": null,
+#                     "sum": 190,
+#                     "type": "CASH",
+#                     "parts": [
+#                         {
+#                             "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                             "part_sum": 190,
+#                             "change": 0,
+#                         }
+#                     ],
+#                     "app_payment": null,
+#                     "merchant_info": null,
+#                     "bank_info": null,
+#                     "app_info": {"app_id": null, "name": "Наличные"},
+#                     "cashless_info": null,
+#                     "driver_info": null,
+#                 }
+#             ],
+#             "print_groups": [
+#                 {
+#                     "id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                     "type": "CASH_RECEIPT",
+#                     "org_name": null,
+#                     "org_inn": null,
+#                     "org_address": null,
+#                     "taxation_system": null,
+#                     "medicine_attributes": null,
+#                 }
+#             ],
+#             "pos_print_results": [
+#                 {
+#                     "receipt_number": 4430,
+#                     "document_number": 15271,
+#                     "session_number": 207,
+#                     "receipt_date": "02022025",
+#                     "receipt_time": "1718",
+#                     "fn_reg_number": null,
+#                     "fiscal_sign_doc_number": "388533948",
+#                     "fiscal_document_number": 44561,
+#                     "fn_serial_number": "7382440700036332",
+#                     "kkt_serial_number": "00307900652283",
+#                     "kkt_reg_number": "0008200608019020",
+#                     "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                     "check_sum": 190,
+#                 }
+#             ],
+#             "sum": 190,
+#             "result_sum": 190,
+#             "customer_email": null,
+#             "customer_phone": null,
+#             "base_document_id": "01185b34-2b96-4b07-8a3a-a984a6512ecb",
+#             "base_document_number": 45375,
+#         },
+#         "counterparties": null,
+#         "created_at": "2025-02-02T10:18:10.007+0000",
+#         "version": "V2",
+#     },
+# }
+
+
+# {
+#     "method": "PUT",
+#     "path": "/crm/api/docs/",
+#     "headers": {
+#         "Host": "provence-coffee.ru",
+#         "X-Real-Ip": "185.170.204.77",
+#         "X-Forwarded-For": "185.170.204.77",
+#         "Connection": "close",
+#         "Content-Length": "3956",
+#         "Accept": "application/json, application/*+json",
+#         "Content-Type": "application/json",
+#         "Authorization": "Bearer 9179d780-56a4-49ea-b042-435e3257eaf8",
+#         "X-Evotor-User-Id": "01-000000010409029",
+#         "X-B3-Traceid": "a2697f32413d00c9",
+#         "X-B3-Spanid": "ebbea88f87e95be8",
+#         "X-B3-Parentspanid": "a2697f32413d00c9",
+#         "X-B3-Sampled": "0",
+#         "User-Agent": "Java/1.8.0_151",
+#     },
+#     "data": {
+#         "type": "SELL",
+#         "id": "ecf96edf-efa0-491a-8308-0f2d2bf8d453",
+#         "extras": {},
+#         "number": 40379,
+#         "close_date": "2025-01-12T13:28:45.000+0000",
+#         "time_zone_offset": 25200000,
+#         "session_id": "9f06abb3-b0fc-4d32-9519-5930846ea46b",
+#         "session_number": 187,
+#         "close_user_id": "20240713-4403-40BB-80DA-F84959820434",
+#         "device_id": "20240713-6F49-40AC-803B-E020F9D50BEF",
+#         "store_id": "20240713-774A-4038-8037-E66BF3AA7552",
+#         "user_id": "01-000000010409029",
+#         "body": {
+#             "positions": [
+#                 {
+#                     "product_id": "2a0f4d45-6dbd-4d96-95dd-d80c4a824656",
+#                     "quantity": 1,
+#                     "initial_quantity": -2476,
+#                     "quantity_in_package": null,
+#                     "bar_code": null,
+#                     "product_type": "NORMAL",
+#                     "mark": null,
+#                     "mark_data": null,
+#                     "alcohol_by_volume": 0,
+#                     "alcohol_product_kind_code": 0,
+#                     "tare_volume": 0,
+#                     "code": "8",
+#                     "product_name": "Кофе 0,4",
+#                     "measure_name": "шт",
+#                     "id": 320768,
+#                     "uuid": "5890d2df-4294-48b5-b61c-73bbeb39c624",
+#                     "extra_keys": [],
+#                     "sub_positions": [],
+#                     "measure_precision": 0,
+#                     "price": 310,
+#                     "cost_price": 0,
+#                     "result_price": 310,
+#                     "sum": 310,
+#                     "tax": {"type": "NO_VAT", "sum": 0, "result_sum": 0},
+#                     "result_sum": 310,
+#                     "position_discount": null,
+#                     "doc_distributed_discount": null,
+#                     "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                     "splitted_positions": null,
+#                     "attributes_choices": null,
+#                     "settlement_method": {"type": "CHECKOUT_FULL", "amount": null},
+#                     "agent_requisites": null,
+#                 },
+#                 {
+#                     "product_id": "3edc36f3-03f9-4e0a-9717-4be906eceace",
+#                     "quantity": 1,
+#                     "initial_quantity": -997,
+#                     "quantity_in_package": null,
+#                     "bar_code": null,
+#                     "product_type": "NORMAL",
+#                     "mark": null,
+#                     "mark_data": null,
+#                     "alcohol_by_volume": 0,
+#                     "alcohol_product_kind_code": 0,
+#                     "tare_volume": 0,
+#                     "code": "4",
+#                     "product_name": "Сироп",
+#                     "measure_name": "шт",
+#                     "id": 320770,
+#                     "uuid": "ee3c0380-aabb-435a-baab-2f93cbba02a9",
+#                     "extra_keys": [],
+#                     "sub_positions": [],
+#                     "measure_precision": 0,
+#                     "price": 30,
+#                     "cost_price": 0,
+#                     "result_price": 30,
+#                     "sum": 30,
+#                     "tax": {"type": "NO_VAT", "sum": 0, "result_sum": 0},
+#                     "result_sum": 30,
+#                     "position_discount": null,
+#                     "doc_distributed_discount": null,
+#                     "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                     "splitted_positions": null,
+#                     "attributes_choices": null,
+#                     "settlement_method": {"type": "CHECKOUT_FULL", "amount": null},
+#                     "agent_requisites": null,
+#                 },
+#                 {
+#                     "product_id": "13111c38-e846-41f7-a723-7914a818eaac",
+#                     "quantity": 1,
+#                     "initial_quantity": -3219,
+#                     "quantity_in_package": null,
+#                     "bar_code": null,
+#                     "product_type": "NORMAL",
+#                     "mark": null,
+#                     "mark_data": null,
+#                     "alcohol_by_volume": 0,
+#                     "alcohol_product_kind_code": 0,
+#                     "tare_volume": 0,
+#                     "code": "2",
+#                     "product_name": "Кофе 0,3",
+#                     "measure_name": "шт",
+#                     "id": 320772,
+#                     "uuid": "42858995-3959-415f-acdf-1c8eeeb86856",
+#                     "extra_keys": [],
+#                     "sub_positions": [],
+#                     "measure_precision": 0,
+#                     "price": 280,
+#                     "cost_price": 0,
+#                     "result_price": 280,
+#                     "sum": 280,
+#                     "tax": {"type": "NO_VAT", "sum": 0, "result_sum": 0},
+#                     "result_sum": 280,
+#                     "position_discount": null,
+#                     "doc_distributed_discount": null,
+#                     "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                     "splitted_positions": null,
+#                     "attributes_choices": null,
+#                     "settlement_method": {"type": "CHECKOUT_FULL", "amount": null},
+#                     "agent_requisites": null,
+#                 },
+#             ],
+#             "doc_discounts": [],
+#             "payments": [
+#                 {
+#                     "id": "fddafcf5-db67-4085-8277-9ba7311eed03",
+#                     "parent_id": null,
+#                     "sum": 1000,
+#                     "type": "CASH",
+#                     "parts": [
+#                         {
+#                             "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                             "part_sum": 1000,
+#                             "change": 380,
+#                         }
+#                     ],
+#                     "app_payment": null,
+#                     "merchant_info": null,
+#                     "bank_info": null,
+#                     "app_info": {"app_id": null, "name": "Наличные"},
+#                     "cashless_info": null,
+#                     "driver_info": null,
+#                 }
+#             ],
+#             "print_groups": [
+#                 {
+#                     "id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                     "type": "CASH_RECEIPT",
+#                     "org_name": null,
+#                     "org_inn": null,
+#                     "org_address": null,
+#                     "taxation_system": null,
+#                     "medicine_attributes": null,
+#                 }
+#             ],
+#             "pos_print_results": [
+#                 {
+#                     "receipt_number": 9516,
+#                     "document_number": 10088,
+#                     "session_number": 186,
+#                     "receipt_date": "12012025",
+#                     "receipt_time": "2028",
+#                     "fn_reg_number": null,
+#                     "fiscal_sign_doc_number": "3884633961",
+#                     "fiscal_document_number": 39647,
+#                     "fn_serial_number": "7382440700036332",
+#                     "kkt_serial_number": "00307900652283",
+#                     "kkt_reg_number": "0008200608019020",
+#                     "print_group_id": "46dd89f0-3a54-470a-a166-ad01fa34b86a",
+#                     "check_sum": 620,
+#                 }
+#             ],
+#             "sum": 620,
+#             "result_sum": 620,
+#             "customer_email": null,
+#             "customer_phone": null,
+#         },
+#         "counterparties": null,
+#         "created_at": "2025-01-12T13:28:47.145+0000",
+#         "version": "V2",
+#     },
+# }

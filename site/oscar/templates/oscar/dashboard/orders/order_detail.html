@@ -646,102 +646,100 @@
             </div>
             <div class="tab-pane fade {% if active_tab == 'payment' %}show active{% endif %}" id="payment" role="tabpanel">
                 {% block tab_payment %}
-                    {% with sources=order.sources.all %}
-                        <div class="table-header">
-                            <h3 class="float-left">
-                                <i class="fa-solid fa-credit-card"></i>
-                                Источники оплаты
-                            </h3>
-                            <a class="btn btn-secondary float-right caption-fill-width" href="{% url 'dashboard:add-source' number=order.number %}">
-                                <i class="fas fa-plus"></i>
-                                <span class="caption-button">
-                                    Добавить способ оплаты
-                                </span>
-                            </a>
-                        </div>
-                        {% if sources %}
-                            <div class="mobile-table">
-                                <table class="table table-striped table-bordered table-hover">
-                                    <thead>
+                    <div class="table-header">
+                        <h3 class="float-left">
+                            <i class="fa-solid fa-credit-card"></i>
+                            Источники оплаты
+                        </h3>
+                        <a class="btn btn-secondary float-right caption-fill-width" href="{% url 'dashboard:add-source' number=order.number %}">
+                            <i class="fas fa-plus"></i>
+                            <span class="caption-button">
+                                Добавить способ оплаты
+                            </span>
+                        </a>
+                    </div>
+                    {% if sources %}
+                        <div class="mobile-table">
+                            <table class="table table-striped table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="name">Источник</th>
+                                        <th>К оплате</th>
+                                        <th>Оплачено</th>
+                                        <th>Возвращено</th>
+                                        <th class="actions">Обновить</th>
+                                        <th>Удалить</th>
+                                        <th class="toggle-row"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for source in sources %}
                                         <tr>
-                                            <th class="name">Источник</th>
-                                            <th>К оплате</th>
-                                            <th>Оплачено</th>
-                                            <th>Возвращено</th>
-                                            <th class="actions">Обновить</th>
-                                            <th>Удалить</th>
-                                            <th class="toggle-row"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for source in sources %}
-                                            <tr>
-                                                <td class="name">
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="spinner-border-sm {% if source.paid %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
-                                                        {{ source.source_type }} ({{ source.reference|default:"-" }})
-                                                    </div>
-                                                </td>
-                                                <td data-label="К оплате">{{ source.amount_allocated|currency:order.currency }}</td>
-                                                <td data-label="Оплачено">{{ source.amount_debited|currency:order.currency }}</td>
-                                                <td data-label="Возвращено">{{ source.amount_refunded|currency:order.currency }}</td>
-                                                <td class="actions">
-                                                    {% if source.payment_id or source.refund_id %}
-                                                        <a class="btn btn-info" href="{% url 'dashboard:update-source' number=order.number pk=source.id %}">
-                                                            <i class="fa-solid fa-arrows-rotate"></i>
-                                                            <span class="caption-button">
-                                                                Обновить
-                                                            </span>
-                                                        </a>
-                                                    {% else %}
+                                            <td class="name">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="spinner-border-sm {% if source.paid %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
+                                                    {{ source.source_type }} ({{ source.reference|default:"-" }})
+                                                </div>
+                                            </td>
+                                            <td data-label="К оплате">{{ source.amount_allocated|currency:order.currency }}</td>
+                                            <td data-label="Оплачено">{{ source.amount_debited|currency:order.currency }}</td>
+                                            <td data-label="Возвращено">{{ source.amount_refunded|currency:order.currency }}</td>
+                                            <td class="actions">
+                                                {% if source.online_payment %}
+                                                    <a class="btn btn-info" href="{% url 'dashboard:update-source' number=order.number pk=source.id %}">
+                                                        <i class="fa-solid fa-arrows-rotate"></i>
                                                         <span class="caption-button">
-                                                            -
+                                                            Обновить
                                                         </span>
-                                                    {% endif %}
-                                                </td>
-                                                <td data-label="Удалить">
-                                                    {% if not source.id in payment_transactions_source_id %}
-                                                        <a class="btn btn-danger" href="{% url 'dashboard:delete-source' number=order.number pk=source.id %}">
-                                                            <i class="fa-solid fa-trash"></i>
-                                                            <span class="caption-button">
-                                                                Удалить
-                                                            </span>
-                                                        </a>
-                                                    {% else %}
-                                                        Удаление недоступно. 
-                                                        Имеются транзакции
-                                                    {% endif %}
-                                                </td>
-                                                <td class="toggle-row">
-                                                    <button class="btn btn-secondary" type="button">
-                                                        <i class="fa-solid fa-chevron-up"></i>
-                                                        <i class="fa-solid fa-chevron-down"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                    <tfoot class="">
-                                        <tr>
-                                            <td class="payment-footer" colspan="8">
-                                                {% if order_paid == order.total %}
-                                                    <span class="text-success"><strong>Заказ оплачен</strong></span>
-                                                {% elif order_paid == 0 %}
-                                                    <span class="text-danger"><strong>Заказ не оплачен</strong></span>
+                                                    </a>
                                                 {% else %}
-                                                    <span class="text-warning"><strong>Оплачено: {{ order_paid|currency:order.currency }}</strong></span>
+                                                    <span class="caption-button">
+                                                        -
+                                                    </span>
                                                 {% endif %}
                                             </td>
+                                            <td data-label="Удалить">
+                                                {% if not source.id in payment_transactions_source_id %}
+                                                    <a class="btn btn-danger" href="{% url 'dashboard:delete-source' number=order.number pk=source.id %}">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                        <span class="caption-button">
+                                                            Удалить
+                                                        </span>
+                                                    </a>
+                                                {% else %}
+                                                    Удаление недоступно. 
+                                                    Имеются транзакции
+                                                {% endif %}
+                                            </td>
+                                            <td class="toggle-row">
+                                                <button class="btn btn-secondary" type="button">
+                                                    <i class="fa-solid fa-chevron-up"></i>
+                                                    <i class="fa-solid fa-chevron-down"></i>
+                                                </button>
+                                            </td>
                                         </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        {% else %}
-                            <table class="table table-striped table-bordered table-hover">
-                                <tr><td>Источники оплаты для этого заказа не найдены.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="">
+                                    <tr>
+                                        <td class="payment-footer" colspan="8">
+                                            {% if order_paid == order.total %}
+                                                <span class="text-success"><strong>Заказ оплачен</strong></span>
+                                            {% elif order_paid == 0 %}
+                                                <span class="text-danger"><strong>Заказ не оплачен</strong></span>
+                                            {% else %}
+                                                <span class="text-warning"><strong>Оплачено: {{ order_paid|currency:order.currency }}</strong></span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </tfoot>
                             </table>
-                        {% endif %}
-                    {% endwith %}
+                        </div>
+                    {% else %}
+                        <table class="table table-striped table-bordered table-hover">
+                            <tr><td>Источники оплаты для этого заказа не найдены.</td></tr>
+                        </table>
+                    {% endif %}
 
                     {% block payment_transactions %}
                         <div class="table-header">

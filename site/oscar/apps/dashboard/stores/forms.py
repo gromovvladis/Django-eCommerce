@@ -4,7 +4,8 @@ from oscar.core.loading import get_model
 
 User = get_user_model()
 Store = get_model("store", "Store")
-StoreAddress = get_model("store", "StoreAddress")
+Store = get_model("store", "Store")
+StoreCashTransaction = get_model("store", "StoreCashTransaction")
 
 
 class StoreSearchForm(forms.Form):
@@ -58,3 +59,29 @@ class StoreForm(forms.ModelForm):
             "end_worktime",
             "is_active",
         )
+
+
+class StoreCashTransactionForm(forms.ModelForm):
+    def __init__(self, store, user, *args, **kwargs):
+        self.store = store
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.user = self.user
+        instance.store = self.store
+        if commit:
+            instance.save()
+        return instance
+
+    class Meta:
+        model = StoreCashTransaction
+        fields = (
+            "type",
+            "description",
+            "sum",
+            "store",
+            "user",
+        )
+        exclude = ["store", "user"]

@@ -39,10 +39,14 @@ class Transaction(models.Model):
     amount = models.DecimalField("Сумма", decimal_places=2, max_digits=12)
     reference = models.CharField("Референс", max_length=128, blank=True)
     status = models.CharField("Статус", max_length=128, blank=True)
-    paid = models.BooleanField("Оплачено", blank=True)
-    refundable = models.BooleanField("Возвращено", blank=True)
-    code = models.CharField("Номер транзакции", max_length=128, blank=True)
-    receipt = models.BooleanField("Чек", blank=True, default=False)
+
+    is_included = models.BooleanField("Транзакция учтена в источнике", default=False)
+    receipt = models.BooleanField("Чек ОФД", default=False)
+    paid = models.BooleanField("Оплачено", default=False)
+    refundable = models.BooleanField("Возврат возможен", default=False)
+
+    payment_id = models.CharField("Код оплаты", max_length=128, blank=True)
+    refund_id = models.CharField("Код возврата", max_length=128, blank=True)
 
     date_created = models.DateTimeField(
         "Дата создания", auto_now_add=True, db_index=True
@@ -86,9 +90,7 @@ class Source(models.Model):
         related_name="sources",
         verbose_name="Тип источника",
     )
-    currency = models.CharField(
-        "Валюта", max_length=12, default=get_default_currency
-    )
+    currency = models.CharField("Валюта", max_length=12, default=get_default_currency)
 
     # Track the various amounts associated with this source
     amount_allocated = models.DecimalField(
@@ -111,12 +113,6 @@ class Source(models.Model):
     # paid
     paid = models.BooleanField("Оплачено", blank=True)
 
-    # A payment code for the source, eg XXXX-XXXX-XXXX-1234
-    payment_id = models.CharField("Код оплаты", max_length=128, blank=True)
-
-    # A refund code for the source, eg XXXX-XXXX-XXXX-1234
-    refund_id = models.CharField("Код возврата", max_length=128, blank=True)
-
     # A dictionary of submission data that is stored as part of the
     # checkout process, where we need to pass an instance of this class around
     submission_data = None
@@ -131,7 +127,7 @@ class Source(models.Model):
         permissions = (
             ("full_access", "Полный доступ к источникам оплаты"),
             ("read", "Просматривать платежи и возвраты"),
-            ("make_refund", "Остуществлять возвраты"),    
+            ("make_refund", "Остуществлять возвраты"),
         )
         verbose_name = "Источник оплаты"
         verbose_name_plural = "Источники оплаты"
@@ -151,19 +147,17 @@ class Source(models.Model):
             for txn in self.deferred_txns:
                 self._create_transaction(*txn)
 
-
-    def set_payment_id(self, pay_id):
-        self.payment_id = pay_id
-        self.save()
-
-
-    def set_refund_id(self, ref_id):
-        self.refund_id = ref_id
-        self.save()
-
-
     def create_deferred_transaction(
-        self, txn_type, amount, reference=None, status=None, paid=None,  code=None, refundable=None, receipt=False
+        self,
+        txn_type,
+        amount,
+        reference=None,
+        status=None,
+        paid=None,
+        refundable=None,
+        receipt=False,
+        payment_id=None,
+        refund_id=None,
     ):
         """
         Register the data for a transaction that can't be created yet due to FK
@@ -172,19 +166,42 @@ class Source(models.Model):
         """
         if self.deferred_txns is None:
             self.deferred_txns = []
-        self.deferred_txns.append((txn_type, amount, reference, status, paid, code, refundable, receipt))
+        self.deferred_txns.append(
+            (
+                txn_type,
+                amount,
+                reference,
+                status,
+                paid,
+                refundable,
+                receipt,
+                payment_id,
+                refund_id,
+            )
+        )
 
-
-    def _create_transaction(self, txn_type, amount, reference="", status="", paid=False,  code="", refundable=False, receipt=False):
-        self.transactions.create(
-            txn_type=txn_type, 
-            amount=amount, 
-            reference=reference, 
-            status=status, 
-            paid=paid, 
-            code=code,
+    def _create_transaction(
+        self,
+        txn_type,
+        amount,
+        reference="",
+        status="",
+        paid=False,
+        refundable=False,
+        receipt=False,
+        payment_id="",
+        refund_id="",
+    ):
+        return self.transactions.create(
+            txn_type=txn_type,
+            amount=amount,
+            reference=reference,
+            status=status,
+            paid=paid,
             refundable=refundable,
-            receipt=receipt
+            receipt=receipt,
+            payment_id=payment_id,
+            refund_id=refund_id,
         )
 
     # =======
@@ -192,164 +209,312 @@ class Source(models.Model):
     # =======
 
     # PAYMENTS
-    
-    def allocate(self, amount, reference="", status="", paid="", code="", refundable=True, receipt=False):
+    def allocate(
+        self,
+        amount,
+        reference="",
+        status="",
+        paid="",
+        refundable=True,
+        receipt=False,
+        payment_id="",
+    ):
         """
         Convenience method for ring-fencing money against this source
         """
         self.amount_allocated += amount
         self.save()
-        self._create_transaction(Transaction.PAYMENT, amount, reference, status, paid, code, refundable, receipt)
+        self._create_transaction(
+            txn_type=Transaction.PAYMENT,
+            amount=amount,
+            reference=reference,
+            status=status,
+            paid=paid,
+            refundable=refundable,
+            receipt=receipt,
+            payment_id=payment_id,
+        )
 
     allocate.alters_data = True
 
-    def debit(self, amount=None, reference="", status="", paid="", code="", refundable=True, receipt=False):
+    def debit(
+        self,
+        amount=None,
+        reference="",
+        status="",
+        paid="",
+        refundable=True,
+        receipt=False,
+        payment_id="",
+    ):
         """
         Convenience method for recording debits against this source
         """
         if amount is None:
             amount = self.balance
-            
+
         self.amount_debited += amount
         self.save()
-        self._create_transaction(Transaction.PAYMENT, amount, reference, status, paid, code, refundable, receipt)
+        self._create_transaction(
+            txn_type=Transaction.PAYMENT,
+            amount=amount,
+            reference=reference,
+            status=status,
+            paid=paid,
+            refundable=refundable,
+            receipt=receipt,
+            payment_id=payment_id,
+        )
 
     debit.alters_data = True
 
-    def new_payment(self, amount=None, reference="", status="", paid="", code="", refundable=True, receipt=False):
+    def new_payment(
+        self,
+        amount=None,
+        reference="",
+        status="",
+        paid="",
+        refundable=True,
+        receipt=False,
+        payment_id="",
+    ):
         """
         Добавление новой транзакции оплаты
-        """ 
+        """
         receipt = receipt or False
-
-        if status == 'succeeded':
-            self.amount_debited += amount
-            self.paid = paid
-            self.refundable = refundable
 
         if amount is None:
             amount = self.balance
-        
+
+        trx = self._create_transaction(
+            txn_type=Transaction.PAYMENT,
+            amount=amount,
+            reference=reference,
+            status=status,
+            paid=paid,
+            refundable=refundable,
+            receipt=receipt,
+            payment_id=payment_id,
+        )
+
+        if status == "succeeded":
+            self.amount_debited += amount
+            self.paid = self.balance >= self.amount_allocated
+            self.refundable = any(trx.refundable for trx in self.transactions.all())
+
         self.save()
-        self._create_transaction(Transaction.PAYMENT, amount, reference, status, paid, code, refundable, receipt)
+
+        return trx
 
     new_payment.alters_data = True
 
-    def update_payment(self, amount=None, reference="", status="", paid="", code="", refundable=True, receipt=False):
+    def update_payment(
+        self,
+        amount=None,
+        reference="",
+        status="",
+        paid="",
+        refundable=True,
+        receipt=False,
+        payment_id="",
+    ):
         """
         Обновление существующей транзакции оплаты.
         """
-        if status != 'succeeded':
-            return
-
-        receipt = receipt or False
-
         try:
-            updated = False
-            transaction = self.transactions.get(code=code)
+            transaction = self.transactions.get(payment_id=payment_id)
+            old_amount = transaction.amount
 
-            if transaction.amount != amount:
-                self.amount_debited += amount - transaction.amount
-                transaction.amount = amount
-                updated = True
+            fields_to_update = {
+                "amount": amount,
+                "reference": reference,
+                "status": status,
+                "paid": paid,
+                "refundable": refundable,
+                "receipt": receipt,
+            }
+            updated_fields = {
+                field: new_value
+                for field, new_value in fields_to_update.items()
+                if getattr(transaction, field) != new_value
+            }
 
-            if transaction.paid != paid:
-                transaction.paid = paid
-                updated = True
-
-            if transaction.refundable != refundable or self.refundable != refundable:
-                self.refundable = refundable
-                transaction.refundable = refundable
-                updated = True
-
-            if self.payment_id != transaction.code:
-                self.payment_id = code
-                updated = True
-
-            if updated:
-                self.save()
+            if updated_fields:
+                for field, value in updated_fields.items():
+                    setattr(transaction, field, value)
                 transaction.save()
 
-        except self.transactions.model.DoesNotExist:
-            self.new_payment(amount, reference, status, paid, code, refundable, receipt)
+            if status == "succeeded":
+                transaction_is_new = not transaction.is_included
+                amount_delta = (
+                    transaction.amount - old_amount
+                    if not transaction_is_new
+                    else transaction.amount
+                )
 
-        return updated
+                if transaction_is_new or updated_fields:
+                    self.amount_debited += amount_delta
+                    self.paid = self.balance >= self.amount_allocated
+                    self.refundable = self.transactions.filter(refundable=True).exists()
+                    self.save()
+
+                    if transaction_is_new:
+                        transaction.is_included = True
+                        transaction.save()
+
+            return bool(updated_fields)
+
+        except self.transactions.model.DoesNotExist:
+            return self.new_payment(
+                amount=amount,
+                reference=reference,
+                status=status,
+                paid=paid,
+                refundable=refundable,
+                receipt=receipt,
+                payment_id=payment_id,
+            )
 
     update_payment.alters_data = True
 
-    #REFUND
-    def refund(self, amount, reference="", status="", paid="", code="", refundable=False, receipt=False):
+    # REFUND
+    def refund(
+        self,
+        amount,
+        reference="",
+        status="",
+        paid="",
+        refundable=False,
+        receipt=False,
+        refund_id="",
+    ):
         """
         Convenience method for recording refunds against this source
         """
         if self.refundable:
             self.amount_refunded += amount
             self.save()
-            self._create_transaction(Transaction.REFUND, amount, reference, status, paid, code, refundable, receipt)
+            self._create_transaction(
+                txn_type=Transaction.REFUND,
+                amount=amount,
+                reference=reference,
+                status=status,
+                paid=paid,
+                refundable=refundable,
+                receipt=receipt,
+                refund_id=refund_id,
+            )
 
     refund.alters_data = True
 
-    def new_refund(self, amount=None, reference="", status="", paid=False, code="", refundable=False, receipt=False):
+    def new_refund(
+        self,
+        amount=None,
+        reference="",
+        status="",
+        paid=False,
+        refundable=False,
+        receipt=False,
+        refund_id="",
+    ):
         """
         Добавление новой транзакции возврата
         """
         receipt = receipt or False
 
-        if status == 'succeeded':
-            self.amount_refunded += amount
-            self.refund_id = code
-            self.paid = paid 
-            self.refundable = refundable
-
         if amount is None:
             amount = self.balance
-            
+
+        trx = self._create_transaction(
+            txn_type=Transaction.REFUND,
+            amount=amount,
+            reference=reference,
+            status=status,
+            paid=paid,
+            refundable=refundable,
+            receipt=receipt,
+            refund_id=refund_id,
+        )
+
+        if status == "succeeded":
+            self.amount_refunded += amount
+            self.paid = self.balance >= self.amount_allocated
+            self.refundable = any(trx.refundable for trx in self.transactions.all())
+
         self.save()
-        self._create_transaction(Transaction.REFUND, amount, reference, status, paid, code, refundable, receipt)
+
+        return trx
 
     new_refund.alters_data = True
 
-    def update_refund(self, amount=None, reference="", status="", paid=False, code="", refundable=False, receipt=False):
+    def update_refund(
+        self,
+        amount=None,
+        reference="",
+        status="",
+        paid=False,
+        refundable=False,
+        receipt=False,
+        refund_id="",
+    ):
         """
         Обновление существующей транзакции возврата.
         """
-        if status != 'succeeded':
-            return
-
-        receipt = receipt or False
-
         try:
-            updated = False
-            transaction = self.transactions.get(code=code)
+            transaction = self.transactions.get(refund_id=refund_id)
+            old_amount = transaction.amount
 
-            if transaction.amount != amount:
-                self.amount_refunded += amount - transaction.amount
-                transaction.amount = amount
-                updated = True
+            # Обновляем только измененные поля
+            fields_to_update = {
+                "amount": amount,
+                "reference": reference,
+                "status": status,
+                "paid": paid,
+                "refundable": refundable,
+                "receipt": receipt,
+            }
+            updated_fields = {
+                field: new_value
+                for field, new_value in fields_to_update.items()
+                if getattr(transaction, field) != new_value
+            }
 
-            if transaction.paid != paid or self.paid != paid:
-                self.paid = paid
-                transaction.paid = paid
-                updated = True
-
-            if transaction.refundable != refundable or self.refundable != refundable:
-                self.refundable = refundable
-                transaction.refundable = refundable
-                updated = True
-
-            if self.refund_id != transaction.code:
-                self.refund_id = code
-                updated = True
-
-            if updated:
-                self.save()
+            if updated_fields:
+                for field, value in updated_fields.items():
+                    setattr(transaction, field, value)
                 transaction.save()
 
-        except self.transactions.model.DoesNotExist:
-            self.new_payment(amount, reference, status, paid, code, refundable, receipt)
+            if status == "succeeded":
+                transaction_is_new = not transaction.is_included
+                amount_delta = (
+                    transaction.amount + old_amount
+                    if transaction_is_new
+                    else transaction.amount
+                )
 
-        return updated
-            
+                if transaction_is_new or updated_fields:
+                    self.amount_refunded -= amount_delta
+                    self.paid = self.balance >= self.amount_allocated
+                    self.refundable = self.transactions.filter(refundable=True).exists()
+                    self.save()
+
+                    if transaction_is_new:
+                        transaction.is_included = True
+                        transaction.save()
+
+            return bool(updated_fields)
+
+        except self.transactions.model.DoesNotExist:
+            return self.new_refund(
+                amount=amount,
+                reference=reference,
+                status=status,
+                paid=paid,
+                refundable=refundable,
+                receipt=receipt,
+                refund_id=refund_id,
+            )
+
     update_refund.alters_data = True
 
     # ==========
@@ -361,7 +526,7 @@ class Source(models.Model):
         """
         Return the balance of this source
         """
-        return self.amount_allocated - self.amount_debited + self.amount_refunded
+        return self.amount_debited - self.amount_refunded
 
     @property
     def amount_available_for_refund(self):
@@ -436,7 +601,6 @@ class Bankcard(models.Model):
     # We store a date even though only the month is visible.  Bankcards are
     # valid until the last day of the month.
     expiry_date = models.DateField("Дата истечения срока действия")
-
 
     # Temporary data not persisted to the DB
     start_date = None

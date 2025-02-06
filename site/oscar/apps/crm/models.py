@@ -1,11 +1,16 @@
 from django.db import models
 
+
 class CRMEvent(models.Model):
-
     body = models.TextField()
-
     TERMINAL, STORE, ORDER, DOC = "TERMINAL", "STORE", "ORDER", "DOC"
-    INSTALLATION, STAFF, PRODUCT, GROUP, MICS  = "INSTALLATION", "STAFF", "PRODUCT", "GROUP", "MICS"
+    INSTALLATION, STAFF, PRODUCT, GROUP, MICS = (
+        "INSTALLATION",
+        "STAFF",
+        "PRODUCT",
+        "GROUP",
+        "MICS",
+    )
     sender_choices = (
         (TERMINAL, "Терминал"),
         (STORE, "Магазин"),
@@ -18,9 +23,16 @@ class CRMEvent(models.Model):
         (MICS, "Неизвестно"),
     )
     sender = models.CharField(max_length=32, choices=sender_choices, default=MICS)
-    
-    CREATION, DELETE, UPDATE, INFO, BULK, ERROR = "CREATION", "DELETE", "UPDATE", "INFO", "BULK", "ERROR"
-    type_choices = (   
+
+    CREATION, DELETE, UPDATE, INFO, BULK, ERROR = (
+        "CREATION",
+        "DELETE",
+        "UPDATE",
+        "INFO",
+        "BULK",
+        "ERROR",
+    )
+    type_choices = (
         (CREATION, "Создание"),
         (DELETE, "Удаление"),
         (UPDATE, "Обновление"),
@@ -77,12 +89,8 @@ class CRMBulk(models.Model):
     status = models.CharField(
         "Статус задачи", default=ACCEPTED, choices=STATUS_CHOICES, max_length=128
     )
-    date_created = models.DateTimeField(
-        "Дата создания", auto_now_add=True
-    )
-    date_finish = models.DateTimeField(
-        "Дата окончания", blank=True, null=True
-    )
+    date_created = models.DateTimeField("Дата создания", auto_now_add=True)
+    date_finish = models.DateTimeField("Дата окончания", blank=True, null=True)
 
     FINAL_STATUSES = (
         "COMPLETED",
@@ -100,12 +108,12 @@ class CRMBulk(models.Model):
         return f"{self.object_type} - {self.status} - {self.date_finish}"
 
 
-class CRMMobileCashierToken(models.Model):
-    token = models.CharField(max_length=255, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+# class CRMMobileCashierToken(models.Model):
+#     token = models.CharField(max_length=255, unique=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        app_label = "crm"
-        ordering = ("-created_at",)
-        verbose_name = "Токен пользователя мобильного кассира Эвотор"
-        verbose_name_plural = "Токены пользователя мобильного кассира Эвотор"
+#     class Meta:
+#         app_label = "crm"
+#         ordering = ("-created_at",)
+#         verbose_name = "Токен пользователя мобильного кассира Эвотор"
+#         verbose_name_plural = "Токены пользователя мобильного кассира Эвотор"

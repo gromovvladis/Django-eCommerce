@@ -360,7 +360,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         # We define a general error message for when an unanticipated payment
         # error occurs.
         error_msg = (
-            "Произошла проблема при обработке платежа "
+            "Произошла проблема при обработке платежа. "
             "Оплата не была принята. "
             "Пожалуйста обратитесь в службу поддержки клиентов, если проблема не исчезнет"
         )
@@ -603,11 +603,11 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
             email = email_name + "@" + domain_part.lower()
         return email
 
-    def handle_payment(self, total, source, order, method, email_or_change, **kwargs):
-        payment_method = PaymentManager(method).get_method()
+    def handle_payment(self, total, source, order, source_reference, email_or_change, **kwargs):
+        payment_method = PaymentManager(source_reference).get_method()
         email = ""
 
-        if method in settings.CASH_PAYMENTS and email_or_change:
+        if source_reference in settings.CASH_PAYMENTS and email_or_change:
             self.add_payment_event(
                 'Требуется сдача',
                 int(email_or_change),
@@ -618,6 +618,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
 
         payment = payment_method.pay(
             order=order,
+            source=source,
             amount=total,
             email=email,
         )
@@ -627,14 +628,9 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
             order.user.save()
         
         if payment is not None:
-            self.add_payment_event(
-                'Оплата начата',
-                total.money,
-            )
             self.save_payment_events(order)
 
             url = payment.confirmation.confirmation_url
-            source.set_payment_id(payment.id)
             logger.info("Redirecting user to {0}".format(url))
             raise RedirectRequired(url)
       

@@ -1,0 +1,14 @@
+{% load django_tables2 %}
+
+{% if record.type == "Внесение наличных" %}
+    <span class="badge badge-success">
+{% elif record.type == "Оплата заказа" %}
+    <span class="badge badge-info">
+{% elif record.type == "Возврат заказа" %}
+    <span class="badge badge-warning">
+{% else %}
+    <span class="badge badge-danger">
+{% endif %}
+    {{ record.type }}
+</span>
+
