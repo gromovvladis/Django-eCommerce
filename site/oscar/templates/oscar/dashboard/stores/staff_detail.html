@@ -19,6 +19,10 @@
 
 {% block navtext %}
     <h1>{{ staff.get_full_name }}</h1>
+    <a class="btn btn-danger mr-2" href="{% url 'dashboard:staff-delete' pk=staff.id %}">
+        <i class="fa-solid fa-trash"></i>
+        <span>Удалить</span>
+    </a>
 {% endblock %}
 
 {% block dashboard_content %}

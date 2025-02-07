@@ -5,11 +5,12 @@ from django.views import generic
 
 from oscar.core.loading import get_class, get_model
 
-CommunicationEventType = get_model("communication", "CommunicationEventType")
 CommunicationEventTypeForm = get_class(
     "dashboard.communications.forms", "CommunicationEventTypeForm"
 )
 Dispatcher = get_class("communication.utils", "Dispatcher")
+
+CommunicationEventType = get_model("communication", "CommunicationEventType")
 
 
 class EmailListView(generic.ListView):
@@ -36,7 +37,9 @@ class UpdateView(generic.UpdateView):
 
     def form_invalid(self, form):
         messages.error(
-            self.request, "Отправленная форма недействительна, пожалуйста, исправьте ошибки и повторите отправку")
+            self.request,
+            "Отправленная форма недействительна, пожалуйста, исправьте ошибки и повторите отправку",
+        )
         return super().form_invalid(form)
 
     def form_valid(self, form):
@@ -83,6 +86,9 @@ class UpdateView(generic.UpdateView):
         email = form.cleaned_data["preview_email"]
         dispatch = Dispatcher()
         dispatch.send_email_messages(email, msgs)
-        messages.success(self.request, "Письмо с предварительным просмотром было отправлено на адрес %s" % email)
+        messages.success(
+            self.request,
+            "Письмо с предварительным просмотром было отправлено на адрес %s" % email,
+        )
 
         return self.render_to_response(ctx)

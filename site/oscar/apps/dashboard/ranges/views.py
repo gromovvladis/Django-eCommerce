@@ -3,27 +3,26 @@ from io import TextIOWrapper
 from django.conf import settings
 from django.contrib import messages
 from django.core import exceptions
-from django.db.models import Count, Sum, F, IntegerField, ExpressionWrapper
+from django.db.models import Count
 from django.shortcuts import HttpResponse, get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView, View
 from django_tables2 import SingleTableView
+from django.utils.translation import ngettext
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import BulkEditMixin
 
-from django.utils.translation import ngettext
-
 RangeTable = get_class("dashboard.ranges.tables", "RangeTable")
+RangeForm, RangeProductForm = get_classes(
+    "dashboard.ranges.forms", ["RangeForm", "RangeProductForm"]
+)
 
 Range = get_model("offer", "Range")
 RangeProduct = get_model("offer", "RangeProduct")
 RangeProductFileUpload = get_model("offer", "RangeProductFileUpload")
 Product = get_model("catalogue", "Product")
-RangeForm, RangeProductForm = get_classes(
-    "dashboard.ranges.forms", ["RangeForm", "RangeProductForm"]
-)
 
 
 class RangeListView(SingleTableView):
@@ -33,7 +32,9 @@ class RangeListView(SingleTableView):
     paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
 
     def get_queryset(self):
-        return Range._default_manager.prefetch_related("included_categories", "included_products").annotate(
+        return Range._default_manager.prefetch_related(
+            "included_categories", "included_products"
+        ).annotate(
             benefits=Count("benefit"),
             included_categories_count=Count("included_categories"),
         )
@@ -96,7 +97,7 @@ class RangeDeleteView(DeleteView):
     context_object_name = "range"
 
     def get_success_url(self):
-        messages.warning(self.request,"Диапазон удален")
+        messages.warning(self.request, "Диапазон удален")
         return reverse("dashboard:range-list")
 
 

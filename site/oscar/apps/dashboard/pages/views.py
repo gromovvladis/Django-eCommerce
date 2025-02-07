@@ -11,11 +11,12 @@ from oscar.core.loading import get_classes, get_model
 from oscar.core.utils import slugify
 from oscar.core.validators import URLDoesNotExistValidator
 
-FlatPage = get_model("flatpages", "FlatPage")
-Site = get_model("sites", "Site")
 PageSearchForm, PageUpdateForm = get_classes(
     "dashboard.pages.forms", ("PageSearchForm", "PageUpdateForm")
 )
+
+FlatPage = get_model("flatpages", "FlatPage")
+Site = get_model("sites", "Site")
 
 
 class PageListView(ListView):

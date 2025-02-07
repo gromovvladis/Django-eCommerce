@@ -9,8 +9,8 @@ class SmsConfig(OscarConfig):
     namespace = "sms_auth"
 
     def ready(self):
-        from django_celery_beat.models import PeriodicTask, IntervalSchedule
         from celery import current_app
+        from django_celery_beat.models import PeriodicTask, IntervalSchedule
 
         if current_app.loader:
             schedule = IntervalSchedule.objects.get_or_create(

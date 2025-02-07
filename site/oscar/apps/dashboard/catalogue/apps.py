@@ -1,4 +1,5 @@
 from django.urls import path, re_path
+
 from oscar.core.application import OscarDashboardConfig
 from oscar.core.loading import get_class
 
@@ -23,63 +24,146 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
             ["catalogue.full_access"],
             ["catalogue.update_stockrecord"],
         ),
-        
-        "catalogue-product-list": (["user.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
-        "catalogue-additional-list": (["user.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
-        
-        "stock-alert-list": (["user.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
-        "stock-alert-update-list": (["user.full_access"], ["catalogue.full_access"], ["catalogue.read"]),
+        "catalogue-product-list": (
+            ["user.full_access"],
+            ["catalogue.full_access"],
+            ["catalogue.read"],
+        ),
+        "catalogue-additional-list": (
+            ["user.full_access"],
+            ["catalogue.full_access"],
+            ["catalogue.read"],
+        ),
+        "stock-alert-list": (
+            ["user.full_access"],
+            ["catalogue.full_access"],
+            ["catalogue.read"],
+        ),
+        "stock-alert-update-list": (
+            ["user.full_access"],
+            ["catalogue.full_access"],
+            ["catalogue.read"],
+        ),
     }
-
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
-        self.product_list_view = get_class("dashboard.catalogue.views", "ProductListView")
-        self.product_create_redirect_view = get_class("dashboard.catalogue.views", "ProductCreateRedirectView")
-        self.product_createupdate_view = get_class("dashboard.catalogue.views", "ProductCreateUpdateView")
-        self.product_delete_view = get_class("dashboard.catalogue.views", "ProductDeleteView")
+        self.product_list_view = get_class(
+            "dashboard.catalogue.views", "ProductListView"
+        )
+        self.product_create_redirect_view = get_class(
+            "dashboard.catalogue.views", "ProductCreateRedirectView"
+        )
+        self.product_createupdate_view = get_class(
+            "dashboard.catalogue.views", "ProductCreateUpdateView"
+        )
+        self.product_delete_view = get_class(
+            "dashboard.catalogue.views", "ProductDeleteView"
+        )
 
-        self.product_class_create_view = get_class("dashboard.catalogue.views", "ProductClassCreateView")
-        self.product_class_update_view = get_class("dashboard.catalogue.views", "ProductClassUpdateView")
-        self.product_class_list_view = get_class("dashboard.catalogue.views", "ProductClassListView")
-        self.product_class_delete_view = get_class("dashboard.catalogue.views", "ProductClassDeleteView")
+        self.product_class_create_view = get_class(
+            "dashboard.catalogue.views", "ProductClassCreateView"
+        )
+        self.product_class_update_view = get_class(
+            "dashboard.catalogue.views", "ProductClassUpdateView"
+        )
+        self.product_class_list_view = get_class(
+            "dashboard.catalogue.views", "ProductClassListView"
+        )
+        self.product_class_delete_view = get_class(
+            "dashboard.catalogue.views", "ProductClassDeleteView"
+        )
 
-        self.category_list_view = get_class("dashboard.catalogue.views", "CategoryListView")
-        self.category_detail_list_view = get_class("dashboard.catalogue.views", "CategoryDetailListView")
-        self.category_create_view = get_class("dashboard.catalogue.views", "CategoryCreateView")
-        self.category_update_view = get_class("dashboard.catalogue.views", "CategoryUpdateView")
-        self.category_delete_view = get_class("dashboard.catalogue.views", "CategoryDeleteView")
+        self.category_list_view = get_class(
+            "dashboard.catalogue.views", "CategoryListView"
+        )
+        self.category_detail_list_view = get_class(
+            "dashboard.catalogue.views", "CategoryDetailListView"
+        )
+        self.category_create_view = get_class(
+            "dashboard.catalogue.views", "CategoryCreateView"
+        )
+        self.category_update_view = get_class(
+            "dashboard.catalogue.views", "CategoryUpdateView"
+        )
+        self.category_delete_view = get_class(
+            "dashboard.catalogue.views", "CategoryDeleteView"
+        )
 
-        self.stock_alert_view = get_class("dashboard.catalogue.views", "StockAlertListView")
-        self.stock_alert_update_view = get_class("dashboard.catalogue.views", "StockAlertUpdateView")
+        self.stock_alert_view = get_class(
+            "dashboard.catalogue.views", "StockAlertListView"
+        )
+        self.stock_alert_update_view = get_class(
+            "dashboard.catalogue.views", "StockAlertUpdateView"
+        )
 
-        self.attribute_list_view = get_class("dashboard.catalogue.views", "AttributeListView")
-        self.attribute_create_view = get_class("dashboard.catalogue.views", "AttributeCreateView")
-        self.attribute_update_view = get_class("dashboard.catalogue.views", "AttributeUpdateView")
-        self.attribute_delete_view = get_class("dashboard.catalogue.views", "AttributeDeleteView")
+        self.attribute_list_view = get_class(
+            "dashboard.catalogue.views", "AttributeListView"
+        )
+        self.attribute_create_view = get_class(
+            "dashboard.catalogue.views", "AttributeCreateView"
+        )
+        self.attribute_update_view = get_class(
+            "dashboard.catalogue.views", "AttributeUpdateView"
+        )
+        self.attribute_delete_view = get_class(
+            "dashboard.catalogue.views", "AttributeDeleteView"
+        )
 
-        self.attribute_option_group_create_view = get_class("dashboard.catalogue.views", "AttributeOptionGroupCreateView")
-        self.attribute_option_group_list_view = get_class("dashboard.catalogue.views", "AttributeOptionGroupListView")
-        self.attribute_option_group_update_view = get_class("dashboard.catalogue.views", "AttributeOptionGroupUpdateView")
-        self.attribute_option_group_delete_view = get_class("dashboard.catalogue.views", "AttributeOptionGroupDeleteView")
+        self.attribute_option_group_create_view = get_class(
+            "dashboard.catalogue.views", "AttributeOptionGroupCreateView"
+        )
+        self.attribute_option_group_list_view = get_class(
+            "dashboard.catalogue.views", "AttributeOptionGroupListView"
+        )
+        self.attribute_option_group_update_view = get_class(
+            "dashboard.catalogue.views", "AttributeOptionGroupUpdateView"
+        )
+        self.attribute_option_group_delete_view = get_class(
+            "dashboard.catalogue.views", "AttributeOptionGroupDeleteView"
+        )
 
         self.option_list_view = get_class("dashboard.catalogue.views", "OptionListView")
-        self.option_create_view = get_class("dashboard.catalogue.views", "OptionCreateView")
-        self.option_update_view = get_class("dashboard.catalogue.views", "OptionUpdateView")
-        self.option_delete_view = get_class("dashboard.catalogue.views", "OptionDeleteView")
+        self.option_create_view = get_class(
+            "dashboard.catalogue.views", "OptionCreateView"
+        )
+        self.option_update_view = get_class(
+            "dashboard.catalogue.views", "OptionUpdateView"
+        )
+        self.option_delete_view = get_class(
+            "dashboard.catalogue.views", "OptionDeleteView"
+        )
 
-        self.additional_list_view = get_class("dashboard.catalogue.views", "AdditionalListView")
-        self.additional_create_view = get_class("dashboard.catalogue.views", "AdditionalCreateView")
-        self.additional_update_view = get_class("dashboard.catalogue.views", "AdditionalUpdateView")
-        self.additional_delete_view = get_class("dashboard.catalogue.views", "AdditionalDeleteView")
+        self.additional_list_view = get_class(
+            "dashboard.catalogue.views", "AdditionalListView"
+        )
+        self.additional_create_view = get_class(
+            "dashboard.catalogue.views", "AdditionalCreateView"
+        )
+        self.additional_update_view = get_class(
+            "dashboard.catalogue.views", "AdditionalUpdateView"
+        )
+        self.additional_delete_view = get_class(
+            "dashboard.catalogue.views", "AdditionalDeleteView"
+        )
 
-        self.product_lookup_view = get_class("dashboard.catalogue.views", "ProductLookupView")
-        self.additional_lookup_view = get_class("dashboard.catalogue.views", "AdditionalLookupView")
-        self.attribute_lookup_view = get_class("dashboard.catalogue.views", "AttributeLookupView")
+        self.product_lookup_view = get_class(
+            "dashboard.catalogue.views", "ProductLookupView"
+        )
+        self.additional_lookup_view = get_class(
+            "dashboard.catalogue.views", "AdditionalLookupView"
+        )
+        self.attribute_lookup_view = get_class(
+            "dashboard.catalogue.views", "AttributeLookupView"
+        )
 
     def get_urls(self):
         urls = [
-            path("products/", self.product_list_view.as_view(), name="catalogue-product-list"),
+            path(
+                "products/",
+                self.product_list_view.as_view(),
+                name="catalogue-product-list",
+            ),
             path(
                 "products/<int:pk>/",
                 self.product_createupdate_view.as_view(),
@@ -208,7 +292,7 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 "attribute-option-group/<str:pk>/delete/",
                 self.attribute_option_group_delete_view.as_view(),
                 name="catalogue-attribute-option-group-delete",
-            ),            
+            ),
             path(
                 "option/", self.option_list_view.as_view(), name="catalogue-option-list"
             ),
@@ -228,9 +312,9 @@ class CatalogueDashboardConfig(OscarDashboardConfig):
                 name="catalogue-option-delete",
             ),
             path(
-                "additionals/", 
-                self.additional_list_view.as_view(), 
-                name="catalogue-additional-list"
+                "additionals/",
+                self.additional_list_view.as_view(),
+                name="catalogue-additional-list",
             ),
             path(
                 "additionals/create/",

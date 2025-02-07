@@ -3,8 +3,9 @@ from django_tables2 import A, Column, LinkColumn, TemplateColumn
 from oscar.core.loading import get_class
 from oscar.core.compat import get_user_model
 
-User = get_user_model()
 DashboardTable = get_class("dashboard.tables", "DashboardTable")
+
+User = get_user_model()
 
 
 class UserTable(DashboardTable):
@@ -18,7 +19,9 @@ class UserTable(DashboardTable):
         args=[A("id")],
         accessor="username",
         verbose_name="Номер телефона",
-        attrs = {'td': {'class': 'name'},}
+        attrs={
+            "td": {"class": "name"},
+        },
     )
     email = Column(
         accessor="email",
@@ -26,7 +29,7 @@ class UserTable(DashboardTable):
         verbose_name="Email",
     )
     first_name = Column(
-        accessor="get_full_name", 
+        accessor="get_full_name",
         order_by=("first_name"),
         verbose_name="Имя клиента",
     )
@@ -75,7 +78,6 @@ class UserTable(DashboardTable):
             "date_registered",
         )
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
         empty_text = "Список пользователей пуст"
-

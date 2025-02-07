@@ -1,7 +1,6 @@
 import json
 import requests
 import logging
-
 from collections import defaultdict
 from rest_framework.renderers import JSONRenderer
 
@@ -30,8 +29,6 @@ from oscar.apps.store.serializers import (
 )
 from .tasks import process_bulk_task
 
-logger = logging.getLogger("oscar.crm")
-
 CRMEvent = get_model("crm", "CRMEvent")
 CRMBulk = get_model("crm", "CRMBulk")
 Store = get_model("store", "Store")
@@ -44,6 +41,8 @@ Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 Order = get_model("order", "Order")
 Additional = get_model("catalogue", "Additional")
+
+logger = logging.getLogger("oscar.crm")
 
 evator_cloud_token = settings.EVOTOR_CLOUD_TOKEN
 
@@ -177,6 +176,7 @@ class EvotorAPICloud:
         :return: Ответ от API в формате JSON.
         """
         url = self.base_url + endpoint
+        response = None
 
         if bulk:
             self.headers["Content-Type"] = "application/vnd.evotor.v2+bulk+json"
@@ -224,7 +224,7 @@ class EvotorAPICloud:
             logger.error(f"Ошибка HTTP запроса при отправке Эвотор запроса: {http_err}")
             return {"error": error}
         except Exception as err:
-            if response.status_code == 204:
+            if response is not None and response.status_code == 204:
                 return {}
             logger.error(f"Ошибка при отправке Эвотор запроса: {err}")
             return {"error": f"Ошибка при отправке Эвотор запроса: {err}"}
@@ -1456,7 +1456,7 @@ class EvotorProductClient(EvotorGroupClient):
                 return ", ".join(error_msgs), False
 
             if not is_filtered:
-                for product in products:
+                for product in Product.objects.all():
                     if product.evotor_id not in evotor_ids:
                         product.evotor_id = None
                         product.save()

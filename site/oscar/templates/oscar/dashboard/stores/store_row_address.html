@@ -2,7 +2,7 @@
 
 {% with adr=record.primary_address %}
     {% if adr %}
-        {{ adr.line1 }}
+        {{ adr }}
     {% else %}
         -
     {% endif %}

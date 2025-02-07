@@ -2,11 +2,12 @@ from django.conf import settings
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django_tables2 import A, Column, LinkColumn, TemplateColumn, ManyToManyColumn
-
 from django.utils.translation import ngettext_lazy
+
 from oscar.core.loading import get_class, get_model
 
 DashboardTable = get_class("dashboard.tables", "DashboardTable")
+
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 Category = get_model("catalogue", "Category")
@@ -19,8 +20,8 @@ StockAlert = get_model("store", "StockAlert")
 
 class ProductClassTable(DashboardTable):
     name = LinkColumn(
-        "dashboard:catalogue-class-update", 
-        args=[A("pk")], 
+        "dashboard:catalogue-class-update",
+        args=[A("pk")],
     )
     class_options = TemplateColumn(
         verbose_name="Опции",
@@ -47,19 +48,25 @@ class ProductClassTable(DashboardTable):
         verbose_name="Доставка",
         template_name="oscar/dashboard/table/boolean.html",
         order_by=("requires_shipping"),
-        attrs = {'th': {'class': 'delivery'},}
+        attrs={
+            "th": {"class": "delivery"},
+        },
     )
     track_stock = TemplateColumn(
         verbose_name="Запасы",
         template_name="oscar/dashboard/table/boolean.html",
         order_by=("track_stock"),
-        attrs = {'th': {'class': 'stock'},}
+        attrs={
+            "th": {"class": "stock"},
+        },
     )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/product_class_row_actions.html",
         orderable=False,
-        attrs = {'th': {'class': 'actions'},}
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
 
     icon = "fas fa-list"
@@ -84,17 +91,18 @@ class ProductClassTable(DashboardTable):
             "num_products",
             "requires_shipping",
             "track_stock",
+            "...",
             "actions",
         )
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых типов товаров"
+        empty_text = "Нет созданых типов товаров."
 
 
 class ProductTable(DashboardTable):
     image = TemplateColumn(
-        verbose_name='',
+        verbose_name="",
         template_name="oscar/dashboard/catalogue/product_row_image.html",
         orderable=False,
     )
@@ -102,12 +110,15 @@ class ProductTable(DashboardTable):
         verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/product_row_name.html",
         order_by="name",
-        attrs = {'th': {'class': 'title'},}
+        attrs={
+            "th": {"class": "title"},
+        },
     )
-    variants = TemplateColumn(
-        verbose_name="Варианты",
-        template_name="oscar/dashboard/catalogue/product_row_variants.html",
-        orderable=True,
+    categories = TemplateColumn(
+        verbose_name="Категории",
+        template_name="oscar/dashboard/catalogue/product_row_categories.html",
+        accessor=A("categories"),
+        order_by="categories__name",
     )
     additionals = TemplateColumn(
         verbose_name="Доп. товары",
@@ -119,22 +130,18 @@ class ProductTable(DashboardTable):
         verbose_name="Опции",
         template_name="oscar/dashboard/catalogue/product_row_options.html",
         orderable=False,
+        attrs={
+            "th": {"class": "options"},
+        },
+    )
+    variants = TemplateColumn(
+        verbose_name="Варианты",
+        template_name="oscar/dashboard/catalogue/product_row_variants.html",
+        orderable=True,
     )
     cooking_time = TemplateColumn(
         verbose_name="Время приготовления",
         template_name="oscar/dashboard/catalogue/product_row_time.html",
-        orderable=True,
-    )
-    categories = TemplateColumn(
-        verbose_name="Категории",
-        template_name="oscar/dashboard/catalogue/product_row_categories.html",
-        accessor=A("categories"),
-        order_by="categories__name",
-    )
-    price = TemplateColumn(
-        verbose_name="Цена",
-        template_name="oscar/dashboard/catalogue/product_row_price.html",
-        order_by="min_price",
         orderable=True,
     )
     is_public = TemplateColumn(
@@ -143,18 +150,30 @@ class ProductTable(DashboardTable):
         accessor="is_public",
         order_by=("is_public"),
     )
+    price = TemplateColumn(
+        verbose_name="Цена",
+        template_name="oscar/dashboard/catalogue/product_row_price.html",
+        order_by="min_price",
+        orderable=True,
+    )
+    date_updated = TemplateColumn(
+        template_code='{{ record.date_updated|date:"d.m.y H:i" }}',
+    )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/product_row_actions.html",
         orderable=False,
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
     statistic = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/product_row_statistic.html",
         orderable=False,
-    )
-    date_updated = TemplateColumn(
-        template_code='{{ record.date_updated|date:"d.m.y H:i" }}',
+        attrs={
+            "th": {"class": "statistic"},
+        },
     )
 
     icon = "fas fa-chart-bar"
@@ -170,19 +189,19 @@ class ProductTable(DashboardTable):
             "additionals",
             "options",
             "variants",
-            "price",
             "cooking_time",
-            "...",
             "is_public",
+            "price",
             "date_updated",
+            "...",
             "actions",
             "statistic",
         )
         order_by = "-date_updated"
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых товаров"
+        empty_text = "Нет созданых товаров."
 
 
 class CategoryTable(DashboardTable):
@@ -224,11 +243,17 @@ class CategoryTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/category_row_actions.html",
         orderable=False,
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
     statistic = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/category_row_statistic.html",
         orderable=False,
+        attrs={
+            "th": {"class": "statistic"},
+        },
     )
 
     icon = "fas fa-layer-group"
@@ -237,11 +262,21 @@ class CategoryTable(DashboardTable):
     class Meta(DashboardTable.Meta):
         model = Category
         fields = ("image", "name", "description", "is_public")
-        sequence = ("image", "name", "description", "num_children", "num_products",  "...", "is_public", "actions", "statistic")
+        sequence = (
+            "image",
+            "name",
+            "description",
+            "num_children",
+            "num_products",
+            "is_public",
+            "...",
+            "actions",
+            "statistic",
+        )
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых категорий"
+        empty_text = "Нет созданых категорий."
 
 
 class AttributeOptionGroupTable(DashboardTable):
@@ -259,6 +294,9 @@ class AttributeOptionGroupTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/attribute_option_group_row_actions.html",
         orderable=False,
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
 
     icon = "fas fa-paperclip"
@@ -270,9 +308,9 @@ class AttributeOptionGroupTable(DashboardTable):
         sequence = ("name", "option_summary", "actions")
         per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых групп атрибутов"
+        empty_text = "Нет созданых групп атрибутов."
 
 
 class AttributeTable(DashboardTable):
@@ -298,9 +336,12 @@ class AttributeTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/attribute_row_actions.html",
         orderable=False,
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
-    icon = "fas fa-chart-bar" 
-    caption = ngettext_lazy("%s Атрибут","%s Атрибутов")
+    icon = "fas fa-chart-bar"
+    caption = ngettext_lazy("%s Атрибут", "%s Атрибутов")
 
     class Meta(DashboardTable.Meta):
         model = Attribute
@@ -308,9 +349,9 @@ class AttributeTable(DashboardTable):
         sequence = ("name", "type", "option_group", "required", "actions")
         per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых атрибутов"
+        empty_text = "Нет созданых атрибутов."
 
 
 class OptionTable(DashboardTable):
@@ -324,19 +365,24 @@ class OptionTable(DashboardTable):
     )
     help_text = Column(
         verbose_name="Описание",
-        attrs = {'th': {'class': 'description'},}
+        attrs={
+            "th": {"class": "description"},
+        },
     )
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/catalogue/option_row_actions.html",
         orderable=False,
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
     required = TemplateColumn(
         verbose_name="Обязательная опция",
         template_name="oscar/dashboard/table/boolean.html",
         accessor="required",
         order_by=("required"),
-    ) 
+    )
     order = Column(
         verbose_name="Порядок",
         order_by="order",
@@ -351,9 +397,9 @@ class OptionTable(DashboardTable):
         sequence = ("name", "type", "help_text", "order", "required", "actions")
         per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых опций"
+        empty_text = "Нет созданых опций."
 
 
 class AdditionalTable(DashboardTable):
@@ -395,6 +441,9 @@ class AdditionalTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/additional_row_actions.html",
         orderable=False,
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
     is_public = TemplateColumn(
         verbose_name="Доступен",
@@ -402,22 +451,42 @@ class AdditionalTable(DashboardTable):
         order_by=("is_public"),
     )
 
-    icon = "fas fa-chart-bar" 
-    caption = ngettext_lazy("%s Дополнительный товар","%s Дополнительных товара")
+    icon = "fas fa-chart-bar"
+    caption = ngettext_lazy("%s Дополнительный товар", "%s Дополнительных товара")
 
     class Meta(DashboardTable.Meta):
         model = Additional
-        fields = ("image", "name", "stores", "price", "old_price", "weight", "max_amount", "is_public")
-        sequence = ("image", "name", "stores", "price", "old_price", "weight", "max_amount", "is_public", "actions")
+        fields = (
+            "image",
+            "name",
+            "stores",
+            "price",
+            "old_price",
+            "weight",
+            "max_amount",
+            "is_public",
+        )
+        sequence = (
+            "image",
+            "name",
+            "stores",
+            "price",
+            "old_price",
+            "weight",
+            "max_amount",
+            "is_public",
+            "...",
+            "actions",
+        )
         per_page = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых дополнительных товаров"
+        empty_text = "Нет созданых дополнительных товаров."
 
 
 class StockAlertTable(DashboardTable):
-    name = TemplateColumn( 
+    name = TemplateColumn(
         verbose_name="Товар",
         template_name="oscar/dashboard/catalogue/stock_alert_row_name.html",
         orderable=True,
@@ -458,18 +527,21 @@ class StockAlertTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/catalogue/stock_alert_row_actions.html",
         orderable=False,
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
 
     icon = "fas fa-cubes-stacked"
     filter = {
         "url": reverse_lazy("dashboard:stock-alert-list"),
         "values": [
-            ("", "Все"), 
-            ("status=Открыто", "Открытые"), 
-            ("status=Закрыто", "Закрытые"), 
-        ]
+            ("", "Все"),
+            ("status=Открыто", "Открытые"),
+            ("status=Закрыто", "Закрытые"),
+        ],
     }
-    
+
     caption = ngettext_lazy("%s Уведомление о наличии", "%s Уведомлений о наличии")
 
     class Meta(DashboardTable.Meta):
@@ -497,6 +569,6 @@ class StockAlertTable(DashboardTable):
             "actions",
         )
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет уведомлений о наличии"
+        empty_text = "Нет уведомлений о наличии."

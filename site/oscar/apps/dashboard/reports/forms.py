@@ -1,4 +1,5 @@
 from django import forms
+
 from oscar.core.loading import get_class
 from oscar.forms.widgets import DatePickerInput
 
@@ -12,7 +13,9 @@ class ReportForm(forms.Form):
         type_choices.append((generator.code, generator.description))
 
     date_from = forms.DateField(
-        label="Дата с", required=False, widget=DatePickerInput(attrs={"class": "dateinput"}),
+        label="Дата с",
+        required=False,
+        widget=DatePickerInput(attrs={"class": "dateinput"}),
     )
     date_to = forms.DateField(
         label="Дата до",
@@ -35,6 +38,8 @@ class ReportForm(forms.Form):
             all([date_from, date_to])
             and self.cleaned_data["date_from"] > self.cleaned_data["date_to"]
         ):
-            raise forms.ValidationError("Дата начала должна предшествовать дате окончания.")
-        
+            raise forms.ValidationError(
+                "Дата начала должна предшествовать дате окончания."
+            )
+
         return self.cleaned_data

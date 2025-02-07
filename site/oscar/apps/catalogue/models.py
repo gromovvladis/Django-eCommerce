@@ -1548,20 +1548,19 @@ class AttributeOption(models.Model):
     Provides an option within an option group for an attribute type
     Examples: In a Language group, English, Greek, French
     """
-
-    group = models.ForeignKey(
-        "catalogue.AttributeOptionGroup",
-        on_delete=models.CASCADE,
-        related_name="options",
-        verbose_name="Группа",
-    )
-    option = models.CharField("Опция", max_length=255)
     evotor_id = models.CharField(
         "ID Эвотор",
         max_length=128,
         blank=True,
         null=True,
         unique=True,
+    )
+    option = models.CharField("Опция", max_length=255)
+    group = models.ForeignKey(
+        "catalogue.AttributeOptionGroup",
+        on_delete=models.CASCADE,
+        related_name="options",
+        verbose_name="Группа",
     )
 
     def __str__(self):

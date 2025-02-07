@@ -256,7 +256,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
         ],
     },
     {
-        "label": "Эвотор данные",
+        "label": "Эвотор",
         "icon": "fas fa-crm",
         "children": [
             {
@@ -289,44 +289,6 @@ OSCAR_DASHBOARD_NAVIGATION = [
             # },
         ],
     },
-    # {
-    #     "label": "Эвотор история",
-    #     "icon": "fas fa-server",
-    #     "children": [
-    #         {
-    #             "label": "Приёмка товаров",
-    #             "url_name": "dashboard:crm-accept",
-    #         },
-    #         {
-    #             "label": "Переоценка товаров",
-    #             "url_name": "dashboard:crm-revaluation",
-    #         },
-    #         {
-    #             "label": "Списание товара",
-    #             "url_name": "dashboard:crm-write-off",
-    #         },
-    #         {
-    #             "label": "Инвентаризация",
-    #             "url_name": "dashboard:crm-inventory",
-    #         },
-    #         {
-    #             "label": "Смены",
-    #             "url_name": "dashboard:crm-sessions",
-    #         },
-    #         {
-    #             "label": "Внесение и изъятие наличных",
-    #             "url_name": "dashboard:crm-cash",
-    #         },
-    #         {
-    #             "label": "Z-отчёт",
-    #             "url_name": "dashboard:crm-report",
-    #         },
-    #         {
-    #             "label": "История уведомлений",
-    #             "url_name": "dashboard:crm-events",
-    #         },
-    #     ],
-    # },
     # {
     #     "label": "Телеграм",
     #     "icon": "fas fa-telegram",

@@ -1,3 +1,6 @@
+import logging
+from datetime import datetime
+
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -5,34 +8,20 @@ from django.views.generic import View
 from django.db.models import Count, Max, Min, Case, When, DecimalField, BooleanField, Q
 from django_tables2 import SingleTableView
 
-from oscar.apps.catalogue.serializers import AdditionalsSerializer, ProductGroupsSerializer, ProductsSerializer
+from oscar.core.loading import get_class, get_classes, get_model
 from oscar.apps.crm.client import EvatorCloud
 from oscar.apps.customer.serializers import StaffsSerializer
 from oscar.apps.dashboard.crm.mixins import CRMTablesMixin
 from oscar.apps.store.serializers import StoresSerializer, TerminalsSerializer
-from oscar.core.loading import get_class, get_classes, get_model
-
-from django.contrib import messages
-from django.shortcuts import redirect
-from django.views.generic.base import View
-from datetime import datetime
-
-import logging
+from oscar.apps.catalogue.serializers import (
+    AdditionalsSerializer,
+    ProductGroupsSerializer,
+    ProductsSerializer,
+)
 
 logger = logging.getLogger("oscar.dashboard")
 
-Store = get_model("store", "Store")
-Staff = get_model("user", "Staff")
-Terminal = get_model("store", "Terminal")
-Order = get_model("order", "Order")
-Line = get_model("order", "Line")
-Product = get_model("catalogue", "Product")
-Category = get_model("catalogue", "Category")
-Additional = get_model("catalogue", "Additional")
-AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
-
 CRMStoreForm = get_class("dashboard.crm.forms", "CRMStoreForm")
-
 (
     CRMStoreEvotorTable,
     CRMStoreSiteTable,
@@ -63,6 +52,16 @@ CRMStoreForm = get_class("dashboard.crm.forms", "CRMStoreForm")
         "CRMGroupSiteTable",
     ),
 )
+
+Store = get_model("store", "Store")
+Staff = get_model("user", "Staff")
+Terminal = get_model("store", "Terminal")
+Order = get_model("order", "Order")
+Line = get_model("order", "Line")
+Product = get_model("catalogue", "Product")
+Category = get_model("catalogue", "Category")
+Additional = get_model("catalogue", "Additional")
+AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 
 
 class CRMStoreListView(CRMTablesMixin):
@@ -95,7 +94,7 @@ class CRMStoreListView(CRMTablesMixin):
                     data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
                 )
                 name = data_item["name"]
-                address = data_item.get("address")
+                address = data_item.get("address", "")
                 model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
 
                 if model_instance:
@@ -262,10 +261,14 @@ class CRMStaffListView(CRMTablesMixin):
                         if model_instance.user
                         else set()
                     )
-                    
+
                     def is_equal(value1, value2):
-                        return value1 in [None, ""] if value2 in [None, ""] else value1 == value2
-                
+                        return (
+                            value1 in [None, ""]
+                            if value2 in [None, ""]
+                            else value1 == value2
+                        )
+
                     store_matches = bool(store_evotor_ids.intersection(stores_ids))
                     data_item["is_valid"] = (
                         is_equal(model_instance.first_name, first_name)
@@ -369,7 +372,7 @@ class CRMGroupsListView(CRMTablesMixin):
                     data_item["store"] = Store.objects.filter(
                         evotor_id=store_id
                     ).first()
-   
+
                 try:
                     model_instance = Category.objects.get(evotor_id=evotor_id)
                 except Category.DoesNotExist:
@@ -383,10 +386,7 @@ class CRMGroupsListView(CRMTablesMixin):
                         or parent_id is None
                         or model_instance.get_parent().evotor_id == parent_id
                     )
-                    data_item["is_valid"] = (
-                        model_instance.name == name
-                        and parent_match
-                    )
+                    data_item["is_valid"] = model_instance.name == name and parent_match
                 else:
                     if evotor_id == Additional.parent_id:
                         data_item.update({"is_created": True, "is_valid": True})
@@ -423,9 +423,12 @@ class CRMGroupsListView(CRMTablesMixin):
         try:
             error = EvatorCloud().update_or_create_evotor_groups(models)
         except Exception as e:
-            error = "Ошибка при отправке созданной / измененной категории или модификации в Эвотор. Ошибка %s", e
+            error = (
+                "Ошибка при отправке созданной / измененной категории или модификации в Эвотор. Ошибка %s",
+                e,
+            )
             logger.error(error)
-        
+
         if error:
             messages.error(self.request, error)
         else:
@@ -451,50 +454,59 @@ class CRMProductListView(CRMTablesMixin):
     url_redirect = reverse_lazy("dashboard:crm-products")
 
     def get_site_table(self):
-        evotor_ids = [model_qs['id'] for model_qs in self.queryset]
-        correct_ids = [model_qs['id'] for model_qs in self.queryset if model_qs['is_valid'] == True]
+        evotor_ids = [model_qs["id"] for model_qs in self.queryset]
+        correct_ids = [
+            model_qs["id"] for model_qs in self.queryset if model_qs["is_valid"] == True
+        ]
 
         data = self.form.cleaned_data
         store_id = data.get("store") or self.form.fields.get("store").initial
 
-        site_models = self.model.objects.filter(
-            Q(stockrecords__store__evotor_id=store_id) | Q(children__stockrecords__store__evotor_id=store_id)).annotate(
-            is_valid=Case(
-                When(Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids), then=True),
-                default=False,
-                output_field=BooleanField()
-            ),
-            wrong_evotor_id=Case(
-                When(
-                    Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
-                    then=True
+        site_models = (
+            self.model.objects.filter(
+                Q(stockrecords__store__evotor_id=store_id)
+                | Q(children__stockrecords__store__evotor_id=store_id)
+            )
+            .annotate(
+                is_valid=Case(
+                    When(
+                        Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids),
+                        then=True,
+                    ),
+                    default=False,
+                    output_field=BooleanField(),
                 ),
-                default=False,
-                output_field=BooleanField()
-            ),
-            min_price=Case(
-                When(structure="parent", then=Min("children__stockrecords__price")),
-                default=Min('stockrecords__price'),
-                output_field=DecimalField()
-            ),
-            max_price=Case(
-                When(structure="parent", then=Max("children__stockrecords__price")),
-                default=Max('stockrecords__price'),
-                output_field=DecimalField()
-            ),
-            old_price=Case(
-                When(structure="parent", then=Max("children__stockrecords__old_price")),
-                default=Max('stockrecords__old_price'),
-                output_field=DecimalField()
-            ),
-            variants=Count("children"),
-        ).order_by(
-            '-wrong_evotor_id',
-            'is_valid',
-            'evotor_id',
-            '-is_valid'
+                wrong_evotor_id=Case(
+                    When(
+                        Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
+                        then=True,
+                    ),
+                    default=False,
+                    output_field=BooleanField(),
+                ),
+                min_price=Case(
+                    When(structure="parent", then=Min("children__stockrecords__price")),
+                    default=Min("stockrecords__price"),
+                    output_field=DecimalField(),
+                ),
+                max_price=Case(
+                    When(structure="parent", then=Max("children__stockrecords__price")),
+                    default=Max("stockrecords__price"),
+                    output_field=DecimalField(),
+                ),
+                old_price=Case(
+                    When(
+                        structure="parent",
+                        then=Max("children__stockrecords__old_price"),
+                    ),
+                    default=Max("stockrecords__old_price"),
+                    output_field=DecimalField(),
+                ),
+                variants=Count("children"),
+            )
+            .order_by("-wrong_evotor_id", "is_valid", "evotor_id", "-is_valid")
         )
-            
+
         return self.table_site(site_models)
 
     def get_queryset(self):
@@ -556,7 +568,9 @@ class CRMProductListView(CRMTablesMixin):
                 else:
                     data_item["is_created"] = True
                     if store:
-                        stockrecord = model_instance.stockrecords.filter(store__evotor_id=store_id).first()
+                        stockrecord = model_instance.stockrecords.filter(
+                            store__evotor_id=store_id
+                        ).first()
                         stockrecord_match = (
                             stockrecord
                             # and stockrecord.evotor_code == data_item.get("code")
@@ -564,7 +578,8 @@ class CRMProductListView(CRMTablesMixin):
                             and stockrecord.cost_price == data_item.get("cost_price", 0)
                             and stockrecord.num_in_stock == data_item.get("quantity", 0)
                             and stockrecord.tax == data_item.get("tax")
-                            and stockrecord.is_public == data_item.get("allow_to_sell", False)
+                            and stockrecord.is_public
+                            == data_item.get("allow_to_sell", False)
                         ) or False
 
                         product_class_match = (
@@ -573,22 +588,29 @@ class CRMProductListView(CRMTablesMixin):
                         )
                         data_item["is_valid"] = (
                             model_instance.name == data_item.get("name", "").strip()
-                            and model_instance.article == data_item.get("article_number", "").strip()
-                            and model_instance.short_description == data_item.get("description", None)
-                            and model_instance.get_evotor_parent_id() == data_item.get("parent_id", None)
+                            and model_instance.article
+                            == data_item.get("article_number", "").strip()
+                            and model_instance.short_description
+                            == data_item.get("description", None)
+                            and model_instance.get_evotor_parent_id()
+                            == data_item.get("parent_id", None)
                             and stockrecord_match
                             and product_class_match
                         )
                     else:
                         data_item["is_valid"] = False
 
-            self.queryset = sorted(data_items, key=lambda x: (x["is_created"], x["is_valid"]))
+            self.queryset = sorted(
+                data_items, key=lambda x: (x["is_created"], x["is_valid"])
+            )
 
             return self.queryset
         else:
             self.queryset = []
             logger.error(f"Ошибка при сериализации данных {serializer.errors}")
-            messages.error(self.request,(f"Ошибка при сериализации данных {serializer.errors}"))
+            messages.error(
+                self.request, (f"Ошибка при сериализации данных {serializer.errors}")
+            )
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
@@ -608,9 +630,12 @@ class CRMProductListView(CRMTablesMixin):
         try:
             error = EvatorCloud().update_or_create_evotor_products(models)
         except Exception as e:
-            error = "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s", e
+            error = (
+                "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s",
+                e,
+            )
             logger.error(error)
-        
+
         if error:
             messages.error(self.request, error)
         else:
@@ -636,30 +661,34 @@ class CRMAdditionalListView(CRMTablesMixin):
     url_redirect = reverse_lazy("dashboard:crm-additionals")
 
     def get_site_table(self):
-        evotor_ids = [model_qs['id'] for model_qs in self.queryset]
-        correct_ids = [model_qs['id'] for model_qs in self.queryset if model_qs['is_valid'] == True]
+        evotor_ids = [model_qs["id"] for model_qs in self.queryset]
+        correct_ids = [
+            model_qs["id"] for model_qs in self.queryset if model_qs["is_valid"] == True
+        ]
 
-        site_models = self.model.objects.all().annotate(
-            is_valid=Case(
-                When(Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids), then=True),
-                default=False,
-                output_field=BooleanField()
-            ),
-            wrong_evotor_id=Case(
-                When(
-                    Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
-                    then=True
+        site_models = (
+            self.model.objects.all()
+            .annotate(
+                is_valid=Case(
+                    When(
+                        Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids),
+                        then=True,
+                    ),
+                    default=False,
+                    output_field=BooleanField(),
                 ),
-                default=False,
-                output_field=BooleanField()
-            ),
-        ).order_by(
-            '-wrong_evotor_id',
-            'is_valid',
-            'evotor_id',
-            '-is_valid'
+                wrong_evotor_id=Case(
+                    When(
+                        Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
+                        then=True,
+                    ),
+                    default=False,
+                    output_field=BooleanField(),
+                ),
+            )
+            .order_by("-wrong_evotor_id", "is_valid", "evotor_id", "-is_valid")
         )
-            
+
         return self.table_site(site_models)
 
     def get_queryset(self):
@@ -715,23 +744,32 @@ class CRMAdditionalListView(CRMTablesMixin):
                     if store:
                         data_item["is_valid"] = (
                             model_instance.name == data_item.get("name", "").strip()
-                            and model_instance.article == data_item.get("article_number", "").strip()
-                            and model_instance.description == data_item.get("description", None)
-                            and model_instance.parent_id == data_item.get("parent_id", None)
-                            and data_item.get("store_id", None) in model_instance.stores.values_list("evotor_id", flat=True) 
-                            and model_instance.is_public == data_item.get("allow_to_sell", None)
+                            and model_instance.article
+                            == data_item.get("article_number", "").strip()
+                            and model_instance.description
+                            == data_item.get("description", None)
+                            and model_instance.parent_id
+                            == data_item.get("parent_id", None)
+                            and data_item.get("store_id", None)
+                            in model_instance.stores.values_list("evotor_id", flat=True)
+                            and model_instance.is_public
+                            == data_item.get("allow_to_sell", None)
                             and model_instance.tax == data_item.get("tax", None)
                         )
                     else:
                         data_item["is_valid"] = False
 
-            self.queryset = sorted(data_items, key=lambda x: (x["is_created"], x["is_valid"]))
+            self.queryset = sorted(
+                data_items, key=lambda x: (x["is_created"], x["is_valid"])
+            )
 
             return self.queryset
         else:
             self.queryset = []
             logger.error(f"Ошибка при сериализации данных {serializer.errors}")
-            messages.error(self.request,(f"Ошибка при сериализации данных {serializer.errors}"))
+            messages.error(
+                self.request, (f"Ошибка при сериализации данных {serializer.errors}")
+            )
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
@@ -753,11 +791,13 @@ class CRMAdditionalListView(CRMTablesMixin):
         except Exception as e:
             error = "Ошибка при отправке дополнительных товаров в Эвотор. Ошибка %s", e
             logger.error(error)
-        
+
         if error:
             messages.error(self.request, error)
         else:
-            messages.success(self.request, "Дополнительные товары успешно отправлены в Эвотор.")
+            messages.success(
+                self.request, "Дополнительные товары успешно отправлены в Эвотор."
+            )
 
         return redirect(self.url_redirect)
 
@@ -806,4 +846,3 @@ class CRMReportListView(View):
 
 class CRMEventListView(View):
     pass
-       

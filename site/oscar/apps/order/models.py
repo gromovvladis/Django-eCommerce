@@ -246,6 +246,12 @@ class Order(models.Model):
         return pipeline.get(self.status, None)
 
     @property
+    def cancel_status(self):
+        if self.status != settings.OSCAR_FAIL_ORDER_STATUS:
+            return settings.OSCAR_FAIL_ORDER_STATUS
+        return None
+
+    @property
     def basket_total_before_discounts(self):
         """
         Return basket total but before discounts are applied

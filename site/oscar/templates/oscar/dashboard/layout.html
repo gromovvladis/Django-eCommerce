@@ -19,7 +19,6 @@
 {% block title %}Панель управления {{ block.super }}{% endblock %}
 
 {% block layout %}
-
     {% block navbar %}
         <nav class="navbar navbar-expand-lg navbar-light navbar-accounts">
             <div class="container-navbar fill-width fill-height d-flex justify-content-between">
@@ -28,17 +27,19 @@
                         <i class="fa-solid fa-bars align-middle"></i>
                     </button>
                 </div>
-                <div class="badges-navbar">
+                <div class="badges-navbar position-relative">
                     <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1{% if not active_orders %} d-none{% endif %}" data-id="active-navbar">
                         <i class="fas fa-shopping-cart"></i>
                         <div class="dropdown-item-badge item-badge-navbar">{{ active_orders }}</div>
                     </a>
-                    <span class="badge badge-info">{{ revenue_today|currency:"RUB" }}</span>
+                    <span class="badge badge-info pointer" id="navbarCash" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ revenue_today|currency:"RUB" }}</span>
+                    <div class="dropdown-menu dropdown-menu-right" id="navbarCashModal" aria-labelledby="navbarCash">
+                        <div id="navbarCashModalContent" class="navbar-loading"></div>
+                    </div>
                 </div>
             </div>
         </nav>
     {% endblock navbar %}
-
     <div class="dashboard-wrapper">
         <div class="navbar-menu">
             {% block dashboard_nav %}
@@ -141,6 +142,7 @@
 
 {% block templatescripts %}
     var csrf_token = "{{ csrf_token }}";
+    var navbar_cash_url = "{% url 'dashboard:navbar-cash' %}";
 {% endblock %}
 
 {% block scripts %}
@@ -158,6 +160,7 @@
             <script src="{% static "js/dashboard/oscar/dashboard.js" %}"></script>
             <script src="{% static "js/dashboard/oscar/RelatedObjectLookups.js" %}"></script>
 
+            <script src="{% static "js/dashboard/index/navbar-cash.js" %}"></script>
             <script src="{% static "js/dashboard/index/dashboard-sliders.js" %}"></script>
             <script src="{% static "js/dashboard/utils/navi.js" %}"></script>
             <script src="{% static "js/dashboard/utils/table.js" %}"></script>

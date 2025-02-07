@@ -18,6 +18,7 @@ class DashboardConfig(OscarDashboardConfig):
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
         self.index_view = get_class("dashboard.views", "IndexView")
+        self.navbarcash_view = get_class("dashboard.views", "NavbarCash")
         self.login_view = get_class("dashboard.views", "LoginView")
 
         self.catalogue_app = apps.get_app_config("catalogue_dashboard")
@@ -42,7 +43,7 @@ class DashboardConfig(OscarDashboardConfig):
 
         urls = [
             path("", self.index_view.as_view(), name="index"),
-
+            path("navbar-cash/", self.navbarcash_view.as_view(), name="navbar-cash"),
             path("catalogue/", include(self.catalogue_app.urls[0])),
             path("reports/", include(self.reports_app.urls[0])),
             path("orders/", include(self.orders_app.urls[0])),
@@ -59,8 +60,9 @@ class DashboardConfig(OscarDashboardConfig):
             path("delivery/", include(self.delivery_app.urls[0])),
             path("telegram/", include(self.telegram_app.urls[0])),
             path("crm/", include(self.crm_app.urls[0])),
-
             path("login/", self.login_view.as_view(), name="login"),
-            path("logout/", auth_views.LogoutView.as_view(next_page="/"), name="logout"),
+            path(
+                "logout/", auth_views.LogoutView.as_view(next_page="/"), name="logout"
+            ),
         ]
         return self.post_process_urls(urls)

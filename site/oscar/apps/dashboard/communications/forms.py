@@ -4,8 +4,8 @@ from django.template import Template, TemplateSyntaxError
 from oscar.apps.customer.utils import normalise_email
 from oscar.core.loading import get_model
 
-CommunicationEventType = get_model("communication", "CommunicationEventType")
 Order = get_model("order", "Order")
+CommunicationEventType = get_model("communication", "CommunicationEventType")
 
 
 class CommunicationEventTypeForm(forms.ModelForm):
@@ -20,7 +20,9 @@ class CommunicationEventTypeForm(forms.ModelForm):
     )
 
     preview_order_number = forms.CharField(label="Номер заказа", required=False)
-    preview_email = forms.EmailField(label="Предварительный просмотр письма", required=False)
+    preview_email = forms.EmailField(
+        label="Предварительный просмотр письма", required=False
+    )
 
     # pylint: disable=attribute-defined-outside-init
     def __init__(self, *args, data=None, **kwargs):

@@ -1,26 +1,12 @@
 import logging
 
-from oscar.apps.crm.client import EvatorCloud
-
-logger = logging.getLogger("oscar.catalogue")
-
 from django import forms
 from django.forms.models import inlineformset_factory, modelformset_factory
 
+from oscar.apps.crm.client import EvatorCloud
 from oscar.core.loading import get_classes, get_model
 
-Product = get_model("catalogue", "Product")
-ProductClass = get_model("catalogue", "ProductClass")
-ProductAttribute = get_model("catalogue", "ProductAttribute")
-StockRecord = get_model("store", "StockRecord")
-StockRecordOperation = get_model("store", "StockRecordOperation")
-ProductCategory = get_model("catalogue", "ProductCategory")
-ProductImage = get_model("catalogue", "ProductImage")
-ProductRecommendation = get_model("catalogue", "ProductRecommendation")
-Additional = get_model("catalogue", "Additional")
-ProductAdditional = get_model("catalogue", "ProductAdditional")
-AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
-AttributeOption = get_model("catalogue", "AttributeOption")
+logger = logging.getLogger("oscar.catalogue")
 
 (
     StockRecordForm,
@@ -50,6 +36,19 @@ AttributeOption = get_model("catalogue", "AttributeOption")
         "AttributeOptionForm",
     ),
 )
+
+Product = get_model("catalogue", "Product")
+ProductClass = get_model("catalogue", "ProductClass")
+ProductAttribute = get_model("catalogue", "ProductAttribute")
+StockRecord = get_model("store", "StockRecord")
+StockRecordOperation = get_model("store", "StockRecordOperation")
+ProductCategory = get_model("catalogue", "ProductCategory")
+ProductImage = get_model("catalogue", "ProductImage")
+ProductRecommendation = get_model("catalogue", "ProductRecommendation")
+Additional = get_model("catalogue", "Additional")
+ProductAdditional = get_model("catalogue", "ProductAdditional")
+AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
+AttributeOption = get_model("catalogue", "AttributeOption")
 
 
 BaseStockRecordFormSet = inlineformset_factory(

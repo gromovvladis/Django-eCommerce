@@ -1,11 +1,11 @@
 from django_tables2 import A, Column, LinkColumn, TemplateColumn
+from django.contrib.auth.models import Group
 
 from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
 
-from django.contrib.auth.models import Group
-
 DashboardTable = get_class("dashboard.tables", "DashboardTable")
+
 Store = get_model("store", "Store")
 StoreCashTransaction = get_model("store", "StoreCashTransaction")
 Terminal = get_model("store", "Terminal")
@@ -17,33 +17,21 @@ class StoreListTable(DashboardTable):
         verbose_name="Название",
         template_name="oscar/dashboard/stores/store_row_name.html",
         order_by="name",
-        attrs={
-            "th": {"class": "name"},
-        },
     )
     work_time = TemplateColumn(
         verbose_name="Время работы",
         template_name="oscar/dashboard/stores/store_row_time.html",
         order_by="start_worktime",
-        attrs={
-            "th": {"class": "date"},
-        },
     )
     staff = TemplateColumn(
         verbose_name="Персонал",
         template_name="oscar/dashboard/stores/store_row_staff.html",
         order_by="users",
-        attrs={
-            "th": {"class": "staff"},
-        },
     )
     address = TemplateColumn(
         verbose_name="Адрес",
         template_name="oscar/dashboard/stores/store_row_address.html",
         order_by="addresses",
-        attrs={
-            "th": {"class": "address"},
-        },
     )
     is_active = TemplateColumn(
         verbose_name="Активен",
@@ -56,8 +44,7 @@ class StoreListTable(DashboardTable):
     actions = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/stores/store_row_actions.html",
-        orderable=False,
-        attrs={
+        orderable=False,attrs={
             "th": {"class": "actions"},
         },
     )
@@ -84,7 +71,7 @@ class StoreListTable(DashboardTable):
         attrs = {
             "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых точек продажи"
+        empty_text = "Нет созданых точек продажи."
 
 
 class StoreCashTransactionListTable(DashboardTable):
@@ -107,8 +94,8 @@ class StoreCashTransactionListTable(DashboardTable):
         },
     )
     order = LinkColumn(
-        "dashboard:order-detail", 
-        args=[A("order.number")], 
+        "dashboard:order-detail",
+        args=[A("order.number")],
         order_by="order__number",
         verbose_name="Заказ",
     )
@@ -128,7 +115,9 @@ class StoreCashTransactionListTable(DashboardTable):
     )
 
     icon = "fas fa-id-card-clip"
-    caption = ngettext_lazy("%s Внесение / Изъятие наличиных", "%s Внесений / Изъятий наличиных")
+    caption = ngettext_lazy(
+        "%s Внесение / Изъятие наличиных", "%s Внесений / Изъятий наличиных"
+    )
 
     class Meta(DashboardTable.Meta):
         model = StoreCashTransaction
@@ -156,48 +145,31 @@ class StaffListTable(DashboardTable):
         verbose_name="Имя",
         template_name="oscar/dashboard/stores/staff_row_name.html",
         order_by="name",
-        attrs={
-            "th": {"class": "name"},
-        },
     )
     role = TemplateColumn(
         verbose_name="Должность",
         template_name="oscar/dashboard/stores/staff_row_role.html",
         order_by="role",
-        attrs={
-            "th": {"class": "role"},
-        },
     )
     user = TemplateColumn(
         verbose_name="Пользователь",
         template_name="oscar/dashboard/stores/staff_row_user.html",
         order_by="user",
-        attrs={
-            "th": {"class": "user"},
-        },
     )
     stores = TemplateColumn(
         verbose_name="Магазины",
         template_name="oscar/dashboard/stores/staff_row_stores.html",
         order_by="stores",
-        attrs={
-            "th": {"class": "stores"},
-        },
     )
     notif = TemplateColumn(
         verbose_name="Уведомления",
         template_name="oscar/dashboard/stores/staff_row_notif.html",
         order_by="telegram",
-        attrs={
-            "th": {"class": "notif"},
-        },
     )
-    age = Column(
+    age = TemplateColumn(
         verbose_name="Возраст",
-        order_by="age",
-        attrs={
-            "th": {"class": "age"},
-        },
+        template_name="oscar/dashboard/stores/staff_row_age.html",
+        order_by="date_of_birth",
     )
     is_active = TemplateColumn(
         verbose_name="Активен",
@@ -244,7 +216,7 @@ class StaffListTable(DashboardTable):
         attrs = {
             "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Список сотрудников пуст"
+        empty_text = "Список сотрудников пуст."
 
 
 class StoreStaffListTable(DashboardTable):
@@ -252,33 +224,21 @@ class StoreStaffListTable(DashboardTable):
         verbose_name="Имя",
         template_name="oscar/dashboard/stores/staff_row_name.html",
         order_by="name",
-        attrs={
-            "th": {"class": "name"},
-        },
     )
     role = TemplateColumn(
         verbose_name="Должность",
         template_name="oscar/dashboard/stores/staff_row_role.html",
         order_by="role",
-        attrs={
-            "th": {"class": "role"},
-        },
     )
     user = TemplateColumn(
         verbose_name="Пользователь",
         template_name="oscar/dashboard/stores/staff_row_user.html",
         order_by="user",
-        attrs={
-            "th": {"class": "user"},
-        },
     )
     stores = TemplateColumn(
         verbose_name="Магазины",
         template_name="oscar/dashboard/stores/staff_row_stores.html",
         order_by="stores",
-        attrs={
-            "th": {"class": "stores"},
-        },
     )
     is_active = TemplateColumn(
         verbose_name="Активен",
@@ -313,7 +273,7 @@ class StoreStaffListTable(DashboardTable):
         attrs = {
             "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Список персонала пуст"
+        empty_text = "Список персонала пуст."
 
 
 class TerminalListTable(DashboardTable):
@@ -321,39 +281,24 @@ class TerminalListTable(DashboardTable):
         verbose_name="Название",
         template_name="oscar/dashboard/stores/terminal_row_name.html",
         order_by="name",
-        attrs={
-            "th": {"class": "name"},
-        },
     )
     store = TemplateColumn(
         verbose_name="Магазины",
         template_name="oscar/dashboard/stores/terminal_row_store.html",
         order_by="store",
-        attrs={
-            "th": {"class": "store"},
-        },
     )
     model = Column(
         verbose_name="Модель",
         order_by="model",
-        attrs={
-            "th": {"class": "model"},
-        },
     )
     imei = Column(
         verbose_name="IMEI",
         order_by="imei",
-        attrs={
-            "th": {"class": "imei"},
-        },
     )
     date_created = TemplateColumn(
         verbose_name="Создан",
         template_name="oscar/dashboard/stores/terminal_row_date_created.html",
         order_by="date_created",
-        attrs={
-            "th": {"class": "date_created"},
-        },
     )
     date_updated = TemplateColumn(
         verbose_name="Изменен",
@@ -397,7 +342,7 @@ class TerminalListTable(DashboardTable):
         attrs = {
             "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых терминалов"
+        empty_text = "Нет созданых терминалов."
 
 
 class GroupListTable(DashboardTable):
@@ -405,17 +350,11 @@ class GroupListTable(DashboardTable):
         verbose_name="Название",
         template_name="oscar/dashboard/stores/group_row_name.html",
         order_by="name",
-        attrs={
-            "th": {"class": "name"},
-        },
     )
     permission = TemplateColumn(
         verbose_name="Права пользователя",
         template_name="oscar/dashboard/stores/group_row_permission.html",
         order_by="start_worktime",
-        attrs={
-            "th": {"class": "permission"},
-        },
     )
     actions = TemplateColumn(
         verbose_name="",
@@ -436,4 +375,4 @@ class GroupListTable(DashboardTable):
         attrs = {
             "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Нет созданых групп персонала"
+        empty_text = "Нет созданых групп персонала."

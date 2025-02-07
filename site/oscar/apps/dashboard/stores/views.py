@@ -1,30 +1,33 @@
 # pylint: disable=attribute-defined-outside-init
 import re
+
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django_tables2 import SingleTableView
-
 from django.db.models import Q, F
-
 from django.contrib.auth.models import Group
+from django.views.generic import CreateView, UpdateView, DeleteView, View
+from django_tables2 import SingleTableView
+from django.db.models import Exists, OuterRef, BooleanField
 
 from oscar.apps.communication.notifications.views import DetailView
 from oscar.apps.dashboard.users.views import CustomerListView
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 
-from django.views.generic import CreateView, UpdateView, DeleteView, View, ListView
-from django_tables2 import SingleTableView
-from django.db.models import Exists, OuterRef, BooleanField
-
-User = get_user_model()
-Staff = get_model("user", "Staff")
-Store = get_model("store", "Store")
-StoreCashTransaction = get_model("store", "StoreCashTransaction")
-Terminal = get_model("store", "Terminal")
+StaffForm = get_class("dashboard.users.forms", "StaffForm")
+GroupForm = get_class("dashboard.users.forms", "GroupForm")
+StoreListTable = get_class("dashboard.stores.tables", "StoreListTable")
+GroupListTable = get_class("dashboard.stores.tables", "GroupListTable")
+StaffListTable = get_class("dashboard.stores.tables", "StaffListTable")
+TerminalListTable = get_class("dashboard.stores.tables", "TerminalListTable")
+StoreStaffListTable = get_class("dashboard.stores.tables", "StoreStaffListTable")
+StoreCashTransactionListTable = get_class(
+    "dashboard.stores.tables", "StoreCashTransactionListTable"
+)
 (
     StoreSearchForm,
     StoreCashTransactionForm,
@@ -37,16 +40,12 @@ Terminal = get_model("store", "Terminal")
         "StoreForm",
     ],
 )
-StaffForm = get_class("dashboard.users.forms", "StaffForm")
-GroupForm = get_class("dashboard.users.forms", "GroupForm")
-StoreListTable = get_class("dashboard.stores.tables", "StoreListTable")
-GroupListTable = get_class("dashboard.stores.tables", "GroupListTable")
-StaffListTable = get_class("dashboard.stores.tables", "StaffListTable")
-TerminalListTable = get_class("dashboard.stores.tables", "TerminalListTable")
-StoreStaffListTable = get_class("dashboard.stores.tables", "StoreStaffListTable")
-StoreCashTransactionListTable = get_class(
-    "dashboard.stores.tables", "StoreCashTransactionListTable"
-)
+
+User = get_user_model()
+Staff = get_model("user", "Staff")
+Store = get_model("store", "Store")
+StoreCashTransaction = get_model("store", "StoreCashTransaction")
+Terminal = get_model("store", "Terminal")
 
 
 class StoreListView(SingleTableView):
