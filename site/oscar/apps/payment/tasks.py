@@ -3,10 +3,10 @@ from celery import shared_task
 
 from oscar.core.loading import get_model
 
-logger = logging.getLogger("oscar.payment")
-
 Transaction = get_model("payment", "Transaction")
 StoreCashTransaction = get_model("store", "StoreCashTransaction")
+
+logger = logging.getLogger("oscar.payment")
 
 
 @shared_task

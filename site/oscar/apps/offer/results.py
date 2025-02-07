@@ -139,6 +139,7 @@ class BasketDiscount(ApplicationResult):
     For when an offer application leads to a simple discount off the basket's
     total
     """
+
     is_final = True
 
     affects = ApplicationResult.BASKET

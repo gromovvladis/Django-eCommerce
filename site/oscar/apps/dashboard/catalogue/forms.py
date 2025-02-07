@@ -1,22 +1,26 @@
 import logging
-from django import forms
-from django.core import exceptions
 from treebeard.forms import movenodeform_factory
 
+from django import forms
+from django.core import exceptions
 from django.db.models.query import QuerySet
 
 from oscar.apps.crm.client import EvatorCloud
-
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import slugify
 from oscar.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
 
-logger = logging.getLogger("oscar.catalogue")
+AttributeSelect = get_class("dashboard.catalogue.widgets", "AttributeSelect")
+ProductSelect = get_class("dashboard.catalogue.widgets", "ProductSelect")
+AdditionalSelect = get_class("dashboard.catalogue.widgets", "AdditionalSelect")
+(RelatedFieldWidgetWrapper, RelatedMultipleFieldWidgetWrapper) = get_classes(
+    "dashboard.widgets",
+    ("RelatedFieldWidgetWrapper", "RelatedMultipleFieldWidgetWrapper"),
+)
 
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 Attribute = get_model("catalogue", "Attribute")
-AttributeSelect = get_class("dashboard.catalogue.widgets", "AttributeSelect")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
 Store = get_model("store", "Store")
@@ -30,13 +34,8 @@ AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 AttributeOption = get_model("catalogue", "AttributeOption")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
-ProductSelect = get_class("dashboard.catalogue.widgets", "ProductSelect")
-AdditionalSelect = get_class("dashboard.catalogue.widgets", "AdditionalSelect")
-(RelatedFieldWidgetWrapper, RelatedMultipleFieldWidgetWrapper) = get_classes(
-    "dashboard.widgets",
-    ("RelatedFieldWidgetWrapper", "RelatedMultipleFieldWidgetWrapper"),
-)
 
+logger = logging.getLogger("oscar.catalogue")
 
 BaseCategoryForm = movenodeform_factory(
     Category,

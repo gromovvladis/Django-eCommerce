@@ -2,8 +2,8 @@
 import datetime
 
 from django.conf import settings
-from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
+from django.http import HttpResponseRedirect
 from django.views import generic
 from django_tables2 import SingleTableView
 from django.db.models import Max, Min, Case, When, DecimalField, Q
@@ -13,15 +13,23 @@ from oscar.views import sort_queryset
 from oscar.core.loading import get_classes, get_model
 from oscar.core.utils import format_datetime
 
-ProductReview = get_model("reviews", "productreview")
-OrderReview = get_model("customer", "OrderReview")
-
-ProductReviewSearchForm, DashboardProductReviewForm, DashboardOrderReviewForm = get_classes(
-    "dashboard.reviews.forms", ("ProductReviewSearchForm", "DashboardProductReviewForm", "DashboardOrderReviewForm")
-)
 ReviewOrderTable, ReviewProductTable = get_classes(
     "dashboard.reviews.tables", ("ReviewOrderTable", "ReviewProductTable")
 )
+ProductReviewSearchForm, DashboardProductReviewForm, DashboardOrderReviewForm = (
+    get_classes(
+        "dashboard.reviews.forms",
+        (
+            "ProductReviewSearchForm",
+            "DashboardProductReviewForm",
+            "DashboardOrderReviewForm",
+        ),
+    )
+)
+
+ProductReview = get_model("reviews", "productreview")
+OrderReview = get_model("customer", "OrderReview")
+
 
 class BaseReviewListView(BulkEditMixin, SingleTableView):
     form_class = ProductReviewSearchForm
@@ -155,7 +163,9 @@ class BaseReviewListView(BulkEditMixin, SingleTableView):
             review.save()
         return HttpResponseRedirect(self.success_url)
 
+
 # product
+
 
 class ReviewProductListView(BaseReviewListView):
     table_class = ReviewProductTable
@@ -184,19 +194,28 @@ class ReviewProductUpdateView(generic.UpdateView):
         qs = super().get_queryset(*args, **kwargs)
         qs = qs.annotate(
             product_min_price=Case(
-                When(product__structure="product__parent", then=Min("product__children__stockrecords__price")),
-                default=Min('product__stockrecords__price'),
-                output_field=DecimalField()
+                When(
+                    product__structure="product__parent",
+                    then=Min("product__children__stockrecords__price"),
+                ),
+                default=Min("product__stockrecords__price"),
+                output_field=DecimalField(),
             ),
             product_max_price=Case(
-                When(product__structure="product__parent", then=Max("product__children__stockrecords__price")),
-                default=Max('product__stockrecords__price'),
-                output_field=DecimalField()
+                When(
+                    product__structure="product__parent",
+                    then=Max("product__children__stockrecords__price"),
+                ),
+                default=Max("product__stockrecords__price"),
+                output_field=DecimalField(),
             ),
             product_old_price=Case(
-                When(product__structure="product__parent", then=Max("product__children__stockrecords__old_price")),
-                default=Max('product__stockrecords__old_price'),
-                output_field=DecimalField()
+                When(
+                    product__structure="product__parent",
+                    then=Max("product__children__stockrecords__old_price"),
+                ),
+                default=Max("product__stockrecords__old_price"),
+                output_field=DecimalField(),
             ),
         )
         return qs
@@ -223,7 +242,9 @@ class ReviewProductDeleteView(generic.DeleteView):
     def get_success_url(self):
         return reverse("dashboard:reviews-product-list")
 
+
 # order
+
 
 class ReviewOrderListView(BaseReviewListView):
     table_class = ReviewOrderTable
@@ -260,7 +281,7 @@ class ReviewOrderReadView(generic.UpdateView):
         review.is_open = True
         review.save()
         return HttpResponseRedirect(reverse("dashboard:reviews-order-list"))
-         
+
 
 class ReviewOrderDeleteView(generic.DeleteView):
     model = OrderReview

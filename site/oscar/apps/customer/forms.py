@@ -1,14 +1,14 @@
 import datetime
 import phonenumbers
 
+from phonenumber_field.modelfields import PhoneNumberField
+from phonenumber_field.phonenumber import PhoneNumber
+
 from django import forms
 from django.conf import settings
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.utils.module_loading import import_string
-
-from phonenumber_field.modelfields import PhoneNumberField
-from phonenumber_field.phonenumber import PhoneNumber
 
 from oscar.apps.customer.utils import normalise_email
 from oscar.core.compat import existing_user_fields, get_user_model
@@ -19,7 +19,7 @@ User = get_user_model()
 
 class UserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
+        self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
 
     def clean_email(self):
@@ -37,7 +37,9 @@ class UserForm(forms.ModelForm):
                 .exclude(id=self.user.id)
                 .exists()
             ):
-                raise ValidationError("Пользователь с таким адресом электронной почты уже существует")
+                raise ValidationError(
+                    "Пользователь с таким адресом электронной почты уже существует"
+                )
         # Save the email unaltered
         return email
 
@@ -50,7 +52,6 @@ ProfileForm = UserForm
 
 
 class PhoneAuthenticationForm(forms.Form):
-    
     """
     Extends the standard django AuthenticationForm, to support 75 character
     usernames. 75 character usernames are needed to support the EmailOrUsername
@@ -61,21 +62,25 @@ class PhoneAuthenticationForm(forms.Form):
         label="Телефон",
         required=True,
         max_length=17,
-        widget=forms.TextInput(attrs={
-            'placeholder': '+7 (900) 000 0000',
-            'inputmode': 'tel',
-        })
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "+7 (900) 000 0000",
+                "inputmode": "tel",
+            }
+        ),
     )
 
     password = forms.CharField(
         label="СМС код",
         max_length=4,
         required=False,
-        widget=forms.TextInput(attrs={
-            'placeholder': '0000',
-            'inputmode': 'numeric',
-        }),
-        validators=[validators.RegexValidator(r'^\d{1,10}$')]
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "0000",
+                "inputmode": "numeric",
+            }
+        ),
+        validators=[validators.RegexValidator(r"^\d{1,10}$")],
     )
 
     error_messages = {
@@ -85,10 +90,9 @@ class PhoneAuthenticationForm(forms.Form):
 
     def __init__(self, host, *args, **kwargs):
         self.host = host
-        self.request = kwargs.pop('request')
+        self.request = kwargs.pop("request")
         self.user_cache = None
         super().__init__(*args, **kwargs)
-
 
     def confirm_login_allowed(self, user):
         """
@@ -121,45 +125,41 @@ class PhoneAuthenticationForm(forms.Form):
                 self.confirm_login_allowed(self.user_cache)
 
         return self.user_cache
-        
 
     def save(self, commit=True):
         user = super().save(commit=False)
         if commit:
             user.save()
         return user
-    
+
     def get_phone(self):
         phone_number = self.cleaned_data.get("username")
         return phone_number
-
 
     def clean_phone_number_field(self, field_name):
         number = self.cleaned_data.get(field_name)
 
         try:
-            phone_number = PhoneNumber.from_string(number, region='RU')
+            phone_number = PhoneNumber.from_string(number, region="RU")
             if not phone_number.is_valid():
-                self.add_error(
-                    field_name, "Это недопустимый формат телефона."
-                )
+                self.add_error(field_name, "Это недопустимый формат телефона.")
         except phonenumbers.NumberParseException:
             self.add_error(
-                field_name, "Это недействительный формат телефона.",
+                field_name,
+                "Это недействительный формат телефона.",
             )
             return number
 
         return phone_number
 
-
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_data['username'] = self.clean_phone_number_field('username')
+        cleaned_data["username"] = self.clean_phone_number_field("username")
         return cleaned_data
 
 
 class PhoneUserCreationForm(forms.Form):
-    
+
     phone = PhoneNumberField(
         "Номер телефона",
         blank=True,
@@ -192,7 +192,7 @@ class PhoneUserCreationForm(forms.Form):
     def save(self, commit=True):
         user = super().save(commit=commit)
         return user
-    
+
 
 class OrderSearchForm(forms.Form):
 
@@ -221,7 +221,7 @@ class OrderSearchForm(forms.Form):
             return
             # return "Все заказы"
         else:
-            date_range = self.cleaned_data["date_range"].split(' - ')
+            date_range = self.cleaned_data["date_range"].split(" - ")
             date_from = None
             date_to = None
 
@@ -272,7 +272,7 @@ class OrderSearchForm(forms.Form):
         return desc % params
 
     def get_filters(self):
-        date_range = self.cleaned_data["date_range"].split(' - ')
+        date_range = self.cleaned_data["date_range"].split(" - ")
         date_from = None
         date_to = None
 

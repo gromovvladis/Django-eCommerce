@@ -2,9 +2,6 @@ from haystack import indexes
 
 from oscar.core.loading import get_class, get_model
 
-# Load default strategy (without a user/request)
-# is_solr_supported = get_class("search.features", "is_solr_supported")
-
 Selector = get_class("store.strategy", "Selector")
 
 
@@ -26,8 +23,10 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
     category_name = indexes.CharField(null=True, indexed=False)
 
     is_available = indexes.BooleanField(null=True, faceted=True)
-    order = indexes.IntegerField(model_attr="order", null=True, faceted=False) 
-    short_description = indexes.CharField(model_attr="short_description", null=True, faceted=False)
+    order = indexes.IntegerField(model_attr="order", null=True, faceted=False)
+    short_description = indexes.CharField(
+        model_attr="short_description", null=True, faceted=False
+    )
 
     # Spelling suggestions
     suggestions = indexes.FacetCharField()
@@ -59,7 +58,7 @@ class ProductIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_category_name(self, obj):
         return " ".join(obj.get_categories().values_list("name", flat=True) or [])
-    
+
     def prepare_is_available(self, obj):
         strategy = self.get_strategy()
         return strategy.is_available(obj)

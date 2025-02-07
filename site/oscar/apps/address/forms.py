@@ -18,23 +18,33 @@ class UserAddressForm(forms.ModelForm):
         ]
 
         widgets = {
-            'line1': forms.TextInput(attrs={
-                'class' : 'input d-flex align-center input__label-active input__padding',
-            }),
-            'line2': forms.TextInput(attrs={
-                'class' : 'input d-flex align-center input__label-active input__padding',
-            }),
-            'line3': forms.TextInput(attrs={
-                'class' : 'input d-flex align-center input__label-active input__padding',
-            }),
-            'line4': forms.TextInput(attrs={
-                'class' : 'input d-flex align-center input__label-active input__padding',
-            }),
-            'notes': forms.TextInput(attrs={
-                'class' : 'input d-flex align-center input__label-active input__padding',
-            }),
-            'coords_long': forms.HiddenInput(),
-            'coords_lat': forms.HiddenInput(),
+            "line1": forms.TextInput(
+                attrs={
+                    "class": "input d-flex align-center input__label-active input__padding",
+                }
+            ),
+            "line2": forms.TextInput(
+                attrs={
+                    "class": "input d-flex align-center input__label-active input__padding",
+                }
+            ),
+            "line3": forms.TextInput(
+                attrs={
+                    "class": "input d-flex align-center input__label-active input__padding",
+                }
+            ),
+            "line4": forms.TextInput(
+                attrs={
+                    "class": "input d-flex align-center input__label-active input__padding",
+                }
+            ),
+            "notes": forms.TextInput(
+                attrs={
+                    "class": "input d-flex align-center input__label-active input__padding",
+                }
+            ),
+            "coords_long": forms.HiddenInput(),
+            "coords_lat": forms.HiddenInput(),
         }
 
     def __init__(self, user, *args, **kwargs):
@@ -51,8 +61,8 @@ class UserLiteAddressForm(forms.ModelForm):
             "coords_lat",
         ]
         widgets = {
-            'coords_long': forms.HiddenInput(),
-            'coords_lat': forms.HiddenInput(),
+            "coords_long": forms.HiddenInput(),
+            "coords_lat": forms.HiddenInput(),
         }
 
     def __init__(self, user, *args, **kwargs):

@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.crypto import get_random_string
+
 from oscar.core.compat import AUTH_USER_MODEL
 
 
@@ -137,4 +138,3 @@ class Line(models.Model):
         unique_together = (("wishlist", "product"),)
         verbose_name = "Позиция избранного"
         verbose_name_plural = "Позиции избранного"
-

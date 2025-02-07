@@ -9,6 +9,7 @@ from oscar.core.loading import get_classes, get_model
 WeightBandForm, WeightBasedForm = get_classes(
     "dashboard.shipping.forms", ["WeightBandForm", "WeightBasedForm"]
 )
+
 WeightBased = get_model("shipping", "WeightBased")
 WeightBand = get_model("shipping", "WeightBand")
 

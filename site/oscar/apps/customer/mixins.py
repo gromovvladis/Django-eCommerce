@@ -6,7 +6,7 @@ from django.contrib.auth import login as auth_login
 
 from oscar.apps.customer.signals import user_registered
 from oscar.core.compat import get_user_model
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_model
 
 User = get_user_model()
 CommunicationEventType = get_model("communication", "CommunicationEventType")
@@ -87,7 +87,7 @@ class RegisterUserPhoneMixin(object):
         Create a user instance and send a new registration email (if configured
         to).
         """
-        user = form.save()  
+        user = form.save()
 
         # Raise signal robustly (we don't want exceptions to crash the request
         # handling).

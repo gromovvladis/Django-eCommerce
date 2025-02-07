@@ -9,8 +9,8 @@ class SmsConfig(OscarConfig):
     namespace = "sms_auth"
 
     def ready(self):
-        from django_celery_beat.models import PeriodicTask, IntervalSchedule
         from celery import current_app
+        from django_celery_beat.models import PeriodicTask, IntervalSchedule
 
         if current_app.loader:
             schedule = IntervalSchedule.objects.get_or_create(
@@ -25,7 +25,5 @@ class SmsConfig(OscarConfig):
             )
 
     def get_urls(self):
-        urls = [
-            path('', include('oscar.apps.sms_auth.api.urls'), name='sms_auth')
-        ]
+        urls = [path("", include("oscar.apps.sms_auth.api.urls"), name="sms_auth")]
         return self.post_process_urls(urls)

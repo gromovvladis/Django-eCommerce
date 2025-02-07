@@ -1,4 +1,5 @@
 import re
+
 from django import forms
 from django.db.models import Q
 
@@ -76,8 +77,7 @@ class RangeProductForm(forms.Form):
             if len(self.products) == 0:
                 self.add_error(
                     "query",
-                    "Нет товаров, соответствующих артикулу %s"
-                    % ", ".join(ids),
+                    "Нет товаров, соответствующих артикулу %s" % ", ".join(ids),
                 )
             found_skus = set(
                 self.products.values_list("stockrecords__evotor_code", flat=True)
@@ -90,7 +90,9 @@ class RangeProductForm(forms.Form):
     def clean(self):
         clean_data = super().clean()
         if not clean_data.get("query") and not clean_data.get("file_upload"):
-            raise forms.ValidationError("Вы должны отправить либо список артикулов, либо файл.")
+            raise forms.ValidationError(
+                "Вы должны отправить либо список артикулов, либо файл."
+            )
 
         raw = clean_data["query"]
         if raw:
@@ -138,7 +140,9 @@ class RangeExcludedProductForm(RangeProductForm):
             Q(stockrecords__evotor_code__in=new_ids) | Q(article__in=new_ids)
         )
         if len(self.products) == 0:
-            raise forms.ValidationError("Нет товаров, соответствующих артикулу %s") % ", ".join(ids)
+            raise forms.ValidationError(
+                "Нет товаров, соответствующих артикулу %s"
+            ) % ", ".join(ids)
 
         found_skus = set(
             self.products.values_list("stockrecords__evotor_code", flat=True)

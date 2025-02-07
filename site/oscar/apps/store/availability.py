@@ -1,4 +1,3 @@
-
 class Base(object):
     """
     Base availability policy.
@@ -88,7 +87,9 @@ class StockRequired(Base):
         if self.num_available <= 0:
             return False, "Нет в наличии"
         if quantity > self.num_available:
-            msg = "Максимум %(max)d шт. доступно для покупки" % {"max": self.num_available}
+            msg = "Максимум %(max)d шт. доступно для покупки" % {
+                "max": self.num_available
+            }
             return False, msg
         return True, ""
 

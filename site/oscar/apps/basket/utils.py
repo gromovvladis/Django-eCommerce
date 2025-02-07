@@ -6,14 +6,13 @@ from django.template.loader import render_to_string
 from oscar.core.loading import get_class, get_model
 
 Applicator = get_class("offer.applicator", "Applicator")
-ConditionalOffer = get_model("offer", "ConditionalOffer")
 
-DiscountApplication = namedtuple(
-    "DiscountApplication", ["amount", "quantity", "offer"]
-)
+ConditionalOffer = get_model("offer", "ConditionalOffer")
+DiscountApplication = namedtuple("DiscountApplication", ["amount", "quantity", "offer"])
+
 
 class BasketMessageGenerator(object):
-    
+
     offer_lost_template_name = "oscar/basket/messages/offer_lost.html"
     offer_gained_template_name = "oscar/basket/messages/offer_gained.html"
 
@@ -36,7 +35,9 @@ class BasketMessageGenerator(object):
     def get_offer_messages(self, offers_before, offers_after):
         offer_messages = []
         offer_messages.extend(self.get_offer_lost_messages(offers_before, offers_after))
-        offer_messages.extend(self.get_offer_gained_messages(offers_before, offers_after))
+        offer_messages.extend(
+            self.get_offer_gained_messages(offers_before, offers_after)
+        )
         return offer_messages
 
     def apply_messages(self, request, offers_before):
@@ -82,7 +83,7 @@ class LineOfferConsumer(object):
         num_consumed = min(available, quantity)
         self._affected_quantity += num_consumed
         return num_consumed
-    
+
     # public
     def consume(self, quantity: int, offer=None):
         """

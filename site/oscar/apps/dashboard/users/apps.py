@@ -1,4 +1,5 @@
 from django.urls import path, re_path
+
 from oscar.core.application import OscarDashboardConfig
 from oscar.core.loading import get_class
 
@@ -21,7 +22,9 @@ class UsersDashboardConfig(OscarDashboardConfig):
         urls = [
             path("customers/", self.customer_list_view.as_view(), name="customer-list"),
             re_path(
-                r"^customers/(?P<pk>-?\d+)/$", self.user_detail_view.as_view(), name="user-detail"
+                r"^customers/(?P<pk>-?\d+)/$",
+                self.user_detail_view.as_view(),
+                name="user-detail",
             ),
         ]
         return self.post_process_urls(urls)

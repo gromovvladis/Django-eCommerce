@@ -1,10 +1,12 @@
 from functools import cached_property
+
 from django.db import models
 from django.urls import reverse
+from django.template.defaultfilters import striptags
+
+from oscar.core.utils import slugify
 from oscar.apps.catalogue.models import MissingProductImage
 from oscar.models.fields import AutoSlugField
-from django.template.defaultfilters import striptags
-from oscar.core.utils import slugify
 
 
 class Action(models.Model):
@@ -20,22 +22,22 @@ class Action(models.Model):
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True)
 
-    meta_title = models.CharField("Мета заголовок", max_length=255, blank=True, null=True)
+    meta_title = models.CharField(
+        "Мета заголовок", max_length=255, blank=True, null=True
+    )
     meta_description = models.TextField("Мета описание", blank=True, null=True)
 
-    is_active =models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     products_related = models.ManyToManyField(
         "catalogue.Product",
         blank=True,
         verbose_name="Связаные товары",
-        help_text=(
-            "товары которые стоит показать на странице акции"
-        ),
+        help_text=("товары которые стоит показать на странице акции"),
     )
 
     class Meta:
-        db_table = 'actions_action'
+        db_table = "actions_action"
         app_label = "home"
         ordering = ["order", "title"]
         verbose_name = "Акция для слайдера"
@@ -43,22 +45,22 @@ class Action(models.Model):
 
     def __str__(self):
         return self.title or self.slug
-    
+
     def get_title(self):
         return self.title
-    
+
     def get_meta_title(self):
         return self.meta_title or self.get_title()
-    
+
     def get_meta_description(self):
         return self.meta_description or striptags(self.description)
-    
+
     get_meta_description.short_description = "Мета-описание товара"
 
     @cached_property
     def full_slug(self):
         return self.slug
-    
+
     def generate_slug(self):
         return slugify(self.title)
 
@@ -66,15 +68,15 @@ class Action(models.Model):
         if not self.slug:
             self.slug = self.generate_slug()
         super().save(*args, **kwargs)
-    
+
     # Image
 
     @cached_property
     def has_image(self):
-        if self.image: 
+        if self.image:
             return True
         return False
-    
+
     @cached_property
     def primary_image(self):
         """
@@ -88,23 +90,27 @@ class Action(models.Model):
             return {"original": mis_img, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}
-    
+
     def get_absolute_url(self):
-        return reverse(
-            "home:action-detail", kwargs={"action_slug": self.full_slug}
-        )
-    
+        return reverse("home:action-detail", kwargs={"action_slug": self.full_slug})
+
     @cached_property
     def has_products(self):
         return self.products_related.exists()
-    
+
     @property
     def all_products(self):
         """
         Return a queryset of products in this action
         """
-        return self.products_related.select_related("parent", "product_class").prefetch_related("stockrecords", "images", "parent__product_class", "categories").all()
-    
+        return (
+            self.products_related.select_related("parent", "product_class")
+            .prefetch_related(
+                "stockrecords", "images", "parent__product_class", "categories"
+            )
+            .all()
+        )
+
 
 class PromoCategory(models.Model):
 
@@ -119,54 +125,59 @@ class PromoCategory(models.Model):
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True)
 
-    meta_title = models.CharField("Мета заголовок", max_length=255, blank=True, null=True)
+    meta_title = models.CharField(
+        "Мета заголовок", max_length=255, blank=True, null=True
+    )
     meta_description = models.TextField("Мета описание", blank=True, null=True)
 
-    is_active =models.BooleanField(default=True)
-    
-    PROMO, RECOMENDATION, ACTION = 'PROMO', 'RECOMEND', 'ACTION'
+    is_active = models.BooleanField(default=True)
+
+    PROMO, RECOMENDATION, ACTION = "PROMO", "RECOMEND", "ACTION"
 
     choices = (
-        (PROMO, 'Промо-категория'),
-        (RECOMENDATION, 'Рекомендоданые товары'),
-        (ACTION, 'Акция на товары')
+        (PROMO, "Промо-категория"),
+        (RECOMENDATION, "Рекомендоданые товары"),
+        (ACTION, "Акция на товары"),
     )
-    type = models.CharField(max_length=255, choices=choices, verbose_name="Тип категории товаров", default=RECOMENDATION)
+    type = models.CharField(
+        max_length=255,
+        choices=choices,
+        verbose_name="Тип категории товаров",
+        default=RECOMENDATION,
+    )
 
     products_related = models.ManyToManyField(
         "catalogue.Product",
         blank=True,
         verbose_name="Связаные товары",
-        help_text=(
-            "товары которые стоит показать на странице акции"
-        ),
+        help_text=("товары которые стоит показать на странице акции"),
     )
 
     class Meta:
-        db_table = 'actions_promocategory'
+        db_table = "actions_promocategory"
         app_label = "home"
         ordering = ["order", "title"]
         verbose_name = "Промо товары"
         verbose_name_plural = "Промо товары"
-    
+
     def __str__(self):
         return self.title or self.slug
-    
+
     def get_title(self):
         return self.title
-    
+
     def get_meta_title(self):
         return self.meta_title or self.get_title()
-    
+
     def get_meta_description(self):
         return self.meta_description or striptags(self.description)
-    
+
     get_meta_description.short_description = "Мета-описание товара"
 
     @property
     def full_slug(self):
         return self.slug
-    
+
     def generate_slug(self):
         return slugify(self.title)
 
@@ -177,10 +188,10 @@ class PromoCategory(models.Model):
 
     @cached_property
     def has_image(self):
-        if self.image: 
+        if self.image:
             return True
         return False
-    
+
     # Image
     def primary_image(self):
         """
@@ -194,20 +205,23 @@ class PromoCategory(models.Model):
             return {"original": mis_img, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}
-    
+
     @cached_property
     def has_products(self):
         return self.products_related.exists()
-    
+
     @property
     def all_products(self):
         """
         Return a queryset of products in this action
         """
-        return self.products_related.select_related("parent", "product_class").prefetch_related("stockrecords", "images", "parent__product_class", "categories").all()
-
+        return (
+            self.products_related.select_related("parent", "product_class")
+            .prefetch_related(
+                "stockrecords", "images", "parent__product_class", "categories"
+            )
+            .all()
+        )
 
     def get_absolute_url(self):
-        return reverse(
-            "home:promo-detail", kwargs={"action_slug": self.full_slug}
-        )
+        return reverse("home:promo-detail", kwargs={"action_slug": self.full_slug})

@@ -1,18 +1,21 @@
-import json
-import ipaddress
-import logging
-from django import http
-from oscar.core.loading import get_class, get_model
+# import json
+# import ipaddress
+# import logging
 
-from django.db.models import Q
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+# from rest_framework.views import APIView
+# from rest_framework.permissions import AllowAny
 
-PaymentManager = get_class("payment.methods", "PaymentManager")
-Yoomoney = get_class("payment.methods", "Yoomoney")
-Source = get_model("payment", "Source")
+# from django import http
+# from django.db.models import Q
 
-logger = logging.getLogger("oscar.payment")
+# from oscar.core.loading import get_class, get_model
+
+# PaymentManager = get_class("payment.methods", "PaymentManager")
+# Yoomoney = get_class("payment.methods", "Yoomoney")
+
+# Source = get_model("payment", "Source")
+
+# logger = logging.getLogger("oscar.payment")
 
 
 # class CallbackKomtet(APIView):
@@ -62,4 +65,3 @@ logger = logging.getLogger("oscar.payment")
 
 #     def post(self, request, *args, **kwargs):
 #         pass
-

@@ -1,8 +1,8 @@
 from rest_framework import serializers
+
 from oscar.core.loading import get_model
 
 Staff = get_model("user", "Staff")
-
 Store = get_model("store", "Store")
 StockRecord = get_model("store", "StockRecord")
 StockRecordOperation = get_model("store", "StockRecordOperation")

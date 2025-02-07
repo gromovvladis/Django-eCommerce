@@ -15,10 +15,9 @@ class AuthService(SmsService):
         super().__init__()
 
     def process(self):
-        generated_code = PhoneCode.objects.\
-            filter(phone_number=self.phone_number,
-                   code=self.code)\
-            .first()
+        generated_code = PhoneCode.objects.filter(
+            phone_number=self.phone_number, code=self.code
+        ).first()
 
         if generated_code is None:
             return None, False
@@ -33,7 +32,7 @@ class AuthService(SmsService):
                     "is_active": True,
                     "is_superuser": False,
                     "is_staff": False,
-                    }
+                }
             )
         else:
             user.save(**kwargs)

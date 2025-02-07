@@ -1,6 +1,7 @@
 from django.db import models
 from oscar.core.compat import AUTH_USER_MODEL
 
+
 class Address(models.Model):
     """
     Superclass address object
@@ -16,8 +17,12 @@ class Address(models.Model):
     line3 = models.PositiveIntegerField("Подъезд", blank=True, null=True)
     line4 = models.PositiveIntegerField("Этаж", blank=True, null=True)
 
-    coords_long = models.CharField("Координаты долгота", max_length=255, blank=True, null=True)
-    coords_lat = models.CharField("Координаты широта", max_length=255, blank=True, null=True)
+    coords_long = models.CharField(
+        "Координаты долгота", max_length=255, blank=True, null=True
+    )
+    coords_lat = models.CharField(
+        "Координаты широта", max_length=255, blank=True, null=True
+    )
 
     # A field only used for searching addresses - this contains all the
     # `search_fields`.  This is effectively a poor man's Solr text field.
@@ -65,7 +70,6 @@ class Address(models.Model):
                 if isinstance(self.__dict__[field], str):
                     self.__dict__[field] = self.__dict__[field].strip()
 
-
     def _update_search_text(self):
         self.search_text = self.join_fields(self.search_fields, separator=" ")
 
@@ -93,7 +97,9 @@ class Address(models.Model):
         """
         Returns set of field values within the salutation and country.
         """
-        field_values = [f.strip() for f in self.get_field_values(fields) if isinstance(f, str)]
+        field_values = [
+            f.strip() for f in self.get_field_values(fields) if isinstance(f, str)
+        ]
         field_values += [f for f in self.get_field_values(fields) if isinstance(f, int)]
         return field_values
 
@@ -125,7 +131,6 @@ class Address(models.Model):
         """
         return self.get_address_field_values(self.base_fields)
 
-    
     def active_address_fields_and_labels(self):
         """
         Returns the non-empty components of the address, but merging the
@@ -133,13 +138,13 @@ class Address(models.Model):
         listed out in `base_fields` property.
         """
         field_values = []
-        for f in self.address_fields :
+        for f in self.address_fields:
             label = f[1]
             value = getattr(self, f[0])
             if value:
                 str(value).strip()
-                field_values.append({'label':label, 'value':value})
-                
+                field_values.append({"label": label, "value": value})
+
         return field_values
 
 
@@ -158,6 +163,7 @@ class ShippingAddress(Address):
     ShippingAddress to the order app, and move
     StoreAddress to the store app.
     """
+
     notes = models.TextField(
         blank=True,
         verbose_name="Комментарий курьеру",
@@ -165,7 +171,7 @@ class ShippingAddress(Address):
     )
 
     note_field = [
-        ("notes",notes.verbose_name),
+        ("notes", notes.verbose_name),
     ]
 
     def note_field_and_label(self):
@@ -179,9 +185,8 @@ class ShippingAddress(Address):
         value = str(getattr(self, self.note_field[0]))
         if isinstance(value, str):
             value.strip()
-        field_values.append({'label':label, "value":value})
+        field_values.append({"label": label, "value": value})
         return field_values
-
 
     class Meta:
         # ShippingAddress is registered in order/models.py
@@ -195,7 +200,7 @@ class ShippingAddress(Address):
         Return the order linked to this shipping address
         """
         return self.order_set.first()
-    
+
 
 class UserAddress(ShippingAddress):
     """
@@ -225,7 +230,6 @@ class UserAddress(ShippingAddress):
             pass
 
         super().save(*args, **kwargs)
-
 
     class Meta:
         app_label = "address"

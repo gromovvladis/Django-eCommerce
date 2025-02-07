@@ -1,6 +1,8 @@
-from django.contrib.auth import get_user_model
 from phonenumber_field.serializerfields import PhoneNumberField
+
 from rest_framework import serializers
+
+from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -22,6 +24,6 @@ class DefaultUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'pk',
-            'name',
+            "pk",
+            "name",
         ]

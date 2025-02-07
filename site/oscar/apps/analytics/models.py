@@ -21,8 +21,7 @@ class ProductRecord(models.Model):
     # Data used for generating a score
     num_views = models.PositiveIntegerField("Просмотры товара", default=0)
     num_basket_additions = models.PositiveIntegerField("Дополнения корзины", default=0)
-    num_purchases = models.PositiveIntegerField("Покупки", default=0, db_index=True
-    )
+    num_purchases = models.PositiveIntegerField("Покупки", default=0, db_index=True)
 
     # Product score - used within search
     score = models.FloatField("Счет", default=0.00)
@@ -51,11 +50,21 @@ class UserRecord(models.Model):
     num_basket_additions = models.PositiveIntegerField("Дополнения корзины", default=0)
 
     # Order stats
-    num_orders = models.PositiveIntegerField("Количество заказов", default=0, db_index=True)
-    num_order_lines = models.PositiveIntegerField("Количество позиций", default=0, db_index=True)
-    num_order_items = models.PositiveIntegerField("Количество товаров", default=0, db_index=True)
-    total_spent = models.DecimalField("Общая сумма покупок", decimal_places=2, max_digits=12, default=Decimal("0.00"))
-    date_last_order = models.DateTimeField("Дата последнего заказа", blank=True, null=True)
+    num_orders = models.PositiveIntegerField(
+        "Количество заказов", default=0, db_index=True
+    )
+    num_order_lines = models.PositiveIntegerField(
+        "Количество позиций", default=0, db_index=True
+    )
+    num_order_items = models.PositiveIntegerField(
+        "Количество товаров", default=0, db_index=True
+    )
+    total_spent = models.DecimalField(
+        "Общая сумма покупок", decimal_places=2, max_digits=12, default=Decimal("0.00")
+    )
+    date_last_order = models.DateTimeField(
+        "Дата последнего заказа", blank=True, null=True
+    )
 
     class Meta:
         app_label = "analytics"

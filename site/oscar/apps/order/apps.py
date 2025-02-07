@@ -2,6 +2,7 @@ from oscar.core.application import OscarConfig
 from oscar.core.loading import get_class
 from django.urls import path
 
+
 class OrderConfig(OscarConfig):
     label = "order"
     name = "oscar.apps.order"

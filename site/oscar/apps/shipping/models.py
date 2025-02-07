@@ -3,6 +3,7 @@ from decimal import Decimal as D
 
 from django.core.validators import MinValueValidator
 from django.db import models
+
 from oscar.core import loading, prices
 from oscar.models.fields import AutoSlugField
 
@@ -78,9 +79,7 @@ class OrderAndItemCharges(Base):
             self.free_shipping_threshold is not None
             and basket.total >= self.free_shipping_threshold
         ):
-            return prices.Price(
-                currency=basket.currency, money=D("0.00")
-            )
+            return prices.Price(currency=basket.currency, money=D("0.00"))
 
         charge = self.price_per_order
         for line in basket.all_lines():

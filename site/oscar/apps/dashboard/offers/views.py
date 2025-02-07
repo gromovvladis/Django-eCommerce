@@ -10,12 +10,6 @@ from django.views.generic import DeleteView, ListView
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views import sort_queryset
 
-ConditionalOffer = get_model("offer", "ConditionalOffer")
-Condition = get_model("offer", "Condition")
-Range = get_model("offer", "Range")
-Product = get_model("catalogue", "Product")
-OrderDiscount = get_model("order", "OrderDiscount")
-Benefit = get_model("offer", "Benefit")
 (
     MetaDataForm,
     ConditionForm,
@@ -36,6 +30,13 @@ OfferWizardStepView = get_class("dashboard.offers.wizard_views", "OfferWizardSte
 OrderDiscountCSVFormatter = get_class(
     "dashboard.offers.reports", "OrderDiscountCSVFormatter"
 )
+
+ConditionalOffer = get_model("offer", "ConditionalOffer")
+Condition = get_model("offer", "Condition")
+Range = get_model("offer", "Range")
+Product = get_model("catalogue", "Product")
+OrderDiscount = get_model("order", "OrderDiscount")
+Benefit = get_model("offer", "Benefit")
 
 
 # pylint: disable=attribute-defined-outside-init
@@ -104,10 +105,14 @@ class OfferListView(ListView):
             )
         if has_vouchers is not None:
             qs = qs.filter(vouchers__isnull=not has_vouchers).distinct()
-            self.search_filters.append("Есть промокод" if has_vouchers else "Нет промокода")
+            self.search_filters.append(
+                "Есть промокод" if has_vouchers else "Нет промокода"
+            )
         if voucher_code:
             qs = qs.filter(vouchers__code__icontains=voucher_code).distinct()
-            self.search_filters.append('Промокод соответствует коду: "%s"' % voucher_code)
+            self.search_filters.append(
+                'Промокод соответствует коду: "%s"' % voucher_code
+            )
 
         return qs
 
@@ -189,7 +194,7 @@ class OfferDeleteView(DeleteView):
         if offer.vouchers.exists():
             messages.warning(
                 request,
-                "Это предложение можно удалить только в том случае, если к нему не прикреплены ваучеры."
+                "Это предложение можно удалить только в том случае, если к нему не прикреплены ваучеры.",
             )
             return redirect("dashboard:offer-detail", pk=offer.pk)
         return super().dispatch(request, *args, **kwargs)

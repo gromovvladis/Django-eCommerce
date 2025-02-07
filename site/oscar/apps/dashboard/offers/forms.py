@@ -46,17 +46,19 @@ class MetaDataForm(forms.ModelForm):
 class RestrictionsForm(forms.ModelForm):
     start_datetime = forms.DateTimeField(
         widget=widgets.DateTimePickerInput(
-            format='%d.%m.%Y %H:%M',
-        ), 
-        input_formats=['%d.%m.%Y %H:%M'],
-        label="Дата начала", required=False
+            format="%d.%m.%Y %H:%M",
+        ),
+        input_formats=["%d.%m.%Y %H:%M"],
+        label="Дата начала",
+        required=False,
     )
     end_datetime = forms.DateTimeField(
         widget=widgets.DateTimePickerInput(
-            format='%d.%m.%Y %H:%M',
+            format="%d.%m.%Y %H:%M",
         ),
-        input_formats=['%d.%m.%Y %H:%M'],
-        label="Дата окончания", required=False
+        input_formats=["%d.%m.%Y %H:%M"],
+        label="Дата окончания",
+        required=False,
     )
 
     def __init__(self, *args, **kwargs):
@@ -177,9 +179,7 @@ class ConditionForm(forms.ModelForm):
 
 
 class BenefitForm(forms.ModelForm):
-    custom_benefit = forms.ChoiceField(
-        required=False, label="Стимул", choices=()
-    )
+    custom_benefit = forms.ChoiceField(required=False, label="Стимул", choices=())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -36,10 +36,7 @@ class OrderReview(models.Model):
         (UNHELPFUL, "Неполезный"),
     )
 
-    status = models.SmallIntegerField(
-        "Статус", choices=STATUS_CHOICES, default=UNKNOWN
-    )
-
+    status = models.SmallIntegerField("Статус", choices=STATUS_CHOICES, default=UNKNOWN)
 
     date_created = models.DateTimeField(auto_now_add=True)
 
@@ -49,7 +46,7 @@ class OrderReview(models.Model):
         db_table = "order_review"
         app_label = "customer"
         unique_together = (("order", "user"),)
-        verbose_name ="Отзыв на заказ"
+        verbose_name = "Отзыв на заказ"
         verbose_name_plural = "Отзывы на заказы"
 
     def get_absolute_url(self):
@@ -76,17 +73,17 @@ class OrderReview(models.Model):
     def reviewer_name(self):
         if self.user:
             return self.user.get_full_name()
-       
-        
+
+
 class GroupEvotor(models.Model):
-    group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name='evotor')
-    evotor_id = models.CharField(max_length=128 ,null=True, blank=True)
+    group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="evotor")
+    evotor_id = models.CharField(max_length=128, null=True, blank=True)
 
     def __str__(self):
         return self.group.name
-    
+
     class Meta:
         app_label = "auth"
         unique_together = (("group", "evotor_id"),)
-        verbose_name ="Эвотор ID"
+        verbose_name = "Эвотор ID"
         verbose_name_plural = "Эвотор ID"

@@ -5,21 +5,20 @@ from django.contrib.sites.models import Site
 from django.urls import NoReverseMatch, reverse
 
 from oscar.apps.checkout.signals import post_checkout
-
 from oscar.core.loading import get_class, get_model
 
 OrderCreator = get_class("order.utils", "OrderCreator")
 OrderDispatcher = get_class("order.utils", "OrderDispatcher")
 CheckoutSessionMixin = get_class("checkout.session", "CheckoutSessionMixin")
-ShippingAddress = get_model("order", "ShippingAddress")
 OrderNumberGenerator = get_class("order.utils", "OrderNumberGenerator")
+
+ShippingAddress = get_model("order", "ShippingAddress")
 PaymentEventType = get_model("order", "PaymentEventType")
 PaymentEvent = get_model("order", "PaymentEvent")
 PaymentEventQuantity = get_model("order", "PaymentEventQuantity")
 UserAddress = get_model("address", "UserAddress")
 Basket = get_model("basket", "Basket")
 
-# Standard logger for checkout events
 logger = logging.getLogger("oscar.checkout")
 
 
@@ -140,7 +139,9 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         """
         # Create saved shipping address instance from passed in unsaved
         # instance
-        shipping_address = self.create_shipping_address(user, shipping_address, shipping_method)
+        shipping_address = self.create_shipping_address(
+            user, shipping_address, shipping_method
+        )
 
         if "status" not in kwargs:
             # pylint: disable=assignment-from-none
@@ -194,7 +195,6 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         user_addr = UserAddress(user=user)
         addr.populate_alternative_model(user_addr)
         user_addr.save()
-
 
     def save_payment_details(self, order):
         """
@@ -250,7 +250,7 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         if settings.OSCAR_SEND_ORDER_PLACED_EMAIL:
             try:
                 self.send_order_placed_email(order)
-            except Exception as e: 
+            except Exception as e:
                 logger.error(
                     "Невозможно отправить email у заказа номер №%s",
                     order.number,
@@ -262,10 +262,13 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         # Save order id in session so thank-you page can load it
         self.request.session["checkout_order_id"] = order.id
 
-        setattr(self.request, "cookies_to_delete", ['notes', 'order_note', 'line1', 'line2', 'line3', 'line4'])
- 
-        self.send_signal(self.request, order)
+        setattr(
+            self.request,
+            "cookies_to_delete",
+            ["notes", "order_note", "line1", "line2", "line3", "line4"],
+        )
 
+        self.send_signal(self.request, order)
 
     def send_signal(self, request, order):
         self.view_signal.send(

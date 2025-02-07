@@ -1,10 +1,12 @@
 from decimal import Decimal as D
+
 from oscar.apps.address.models import UserAddress, ShippingAddress
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 
-DeliveryZona = get_model("delivery", "DeliveryZona")
 ZonesUtils = get_class("delivery.zones", "ZonesUtils")
+
+DeliveryZona = get_model("delivery", "DeliveryZona")
 
 
 class Base(object):
@@ -62,10 +64,12 @@ class Free(Base):
     name = "Бесплатная доставка"
 
     def calculate(self, basket, address=None):
-        """"Returns the shipping charges and minimum order price"""
+        """ "Returns the shipping charges and minimum order price"""
         # If the charge is free then tax must be free (musn't it?) and so we
         # immediately set the tax to zero
-        return prices.Price(currency=basket.currency, money=D("0.00")), prices.Price(currency=basket.currency, money=D("0.00"))
+        return prices.Price(currency=basket.currency, money=D("0.00")), prices.Price(
+            currency=basket.currency, money=D("0.00")
+        )
 
 
 class NoShippingRequired(Free):
@@ -73,6 +77,7 @@ class NoShippingRequired(Free):
     This shipping method indicates that shipping costs a fixed price and
     requires no special calculation.
     """
+
     code = "self-pick-up"
     name = "Самовывоз"
 
@@ -86,10 +91,12 @@ class NoShippingRequired(Free):
         self.default_selected = default_selected
 
     def calculate(self, basket, address=None):
-        """"Returns the shipping charges and minimum order price"""
+        """ "Returns the shipping charges and minimum order price"""
 
         discount = basket.total * self.pickup_discount / 100
-        return prices.Price(currency=basket.currency, money=-discount), prices.Price(currency=basket.currency, money=D("0"))
+        return prices.Price(currency=basket.currency, money=-discount), prices.Price(
+            currency=basket.currency, money=D("0")
+        )
 
 
 class FixedPrice(Base):
@@ -111,8 +118,10 @@ class FixedPrice(Base):
         self.default_selected = default_selected
 
     def calculate(self, basket, address=None):
-        """"Returns the shipping charges and minimum order price"""
-        return prices.Price(currency=basket.currency, money=self.charge), prices.Price(currency=basket.currency, money=D("700.00"))
+        """ "Returns the shipping charges and minimum order price"""
+        return prices.Price(currency=basket.currency, money=self.charge), prices.Price(
+            currency=basket.currency, money=D("700.00")
+        )
 
 
 class ZonaBasedShipping(Base):
@@ -127,9 +136,8 @@ class ZonaBasedShipping(Base):
     def __init__(self, default_selected=False):
         self.default_selected = default_selected
 
-
     def calculate(self, basket, address):
-        """"Returns the shipping charges and minimum order price"""
+        """ "Returns the shipping charges and minimum order price"""
         zona_id = 0
         shipping_charge = D("0.0")
         min_order = D("700.0")
@@ -137,7 +145,9 @@ class ZonaBasedShipping(Base):
         zones = ZonesUtils.available_zones()
 
         if isinstance(address, ShippingAddress) or isinstance(address, UserAddress):
-            zona_id = ZonesUtils.zona_id([address.coords_lat, address.coords_long], zones)
+            zona_id = ZonesUtils.zona_id(
+                [address.coords_lat, address.coords_long], zones
+            )
         else:
             zona_id = int(address)
 
@@ -145,8 +155,10 @@ class ZonaBasedShipping(Base):
             shipping_charge = self.zona_charge(zona_id, zones)
             min_order = self.min_order(zona_id, zones)
 
-        return prices.Price(currency=basket.currency, money=shipping_charge), prices.Price(currency=basket.currency, money=min_order)
-        
+        return prices.Price(
+            currency=basket.currency, money=shipping_charge
+        ), prices.Price(currency=basket.currency, money=min_order)
+
     def zona_charge(self, zona_id, zones):
         charge = 0
         try:
@@ -154,9 +166,8 @@ class ZonaBasedShipping(Base):
             charge = zona.delivery_price
         except Exception:
             return 0
-        
+
         return charge
-    
 
     def min_order(self, zona_id, zones):
         amount = 700
@@ -165,9 +176,9 @@ class ZonaBasedShipping(Base):
             amount = zona.order_price
         except Exception:
             return 700
-        
+
         return amount
-    
+
 
 # pylint: disable=abstract-method
 class OfferDiscount(Base):

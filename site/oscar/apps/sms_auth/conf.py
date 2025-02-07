@@ -1,13 +1,9 @@
 from django.conf import settings
 
-# import importlib
-# from django.contrib.auth import get_user_model
-
-
 SMS_AUTH_SETTINGS = getattr(settings, "SMS_AUTH_SETTINGS", {})
 
 # SMS AUTH
-SMS_AUTH_SETTINGS.setdefault("SMS_TIMELIFE", 60*10)
+SMS_AUTH_SETTINGS.setdefault("SMS_TIMELIFE", 60 * 10)
 SMS_AUTH_SETTINGS.setdefault("SMS_TIMERESEND", 30)
 SMS_AUTH_SETTINGS.setdefault("SMS_USER_FIELD", "username")
 SMS_AUTH_SETTINGS.setdefault("SMS_DEBUG", False)
@@ -36,7 +32,9 @@ SMS_AUTH_SETTINGS.setdefault("SMS_AUTH_PROVIDER_URL", "")
 # User model
 SMS_AUTH_SETTINGS.setdefault("USER_MODEL", settings.AUTH_USER_MODEL)
 SMS_AUTH_SETTINGS.setdefault("SMS_AUTH_SUCCESS_KEY", "jwt_token")
-SMS_AUTH_SETTINGS.setdefault("SMS_USER_SERIALIZER", "sms_auth.api.serializers.DefaultUserSerializer")
+SMS_AUTH_SETTINGS.setdefault(
+    "SMS_USER_SERIALIZER", "sms_auth.api.serializers.DefaultUserSerializer"
+)
 
 
 # Provider

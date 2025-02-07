@@ -5,12 +5,19 @@ from datetime import datetime, timedelta
 from decimal import ROUND_UP
 from decimal import Decimal as D
 
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication
+
+from django.conf import settings
 from django.contrib import messages
-from django.db.models import Avg, Count, Sum
+from django.db.models import Avg, Count, Sum, Q
 from django.template.response import TemplateResponse
 from django.urls import reverse_lazy
 from django.utils.timezone import now
 from django.views.generic import TemplateView
+from django.template.loader import render_to_string
 
 from oscar.apps.customer.views import AccountAuthView
 from oscar.apps.dashboard.orders.views import queryset_orders
@@ -19,6 +26,7 @@ from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
 
 RelatedFieldWidgetWrapper = get_class("dashboard.widgets", "RelatedFieldWidgetWrapper")
+
 ConditionalOffer = get_model("offer", "ConditionalOffer")
 Voucher = get_model("voucher", "Voucher")
 Basket = get_model("basket", "Basket")
@@ -382,6 +390,38 @@ class IndexView(TemplateView):
                 total_vouchers=self.get_active_vouchers().count(),
             )
         return stats
+
+
+class NavbarCash(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            stores = request.staff_stores
+            current_time = now()
+            for store in stores:
+                store.orders_today = Order.objects.filter(
+                    store=store,
+                    date_placed__gt=datetime_combine(current_time, datetime_min.time.min),
+                ).aggregate(
+                    total_orders=Count("id"),
+                    revenue_today=Sum("total"),
+                    online_orders=Count(
+                        "id", filter=~Q(site__in=settings.OFFLINE_ORDERS)
+                    ),
+                )
+
+            staore_cash_html = render_to_string(
+                "oscar/dashboard/partials/navbar-cash.html",
+                {
+                    "stores": stores,
+                },
+                request=self.request,
+            )
+            return Response({"html": staore_cash_html}, status=200)
+        except Exception:
+            return Response({"error": "Ошибка при запросе."})
 
 
 class PopUpWindowMixin:

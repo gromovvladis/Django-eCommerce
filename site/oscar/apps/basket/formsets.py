@@ -1,10 +1,12 @@
-from django.forms.models import BaseModelFormSet, modelformset_factory
 from django.utils.functional import cached_property
+from django.forms.models import BaseModelFormSet, modelformset_factory
 
 from oscar.core.loading import get_class, get_model
 
-Line = get_model("basket", "line")
 BasketLineForm = get_class("basket.forms", "BasketLineForm")
+
+Line = get_model("basket", "line")
+
 
 class BaseBasketLineFormSet(BaseModelFormSet):
     def __init__(self, strategy, *args, **kwargs):
@@ -25,7 +27,6 @@ class BaseBasketLineFormSet(BaseModelFormSet):
 
         if not form.instance.id:
             return True
-
 
     @cached_property
     def forms_with_instances(self):

@@ -61,7 +61,7 @@
 
 #     def create_check(self, order_json):
 #         client = Client(shop_id, secret_key)
-        
+
 #         lines = order_json.get('lines')
 #         user = order_json.get('user')
 
@@ -102,7 +102,7 @@
 #         check.add_payment(order_json.get('amount_allocated'))
 #         check.set_print(False)
 #         check.set_callback_url(f"https://{payment_address}{callback_url}")
-        
+
 #         try:
 #             client.create_task(check)
 #         except HTTPError as exc:
@@ -153,7 +153,7 @@
 #         check.add_payment(order_json.get('amount_allocated'))
 #         check.set_print(False)
 #         check.set_callback_url(f"https://{payment_address}{callback_url}")
-        
+
 #         try:
 #             client.create_task(check)
 #         except HTTPError as exc:
@@ -181,14 +181,6 @@
 
 #     def delete_employee(self, order_json):
 #         pass
-
-
-
-
-
-
-
-
 
 
 #     # position_name = 'Наименование позиции'
@@ -290,8 +282,6 @@
 #     #                     vat=vat_rate,  # Тип налога
 #     #                     payment_object=payment_object # Объект расчёта
 #     # )
-
-
 
 
 #     # # Типы маркировок
@@ -445,7 +435,6 @@
 #     # # fiscal_data - фискальные данные
 
 
-
 #     # # Чтобы проверить, является ли очередь активной, выполните:
 #     # client.is_queue_active('идентификатор очереди')
 
@@ -460,14 +449,6 @@
 #     #     print(exc.response.text)
 #     # else:
 #     #     print(task)
-
-        
-
-
-
-
-
-
 
 
 # # ========== Сериализоторы АТОЛ для отправки / изменения чеков ==========
@@ -511,7 +492,7 @@
 # #         "vat120":"VAT_18_118",
 # #     }
 
-# #     def to_representation(self, instance):      
+# #     def to_representation(self, instance):
 # #         return {
 # #             "name": instance.get_full_name(),
 # #             "price": instance.unit_price,
@@ -525,7 +506,7 @@
 
 
 # # class ReceiptSerializer(serializers.Serializer):
-# #      def to_representation(self, instance):        
+# #      def to_representation(self, instance):
 # #         representation = {
 # #             "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
 # #             "external_id": instance.id,
@@ -551,7 +532,7 @@
 # #         }
 
 # #         if instance.shipping > 0:
-# #             representation["items"].append({     
+# #             representation["items"].append({
 # #                 "name": "Доставка",
 # #                 "price": instance.shipping,
 # #                 "quantity": 1,
@@ -563,7 +544,6 @@
 # #             })
 
 # #         return representation
-     
 
 
 # # ================= запросы к терминалам (Отправка заказов) =================
@@ -628,7 +608,7 @@
 
 # #             response.raise_for_status()  # Проверка на успешный статус запроса (2xx)
 # #             return response.json()  # Возврат данных в формате JSON
-        
+
 # #         except requests.exceptions.HTTPError as http_err:
 # #             error = ""
 # #             if response.status_code == 400:
@@ -717,7 +697,6 @@
 # # ================= запросы к АТОЛ Онлайн (Отправка чеков) =================
 
 
-
 # # class EvotorAPIATOL:
 # #     """ "
 # #     Документация для внедрения по ссылке ниже
@@ -777,7 +756,7 @@
 
 # #             response.raise_for_status()  # Проверка на успешный статус запроса (2xx)
 # #             return response.json()  # Возврат данных в формате JSON
-        
+
 # #         except requests.exceptions.HTTPError as http_err:
 # #             error = ""
 # #             if response.status_code == 400:
@@ -883,40 +862,6 @@
 
 # #         # if not error:
 # #             # order.update
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #     # сырые данные
@@ -1197,7 +1142,6 @@
 #     # # fiscal_data - фискальные данные
 
 
-
 #     # # Чтобы проверить, является ли очередь активной, выполните:
 #     # client.is_queue_active('идентификатор очереди')
 
@@ -1212,10 +1156,6 @@
 #     #     print(exc.response.text)
 #     # else:
 #     #     print(task)
-
-        
-
-
 
 
 # # ================= запросы к терминалам (Отправка заказов) =================
@@ -1280,7 +1220,7 @@
 
 # #             response.raise_for_status()  # Проверка на успешный статус запроса (2xx)
 # #             return response.json()  # Возврат данных в формате JSON
-        
+
 # #         except requests.exceptions.HTTPError as http_err:
 # #             error = ""
 # #             if response.status_code == 400:
@@ -1369,7 +1309,6 @@
 # # ================= запросы к АТОЛ Онлайн (Отправка чеков) =================
 
 
-
 # # class EvotorAPIATOL:
 # #     """ "
 # #     Документация для внедрения по ссылке ниже
@@ -1429,7 +1368,7 @@
 
 # #             response.raise_for_status()  # Проверка на успешный статус запроса (2xx)
 # #             return response.json()  # Возврат данных в формате JSON
-        
+
 # #         except requests.exceptions.HTTPError as http_err:
 # #             error = ""
 # #             if response.status_code == 400:
@@ -1535,4 +1474,3 @@
 
 # #         # if not error:
 # #             # order.update
-

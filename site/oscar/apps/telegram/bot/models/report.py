@@ -24,7 +24,9 @@ def get_report_message(start_period):
         orders_lines = Line.objects.filter(order__in=orders).count()
         new_users = users.count()
         new_customers = users.filter(orders__isnull=False).count()
-        open_baskets = Basket.objects.filter(status=Basket.OPEN, date_created__gt=start_period).count()
+        open_baskets = Basket.objects.filter(
+            status=Basket.OPEN, date_created__gt=start_period
+        ).count()
         total_revenue = orders.aggregate(Sum("total"))["total__sum"] or D("0.00")
         average_costs = orders.aggregate(Avg("total"))["total__avg"] or D("0.00")
 
@@ -37,13 +39,13 @@ def get_report_message(start_period):
             f"Общий доход: <b>{int(total_revenue)} ₽</b>\n"
             f"Средняя стоимость заказа: <b>{int(average_costs)} ₽</b>"
         )
-        
+
         return msg
 
 
 @sync_to_async
 def get_staffs_message():
-    staffs = Staff.objects.all().prefetch_related('user')
+    staffs = Staff.objects.all().prefetch_related("user")
     if not staffs.exists():
         return "Список персонала пуст."
     else:
@@ -58,7 +60,7 @@ def get_staffs_message():
             )
 
             msg_list.append(msg)
-            
+
         return "\n\n".join(msg_list)
 
 
@@ -71,10 +73,22 @@ def get_customers_message():
         users_count = users.count()
         customers = users.filter(orders__isnull=False)
         customers_count = customers.count()
-        customers_2orders = customers.annotate(order_count=Count('orders')).filter(order_count__gte=2).count()
-        customers_5orders = customers.annotate(order_count=Count('orders')).filter(order_count__gte=5).count()
-        open_customer_baskets = Basket.objects.filter(status=Basket.OPEN, owner__isnull=False).count()
-        open_guest_baskets = Basket.objects.filter(status=Basket.OPEN, owner__isnull=True).count()
+        customers_2orders = (
+            customers.annotate(order_count=Count("orders"))
+            .filter(order_count__gte=2)
+            .count()
+        )
+        customers_5orders = (
+            customers.annotate(order_count=Count("orders"))
+            .filter(order_count__gte=5)
+            .count()
+        )
+        open_customer_baskets = Basket.objects.filter(
+            status=Basket.OPEN, owner__isnull=False
+        ).count()
+        open_guest_baskets = Basket.objects.filter(
+            status=Basket.OPEN, owner__isnull=True
+        ).count()
 
         order_msg = (
             f"Всего пользователей: <b>{users_count}</b>\n"
@@ -84,5 +98,5 @@ def get_customers_message():
             f"Открыто авторизованных корзин: <b>{open_customer_baskets}</b>\n"
             f"Открыто гостевых корзин: <b>{int(open_guest_baskets)}</b>\n"
         )
-        
+
         return order_msg

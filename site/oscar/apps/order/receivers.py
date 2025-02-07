@@ -11,5 +11,10 @@ from oscar.apps.order.signals import order_placed
 # pylint: disable=unused-argument
 @receiver(order_placed)
 def update_paying_status(sender, order, user, **kwargs):
-    if order.status == settings.OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS and not settings.DEBUG:
-        update_paying_status_task.apply_async(args=[order.number], eta=now() + timedelta(minutes=11))
+    if (
+        order.status == settings.OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS
+        and not settings.DEBUG
+    ):
+        update_paying_status_task.apply_async(
+            args=[order.number], eta=now() + timedelta(minutes=11)
+        )

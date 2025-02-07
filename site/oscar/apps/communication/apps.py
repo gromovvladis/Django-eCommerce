@@ -8,7 +8,7 @@ class CommunicationConfig(OscarConfig):
     namespace = "communication"
     name = "oscar.apps.communication"
     verbose_name = "Уведомления"
-    
+
     def ready(self):
         from . import receivers
 
@@ -18,10 +18,11 @@ class CommunicationConfig(OscarConfig):
 
     def get_urls(self):
         urls = [
-            path("webpush/save-subscription/", self.webpush_save_view.as_view(), name="webpush-save"),
+            path(
+                "webpush/save-subscription/",
+                self.webpush_save_view.as_view(),
+                name="webpush-save",
+            ),
         ]
 
         return self.post_process_urls(urls)
-
-
-

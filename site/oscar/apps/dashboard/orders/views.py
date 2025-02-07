@@ -1,5 +1,4 @@
 # pylint: disable=attribute-defined-outside-init
-
 import csv
 import io
 import datetime
@@ -9,10 +8,20 @@ from decimal import Decimal as D
 from decimal import InvalidOperation
 from dateutil.relativedelta import relativedelta
 
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
+
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django_tables2 import SingleTableView, RequestConfig
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.views.generic import DetailView, FormView, UpdateView, DeleteView
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.timezone import now
+from django.template.loader import render_to_string
 from django.db.models import (
     Count,
     Sum,
@@ -29,12 +38,6 @@ from django.db.models import (
     Exists,
     OuterRef,
 )
-from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
-from django.views.generic import DetailView, FormView, UpdateView, DeleteView
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.utils.timezone import now
-from django.template.loader import render_to_string
 
 from oscar.apps.order import exceptions as order_exceptions
 from oscar.apps.payment.exceptions import PaymentError
@@ -44,15 +47,16 @@ from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import datetime_combine, format_datetime
 
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import SessionAuthentication
-
-
-logger = logging.getLogger("oscar.dashboard")
+EventHandlerMixin = get_class("order.mixins", "EventHandlerMixin")
+OrderStatsForm = get_class("dashboard.orders.forms", "OrderStatsForm")
+OrderSearchForm = get_class("dashboard.orders.forms", "OrderSearchForm")
+ActiveOrderSearchForm = get_class("dashboard.orders.forms", "ActiveOrderSearchForm")
+OrderNoteForm = get_class("dashboard.orders.forms", "OrderNoteForm")
+ShippingAddressForm = get_class("dashboard.orders.forms", "ShippingAddressForm")
+OrderStatusForm = get_class("dashboard.orders.forms", "OrderStatusForm")
+OrderTable = get_class("dashboard.orders.tables", "OrderTable")
 
 User = get_user_model()
-
 Order = get_model("order", "Order")
 OrderNote = get_model("order", "OrderNote")
 Line = get_model("order", "Line")
@@ -66,16 +70,7 @@ Product = get_model("catalogue", "Product")
 Transaction = get_model("payment", "Transaction")
 SourceType = get_model("payment", "SourceType")
 
-EventHandlerMixin = get_class("order.mixins", "EventHandlerMixin")
-
-OrderStatsForm = get_class("dashboard.orders.forms", "OrderStatsForm")
-OrderSearchForm = get_class("dashboard.orders.forms", "OrderSearchForm")
-ActiveOrderSearchForm = get_class("dashboard.orders.forms", "ActiveOrderSearchForm")
-OrderNoteForm = get_class("dashboard.orders.forms", "OrderNoteForm")
-ShippingAddressForm = get_class("dashboard.orders.forms", "ShippingAddressForm")
-OrderStatusForm = get_class("dashboard.orders.forms", "OrderStatusForm")
-
-OrderTable = get_class("dashboard.orders.tables", "OrderTable")
+logger = logging.getLogger("oscar.dashboard")
 
 
 def queryset_orders(request, product=None, category=None):
@@ -1102,6 +1097,20 @@ class OrderModalView(APIView):
 class OrderNextStatusView(EventHandlerMixin, APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [SessionAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        number = kwargs.get("number", None)
+        try:
+            order = Order.objects.get(number=number)
+            next_status = order.next_status
+            order.set_status(order.next_status)
+            handler = self.get_handler(user=request.user)
+            handler.handle_order_status_change(order, next_status)
+            messages.success(self.request, "Статус заказа успешно изменен!")
+        except Exception:
+            messages.error(self.request, "Ошибка при смене статуса заказа.")
+
+        return redirect("dashboard:order-detail", number=order.number)
 
     def post(self, request, *args, **kwargs):
         order_number = request.data.get("order_number", None)

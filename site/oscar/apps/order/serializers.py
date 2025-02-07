@@ -1,9 +1,8 @@
 from decimal import Decimal as D
+from rest_framework import serializers
 
 from django.conf import settings
 from django.utils.timezone import now
-
-from rest_framework import serializers
 
 from oscar.core.loading import get_model
 
@@ -13,14 +12,12 @@ Product = get_model("catalogue", "Product")
 Additional = get_model("catalogue", "Additional")
 ProductClass = get_model("catalogue", "ProductClass")
 StockRecord = get_model("store", "StockRecord")
-
 Order = get_model("order", "Order")
 OrderNote = get_model("order", "OrderNote")
 OrderDiscount = get_model("order", "OrderDiscount")
 OrderLineDiscount = get_model("order", "OrderLineDiscount")
 Line = get_model("order", "Line")
 LinePrice = get_model("order", "LinePrice")
-
 Source = get_model("payment", "Source")
 SourceType = get_model("payment", "SourceType")
 Transaction = get_model("payment", "Transaction")
@@ -28,7 +25,7 @@ Transaction = get_model("payment", "Transaction")
 # ========== Сериализоторы для Мобильного кассира ==========
 
 
-class LineSerializer(serializers.Serializer):
+class OrderLineSerializer(serializers.Serializer):
     id = serializers.CharField(source="article")
     product_id = serializers.CharField()
     code = serializers.CharField(source="evotor_code")
@@ -60,16 +57,28 @@ class LineSerializer(serializers.Serializer):
         )
 
     def create(self, validated_data, order, store):
-        product = Product.objects.get_or_create(
+        product, created = Product.objects.get_or_create(
             evotor_id=validated_data["product_id"],
             defaults={
                 "name": "Несозданый продукт",
                 "product_class": self._get_or_create_product_class(),
             },
-        )[0]
-        stockrecord = product.stockrecords.filter(
-            store__evotor_id=store.evotor_id, is_public=True
-        ).first()
+        )
+        if created:
+            stockrecord = StockRecord.objects.get_or_create(
+                product=product,
+                store_id=store.id,
+                defaults={
+                    "product": product,
+                    "store": store,
+                    "evotor_code": "site-%s" % product.id,
+                    "price": D(validated_data["price"]),
+                },
+            )[0]
+        else:
+            stockrecord = product.stockrecords.filter(
+                store__evotor_id=store.evotor_id, is_public=True
+            ).first()
         line = Line.objects.create(
             order=order,
             store=store,
@@ -319,7 +328,7 @@ class OrderSerializer(serializers.Serializer):
         positions = body.get("positions", [])
         for position in positions:
             if position.get("parent_id", None) != Additional.parent_id:
-                LineSerializer().create(position, order, store)
+                OrderLineSerializer().create(position, order, store)
 
         order_lines = order.lines.all()
         for position in positions:
@@ -331,12 +340,18 @@ class OrderSerializer(serializers.Serializer):
                         "price": position.get("price"),
                     },
                 )[0]
+                added = False
                 for line in order_lines:
                     product = line.product
                     if additional in product.get_product_additionals():
                         line.attributes.create(
                             additional=additional, value=position.get("quantity")
                         )
+                        added = True
+                if not added:
+                    line.attributes.create(
+                        additional=additional, value=position.get("quantity")
+                    )
 
         discounts = body.get("doc_discounts", [])
         for discount in discounts:
@@ -372,7 +387,7 @@ class OrderSerializer(serializers.Serializer):
         positions = body.get("positions", [])
         for position in positions:
             if position.get("parent_id", None) != Additional.parent_id:
-                LineSerializer().create(position, instance, store)
+                OrderLineSerializer().create(position, instance, store)
 
         order_lines = instance.lines.all()
         for position in positions:
@@ -384,12 +399,18 @@ class OrderSerializer(serializers.Serializer):
                         "price": position.get("price"),
                     },
                 )[0]
+                added = False
                 for line in order_lines:
                     product = line.product
                     if additional in product.get_product_additionals():
                         line.attributes.create(
                             additional=additional, value=position.get("quantity")
                         )
+                        added = True
+                if not added:
+                    line.attributes.create(
+                        additional=additional, value=position.get("quantity")
+                    )
 
         discounts = body.get("doc_discounts", [])
         for discount in discounts:
@@ -432,7 +453,9 @@ class OrderSerializer(serializers.Serializer):
                 "Оплата": f"{paid}₽" if paid > 0 else "Нет",
                 "Доставка": instance.shipping_method,
             },
-            "positions": [LineSerializer(line).data for line in instance.lines.all()],
+            "positions": [
+                OrderLineSerializer(line).data for line in instance.lines.all()
+            ],
         }
 
         notes = instance.notes.values_list("note_type", "message")

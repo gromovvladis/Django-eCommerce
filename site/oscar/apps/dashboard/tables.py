@@ -1,5 +1,6 @@
 from django_tables2 import Table
 
+
 class DashboardTable(Table):
     caption = ("%d Ряд", "%d Ряды")
 

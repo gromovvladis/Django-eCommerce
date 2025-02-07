@@ -3,10 +3,12 @@ from decimal import Decimal as D
 
 from django.conf import settings
 from django.db import transaction
+
 from oscar.apps.order.signals import order_placed
 from oscar.core.loading import get_class, get_model
-
 from . import exceptions
+
+Dispatcher = get_class("communication.utils", "Dispatcher")
 
 Order = get_model("order", "Order")
 Line = get_model("order", "Line")
@@ -14,7 +16,6 @@ OrderDiscount = get_model("order", "OrderDiscount")
 OrderLineDiscount = get_model("order", "OrderLineDiscount")
 CommunicationEvent = get_model("order", "CommunicationEvent")
 CommunicationEventType = get_model("communication", "CommunicationEventType")
-Dispatcher = get_class("communication.utils", "Dispatcher")
 Surcharge = get_model("order", "Surcharge")
 
 
@@ -175,7 +176,7 @@ class OrderCreator(object):
         return order
 
     def get_referral_source(self, request):
-        return request.COOKIES.get('referral_source', "mikado-sushi.ru")
+        return request.COOKIES.get("referral_source", "mikado-sushi.ru")
 
     def create_line_models(self, order, basket_line, extra_line_fields=None):
         """
@@ -289,7 +290,9 @@ class OrderCreator(object):
         for attr in basket_line.attributes.all():
             if attr.additional:
                 order_line.attributes.create(
-                    additional=attr.additional, type=attr.additional.article, value=attr.value
+                    additional=attr.additional,
+                    type=attr.additional.article,
+                    value=attr.value,
                 )
 
     def create_discount_model(self, order, discount):

@@ -2,10 +2,12 @@ from aiogram.types import Message
 from aiogram import BaseMiddleware
 from aiogram.exceptions import TelegramRetryAfter
 
+
 class ThrottlingMiddleware(BaseMiddleware):
     """
     Simple middleware
     """
+
     def __init__(self, limit: float):
         super().__init__()
         self.limit = limit
@@ -15,7 +17,9 @@ class ThrottlingMiddleware(BaseMiddleware):
             # Пример работы с ограничением запросов
             pass
         except TelegramRetryAfter as exc:
-            await message.answer(f"Пожалуйста, подождите {exc.retry_after} секунд перед следующим запросом.")
+            await message.answer(
+                f"Пожалуйста, подождите {exc.retry_after} секунд перед следующим запросом."
+            )
 
     async def message_throttled(self, message: Message, throttled: TelegramRetryAfter):
         if throttled.exceeded_count <= 2:

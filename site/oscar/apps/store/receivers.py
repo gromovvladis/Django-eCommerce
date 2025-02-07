@@ -1,8 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.conf import settings
 
-# from oscar.apps.store.tasks import update_cache_product_task
 from oscar.core.loading import get_model
 
 StockAlert = get_model("store", "StockAlert")
@@ -24,14 +22,12 @@ def update_stock_alerts(sender, instance, created, **kwargs):
         alert = None
 
     if stockrecord.is_below_threshold and not alert:
-        StockAlert.objects.create(
-            stockrecord=stockrecord
-        )
+        StockAlert.objects.create(stockrecord=stockrecord)
     elif not stockrecord.is_below_threshold and alert:
         alert.close()
+
 
 # @receiver(post_save, sender=StockRecord)
 # def update_cache_product(sender, instance, created, **kwargs):
 #     if settings.DEBUG:
 #         update_cache_product_task.delay(product_id=instance.product_id, store_id=instance.store_id)
-        

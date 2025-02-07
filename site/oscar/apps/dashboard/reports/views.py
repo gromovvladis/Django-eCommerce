@@ -39,7 +39,7 @@ class IndexView(ListView):
             if form.is_valid():
                 generator = self._get_generator(form)
                 if not generator.is_available_to(request.user):
-                    return HttpResponseForbidden("У вас нет доступа к этому отчету")
+                    return HttpResponseForbidden("У вас нет доступа к этому отчету.")
 
                 report = generator.generate(request)
 

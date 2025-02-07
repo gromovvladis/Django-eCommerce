@@ -1,3 +1,5 @@
+from extra_views import ModelFormSetView
+
 from django import shortcuts
 from django import http
 from django.contrib.sessions.serializers import JSONSerializer
@@ -6,7 +8,6 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import FormView, View
-from extra_views import ModelFormSetView
 
 from oscar.apps.basket.signals import basket_addition
 from oscar.core.loading import get_class, get_classes, get_model
@@ -17,7 +18,7 @@ Applicator = get_class("offer.applicator", "Applicator")
     "basket.forms",
     ("BasketLineForm", "AddToBasketForm"),
 )
-BasketLineFormSet = get_class("basket.formsets","BasketLineFormSet")
+BasketLineFormSet = get_class("basket.formsets", "BasketLineFormSet")
 Repository = get_class("shipping.repository", "Repository")
 OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 BasketMessageGenerator = get_class("basket.utils", "BasketMessageGenerator")
@@ -39,7 +40,7 @@ class BasketView(ModelFormSetView):
     def dispatch(self, request, *args, **kwargs):
         self.check_lines()
         return super().dispatch(request, *args, **kwargs)
-    
+
     def check_lines(self):
         if not is_ajax(self.request):
             updated = False
@@ -58,7 +59,7 @@ class BasketView(ModelFormSetView):
 
             for line in self.request.basket._all_lines():
                 line.get_warning()
-            
+
     def get_formset_kwargs(self):
         kwargs = super().get_formset_kwargs()
         kwargs["strategy"] = self.request.strategy
@@ -70,7 +71,7 @@ class BasketView(ModelFormSetView):
         instances associated with the current basket.
         """
         return self.request.basket._all_lines()
-    
+
     def get_upsell_messages(self, basket):
         offers = Applicator().get_offers(basket, self.request.user, self.request)
         applied_offers = list(basket.offer_applications.offers.values())
@@ -78,7 +79,8 @@ class BasketView(ModelFormSetView):
         for offer in offers:
             if (
                 offer.is_condition_partially_satisfied(basket)
-                and offer not in applied_offers and offer.is_available()
+                and offer not in applied_offers
+                and offer.is_available()
             ):
                 data = {"message": offer.get_upsell_message(basket), "offer": offer}
                 msgs.append(data)
@@ -94,28 +96,37 @@ class BasketView(ModelFormSetView):
         context["order_total"] = OrderTotalCalculator().calculate(self.request.basket)
 
         return context
-    
+
     def get_success_url(self):
         return safe_referrer(self.request, "basket:summary")
 
     def formset_valid(self, formset):
         if is_ajax(self.request):
             self.object_list = formset.save()
-            self.request.basket = Basket.objects.get(
-                id=self.request.basket.id
-            )
+            self.request.basket = Basket.objects.get(id=self.request.basket.id)
             self.request.basket.strategy = self.request.strategy
             Applicator().apply(self.request.basket, self.request.user, self.request)
-            new_totals = render_to_string("oscar/basket/partials/basket_totals.html",{
-                "basket": self.request.basket, "order_total": {'currency':self.request.basket.currency,'money': self.request.basket.total}
-                }, request=self.request)
+            new_totals = render_to_string(
+                "oscar/basket/partials/basket_totals.html",
+                {
+                    "basket": self.request.basket,
+                    "order_total": {
+                        "currency": self.request.basket.currency,
+                        "money": self.request.basket.total,
+                    },
+                },
+                request=self.request,
+            )
 
-            return http.JsonResponse({
-                "status": 202,
-                "new_totals": new_totals,
-                "new_nums": self.request.basket.num_items,
-                }, status=202)
-        
+            return http.JsonResponse(
+                {
+                    "status": 202,
+                    "new_totals": new_totals,
+                    "new_nums": self.request.basket.num_items,
+                },
+                status=202,
+            )
+
         return super().formset_valid(formset)
 
     def formset_invalid(self, formset):
@@ -130,10 +141,13 @@ class BasketView(ModelFormSetView):
                 return self.formset_valid(formset)
 
         if is_ajax(self.request):
-            return http.JsonResponse({
-                "errors": formset.errors,
-                "status": 404,
-                }, status=404)
+            return http.JsonResponse(
+                {
+                    "errors": formset.errors,
+                    "status": 404,
+                },
+                status=404,
+            )
 
         return super().formset_invalid(formset)
 
@@ -190,22 +204,22 @@ class BasketView(ModelFormSetView):
 class EmptyBasketView(View):
 
     def post(self, request, *args, **kwargs):
-        
+
         basket = request.basket
-        url=reverse("basket:summary"),
+        url = (reverse("basket:summary"),)
 
         if not basket.id:
-            return http.JsonResponse({"url": url, "status": 403}, status = 403)
+            return http.JsonResponse({"url": url, "status": 403}, status=403)
         try:
             basket.flush()
         except Exception:
             pass
-        
-        return http.JsonResponse({"url": url, "status": 200}, status = 200)
+
+        return http.JsonResponse({"url": url, "status": 200}, status=200)
 
 
 class GetUpsellMasseges(View):
-        
+
     def get_upsell_messages(self, basket):
         offers = Applicator().get_offers(basket, self.request.user, self.request)
         applied_offers = list(basket.offer_applications.offers.values())
@@ -219,18 +233,24 @@ class GetUpsellMasseges(View):
                 msgs.append(data)
         return msgs
 
-
     def get(self, request, *args, **kwargs):
-        upsell_messages = render_to_string("oscar/basket/partials/upsell_messages.html",{"upsell_messages": self.get_upsell_messages(request.basket)}, request=self.request)
-        return http.JsonResponse({"upsell_messages": upsell_messages, "status": 202}, status = 202)
-    
-    
+        upsell_messages = render_to_string(
+            "oscar/basket/partials/upsell_messages.html",
+            {"upsell_messages": self.get_upsell_messages(request.basket)},
+            request=self.request,
+        )
+        return http.JsonResponse(
+            {"upsell_messages": upsell_messages, "status": 202}, status=202
+        )
+
+
 class BasketAddView(FormView):
     """
     Handles the add-to-basket submissions, which are triggered from various
     parts of the site. The add-to-basket form is loaded into templates using
     a templatetag from :py:mod:`oscar.templatetags.basket_tags`.
     """
+
     form_class = AddToBasketForm
     product_model = Product
     add_signal = basket_addition
@@ -238,7 +258,9 @@ class BasketAddView(FormView):
 
     def post(self, request, *args, **kwargs):
         # pylint: disable=W0201
-        self.product = shortcuts.get_object_or_404(self.product_model, slug=kwargs["slug"])
+        self.product = shortcuts.get_object_or_404(
+            self.product_model, slug=kwargs["slug"]
+        )
         return super().post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -262,14 +284,16 @@ class BasketAddView(FormView):
         self.request.session["add_to_basket_form_post_data_%s" % self.product.pk] = (
             serialized_data.decode("latin-1")
         )
-        return http.JsonResponse({"errors": " ".join(clean_msgs), "status": 404}, status=404)
+        return http.JsonResponse(
+            {"errors": " ".join(clean_msgs), "status": 404}, status=404
+        )
 
     def form_valid(self, form):
 
         self.request.basket.add_product(
             form.product, 1, form.cleaned_options(), form.cleaned_additionals()
         )
-        
+
         # Send signal for basket addition
         self.add_signal.send(
             sender=self,
@@ -279,11 +303,10 @@ class BasketAddView(FormView):
         )
 
         super().form_valid(form)
-        
-        return http.JsonResponse({
-            "cart_nums": form.basket.num_items,
-            "status": 200
-            }, status=200)
+
+        return http.JsonResponse(
+            {"cart_nums": form.basket.num_items, "status": 200}, status=200
+        )
 
     def get_success_url(self):
         post_url = self.request.POST.get("next")

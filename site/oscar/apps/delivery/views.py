@@ -1,22 +1,22 @@
 import json
-from zoneinfo import ZoneInfo
 from datetime import datetime, timedelta
+
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework.authentication import SessionAuthentication
 
 from django import http
 from django.db.models import Sum, F
 from django.conf import settings
 from django.utils.timezone import now
 
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework.authentication import SessionAuthentication
-
 from oscar.core.loading import get_class, get_model
 from .utils import pickup_now
 from .maps import Map
 
-DeliveryZona = get_model("delivery", "DeliveryZona")
 ZonesUtils = get_class("delivery.zones", "ZonesUtils")
+
+DeliveryZona = get_model("delivery", "DeliveryZona")
 Order = get_model("order", "Order")
 
 _dir = settings.STATIC_PRIVATE_ROOT
@@ -42,8 +42,8 @@ class OrderNowView(APIView):
 
         return http.JsonResponse(result, status=200)
 
-    def pickup(self, basket):    
-        current_time = now()    
+    def pickup(self, basket):
+        current_time = now()
         new_order_time = pickup_now(basket)
         before_order = new_order_time - current_time
 
@@ -51,11 +51,17 @@ class OrderNowView(APIView):
             minutes = before_order.total_seconds() // 60
             delivery_time_text = f"Самовывоз через {int(minutes)} мин."
         elif new_order_time.date() == current_time.date():
-            delivery_time_text = f"Самовывоз сегодня в {new_order_time.strftime('%H:%M')}"
+            delivery_time_text = (
+                f"Самовывоз сегодня в {new_order_time.strftime('%H:%M')}"
+            )
         elif new_order_time.date() == (current_time + timedelta(days=1)).date():
-            delivery_time_text = f"Самовывоз завтра в {new_order_time.strftime('%H:%M')}"
+            delivery_time_text = (
+                f"Самовывоз завтра в {new_order_time.strftime('%H:%M')}"
+            )
         else:
-            delivery_time_text = f"Самовывоз {new_order_time.strftime('%d.%m.%Y в %H:%M')}"
+            delivery_time_text = (
+                f"Самовывоз {new_order_time.strftime('%d.%m.%Y в %H:%M')}"
+            )
 
         return {
             "timeUTC": new_order_time.isoformat(),
@@ -180,6 +186,7 @@ class OrderLaterView(APIView):
     """
     Время доставки к определенному времени
     """
+
     permission_classes = [AllowAny]
     authentication_classes = [SessionAuthentication]
 
@@ -187,11 +194,13 @@ class OrderLaterView(APIView):
         current_time = datetime.today()
         start_time = request.basket.store.start_worktime
         end_time = request.basket.store.end_worktime
-        
+
         pickup_time = pickup_now(request.basket) + timedelta(hours=1)
 
         if pickup_time.hour > end_time.hour or pickup_time.hour < start_time.hour:
-            pickup_time = datetime.combine(pickup_time.date() + timedelta(days=1), start_time)
+            pickup_time = datetime.combine(
+                pickup_time.date() + timedelta(days=1), start_time
+            )
 
         data = {
             "minHours": start_time.hour,
@@ -212,6 +221,7 @@ class DeliveryZonesGeoJsonView(APIView):
     """
     Return the 'delivery all zones json'.
     """
+
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):

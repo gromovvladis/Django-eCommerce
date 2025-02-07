@@ -18,7 +18,7 @@ class ImageInput(FileInput):
     """
 
     template_name = "oscar/forms/widgets/image_input_widget.html"
-    
+
     def __init__(self, attrs=None):
         if not attrs:
             attrs = {}
@@ -45,6 +45,7 @@ class ThumbnailInput(ClearableFileInput):
     been previously uploaded. Selecting the image will open the file
     dialog and allow for selecting a new or replacing image file.
     """
+
     clear_checkbox_label = "Удалить"
     initial_text = "На данный момент"
     input_text = "Изменить"
@@ -164,10 +165,12 @@ class DateRangeInput(forms.TextInput):
 
     def get_format(self):
         return self.format or formats.get_format(self.format_key)[0]
-    
+
     def build_attrs(self, base_attrs, extra_attrs=None):
         attrs = super().build_attrs(base_attrs, extra_attrs)
-        attrs["data-inputmask"] = "'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy - dd.mm.yyyy'"
+        attrs["data-inputmask"] = (
+            "'alias': 'datetime', 'inputFormat': 'dd.mm.yyyy - dd.mm.yyyy'"
+        )
         attrs["autocomplete"] = "off"
         return attrs
 
@@ -176,6 +179,7 @@ class DateRangeInput(forms.TextInput):
         ctx["input_type"] = "daterange"
         ctx["icon_classes"] = "far fa-calendar-minus"
         return ctx
+
 
 class TimePickerInput(DateTimeWidgetMixin, forms.TimeInput):
     """

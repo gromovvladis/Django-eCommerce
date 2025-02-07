@@ -7,33 +7,43 @@ from django.core.validators import EMPTY_VALUES
 from django.forms.utils import ErrorDict
 from oscar.core.loading import get_class, get_model
 
+Unavailable = get_class("store.availability", "Unavailable")
+
 Line = get_model("basket", "line")
 Basket = get_model("basket", "basket")
 Option = get_model("catalogue", "option")
 Product = get_model("catalogue", "product")
-Unavailable = get_class("store.availability", "Unavailable")
+
 
 def _option_text_field(form, product, option):
     return forms.CharField(
-        label=option.name, required=option.required, help_text=option.help_text,
+        label=option.name,
+        required=option.required,
+        help_text=option.help_text,
     )
 
 
 def _option_integer_field(form, product, option):
     return forms.IntegerField(
-        label=option.name, required=option.required, help_text=option.help_text,
+        label=option.name,
+        required=option.required,
+        help_text=option.help_text,
     )
 
 
 def _option_boolean_field(form, product, option):
     return forms.BooleanField(
-        label=option.name, required=option.required, help_text=option.help_text,
+        label=option.name,
+        required=option.required,
+        help_text=option.help_text,
     )
 
 
 def _option_float_field(form, product, option):
     return forms.FloatField(
-        label=option.name, required=option.required, help_text=option.help_text,
+        label=option.name,
+        required=option.required,
+        help_text=option.help_text,
     )
 
 
@@ -86,19 +96,21 @@ def _option_checkbox_field(form, product, option):
 
 def _good_field(form, product, additional):
     return forms.IntegerField(
-        label=additional.name, 
+        label=additional.name,
         initial=0,
         required=False,
-        widget=forms.widgets.NumberInput(attrs={
-            'additional': True,
-            'image': additional.primary_image,
-            'price': additional.price, 
-            'old_price': additional.old_price,
-            'weight': additional.weight,
-            'min': 0,
-            'max': additional.max_amount,
-            'readonly': True,
-        }),
+        widget=forms.widgets.NumberInput(
+            attrs={
+                "additional": True,
+                "image": additional.primary_image,
+                "price": additional.price,
+                "old_price": additional.old_price,
+                "weight": additional.weight,
+                "min": 0,
+                "max": additional.max_amount,
+                "readonly": True,
+            }
+        ),
     )
 
 
@@ -121,16 +133,18 @@ class BasketLineForm(forms.ModelForm):
             max_allowed_quantity = None
             num_available = getattr(
                 self.instance.purchase_info.availability, "num_available", None
-            ) 
+            )
             if num_available is None:
                 num_available = self.instance.quantity
 
-            basket_max_allowed_quantity = self.instance.basket.max_allowed_quantity()[0] + self.instance.quantity
+            basket_max_allowed_quantity = (
+                self.instance.basket.max_allowed_quantity()[0] + self.instance.quantity
+            )
             if all([num_available, basket_max_allowed_quantity]):
                 max_allowed_quantity = min(num_available, basket_max_allowed_quantity)
             else:
                 max_allowed_quantity = basket_max_allowed_quantity or num_available
-                
+
             if max_allowed_quantity:
                 self.fields["quantity"].widget.attrs["max"] = max_allowed_quantity
 
@@ -149,7 +163,10 @@ class BasketLineForm(forms.ModelForm):
 
     def clean_quantity(self):
         qty = self.cleaned_data["quantity"] or 0
-        if not isinstance(self.instance.purchase_info.availability, Unavailable) and qty > 0:
+        if (
+            not isinstance(self.instance.purchase_info.availability, Unavailable)
+            and qty > 0
+        ):
             self.check_max_allowed_quantity(qty)
             self.check_permission(qty)
         return qty
@@ -224,30 +241,46 @@ class AddToBasketForm(forms.Form):
         for child in children:
             info = self.basket.strategy.fetch_for_product(child)
             child_attributes = {
-                attr.attribute.code: attr.value.first().id if attr.value.exists() else None
+                attr.attribute.code: (
+                    attr.value.first().id if attr.value.exists() else None
+                )
                 for attr in child.attribute_values.all()
             }
-            childs_data.append({
-                child.id: {
-                    "attr": child_attributes,
-                    "price": int(getattr(info.stockrecord, "price", 0)) if getattr(info.stockrecord, "price", None) else None,
-                    "old_price": int(getattr(info.stockrecord, "old_price", 0)) if getattr(info.stockrecord, "old_price", None) else None,
+            childs_data.append(
+                {
+                    child.id: {
+                        "attr": child_attributes,
+                        "price": (
+                            int(getattr(info.stockrecord, "price", 0))
+                            if getattr(info.stockrecord, "price", None)
+                            else None
+                        ),
+                        "old_price": (
+                            int(getattr(info.stockrecord, "old_price", 0))
+                            if getattr(info.stockrecord, "old_price", None)
+                            else None
+                        ),
+                    }
                 }
-            })
+            )
 
         # Поле для child_id
         self.fields["child_id"] = forms.CharField(
             initial=list(childs_data[0].keys())[0],
-            widget=forms.HiddenInput(attrs={
-                "data-childs": json.dumps(childs_data),
-                "variant": True,
-            }),
+            widget=forms.HiddenInput(
+                attrs={
+                    "data-childs": json.dumps(childs_data),
+                    "variant": True,
+                }
+            ),
         )
 
-        default_attr = childs_data[0][next(iter(childs_data[0]))]['attr']
+        default_attr = childs_data[0][next(iter(childs_data[0]))]["attr"]
 
         # Собираем данные об атрибутах товарах
-        product_attributes = product.attribute_values.filter(is_variant=True).select_related('attribute')
+        product_attributes = product.attribute_values.filter(
+            is_variant=True
+        ).select_related("attribute")
 
         for product_attribute in product_attributes:
             attribute_code = product_attribute.attribute.code
@@ -263,10 +296,12 @@ class AddToBasketForm(forms.Form):
                 label=label,
                 initial=initial_value,
                 required=False,
-                widget=forms.widgets.RadioSelect(attrs={
-                    'variant': True,
-                    'left': f"{100 / len(choices) * (next((i + 1 for i, (val, _) in enumerate(choices) if val == initial_value), 0) - 1):.2f}%"
-                }),
+                widget=forms.widgets.RadioSelect(
+                    attrs={
+                        "variant": True,
+                        "left": f"{100 / len(choices) * (next((i + 1 for i, (val, _) in enumerate(choices) if val == initial_value), 0) - 1):.2f}%",
+                    }
+                ),
             )
 
     def _create_product_fields(self, product):
@@ -275,7 +310,7 @@ class AddToBasketForm(forms.Form):
         """
         for option in product.options:
             self._add_option_field(product, option)
-        
+
         for additional in product.additionals:
             if self.store_id in additional.stores.values_list("id", flat=True):
                 self._add_additional_field(product, additional)
@@ -322,7 +357,7 @@ class AddToBasketForm(forms.Form):
         # qty = self.cleaned_data["quantity"]
         # if not qty:
         qty = 1
-            
+
         basket_threshold = settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD
         if basket_threshold:
             total_basket_quantity = self.basket.num_items
@@ -350,9 +385,7 @@ class AddToBasketForm(forms.Form):
         info = self.basket.strategy.fetch_for_product(self.product)
         # Check that a price was found by the strategy
         if not info.price.exists:
-            raise forms.ValidationError(
-                "Этот товар нельзя добавить в корзину."
-            )
+            raise forms.ValidationError("Этот товар нельзя добавить в корзину.")
 
         # Check currencies are sensible
         if self.basket.currency and info.price.currency != self.basket.currency:
@@ -383,8 +416,7 @@ class AddToBasketForm(forms.Form):
                 if option.required or value not in EMPTY_VALUES:
                     options.append({"option": option, "value": value})
         return options
-    
-    
+
     def cleaned_additionals(self):
         """
         Return submitted options in a clean format

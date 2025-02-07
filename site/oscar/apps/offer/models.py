@@ -25,8 +25,8 @@ ExpandDownwardsCategoryQueryset = get_class(
 ActiveOfferManager, RangeManager, BrowsableRangeManager = get_classes(
     "offer.managers", ["ActiveOfferManager", "RangeManager", "BrowsableRangeManager"]
 )
-ZERO_DISCOUNT = get_class("offer.results", "ZERO_DISCOUNT")
 load_proxy, unit_price = get_classes("offer.utils", ["load_proxy", "unit_price"])
+ZERO_DISCOUNT = get_class("offer.results", "ZERO_DISCOUNT")
 
 
 class BaseOfferMixin(models.Model):
@@ -113,12 +113,23 @@ class ConditionalOffer(models.Model):
     # (d) Session offers - these are temporarily available to a user after some
     #     trigger event.  e.g. users coming from some affiliate site get 10%
     #     off.
-    SITE, VOUCHER, USER, SESSION = ("Общее", "Промокод", "Пользовательское", "Предложение сеанса")
+    SITE, VOUCHER, USER, SESSION = (
+        "Общее",
+        "Промокод",
+        "Пользовательское",
+        "Предложение сеанса",
+    )
     TYPE_CHOICES = (
         (SITE, "Общее предложение - доступно всем пользователям"),
         (VOUCHER, "Промокод — доступно только после ввода кода промокода"),
-        (USER, "Пользовательское предложение - доступно определенным типам пользователей."),
-        (SESSION,"Предложение сеанса – временное предложение, доступное для пользователей на время сеанса"),
+        (
+            USER,
+            "Пользовательское предложение - доступно определенным типам пользователей.",
+        ),
+        (
+            SESSION,
+            "Предложение сеанса – временное предложение, доступное для пользователей на время сеанса",
+        ),
     )
     offer_type = models.CharField(
         "Тип", choices=TYPE_CHOICES, default=SITE, max_length=128
@@ -239,12 +250,12 @@ class ConditionalOffer(models.Model):
     total_discount = models.DecimalField(
         "Общая скидка", decimal_places=2, max_digits=12, default=D("0.00")
     )
-    num_applications = models.PositiveIntegerField(
-        "Количество применений", default=0
-    )
+    num_applications = models.PositiveIntegerField("Количество применений", default=0)
     num_orders = models.PositiveIntegerField("Количество заказов", default=0)
 
-    redirect_url = fields.ExtendedURLField("Перенаправление URL-адреса (необязательно)", blank=True)
+    redirect_url = fields.ExtendedURLField(
+        "Перенаправление URL-адреса (необязательно)", blank=True
+    )
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
     objects = models.Manager()
@@ -282,7 +293,9 @@ class ConditionalOffer(models.Model):
             and self.end_datetime
             and self.start_datetime > self.end_datetime
         ):
-            raise exceptions.ValidationError("Дата окончания должна быть позже даты начала.")
+            raise exceptions.ValidationError(
+                "Дата окончания должна быть позже даты начала."
+            )
 
     @property
     def primary_image(self):
@@ -545,10 +558,16 @@ class Benefit(BaseOfferMixin, models.Model):
         (FIXED, "Скидка — фиксированная сумма от суммы корзины."),
         (FIXED_UNIT, "Скидка — это фиксированная сумма от стоимости товара."),
         (MULTIBUY, "Скидка – это предоставление самого дешевого товара бесплатно."),
-        (FIXED_PRICE, "Приобретайте товары, соответствующие условию, по фиксированной цене."),
+        (
+            FIXED_PRICE,
+            "Приобретайте товары, соответствующие условию, по фиксированной цене.",
+        ),
         (SHIPPING_ABSOLUTE, "Скидка – это фиксированная сумма стоимости доставки."),
         (SHIPPING_FIXED_PRICE, "Получите доставку по фиксированной цене"),
-        (SHIPPING_PERCENTAGE, "Скидка представляет собой процент от стоимости доставки."),
+        (
+            SHIPPING_PERCENTAGE,
+            "Скидка представляет собой процент от стоимости доставки.",
+        ),
     )
     type = models.CharField("Тип", max_length=128, choices=TYPE_CHOICES, blank=True)
 
@@ -573,7 +592,9 @@ class Benefit(BaseOfferMixin, models.Model):
 
     # A custom benefit class can be used instead.  This means the
     # type/value/max_affected_items fields should all be None.
-    proxy_class = fields.NullCharField("Пользовательский класс", max_length=255, default=None)
+    proxy_class = fields.NullCharField(
+        "Пользовательский класс", max_length=255, default=None
+    )
 
     class Meta:
         app_label = "offer"
@@ -616,11 +637,15 @@ class Benefit(BaseOfferMixin, models.Model):
         errors = []
 
         if not self.range:
-            errors.append("Для получения преимуществ мультипокупок требуется ассортимент продукции")
+            errors.append(
+                "Для получения преимуществ мультипокупок требуется ассортимент продукции"
+            )
         if self.value:
             errors.append("Преимущества многократной покупки не требуют значения")
         if self.max_affected_items:
-            errors.append("Для преимуществ многократной покупки не требуется атрибут «Максимальное количество затронутых товаров».")
+            errors.append(
+                "Для преимуществ многократной покупки не требуется атрибут «Максимальное количество затронутых товаров»."
+            )
 
         if errors:
             raise exceptions.ValidationError(errors)
@@ -697,7 +722,9 @@ class Benefit(BaseOfferMixin, models.Model):
     def clean_absolute(self):
         errors = []
         if not self.range:
-            errors.append("Фиксированные скидки требуют наличия ассортимента продукции.")
+            errors.append(
+                "Фиксированные скидки требуют наличия ассортимента продукции."
+            )
         if not self.value:
             errors.append("Фиксированные скидки требуют значения")
 
@@ -707,8 +734,10 @@ class Benefit(BaseOfferMixin, models.Model):
     def clean_fixed(self):
         errors = []
         if not self.range:
-            errors.append("Для фиксированных скидок на уровне товара требуется ассортимент товаров.")
-        
+            errors.append(
+                "Для фиксированных скидок на уровне товара требуется ассортимент товаров."
+            )
+
         if not self.value:
             errors.append("Фиксированные скидки на уровне товара требуют значения.")
 
@@ -784,9 +813,18 @@ class Condition(BaseOfferMixin, models.Model):
 
     COUNT, VALUE, COVERAGE = ("Count", "Value", "Coverage")
     TYPE_CHOICES = (
-        (COUNT,"Зависит от количества товаров в корзине, находящихся в определенном состоянии."),
-        (VALUE, "Зависит от стоимости товаров в корзине, находящихся в определенном состоянии."),
-        (COVERAGE,"Должно содержать заданное количество ОТЛИЧНЫХ элементов из диапазона условий."),
+        (
+            COUNT,
+            "Зависит от количества товаров в корзине, находящихся в определенном состоянии.",
+        ),
+        (
+            VALUE,
+            "Зависит от стоимости товаров в корзине, находящихся в определенном состоянии.",
+        ),
+        (
+            COVERAGE,
+            "Должно содержать заданное количество ОТЛИЧНЫХ элементов из диапазона условий.",
+        ),
     )
     range = models.ForeignKey(
         "offer.Range",
@@ -800,7 +838,9 @@ class Condition(BaseOfferMixin, models.Model):
         "Значение", decimal_places=2, max_digits=12, null=True, blank=True
     )
 
-    proxy_class = fields.NullCharField("Пользовательский класс", max_length=255, default=None)
+    proxy_class = fields.NullCharField(
+        "Пользовательский класс", max_length=255, default=None
+    )
 
     class Meta:
         app_label = "offer"
@@ -885,7 +925,11 @@ class Condition(BaseOfferMixin, models.Model):
         """
         Determines whether the condition can be applied to a given basket line
         """
-        if not line.stockrecord_id or line.quantity < 1 or line.line_price_incl_discounts == 0:
+        if (
+            not line.stockrecord_id
+            or line.quantity < 1
+            or line.line_price_incl_discounts == 0
+        ):
             return False
         product = line.product
         return self.range.contains_product(product) and product.is_discountable
@@ -904,7 +948,7 @@ class Condition(BaseOfferMixin, models.Model):
                 continue
             if line.line_price_incl_discounts == 0:
                 continue
-            
+
             line_tuples.append((price, line))
         key = operator.itemgetter(0)
         if most_expensive_first:
@@ -932,9 +976,9 @@ class Range(models.Model):
     )
 
     includes_all_products = models.BooleanField(
-        "Все товары?", 
+        "Все товары?",
         help_text="Включает все товары выбраных категорий.",
-        default=False
+        default=False,
     )
 
     included_products = models.ManyToManyField(
@@ -1148,7 +1192,9 @@ class RangeProductFileUpload(models.Model):
     filepath = models.CharField("Путь к файлу", max_length=255)
     size = models.PositiveIntegerField("Размер")
     uploaded_by = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Загружено пользователем"
+        AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Загружено пользователем",
     )
     date_uploaded = models.DateTimeField(
         "Дата загрузки", auto_now_add=True, db_index=True
@@ -1170,9 +1216,7 @@ class RangeProductFileUpload(models.Model):
         (FAILED, FAILED),
         (PROCESSED, PROCESSED),
     )
-    status = models.CharField(
-        "Статус", max_length=32, choices=choices, default=PENDING
-    )
+    status = models.CharField("Статус", max_length=32, choices=choices, default=PENDING)
     error_message = models.CharField("Сообщение об ошибке", max_length=255, blank=True)
 
     # Post-processing audit fields
@@ -1229,7 +1273,8 @@ class RangeProductFileUpload(models.Model):
 
         Product = get_model("catalogue", "Product")
         products = Product._default_manager.filter(
-            models.Q(stockrecords__evotor_code__in=new_ids) | models.Q(article__in=new_ids)
+            models.Q(stockrecords__evotor_code__in=new_ids)
+            | models.Q(article__in=new_ids)
         )
         for product in products:
             if self.upload_type == self.INCLUDED_PRODUCTS_TYPE:

@@ -1,12 +1,12 @@
 import re
-from calendar import monthrange
 from datetime import date
+from calendar import monthrange
 
 from django import forms
 from django.core import validators
 from django.core.exceptions import ImproperlyConfigured
-from oscar.core.loading import get_class, get_model
 
+from oscar.core.loading import get_model
 from . import bankcards
 
 Bankcard = get_model("payment", "Bankcard")
@@ -133,8 +133,10 @@ class BankcardExpiryMonthField(BankcardMonthField):
     def clean(self, value):
         expiry_date = super().clean(value)
         if expiry_date and date.today() > expiry_date:
-            raise forms.ValidationError("Введенная вами дата истечения срока действия уже прошла.")
-        
+            raise forms.ValidationError(
+                "Введенная вами дата истечения срока действия уже прошла."
+            )
+
         return expiry_date
 
     def compress(self, data_list):
@@ -176,7 +178,9 @@ class BankcardStartingMonthField(BankcardMonthField):
     def clean(self, value):
         starting_date = super().clean(value)
         if starting_date and date.today() < starting_date:
-            raise forms.ValidationError("Введенная вами дата начала находится в будущем.")
+            raise forms.ValidationError(
+                "Введенная вами дата начала находится в будущем."
+            )
         return starting_date
 
     def compress(self, data_list):
@@ -232,7 +236,9 @@ class BankcardForm(forms.ModelForm):
         number, ccv = data.get("number"), data.get("ccv")
         if number and ccv:
             if bankcards.is_amex(number) and len(ccv) != 4:
-                raise forms.ValidationError("Карты American Express используют 4-значный код безопасности")
+                raise forms.ValidationError(
+                    "Карты American Express используют 4-значный код безопасности"
+                )
 
         return data
 
@@ -255,4 +261,3 @@ class BankcardForm(forms.ModelForm):
             start_date=self.cleaned_data["start_month"],
             ccv=self.cleaned_data["ccv"],
         )
-

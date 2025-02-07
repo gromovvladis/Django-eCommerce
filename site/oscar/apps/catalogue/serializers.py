@@ -4,10 +4,9 @@ from decimal import Decimal as D
 from haystack import connections
 from rest_framework import serializers
 
+from oscar.core.utils import slugify
 from oscar.core.loading import get_model
 from oscar.apps.search.search_indexes import ProductIndex
-
-logger = logging.getLogger("oscar.customer")
 
 Store = get_model("store", "Store")
 Product = get_model("catalogue", "Product")
@@ -19,6 +18,8 @@ AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Additional = get_model("catalogue", "Additional")
+
+logger = logging.getLogger("oscar.customer")
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -453,11 +454,11 @@ class ProductGroupSerializer(serializers.ModelSerializer):
                 instance.attributes.add(attr)
         else:
             self.Meta.model = Category
+            name = validated_data.get("name")
             if parent_id:
-                parent = self._get_or_create_category(parent_id)
+                parent = self._get_or_create_category(parent_id, name)
                 instance = parent.add_child(evotor_id=evotor_id, **validated_data)
             else:
-                name = validated_data.get("name")
                 instance = self._get_or_create_category(evotor_id, name)
 
         return instance
@@ -507,7 +508,7 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             instance.name = name
 
             if parent_id:
-                parent = self._get_or_create_category(parent_id)
+                parent = self._get_or_create_category(parent_id, name)
                 if parent is not None and instance.get_parent() != parent:
                     instance.move(parent, pos="first-child")
                     instance.refresh_from_db()
@@ -596,9 +597,8 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             }
         ]
         """
-        attr = None
-        choices = []
         for attribute in attributes:
+            choices = []
 
             group = AttributeOptionGroup.objects.get_or_create(
                 evotor_id=attribute["id"], defaults={"name": attribute["name"]}
@@ -619,22 +619,27 @@ class ProductGroupSerializer(serializers.ModelSerializer):
                 attr_option.save()
                 choices.append(attr_option)
 
-                attr = Attribute.objects.get_or_create(
-                    name=attribute["name"], defaults={"type": "multi_option"}
-                )[0]
+            code = slugify(attribute["name"])
+            base_code = code
+            counter = 1
+            while Attribute.objects.filter(code=code).exists():
+                code = f"{base_code}-{counter}"
+                counter += 1
 
-                attr.option_group = group
-                attr.save()
+            attr = Attribute.objects.get_or_create(
+                name=attribute["name"],
+                defaults={"type": "multi_option", "option_group": group, "code": code},
+            )[0]
 
-        prd_attr = ProductAttribute.objects.get_or_create(
-            product=instance, attribute=attr
-        )[0]
-        prd_attr.is_variant = True
+            prd_attr = ProductAttribute.objects.get_or_create(
+                product=instance, attribute=attr
+            )[0]
+            prd_attr.is_variant = True
 
-        for choice in choices:
-            prd_attr.value_multi_option.add(choice)
+            for choice in choices:
+                prd_attr.value_multi_option.add(choice)
 
-        prd_attr.save()
+            prd_attr.save()
 
         return attr
 
@@ -676,7 +681,6 @@ class ProductGroupsSerializer(serializers.ModelSerializer):
 
 
 class AdditionalSerializer(serializers.ModelSerializer):
-    # товар
     id = serializers.CharField(source="evotor_id")
     name = serializers.CharField()
     description = serializers.CharField(required=False, allow_blank=True)

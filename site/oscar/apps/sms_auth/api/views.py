@@ -1,15 +1,16 @@
-from django.utils.module_loading import import_string
-
 from rest_framework import generics, permissions
+
+from django.utils.module_loading import import_string
 
 from ..conf import conf
 from ..services import AuthService, GeneratorService
 from .mixins import ResponsesMixin
-from .serializers import \
-    AuthSerializer, \
-    EntrySerializer, \
-    ChangePhoneNumberSerializer, \
-    DefaultUserSerializer
+from .serializers import (
+    AuthSerializer,
+    EntrySerializer,
+    ChangePhoneNumberSerializer,
+    DefaultUserSerializer,
+)
 
 
 class EntryAPIView(ResponsesMixin, generics.GenericAPIView):
@@ -68,7 +69,7 @@ class AuthAPIView(ResponsesMixin, generics.GenericAPIView):
             user, is_created = AuthService.execute(phone_number=phone_number, code=code)
             self.after_auth(user=user, is_created=is_created)
             serializer = self.get_response_serializer()
-            success_value = serializer(instance=user, context={'request': request}).data
+            success_value = serializer(instance=user, context={"request": request}).data
 
             return self.success_objects_response(success_value)
         else:
@@ -85,7 +86,7 @@ class ChangePhoneNumberAPIView(ResponsesMixin, generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            new_phone_number = serializer.validated_data.get('new_phone_number')
+            new_phone_number = serializer.validated_data.get("new_phone_number")
             owner = request.user
             GeneratorService.execute(phone_number=new_phone_number, owner=owner)
 

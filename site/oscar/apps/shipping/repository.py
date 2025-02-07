@@ -1,10 +1,13 @@
 from decimal import Decimal as D
 
 from django.core.exceptions import ImproperlyConfigured
+
 from oscar.apps.shipping.methods import OfferDiscount
 from oscar.core.loading import get_classes
 
-ZonaBasedShipping, NoShippingRequired = get_classes("shipping.methods", ["ZonaBasedShipping", "NoShippingRequired"])
+ZonaBasedShipping, NoShippingRequired = get_classes(
+    "shipping.methods", ["ZonaBasedShipping", "NoShippingRequired"]
+)
 
 
 class Repository(object):
@@ -17,10 +20,7 @@ class Repository(object):
     # property to add your own shipping methods. This should be a list of
     # instantiated shipping methods.
 
-    methods = (
-        ZonaBasedShipping(True), #first if default
-        NoShippingRequired(5)
-    )
+    methods = (ZonaBasedShipping(True), NoShippingRequired(5))  # first if default
 
     # API
 
@@ -54,7 +54,7 @@ class Repository(object):
 
         # Assume first returned method is default
         return shipping_methods[0]
-    
+
     def get_shipping_method(self, method):
 
         shipping_method = None
@@ -64,7 +64,7 @@ class Repository(object):
                 shipping_method = mtd
                 break
 
-        if (shipping_method is None):
+        if shipping_method is None:
             raise ImproperlyConfigured("Нет такого метода доставки")
 
         # Assume first returned method is default
@@ -102,4 +102,3 @@ class Repository(object):
             return method
 
         return OfferDiscount(method, offer)
-

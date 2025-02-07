@@ -22,23 +22,24 @@ from oscar.core.utils import redirect_to_referrer
 
 from . import signals
 
-Source = get_model("payment", "Source")
-SourceType = get_model("payment", "SourceType")
-Repository = get_class("shipping.repository", "Repository")
 
+Repository = get_class("shipping.repository", "Repository")
 CheckoutForm = get_class("checkout.forms", "CheckoutForm")
 RepositoryShipping = get_class("shipping.repository", "Repository")
-RedirectRequired, UnableToTakePayment, PaymentError = get_classes(
-    "payment.exceptions", ["RedirectRequired", "UnableToTakePayment", "PaymentError"]
-)
 UnableToPlaceOrder = get_class("order.exceptions", "UnableToPlaceOrder")
 OrderPlacementMixin = get_class("checkout.mixins", "OrderPlacementMixin")
 CheckoutSessionMixin = get_class("checkout.session", "CheckoutSessionMixin")
-Order = get_model("order", "Order")
-OrderNote = get_model("order", "OrderNote")
 Applicator = get_class("offer.applicator", "Applicator")
 CheckoutVoucherForm = get_class("checkout.forms", "CheckoutVoucherForm")
 PaymentManager = get_class("payment.methods", "PaymentManager")
+RedirectRequired, UnableToTakePayment, PaymentError = get_classes(
+    "payment.exceptions", ["RedirectRequired", "UnableToTakePayment", "PaymentError"]
+)
+
+Source = get_model("payment", "Source")
+SourceType = get_model("payment", "SourceType")
+Order = get_model("order", "Order")
+OrderNote = get_model("order", "OrderNote")
 
 logger = logging.getLogger("oscar.checkout")
 
@@ -49,7 +50,11 @@ class IndexView(CheckoutSessionMixin, generic.FormView):
     """
 
     success_url = reverse_lazy("checkout:checkoutview")
-    pre_conditions = ["delete_non_valid_lines", "check_basket_is_not_empty", "check_basket_is_valid"]
+    pre_conditions = [
+        "delete_non_valid_lines",
+        "check_basket_is_not_empty",
+        "check_basket_is_valid",
+    ]
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -62,11 +67,13 @@ class IndexView(CheckoutSessionMixin, generic.FormView):
     def get_success_response(self):
         return redirect(self.get_success_url())
 
+
 # =========
 # Checkout
 # =========
 
-class CheckoutView(CheckoutSessionMixin,  generic.FormView):
+
+class CheckoutView(CheckoutSessionMixin, generic.FormView):
     template_name = "oscar/checkout/checkout_form.html"
     form_class = CheckoutForm
     success_url = reverse_lazy("checkout:payment-details")
@@ -80,32 +87,34 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
     def get_initial(self):
 
         initial = {}
-        if self.request.COOKIES.get('orderNote'):
-            initial['order_note'] = unquote(unquote(self.request.COOKIES.get('orderNote')))
-        
+        if self.request.COOKIES.get("orderNote"):
+            initial["order_note"] = unquote(
+                unquote(self.request.COOKIES.get("orderNote"))
+            )
+
         user_address = self.get_available_addresses()
 
         if user_address:
-            initial['line1'] = user_address.line1
-            initial['line2'] = user_address.line2
-            initial['line3'] = user_address.line3
-            initial['line4'] = user_address.line4
-            initial['notes'] = user_address.notes
+            initial["line1"] = user_address.line1
+            initial["line2"] = user_address.line2
+            initial["line3"] = user_address.line3
+            initial["line4"] = user_address.line4
+            initial["notes"] = user_address.notes
         else:
-            if self.request.COOKIES.get('line1'):
-                initial['line1'] = unquote(unquote(self.request.COOKIES.get('line1')))
-            if self.request.COOKIES.get('line2'):
-                initial['line2'] = unquote(unquote(self.request.COOKIES.get('line2')))
-            if self.request.COOKIES.get('notes'):
-                initial['line3'] = unquote(unquote(self.request.COOKIES.get('line3')))
-            if self.request.COOKIES.get('line3'):
-                initial['line4'] = unquote(unquote(self.request.COOKIES.get('line4')))
-            if self.request.COOKIES.get('line4'):
-                initial['notes'] = unquote(unquote(self.request.COOKIES.get('notes')))
+            if self.request.COOKIES.get("line1"):
+                initial["line1"] = unquote(unquote(self.request.COOKIES.get("line1")))
+            if self.request.COOKIES.get("line2"):
+                initial["line2"] = unquote(unquote(self.request.COOKIES.get("line2")))
+            if self.request.COOKIES.get("notes"):
+                initial["line3"] = unquote(unquote(self.request.COOKIES.get("line3")))
+            if self.request.COOKIES.get("line3"):
+                initial["line4"] = unquote(unquote(self.request.COOKIES.get("line4")))
+            if self.request.COOKIES.get("line4"):
+                initial["notes"] = unquote(unquote(self.request.COOKIES.get("notes")))
 
         # initial['order_time'] = format(now() + datetime.timedelta(hours=2),'%d.%m.%Y %H:%M')
-        initial['order_time'] = now() + datetime.timedelta(hours=2)
-        
+        initial["order_time"] = now() + datetime.timedelta(hours=2)
+
         return initial
 
     def get_form_kwargs(self):
@@ -119,31 +128,37 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         if there are no vouchers available.
         """
         return CheckoutVoucherForm()
-    
+
     def get_context_data(self, **kwargs):
 
-        ctx = super().get_context_data(**kwargs) 
+        ctx = super().get_context_data(**kwargs)
 
-        shipping_charge = prices.Price(currency=self.request.basket.currency, money=D("0.0"))
-        min_order = prices.Price(currency=self.request.basket.currency, money=D("700.0"))
+        shipping_charge = prices.Price(
+            currency=self.request.basket.currency, money=D("0.0")
+        )
+        min_order = prices.Price(
+            currency=self.request.basket.currency, money=D("700.0")
+        )
 
         method = self.get_default_shipping_method(self.request.basket)
         ctx["shipping_method"] = method
 
-        #shipping method form
+        # shipping method form
         if self.request.user.is_authenticated:
             # Look up address book data
             address = self.get_available_addresses()
             ctx["addresses"] = address
-            if address and address.coords_lat and address.coords_long: 
-                shipping_charge, min_order = method.calculate(self.request.basket, address)
-       
-        #payment form
+            if address and address.coords_lat and address.coords_long:
+                shipping_charge, min_order = method.calculate(
+                    self.request.basket, address
+                )
+
+        # payment form
         ctx["methods"] = self._methods
         ctx["min_order"] = int(min_order.money)
         ctx["shipping_charge"] = int(shipping_charge.money)
 
-        #promocode
+        # promocode
         ctx["voucher_form"] = self.get_voucher_form()
 
         return ctx
@@ -180,14 +195,14 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         self._methods = self.get_available_shipping_methods()
         super().post(request, *args, **kwargs)
         return redirect(self.get_success_url())
-  
+
     def get(self, request, *args, **kwargs):
         self._methods = self.get_available_shipping_methods()
         if len(self._methods) == 0:
             # No shipping methods available for given address
             messages.warning(
                 request,
-                "Доставка недоступна по выбранному вами адресу — пожалуйста выберете другой адрес"
+                "Доставка недоступна по выбранному вами адресу — пожалуйста выберете другой адрес",
             )
             return redirect("checkout:checkoutview")
 
@@ -201,7 +216,7 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         shipping_method = form.cleaned_data["method_code"]
 
         # нужна проверак полей алреса
-        if  not self.is_shipping_address_set(address_fields, shipping_method):
+        if not self.is_shipping_address_set(address_fields, shipping_method):
             messages.error(self.request, "Введенный адрес некорректен")
             return redirect("checkout:checkoutview")
 
@@ -209,23 +224,30 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
         if not self.is_min_order_set(form.instance, shipping_method):
             messages.error(self.request, "Сумма заказа меньше минимальной")
             return redirect("checkout:checkoutview")
-        
+
         # нужна проверка корректности времени
-        if not self.is_time_set(form.cleaned_data['order_time']): 
+        if not self.is_time_set(form.cleaned_data["order_time"]):
             messages.error(self.request, "Данное время заказа более не доступно")
             return redirect("checkout:checkoutview")
-        
+
         # Store payment method in the CheckoutSessionMixin.checkout_session (a CheckoutSessionData object)
         self.checkout_session.set_session_address(address_fields)
-        self.checkout_session.pay_by(form.cleaned_data['payment_method'])
+        self.checkout_session.pay_by(form.cleaned_data["payment_method"])
         self.checkout_session.use_shipping_method(shipping_method)
-        self.checkout_session.set_order_note(form.cleaned_data['order_note'])
-        self.checkout_session.set_order_time(form.cleaned_data['order_time'])
-        self.checkout_session.set_email_or_change(form.cleaned_data['email_or_change'])
-        
+        self.checkout_session.set_order_note(form.cleaned_data["order_note"])
+        self.checkout_session.set_order_time(form.cleaned_data["order_time"])
+        self.checkout_session.set_email_or_change(form.cleaned_data["email_or_change"])
+
     def is_shipping_address_set(self, address_fields, shipping_method):
         if shipping_method == "zona-shipping":
-            requred_fields = ['line1', 'line2', 'line3', 'line4', 'coords_long', 'coords_lat']
+            requred_fields = [
+                "line1",
+                "line2",
+                "line3",
+                "line4",
+                "coords_long",
+                "coords_lat",
+            ]
             for field in address_fields.items():
                 if field[0] in requred_fields and not field[1]:
                     return False
@@ -235,7 +257,9 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
     def is_min_order_set(self, shipping_address, shipping_method):
         if shipping_method == "zona-shipping":
             method = Repository().get_shipping_method(shipping_method)
-            shipping_charge, min_order = method.calculate(self.request.basket, shipping_address)
+            shipping_charge, min_order = method.calculate(
+                self.request.basket, shipping_address
+            )
             if min_order.money > self.request.basket.total:
                 return False
 
@@ -244,16 +268,17 @@ class CheckoutView(CheckoutSessionMixin,  generic.FormView):
     # переделай
     def is_time_set(self, order_time):
         return True
-    
+
     def form_invalid(self, form):
         messages.error(
-            self.request, "Ошибка при оформлении заказа, пожалуйста, попробуйте еще раз."
+            self.request,
+            "Ошибка при оформлении заказа, пожалуйста, попробуйте еще раз.",
         )
         return super().form_invalid(form)
- 
+
     def get_success_url(self):
         return str(self.success_url)
-    
+
 
 class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
     """
@@ -282,13 +307,13 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         "check_basket_is_not_empty",
         "check_basket_is_valid",
         "check_shipping_data_is_captured",
-        "check_payment_method_is_captured", # переделай
-        "check_order_time_is_captured", # переделай
+        "check_payment_method_is_captured",  # переделай
+        "check_order_time_is_captured",  # переделай
     ]
 
     def get(self, request, *args, **kwargs):
         return self.handle_place_order_submission(request)
-    
+
     def handle_place_order_submission(self, request):
         """
         Handle a request to place an order.
@@ -304,7 +329,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         """
         # Collect all the data!
         submission = self.build_submission()
-        submission['payment_kwargs']['submission'] = submission
+        submission["payment_kwargs"]["submission"] = submission
 
         # Start the payment process!
         # This jumps to handle_payment()
@@ -325,14 +350,14 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         order_kwargs=None,
         surcharges=None,
     ):
-        
+
         payment_method = self.checkout_session.payment_method()
 
         if payment_method is None:
-             payment_method = 'CASH'
+            payment_method = "CASH"
 
-        payment_kwargs['payment_method'] =  payment_method
-        
+        payment_kwargs["payment_method"] = payment_method
+
         if order_kwargs is None:
             order_kwargs = {}
 
@@ -367,9 +392,9 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
 
         try:
             source, order = self.add_source_and_create_order(
-                order_number, 
+                order_number,
                 user,
-                basket, 
+                basket,
                 shipping_address,
                 shipping_method,
                 shipping_charge,
@@ -380,7 +405,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
                 surcharges,
                 **order_kwargs,
             )
-        
+
         except UnableToPlaceOrder as e:
             # It's possible that something will go wrong while trying to
             # actually place an order.  Not a good situation to be in as a
@@ -402,29 +427,36 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
                 order_number,
                 e,
             )
-            error_msg = (
-                "При размещении этого заказа возникла проблема. Пожалуйста, свяжитесь со службой поддержки клиентов."
-            )
+            error_msg = "При размещении этого заказа возникла проблема. Пожалуйста, свяжитесь со службой поддержки клиентов."
             self.restore_frozen_basket()
             return self.render_preview(self.request, error=error_msg, **payment_kwargs)
-        
+
         signals.pre_payment.send_robust(sender=self, view=self)
 
         try:
-            self.handle_payment( 
-                order_total, 
-                source, 
+            self.handle_payment(
+                order_total,
+                source,
                 order,
                 payment_method,
                 email_or_change,
-                **payment_kwargs
+                **payment_kwargs,
             )
         except RedirectRequired as e:
             # Redirect required (e.g. PayPal, 3DS)
-            logger.info("Заказ #%s: перенаправление на страницу оплаты %s", order_number, e.url)
+            logger.info(
+                "Заказ #%s: перенаправление на страницу оплаты %s", order_number, e.url
+            )
             signals.post_payment.send_robust(sender=self, view=self, order=order)
             response = http.HttpResponseRedirect(e.url)
-            cookies_to_delete = ['notes', 'order_note', 'line1', 'line2', 'line3', 'line4']
+            cookies_to_delete = [
+                "notes",
+                "order_note",
+                "line1",
+                "line2",
+                "line3",
+                "line4",
+            ]
             for cookie in cookies_to_delete:
                 response.delete_cookie(cookie)
             return response
@@ -434,7 +466,9 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
             # thing. This type of exception is supposed to set a friendly error
             # message that makes sense to the customer.
             msg = str(e)
-            signals.error_order.send_robust(sender=self, error=e, order_number=order_number)
+            signals.error_order.send_robust(
+                sender=self, error=e, order_number=order_number
+            )
             logger.warning(
                 "Заказ #%s: Невозможно произвести оплату (%s)",
                 order_number,
@@ -453,7 +487,9 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
             # mail admins on an error as this issue warrants some further
             # investigation.
             msg = str(e)
-            signals.error_order.send_robust(sender=self, error=e, order_number=order_number)
+            signals.error_order.send_robust(
+                sender=self, error=e, order_number=order_number
+            )
             logger.error(
                 "Заказ #%s: ошибка оплаты (%s)", order_number, msg, exc_info=True
             )
@@ -461,7 +497,9 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         except Exception as e:
             # Unhandled exception - hopefully, you will only ever see this in
             # development...
-            signals.error_order.send_robust(sender=self, error=e, order_number=order_number)
+            signals.error_order.send_robust(
+                sender=self, error=e, order_number=order_number
+            )
             logger.exception(
                 "Заказ #%s: получил ошибку во время перехвата платежа (%s)",
                 order_number,
@@ -476,38 +514,35 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         return dict(settings.WEBSHOP_PAYMENT_CHOICES).get(payment_method)
 
     def add_source_and_create_order(
-            self,
-            order_number, 
+        self,
+        order_number,
+        user,
+        basket,
+        shipping_address,
+        shipping_method,
+        shipping_charge,
+        order_total,
+        payment_method,
+        order_note,
+        order_time,
+        surcharges,
+        **order_kwargs,
+    ):
+
+        source = self._crete_source(payment_method, order_total)
+
+        order = self._save_order(
+            order_number,
             user,
-            basket, 
+            basket,
             shipping_address,
             shipping_method,
             shipping_charge,
             order_total,
             payment_method,
-            order_note,
             order_time,
             surcharges,
             **order_kwargs,
-        ):
-
-        source = self._crete_source(
-            payment_method,
-            order_total
-        )
- 
-        order = self._save_order(
-            order_number, 
-            user,
-            basket, 
-            shipping_address,
-            shipping_method,
-            shipping_charge,
-            order_total,
-            payment_method,
-            order_time,
-            surcharges,
-            **order_kwargs
         )
 
         if order_note:
@@ -516,7 +551,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         return source, order
 
     def _crete_source(self, payment_method, order_total):
-        
+
         payment_name = self.get_payment_method_display(payment_method)
 
         source_type = SourceType.objects.get_or_create(name=payment_name)[0]
@@ -535,27 +570,27 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         return source
 
     def _save_order(
-            self, 
-            order_number, 
-            user, 
-            basket, 
-            shipping_address,
-            shipping_method,
-            shipping_charge,
-            order_total,
-            payment_method,
-            order_time,
-            surcharges,
-            **order_kwargs,
-        ):
+        self,
+        order_number,
+        user,
+        basket,
+        shipping_address,
+        shipping_method,
+        shipping_charge,
+        order_total,
+        payment_method,
+        order_time,
+        surcharges,
+        **order_kwargs,
+    ):
         # Finalize the order that PaymentDetailsView.submit() started
         # If all is ok with payment, try and place order
-        logger.info(u"Заказ #%s: оплата началась, идет размещение заказа", order_number)
+        logger.info("Заказ #%s: оплата началась, идет размещение заказа", order_number)
 
         if payment_method in settings.ONLINE_PAYMENTS:
-            order_kwargs['status'] = settings.OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS
+            order_kwargs["status"] = settings.OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS
         else:
-            order_kwargs['status'] = settings.OSCAR_INITIAL_ORDER_STATUS
+            order_kwargs["status"] = settings.OSCAR_INITIAL_ORDER_STATUS
 
         try:
             return self.handle_order_placement(
@@ -568,31 +603,37 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
                 order_total=order_total,
                 order_time=order_time,
                 surcharges=surcharges,
-                **order_kwargs
+                **order_kwargs,
             )
         except UnableToPlaceOrder as e:
             # It's possible that something will go wrong while trying to
             # actually place an order.  Not a good situation to be in as a
             # payment transaction may already have taken place, but needs
             # to be handled gracefully.
-            logger.error(u"Заказ #%s: неудалось разместить заказ - %s", order_number, e, exc_info=True)
-            signals.error_order.send_robust(sender=self, error=e, order_number=order_number)
+            logger.error(
+                "Заказ #%s: неудалось разместить заказ - %s",
+                order_number,
+                e,
+                exc_info=True,
+            )
+            signals.error_order.send_robust(
+                sender=self, error=e, order_number=order_number
+            )
             self.restore_frozen_basket()
             return self.render_to_response(self.get_context_data(error=e))
-        
+
     def _add_user_note(self, order, user, order_note):
         try:
             note = OrderNote(
                 order=order,
                 user=user,
-                note_type='Комментарий к заказу',
+                note_type="Комментарий к заказу",
                 message=order_note,
-
             )
             note.save()
         except ObjectDoesNotExist:
             pass
-          
+
     def normalize_email(self, email):
         email = email or ""
         try:
@@ -603,18 +644,20 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
             email = email_name + "@" + domain_part.lower()
         return email
 
-    def handle_payment(self, total, source, order, source_reference, email_or_change, **kwargs):
+    def handle_payment(
+        self, total, source, order, source_reference, email_or_change, **kwargs
+    ):
         payment_method = PaymentManager(source_reference).get_method()
         email = ""
 
         if source_reference in settings.CASH_PAYMENTS and email_or_change:
             self.add_payment_event(
-                'Требуется сдача',
+                "Требуется сдача",
                 int(email_or_change),
             )
             self.save_payment_events(order)
         else:
-           email = self.normalize_email(email_or_change)
+            email = self.normalize_email(email_or_change)
 
         payment = payment_method.pay(
             order=order,
@@ -626,14 +669,14 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         if email:
             order.user.email = email
             order.user.save()
-        
+
         if payment is not None:
             self.save_payment_events(order)
 
             url = payment.confirmation.confirmation_url
             logger.info("Redirecting user to {0}".format(url))
             raise RedirectRequired(url)
-      
+
     def render_preview(self, request, **kwargs):
         """
         Show a preview of the order.
@@ -664,24 +707,41 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
 class UpdateTotalsView(View):
     def get(self, request, *args, **kwargs):
         try:
-            new_method = request.GET.get('shipping_method')
-            zona_id = request.GET.get('zona_id')
+            new_method = request.GET.get("shipping_method")
+            zona_id = request.GET.get("zona_id")
             shipping_method = self.get_shipping_method(new_method)
-            shipping_charge, min_order = shipping_method.calculate(self.request.basket, zona_id)
-            min_order_html = "Минимальная сумма заказа для доставки %s ₽" % min_order.money
+            shipping_charge, min_order = shipping_method.calculate(
+                self.request.basket, zona_id
+            )
+            min_order_html = (
+                "Минимальная сумма заказа для доставки %s ₽" % min_order.money
+            )
 
-            new_totals = render_to_string("oscar/checkout/checkout_totals.html",{
-                "basket": self.request.basket, "shipping_method": shipping_method, 'shipping_charge': shipping_charge, 'min_order': min_order}, request=self.request)
-            return http.JsonResponse({'totals': new_totals, 'min_order': min_order_html, 'status': 202}, status=202)
+            new_totals = render_to_string(
+                "oscar/checkout/checkout_totals.html",
+                {
+                    "basket": self.request.basket,
+                    "shipping_method": shipping_method,
+                    "shipping_charge": shipping_charge,
+                    "min_order": min_order,
+                },
+                request=self.request,
+            )
+            return http.JsonResponse(
+                {"totals": new_totals, "min_order": min_order_html, "status": 202},
+                status=202,
+            )
         except Exception:
-            return http.JsonResponse({'totals': 'error', 'status': 200}, status=200)
+            return http.JsonResponse({"totals": "error", "status": 200}, status=200)
 
     def get_shipping_method(self, new_method):
         return Repository().get_shipping_method(method=new_method)
 
+
 # =========
 # Thank you
 # =========
+
 
 class ThankYouView(generic.DetailView):
     """
@@ -730,9 +790,11 @@ class ThankYouView(generic.DetailView):
 
         return ctx
 
+
 # =========
 # Voucher
 # =========
+
 
 def update_discounts(basket, user, request):
     basket.reset_offer_applications()
@@ -750,16 +812,18 @@ class VoucherAddView(FormView):
 
     def apply_voucher_to_basket(self, voucher, _dict):
         if voucher.is_expired():
-            _dict['message'] = ("Срок действия промокода '{0}' истек").format(voucher.code)
+            _dict["message"] = ("Срок действия промокода '{0}' истек").format(
+                voucher.code
+            )
             return _dict, 200
 
         if not voucher.is_active():
-            _dict['message'] = ("Промокод '{0}' не активен").format(voucher.code)
+            _dict["message"] = ("Промокод '{0}' не активен").format(voucher.code)
             return _dict, 200
 
         is_available, message = voucher.is_available_to_user(self.request.user)
         if not is_available:
-            _dict['message'] = message
+            _dict["message"] = message
             return _dict, 200
 
         self.request.basket.vouchers.add(voucher)
@@ -767,7 +831,9 @@ class VoucherAddView(FormView):
         # Raise signal
         self.add_signal.send(sender=self, basket=self.request.basket, voucher=voucher)
 
-        discounts_after = update_discounts(self.request.basket, self.request.user, self.request)
+        discounts_after = update_discounts(
+            self.request.basket, self.request.user, self.request
+        )
 
         found_discount = False
         for discount in discounts_after:
@@ -776,15 +842,21 @@ class VoucherAddView(FormView):
                 break
         if not found_discount:
             self.request.basket.vouchers.remove(voucher)
-            _dict['message'] =  "На вашу корзину не распространяется скидка по промокоду."
+            _dict["message"] = (
+                "На вашу корзину не распространяется скидка по промокоду."
+            )
             return _dict, 200
-            
+
         else:
-            _dict['message'] = "Промокод '%(code)s' успешно применен!" % {"code": voucher.code}
-            _dict['new_totals'] = render_to_string("oscar/checkout/checkout_totals.html",{"basket": self.request.basket, "editable": True}, request=self.request)
+            _dict["message"] = "Промокод '%(code)s' успешно применен!" % {
+                "code": voucher.code
+            }
+            _dict["new_totals"] = render_to_string(
+                "oscar/checkout/checkout_totals.html",
+                {"basket": self.request.basket, "editable": True},
+                request=self.request,
+            )
             return _dict, 202
-
-
 
     def form_valid(self, form):
         code = form.cleaned_data["code"]
@@ -793,18 +865,16 @@ class VoucherAddView(FormView):
         if not self.request.basket.id:
             return redirect_to_referrer(self.request, "checkout:checkoutview")
         if self.request.basket.contains_voucher(code):
-            _dict['message'] = ("Промокод '{0}' уже применен").format(code)
+            _dict["message"] = ("Промокод '{0}' уже применен").format(code)
         else:
             try:
                 voucher = self.voucher_model._default_manager.get(code=code)
             except self.voucher_model.DoesNotExist:
-                _dict['message'] = ("Промокод '{0}' не найден").format(code),
+                _dict["message"] = (("Промокод '{0}' не найден").format(code),)
             else:
                 _dict, status = self.apply_voucher_to_basket(voucher, _dict)
 
         return http.JsonResponse(_dict, status=status)
-
-
 
     def form_invalid(self, form):
         return redirect(reverse("basket:summary") + "#voucher")
@@ -816,7 +886,7 @@ class VoucherRemoveView(View):
     http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
-        status=200
+        status = 200
         _dict = {}
         voucher_id = kwargs["pk"]
         if not request.basket.id:
@@ -826,17 +896,21 @@ class VoucherRemoveView(View):
         try:
             voucher = request.basket.vouchers.get(id=voucher_id)
         except ObjectDoesNotExist:
-            _dict['message'] = "Промокод с кодом '%s' не найден" % voucher_id
+            _dict["message"] = "Промокод с кодом '%s' не найден" % voucher_id
         else:
             request.basket.vouchers.remove(voucher)
             self.remove_signal.send(sender=self, basket=request.basket, voucher=voucher)
             update_discounts(request.basket, request.user, request)
-            new_totals = render_to_string("oscar/checkout/checkout_totals.html",{"basket": request.basket}, request=request)
+            new_totals = render_to_string(
+                "oscar/checkout/checkout_totals.html",
+                {"basket": request.basket},
+                request=request,
+            )
             _dict = {
-                'message': "Промокд '%s' успешно удален" % voucher.code,
-                'new_totals': new_totals,
+                "message": "Промокд '%s' успешно удален" % voucher.code,
+                "new_totals": new_totals,
             }
-            status=202
+            status = 202
 
-        _dict['status'] = status
+        _dict["status"] = status
         return http.JsonResponse(_dict, status=status)

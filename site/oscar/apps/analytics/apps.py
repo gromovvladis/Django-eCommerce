@@ -1,5 +1,6 @@
 from oscar.core.application import OscarConfig
 
+
 class AnalyticsConfig(OscarConfig):
     label = "analytics"
     name = "oscar.apps.analytics"

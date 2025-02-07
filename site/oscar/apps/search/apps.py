@@ -1,4 +1,5 @@
 from django.urls import path
+
 from oscar.core.application import OscarConfig
 from oscar.core.loading import get_class
 
@@ -18,9 +19,11 @@ class SearchConfig(OscarConfig):
 
     def get_urls(self):
         urlpatterns = [
-            path("api/suggestions/", self.suggestions_view.as_view(), name="suggestions"),
+            path(
+                "api/suggestions/", self.suggestions_view.as_view(), name="suggestions"
+            ),
             path("result/", self.search_result_view.as_view(), name="search"),
-            path("", self.search_view.as_view(), name="search-page")
+            path("", self.search_view.as_view(), name="search-page"),
         ]
 
         return self.post_process_urls(urlpatterns)

@@ -1,7 +1,8 @@
 import phonenumbers
+from phonenumber_field.phonenumber import PhoneNumber
+
 from django import forms
 from django.core import validators
-from phonenumber_field.phonenumber import PhoneNumber
 
 
 class PhoneNumberMixin(object):
@@ -14,6 +15,7 @@ class PhoneNumberMixin(object):
     `phone_number_fields`, a dictionary of fields names and default kwargs
     for instantiation of the field.
     """
+
     # Since this mixin will be used with `ModelForms`, names of phone number
     # fields should match names of the related Model field
     phone_number_fields = {
@@ -44,7 +46,6 @@ class PhoneNumberMixin(object):
 
             self.fields[field_name] = forms.CharField(**field_kwargs)
 
-
     def clean_phone_number_field(self, field_name):
         number = self.cleaned_data.get(field_name)
 
@@ -58,15 +59,14 @@ class PhoneNumberMixin(object):
         except phonenumbers.NumberParseException:
 
             try:
-                phone_number = PhoneNumber.from_string(number, region='RU')
+                phone_number = PhoneNumber.from_string(number, region="RU")
                 if not phone_number.is_valid():
-                    self.add_error(
-                        field_name, "Это недопустимый формат телефона"
-                    )
+                    self.add_error(field_name, "Это недопустимый формат телефона")
             except phonenumbers.NumberParseException:
                 # Not a valid local or international phone number
                 self.add_error(
-                    field_name, "Это недействительный формат местного или международного телефона"
+                    field_name,
+                    "Это недействительный формат местного или международного телефона",
                 )
                 return number
 

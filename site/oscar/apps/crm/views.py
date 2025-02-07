@@ -1,6 +1,11 @@
 import json
 import logging
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+
 from django.conf import settings
 from django.http import JsonResponse
 
@@ -9,15 +14,10 @@ from oscar.apps.telegram.models import TelegramMessage
 from oscar.core.loading import get_model
 from oscar.apps.telegram.bot.synchron.send_message import send_message_to_staffs
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import AllowAny
-
-logger = logging.getLogger("oscar.crm")
-
 CRMEvent = get_model("crm", "CRMEvent")
 Store = get_model("store", "Store")
+
+logger = logging.getLogger("oscar.crm")
 
 site_token = settings.EVOTOR_SITE_TOKEN
 user_token = settings.EVOTOR_SITE_USER_TOKEN

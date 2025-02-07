@@ -2,6 +2,7 @@ from datetime import time
 
 from django.http import HttpResponse
 from django.template.defaultfilters import date
+
 from oscar.core import utils
 from oscar.core.compat import UnicodeCSVWriter
 
@@ -29,7 +30,7 @@ class ReportGenerator(object):
         self.formatter = self.formatters[formatter_name]()
         self.queryset = self.get_queryset()
         self.queryset = self.filter_with_date_range(self.queryset)
-    
+
     def report_description(self):
         start_date = date(self.start_date, "DATE_FORMAT")
         end_date = date(self.end_date, "DATE_FORMAT")
@@ -42,9 +43,9 @@ class ReportGenerator(object):
             date_range = f"до {end_date}"
         else:
             date_range = ""
-            
+
         return f"{self.description} {date_range}"
-    
+
     def search_filters(self):
         filters = []
 
@@ -52,13 +53,16 @@ class ReportGenerator(object):
         end_date = date(self.end_date, "DATE_FORMAT")
 
         if start_date:
-            filters.append((
-                ("С {start_date}").format(start_date=start_date), (("date_from", start_date),)
-            ))
+            filters.append(
+                (
+                    ("С {start_date}").format(start_date=start_date),
+                    (("date_from", start_date),),
+                )
+            )
         if end_date:
-            filters.append((
-                ("До {end_date}").format(end_date=end_date), (("date_to", end_date),)
-            ))
+            filters.append(
+                (("До {end_date}").format(end_date=end_date), (("date_to", end_date),))
+            )
 
         return filters
 

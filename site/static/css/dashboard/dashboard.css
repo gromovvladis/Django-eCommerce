@@ -548,6 +548,7 @@ pre code {
 .container-navbar{
   padding-top: .5rem;
   padding-bottom: .5rem;
+  max-width: 1620px;
 }
 
 .container,
@@ -2682,6 +2683,13 @@ fieldset:disabled a.btn {
   box-shadow: 0 0 0 0.1rem rgba(58, 176, 195, 0.3);
 }
 
+.btn-status{
+  padding: .4rem .5rem;
+  min-height: unset;
+  line-height: 1rem;
+  border-radius: 5px;
+}
+
 .btn-warning {
   color: #212529;
   background-color: #ffc107;
@@ -3117,6 +3125,10 @@ input[type=button].btn-block {
   border-radius: 0.25rem;
 }
 
+.dropdown-status {
+  min-width: unset;
+}
+
 .dropdown-menu-left {
   right: auto;
   left: 0;
@@ -3363,7 +3375,7 @@ input[type=button].btn-block {
 
 .navbar-active i{
   width: 15px;
-  margin-top: 11px;
+  margin-top: 9px;
 }
 
 .item-badge-navbar{
@@ -4823,9 +4835,9 @@ input[type=button].btn-block {
   color: rgba(0, 0, 0, 0.3);
   border-color: rgba(0, 0, 0, 0.1);
 }
-.navbar-light .fa-solid {
+/* .navbar-light .fa-solid {
   color: #747474;
-}
+} */
 /* .navbar-light .navbar-toggler-icon {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.5%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 } */
@@ -5490,6 +5502,20 @@ a.badge-filter:hover, a.badge-filter:focus {
   background-color: #d7ebff;
 }
 a.badge-filter:focus, a.badge-filter.focus {
+  outline: 0;
+  box-shadow: 0 0 0 0.1rem rgba(248, 249, 250, 0.3);
+}
+
+.badge-navbar {
+  background-color: #f4f4f4;
+  font-size: .8rem;
+  font-weight: 500;
+}
+a.badge-navbar:hover, a.badge-filter:focus {
+  color: #212529;
+  background-color: #d7ebff;
+}
+a.badge-navbar:focus, a.badge-filter.focus {
   outline: 0;
   box-shadow: 0 0 0 0.1rem rgba(248, 249, 250, 0.3);
 }
@@ -6203,6 +6229,12 @@ a.close.disabled {
   position: relative;
 }
 
+.navbar-loading{
+  min-height: 100px;
+  position: relative;
+}
+
+.navbar-loading::before,
 .content-loading::before{
   content: '';
   display: block;
@@ -20399,6 +20431,11 @@ input[type="number"]:focus {
 
 
 
+.navbar-store{
+  color: var(--purple);
+  font-size: .9rem;
+  font-weight: 500;
+}
 
 @media (max-width: 768px) {
 
@@ -20517,7 +20554,6 @@ input[type="number"]:focus {
   .mobile-table .table-striped tbody tr .statistic{
     padding: .5rem 1rem 0 .5rem;
   }
-
 
   .mobile-table tbody .title a,
   .mobile-table tbody .name a{

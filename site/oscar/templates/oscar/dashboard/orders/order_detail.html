@@ -204,9 +204,21 @@
                         <i class="fas fa-shopping-cart"></i>
                         Заказ
                     </h3>
-                    <span class="badge {% if order.status == "Завершён" %}badge-success{% elif order.status == "Отменен" %}badge-danger{% elif order.status == "Готовится" %}badge-info{% else %}badge-warning{% endif %}">
+                    <span id="dropdownOrderStatus" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-status dropdown-toggle {% if order.status == "Завершён" %}btn-success{% elif order.status == "Отменен" %}btn-danger{% elif order.status == "Готовится" %}btn-info{% else %}btn-warning{% endif %}">
                         {{ order.status|default:"N/A" }}
                     </span>
+                    <div class="dropdown-menu actions dropdown-menu-right dropdown-status" aria-labelledby="dropdownOrderStatus">
+                        {% if order.next_status %}
+                            <a class="dropdown-item" href="{% url 'dashboard:order-next-status' number=order.number %}">
+                                {{ order.next_status }}
+                            </a>
+                        {% endif %}
+                        {% if not order.cancel_status and not order.next_status %}
+                            <span class="dropdown-item text-muted">
+                                Статус заказа нельзя изменить
+                            </span>
+                        {% endif %}
+                    </div>
                 </div>
                 <form id="order_lines_form" method="post">
                     {% csrf_token %}

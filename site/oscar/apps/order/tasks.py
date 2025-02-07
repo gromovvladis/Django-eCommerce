@@ -9,6 +9,7 @@ logger = logging.getLogger("oscar.order")
 
 Order = get_model("order", "Order")
 
+
 @shared_task
 def update_paying_status_task(order_number, *args, **kwargs):
     try:
@@ -16,4 +17,6 @@ def update_paying_status_task(order_number, *args, **kwargs):
         if order.status == settings.OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS:
             order.set_status(settings.OSCAR_FAIL_ORDER_STATUS)
     except Exception as err:
-        logger.error("Ошибка при проверке статуса заказа 'Ожидает оплаты' через 11 минут %s", err)
+        logger.error(
+            "Ошибка при проверке статуса заказа 'Ожидает оплаты' через 11 минут %s", err
+        )

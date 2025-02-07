@@ -1,14 +1,7 @@
-{% load django_tables2 %}
+{% load dashboard_tags %}
 
-<a href="{% url 'dashboard:store-manage' pk=record.id %}">
-    {% if record.evotor_id %}
-        <span class="text-success">
-            <i class="fa-solid fa-circle-check"></i>&nbsp; 
-        </span>
-    {% endif %}
-    {% if record.first_name or record.last_name %}
-        {{ record.get_full_name }}
-    {% else %}
-        -
-    {% endif %}
-</a>
+{% if record.date_of_birth %}
+    {{ record.date_of_birth|age }}
+{% else %}
+    -
+{% endif %}

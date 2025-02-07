@@ -1,5 +1,8 @@
 # pylint: disable=attribute-defined-outside-init
-from . import signals
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework.authentication import SessionAuthentication
+
 from django import http
 from django.conf import settings
 from django.contrib import messages
@@ -16,11 +19,7 @@ from oscar.apps.customer.mixins import RegisterUserPhoneMixin
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import PostActionMixin
-
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework.authentication import SessionAuthentication
-
+from . import signals
 
 PageTitleMixin, RegisterUserMixin = get_classes(
     "customer.mixins", ["PageTitleMixin", "RegisterUserMixin"]
@@ -31,10 +30,10 @@ PhoneAuthenticationForm, OrderSearchForm = get_classes(
 )
 ProfileForm = get_class("customer.forms", "ProfileForm")
 UserAddressForm = get_class("address.forms", "UserAddressForm")
-Order = get_model("order", "Order")
-UserAddress = get_model("address", "UserAddress")
 
 User = get_user_model()
+Order = get_model("order", "Order")
+UserAddress = get_model("address", "UserAddress")
 
 
 # =======
@@ -56,12 +55,13 @@ class AccountSummaryView(generic.RedirectView):
 
     pattern_name = settings.OSCAR_ACCOUNTS_REDIRECT_URL
     permanent = False
- 
+
 
 class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
     """
     Resiter via sms.
     """
+
     permission_classes = [AllowAny]
     authentication_classes = [SessionAuthentication]
 
@@ -74,27 +74,23 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
             return redirect(settings.LOGIN_REDIRECT_URL)
         context = self.get_context_data()
         auth_modal = render_to_string(self.template_name, context, request=request)
-        return http.JsonResponse({"auth_modal": auth_modal}, status = 202)
-
+        return http.JsonResponse({"auth_modal": auth_modal}, status=202)
 
     def get_context_data(self, *args, **kwargs):
-        return {
-            "auth_form": self.get_auth_form()
-        }
-
+        return {"auth_form": self.get_auth_form()}
 
     def post(self, request, *args, **kwargs):
-        if request.POST.get('action') == "sms":
+        if request.POST.get("action") == "sms":
             return self.validate_sms_form()
-        if request.POST.get('action') == "auth":
+        if request.POST.get("action") == "auth":
             return self.validate_auth_form()
-        return http.JsonResponse({"errors": "Ошибка авторизации", "status": 400}, status=400)
-
+        return http.JsonResponse(
+            {"errors": "Ошибка авторизации", "status": 400}, status=400
+        )
 
     # AUTH
     def get_auth_form(self, bind_data=False):
         return self.form_class(**self.get_auth_form_kwargs(bind_data))
-
 
     def get_auth_form_kwargs(self, bind_data=False):
         kwargs = {}
@@ -112,17 +108,20 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
             )
         return kwargs
 
-
     def validate_auth_form(self):
         form = self.get_auth_form(bind_data=True)
         if form.is_valid():
-            
+
             user = form.get_user()
 
             if user is not None:
                 # Grab a reference to the session ID before logging in
                 old_session_key = self.request.session.session_key
-                auth_login(self.request, user, backend="oscar.apps.user.auth_backends.PhoneBackend")
+                auth_login(
+                    self.request,
+                    user,
+                    backend="oscar.apps.user.auth_backends.PhoneBackend",
+                )
                 # Raise signal robustly (we don't want exceptions to crash the
                 # request handling). We use a custom signal as we want to track the
                 # session key before calling login (which cycles the session ID).
@@ -139,14 +138,12 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
 
         return http.JsonResponse({"error": "Код не верный", "status": 400}, status=404)
 
-
-    def get_auth_success_url(self, form):    
-        redirect_url = self.request.POST.get('redirect_url')
+    def get_auth_success_url(self, form):
+        redirect_url = self.request.POST.get("redirect_url")
         if redirect_url:
             return redirect_url
-        
-        return settings.LOGIN_REDIRECT_URL
 
+        return settings.LOGIN_REDIRECT_URL
 
     def validate_sms_form(self):
         form = self.get_auth_form(bind_data=True)
@@ -155,26 +152,33 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
                 phone = form.get_phone()
 
                 sms_generator = GeneratorService(phone)
-                
+
                 sms_code = sms_generator.process()
                 sms_message = sms_code.message
 
                 auth_service = Smsaero(phone, sms_message)
                 sms_result = auth_service.send_sms()
 
-                if sms_result == 'secceded':
-                    return http.JsonResponse({"secceded": "Смс выслано", "status": 200}, status=200)
+                if sms_result == "secceded":
+                    return http.JsonResponse(
+                        {"secceded": "Смс выслано", "status": 200}, status=200
+                    )
 
             except Exception as e:
-                return http.JsonResponse({"error": e.message, "status": 403}, status=403)
+                return http.JsonResponse(
+                    {"error": e.message, "status": 403}, status=403
+                )
 
-        return http.JsonResponse({"error": "Укажите корректный номер телефона", "status": 400}, status=400)
-    
+        return http.JsonResponse(
+            {"error": "Укажите корректный номер телефона", "status": 400}, status=400
+        )
+
 
 class AccountAuthView(generic.TemplateView, AccountAuthModalView):
     """
     Resiter via sms.
     """
+
     template_name = "oscar/customer/auth.html"
 
     def get(self, request, *args, **kwargs):
@@ -213,7 +217,7 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
     page_title = "Профиль"
     active_tab = "profile"
     model = User
-    context_object_name = 'user'
+    context_object_name = "user"
     success_url = reverse_lazy("customer:profile-view")
 
     def get_object(self):
@@ -223,14 +227,13 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
-    
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["summary"] = "Профиль"
         ctx["content_open"] = False
         return ctx
 
-    
     def get_initial(self):
         return {
             "name": self.request.user.name,
@@ -240,7 +243,7 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
     def form_valid(self, form):
         # Grab current user instance before we save form. We may need this to
         # send a warning email if the email address is changed.
-        try: 
+        try:
             old_user = User.objects.get(id=self.request.user.id)
         except User.DoesNotExist:
             old_user = None
@@ -259,10 +262,12 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
             old_user.is_email_verified = False
             self.send_email_changed_email(old_user, new_email)
 
-        return http.JsonResponse({"message": "Информация успешно обновлена"}, status=200)
+        return http.JsonResponse(
+            {"message": "Информация успешно обновлена"}, status=200
+        )
 
     def form_invalid(self, form):
-        return http.JsonResponse({"message":", ".join(form.errors)}, status=402)
+        return http.JsonResponse({"message": ", ".join(form.errors)}, status=402)
 
     def send_email_changed_email(self, old_user, new_email):
         user = self.request.user
@@ -403,7 +408,7 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
                     options.append(
                         {"option": attribute.option, "value": attribute.value}
                     )
-                else:   
+                else:
                     additionals.append(
                         {"additional": attribute.additional, "value": attribute.value}
                     )
@@ -432,7 +437,7 @@ class AddressListView(PageTitleMixin, generic.ListView):
     def get_queryset(self):
         """Return customer's addresses"""
         return UserAddress._default_manager.filter(user=self.request.user)
-    
+
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["content_open"] = True

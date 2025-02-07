@@ -1,10 +1,8 @@
 # pylint: disable=W0621, unused-argument
-
 from decimal import Decimal as D
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.templatetags.currency_filters import currency
 
-Benefit = get_model("offer", "Benefit")
 BasketDiscount, SHIPPING_DISCOUNT, ZERO_DISCOUNT = get_classes(
     "offer.results", ["BasketDiscount", "SHIPPING_DISCOUNT", "ZERO_DISCOUNT"]
 )
@@ -24,6 +22,8 @@ __all__ = [
     "ShippingFixedPriceBenefit",
     "ShippingPercentageDiscountBenefit",
 ]
+
+Benefit = get_model("offer", "Benefit")
 
 
 def apply_discount(line, discount, quantity, offer=None):

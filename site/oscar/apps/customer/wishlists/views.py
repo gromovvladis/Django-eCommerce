@@ -4,15 +4,16 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import (ListView, View)
+from django.views.generic import ListView, View
 
 from oscar.core.loading import get_class, get_model
-from oscar.core.utils import is_ajax
+
+PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
 
 WishList = get_model("wishlists", "WishList")
 Line = get_model("wishlists", "Line")
 Product = get_model("catalogue", "Product")
-PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
+
 
 class WishListDetailView(PageTitleMixin, ListView):
     """
@@ -50,7 +51,7 @@ class WishListDetailView(PageTitleMixin, ListView):
         ctx["content_open"] = True
         ctx["summary"] = "Профиль"
         return ctx
-    
+
 
 class WishListAddProduct(View):
     """
@@ -87,11 +88,17 @@ class WishListAddProduct(View):
 
     def add_product(self):
         self.wishlist.add(self.product)
-        return http.JsonResponse({
-            "html": '<svg width="24" height="24"><use xlink:href="#add-to-wishlist"></use></svg>',
-            "url": reverse_lazy('customer:wishlist-remove-product', kwargs={"product_pk": self.product.id}),
-            "status": 200
-            }, status=200)
+        return http.JsonResponse(
+            {
+                "html": '<svg width="24" height="24"><use xlink:href="#add-to-wishlist"></use></svg>',
+                "url": reverse_lazy(
+                    "customer:wishlist-remove-product",
+                    kwargs={"product_pk": self.product.id},
+                ),
+                "status": 200,
+            },
+            status=200,
+        )
 
 
 class LineMixin(object):
@@ -130,19 +137,24 @@ class WishListRemoveProduct(LineMixin, View):
             self.kwargs.get("product_pk"),
         )
         return self.line
-        
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         return self._delete()
 
     def _delete(self):
         self.object.delete()
-        return http.JsonResponse({
-            "html": '<svg width="24" height="24"><use xlink:href="#remove-from-wishlist"></use></svg>',
-            "url": reverse_lazy('customer:wishlist-add-product', kwargs={"product_pk": self.product.id}),
-            "status": 200
-            }, status=200)
+        return http.JsonResponse(
+            {
+                "html": '<svg width="24" height="24"><use xlink:href="#remove-from-wishlist"></use></svg>',
+                "url": reverse_lazy(
+                    "customer:wishlist-add-product",
+                    kwargs={"product_pk": self.product.id},
+                ),
+                "status": 200,
+            },
+            status=200,
+        )
 
     def get_success_response(self):
         return redirect(reverse("customer:wishlist"))
-    

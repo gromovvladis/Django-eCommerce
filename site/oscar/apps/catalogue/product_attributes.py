@@ -1,4 +1,5 @@
 from copy import deepcopy
+
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.functional import cached_property
@@ -32,11 +33,18 @@ class AttributesQuerysetCache:
     @cached_property
     def attributes(self):
         if self.product.id:
-            return QuerysetCache(self.product.attributes.all() | self.product.get_product_class().class_attributes.all())
+            return QuerysetCache(
+                self.product.attributes.all()
+                | self.product.get_product_class().class_attributes.all()
+            )
         elif self.product.is_child:
-            return QuerysetCache(self.product.parent.attributes.filter(productattribute__is_variant=True))
+            return QuerysetCache(
+                self.product.parent.attributes.filter(productattribute__is_variant=True)
+            )
         else:
-            return QuerysetCache(self.product.get_product_class().class_attributes.all())
+            return QuerysetCache(
+                self.product.get_product_class().class_attributes.all()
+            )
 
     @cached_property
     def attribute_values(self):
@@ -102,7 +110,7 @@ class ProductAttributesContainer:
                     cpy.__dict__[key] = deepcopy(value, memo)
 
         return cpy
-    
+
     def __getstate__(self):
         # Allow everything to go into the pickle except for _cache (which can't
         # be pickled since it contains a generator)
@@ -216,7 +224,7 @@ class ProductAttributesContainer:
             value = getattr(self, attribute.code, None)
             values.append(value)
 
-        return values   
+        return values
 
     def get_value_by_attribute(self, attribute):
         return self.cache.attribute_values.get(attribute.code)

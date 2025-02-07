@@ -1,6 +1,5 @@
 from decimal import Decimal as D
 
-from django.conf import settings
 from oscar.apps.order import exceptions
 
 
@@ -86,9 +85,10 @@ class EventHandler(object):
             # 'is_shipping_event_permitted' and enforce the correct order of
             # shipping events.
             if not line.is_shipping_event_permitted(event_type, qty):
-                msg = "Выбранное количество для позиций #%(line_id)s слишком большое" % {
-                    "line_id": line.id
-                }
+                msg = (
+                    "Выбранное количество для позиций #%(line_id)s слишком большое"
+                    % {"line_id": line.id}
+                )
                 errors.append(msg)
         if errors:
             raise exceptions.InvalidShippingEvent(", ".join(errors))

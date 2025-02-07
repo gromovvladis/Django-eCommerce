@@ -7,9 +7,9 @@ class Base(object):
     exists = False
 
     #: Price
-    money = None 
+    money = None
 
-    old_price = None 
+    old_price = None
 
     #: Price to use for offer calculations
     @property
@@ -64,7 +64,7 @@ class TaxInclusiveFixedPrice(FixedPrice):
     specifies that offers should use the tax-inclusive price (which is the norm
     in the UK).
     """
-    
+
     @property
     def effective_price(self):
         return self.money

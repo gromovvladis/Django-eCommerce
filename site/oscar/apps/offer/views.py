@@ -76,7 +76,7 @@ class RangeDetailView(ListView):
         ctx["range"] = self.range
         return ctx
 
-        
+
 class GetUpsellMasseges(View):
 
     def get(self, request, *args, **kwargs):
@@ -84,9 +84,17 @@ class GetUpsellMasseges(View):
             self.offer = ConditionalOffer.active.select_related().get(
                 slug=self.kwargs["slug"]
             )
-            upsell_message = render_to_string("oscar/offer/partials/upsell_message.html", {"upsell_message": self.offer.get_upsell_message(request.basket)}, request=request)
-        
+            upsell_message = render_to_string(
+                "oscar/offer/partials/upsell_message.html",
+                {"upsell_message": self.offer.get_upsell_message(request.basket)},
+                request=request,
+            )
+
         except ConditionalOffer.DoesNotExist:
-            raise http.JsonResponse({"error": 'ConditionalOffer.DoesNotExist', "status": 404}, status = 404)
-        
-        return http.JsonResponse({"upsell_message": upsell_message, "status": 202}, status = 202)
+            raise http.JsonResponse(
+                {"error": "ConditionalOffer.DoesNotExist", "status": 404}, status=404
+            )
+
+        return http.JsonResponse(
+            {"upsell_message": upsell_message, "status": 202}, status=202
+        )

@@ -5,15 +5,19 @@ from django.utils.translation import ngettext_lazy
 from oscar.core.loading import get_class, get_model
 
 DashboardTable = get_class("dashboard.tables", "DashboardTable")
+
 OrderReview = get_model("customer", "OrderReview")
 ProductReview = get_model("reviews", "ProductReview")
+
 
 class ReviewOrderTable(DashboardTable):
     checkbox = TemplateColumn(
         verbose_name="",
         template_name="oscar/dashboard/reviews/review_row_checkbox.html",
         orderable=False,
-        attrs = {'th': {'class': 'checkbox'},}
+        attrs={
+            "th": {"class": "checkbox"},
+        },
     )
     name = TemplateColumn(
         verbose_name="Заказ",
@@ -48,19 +52,22 @@ class ReviewOrderTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/reviews/review_row_order_action.html",
         orderable=False,
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
-    
+
     icon = "fas fa-thumbs-up"
     caption = ngettext_lazy("%s Отзыв на заказ", "%s Отзыва на заказы")
 
     filter = {
         "url": reverse_lazy("dashboard:reviews-order-list"),
         "values": [
-            ("", "Все"), 
-            ("status=0", "Неизвестно"), 
-            ("status=1", "Полезные"), 
+            ("", "Все"),
+            ("status=0", "Неизвестно"),
+            ("status=1", "Полезные"),
             ("status=2", "Неполезные"),
-        ]
+        ],
     }
 
     class Meta(DashboardTable.Meta):
@@ -82,14 +89,12 @@ class ReviewOrderTable(DashboardTable):
             "body",
             "date_created",
             "actions",
-            "..."
+            "...",
         )
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        row_attrs = {
-            'class': lambda record: 'new-record' if not record.is_open else ''
-        }
+        row_attrs = {"class": lambda record: "new-record" if not record.is_open else ""}
         order_by = "date_created"
         empty_text = "Нет созданых отзывов на заказы"
 
@@ -99,7 +104,9 @@ class ReviewProductTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/reviews/review_row_checkbox.html",
         orderable=False,
-        attrs = {'th': {'class': 'checkbox'},}
+        attrs={
+            "th": {"class": "checkbox"},
+        },
     )
     name = TemplateColumn(
         verbose_name="Товар",
@@ -134,19 +141,22 @@ class ReviewProductTable(DashboardTable):
         verbose_name="",
         template_name="oscar/dashboard/reviews/review_row_product_action.html",
         orderable=False,
+        attrs={
+            "th": {"class": "actions"},
+        },
     )
-    
+
     icon = "fas fa-thumbs-up"
     caption = ngettext_lazy("%s Отзыв на товар", "%s Отзывов на товары")
 
     filter = {
         "url": reverse_lazy("dashboard:reviews-product-list"),
         "values": [
-            ("", "Все"), 
-            ("status=0", "Неизвестно"), 
-            ("status=1", "Полезные"), 
+            ("", "Все"),
+            ("status=0", "Неизвестно"),
+            ("status=1", "Полезные"),
             ("status=2", "Неполезные"),
-        ]
+        ],
     }
 
     class Meta(DashboardTable.Meta):
@@ -168,14 +178,11 @@ class ReviewProductTable(DashboardTable):
             "body",
             "date_created",
             "actions",
-            "..."
+            "...",
         )
         attrs = {
-            'class': 'table table-striped table-bordered table-hover',
+            "class": "table table-striped table-bordered table-hover",
         }
-        row_attrs = {
-            'class': lambda record: 'new-record' if not record.is_open else ''
-        }
+        row_attrs = {"class": lambda record: "new-record" if not record.is_open else ""}
         order_by = "date_created"
         empty_text = "Нет созданых отзывов на товары"
-

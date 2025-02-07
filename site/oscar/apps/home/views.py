@@ -1,15 +1,15 @@
 from user_agents import parse
 
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+
 from django import http
 from django.conf import settings
 from django.http import Http404, HttpResponse
-from django.views.generic import  ListView, DetailView
+from django.views.generic import ListView, DetailView
 from django.db.models import Count
 from django.core.cache import cache
 from django.template.loader import render_to_string
-
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
 
 from oscar.views import sort_queryset
 from oscar.core.loading import get_model
@@ -20,33 +20,42 @@ ConditionalOffer = get_model("offer", "ConditionalOffer")
 Action = get_model("home", "Action")
 PromoCategory = get_model("home", "PromoCategory")
 
+
 def service_worker(request):
-    return HttpResponse(open(_dir + '/js/dashboard/utils/service-worker.js', 'rb').read(), status=202, content_type='application/javascript')
+    return HttpResponse(
+        open(_dir + "/js/dashboard/utils/service-worker.js", "rb").read(),
+        status=202,
+        content_type="application/javascript",
+    )
 
 
 class GetCookiesView(APIView):
     """
     Сообщение , что мы используем куки
     """
+
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         cookies = render_to_string("oscar/includes/cookie.html", request=self.request)
-        return http.JsonResponse({"cookies": cookies}, status = 202)
-  
+        return http.JsonResponse({"cookies": cookies}, status=202)
+
 
 class HomeView(ListView):
     """
     Главная страница
     """
+
     template_name = "oscar/home/homepage.html"
 
     def get_queryset(self):
 
-        actions = cache.get('actions_all')
+        actions = cache.get("actions_all")
 
         if not actions:
-            actions = Action.objects.only('image', 'slug', 'title').filter(is_active=True)
+            actions = Action.objects.only("image", "slug", "title").filter(
+                is_active=True
+            )
             cache.set("actions_all", actions, 3600)
 
         return actions
@@ -54,14 +63,16 @@ class HomeView(ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["summary"] = settings.PRIMARY_TITLE
-        
-        agent = parse(self.request.META['HTTP_USER_AGENT'])
+
+        agent = parse(self.request.META["HTTP_USER_AGENT"])
         ctx["is_mobile"] = agent.is_mobile
 
         if not agent.is_mobile:
-            promo_cats = cache.get('promo_cats_all')
+            promo_cats = cache.get("promo_cats_all")
             if not promo_cats:
-                promo_cats = PromoCategory.objects.prefetch_related('products_related').filter(is_active=True)
+                promo_cats = PromoCategory.objects.prefetch_related(
+                    "products_related"
+                ).filter(is_active=True)
                 cache.set("promo_cats_all", promo_cats, 3600)
 
             ctx["promo_cats"] = promo_cats
@@ -94,14 +105,15 @@ class ActionsView(ListView):
         )
 
         return qs
-    
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        actions = cache.get('actions_all')
+        actions = cache.get("actions_all")
 
         if not actions:
-            actions = Action.objects.prefetch_related('products_related').filter(is_active=True)
+            actions = Action.objects.prefetch_related("products_related").filter(
+                is_active=True
+            )
             cache.set("actions_all", actions, 3600)
 
         ctx["actions"] = actions
@@ -145,7 +157,7 @@ class PromoDetailView(DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx["summary"] = self.object.title
         return ctx
-    
+
 
 class ActionDetailView(PromoDetailView):
     model = Action

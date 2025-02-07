@@ -37,9 +37,7 @@ class PercentageCharge(BaseSurcharge):
                 money=total * self.percentage / 100,
             )
         else:
-            return prices.Price(
-                currency=basket.currency, money=D("0.0")
-            )
+            return prices.Price(currency=basket.currency, money=D("0.0"))
 
 
 class FlatCharge(BaseSurcharge):
@@ -50,6 +48,4 @@ class FlatCharge(BaseSurcharge):
         self.money = money
 
     def calculate(self, basket, **kwargs):
-        return prices.Price(
-            currency=basket.currency, money=self.money
-        )
+        return prices.Price(currency=basket.currency, money=self.money)

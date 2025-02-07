@@ -1,6 +1,7 @@
 import logging
 from decimal import Decimal as D
 from datetime import datetime
+from yookassa import Payment, Refund
 
 from django.conf import settings
 from django.contrib import messages
@@ -11,25 +12,24 @@ from django.views.generic import DetailView, UpdateView, DeleteView, CreateView
 from django_tables2 import SingleTableView
 from django.views.generic.edit import FormView
 
-from yookassa import Payment, Refund
-
 from oscar.apps.payment.exceptions import DebitedAmountIsNotEqualsRefunded
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 
-logger = logging.getLogger("oscar.dashboard")
+NewSourceForm = get_class("dashboard.orders.forms", "NewSourceForm")
+NewTransactionForm = get_class("dashboard.orders.forms", "NewTransactionForm")
+PaymentManager = get_class("payment.methods", "PaymentManager")
+PaymentListTable, RefundListTable = get_classes(
+    "dashboard.payments.tables", ["PaymentListTable", "RefundListTable"]
+)
 
 User = get_user_model()
 Transaction = get_model("payment", "Transaction")
 Order = get_model("order", "Order")
 Source = get_model("payment", "Source")
 SourceType = get_model("payment", "SourceType")
-PaymentListTable, RefundListTable = get_classes(
-    "dashboard.payments.tables", ["PaymentListTable", "RefundListTable"]
-)
-NewSourceForm = get_class("dashboard.orders.forms", "NewSourceForm")
-NewTransactionForm = get_class("dashboard.orders.forms", "NewTransactionForm")
-PaymentManager = get_class("payment.methods", "PaymentManager")
+
+logger = logging.getLogger("oscar.dashboard")
 
 
 class TransactionsListView(SingleTableView):

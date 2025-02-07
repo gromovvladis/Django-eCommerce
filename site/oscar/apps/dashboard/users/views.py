@@ -1,8 +1,20 @@
 # pylint: disable=attribute-defined-outside-init
 import re
+
 from django.conf import settings
 from django.contrib import messages
-from django.db.models import Sum, F, Max, ExpressionWrapper, DurationField, When, Value, Case, Q, Count
+from django.db.models import (
+    Sum,
+    F,
+    Max,
+    ExpressionWrapper,
+    DurationField,
+    When,
+    Value,
+    Case,
+    Q,
+    Count,
+)
 from django.shortcuts import redirect
 from django.views.generic import DetailView
 from django.views.generic.edit import FormMixin
@@ -13,15 +25,16 @@ from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import BulkEditMixin
 
-Order = get_model("order", "Order")
-UserSearchForm = get_class("dashboard.users.forms","UserSearchForm")
+UserSearchForm = get_class("dashboard.users.forms", "UserSearchForm")
 UserTable = get_class("dashboard.users.tables", "UserTable")
-User = get_user_model()
-
 OrderTable = get_class("dashboard.orders.tables", "OrderTable")
 ReviewOrderTable, ReviewProductTable = get_classes(
     "dashboard.reviews.tables", ("ReviewOrderTable", "ReviewProductTable")
 )
+
+Order = get_model("order", "Order")
+User = get_user_model()
+
 
 class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
     template_name = "oscar/dashboard/users/customer_list.html"
@@ -84,10 +97,17 @@ class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
         Function is split out to allow customisation with little boilerplate.
         """
         if data["username"]:
-            username = re.sub(r'[^\d+]', '', data["username"])
+            username = re.sub(r"[^\d+]", "", data["username"])
             queryset = queryset.filter(username__istartswith=username)
-            self.desc_ctx["phone_filter"] = " с телефоном соответствующим '%s'" % username
-            self.search_filters.append((('Телефон начинается с "%s"' % username), (("username", data["username"]),)))
+            self.desc_ctx["phone_filter"] = (
+                " с телефоном соответствующим '%s'" % username
+            )
+            self.search_filters.append(
+                (
+                    ('Телефон начинается с "%s"' % username),
+                    (("username", data["username"]),),
+                )
+            )
         if data["name"]:
             # If the value is two words, then assume they are first name and
             # last name
@@ -97,8 +117,12 @@ class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
             for part in parts:
                 condition &= Q(name__icontains=part)
             queryset = queryset.filter(condition).distinct()
-            self.desc_ctx["name_filter"] = " с именем соответствующим '%s'" % data["name"]
-            self.search_filters.append((('Имя соответствует "%s"' % data["name"]), (("name", data["name"]),)))
+            self.desc_ctx["name_filter"] = (
+                " с именем соответствующим '%s'" % data["name"]
+            )
+            self.search_filters.append(
+                (('Имя соответствует "%s"' % data["name"]), (("name", data["name"]),))
+            )
 
         return queryset
 
@@ -112,7 +136,7 @@ class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
         context["form"] = self.form
         context["search_filters"] = self.search_filters
         return context
-    
+
     def make_nothing(self, request, users):
         messages.info(self.request, "Выберите статус 'Активен' или 'Не активен'")
         return redirect("dashboard:customer-list")
@@ -145,17 +169,21 @@ class UserDetailView(MultiTableMixin, DetailView):
 
     def get_queryset(self):
         self.queryset = self.model.objects.prefetch_related(
-            "orders__lines", "orders__surcharges", "orders__sources", "order_reviews", "product_reviews"
+            "orders__lines",
+            "orders__surcharges",
+            "orders__sources",
+            "order_reviews",
+            "product_reviews",
         ).annotate(
-            total_reviews=Count("order_reviews", distinct=True) + Count("product_reviews", distinct=True),
+            total_reviews=Count("order_reviews", distinct=True)
+            + Count("product_reviews", distinct=True),
         )
         return self.queryset
-    
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        user_orders = Order.objects.filter(user=context['customer'])
+        user_orders = Order.objects.filter(user=context["customer"])
         order_amount = 0
 
         for order in user_orders:
@@ -166,10 +194,10 @@ class UserDetailView(MultiTableMixin, DetailView):
             "order_amount": order_amount,
         }
 
-        context["active_tab"] = 'user_orders'
+        context["active_tab"] = "user_orders"
 
         return context
-    
+
     def get_tables(self):
         self.user = self.queryset.get(pk=self.kwargs.get(self.pk_url_kwarg))
         return [
@@ -184,13 +212,19 @@ class UserDetailView(MultiTableMixin, DetailView):
     def get_orders_table(self):
         orders = self.user.orders.annotate(
             source=Max("sources__reference"),
-            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
+            amount_paid=Sum("sources__amount_debited")
+            - Sum("sources__amount_refunded"),
             paid=F("sources__paid"),
             before_order=Case(
-                When(date_finish__isnull=True, then=ExpressionWrapper(F('order_time') - now(), output_field=DurationField())),
+                When(
+                    date_finish__isnull=True,
+                    then=ExpressionWrapper(
+                        F("order_time") - now(), output_field=DurationField()
+                    ),
+                ),
                 default=Value(None),
-                output_field=DurationField()
-            )
+                output_field=DurationField(),
+            ),
         )
         return self.orders_table(orders)
 

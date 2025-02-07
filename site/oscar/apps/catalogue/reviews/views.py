@@ -11,6 +11,7 @@ PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
 ProductReviewForm, SortReviewsForm = get_classes(
     "catalogue.reviews.forms", ["ProductReviewForm", "SortReviewsForm"]
 )
+
 ProductReview = get_model("reviews", "ProductReview")
 Product = get_model("catalogue", "product")
 

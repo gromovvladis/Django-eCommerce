@@ -1,4 +1,5 @@
 from django.urls import path, re_path
+
 from oscar.core.application import OscarDashboardConfig
 from oscar.core.loading import get_class
 
@@ -14,9 +15,13 @@ class CommunicationsDashboardConfig(OscarDashboardConfig):
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
-        self.email_list_view = get_class("dashboard.communications.views", "EmailListView")
+        self.email_list_view = get_class(
+            "dashboard.communications.views", "EmailListView"
+        )
         self.sms_list_view = get_class("dashboard.communications.views", "SmsListView")
-        self.sended_sms_view = get_class("dashboard.communications.views", "SendedSmsView")
+        self.sended_sms_view = get_class(
+            "dashboard.communications.views", "SendedSmsView"
+        )
         self.update_view = get_class("dashboard.communications.views", "UpdateView")
 
     def get_urls(self):

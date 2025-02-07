@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from django import forms
-
 from oscar.core.loading import get_model
 
 WishList = get_model("wishlists", "WishList")

@@ -1,7 +1,7 @@
-from django.conf import settings
-from django.db.models.signals import post_save
+# from django.conf import settings
+# from django.db.models.signals import post_save
 
-from oscar.core.loading import get_class, get_model
+# from oscar.core.loading import get_class, get_model
 
 # AlertsDispatcher = get_class("customer.alerts.utils", "AlertsDispatcher")
 

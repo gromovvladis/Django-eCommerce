@@ -10,18 +10,20 @@ from django.views.generic import (
 
 from oscar.core.loading import get_class, get_model
 
+PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
+OrderReviewForm = get_class("catalogue.reviews.forms", "OrderReviewForm")
+
 Order = get_model("order", "Order")
 OrderReview = get_model("customer", "OrderReview")
 Line = get_model("wishlists", "Line")
 Product = get_model("catalogue", "Product")
-PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
-OrderReviewForm = get_class("catalogue.reviews.forms", "OrderReviewForm")
 
 
 class OrderFeedbackAvailibleListView(PageTitleMixin, ListView):
     """
     Customer order history
     """
+
     context_object_name = "orders"
     template_name = "oscar/customer/feedbacks/feedbacks_order_list.html"
     paginate_by = settings.OSCAR_ORDERS_PER_PAGE
@@ -37,7 +39,7 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ListView):
         return self.model.objects.filter(
             Q(user=self.request.user),
             Q(status="Завершён"),
-            ~Q(reviews__isnull=False)  # Проверяем, что связанных отзывов нет
+            ~Q(reviews__isnull=False),  # Проверяем, что связанных отзывов нет
         )
 
     def get_context_data(self, *args, **kwargs):
@@ -51,6 +53,7 @@ class OrderFeedbackListView(PageTitleMixin, ListView):
     """
     Customer order history
     """
+
     context_object_name = "reviews"
     template_name = "oscar/customer/feedbacks/feedbacks_list.html"
     paginate_by = settings.OSCAR_ORDERS_PER_PAGE
@@ -62,7 +65,7 @@ class OrderFeedbackListView(PageTitleMixin, ListView):
         """
         Return Queryset of :py:class:`Order <oscar.apps.order.models.Order>`
         instances for the currently authenticated user.
-        """        
+        """
         return self.model.objects.filter(user=self.request.user)
 
     def get_context_data(self, *args, **kwargs):
@@ -71,8 +74,8 @@ class OrderFeedbackListView(PageTitleMixin, ListView):
         ctx["summary"] = "Профиль"
         return ctx
 
-            
-class AddOrderFeedbackView(PageTitleMixin, CreateView): 
+
+class AddOrderFeedbackView(PageTitleMixin, CreateView):
     context_object_name = "order_review"
     template_name = "oscar/customer/feedbacks/feedbacks_add.html"
     model = OrderReview
@@ -84,9 +87,7 @@ class AddOrderFeedbackView(PageTitleMixin, CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         # pylint: disable=attribute-defined-outside-init
-        self.order = get_object_or_404(
-            self.order_model, number=kwargs["order_number"]
-        )
+        self.order = get_object_or_404(self.order_model, number=kwargs["order_number"])
         if not self.order.is_review_permitted(request.user):
             if self.order.has_review_by(request.user):
                 message = "Вы уже оставили отзыв об этом заказе!"
@@ -110,4 +111,3 @@ class AddOrderFeedbackView(PageTitleMixin, CreateView):
         ctx["summary"] = "Профиль"
         ctx["content_open"] = True
         return ctx
-

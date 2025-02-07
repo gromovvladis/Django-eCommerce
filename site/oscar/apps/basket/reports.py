@@ -3,6 +3,7 @@ from oscar.core.loading import get_class, get_model
 ReportGenerator = get_class("dashboard.reports.reports", "ReportGenerator")
 ReportCSVFormatter = get_class("dashboard.reports.reports", "ReportCSVFormatter")
 ReportHTMLFormatter = get_class("dashboard.reports.reports", "ReportHTMLFormatter")
+
 Basket = get_model("basket", "Basket")
 
 
