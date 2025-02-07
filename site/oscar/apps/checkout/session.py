@@ -2,14 +2,14 @@ from decimal import Decimal as D
 from datetime import datetime
 
 from django import http
+from django.urls import reverse
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
-from django.urls import reverse
 
-from oscar.apps.shipping.methods import NoShippingRequired
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from oscar.apps.delivery.utils import is_valid_order_time
+from oscar.apps.shipping.methods import NoShippingRequired
 
 from . import exceptions
 
@@ -19,6 +19,7 @@ OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 CheckoutSessionData = get_class("checkout.utils", "CheckoutSessionData")
 Map = get_class("delivery.maps", "Map")
 ZonesUtils = get_class("delivery.zones", "ZonesUtils")
+
 ShippingAddress = get_model("order", "ShippingAddress")
 UserAddress = get_model("address", "UserAddress")
 
@@ -168,11 +169,11 @@ class CheckoutSessionMixin(object):
                     url=reverse("checkout:checkoutview"),
                 )
             return
-            
+
         shipping_method = self.get_shipping_method(request.basket)
         if shipping_method and shipping_method.code == NoShippingRequired().code:
             return
-        
+
         # Basket requires shipping: check address and method are captured and
         # valid.
         self.check_a_valid_shipping_address_is_captured()
@@ -201,7 +202,7 @@ class CheckoutSessionMixin(object):
                 url=reverse("checkout:checkoutview"),
                 message="Пожалуйста, укажите метод оплаты.",
             )
-        
+
     def check_order_time_is_captured(self, request):
         order_time = self.get_order_time()
         shipping_method = self.checkout_session.shipping_method_code()
@@ -212,7 +213,6 @@ class CheckoutSessionMixin(object):
                 url=reverse("checkout:checkoutview"),
                 message="Данное время заказа более недоступно. Пожалуйста, повторите оформление заказа.",
             )
-        
 
     # Helpers
 
@@ -235,14 +235,20 @@ class CheckoutSessionMixin(object):
 
         if not shipping_method:
             # total = shipping_charge = surcharges = min_order = None
-            shipping_charge = surcharges = min_order = prices.Price(currency=basket.currency, money=D("0.00"))
+            shipping_charge = surcharges = min_order = prices.Price(
+                currency=basket.currency, money=D("0.00")
+            )
         elif shipping_method.code == NoShippingRequired().code:
-            shipping_address = None 
-            shipping_charge = min_order = prices.Price(currency=basket.currency, money=D("0.00"))
+            shipping_address = None
+            shipping_charge = min_order = prices.Price(
+                currency=basket.currency, money=D("0.00")
+            )
 
         elif shipping_address:
             if shipping_address.coords_lat and shipping_address.coords_long:
-                shipping_charge, min_order = shipping_method.calculate(basket, shipping_address)
+                shipping_charge, min_order = shipping_method.calculate(
+                    basket, shipping_address
+                )
             elif shipping_address.line1:
                 map = Map()
                 geoObject = map.geocode(address=shipping_address.line1)
@@ -300,13 +306,13 @@ class CheckoutSessionMixin(object):
         """
         if not basket.is_shipping_required():
             return None
-        
+
         addr_data = self.checkout_session.session_shipping_address_fields()
         if addr_data:
             # Load address data into a blank shipping address model
             return ShippingAddress(**addr_data)
         return None
-    
+
     def get_shipping_method(self, basket, shipping_address=None, **kwargs):
         """
         Return the selected shipping method instance from this checkout session
@@ -324,7 +330,6 @@ class CheckoutSessionMixin(object):
         for method in methods:
             if method.code == code:
                 return method
-            
 
     # =======================
 
@@ -336,7 +341,7 @@ class CheckoutSessionMixin(object):
 
     def get_email_or_change(self, **kwargs):
         return self.checkout_session.email_or_change()
-         
+
     # ========================
 
     def get_order_totals(self, basket, shipping_charge, surcharges=None, **kwargs):

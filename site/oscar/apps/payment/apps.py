@@ -1,7 +1,8 @@
-from oscar.core.application import OscarConfig
 from django.urls import path
-from oscar.core.loading import get_class
 from django.views.decorators.csrf import csrf_exempt
+
+from oscar.core.application import OscarConfig
+from oscar.core.loading import get_class
 
 
 class PaymentConfig(OscarConfig):

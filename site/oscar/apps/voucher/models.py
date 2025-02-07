@@ -4,6 +4,7 @@ from django.core import exceptions
 from django.db import models
 from django.db.models import Sum
 from django.utils import timezone
+
 from oscar.core.compat import AUTH_USER_MODEL
 
 
@@ -48,7 +49,9 @@ class VoucherSet(models.Model):
             and self.end_datetime
             and (self.start_datetime > self.end_datetime)
         ):
-            raise exceptions.ValidationError("Дата окончания должна быть позже даты начала.")
+            raise exceptions.ValidationError(
+                "Дата окончания должна быть позже даты начала."
+            )
 
     def update_count(self):
         vouchers_count = self.vouchers.count()
@@ -165,7 +168,9 @@ class Voucher(models.Model):
             and self.end_datetime
             and (self.start_datetime > self.end_datetime)
         ):
-            raise exceptions.ValidationError("Дата окончания должна быть позже даты начала.")
+            raise exceptions.ValidationError(
+                "Дата окончания должна быть позже даты начала."
+            )
 
     def save(self, *args, **kwargs):
         self.code = self.code.upper()

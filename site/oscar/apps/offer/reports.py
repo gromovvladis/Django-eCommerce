@@ -1,12 +1,12 @@
-from django.db.models import OuterRef, Subquery, Sum, Value, CharField, Case, When, F, Q
+from django.db.models import OuterRef, Subquery, Sum, Value, CharField, Case, When, F
 from django.db.models.functions import Coalesce, Concat
 
-from django.db.models.functions import Coalesce
 from oscar.core.loading import get_class, get_model
 
 ReportGenerator = get_class("dashboard.reports.reports", "ReportGenerator")
 ReportCSVFormatter = get_class("dashboard.reports.reports", "ReportCSVFormatter")
 ReportHTMLFormatter = get_class("dashboard.reports.reports", "ReportHTMLFormatter")
+
 ConditionalOffer = get_model("offer", "ConditionalOffer")
 OrderDiscount = get_model("order", "OrderDiscount")
 
@@ -56,14 +56,22 @@ class OfferReportGenerator(ReportGenerator):
                 offer_name=Coalesce(
                     Subquery(offers.values("name")[:1]),
                     Subquery(order_discounts.values("offer_name")[:1]),
-                    output_field=CharField()
-                ),      
-                message=Subquery(order_discounts.values("message")[:1], output_field=CharField()),
+                    output_field=CharField(),
+                ),
+                message=Subquery(
+                    order_discounts.values("message")[:1], output_field=CharField()
+                ),
                 display_offer_name=Case(
                     When(message="", then=F("offer_name")),
                     When(message__isnull=True, then=F("offer_name")),
-                    default=Concat(F("offer_name"), Value(" ("), F("message"), Value(")"), output_field=CharField()),
-                    output_field=CharField()
+                    default=Concat(
+                        F("offer_name"),
+                        Value(" ("),
+                        F("message"),
+                        Value(")"),
+                        output_field=CharField(),
+                    ),
+                    output_field=CharField(),
                 ),
             )
             .values("offer_id", "offer", "total_discount", "display_offer_name")

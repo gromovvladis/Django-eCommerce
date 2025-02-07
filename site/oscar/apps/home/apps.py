@@ -1,8 +1,9 @@
 from django.urls import path, re_path
+from django.views.decorators.cache import cache_page
+
 from oscar.core.application import OscarConfig
 from oscar.core.loading import get_class
 
-from django.views.decorators.cache import cache_page
 
 class HomeConfig(OscarConfig):
     label = "home"
@@ -20,7 +21,7 @@ class HomeConfig(OscarConfig):
         self.action_detail_view = get_class("home.views", "ActionDetailView")
         self.promocat_detail_view = get_class("home.views", "PromoCatDetailView")
         self.cookies_view = get_class("home.views", "GetCookiesView")
-        
+
         self.service_worker_view = get_class("home.views", "service_worker")
 
     def get_urls(self):
@@ -38,7 +39,11 @@ class HomeConfig(OscarConfig):
                 self.promocat_detail_view.as_view(),
                 name="promo-detail",
             ),
-            path("api/cookies/", cache_page(60 * 60 * 12)(self.cookies_view.as_view()), name="cookies"),
-            path('service-worker.js', self.service_worker_view),
+            path(
+                "api/cookies/",
+                cache_page(60 * 60 * 12)(self.cookies_view.as_view()),
+                name="cookies",
+            ),
+            path("service-worker.js", self.service_worker_view),
         ]
         return self.post_process_urls(urls)

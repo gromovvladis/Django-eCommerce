@@ -1,5 +1,6 @@
 from oscar.apps.shipping.methods import NoShippingRequired
 
+
 class CheckoutSessionData(object):
     """
     Responsible for marshalling all the checkout session data
@@ -98,7 +99,6 @@ class CheckoutSessionData(object):
             return True
 
         return self.session_shipping_address_fields()
-    
 
     # Shipping method
     # ===============
@@ -128,7 +128,6 @@ class CheckoutSessionData(object):
         """
         return self.shipping_method_code() is not None
 
-
     # Submission methods
     # ==================
 
@@ -144,7 +143,6 @@ class CheckoutSessionData(object):
     def get_submitted_basket_id(self):
         return self._get("submission", "basket_id")
 
-
     # Payment methods
     # ===============
 
@@ -153,7 +151,6 @@ class CheckoutSessionData(object):
 
     def payment_method(self):
         return self._get("payment", "method")
-    
 
     # Order note
     # ==================
@@ -162,8 +159,10 @@ class CheckoutSessionData(object):
         self._set("submission", "order_note", order_note)
 
     def order_note(self):
-        return self._get("submission", "order_note",)
-
+        return self._get(
+            "submission",
+            "order_note",
+        )
 
     # Order time
     # ==================
@@ -172,8 +171,11 @@ class CheckoutSessionData(object):
         self._set("submission", "order_time", order_time.isoformat())
 
     def order_time(self):
-        return self._get("submission", "order_time",)
-    
+        return self._get(
+            "submission",
+            "order_time",
+        )
+
     # email or charge
     # ==================
 
@@ -181,4 +183,7 @@ class CheckoutSessionData(object):
         self._set("submission", "email_or_change", email_or_change)
 
     def email_or_change(self):
-        return self._get("submission", "email_or_change",)
+        return self._get(
+            "submission",
+            "email_or_change",
+        )

@@ -1,11 +1,14 @@
 from haystack.query import SearchQuerySet
 
+
 def base_sqs():
     """
     Return the base SearchQuerySet for Haystack searches.
     """
     sqs = SearchQuerySet()
-    sqs = sqs.filter_and(is_public="true", structure__in=["standalone", "parent"]).order_by("-is_available", "-order")
+    sqs = sqs.filter_and(
+        is_public="true", structure__in=["standalone", "parent"]
+    ).order_by("-is_available", "-order")
     return sqs
 
 

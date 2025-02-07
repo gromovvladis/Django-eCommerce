@@ -1,4 +1,5 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+
 from oscar.apps.telegram.bot.const_texts import report_text, staffs_text, customers_text
 
 staff_buttons = ReplyKeyboardMarkup(
@@ -15,7 +16,7 @@ staff_buttons = ReplyKeyboardMarkup(
             ),
             KeyboardButton(
                 text=customers_text,
-            )
+            ),
         ]
-    ]
+    ],
 )

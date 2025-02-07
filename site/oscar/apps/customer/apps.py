@@ -38,18 +38,38 @@ class CustomerConfig(OscarConfig):
         # self.profile_delete_view = get_class("customer.views", "ProfileDeleteView")
         # self.change_password_view = get_class("customer.views", "ChangePasswordView")
 
-        self.notification_inbox_view = get_class("communication.notifications.views", "InboxView")
-        self.notification_archive_view = get_class("communication.notifications.views", "ArchiveView")
-        self.notification_update_view = get_class("communication.notifications.views", "UpdateView")
-        self.notification_detail_view = get_class("communication.notifications.views", "DetailView")
+        self.notification_inbox_view = get_class(
+            "communication.notifications.views", "InboxView"
+        )
+        self.notification_archive_view = get_class(
+            "communication.notifications.views", "ArchiveView"
+        )
+        self.notification_update_view = get_class(
+            "communication.notifications.views", "UpdateView"
+        )
+        self.notification_detail_view = get_class(
+            "communication.notifications.views", "DetailView"
+        )
 
-        self.wishlists_add_product_view = get_class("customer.wishlists.views", "WishListAddProduct")
-        self.wishlists_detail_view = get_class("customer.wishlists.views", "WishListDetailView")
-        self.wishlists_remove_product_view = get_class("customer.wishlists.views", "WishListRemoveProduct")
+        self.wishlists_add_product_view = get_class(
+            "customer.wishlists.views", "WishListAddProduct"
+        )
+        self.wishlists_detail_view = get_class(
+            "customer.wishlists.views", "WishListDetailView"
+        )
+        self.wishlists_remove_product_view = get_class(
+            "customer.wishlists.views", "WishListRemoveProduct"
+        )
 
-        self.feedbacks_available_view = get_class("customer.feedbacks.views", "OrderFeedbackAvailibleListView")
-        self.feedbacks_view = get_class("customer.feedbacks.views", "OrderFeedbackListView")
-        self.feedbacks_add_view = get_class("customer.feedbacks.views", "AddOrderFeedbackView")
+        self.feedbacks_available_view = get_class(
+            "customer.feedbacks.views", "OrderFeedbackAvailibleListView"
+        )
+        self.feedbacks_view = get_class(
+            "customer.feedbacks.views", "OrderFeedbackListView"
+        )
+        self.feedbacks_add_view = get_class(
+            "customer.feedbacks.views", "AddOrderFeedbackView"
+        )
 
     def get_urls(self):
         urls = [

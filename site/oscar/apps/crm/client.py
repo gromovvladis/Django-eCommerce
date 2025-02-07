@@ -1,14 +1,19 @@
 import json
 import requests
 import logging
+
 from collections import defaultdict
+from rest_framework.renderers import JSONRenderer
+
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.utils.timezone import now
 from django.db.models.functions import Coalesce, Greatest
 from django.db.models import F
 
-from rest_framework.renderers import JSONRenderer
+from oscar.apps.customer.serializers import UserGroupSerializer, StaffSerializer
+from oscar.apps.order.serializers import OrderSerializer
+from oscar.core.loading import get_model
 from oscar.apps.catalogue.serializers import (
     AdditionalSerializer,
     AdditionalsSerializer,
@@ -17,15 +22,12 @@ from oscar.apps.catalogue.serializers import (
     ProductSerializer,
     ProductsSerializer,
 )
-from oscar.apps.customer.serializers import UserGroupSerializer, StaffSerializer
-from oscar.apps.order.serializers import OrderSerializer
 from oscar.apps.store.serializers import (
     StoreSerializer,
     TerminalSerializer,
     StoreCashTransactionSerializer,
     StockRecordOperationSerializer,
 )
-from oscar.core.loading import get_model
 from .tasks import process_bulk_task
 
 logger = logging.getLogger("oscar.crm")
@@ -1852,7 +1854,9 @@ class EvotorDocClient(EvotorAPICloud):
                                     (Coalesce(F("num_in_stock"), 0) - line.quantity), 0
                                 ),
                             )
-                            line.stockrecord.refresh_from_db(fields=["num_allocated", "num_in_stock"])
+                            line.stockrecord.refresh_from_db(
+                                fields=["num_allocated", "num_in_stock"]
+                            )
 
             else:
                 json_valid = False
@@ -1886,7 +1890,9 @@ class EvotorDocClient(EvotorAPICloud):
                     for line in order.lines.all():
                         if line.product.get_product_class().track_stock:
                             line.stockrecord.num_in_stock += line.quantity
-                            line.stockrecord.refresh_from_db(fields=["num_allocated", "num_in_stock"])
+                            line.stockrecord.refresh_from_db(
+                                fields=["num_allocated", "num_in_stock"]
+                            )
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)

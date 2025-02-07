@@ -4,6 +4,7 @@ from oscar.core.loading import get_model
 
 ProductReview = get_model("reviews", "ProductReview")
 
+
 class ProductReviewAdmin(admin.ModelAdmin):
     list_display = (
         "product",
@@ -11,5 +12,6 @@ class ProductReviewAdmin(admin.ModelAdmin):
         "status",
         "date_created",
     )
+
 
 admin.site.register(ProductReview, ProductReviewAdmin)

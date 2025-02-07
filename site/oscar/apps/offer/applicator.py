@@ -1,5 +1,3 @@
-# import logging
-# logger = logging.getLogger("oscar.offers")
 from itertools import chain
 
 from oscar.core.loading import get_class, get_model
@@ -52,8 +50,8 @@ class Applicator(object):
         """
         site_offers = self.get_site_offers()
         basket_offers = self.get_basket_offers(basket, user)
-        #user_offers = self.get_user_offers(user)
-        #session_offers = self.get_session_offers(request)
+        # user_offers = self.get_user_offers(user)
+        # session_offers = self.get_session_offers(request)
 
         return list(
             sorted(

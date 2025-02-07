@@ -38,9 +38,7 @@ class ProductReview(models.Model):
         (UNHELPFUL, "Неполезный"),
     )
 
-    status = models.SmallIntegerField(
-        "Статус", choices=STATUS_CHOICES, default=UNKNOWN
-    )
+    status = models.SmallIntegerField("Статус", choices=STATUS_CHOICES, default=UNKNOWN)
 
     date_created = models.DateTimeField(auto_now_add=True)
 
@@ -52,7 +50,7 @@ class ProductReview(models.Model):
     class Meta:
         app_label = "reviews"
         unique_together = (("product", "user"),)
-        verbose_name ="Отзыв товара"
+        verbose_name = "Отзыв товара"
         verbose_name_plural = "Отзывы товаров"
 
     def get_absolute_url(self):

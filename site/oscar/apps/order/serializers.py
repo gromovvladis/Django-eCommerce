@@ -1,9 +1,8 @@
 from decimal import Decimal as D
+from rest_framework import serializers
 
 from django.conf import settings
 from django.utils.timezone import now
-
-from rest_framework import serializers
 
 from oscar.core.loading import get_model
 
@@ -13,14 +12,12 @@ Product = get_model("catalogue", "Product")
 Additional = get_model("catalogue", "Additional")
 ProductClass = get_model("catalogue", "ProductClass")
 StockRecord = get_model("store", "StockRecord")
-
 Order = get_model("order", "Order")
 OrderNote = get_model("order", "OrderNote")
 OrderDiscount = get_model("order", "OrderDiscount")
 OrderLineDiscount = get_model("order", "OrderLineDiscount")
 Line = get_model("order", "Line")
 LinePrice = get_model("order", "LinePrice")
-
 Source = get_model("payment", "Source")
 SourceType = get_model("payment", "SourceType")
 Transaction = get_model("payment", "Transaction")

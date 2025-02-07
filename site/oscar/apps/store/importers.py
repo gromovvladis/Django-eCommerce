@@ -1,10 +1,14 @@
 import csv
 import os
+
 from decimal import Decimal as D
+
 from django.db.transaction import atomic
+
 from oscar.core.loading import get_class, get_model
 
 ImportingError = get_class("store.exceptions", "ImportingError")
+create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
 
 Category = get_model("catalogue", "Category")
 Store = get_model("store", "Store")
@@ -12,8 +16,6 @@ Product = get_model("catalogue", "Product")
 ProductCategory = get_model("catalogue", "ProductCategory")
 ProductClass = get_model("catalogue", "ProductClass")
 StockRecord = get_model("store", "StockRecord")
-
-create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
 
 
 class CatalogueImporter(object):
@@ -74,7 +76,9 @@ class CatalogueImporter(object):
             # With stock data
             self._create_stockrecord(item, *row[5:9])
 
-    def _create_item(self, product_class, category_str, article, name, description, stats):
+    def _create_item(
+        self, product_class, category_str, article, name, description, stats
+    ):
         # Ignore any entries that are NULL
         if description == "NULL":
             description = ""

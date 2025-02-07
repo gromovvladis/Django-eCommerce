@@ -4,8 +4,8 @@ from django.urls import reverse
 from django.utils.translation import get_language, activate
 from oscar.core.loading import get_model
 
-Product = get_model('catalogue', 'Product')
-Category = get_model('catalogue', 'Category')
+Product = get_model("catalogue", "Product")
+Category = get_model("catalogue", "Category")
 
 
 """
@@ -21,6 +21,7 @@ class I18nSitemap(Sitemap):
     A language-specific Sitemap class. Returns URLS for items for passed
     language.
     """
+
     def __init__(self, language="ru"):
         self.language = language
         self.original_language = get_language()
@@ -38,7 +39,9 @@ class I18nSitemap(Sitemap):
 class StaticSitemap(I18nSitemap):
 
     def items(self):
-        return ['home', ]
+        return [
+            "home",
+        ]
 
     def get_obj_location(self, obj):
         return reverse(obj)
@@ -57,9 +60,9 @@ class CategorySitemap(I18nSitemap):
 
 
 neutral_sitemaps = {
-    'static': StaticSitemap,
-    'products': ProductSitemap,
-    'categories': CategorySitemap,
+    "static": StaticSitemap,
+    "products": ProductSitemap,
+    "categories": CategorySitemap,
 }
 
 # Construct the sitemaps for every language

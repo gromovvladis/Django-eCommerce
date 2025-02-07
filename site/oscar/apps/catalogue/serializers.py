@@ -1,13 +1,10 @@
 import logging
-
 from decimal import Decimal as D
 from haystack import connections
 from rest_framework import serializers
 
 from oscar.core.loading import get_model
 from oscar.apps.search.search_indexes import ProductIndex
-
-logger = logging.getLogger("oscar.customer")
 
 Store = get_model("store", "Store")
 Product = get_model("catalogue", "Product")
@@ -19,6 +16,8 @@ AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Additional = get_model("catalogue", "Additional")
+
+logger = logging.getLogger("oscar.customer")
 
 
 class ProductSerializer(serializers.ModelSerializer):

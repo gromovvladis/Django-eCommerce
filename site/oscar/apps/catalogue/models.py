@@ -25,9 +25,9 @@ from django.utils.safestring import mark_safe
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import get_default_currency, slugify
+from oscar.utils.models import get_image_upload_path
 from oscar.models.fields import AutoSlugField, NullCharField
 from oscar.models.fields.slugfield import SlugField
-from oscar.utils.models import get_image_upload_path
 
 CategoryQuerySet, ProductQuerySet, AdditionalQuerySet, AttributeQuerySet = get_classes(
     "catalogue.managers",

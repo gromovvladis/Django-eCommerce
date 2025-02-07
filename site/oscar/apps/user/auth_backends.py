@@ -13,6 +13,7 @@ if hasattr(User, "REQUIRED_FIELDS"):
             "PhoneBack: Your User model must have an username field with blank=False"
         )
 
+
 class PhoneBackend(ModelBackend):
     # pylint: disable=keyword-arg-before-vararg
     def _authenticate(self, username, password):
@@ -39,4 +40,3 @@ class PhoneBackend(ModelBackend):
             password = kwargs["password"]
 
         return self._authenticate(username, password)
-

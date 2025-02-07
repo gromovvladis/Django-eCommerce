@@ -1,9 +1,11 @@
-from decimal import Decimal
 import json
 import random
 import typing
-from django.conf import settings
 import requests
+from decimal import Decimal
+
+from django.conf import settings
+
 from .utils import unix_time
 from .exceptions import *
 
@@ -214,7 +216,7 @@ class GISMap:
     # ----------------------------------------------------------------
 
     def geocode(self, address=None, coords=None) -> dict[str, typing.Any]:
-        
+
         url = "https://catalog.api.2gis.com/3.0/items/geocode"
 
         params = {
@@ -230,19 +232,19 @@ class GISMap:
             # "city_id":
         }
 
-        if coords: 
+        if coords:
             params["lat"] = coords[0]
             params["lon"] = coords[1]
             params["radius"] = 200
         elif address:
             params["q"] = address
-        else: 
+        else:
             return {"error": "Coordinates or address must be provided"}
 
         response = requests.get(url=url, params=params)
 
         if response.status_code == 200:
-            return json.loads(response.content.decode('utf8'))
+            return json.loads(response.content.decode("utf8"))
         elif response.status_code == 403:
             raise InvalidKey()
         else:
@@ -251,7 +253,7 @@ class GISMap:
             )
 
     def routing(self, points: list, departure_time=None, transport="car"):
-        """ Формат points: [[[lon,lat], [lon,lat]], [[lon,lat], [lon,lat]]], 
+        """Формат points: [[[lon,lat], [lon,lat]], [[lon,lat], [lon,lat]]],
         Для каждого маршрута необходимо указать четное количество точек
         формат departure_time: 'YYYY-MM-DD HH:MM'"""
 
@@ -272,26 +274,30 @@ class GISMap:
         point_list = []
 
         for rote in points:
-            point_list.append([
-                {
-                    "lon": rote[0][0],
-                    "lat": rote[0][1],
-                },
-                {
-                    "lon": rote[1][0],
-                    "lat": rote[1][1],
-                }
-            ])
+            point_list.append(
+                [
+                    {
+                        "lon": rote[0][0],
+                        "lat": rote[0][1],
+                    },
+                    {
+                        "lon": rote[1][0],
+                        "lat": rote[1][1],
+                    },
+                ]
+            )
 
         data["points"] = point_list
 
-        response = requests.post(url=url, params={"key": gis_key}, data=json.dumps(data))
+        response = requests.post(
+            url=url, params={"key": gis_key}, data=json.dumps(data)
+        )
 
         if response.status_code == 200:
-            return json.loads(response.content.decode('utf8'))
+            return json.loads(response.content.decode("utf8"))
 
     def directions(self, startpoint: list, waypoints: list, departure_time=None):
-        """ Формат startpoint: [x,y], формат waypoints: [[x,y],[x,y],[x,y]], 
+        """Формат startpoint: [x,y], формат waypoints: [[x,y],[x,y],[x,y]],
         формат departure_time: 'YYYY-MM-DD HH:MM'"""
 
         url = "https://routing.api.2gis.com/carrouting/6.0.0/global"
@@ -312,14 +318,16 @@ class GISMap:
 
         data["points"] = point_list
 
-        response = requests.post(url=url, params={"key": gis_key}, data=json.dumps(data))
+        response = requests.post(
+            url=url, params={"key": gis_key}, data=json.dumps(data)
+        )
 
         if response.status_code == 200:
-            return json.loads(response.content.decode('utf8'))
+            return json.loads(response.content.decode("utf8"))
 
     def pairsDirections(self, points: list, departure_time=None, routing_type="car"):
-        """ Формат points: [[[lon1,lat1],[lon1,lat2]],[[lon1,lat1],[lon1,lat2]]], 
-        формат departure_time: 'YYYY-MM-DD HH:MM' """
+        """Формат points: [[[lon1,lat1],[lon1,lat2]],[[lon1,lat1],[lon1,lat2]]],
+        формат departure_time: 'YYYY-MM-DD HH:MM'"""
 
         url = "https://routing.api.2gis.com/get_pairs/1.0/"
 
@@ -335,25 +343,39 @@ class GISMap:
         point_list = []
 
         for rote in points:
-            point_list.append({
-                "lon1": rote[0][0],
-                "lat1": rote[0][1],
-                "lon2": rote[1][0], 
-                "lat2": rote[1][1],
-            })
+            point_list.append(
+                {
+                    "lon1": rote[0][0],
+                    "lat1": rote[0][1],
+                    "lon2": rote[1][0],
+                    "lat2": rote[1][1],
+                }
+            )
 
         data["points"] = point_list
 
-        response = requests.post(url=url, params={"key":gis_key, "routing_type":routing_type}, data=json.dumps(data))
+        response = requests.post(
+            url=url,
+            params={"key": gis_key, "routing_type": routing_type},
+            data=json.dumps(data),
+        )
 
         if response.status_code == 200:
-            return json.loads(response.content.decode('utf8'))
+            return json.loads(response.content.decode("utf8"))
 
-    def distanceMatrix(self, points: list, sources: list, targets: list, departure_time=None, type="jam", mode="driving"):
-        """ Формат points: [[lon,lat],[lon,lat],[lon,lat],[lon,lat]], 
+    def distanceMatrix(
+        self,
+        points: list,
+        sources: list,
+        targets: list,
+        departure_time=None,
+        type="jam",
+        mode="driving",
+    ):
+        """Формат points: [[lon,lat],[lon,lat],[lon,lat],[lon,lat]],
         формат departure_time: 'YYYY-MM-DD HH:MM'
         формат sources (начальный точки): [0,1]
-        формат targets (конечные точки): [2,3] """
+        формат targets (конечные точки): [2,3]"""
 
         url = "https://routing.api.2gis.com/get_dist_matrix"
 
@@ -370,19 +392,23 @@ class GISMap:
         point_list = []
 
         for point in points:
-            point_list.append({
-                "lon": point[0],
-                "lat": point[1],
-            })
+            point_list.append(
+                {
+                    "lon": point[0],
+                    "lat": point[1],
+                }
+            )
 
         data["points"] = point_list
         data["sources"] = sources
         data["targets"] = targets
 
-        response = requests.post(url=url, params={"key":gis_key, "version":2.0}, data=json.dumps(data))
+        response = requests.post(
+            url=url, params={"key": gis_key, "version": 2.0}, data=json.dumps(data)
+        )
 
         if response.status_code == 200:
-            return json.loads(response.content.decode('utf8'))
+            return json.loads(response.content.decode("utf8"))
 
     # ----------------------------------------------------------------
     # Helper methods
@@ -392,35 +418,37 @@ class GISMap:
         """Fetch coordinates (longitude, latitude) for passed address."""
         try:
             data = geoObject["result"]
-            
+
             if not data:
                 return None
-            
-            coordinates = data['items'][0]["point"]
-            return coordinates['lon'], coordinates['lat']
+
+            coordinates = data["items"][0]["point"]
+            return coordinates["lon"], coordinates["lat"]
         except Exception:
             return None
-        
+
     def address(self, geoObject) -> str:
         """Fetch address for the provided coordinates."""
         try:
             data = geoObject.get("result", {})
 
-            if not data or not data.get('items'):
+            if not data or not data.get("items"):
                 return "Адрес не найден"
 
-            address = data['items'][0].get("address_name") or data['items'][0].get("name")
+            address = data["items"][0].get("address_name") or data["items"][0].get(
+                "name"
+            )
 
             return address if address else "Адрес не найден"
-            
+
         except Exception:
             return None
 
     def routeTime(self, start_point, end_point):
         try:
             directions = self.directions(start_point, end_point)
-            rote = directions.get('result').pop()
-            time = rote.get('total_duration') // 60
+            rote = directions.get("result").pop()
+            time = rote.get("total_duration") // 60
             return time
         except Exception:
             return 60
@@ -428,8 +456,8 @@ class GISMap:
     def routeDistance(self, start_point, end_point):
         try:
             directions = self.directions(start_point, end_point)
-            rote = directions.get('result').pop()
-            dist = rote.get('total_distance') // 60
+            rote = directions.get("result").pop()
+            dist = rote.get("total_distance") // 60
             return dist
         except Exception:
             return 60
@@ -437,7 +465,7 @@ class GISMap:
     def exact(self, geoObject) -> str:
         """Fetch address for passed coordinates."""
         try:
-            data = geoObject["result"]['items'][0]
+            data = geoObject["result"]["items"][0]
         except Exception:
             return False
 

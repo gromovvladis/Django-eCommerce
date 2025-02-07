@@ -5,14 +5,8 @@ from ..conf import conf
 
 def get_error(error_message):
     ERROR = {
-        'message': '',
-        'errors': [
-            {
-                "code": "0000",
-                "field": None,
-                "message": error_message
-            }
-        ]
+        "message": "",
+        "errors": [{"code": "0000", "field": None, "message": error_message}],
     }
 
     return ERROR

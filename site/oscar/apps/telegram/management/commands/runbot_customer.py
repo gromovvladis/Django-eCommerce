@@ -2,15 +2,18 @@ import asyncio
 import logging
 
 from django.core.management.base import BaseCommand
-from bot_loader import customer_bot, customer_dp
 
 from oscar.apps.telegram.bot.middlewares import *
 from oscar.apps.telegram.bot.handlers import *
 from oscar.apps.telegram.bot.utils.notify_admins import on_startup_notify
 from oscar.apps.telegram.bot.utils.set_bot_commands import set_customerbot_commands
 
+from bot_loader import customer_bot, customer_dp
+
 # Настройка логирования
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 async def on_startup(bot, dp):
@@ -19,7 +22,7 @@ async def on_startup(bot, dp):
 
 
 class Command(BaseCommand):
-    help = 'RUN COMMAND: python manage.py runbot_customer'
+    help = "RUN COMMAND: python manage.py runbot_customer"
 
     def handle(self, *args, **options):
         try:
@@ -32,4 +35,3 @@ class Command(BaseCommand):
         if customer_bot:
             await on_startup(customer_bot, customer_dp)
             await customer_dp.start_polling(customer_bot)
-

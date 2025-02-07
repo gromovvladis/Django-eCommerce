@@ -17,12 +17,14 @@ class ProductReviewForm(forms.ModelForm):
         model = ProductReview
         fields = ("score", "body")
         widgets = {
-            'score': forms.RadioSelect(),
-            'body': forms.Textarea(attrs={
-                'class' : 'input input-textarea fill-width fill-height d-flex align-center input__padding pd-2',
-                'rows': 6,
-                'placeholder': "Ваш отзыв"
-            }),
+            "score": forms.RadioSelect(),
+            "body": forms.Textarea(
+                attrs={
+                    "class": "input input-textarea fill-width fill-height d-flex align-center input__padding pd-2",
+                    "rows": 6,
+                    "placeholder": "Ваш отзыв",
+                }
+            ),
         }
 
 
@@ -38,12 +40,14 @@ class OrderReviewForm(forms.ModelForm):
         model = OrderReview
         fields = ("score", "body")
         widgets = {
-            'score': forms.RadioSelect(),
-            'body': forms.Textarea(attrs={
-                'class' : 'input input-textarea fill-width fill-height d-flex align-center input__padding pd-2',
-                'rows': 6,
-                'placeholder': "Ваш отзыв"
-            }),
+            "score": forms.RadioSelect(),
+            "body": forms.Textarea(
+                attrs={
+                    "class": "input input-textarea fill-width fill-height d-flex align-center input__padding pd-2",
+                    "rows": 6,
+                    "placeholder": "Ваш отзыв",
+                }
+            ),
         }
 
 

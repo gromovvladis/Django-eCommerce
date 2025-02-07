@@ -10,7 +10,7 @@ class LineInline(admin.TabularInline):
     readonly_fields = (
         "line_reference",
         "product",
-        # "price",
+        "tax_code",
         "price_currency",
         "stockrecord",
     )
@@ -23,7 +23,7 @@ class LineAdmin(admin.ModelAdmin):
         "product",
         "stockrecord",
         "quantity",
-        # "price",
+        "tax_code",
         "price_currency",
         "date_created",
     )
@@ -33,7 +33,6 @@ class LineAdmin(admin.ModelAdmin):
         "line_reference",
         "product",
         "price_currency",
-        # "price",
         "quantity",
     )
 

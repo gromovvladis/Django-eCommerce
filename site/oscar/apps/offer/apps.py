@@ -1,4 +1,5 @@
 from django.urls import path, re_path
+
 from oscar.core.application import OscarConfig
 from oscar.core.loading import get_class
 
@@ -22,6 +23,8 @@ class OfferConfig(OscarConfig):
         urls = [
             path("", self.list_view.as_view(), name="list"),
             re_path(r"^(?P<slug>[\w-]+)/$", self.detail_view.as_view(), name="detail"),
-            re_path(r"^(?P<slug>[\w-]+)/upsell/$", self.upsell_view.as_view(), name="upsell"),
+            re_path(
+                r"^(?P<slug>[\w-]+)/upsell/$", self.upsell_view.as_view(), name="upsell"
+            ),
         ]
         return self.post_process_urls(urls)

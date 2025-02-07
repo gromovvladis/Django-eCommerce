@@ -1,14 +1,16 @@
 from decimal import ROUND_UP
 from decimal import Decimal as D
 
-from oscar.core.loading import get_classes, get_model
-from oscar.templatetags.currency_filters import currency
 from django.utils.translation import ngettext
 
-Condition = get_model("offer", "Condition")
+from oscar.core.loading import get_classes, get_model
+from oscar.templatetags.currency_filters import currency
+
 range_anchor, unit_price = get_classes("offer.utils", ["range_anchor", "unit_price"])
 
 __all__ = ["CountCondition", "CoverageCondition", "ValueCondition"]
+
+Condition = get_model("offer", "Condition")
 
 
 class CountCondition(Condition):
@@ -17,7 +19,9 @@ class CountCondition(Condition):
     basket.
     """
 
-    _description = "Корзина включает в себя %(count)d товар(ов) из диапазона - %(range)s"
+    _description = (
+        "Корзина включает в себя %(count)d товар(ов) из диапазона - %(range)s"
+    )
 
     @property
     def name(self):
@@ -285,7 +289,9 @@ class ValueCondition(Condition):
             #     "value": currency(delta, basket.currency),
             #     "range": self.range,
             # }
-            return ("Купите еще на %(value)s товаров из списка ниже для участия в акции") % {
+            return (
+                "Купите еще на %(value)s товаров из списка ниже для участия в акции"
+            ) % {
                 "value": currency(delta, basket.currency),
                 "range": self.range,
             }

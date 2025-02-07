@@ -10,6 +10,7 @@ from rest_framework.permissions import AllowAny
 
 PaymentManager = get_class("payment.methods", "PaymentManager")
 Yoomoney = get_class("payment.methods", "Yoomoney")
+
 Source = get_model("payment", "Source")
 
 logger = logging.getLogger("oscar.payment")
@@ -62,4 +63,3 @@ logger = logging.getLogger("oscar.payment")
 
 #     def post(self, request, *args, **kwargs):
 #         pass
-

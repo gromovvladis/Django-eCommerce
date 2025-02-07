@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.db import models
+
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.utils import get_default_currency
 from oscar.models.fields import AutoSlugField

@@ -12,12 +12,22 @@ class CatalogueReviewsConfig(OscarConfig):
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
-        self.review_create_view = get_class("catalogue.reviews.views", "CreateProductReview")
-        self.review_list_view = get_class("catalogue.reviews.views", "ProductReviewList")
+        self.review_create_view = get_class(
+            "catalogue.reviews.views", "CreateProductReview"
+        )
+        self.review_list_view = get_class(
+            "catalogue.reviews.views", "ProductReviewList"
+        )
 
     def get_urls(self):
         urlpatterns = [
-            path("add/", login_required(self.review_create_view.as_view()), name="reviews-add"),
-            path("", login_required(self.review_list_view.as_view()), name="reviews-list"),
+            path(
+                "add/",
+                login_required(self.review_create_view.as_view()),
+                name="reviews-add",
+            ),
+            path(
+                "", login_required(self.review_list_view.as_view()), name="reviews-list"
+            ),
         ]
         return self.post_process_urls(urlpatterns)

@@ -8,6 +8,7 @@ from aiogram.exceptions import (
 
 from bot_loader import dp
 
+
 @dp.errors_handler()
 async def errors(update, exception):
     """
@@ -19,15 +20,15 @@ async def errors(update, exception):
     """
 
     if isinstance(exception, TelegramUnauthorizedError):
-        logging.exception(f'Unauthorized: {exception}')
+        logging.exception(f"Unauthorized: {exception}")
         return True
 
     if isinstance(exception, TelegramAPIError):
-        logging.exception(f'TelegramAPIError: {exception} \nUpdate: {update}')
+        logging.exception(f"TelegramAPIError: {exception} \nUpdate: {update}")
         return True
 
     if isinstance(exception, TelegramRetryAfter):
-        logging.exception(f'RetryAfter: {exception} \nUpdate: {update}')
+        logging.exception(f"RetryAfter: {exception} \nUpdate: {update}")
         return True
-    
-    logging.exception(f'Update: {update} \n{exception}')
+
+    logging.exception(f"Update: {update} \n{exception}")

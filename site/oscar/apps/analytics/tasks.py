@@ -51,7 +51,9 @@ def record_products_in_order_task(order_id):
     Записывает данные о товарах в заказе.
     """
     try:
-        order = Order.objects.prefetch_related("lines", "lines__product").get(id=order_id)
+        order = Order.objects.prefetch_related("lines", "lines__product").get(
+            id=order_id
+        )
         updates = [
             update_counter_task.s(
                 "ProductRecord",

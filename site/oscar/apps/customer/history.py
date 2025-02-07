@@ -1,8 +1,11 @@
 import json
+
 from django.conf import settings
+
 from oscar.core.loading import get_model
 
 Product = get_model("catalogue", "Product")
+
 
 class CustomerHistoryManager:
     cookie_name = settings.OSCAR_RECENTLY_VIEWED_COOKIE_NAME

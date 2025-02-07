@@ -1,5 +1,6 @@
 from collections import namedtuple
 from decimal import Decimal as D
+
 from django.db.models import Q, F
 
 from oscar.core.loading import get_class, get_model
@@ -290,9 +291,11 @@ class PricingPolicy(object):
         if not stockrecords:
             return UnavailablePrice()
 
-        first_child = product.children.order_by('-order').first()
-        stockrecord = next((sr for sr in stockrecords if sr.product == first_child), None)
-        
+        first_child = product.children.order_by("-order").first()
+        stockrecord = next(
+            (sr for sr in stockrecords if sr.product == first_child), None
+        )
+
         if stockrecord:
             return FixedPrice(
                 currency=stockrecord.price_currency,

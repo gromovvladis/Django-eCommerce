@@ -1,5 +1,6 @@
-from oscar.core.application import OscarConfig
 from django.urls import path
+
+from oscar.core.application import OscarConfig
 from oscar.core.loading import get_class
 
 

@@ -205,11 +205,16 @@ class Notification(models.Model):
     body = models.TextField()
 
     INBOX, ARCHIVE = "Inbox", "Archive"
-    location_choices = ((INBOX,"Входящие"), (ARCHIVE, "Архив"))
+    location_choices = ((INBOX, "Входящие"), (ARCHIVE, "Архив"))
     location = models.CharField(max_length=32, choices=location_choices, default=INBOX)
 
-    SUCCESS, INFO, WARNING, CANCELED  = "Success", "Info", "Warning", "Canceled"
-    status_choices = ((SUCCESS,"Успешно"), (INFO, "Инфо"), (WARNING, "Предупреждение"), (CANCELED, "Отмена"))
+    SUCCESS, INFO, WARNING, CANCELED = "Success", "Info", "Warning", "Canceled"
+    status_choices = (
+        (SUCCESS, "Успешно"),
+        (INFO, "Инфо"),
+        (WARNING, "Предупреждение"),
+        (CANCELED, "Отмена"),
+    )
     status = models.CharField(max_length=32, choices=status_choices, default=INFO)
 
     date_sent = models.DateTimeField(auto_now_add=True)
@@ -236,7 +241,9 @@ class Notification(models.Model):
 
 
 class WebPushSubscription(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(
+        AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
+    )
     endpoint = models.URLField()
     p256dh = models.TextField()
     auth = models.TextField()

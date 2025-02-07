@@ -25,7 +25,5 @@ class SmsConfig(OscarConfig):
             )
 
     def get_urls(self):
-        urls = [
-            path('', include('oscar.apps.sms_auth.api.urls'), name='sms_auth')
-        ]
+        urls = [path("", include("oscar.apps.sms_auth.api.urls"), name="sms_auth")]
         return self.post_process_urls(urls)

@@ -8,12 +8,13 @@ from django.utils.functional import SimpleLazyObject, empty
 from oscar.core.loading import get_class, get_model
 
 Applicator = get_class("offer.applicator", "Applicator")
-Basket = get_model("basket", "basket")
 Selector = get_class("store.strategy", "Selector")
 
 selector = Selector()
 
+Basket = get_model("basket", "basket")
 store = namedtuple("store", ["id"])
+
 
 class BasketMiddleware:
     def __init__(self, get_response):
@@ -23,12 +24,12 @@ class BasketMiddleware:
         # Keep track of cookies that need to be deleted (which can only be done
         # when we're processing the response instance).
         request.cookies_to_delete = []
-        
+
         # We lazily load the basket so use a private variable to hold the
         # cached instance.
         request._basket_cache = None
         request._store_cache = None
-    
+
         # Load stock/price strategy and assign to request (it will later be
         # assigned to the basket too).
         strategy = selector.strategy(request=request, user=request.user)
@@ -39,9 +40,9 @@ class BasketMiddleware:
                 parsed_url = urlparse(url)
                 return parsed_url.netloc
 
-            if 'referral_source' not in request.COOKIES:
-                return extract_domain(request.META.get('HTTP_REFERER'))
-            
+            if "referral_source" not in request.COOKIES:
+                return extract_domain(request.META.get("HTTP_REFERER"))
+
         _referral_source = SimpleLazyObject(load_referral_source)
         if _referral_source:
             request._referral_source = _referral_source
@@ -95,9 +96,9 @@ class BasketMiddleware:
         for cookie_key in cookies_to_delete:
             response.delete_cookie(cookie_key)
 
-        if hasattr(request, '_referral_source') and request._referral_source:
+        if hasattr(request, "_referral_source") and request._referral_source:
             response.set_cookie(
-                'referral_source',
+                "referral_source",
                 request._referral_source,
                 max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
                 secure=settings.OSCAR_BASKET_COOKIE_SECURE,
@@ -186,8 +187,7 @@ class BasketMiddleware:
             # that they have just signed in and we need to merge their cookie
             # basket into their user basket, then delete the cookie.
             try:
-                # basket = manager.get_or_create(owner=request.user)
-                basket, is_created = manager.get_or_create(owner=request.user)
+                basket, _ = manager.get_or_create(owner=request.user)
             except Basket.MultipleObjectsReturned:
                 # Not sure quite how we end up here with multiple baskets.
                 # We merge them and create a fresh one

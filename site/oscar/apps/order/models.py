@@ -17,7 +17,6 @@ from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_model
 from oscar.core.utils import get_default_currency
 from oscar.apps.order.signals import order_line_status_changed, order_status_changed
-
 from . import exceptions
 
 logger = logging.getLogger("oscar.order")
@@ -39,7 +38,13 @@ class Order(models.Model):
         db_index=True,
     )
     # We track the site that each order is placed within
-    site = models.CharField(verbose_name="Источник заказа", null=True, blank=True, db_index=True, max_length=128)
+    site = models.CharField(
+        verbose_name="Источник заказа",
+        null=True,
+        blank=True,
+        db_index=True,
+        max_length=128,
+    )
     basket = models.ForeignKey(
         "basket.Basket",
         verbose_name="Корзина",
@@ -69,12 +74,8 @@ class Order(models.Model):
     # Total price looks like it could be calculated by adding up the
     # prices of the associated lines, but in some circumstances extra
     # order-level charges are added and so we need to store it separately
-    currency = models.CharField(
-        "Валюта", max_length=12, default=get_default_currency
-    )
-    total = models.DecimalField(
-        "Сумма заказа", decimal_places=2, max_digits=12
-    )
+    currency = models.CharField("Валюта", max_length=12, default=get_default_currency)
+    total = models.DecimalField("Сумма заказа", decimal_places=2, max_digits=12)
     # Shipping charges
     shipping = models.DecimalField(
         "Плата за доставку", decimal_places=2, max_digits=12, default=0
@@ -88,7 +89,9 @@ class Order(models.Model):
         verbose_name="Адрес доставки",
         on_delete=models.SET_NULL,
     )
-    shipping_method = models.CharField("Способ доставки", max_length=128, blank=True, db_index=True)
+    shipping_method = models.CharField(
+        "Способ доставки", max_length=128, blank=True, db_index=True
+    )
 
     # Use this field to indicate that an order is on hold / awaiting payment
     status = models.CharField("Статус", max_length=100, blank=True, db_index=True)
@@ -158,17 +161,17 @@ class Order(models.Model):
                 if new_line_status in line.available_statuses():
                     line.status = new_line_status
                     line.save()
-        
+
         if new_status in settings.ORDER_FINAL_STATUSES:
             self.date_finish = timezone.now()
-        
+
         if new_status == settings.OSCAR_SUCCESS_ORDER_STATUS:
             self.consume_stock_allocations()
         elif new_status == settings.OSCAR_FAIL_ORDER_STATUS:
             self.cancel_stock_allocations()
-                
+
         self.save()
-        
+
         # Send signal for handling status changed
         order_status_changed.send(
             sender=self,
@@ -208,7 +211,7 @@ class Order(models.Model):
     def _create_order_status_change(self, old_status, new_status):
         # Not setting the status on the order as that should be handled before
         self.status_changes.create(old_status=old_status, new_status=new_status)
-        
+
     def open(self):
         self.is_open = True
         self.save()
@@ -232,12 +235,12 @@ class Order(models.Model):
             return not self.has_review_by(user)
         else:
             return False
-        
+
     @property
     def next_status(self):
         pipeline = (
-            settings.PICKUP_NEXT_STATUS_PIPELINE 
-            if self.shipping_method == "Самовывоз" 
+            settings.PICKUP_NEXT_STATUS_PIPELINE
+            if self.shipping_method == "Самовывоз"
             else settings.DELIVERY_NEXT_STATUS_PIPELINE
         )
         return pipeline.get(self.status, None)
@@ -249,7 +252,7 @@ class Order(models.Model):
         """
         result = self.lines.aggregate(total=Sum("line_price_before_discounts"))
         return result["total"]
-    
+
     @property
     def is_online(self):
         """
@@ -301,7 +304,9 @@ class Order(models.Model):
         """
         Returns the number of items in this order.
         """
-        return ", ".join(f"{line.get_full_name()} ({line.quantity})" for line in self.lines.all())
+        return ", ".join(
+            f"{line.get_full_name()} ({line.quantity})" for line in self.lines.all()
+        )
 
     @property
     def shipping_status(self):
@@ -395,12 +400,12 @@ class Order(models.Model):
     def email(self):
         if self.user:
             return self.user.email
-        
+
     @property
     def client_note(self):
         note = self.notes.get(note_type="Комментарий к заказу")
         if note:
-            return note.message   
+            return note.message
 
     @property
     def basket_discounts(self):
@@ -465,18 +470,32 @@ class OrderNote(models.Model):
     # These are sometimes programatically generated so don't need a
     # user everytime
     user = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, verbose_name="Пользователь"
+        AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        verbose_name="Пользователь",
     )
 
     # We allow notes to be classified although this isn't always needed
-    USER, MANAGER, STAFF, SYSTEM = "Комментарий к заказу", "Заметка менеджера", "Заметка персоналу", "Системная заметка"
+    USER, MANAGER, STAFF, SYSTEM = (
+        "Комментарий к заказу",
+        "Заметка менеджера",
+        "Заметка персоналу",
+        "Системная заметка",
+    )
     TYPE_CHOICES = (
         (USER, "Комментарий к заказу"),
         (MANAGER, "Заметка менеджера"),
         (STAFF, "Заметка персоналу"),
         (SYSTEM, "Системная заметка"),
     )
-    note_type = models.CharField("Тип примечания", choices=TYPE_CHOICES, default=MANAGER, max_length=30, blank=True)
+    note_type = models.CharField(
+        "Тип примечания",
+        choices=TYPE_CHOICES,
+        default=MANAGER,
+        max_length=30,
+        blank=True,
+    )
 
     message = models.TextField("Сообщение")
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
@@ -521,9 +540,7 @@ class OrderStatusChange(models.Model):
         ordering = ["-date_created"]
 
     def __str__(self):
-        return (
-            "%(order)s изменил статус с %(old_status)s на %(new_status)s"
-        ) % {
+        return ("%(order)s изменил статус с %(old_status)s на %(new_status)s") % {
             "order": self.order,
             "old_status": self.old_status,
             "new_status": self.new_status,
@@ -547,7 +564,9 @@ class CommunicationEvent(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Тип события",
     )
-    date_created = models.DateTimeField("Дата создания", auto_now_add=True, db_index=True)
+    date_created = models.DateTimeField(
+        "Дата создания", auto_now_add=True, db_index=True
+    )
 
     class Meta:
         app_label = "order"
@@ -561,7 +580,9 @@ class CommunicationEvent(models.Model):
             "number": self.order.number,
         }
 
+
 # LINES
+
 
 class Line(models.Model):
     """
@@ -628,9 +649,7 @@ class Line(models.Model):
 
     # Price information (these fields are actually redundant as the information
     # can be calculated from the LinePrice models
-    line_price = models.DecimalField(
-        "Цена", decimal_places=2, max_digits=12
-    )
+    line_price = models.DecimalField("Цена", decimal_places=2, max_digits=12)
 
     # Price information before discounts are applied
     line_price_before_discounts = models.DecimalField(
@@ -646,9 +665,7 @@ class Line(models.Model):
         null=True,
     )
 
-    tax_code = models.CharField(
-        "Налоговый код", max_length=64, blank=True, null=True
-    )
+    tax_code = models.CharField("Налоговый код", max_length=64, blank=True, null=True)
 
     # Stores often want to assign some status to each line to help with their
     # own business processes.
@@ -743,13 +760,15 @@ class Line(models.Model):
     @property
     def options(self):
         ops = [
-            f"{attribute.option.name}: {', '.join(map(str, attribute.value))}" 
-            if isinstance(attribute.value, list) 
-            else f"{attribute.option.name}: {attribute.value}"
+            (
+                f"{attribute.option.name}: {', '.join(map(str, attribute.value))}"
+                if isinstance(attribute.value, list)
+                else f"{attribute.option.name}: {attribute.value}"
+            )
             for attribute in self.attributes.filter(option__isnull=False)
         ]
         return "\n".join(ops) if ops else ""
-    
+
     @property
     def additions(self):
         additions = [
@@ -758,8 +777,8 @@ class Line(models.Model):
             if attribute.value > 0
         ]
         return ", ".join(additions) if additions else ""
-    
-    @property 
+
+    @property
     def variants(self):
         return self.product.get_variants()
 
@@ -857,7 +876,7 @@ class Line(models.Model):
                     "quantity": event_quantity,
                 }
         return status_map
-    
+
     @property
     def missing_image(self):
         """
@@ -901,11 +920,9 @@ class Line(models.Model):
         Test if this line can be re-ordered using the passed strategy and
         basket
         """
-        
+
         if not self.product:
-            return False, (
-                ("'%(name)s' больше недоступно") % {"name": self.name}
-            )
+            return False, (("'%(name)s' больше недоступно") % {"name": self.name})
 
         try:
             # переделай. если несолько товаров с разными параметрами но один товар типа товар2, то он добавит каждого по 1 если доступен всего 1, получается всего будет 2, изза этого ощиьки в форме
@@ -984,15 +1001,11 @@ class LinePrice(models.Model):
         verbose_name="Позиция",
     )
     quantity = models.PositiveIntegerField("Количество", default=1)
-    price = models.DecimalField(
-        "Цена", decimal_places=2, max_digits=12
-    )
+    price = models.DecimalField("Цена", decimal_places=2, max_digits=12)
     shipping = models.DecimalField(
         "Доставка", decimal_places=2, max_digits=12, default=0
     )
-    tax_code = models.CharField(
-        "Налоговый код", max_length=64, blank=True, null=True
-    )
+    tax_code = models.CharField("Налоговый код", max_length=64, blank=True, null=True)
 
     class Meta:
         app_label = "order"
@@ -1007,7 +1020,9 @@ class LinePrice(models.Model):
             "price": self.price,
         }
 
+
 # PAYMENT EVENTS
+
 
 class PaymentEventType(models.Model):
     """
@@ -1081,7 +1096,7 @@ class PaymentEvent(models.Model):
         return self.lines.all().count()
 
 
-class PaymentEventQuantity(models.Model):   
+class PaymentEventQuantity(models.Model):
     """
     A "through" model linking lines to payment events
     """
@@ -1106,7 +1121,9 @@ class PaymentEventQuantity(models.Model):
         verbose_name_plural = "События платежей - Количества"
         unique_together = ("event", "line")
 
+
 # SHIPPING EVENTS
+
 
 class ShippingEvent(models.Model):
     """
@@ -1223,7 +1240,9 @@ class ShippingEventType(models.Model):
     def __str__(self):
         return self.name
 
+
 # DISCOUNTS
+
 
 class OrderDiscount(models.Model):
     """
@@ -1261,13 +1280,9 @@ class OrderDiscount(models.Model):
         "Название предложения", max_length=128, db_index=True, blank=True
     )
     voucher_id = models.PositiveIntegerField("ID Промокода", blank=True, null=True)
-    voucher_code = models.CharField(
-        "Код", max_length=128, db_index=True, blank=True
-    )
+    voucher_code = models.CharField("Код", max_length=128, db_index=True, blank=True)
     frequency = models.PositiveIntegerField("Количество применений", null=True)
-    amount = models.DecimalField(
-        "Сумма", decimal_places=2, max_digits=12, default=0
-    )
+    amount = models.DecimalField("Сумма", decimal_places=2, max_digits=12, default=0)
 
     # Post-order offer applications can return a message to indicate what
     # action was taken after the order was placed.
@@ -1330,7 +1345,7 @@ class OrderDiscount(models.Model):
         if self.voucher_code:
             return self.voucher_code
         return self.offer_name or ""
-    
+
 
 class OrderLineDiscount(models.Model):
     line = models.ForeignKey(
@@ -1371,9 +1386,7 @@ class Surcharge(models.Model):
     money = models.DecimalField(
         "Сумма дополнительных сборов", decimal_places=2, max_digits=12, default=0
     )
-    tax_code = models.CharField(
-        "Налоговый код", max_length=64, blank=True, null=True
-    )
+    tax_code = models.CharField("Налоговый код", max_length=64, blank=True, null=True)
 
     class Meta:
         app_label = "order"

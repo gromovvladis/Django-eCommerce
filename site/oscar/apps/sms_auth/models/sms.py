@@ -1,8 +1,8 @@
+from phonenumber_field.modelfields import PhoneNumberField
+
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-
-from phonenumber_field.modelfields import PhoneNumberField
 
 from ..utils import random_code, valid_to, resend_at
 from ..conf import conf
@@ -34,9 +34,7 @@ class PhoneCode(models.Model):
     """
 
     phone_number = PhoneNumberField(unique=True)
-    owner = models.ForeignKey(get_user_model(),
-                              null=True,
-                              on_delete=models.CASCADE)
+    owner = models.ForeignKey(get_user_model(), null=True, on_delete=models.CASCADE)
     code = models.PositiveIntegerField(default=random_code)
     valid_to = models.DateTimeField(default=valid_to)
     resend_at = models.DateTimeField(default=resend_at)
@@ -56,14 +54,14 @@ class PhoneCode(models.Model):
     @property
     def is_allow(self):
         return timezone.now() >= self.valid_to
-    
+
     @property
     def is_resend_allow(self):
         return timezone.now() >= self.resend_at
 
     @property
     def message(self) -> str:
-        return  " ".join((str(conf.SMS_AUTH_MESSAGE) , str(self.code)))
+        return " ".join((str(conf.SMS_AUTH_MESSAGE), str(self.code)))
 
     def save(self, *args, **kwargs):
         from ..conf import conf

@@ -12,7 +12,7 @@ store_router = Router()
 # ============= store ================
 
 
-@store_router.message(Command('stores'))
+@store_router.message(Command("stores"))
 async def stores(message: Message, state: FSMContext):
     if await check_staff_status(message, state):
         telegram_id = message.from_user.id

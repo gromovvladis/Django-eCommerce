@@ -1,6 +1,8 @@
 from typing import Protocol
 from smsaero import SmsAero
+
 from ..conf import conf
+
 
 def sms_decorator(func, to):
     from ..models import SMSMessage
@@ -8,9 +10,9 @@ def sms_decorator(func, to):
     def wrapper():
         result = func()
         if result:
-            cost = result.get('cost')
+            cost = result.get("cost")
             SMSMessage.objects.create(phone_number=to, cost=cost)
-            return 'secceded'
+            return "secceded"
 
     return wrapper
 
@@ -43,6 +45,7 @@ class SMSProvider:
 
 TYPE_SEND = 2
 
+
 class SmsAeroException(Exception):
     pass
 
@@ -63,7 +66,7 @@ class Smsaero(SMSProvider):
         signature = self.conf.SMS_PROVIDER_FROM
 
         if conf.SMS_DEBUG:
-            return {'cost': 12}
+            return {"cost": 12}
 
         api = SmsAero(
             email=self.conf.SMS_PROVIDER_LOGIN,
@@ -71,9 +74,9 @@ class Smsaero(SMSProvider):
         )
         res = api.send(
             number=self.to,
-            text=self.message, 
-            date_send=None, 
+            text=self.message,
+            date_send=None,
             callback_url=None,
         )
-        assert res.get('success'), res.get('message')
-        return res.get('data')
+        assert res.get("success"), res.get("message")
+        return res.get("data")

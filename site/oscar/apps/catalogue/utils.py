@@ -10,12 +10,12 @@ from django.core.files import File
 from django.db.transaction import atomic
 from PIL import Image
 
+from oscar.core.loading import get_model
 from oscar.apps.catalogue.exceptions import (
     IdenticalImageError,
     ImageImportError,
     InvalidImageArchive,
 )
-from oscar.core.loading import get_model
 
 Product = get_model("catalogue", "product")
 ProductImage = get_model("catalogue", "productimage")

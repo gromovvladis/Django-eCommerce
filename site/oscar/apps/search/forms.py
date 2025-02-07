@@ -1,8 +1,8 @@
 from collections import defaultdict
+from haystack.forms import FacetedSearchForm
+
 from django import forms
 from django.forms.widgets import Input
-
-from haystack.forms import FacetedSearchForm
 
 from oscar.core.loading import get_class
 

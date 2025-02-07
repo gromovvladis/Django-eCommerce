@@ -1,8 +1,8 @@
 from collections import defaultdict
+from treebeard.mp_tree import MP_NodeQuerySet
 
 from django.db import models
 from django.db.models.constants import LOOKUP_SEP
-from treebeard.mp_tree import MP_NodeQuerySet
 
 
 class AttributeFilter(dict):
@@ -100,10 +100,10 @@ class ProductQuerySet(models.query.QuerySet):
         return (
             self.select_related("product_class")
             # .annotate(
-                # has_product_class_options=Exists(product_class_options),
-                # has_product_options=Exists(product_options),
-                # has_product_class_additionals=Exists(product_class_additionals),
-                # has_product_additionals=Exists(product_additionals),
+            # has_product_class_options=Exists(product_class_options),
+            # has_product_options=Exists(product_options),
+            # has_product_class_additionals=Exists(product_class_additionals),
+            # has_product_additionals=Exists(product_additionals),
             # )
             .prefetch_related(
                 "children",
@@ -145,7 +145,7 @@ class CategoryQuerySet(MP_NodeQuerySet):
         Excludes non-public categories
         """
         return self.filter(is_public=True, ancestors_are_public=True)
-    
+
 
 class AdditionalQuerySet(MP_NodeQuerySet):
     def browsable(self):
@@ -153,7 +153,7 @@ class AdditionalQuerySet(MP_NodeQuerySet):
         Excludes non-public categories
         """
         return self.filter(is_public=True)
-    
+
 
 class AttributeQuerySet(MP_NodeQuerySet):
     def browsable(self):

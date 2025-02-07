@@ -10,12 +10,12 @@ from django.db import models
 from django.db.models import Sum
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
+from django.utils.functional import cached_property
 
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 from oscar.models.fields.slugfield import SlugField
-from django.utils.functional import cached_property
 
 OfferApplications = get_class("offer.results", "OfferApplications")
 Unavailable = get_class("store.availability", "Unavailable")
@@ -23,10 +23,12 @@ StockRequired = get_class("store.availability", "StockRequired")
 LineDiscountRegistry = get_class("basket.utils", "LineDiscountRegistry")
 OpenBasketManager = get_class("basket.managers", "OpenBasketManager")
 
+
 class Basket(models.Model):
     """
     Basket object
     """
+
     # Baskets can be anonymously owned - hence this field is nullable.  When a
     # anon user signs in, their two baskets are merged.
     owner = models.ForeignKey(
@@ -143,7 +145,12 @@ class Basket(models.Model):
         if self._lines is None:
             self._lines = (
                 self.lines.select_related("product", "stockrecord")
-                .prefetch_related("attributes", "product__images", "product__categories", "product__stockrecords")
+                .prefetch_related(
+                    "attributes",
+                    "product__images",
+                    "product__categories",
+                    "product__stockrecords",
+                )
                 .order_by(self._meta.pk.name)
             )
         return self._lines
@@ -151,8 +158,12 @@ class Basket(models.Model):
     def all_lines(self):
         if self._filtered_lines is None:
             store_id = self.store_id or settings.STORE_DEFAULT
-            self._filtered_lines = [line for line in self._all_lines() if line.product.stockrecords.filter(store_id=store_id).exists()]
-        return self._filtered_lines    
+            self._filtered_lines = [
+                line
+                for line in self._all_lines()
+                if line.product.stockrecords.filter(store_id=store_id).exists()
+            ]
+        return self._filtered_lines
 
     def max_allowed_quantity(self):
         """
@@ -165,7 +176,7 @@ class Basket(models.Model):
             max_allowed = basket_threshold - total_basket_quantity
             return max_allowed, basket_threshold
         return None, None
-    
+
     def is_quantity_allowed(self, qty, line=None):
         """
         Test whether the passed quantity of items can be added to the basket
@@ -198,8 +209,9 @@ class Basket(models.Model):
                 ) % {"max": line.purchase_info.availability.num_available}
 
         if max_allowed is not None and qty > max_allowed:
-            return False, ("Из-за технических ограничений мы не можем оформить заказ на"
-                           " более чем %(threshold)d товаров в одном заказе."
+            return False, (
+                "Из-за технических ограничений мы не можем оформить заказ на"
+                " более чем %(threshold)d товаров в одном заказе."
             ) % {"threshold": basket_threshold}
 
         return True, None
@@ -244,12 +256,17 @@ class Basket(models.Model):
             if line.stockrecord.store_id != self.store_id:
                 Store = get_model("store", "Store")
                 raise ValueError(
-                    (
-                        "Данный товар не доступен в %s, закажите его в %s"
+                    ("Данный товар не доступен в %s, закажите его в %s")
+                    % (
+                        Store.objects.get(store_id=self.store_id)
+                        .addresses.first()
+                        .line1,
+                        Store.objects.get(store_id=line.stockrecord.store_id)
+                        .addresses.first()
+                        .line1,
                     )
-                    % (Store.objects.get(store_id=self.store_id).addresses.first().line1, Store.objects.get(store_id=line.stockrecord.store_id).addresses.first().line1)
                 )
-            
+
     def add_product(self, product, quantity=1, options=None, additionals=None):
         """
         Add a product to the basket
@@ -272,7 +289,8 @@ class Basket(models.Model):
                 )
             for additional_dict in additionals:
                 line.attributes.create(
-                    additional=additional_dict["additional"], value=additional_dict["value"]
+                    additional=additional_dict["additional"],
+                    value=additional_dict["value"],
                 )
 
         else:
@@ -305,7 +323,6 @@ class Basket(models.Model):
 
     remove_product.alters_data = True
     add = remove_product
-
 
     def get_line(self, product, quantity=1, options=None, additionals=None):
         if options is None:
@@ -343,7 +360,9 @@ class Basket(models.Model):
 
         # Line reference is used to distinguish between variations of the same
         # product (eg T-shirts with different personalisations)
-        line_ref = self._create_line_reference(product, stock_info.stockrecord, options, additionals)
+        line_ref = self._create_line_reference(
+            product, stock_info.stockrecord, options, additionals
+        )
 
         # Determine price to store (if one exists).  It is only stored for
         # audit and sometimes caching.
@@ -361,7 +380,6 @@ class Basket(models.Model):
         )
 
         return line, created
-
 
     def applied_offers(self):
         """
@@ -473,7 +491,7 @@ class Basket(models.Model):
             if line.product.is_shipping_required:
                 return True
         return False
-    
+
     def change_basket_store(self, new_store_id):
         self.store_id = new_store_id
         self.save()
@@ -485,15 +503,19 @@ class Basket(models.Model):
 
     def _update_lines(self):
         for line in self.all_lines():
-            new_stockrecord = line.product.stockrecords.filter(store_id=self.store_id).first()
+            new_stockrecord = line.product.stockrecords.filter(
+                store_id=self.store_id
+            ).first()
             if new_stockrecord is not None:
                 line.stockrecord = new_stockrecord
-                line.line_reference = self._update_stockrecord(line.line_reference, new_stockrecord.id)
+                line.line_reference = self._update_stockrecord(
+                    line.line_reference, new_stockrecord.id
+                )
                 line.save()
 
     def _update_stockrecord(self, s: str, new: str) -> str:
-        return re.sub(r'^([^_]+)_([^_]+)', rf'\1_{new}', s)
-    
+        return re.sub(r"^([^_]+)_([^_]+)", rf"\1_{new}", s)
+
     def _create_line_reference(self, product, stockrecord, options, additionals):
         """
         Returns a reference string for a line based on the item
@@ -503,7 +525,7 @@ class Basket(models.Model):
 
         if not options and not additionals:
             return base
-            
+
         repr_list = []
 
         if options:
@@ -514,14 +536,17 @@ class Basket(models.Model):
 
         if additionals:
             repr_list += [
-                {"key": repr(additional["additional"]), "value": repr(additional["value"])}
+                {
+                    "key": repr(additional["additional"]),
+                    "value": repr(additional["value"]),
+                }
                 for additional in additionals
             ]
-        
+
         repr_list.sort(key=itemgetter("key"))
 
         return "%s_%s" % (base, zlib.crc32(repr(repr_list).encode("utf8")))
-    
+
     def _get_total(self, model_property):
         """
         For executing a named method on each line of the basket
@@ -547,14 +572,14 @@ class Basket(models.Model):
 
     @property
     def has_valid_lines(self):
-        """ 
+        """
         Test if this basket is empty
         """
         return self.id is not None and self.num_items > 0
-    
+
     @property
     def is_empty(self):
-        """ 
+        """
         Test if this basket is empty
         """
         return self.id is None or sum(line.quantity for line in self._all_lines()) == 0
@@ -652,12 +677,12 @@ class Basket(models.Model):
     def time_before_submit(self):
         if not self.date_submitted:
             return "Не отправлено"
-        
+
         delta = self.date_submitted - self.date_created
         days = delta.days
         hours, remainder = divmod(delta.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
-        
+
         if days > 0:
             return f"{days} дней, {hours} часов, {minutes} минут"
         elif hours > 0:
@@ -666,7 +691,7 @@ class Basket(models.Model):
             return f"{minutes} минут, {seconds} секунд"
         else:
             return f"{seconds} секунд"
-    
+
         # if not self.date_submitted:
         #     return None
         # return self.date_submitted - self.date_created
@@ -731,12 +756,17 @@ class Basket(models.Model):
             return quantity or 0
 
         return 0
-    
-    def line_quantity(self, product, stockrecord, options=None, ):
+
+    def line_quantity(
+        self,
+        product,
+        stockrecord,
+        options=None,
+    ):
         """
         Return the current quantity of a specific product and options
         """
-        
+
         ref = self._create_line_reference(product, stockrecord, options)
         try:
             return self.lines.get(line_reference=ref).quantity
@@ -796,9 +826,7 @@ class Line(models.Model):
     price_currency = models.CharField(
         "Валюта", max_length=12, default=get_default_currency
     )
-    tax_code = models.CharField(
-        "Налоговый код", max_length=64, blank=True, null=True
-    )
+    tax_code = models.CharField("Налоговый код", max_length=64, blank=True, null=True)
 
     # Track date of first addition
     date_created = models.DateTimeField(
@@ -869,15 +897,11 @@ class Line(models.Model):
         """
         prices = []
         if not self.discount_value:
-            prices.append(
-                (self.unit_price, self.quantity)
-            )
+            prices.append((self.unit_price, self.quantity))
         else:
             # Need to split the discount among the affected quantity
             # of products.
-            item_discount = self.discount_value / int(
-                self.discounts.num_consumed()
-            )
+            item_discount = self.discount_value / int(self.discounts.num_consumed())
             prices.append(
                 (
                     self.unit_price - item_discount,
@@ -913,7 +937,7 @@ class Line(models.Model):
         return self.quantity_without_offer_discount(
             offer
         ) + self.quantity_with_offer_discount(offer)
-    
+
     def get_warning(self):
         """
         Return a warning message about this basket line if one is applicable
@@ -926,7 +950,9 @@ class Line(models.Model):
             self.critical_warning = True
             return msg
         elif isinstance(self.purchase_info.availability, StockRequired):
-            available, msg = self.purchase_info.availability.is_purchase_permitted(self.quantity)
+            available, msg = self.purchase_info.availability.is_purchase_permitted(
+                self.quantity
+            )
             if not available:
                 self.warning = msg
                 self.critical_warning = True
@@ -935,7 +961,7 @@ class Line(models.Model):
                     self.quantity = max_quantity
                     self.critical_warning = False
                     self.save()
-                
+
                 return msg
 
     def get_options(self):
@@ -946,7 +972,7 @@ class Line(models.Model):
                     ops.append(attribute)
 
         return ops
-    
+
     def get_additions(self):
         return self.attributes.filter(
             additional__isnull=False,
@@ -954,7 +980,7 @@ class Line(models.Model):
             additional__stores__id=self.basket.store_id,
             value__gt=0,
         ).distinct()
-    
+
     def get_full_name(self):
         if self.product:
             name_parts = [
@@ -1004,7 +1030,7 @@ class Line(models.Model):
         The price to use for offer calculations
         """
         return self.purchase_info.price.effective_price
-    
+
     @property
     def unit_price(self):
         if self._cached_unit_price is None:
@@ -1022,7 +1048,7 @@ class Line(models.Model):
     @property
     def line_price_incl_discounts(self):
         _discounts = self.discounts.total
-        
+
         if self.line_price is not None and _discounts:
             return max(0, self.line_price - _discounts)
 
@@ -1037,15 +1063,18 @@ class Line(models.Model):
     def name(self):
         d = smart_str(self.product)
         return d
-    
+
     @property
     def options(self):
         return "\n".join(
-            f"{attr.option.name}: {', '.join(map(str, attr.value))}" if isinstance(attr.value, list)
-            else f"{attr.option.name}: {attr.value}"
+            (
+                f"{attr.option.name}: {', '.join(map(str, attr.value))}"
+                if isinstance(attr.value, list)
+                else f"{attr.option.name}: {attr.value}"
+            )
             for attr in self.attributes.filter(option__isnull=False)
         )
-    
+
     @property
     def additions(self):
         additions = self.attributes.filter(
@@ -1054,7 +1083,9 @@ class Line(models.Model):
             additional__stores__id=self.basket.store_id,
             value__gt=0,
         ).distinct()
-        return ", ".join(f"{attr.additional.name} ({attr.value} шт)" for attr in additions)
+        return ", ".join(
+            f"{attr.additional.name} ({attr.value} шт)" for attr in additions
+        )
 
     @property
     def additions_total(self):
@@ -1070,11 +1101,11 @@ class Line(models.Model):
             )
         )
 
-    @property 
+    @property
     def variants(self):
         return self.product.get_variants()
-    
-    @property 
+
+    @property
     def old_price(self):
         old_price = None
         if self.stockrecord.old_price:
@@ -1103,7 +1134,9 @@ class LineAttribute(models.Model):
         "catalogue.Option", on_delete=models.CASCADE, verbose_name="Опция", null=True
     )
     additional = models.ForeignKey(
-        "catalogue.Additional", on_delete=models.CASCADE, verbose_name="Дополнительный товар"
+        "catalogue.Additional",
+        on_delete=models.CASCADE,
+        verbose_name="Дополнительный товар",
     )
 
     value = models.JSONField("Значение", encoder=DjangoJSONEncoder)
