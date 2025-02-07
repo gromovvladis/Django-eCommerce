@@ -102,11 +102,7 @@ class CRMStoreListView(CRMTablesMixin):
                     # Партнер существует: проверяем совпадение полей
                     data_item["is_created"] = True
                     # Проверка совпадения полей
-                    address_matches = address == (
-                        model_instance.primary_address.line1
-                        if model_instance.primary_address
-                        else None
-                    )
+                    address_matches = address == model_instance.primary_address
                     data_item["is_valid"] = (
                         model_instance.name == name and address_matches
                     )

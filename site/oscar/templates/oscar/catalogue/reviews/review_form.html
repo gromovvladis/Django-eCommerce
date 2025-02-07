@@ -71,7 +71,7 @@
                                                         class="dish-order__name router-link-exact-active router-link-active"
                                                         data-id="dish-order-link"> 
                                                         {% if product and product.is_public %}
-                                                            <a href="{{ line.product.get_absolute_url }}">{{ product.get_name }}</a>
+                                                            <a href="{{ product.get_absolute_url }}">{{ product.get_name }}</a>
                                                         {% else %}
                                                             <em>{{ product.get_name }} (Временно недоступен)</em>
                                                         {% endif %}

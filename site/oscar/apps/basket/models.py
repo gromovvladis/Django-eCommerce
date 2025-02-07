@@ -956,13 +956,16 @@ class Line(models.Model):
         ).distinct()
     
     def get_full_name(self):
-        name_parts = [
-            self.product.get_name() if self.product else None,
-            self.variants or None,
-            self.options or None,
-            self.additions or None,
-        ]
-        return " | ".join(filter(None, name_parts))
+        if self.product:
+            name_parts = [
+                self.product.get_name(),
+                self.variants or None,
+                self.options or None,
+                self.additions or None,
+            ]
+            return " | ".join(filter(None, name_parts))
+        else:
+            return self.name
 
     # ==========
     # Properties

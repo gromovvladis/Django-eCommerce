@@ -53,9 +53,9 @@
         <div class="mb-4">
             {% for line in order.lines.all %}
                 {% with product=line.product %}
-                    {% if product %}
-                        <div class="dish-order d-flex fill-width">
-                            <div class="dish-order__picture">
+                    <div class="dish-order d-flex fill-width">
+                        <div class="dish-order__picture">
+                            {% if product %}
                                 <a href="{{ product.get_absolute_url }}" aria-current="page"
                                     class="d-block router-link-exact-active router-link-active"
                                     data-id="dish-order-image-link">
@@ -70,17 +70,38 @@
                                         </div>
                                     </div>
                                 </a>
-                            </div>
-                            <div class="dish-order__content d-flex flex-column fill-width ml-1">
-                                <div class="dish-order__title s d-flex align-start fill-width">
-                                    <div class="dish-order__name-wrapper d-flex fill-width">
-                                        <a href="{{ product.get_absolute_url }}" aria-current="page"
-                                            class="dish-order__name router-link-exact-active router-link-active"
-                                            data-id="dish-order-link"> 
-                                            {{ line.name }} ({{ line.quantity }} шт.)
-                                        </a>
+                            {% else %}
+                                <span aria-current="page"
+                                class="d-block router-link-exact-active router-link-active"
+                                data-id="dish-order-image-link">
+                                    <div class="dish-image fill-width pos-relative">
+                                        <div class="image">
+                                            <div class="image__inner" style="padding-bottom: 72.072%;">
+                                                {% with image=line.missing_image %}
+                                                    {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
+                                                    <img src="{{ thumb.url }}" alt="{{ line.name }}" loading="lazy"/>
+                                                {% endwith %}
+                                            </div>
+                                        </div>
                                     </div>
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="dish-order__content d-flex flex-column fill-width ml-1">
+                            <div class="dish-order__title s d-flex align-start fill-width">
+                                <div class="dish-order__name-wrapper d-flex fill-width">
+                                    {% if product %}
+                                        <a href="{{ product.get_absolute_url }}" aria-current="page"
+                                        class="dish-order__name router-link-exact-active router-link-active"
+                                        data-id="dish-order-link">
+                                        {{ line.name }} - {{ line.quantity }} {{ product.product_class.measure_name }}
+                                        </a><br>
+                                    {% else %}
+                                        <span>{{ line.name }} - {{ line.quantity }} шт.</span><br>
+                                    {% endif %}
                                 </div>
+                            </div>
+                            {% if product %}
                                 <div class="dish-order__toppings d-flex fill-width">
                                     <div class="d-flex flex-wrap" data-id="dish-order-toppings">
                                         <span class="d-flex">{{ line.variants }}</span>
@@ -88,25 +109,23 @@
                                         <span class="d-flex">{{ line.additions }}</span>
                                     </div>
                                 </div>
-                                {% if order.status == "Завершён" %}
-                                    {% if product|is_review_permitted:user %}
-                                        <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}">Оценить</a>
-                                    {% endif %}
+                            {% endif %}
+                            {% if order.status == "Завершён" %}
+                                {% if product and product|is_review_permitted:user %}
+                                    <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}">Оценить</a>
                                 {% endif %}
+                            {% endif %}
+                            <div role="separator" class="spacer"></div>
+                            <div class="d-flex fill-width mt-1 pos-relative align-center">
                                 <div role="separator" class="spacer"></div>
-                                <div class="d-flex fill-width mt-1 pos-relative align-center">
-                                    <div role="separator" class="spacer"></div>
-                                    <span class="prices d-flex flex-column align-start">
-                                        <span class="prices__price no-wrap">
-                                            {{ line.unit_price|currency:order.currency }}
-                                        </span>
+                                <span class="prices d-flex flex-column align-start">
+                                    <span class="prices__price no-wrap">
+                                        {{ line.unit_price|currency:order.currency }}
                                     </span>
-                                </div>
+                                </span>
                             </div>
                         </div>
-                    {% else %}
-                        <p>{{ line.description }}</p>
-                    {% endif %}
+                    </div>
                 {% endwith %}
             {% endfor %}
             {% include 'oscar/customer/order/order_totals.html' %}

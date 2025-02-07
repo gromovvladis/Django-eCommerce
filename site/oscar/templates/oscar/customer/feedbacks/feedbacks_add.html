@@ -58,6 +58,11 @@
                                                                                 <img class="img-thumbnail" src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy"/>
                                                                             {% endif %}
                                                                         {% endwith %}
+                                                                    {% else %}
+                                                                        {% with image=line.missing_image %}
+                                                                            {% oscar_thumbnail image.original "100x100" upscale=False as thumb %}
+                                                                            <img src="{{ thumb.url }}" alt="{{ line.name }}" loading="lazy"/>
+                                                                        {% endwith %}
                                                                     {% endif %}
                                                                 </div>
                                                             </div>
@@ -67,40 +72,42 @@
                                                 <div class="dish-order__content d-flex flex-column fill-width ml-1">
                                                     <div class="dish-order__title s d-flex align-start fill-width">
                                                         <div class="dish-order__name-wrapper d-flex fill-width">
-                                                            <a href="{{ product.get_absolute_url }}" aria-current="page"
-                                                                class="dish-order__name router-link-exact-active router-link-active"
-                                                                data-id="dish-order-link"> 
-                                                                {% if product and product.is_public %}
-                                                                    <a href="{{ line.product.get_absolute_url }}">{{ product.get_name }}</a>
-                                                                {% else %}
-                                                                    <em>{{ product.get_name }} (Временно недоступен)</em>
-                                                                {% endif %}
-                                                            </a>
+                                                            {% if product and product.is_public %}
+                                                                <a href="{{ product.get_absolute_url }}" aria-current="page"
+                                                                    class="dish-order__name router-link-exact-active router-link-active"
+                                                                    data-id="dish-order-link">
+                                                                    {{ product.get_name }}
+                                                                </a>
+                                                            {% else %}
+                                                                <span>{{ line.name }} (Временно недоступен)</span>
+                                                            {% endif %}
                                                         </div>
                                                         <span class="dish-order__name d-flex shrink pd-0">
                                                             ( {{ line.quantity }} шт. )
                                                         </span>
                                                     </div>
-                                                    <div class="dish-order__toppings d-flex fill-width">
-                                                        <div class="d-flex flex-wrap" data-id="dish-order-toppings">
-                                                            <span class="d-flex">{{ line.variants }}</span>
-                                                            <span class="d-flex">{{ line.options }}</span>
-                                                            <span class="d-flex">{{ line.additions }}</span>
-                                                        </div>
-                                                    </div>  
-                                                    {% if product|is_review_permitted:user %}
-                                                        <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}">Оценить</a>
-                                                    {% endif %}
-                                                    <div role="separator" class="spacer"></div>
-                                                    <div class="d-flex fill-width mt-1 pos-relative align-center">
+                                                    {% if product %}
+                                                        <div class="dish-order__toppings d-flex fill-width">
+                                                            <div class="d-flex flex-wrap" data-id="dish-order-toppings">
+                                                                <span class="d-flex">{{ line.variants }}</span>
+                                                                <span class="d-flex">{{ line.options }}</span>
+                                                                <span class="d-flex">{{ line.additions }}</span>
+                                                            </div>
+                                                        </div>  
+                                                        {% if product|is_review_permitted:user %}
+                                                            <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}">Оценить</a>
+                                                        {% endif %}
                                                         <div role="separator" class="spacer"></div>
-                                                        <span class="prices d-flex flex-column align-start">
-                                                            <span class="prices__price no-wrap">
-                                                                {% purchase_info_for_product request product as session %}
-                                                                {% include "oscar/catalogue/partials/product_price.html" %}
+                                                        <div class="d-flex fill-width mt-1 pos-relative align-center">
+                                                            <div role="separator" class="spacer"></div>
+                                                            <span class="prices d-flex flex-column align-start">
+                                                                <span class="prices__price no-wrap">
+                                                                    {% purchase_info_for_product request product as session %}
+                                                                    {% include "oscar/catalogue/partials/product_price.html" %}
+                                                                </span>
                                                             </span>
-                                                        </span>
-                                                    </div>
+                                                        </div>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </div>  
@@ -152,9 +159,9 @@
     </div>
 {% endblock tabcontent %}
 
-{% block compress %}
+{% block extrascripts %}
     {{ block.super }}
     {% compress js inline %}
-        <script src="{% static "js/frontend/profile/profile-links.js" %}"></script>
+        <script src="{% static "js/frontend/profile/profile-links.js" %}" defer></script>
     {% endcompress %}
 {% endblock %}

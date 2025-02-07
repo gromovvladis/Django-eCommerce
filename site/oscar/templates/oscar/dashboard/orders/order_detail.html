@@ -232,12 +232,17 @@
                                             <input type="checkbox" name="selected_line" value="{{ line.id }}"/>
                                         </td>
                                         <td class="image">
-                                            {% with image=line.product.primary_image %}
-                                                {% oscar_thumbnail image.original "80x80" upscale=False as thumb %}
-                                                <a href="#" data-original="{{ image.original.url }}" class="sub-image">
-                                                    <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.product.get_name }}{% endif %}" loading="lazy">
-                                                </a>
-                                            {% endwith %}
+                                            {% if line.product %}
+                                                {% with image=line.product.primary_image %}
+                                                    {% oscar_thumbnail image.original "90x90" upscale=False as thumb %}
+                                                    <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}" loading="lazy">
+                                                {% endwith %}
+                                            {% else %}              
+                                                {% with image=line.missing_image %}
+                                                    {% oscar_thumbnail image.original "90x90" upscale=False as thumb %}
+                                                    <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}" loading="lazy">
+                                                {% endwith %}
+                                            {% endif %}
                                         </td>
                                         <td class="title">
                                             <div class="d-flex align-items-center">
@@ -250,14 +255,16 @@
                                                     {{ line.name }}
                                                 {% endif %}
                                             </div>
-                                            <div class="d-flex flex-column">
-                                                <span>{{ line.options }}</span>
-                                                <span>{{ line.variants }}</span>
-                                                <span>{{ line.additions }}</span>
-                                                <span class="text-muted">
-                                                    Артикул: {{ line.article|default:"-" }}
-                                                </span>
-                                            </div>
+                                            {% if line.product %}
+                                                <div class="d-flex flex-column">
+                                                    <span>{{ line.options }}</span>
+                                                    <span>{{ line.variants }}</span>
+                                                    <span>{{ line.additions }}</span>
+                                                    <span class="text-muted">
+                                                        Артикул: {{ line.article|default:"-" }}
+                                                    </span>
+                                                </div>
+                                            {% endif %}
                                             <span class="badge badge-info my-1 d-md-none">
                                                 {{ line.quantity }} шт.
                                             </span>

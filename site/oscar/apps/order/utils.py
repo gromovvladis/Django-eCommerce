@@ -201,7 +201,7 @@ class OrderCreator(object):
             "stockrecord": stockrecord,
             # Product details
             "product": product,
-            "name": product.get_name(),
+            "name": basket_line.get_full_name(),
             "article": product.article,
             "quantity": basket_line.quantity,
             # Price details
