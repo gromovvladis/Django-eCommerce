@@ -1,6 +1,8 @@
 import logging
 import uuid
 import os
+from treebeard.mp_tree import MP_Node
+
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.finders import find
@@ -20,7 +22,6 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
-from treebeard.mp_tree import MP_Node
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import get_default_currency, slugify
@@ -943,18 +944,12 @@ class Product(models.Model):
     get_product_class.short_description = "Класс товара"
 
     def get_class_additionals(self):
-        return self.get_product_class().class_additionals.filter(
-            is_public=True
-        )
+        return self.get_product_class().class_additionals.filter(is_public=True)
 
     def get_product_additionals(self):
         if self.is_child:
-            return self.parent.product_additionals.filter(
-                is_public=True
-            )
-        return self.product_additionals.filter(
-            is_public=True
-        )
+            return self.parent.product_additionals.filter(is_public=True)
+        return self.product_additionals.filter(is_public=True)
 
     # pylint: disable=no-member
     def get_categories(self):
@@ -1009,14 +1004,6 @@ class Product(models.Model):
 
     # Images
 
-    def get_missing_image(self):
-        """
-        Returns a missing image object.
-        """
-        # This class should have a 'name' property so it mimics the Django file
-        # field.
-        return MissingProductImage()
-
     # pylint: disable=no-member
     def get_all_images(self):
         if self.is_child and not self.images.exists() and self.parent_id is not None:
@@ -1041,8 +1028,9 @@ class Product(models.Model):
             # We return a dict with fields that mirror the key properties of
             # the ProductImage class so this missing image can be used
             # interchangeably in templates.  Strategy pattern ftw!
-            missing_image = self.get_missing_image()
-            return {"original": missing_image.name, "caption": "", "is_missing": True}
+            mis_img = MissingProductImage()
+            caption = self.name
+            return {"original": mis_img, "caption": caption, "is_missing": True}
 
     # Updating methods
 
@@ -1060,9 +1048,7 @@ class Product(models.Model):
         """
         Calculate rating value
         """
-        result = self.reviews.all().aggregate(
-            sum=Sum("score"), count=Count("id")
-        )
+        result = self.reviews.all().aggregate(sum=Sum("score"), count=Count("id"))
         reviews_sum = result["sum"] or 0
         reviews_count = result["count"] or 0
         rating = None
@@ -1892,7 +1878,7 @@ class Additional(models.Model):
         caption = self.name
         if not img:
             mis_img = MissingProductImage()
-            return {"original": mis_img.name, "caption": caption, "is_missing": True}
+            return {"original": mis_img, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}
 

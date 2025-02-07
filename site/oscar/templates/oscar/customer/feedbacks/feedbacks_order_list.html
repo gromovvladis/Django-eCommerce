@@ -53,9 +53,12 @@
                                             </div>
                                             {% block order_contents %}
                                                 <div class="order-checkout__items">
-                                                    {% for line in order.basket.all_lines %}
-                                                        {% purchase_info_for_line request line as session %}
-                                                        <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br>
+                                                    {% for line in order.lines.all %}
+                                                        {% if line.product %}
+                                                            <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br>
+                                                        {% else %}
+                                                            <span>{{ line.name }} - {{ line.quantity }} шт.</span><br>
+                                                        {% endif %}
                                                     {% endfor %}
                                                 </div>
                                             {% endblock order_contents %}

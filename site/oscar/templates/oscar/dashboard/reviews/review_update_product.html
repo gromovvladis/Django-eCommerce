@@ -109,7 +109,7 @@
             </tbody>
         </table>
     </div>
-    <form method="post" class="form-stacked confirm-content" enctype="multipart/form-data">
+    <form method="post" class="form-stacked confirm-content mb-4" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="table-header">
             <h3>Информация об отзыве</h3>
@@ -155,7 +155,7 @@
             </div>
         </div>
         <div class="table-footer">
-            <div class="d-flex justify-content-end mt-3">
+            <div class="d-flex justify-content-end">
                 <a class="btn btn-secondary mr-2" href="{% url 'dashboard:reviews-order-list' %}">
                     <i class="fa-regular fa-circle-xmark"></i> 
                     <span>

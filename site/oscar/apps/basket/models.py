@@ -965,7 +965,7 @@ class Line(models.Model):
             ]
             return " | ".join(filter(None, name_parts))
         else:
-            return "Товар не найден"
+            return self.name
 
     # ==========
     # Properties

@@ -2,7 +2,6 @@
 
 {% load currency_filters %}
 {% load image_tags %}
-{% load purchase_info_tags %}
 {% load svg_tags %}
 {% load compress %}
 {% load static %}
@@ -128,8 +127,11 @@
                     {% block order_contents %}
                         <div class="order-checkout__items">
                             {% for line in order.lines.all %}
-                                {% purchase_info_for_line request line as session %}
-                                <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br>
+                                {% if line.product %}
+                                    <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br>
+                                {% else %}
+                                    <span>{{ line.name }} - {{ line.quantity }} шт.</span><br>
+                                {% endif %}
                             {% endfor %}
                         </div>
                     {% endblock order_contents %}

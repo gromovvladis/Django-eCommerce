@@ -107,10 +107,17 @@
                 {% for line in lines %}
                     <tr data-id="line-container">
                         <td class="image">
-                            {% with image=line.product.primary_image %}
-                                {% oscar_thumbnail image.original "50x50" upscale=False as thumb %}
-                                <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.product.get_name }}{% endif %}" loading="lazy">
-                            {% endwith %}
+                            {% if line.product %}
+                                {% with image=line.product.primary_image %}
+                                    {% oscar_thumbnail image.original "50x50" upscale=False as thumb %}
+                                    <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}" loading="lazy">
+                                {% endwith %}
+                            {% else %}              
+                                {% with image=line.missing_image %}
+                                    {% oscar_thumbnail image.original "50x50" upscale=False as thumb %}
+                                    <img class="img-dashboard" src="{{ thumb.url }}" alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}" loading="lazy">
+                                {% endwith %}
+                            {% endif %}
                         </td>
                         <td class="title">
                             <div class="d-flex align-items-center">
