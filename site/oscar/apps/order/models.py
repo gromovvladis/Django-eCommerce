@@ -728,7 +728,7 @@ class Line(models.Model):
 
     def get_full_name(self):
         name_parts = [
-            self.product.get_name(),
+            self.product.get_name() if self.product else None,
             self.variants or None,
             self.options or None,
             self.additions or None,
