@@ -32,12 +32,14 @@ def is_valid_site_token(request):
     # Проверка токена сайта
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
+        logger.error(f"Токен авторизации сайта отсутствует. Токен: {auth_header}")
         return Response(
             {"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED
         )
 
     auth_token = auth_header.split(" ")[1]
     if not auth_header or auth_token != site_token:
+        logger.error(f"Токен авторизации сайта не верный. Токен: {auth_header}")
         return Response(
             {"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED
         )
@@ -49,12 +51,14 @@ def is_valid_user_token(request):
     # Проверка токена сайта
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
+        logger.error(f"Токен пользователя отсутствует. Токен: {auth_header}")
         return Response(
             {"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED
         )
 
     auth_token = auth_header.split(" ")[1]
     if not auth_header or auth_token != user_token:
+        logger.error(f"Токен пользователя не верный. Токен: {auth_header}")
         return Response(
             {"errors": [{"code": 1001}]}, status=status.HTTP_401_UNAUTHORIZED
         )
@@ -69,6 +73,7 @@ def is_valid_user_login_and_pass(request):
     password = user_data.get("password")
 
     if not login or not password or login != site_login or password != site_pass:
+        logger.error(f"Неверный пароль или логин. Логин: {login}, Пароль:{password}")
         return Response(
             {"errors": [{"code": 1006}]}, status=status.HTTP_401_UNAUTHORIZED
         )
@@ -81,10 +86,6 @@ def is_valid_site_and_user_tokens(request):
 
 
 # ========= API Endpoints (Уведомления) =========
-
-# новые модели
-#  3. событие +
-
 # добавь испльзование курсора, если объектов много
 
 
@@ -349,6 +350,10 @@ class CRMDocsEndpointView(APIView):
             "headers": dict(request.headers),
             "data": request.data,
         }
+        send_message_to_staffs(
+            f"request: {json.dumps(request_info, ensure_ascii=False)}",
+            TelegramMessage.TECHNICAL,
+        )
         logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
 
         not_allowed = is_valid_user_token(request)
@@ -357,17 +362,10 @@ class CRMDocsEndpointView(APIView):
 
         request_type = request.data.get("type")
 
-        send_message_to_staffs(
-            f"request: {json.dumps(request_info, ensure_ascii=False)}",
-            TelegramMessage.TECHNICAL,
-        )
-
-        if request_type == "SELL":
+        if request_type in ["SELL", "CORRECTION"]:
             self.sell(request.data, *args, **kwargs)
         elif request_type == "PAYBACK":
             self.payback(request.data, *args, **kwargs)
-        elif request_type == "CORRECTION":
-            self.correction(request.data, *args, **kwargs)
         elif request_type in ["ACCEPT", "WRITE_OFF", "INVENTORY"]:
             self.stockrecord_operation(request.data, *args, **kwargs)
         elif request_type in ["CASH_INCOME", "CASH_OUTCOME"]:
@@ -386,9 +384,6 @@ class CRMDocsEndpointView(APIView):
     def sell(self, data):
         EvatorCloud().create_or_update_site_order(data)
 
-    def correction(self, data):
-        EvatorCloud().create_or_update_site_order(data)
-
     def payback(self, data):
         EvatorCloud().refund_site_order(data)
 
@@ -400,6 +395,8 @@ class CRMDocsEndpointView(APIView):
 
     def revaluation(self, data):
         pass
+
+
 
         # data = {
         #     "type": "SELL",
