@@ -97,7 +97,7 @@ class StoreCashTransactionListTable(DashboardTable):
         "dashboard:order-detail",
         args=[A("order.number")],
         order_by="order__number",
-        verbose_name="Заказ",
+        verbose_name="Номер заказа",
     )
     description = Column(
         verbose_name="Описание",
@@ -129,6 +129,7 @@ class StoreCashTransactionListTable(DashboardTable):
             "user",
             "date_created",
         )
+        order_by = "-date_created"
         attrs = {
             "class": "table table-striped table-bordered table-hover",
         }

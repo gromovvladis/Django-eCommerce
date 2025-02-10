@@ -19,6 +19,7 @@ VoucherForm = get_class("dashboard.vouchers.forms", "VoucherForm")
 VoucherSetForm = get_class("dashboard.vouchers.forms", "VoucherSetForm")
 VoucherSetSearchForm = get_class("dashboard.vouchers.forms", "VoucherSetSearchForm")
 VoucherSearchForm = get_class("dashboard.vouchers.forms", "VoucherSearchForm")
+
 Voucher = get_model("voucher", "Voucher")
 VoucherSet = get_model("voucher", "VoucherSet")
 OrderDiscount = get_model("order", "OrderDiscount")
@@ -77,7 +78,9 @@ class VoucherListView(generic.ListView):
             self.search_filters.append('Код - "%s"' % code)
         if offer_name:
             qs = qs.filter(offers__name__icontains=offer_name)
-            self.search_filters.append('Имя прeдложения соответствует "%s"' % offer_name)
+            self.search_filters.append(
+                'Имя прeдложения соответствует "%s"' % offer_name
+            )
         if is_active is not None:
             now = timezone.now()
             if is_active:

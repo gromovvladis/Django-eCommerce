@@ -27,6 +27,8 @@
                         <i class="fa-solid fa-bars align-middle"></i>
                     </button>
                 </div>
+                {{ timezone_now }}
+                {{ time_now }}
                 <div class="badges-navbar position-relative">
                     <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1{% if not active_orders %} d-none{% endif %}" data-id="active-navbar">
                         <i class="fas fa-shopping-cart"></i>
@@ -93,7 +95,13 @@
                             <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.username }}</span>
                         </button>
                         <ul class="dropdown-menu text-small actions mb-2" aria-labelledby="nav-account">
-                            {% comment %} <li><a class="dropdown-item" href="#">Задачи: 0</a></li> {% endcomment %}
+                            <li><a class="dropdown-item" href="{% url 'customer:summary' %}">
+                                    Уведомления
+                                    <span class="dropdown-item-badge dropdown-item-badge--nav">{{ num_unread_notifications|default:"0" }}</span>
+                                </a>
+                            </li>
+                            
+            
                             <li><a class="dropdown-item" href="{% url 'customer:summary' %}">Аккаунт</a></li>
                             <li><a class="dropdown-item" href="{{ homepage_url }}">Магазин</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -115,7 +123,6 @@
                         </ol>
                     </nav>
                 {% endblock %}
-        
                 <div class="content">
                     {% include 'oscar/dashboard/partials/alert_messages.html' %}
                     {% block header %}
