@@ -17,7 +17,7 @@ class DashboardMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if not request.path.startswith("/dashboard")and request.user.is_authenticated:
+        if not request.path.startswith("/dashboard") or not request.user.is_authenticated:
             return self.get_response(request)
 
         stores = cache.get("stores")
