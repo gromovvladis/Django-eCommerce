@@ -1,4 +1,3 @@
-let orders = document.querySelector('[data-id="order-status"]');
 let modalContainer = $('[data-id="order-modal"]');
 let modalContent = $(modalContainer).find('[data-id="order-modal-content"]');
 

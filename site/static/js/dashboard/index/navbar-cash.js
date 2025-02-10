@@ -1,5 +1,4 @@
-let modalContainer = document.getElementById('navbarCashModal')
-let modalContent = document.getElementById('navbarCashModalContent')
+let navbarCashModal = document.getElementById('navbarCashModalContent');
 
 document.getElementById('navbarCash').addEventListener('click', function(event) {
     fetch(navbar_cash_url, {
@@ -10,9 +9,9 @@ document.getElementById('navbarCash').addEventListener('click', function(event) 
     })
     .then(response => response.json())
     .then(data => {
-        if (modalContent && data.html) {
-            modalContent.innerHTML = data.html;
-            modalContent.classList.remove('navbar-loading');
+        if (navbarCashModal && data.html) {
+            navbarCashModal.innerHTML = data.html;
+            navbarCashModal.classList.remove('navbar-loading');
         }
     })        
 });

@@ -208,12 +208,14 @@
                         {{ order.status|default:"N/A" }}
                     </span>
                     <div class="dropdown-menu actions dropdown-menu-right dropdown-status" aria-labelledby="dropdownOrderStatus">
+                        <h6 class="dropdown-header">Изменить статус</h6>
+                        <div class="dropdown-divider"></div>
                         {% if order.next_status %}
                             <a class="dropdown-item" href="{% url 'dashboard:order-next-status' number=order.number %}">
                                 {{ order.next_status }}
                             </a>
                         {% endif %}
-                        {% if not order.cancel_status and not order.next_status %}
+                        {% if not order.next_status %}
                             <span class="dropdown-item text-muted">
                                 Статус заказа нельзя изменить
                             </span>
