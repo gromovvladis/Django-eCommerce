@@ -27,8 +27,6 @@
                         <i class="fa-solid fa-bars align-middle"></i>
                     </button>
                 </div>
-                {{ timezone_now }}
-                {{ time_now }}
                 <div class="badges-navbar position-relative">
                     <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1{% if not active_orders %} d-none{% endif %}" data-id="active-navbar">
                         <i class="fas fa-shopping-cart"></i>
@@ -97,7 +95,7 @@
                         <ul class="dropdown-menu text-small actions mb-2" aria-labelledby="nav-account">
                             <li><a class="dropdown-item" href="{% url 'customer:summary' %}">
                                     Уведомления
-                                    <span class="dropdown-item-badge dropdown-item-badge--nav">{{ num_unread_notifications|default:"0" }}</span>
+                                    <span class="dropdown-item-badge dropdown-item-badge--nav ml-1">{{ num_unread_notifications|default:"0" }}</span>
                                 </a>
                             </li>
                             

@@ -58,11 +58,6 @@ class IndexView(TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx.update(self.get_stats())
-        
-        from django.utils import timezone
-        ctx["time_now"] = now()
-        ctx["timezone_now"] = timezone.now()
-        
         return ctx
 
     def get_active_vouchers(self):

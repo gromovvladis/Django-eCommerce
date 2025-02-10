@@ -357,11 +357,10 @@ class CRMDocsEndpointView(APIView):
 
         request_type = request.data.get("type")
 
-        if request_type != "SELL":
-            send_message_to_staffs(
-                f"request: {json.dumps(request_info, ensure_ascii=False)}",
-                TelegramMessage.TECHNICAL,
-            )
+        send_message_to_staffs(
+            f"request: {json.dumps(request_info, ensure_ascii=False)}",
+            TelegramMessage.TECHNICAL,
+        )
 
         if request_type == "SELL":
             self.sell(request.data, *args, **kwargs)
