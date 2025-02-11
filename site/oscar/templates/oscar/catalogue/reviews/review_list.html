@@ -52,7 +52,7 @@
                                                     {% for line in review.order.lines.all %}
                                                         {% purchase_info_for_line request line as session %}
                                                         {% if line.product %}
-                                                            <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br>
+                                                            <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.get_product_class.measure_name }}</span><br>
                                                         {% else %}
                                                             <span>{{ line.name }} - {{ line.quantity }} шт.</span><br>
                                                         {% endif %}

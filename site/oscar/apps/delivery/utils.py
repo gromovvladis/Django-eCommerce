@@ -14,21 +14,26 @@ def unix_time(t):
     return str(t)
 
 
+def couriers_busy(store):
+    pass
+
+
 def kitchen_busy(store):
     timezone = ZoneInfo(settings.TIME_ZONE)
     current_time = datetime.now(tz=timezone)
     active_orders = (
-        Order.objects.prefetch_related("lines", "lines__product")
-        .filter(status__in=settings.ORDER_BUSY_STATUSES, store=store)
+        Order.objects.filter(status__in=settings.ORDER_BUSY_STATUSES, store=store)
         .annotate(
-            total_cooking_time=F("lines__product__cooking_time") * F("lines__quantity")
+            total_cooking_time=Sum(
+                F("lines__quantity") * F("lines__product__cooking_time")
+            )
         )
         .order_by("order_time")
     )
     busy_periods = [
         (
             order.order_time.astimezone(timezone)
-            - timedelta(minutes=order.total_cooking_time),
+            - timedelta(minutes=order.total_cooking_time or 10),
             order.order_time.astimezone(timezone),
         )
         for order in active_orders
@@ -38,21 +43,19 @@ def kitchen_busy(store):
     return busy_periods
 
 
-def couriers_busy(store):
-    pass
-
-
 def pickup_now(basket):
     start_time = basket.store.start_worktime
     end_time = basket.store.end_worktime
 
-    basket_lines = basket.lines.prefetch_related("product").all()
-    order_minutes = basket_lines.annotate(
-        total_cooking_time=F("product__cooking_time") * F("quantity")
-    ).aggregate(cooking_time_sum=Sum("total_cooking_time"))["cooking_time_sum"]
-    new_order_cooking_time = timedelta(
-        minutes=order_minutes
-    )  # Время приготовления нового заказа
+    order_minutes = (
+        basket.lines.aggregate(
+            cooking_time_sum=Sum(F("product__cooking_time") * F("quantity"))
+        )["cooking_time_sum"]
+        or 0
+    )
+
+    # Время приготовления нового заказа
+    new_order_cooking_time = timedelta(minutes=order_minutes)
 
     # Текущее время
     timezone = ZoneInfo(settings.TIME_ZONE)
@@ -62,11 +65,16 @@ def pickup_now(basket):
     current_day_start = datetime.combine(
         current_time.date(), start_time, tzinfo=timezone
     )
+
     earliest_start_time = max(current_time, current_day_start)
     busy_periods = kitchen_busy(basket.store)
 
+    max_days_ahead = 7
+    attempts = 0
+
     new_order_time = None
-    while new_order_time is None:
+    while new_order_time is None and attempts < max_days_ahead:
+        attempts += 1
         # Определяем границы текущего рабочего дня
         work_day_start = datetime.combine(
             earliest_start_time.date(), start_time, tzinfo=timezone
@@ -86,18 +94,26 @@ def pickup_now(basket):
 
         # Фильтруем занятые периоды для текущего дня
         day_busy_periods = [
-            (max(start, work_day_start), min(end, work_day_end))
+            (start, end)
             for start, end in busy_periods
             if start.date() == earliest_start_time.date()
             or end.date() == earliest_start_time.date()
         ]
-        work_day_start_end = (
+
+        current_work_day_start = (
             current_time if current_time > work_day_start else work_day_start
         )
-        day_busy_periods.append(
-            (work_day_start, work_day_start_end)
-        )  # Начало рабочего дня
-        day_busy_periods.append((work_day_end, work_day_end))  # Конец рабочего дня
+
+        if not day_busy_periods or not any(
+            start == work_day_start for start, _ in day_busy_periods
+        ):
+            day_busy_periods.append((work_day_start, current_work_day_start))
+
+        if not day_busy_periods or not any(
+            end == work_day_end for end, _ in day_busy_periods
+        ):
+            day_busy_periods.append((work_day_end, work_day_end))
+
         day_busy_periods.sort(key=lambda x: x[0])
 
         # Проверяем свободные промежутки

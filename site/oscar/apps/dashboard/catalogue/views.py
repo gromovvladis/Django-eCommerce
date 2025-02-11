@@ -349,7 +349,16 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         )
 
     def get_formsets(self):
-        if self.full_access:
+        product = self.get_object()
+        if product.is_parent and self.full_access:
+            self.formsets = {
+                "category_formset": self.category_formset,
+                "image_formset": self.image_formset,
+                "recommended_formset": self.recommendations_formset,
+                "additional_formset": self.additional_formset,
+                "attribute_formset": self.attribute_formset,
+            }
+        elif self.full_access:
             self.formsets = {
                 "category_formset": self.category_formset,
                 "image_formset": self.image_formset,
@@ -362,6 +371,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
             self.formsets = {
                 "stockrecord_formset": self.stockrecordstock_formset,
             }
+
         return self.formsets
 
     def check_objects_or_redirect(self):
@@ -482,7 +492,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                 self.object = None
 
             self.object = self.get_object()
-            self.get_formsets(self.request)
+            self.get_formsets()
             self.get_stockrecord_form(self.request)
 
             ctx = self.get_context_data(form=form)
@@ -753,7 +763,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         )
 
         self.object = self.get_object()
-        self.get_formsets(self.request)
+        self.get_formsets()
         self.get_stockrecord_form(self.request)
 
         ctx = self.get_context_data(form=form, **formsets)

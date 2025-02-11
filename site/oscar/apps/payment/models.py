@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.db.models import Q
 from django.db import models
 
 from oscar.core.compat import AUTH_USER_MODEL
@@ -46,12 +47,23 @@ class Transaction(models.Model):
     paid = models.BooleanField("Оплачено", default=False)
     refundable = models.BooleanField("Возврат возможен", default=False)
 
+    evotor_id = models.CharField("ID Эвотор", max_length=128, blank=True)
     payment_id = models.CharField("Код оплаты", max_length=128, blank=True)
     refund_id = models.CharField("Код возврата", max_length=128, blank=True)
 
     date_created = models.DateTimeField(
         "Дата создания", auto_now_add=True, db_index=True
     )
+
+    def event_reference(self):
+        if self.payment_id:
+            return f"Оплата Юкасса {self.payment_id}"
+        elif self.refund_id:
+            return f"Возврат Юкасса {self.refund_id}"
+        elif self.evotor_id:
+            return f"Эвотор {self.evotor_id}"
+
+        return self.reference
 
     def __str__(self):
         return ("%(type)s - %(amount).2f") % {
@@ -108,11 +120,9 @@ class Source(models.Model):
     # a transaction model for a particular payment store.
     reference = models.CharField("Референс", max_length=255, blank=True)
 
-    # refundable
-    refundable = models.BooleanField("Возврат возможен?", blank=True)
+    refundable = models.BooleanField("Возврат возможен?", blank=True, default=False)
 
-    # paid
-    paid = models.BooleanField("Оплачено", blank=True)
+    paid = models.BooleanField("Оплачено", blank=True, default=False)
 
     # A dictionary of submission data that is stored as part of the
     # checkout process, where we need to pass an instance of this class around
@@ -159,6 +169,7 @@ class Source(models.Model):
         receipt=False,
         payment_id=None,
         refund_id=None,
+        evotor_id=None,
     ):
         """
         Register the data for a transaction that can't be created yet due to FK
@@ -178,6 +189,7 @@ class Source(models.Model):
                 receipt,
                 payment_id,
                 refund_id,
+                evotor_id,
             )
         )
 
@@ -192,6 +204,7 @@ class Source(models.Model):
         receipt=False,
         payment_id="",
         refund_id="",
+        evotor_id="",
     ):
         return self.transactions.create(
             txn_type=txn_type,
@@ -203,6 +216,7 @@ class Source(models.Model):
             receipt=receipt,
             payment_id=payment_id,
             refund_id=refund_id,
+            evotor_id=evotor_id,
         )
 
     # =======
@@ -219,6 +233,7 @@ class Source(models.Model):
         refundable=True,
         receipt=False,
         payment_id="",
+        evotor_id="",
     ):
         """
         Convenience method for ring-fencing money against this source
@@ -234,6 +249,7 @@ class Source(models.Model):
             refundable=refundable,
             receipt=receipt,
             payment_id=payment_id,
+            evotor_id=evotor_id,
         )
 
     allocate.alters_data = True
@@ -247,6 +263,7 @@ class Source(models.Model):
         refundable=True,
         receipt=False,
         payment_id="",
+        evotor_id="",
     ):
         """
         Convenience method for recording debits against this source
@@ -265,6 +282,7 @@ class Source(models.Model):
             refundable=refundable,
             receipt=receipt,
             payment_id=payment_id,
+            evotor_id=evotor_id,
         )
 
     debit.alters_data = True
@@ -274,10 +292,11 @@ class Source(models.Model):
         amount=None,
         reference="",
         status="",
-        paid="",
-        refundable=True,
+        paid=False,
+        refundable=False,
         receipt=False,
         payment_id="",
+        evotor_id="",
     ):
         """
         Добавление новой транзакции оплаты
@@ -296,6 +315,7 @@ class Source(models.Model):
             refundable=refundable,
             receipt=receipt,
             payment_id=payment_id,
+            evotor_id=evotor_id,
         )
 
         if status == "succeeded":
@@ -314,16 +334,17 @@ class Source(models.Model):
         amount=None,
         reference="",
         status="",
-        paid="",
-        refundable=True,
+        paid=False,
+        refundable=False,
         receipt=False,
         payment_id="",
+        evotor_id="",
     ):
         """
         Обновление существующей транзакции оплаты.
         """
         try:
-            transaction = self.transactions.get(payment_id=payment_id)
+            transaction = self.transactions.get(payment_id=payment_id, evotor_id=evotor_id)
             old_amount = transaction.amount
 
             fields_to_update = {
@@ -363,7 +384,7 @@ class Source(models.Model):
                         transaction.is_included = True
                         transaction.save()
 
-            return bool(updated_fields)
+            return transaction if bool(updated_fields) else None
 
         except self.transactions.model.DoesNotExist:
             return self.new_payment(
@@ -374,6 +395,7 @@ class Source(models.Model):
                 refundable=refundable,
                 receipt=receipt,
                 payment_id=payment_id,
+                evotor_id=evotor_id,
             )
 
     update_payment.alters_data = True
@@ -384,10 +406,11 @@ class Source(models.Model):
         amount,
         reference="",
         status="",
-        paid="",
+        paid=False,
         refundable=False,
         receipt=False,
         refund_id="",
+        evotor_id="",
     ):
         """
         Convenience method for recording refunds against this source
@@ -404,6 +427,7 @@ class Source(models.Model):
                 refundable=refundable,
                 receipt=receipt,
                 refund_id=refund_id,
+                evotor_id=evotor_id,
             )
 
     refund.alters_data = True
@@ -417,6 +441,7 @@ class Source(models.Model):
         refundable=False,
         receipt=False,
         refund_id="",
+        evotor_id="",
     ):
         """
         Добавление новой транзакции возврата
@@ -435,6 +460,7 @@ class Source(models.Model):
             refundable=refundable,
             receipt=receipt,
             refund_id=refund_id,
+            evotor_id=evotor_id,
         )
 
         if status == "succeeded":
@@ -457,12 +483,13 @@ class Source(models.Model):
         refundable=False,
         receipt=False,
         refund_id="",
+        evotor_id="",
     ):
         """
         Обновление существующей транзакции возврата.
         """
         try:
-            transaction = self.transactions.get(refund_id=refund_id)
+            transaction = self.transactions.get(refund_id=refund_id, evotor_id=evotor_id)
             old_amount = transaction.amount
 
             # Обновляем только измененные поля
@@ -503,7 +530,7 @@ class Source(models.Model):
                         transaction.is_included = True
                         transaction.save()
 
-            return bool(updated_fields)
+            return transaction if bool(updated_fields) else None
 
         except self.transactions.model.DoesNotExist:
             return self.new_refund(
@@ -514,6 +541,7 @@ class Source(models.Model):
                 refundable=refundable,
                 receipt=receipt,
                 refund_id=refund_id,
+                evotor_id=evotor_id,
             )
 
     update_refund.alters_data = True

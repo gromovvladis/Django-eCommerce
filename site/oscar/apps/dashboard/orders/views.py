@@ -758,7 +758,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
                     # identify products that can be shipped from an online store.
                     # A "store" is a company that ships items to users who
                     # buy things in an online store.
-                    ('Включает товар с артикулом партнера. "{evotor_code}"').format(
+                    ('Включает товар с кодом Эвотор. "{evotor_code}"').format(
                         evotor_code=data["evotor_code"]
                     ),
                     (("evotor_code", data["evotor_code"]),),
@@ -1260,16 +1260,11 @@ class OrderDetailView(EventHandlerMixin, DetailView):
             "order_count": user_orders.count(),
             "order_amount": order_amount,
         }
-
         sources = order.sources.annotate(
             online_payment=Exists(
                 Transaction.objects.filter(
-                    source=OuterRef("pk"),
-                    payment_id__gt="",
-                )
-                | Transaction.objects.filter(
-                    source=OuterRef("pk"),
-                    refund_id__gt="",
+                    Q(source=OuterRef("pk"), payment_id__gt="")
+                    | Q(source=OuterRef("pk"), refund_id__gt="")
                 )
             )
         ).prefetch_related("transactions")
@@ -1576,7 +1571,7 @@ class OrderDeleteView(DeleteView):
         parent product. When deleting any other product, it redirects to the
         product list view.
         """
-        msg = "Удаленный заказ '№%s'" % self.object.number
+        msg = "Заказ №%s успешно удален!" % self.object.number
         messages.success(self.request, msg)
         return reverse("dashboard:order-list")
 

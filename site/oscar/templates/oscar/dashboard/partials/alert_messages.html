@@ -25,15 +25,12 @@ Use message tags to control these alerts.  Available tags include:
                         <i class="fas fa-exclamation-circle"></i>
                     {% endif %}
                 {% endif %}
-
                 {# Allow HTML to be embedded in messages #}
                 {% if 'safe' in message.tags %}
                     {{ message|safe }}
                 {% else %}
                     {{ message }}
                 {% endif %}
-
-
             </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>

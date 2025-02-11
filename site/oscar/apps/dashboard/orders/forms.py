@@ -52,7 +52,7 @@ class OrderStatsForm(forms.Form):
     )
     product_name = forms.CharField(required=False, label="Наименование товара")
     article = forms.CharField(required=False, label="Артикул товара")
-    evotor_code = forms.CharField(required=False, label="Артикул в магазине")
+    evotor_code = forms.CharField(required=False, label="Код в магазине Эвотор")
 
     status_choices = (("", "---------"),) + tuple(
         [(v, v) for v in Order.all_statuses()]
@@ -188,7 +188,7 @@ class OrderStatsForm(forms.Form):
             self._filters["lines__evotor_code"] = evotor_code
             self._search_filters.append(
                 (
-                    ('Включает товар с артикулом партнера. "{sku}"').format(
+                    ('Включает товар с кодом Эвотор. "{sku}"').format(
                         sku=evotor_code
                     ),
                     (("evotor_code", evotor_code),),
@@ -323,7 +323,7 @@ class OrderSearchForm(forms.Form):
     )
     product_name = forms.CharField(required=False, label="Наименование товара")
     article = forms.CharField(required=False, label="Артикул товара")
-    evotor_code = forms.CharField(required=False, label="Артикул в магазине")
+    evotor_code = forms.CharField(required=False, label="Код товара в магазине Эвотор")
 
     status_choices = (("", "---------"),) + tuple(
         [(v, v) for v in Order.all_statuses()]

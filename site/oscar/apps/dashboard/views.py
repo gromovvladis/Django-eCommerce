@@ -170,32 +170,34 @@ class IndexView(TemplateView):
 
     def get_data(self):
         request = self.request
-        prod_slug, cat_slug = request.GET.get("product"), request.GET.get("category")
+        prod_slug = request.GET.get("product")
+        cat_slug = request.GET.get("category")
         users = User.objects.all()
         staff_stores = request.staff_stores
+
+        prod, cat = None, None
 
         if prod_slug:
             prods = Product.objects.filter(slug=prod_slug)
             prod = prods.first()
-            title = f"Статистика для товара '{prod.get_name()}'"
-            ids = [prod.id]
+            title = f"Статистика для товара '{prod.get_name()}'" if prod else "Статистика"
+            ids = [prod.id] if prod else []
         elif cat_slug:
-            cat = Category.objects.get(slug=cat_slug)
-            prods = Product.objects.filter(categories=cat)
-            title = f"Статистика для категории '{cat.name}'"
+            cats = Category.objects.filter(slug=cat_slug)
+            cat = cats.first()
+            prods = Product.objects.filter(categories=cat) if cat else Product.objects.none()
+            title = f"Статистика для категории '{cat.name}'" if cat else "Статистика"
             ids = list(prods.values_list("id", flat=True))
         else:
-            prods, ids, title = Product.objects.all(), [], "Статистика"
+            prods = Product.objects.all()
+            ids = list(prods.values_list("id", flat=True))
+            title = "Общая статистика"
 
         return {
             "title": title,
             "orders": queryset_orders(
                 request=request,
-                **(
-                    {"product": prod}
-                    if prod_slug
-                    else {"category": cat} if cat_slug else {}
-                ),
+                **({"product": prod} if prod else {"category": cat} if cat else {}),
             ),
             "alerts": StockAlert.objects.filter(
                 stockrecord__product_id__in=ids, stockrecord__store__in=staff_stores

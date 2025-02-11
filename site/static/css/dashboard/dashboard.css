@@ -5554,7 +5554,7 @@ a.badge-dark:focus, a.badge-dark.focus {
 
 .alert {
   position: relative;
-  padding: 1rem 1.25rem;
+  padding: 1rem;
   margin: 1rem 0;
   background: #fff;
   border: 1px solid transparent;
@@ -5562,6 +5562,7 @@ a.badge-dark:focus, a.badge-dark.focus {
   box-shadow: 0 0 5px rgba(0, 0, 0, .05);
   overflow: hidden;
   border-radius: 10px;
+  max-width: 690px;
 }
 
 .alert::before {
@@ -5583,7 +5584,7 @@ a.badge-dark:focus, a.badge-dark.focus {
 }
 
 .alert-dismissible {
-  padding-right: 3.7rem;
+  padding-right: 2.2rem;
 }
 .alert-dismissible .close {
   position: absolute;

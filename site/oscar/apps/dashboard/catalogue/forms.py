@@ -219,6 +219,7 @@ class StockRecordOperationForm(forms.ModelForm):
         self.user = user
         super().__init__(*args, **kwargs)
         self.set_initial_data()
+        self.fields["num"].required = False
 
     def set_initial_data(self):
         stockrecords = StockRecord.objects.filter(product=self.product)
@@ -231,6 +232,10 @@ class StockRecordOperationForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.user = self.user
+
+        if not instance.num:
+            return None
+
         if commit:
             instance.save()
         return instance

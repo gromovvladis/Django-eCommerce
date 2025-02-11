@@ -123,17 +123,19 @@
                             <div class="d-flex align-items-center">
                                 {% if line.product %}
                                     <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">
-                                        {{ line.name }} 
+                                        {{ line.product.get_name }} 
                                     </a>
                                 {% else %}
                                     {{ line.name }}
                                 {% endif %}
                             </div>
-                            <div class="d-flex flex-column">
-                                <span>{{ line.options }}</span>
-                                <span>{{ line.variants }}</span>
-                                <span>{{ line.additions }}</span>
-                            </div>
+                            {% if line.product %}
+                                <div class="d-flex flex-column">
+                                    <span>{{ line.options }}</span>
+                                    <span>{{ line.variants }}</span>
+                                    <span>{{ line.additions }}</span>
+                                </div>
+                            {% endif %}
                             <span class="badge badge-info my-1 d-md-none">
                                 {{ line.quantity }} шт.
                             </span>

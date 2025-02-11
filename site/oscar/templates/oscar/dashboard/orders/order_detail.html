@@ -217,7 +217,7 @@
                         {% endif %}
                         {% if not order.next_status %}
                             <span class="dropdown-item text-muted">
-                                Статус заказа нельзя изменить
+                                Нет следующего статуса заказа
                             </span>
                         {% endif %}
                     </div>
@@ -263,7 +263,7 @@
                                                 <span class="spinner-border-sm {% if line.status == "Готовится" %}badge-warning{% elif line.status == "Отменен" %}badge-danger{% else %}badge-success{% endif %} rounded-circle mr-2">&nbsp;</span>
                                                 {% if line.product %}
                                                     <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">
-                                                        {{ line.name }} 
+                                                        {{ line.product.get_name }} 
                                                     </a>
                                                 {% else %}
                                                     {{ line.name }}
@@ -322,7 +322,7 @@
                                         <th class="text-right">{{ order.total_discount|currency:order.currency }}</th>
                                     </tr>
                                 {% endif %}
-                                {% with discounts=order.basket_discounts %}
+                                {% with discounts=order.order_discounts %}
                                     {% if discounts %}
                                         <tr class="order-totals collapse discount_details">
                                             <td colspan="5"></td>
@@ -332,7 +332,7 @@
                                         {% for discount in discounts %}
                                             <tr class="order-totals collapse discount_details">
                                                 <td colspan="5"></td>
-                                                <th colspan="2" class="text-left">{{ discount.offer_name|default:discount.message }}</th>
+                                                <th colspan="2" class="text-left">{{ discount.display_name }}</th>
                                                 <th class="text-right">- {{ discount.amount|currency:order.currency }}</th>
                                             </tr>
                                         {% endfor %}
@@ -688,7 +688,9 @@
                                         <th>К оплате</th>
                                         <th>Оплачено</th>
                                         <th>Возвращено</th>
-                                        <th class="actions">Обновить</th>
+                                        {% if source.online_payment %}
+                                            <th class="actions">Обновить</th>
+                                        {% endif %}
                                         <th>Удалить</th>
                                         <th class="toggle-row"></th>
                                     </tr>
@@ -705,20 +707,16 @@
                                             <td data-label="К оплате">{{ source.amount_allocated|currency:order.currency }}</td>
                                             <td data-label="Оплачено">{{ source.amount_debited|currency:order.currency }}</td>
                                             <td data-label="Возвращено">{{ source.amount_refunded|currency:order.currency }}</td>
-                                            <td class="actions">
-                                                {% if source.online_payment %}
+                                            {% if source.online_payment %}
+                                                <td class="actions">
                                                     <a class="btn btn-info" href="{% url 'dashboard:update-source' number=order.number pk=source.id %}">
                                                         <i class="fa-solid fa-arrows-rotate"></i>
                                                         <span class="caption-button">
                                                             Обновить
                                                         </span>
                                                     </a>
-                                                {% else %}
-                                                    <span class="caption-button">
-                                                        -
-                                                    </span>
-                                                {% endif %}
-                                            </td>
+                                                </td>
+                                            {% endif %}
                                             <td data-label="Удалить">
                                                 {% if not source.id in payment_transactions_source_id %}
                                                     <a class="btn btn-danger" href="{% url 'dashboard:delete-source' number=order.number pk=source.id %}">
@@ -820,9 +818,9 @@
                                                 <td class="is_public" data-label="Оплачено">{{ txn.paid|yesno:"✔️,❌" }}</td>
                                                 <td class="is_public" data-label="Чек">{{ txn.receipt|yesno:"✔️,❌" }}</td>
                                                 <td data-label="Дата">{{ txn.date_created }}</td>
-                                                <td data-label="Сумма">
+                                                <td data-label="Возврат">
                                                     {% if txn.txn_type == "Payment" and txn.source_refundable and txn.refundable %}
-                                                        <a href="{% url 'dashboard:refund-transaction' pk=txn.id %}">Вернуть деньги</a>
+                                                        <a class="badge badge-danger" href="{% url 'dashboard:refund-transaction' pk=txn.id %}">Вернуть деньги</a>
                                                     {% elif txn.txn_type == "Refund" %}
                                                         -
                                                     {% else %}

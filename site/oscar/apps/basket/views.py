@@ -14,15 +14,15 @@ from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import is_ajax, safe_referrer
 
 Applicator = get_class("offer.applicator", "Applicator")
-(BasketLineForm, AddToBasketForm) = get_classes(
-    "basket.forms",
-    ("BasketLineForm", "AddToBasketForm"),
-)
 BasketLineFormSet = get_class("basket.formsets", "BasketLineFormSet")
 Repository = get_class("shipping.repository", "Repository")
 OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 BasketMessageGenerator = get_class("basket.utils", "BasketMessageGenerator")
 SurchargeApplicator = get_class("checkout.applicator", "SurchargeApplicator")
+BasketLineForm, AddToBasketForm = get_classes(
+    "basket.forms",
+    ("BasketLineForm", "AddToBasketForm"),
+)
 
 Basket = get_model("basket", "Basket")
 Line = get_model("basket", "Line")
@@ -44,7 +44,8 @@ class BasketView(ModelFormSetView):
     def check_lines(self):
         if not is_ajax(self.request):
             updated = False
-            # переделай. когда товаров к корзине больше чем можем продать нужно чтобы они автоматически уменьшались. если форма не валидная то хоть чтонибудб делай.
+            # переделай. когда товаров к корзине больше чем можем 
+            # продать нужно чтобы они автоматически уменьшались. если форма не валидная то хоть чтонибудб делай.
             for line in self.request.basket._all_lines():
                 if line.quantity == 0:
                     updated = True
