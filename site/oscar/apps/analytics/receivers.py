@@ -1,7 +1,12 @@
 from django.conf import settings
 from django.dispatch import receiver
 from django.db import transaction
+from django.db.models import Sum
 
+from oscar.apps.basket.signals import basket_addition
+from oscar.apps.catalogue.signals import product_viewed
+from oscar.apps.order.signals import order_placed
+from oscar.apps.search.signals import user_search
 from oscar.apps.analytics.tasks import (
     record_products_in_order_task,
     record_user_order_task,
@@ -9,10 +14,6 @@ from oscar.apps.analytics.tasks import (
     user_searched_product_task,
     user_viewed_product_task,
 )
-from oscar.apps.basket.signals import basket_addition
-from oscar.apps.catalogue.signals import product_viewed
-from oscar.apps.order.signals import order_placed
-from oscar.apps.search.signals import user_search
 
 
 # pylint: disable=unused-argument
@@ -73,13 +74,21 @@ def receive_basket_addition(sender, product, user, **kwargs):
             )
 
 
-# pylint: disable=unused-argument
 @receiver(order_placed)
 def receive_order_placed(sender, order, user, **kwargs):
     if kwargs.get("raw", False):
         return
 
     def execute_tasks():
+        order_data = {
+            "total": order.total,
+            "date_placed": order.date_placed,
+            "num_lines": order.lines.count(),
+            "num_items": order.lines.aggregate(total_items=Sum("quantity"))[
+                "total_items"
+            ],
+        }
+
         if settings.DEBUG:
             record_products_in_order_task(order.id)
         else:
@@ -87,8 +96,8 @@ def receive_order_placed(sender, order, user, **kwargs):
 
         if user and user.is_authenticated:
             if settings.DEBUG:
-                record_user_order_task(user.id, order.id)
+                record_user_order_task(user.id, order_data)
             else:
-                record_user_order_task.delay(user.id, order.id)
+                record_user_order_task.delay(user.id, order_data)
 
     transaction.on_commit(execute_tasks)

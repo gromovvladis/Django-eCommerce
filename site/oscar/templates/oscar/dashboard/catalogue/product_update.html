@@ -249,32 +249,32 @@
                                         {{ image_formset.management_form }}
                                         {{ image_formset.non_form_errors }}
                                         <div class="mobile-table">
-                                        <table class="table table-striped table-bordered">
-                                            <caption>Загрузить, изменить или удалить изображения</caption>
-                                            <thead style="text-align:center;">
-                                                <tr>
-                                                    <th></th>
-                                                    <th>Изображение</th>
-                                                    <th>Описание</th>
-                                                    <th class="text-danger">Удалить</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="upload-image">
-                                                {% for image_form in image_formset %}
-                                                    {% include "oscar/dashboard/partials/product_images.html" with form=image_form %}
-                                                {% endfor %}
-                                            </tbody>
-                                            <tfoot>
-                                                <tr>
-                                                    <td colspan="4">
-                                                    <p class="form-text">
-                                                        Перетащите изображения, чтобы изменить их порядок. Место для дополнительных изображений появится при добавлении изображений.
-                                                    </p>
-                                                    Первое изображение в списке используется, как основное изображение.
-                                                    </td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
+                                            <table class="table table-striped table-bordered">
+                                                <caption>Загрузить, изменить или удалить изображения</caption>
+                                                <thead style="text-align:center;">
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Изображение</th>
+                                                        <th>Описание</th>
+                                                        <th class="text-danger">Удалить</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="upload-image">
+                                                    {% for image_form in image_formset %}
+                                                        {% include "oscar/dashboard/partials/product_images.html" with form=image_form %}
+                                                    {% endfor %}
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="4">
+                                                        <p class="form-text">
+                                                            Перетащите изображения, чтобы изменить их порядок. Место для дополнительных изображений появится при добавлении изображений.
+                                                        </p>
+                                                        Первое изображение в списке используется, как основное изображение.
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
                                         </div>
                                     {% endblock product_images_content %}
                                 </div>
@@ -549,86 +549,98 @@
                         {% block child_products %}
                             {% with children=product.children.all %}
                                 <div class="tab-pane" id="child_products">
-                                    {% block child_products_content %}
-                                        <table class='table table-striped table-bordered'>
-                                            <caption>
-                                                <div class="d-flex justify-space-between">
-                                                    Варианты
-                                                    <div class="ml-3">
-                                                        {% if full_access %}
-                                                            {% if product.can_be_parent %}
-                                                                <button class="btn btn-success" name="action" type="submit" value="create-all-child" data-loading-text="Создание...">
-                                                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                                                    <span class="caption-button"> Создать все вариации</span>
+                                    {% block child_products_content %}    
+                                        <div class="mobile-table">
+                                            <table class='table table-striped table-bordered'>
+                                                <caption>
+                                                    <div class="d-flex justify-space-between">
+                                                        Варианты
+                                                        <div class="ml-3">
+                                                            {% if full_access %}
+                                                                {% if product.can_be_parent %}
+                                                                    <button class="btn btn-success" name="action" type="submit" value="create-all-child" data-loading-text="Создание...">
+                                                                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                                                        <span class="caption-button"> Создать все вариации</span>
+                                                                    </button>
+                                                                {% endif %}
+                                                                <button class="btn btn-primary ml-2" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
+                                                                    <i class="fas fa-plus"></i> 
+                                                                    <span class="caption-button"> Добавить вариант</span>
                                                                 </button>
                                                             {% endif %}
-                                                            <button class="btn btn-primary ml-2" {% if not product.can_be_parent %}disabled{% endif %} name="action" type="submit" value="create-child" data-loading-text="Добавление...">
-                                                                <i class="fas fa-plus"></i> 
-                                                                <span class="caption-button"> Добавить вариант</span>
-                                                            </button>
-                                                        {% endif %}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </caption>
-                                            {% if children %}
-                                                <tr>
-                                                    <th>Имя</th>
-                                                    <th>Атрибуты</th>
-                                                    <th>Товарные записи</th>
-                                                    <th>Доступен?</th>
-                                                    <th>&nbsp;</th>
-                                                </tr>
-                                                {% for child in children %}
-                                                    <tr>
-                                                        <td>
-                                                            <a href="{% url 'dashboard:catalogue-product' pk=child.id %}">
-                                                                {{ child.get_name }}
-                                                            </a>
-                                                        </td>
-                                                        <td>{{ child.attributes_variants }}</td>
-                                                        <td>{{ child.stockrecords.count }}</td>
-                                                        <td>{{ child.is_public|yesno:"✔️,❌" }}</td>
-                                                        <td>
-                                                            <div class="actions">
-                                                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </button>
-                                                                <div class="dropdown-menu dropdown-menu-right" data-labelledby="dropdownMenuButton">
-                                                                    <a class="dropdown-item" href="{% url 'dashboard:catalogue-product' pk=child.id %}">
-                                                                        Изменить
+                                                </caption>
+                                                {% if children %}
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Имя</th>
+                                                            <th>Атрибуты</th>
+                                                            <th>Товарные записи</th>
+                                                            <th>Доступен</th>
+                                                            <th>&nbsp;</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for child in children %}
+                                                            <tr>
+                                                                <td class="name">
+                                                                    <a href="{% url 'dashboard:catalogue-product' pk=child.id %}">
+                                                                        {{ child.get_name }}
                                                                     </a>
-                                                                    {% if full_access %}
-                                                                        <a class="dropdown-item" href="{% url 'dashboard:catalogue-product-delete' pk=child.id %}">
-                                                                            Удалить
+                                                                </td>
+                                                                <td class="title">{{ child.attributes_variants }}</td>
+                                                                <td data-label="Товарные записи">{{ child.stockrecords.count }}</td>
+                                                                <td data-label="Доступен">{{ child.is_public|yesno:"✔️,❌" }}</td>
+                                                                <td class="actions">
+                                                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </button>
+                                                                    <div class="dropdown-menu dropdown-menu-right" data-labelledby="dropdownMenuButton">
+                                                                        <a class="dropdown-item" href="{% url 'dashboard:catalogue-product' pk=child.id %}">
+                                                                            Изменить
                                                                         </a>
+                                                                        {% if full_access %}
+                                                                            <a class="dropdown-item" href="{% url 'dashboard:catalogue-product-delete' pk=child.id %}">
+                                                                                Удалить
+                                                                            </a>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </td>
+                                                                <td class="toggle-row">
+                                                                    <button class="btn btn-secondary" type="button">
+                                                                        <i class="fa-solid fa-chevron-up"></i>
+                                                                        <i class="fa-solid fa-chevron-down"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                {% else %}
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="p-3" colspan="5">
+                                                                {% if product.can_be_parent %}
+                                                                    У этого товара нет созданых варианий
+                                                                {% else %}
+                                                                        На данный момент нельзя добавлять варианты к этому товару.
+                                                                        <br><br>
+                                                                    {% if product.pk is None %}
+                                                                        Пожалуйста, сохраните товар, прежде чем пытаться добавить варианты.
+                                                                    {% elif product.has_stockrecords %}
+                                                                        Вероятно, это связано с тем, что для этого продукта все еще имеются товарные записи.
+                                                                        <br>
+                                                                        Удалите товарные записи для создания вариативного товара.
+                                                                    {% else %}
+                                                                        Нет подходящих атрибутов для создания вариаций 
                                                                     {% endif %}
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                {% endfor %}
-                                            {% else %}
-                                                <tr>
-                                                    <td class="p-3" colspan="5">
-                                                        {% if product.can_be_parent %}
-                                                            У этого товара нет созданых варианий
-                                                        {% else %}
-                                                                На данный момент нельзя добавлять варианты к этому товару.
-                                                                <br><br>
-                                                            {% if product.pk is None %}
-                                                                Пожалуйста, сохраните товар, прежде чем пытаться добавить варианты.
-                                                            {% elif product.has_stockrecords %}
-                                                                Вероятно, это связано с тем, что для этого продукта все еще имеются товарные записи.
-                                                                <br>
-                                                                Удалите товарные записи для создания вариативного товара.
-                                                            {% else %}
-                                                                Нет подходящих атрибутов для создания вариаций 
-                                                            {% endif %}
-                                                        {% endif %}
-                                                    </td>
-                                                </tr>
-                                            {% endif %}
-                                        </table>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                {% endif %}
+                                            </table>
+                                        </div>
                                     {% endblock child_products_content %}
                                 </div>
                             {% endwith %}
@@ -658,7 +670,6 @@
                         {% block additional_products %}
                             {% if additional_formset %}
                                 <div class="tab-pane" id="product_additional">
-
                                     {% if has_additionals %}
                                         <div class="tab-pane active mb-3">
                                             <div class="table-header">
@@ -677,7 +688,6 @@
                                             </div>
                                         </div>
                                     {% endif %}
-
                                     {% block additional_products_content %}
                                         {{ additional_formset.management_form }}
                                         {{ additional_formset.non_form_errors }}
@@ -695,7 +705,6 @@
                                 </div>
                             {% endif %}
                         {% endblock additional_products %}
-
                         {% block seo %}
                             {% if full_access %}
                                 <div class="tab-pane" id="seo">

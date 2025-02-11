@@ -75,40 +75,30 @@ def record_products_in_order_task(order_id):
 
 
 @shared_task
-def record_user_order_task(user_id, order_id):
+def record_user_order_task(user_id, order_data):
     """
     Записывает данные о заказе пользователя.
     """
     try:
-        order = (
-            Order.objects.annotate(
-                _num_lines=Count("lines"),
-                _num_items=Sum("lines__quantity"),
-            )
-            .values("total", "date_placed", "_num_lines", "_num_items")
-            .get(id=order_id)
-        )
         record = UserRecord.objects.filter(user_id=user_id)
         affected = record.update(
             num_orders=F("num_orders") + 1,
-            num_order_lines=F("num_order_lines") + order["_num_lines"],
-            num_order_items=F("num_order_items") + order["_num_items"],
-            total_spent=F("total_spent") + order["total"],
-            date_last_order=order["date_placed"],
+            num_order_lines=F("num_order_lines") + order_data["num_lines"],
+            num_order_items=F("num_order_items") + order_data["num_items"],
+            total_spent=F("total_spent") + order_data["total"],
+            date_last_order=order_data["date_placed"],
         )
         if not affected:
             UserRecord.objects.create(
                 user_id=user_id,
                 num_orders=1,
-                num_order_lines=order["_num_lines"],
-                num_order_items=order["_num_items"],
-                total_spent=order["total"],
-                date_last_order=order["date_placed"],
+                num_order_lines=order_data["num_lines"],
+                num_order_items=order_data["num_items"],
+                total_spent=order_data["total"],
+                date_last_order=order_data["date_placed"],
             )
     except Exception as e:
-        logger.error(
-            f"{e} при записи заказа пользователя (order_id={order_id}, user_id={user_id})"
-        )
+        logger.error(f"{e} при записи заказа пользователя (user_id={user_id})")
 
 
 @shared_task
