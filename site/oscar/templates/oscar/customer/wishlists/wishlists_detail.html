@@ -71,7 +71,7 @@
                                                                 {% if product and product.is_public %}
                                                                     <a href="{{ line.product.get_absolute_url }}">{{ line.name }}</a>
                                                                 {% else %}
-                                                                    <em>{{ line.name }} (Временно недоступен)</em>
+                                                                    {{ line.name }} (Временно недоступен)
                                                                 {% endif %}
                                                             </a>
                                                         </div>

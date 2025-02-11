@@ -1,7 +1,8 @@
 from collections import namedtuple
 from decimal import Decimal as D
 
-from django.db.models import Q, F
+from django.db.models.functions import Coalesce
+from django.db.models import Q, F, Value
 
 from oscar.core.loading import get_class, get_model
 
@@ -235,7 +236,7 @@ class UseStoreStockRecord:
         filter_field = "product__parent_id" if product.is_parent else "product_id"
         base_query = Q(**{filter_field: product.id, "is_public": True})
         if product.get_product_class().track_stock:
-            base_query &= Q(num_in_stock__gt=F("num_allocated"))
+            base_query &= Q(num_in_stock__gt=Coalesce(F("num_allocated"), Value(0)))
 
         return StockRecord.objects.filter(base_query)
 

@@ -183,7 +183,7 @@ class UpdateSourceView(UpdateView):
                 pay_id = trx.payment_id
                 if pay_id:
                     source_reference = trx.source.reference
-                    payment_method = PaymentManager(source_reference).get_method()
+                    payment_method = PaymentManager(source_reference, request.user).get_method()
                     payment_api = payment_method.get_payment_api(pay_id)
                     refund_id = trx.refund_id
                     refund_api = payment_method.get_refund_api(refund_id)
@@ -330,7 +330,7 @@ class AddTransactionView(CreateView):
         try:
             source = form.cleaned_data.get("source")
             amount = form.cleaned_data.get("amount")
-            reference = "Добавлено пользователем " + str(self.request.user.username)
+            reference = "Сотрудник " + str(self.request.user.username)
             status = form.cleaned_data.get("status")
             paid = form.cleaned_data.get("paid")
             code = form.cleaned_data.get("code")
@@ -424,7 +424,7 @@ class RefundTransactionView(DetailView):
             self.object = self.get_object()
             amount = D(request.POST.get("amount"))
             source_reference = self.object.source.reference
-            payment_method = PaymentManager(source_reference).get_method()
+            payment_method = PaymentManager(source_reference, request.user).get_method()
 
             payment_method.refund(
                 transaction=self.object,

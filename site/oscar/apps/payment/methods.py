@@ -31,83 +31,52 @@ class PaymentManager:
     Payment method will be chosen.
     """
 
-    def __init__(self, source_reference=None):
+    def __init__(self, source_reference=None, user=None):
         self.source_reference = source_reference
+        self.user = user
 
     def get_method(self):
         if self.source_reference == "ONLINECARD":
-            return Yoomoney(self.source_reference)
+            return Yoomoney(self.source_reference, self.user)
         if self.source_reference == "ELECTRON":
-            return CardOffline(self.source_reference)
+            return CardOffline(self.source_reference, self.user)
         else:
-            return Cash(self.source_reference)
+            return Cash(self.source_reference, self.user)
 
     @classmethod
     def get_sources(self, pk):
         return Source.objects.filter(order_id=pk).select_related("order")
 
-    @classmethod
-    def get_last_source(self, pk: int):
-        sources = self.get_sources(pk)
-        return sources.last()
 
-    @classmethod
-    def get_paid_money(self, pk: int):
-        sources = self.get_sources(pk)
-        sum = 0
-        for source in sources:
-            sum += source.amount_debited
-
-        return sum
-
-    @classmethod
-    def get_available_for_refund_money(self, pk: int):
-        sources = self.get_sources(pk)
-        sum = 0
-        for source in sources:
-            sum += source.amount_available_for_refund
-
-        return sum
-
-    @classmethod
-    def get_refunded_money(self, pk: int):
-        sources = self.get_sources(pk)
-        sum = 0
-        for source in sources:
-            sum += source.amount_refunded
-
-        return sum
-
-    @classmethod
-    def get_allocated_money(self, pk: int):
-        order_total = Order.objects.get(id=pk).total
-        sum = order_total - self.get_paid_money(pk)
-
-        return sum
-
-
-class PaymentMethodHelper(object):
-    def __init__(self, payment_method):
+class PaymentMethod(object):
+    def __init__(self, payment_method, user):
         self.success_url = f"https://{settings.ALLOWED_HOSTS[0]}{thank_you_url}"
         self.payment_method = payment_method
+        self.user = user
 
-    def get_method(self):
-        return self.payment_method
+    def pay(self, order, source, amount=None, email=None):
+        raise NotImplementedError("A PaymentMethod must define a pay method ")
 
-    def get_transactions(self, payment_source):
-        return Transaction.objects.filter(source_id=payment_source.id)
+    def refund(self, transaction, amount=None):
+        raise NotImplementedError("A PaymentMethod must define a refund method ")
 
-    def payment_status_list(self):
-        return settings.PAYMENT_STATUS
-
-    def refund_status_list(self):
-        return settings.REFUND_STATUS
-
-    def payment_status_order(self):
-        return settings.PAYMENT_ORDER_STATUS
-
-    def refund_status_order(self):
-        return settings.REFUND_ORDER_STATUS
+    def add_event(
+        self, order, transaction, transaction_status_list=None, updated=False
+    ):
+        event_type, __ = PaymentEventType.objects.get_or_create(
+            name=self.get_status(transaction_status_list, transaction.status, updated)
+        )
+        event = PaymentEvent(
+            event_type=event_type,
+            amount=transaction.amount,
+            reference=transaction.event_reference(),
+        )
+        event.order = order
+        event.save()
+        for line in order.lines.all():
+            PaymentEventQuantity.objects.create(
+                event=event, line=line, quantity=line.quantity
+            )
 
     def get_status(self, status_list, tnx_status, updated):
         if updated:
@@ -118,24 +87,6 @@ class PaymentMethodHelper(object):
             return status_list["canceled"]
         elif tnx_status == "pending":
             return status_list["pending"]
-
-    def add_event(
-        self, order, transaction, transaction_status_list=None, updated=False
-    ):
-        event_type, __ = PaymentEventType.objects.get_or_create(
-            name=self.get_status(transaction_status_list, transaction.status, updated)
-        )
-        event = PaymentEvent(
-            event_type=event_type,
-            amount=transaction.amount.value,
-            reference=transaction.id,
-        )
-        event.order = order
-        event.save()
-        for line in order.lines.all():
-            PaymentEventQuantity.objects.create(
-                event=event, line=line, quantity=line.quantity
-            )
 
     def change_order_status(self, tnx_status, tnx_type, order):
         current_status = order.status
@@ -159,139 +110,23 @@ class PaymentMethodHelper(object):
         if new_status and new_status != current_status:
             order.set_status(new_status)
 
+    def get_method(self):
+        return self.payment_method
 
-class PaymentMethod(PaymentMethodHelper):
-    def pay(self, order, source, amount=None, email=None):
-        raise NotImplementedError("A PaymentMethod must define a pay method ")
+    def get_transactions(self, payment_source):
+        return Transaction.objects.filter(source_id=payment_source.id)
 
-    def refund(self, transaction, amount=None):
-        raise NotImplementedError("A PaymentMethod must define a refund method ")
+    def payment_status_list(self):
+        return settings.PAYMENT_STATUS
 
-    def get_payment_api(self, pay_id):
-        raise NotImplementedError(
-            "A PaymentMethod must define a get_payment_api method "
-        )
+    def refund_status_list(self):
+        return settings.REFUND_STATUS
 
-    def get_refund_api(self, refund_id):
-        raise NotImplementedError(
-            "A PaymentMethod must define a get_refund_api method "
-        )
+    def payment_status_order(self):
+        return settings.PAYMENT_ORDER_STATUS
 
-    def update(self, source, payment=None, refund=None):
-        refund_updated = False
-        payment_updated = False
-
-        if isinstance(refund, RefundResponse):
-            refund_updated = self.update_refund(refund, source)
-
-        if isinstance(payment, PaymentResponse):
-            payment_updated = self.update_payment(payment, source)
-
-        if refund_updated:
-            self.change_order_status(
-                tnx_status=refund.status,
-                tnx_type="refund",
-                order=source.order,
-            )
-        elif payment_updated:
-            self.change_order_status(
-                tnx_status=payment.status,
-                tnx_type="payment",
-                order=source.order,
-            )
-
-    def update_payment(self, payment, source):
-        payment_transactions = self.get_transactions(source).filter(txn_type="Payment")
-
-        if payment.id in payment_transactions.values_list("payment_id", flat=True):
-            return self.update_payment_transaction(payment, source)
-        else:
-            self.create_payment_transaction(payment, source)
-            return True
-
-    def create_payment_transaction(self, payment, source):
-        if payment.payment_method:
-            reference = payment.payment_method.title
-        else:
-            reference = str(source.reference) + " Payment"
-
-        source.new_payment(
-            amount=payment.amount.value,
-            reference=reference,
-            status=payment.status,
-            paid=payment.paid,
-            refundable=payment.refundable,
-            receipt=payment.receipt_registration,
-            payment_id=payment.id,
-        )
-
-        self.add_event(
-            order=source.order,
-            transaction=payment,
-            transaction_status_list=self.payment_status_list(),
-        )
-
-    def update_payment_transaction(self, payment, source):
-        if payment.payment_method:
-            reference = payment.payment_method.title
-        else:
-            reference = str(source.reference) + " Payment"
-
-        updated = source.update_payment(
-            amount=payment.amount.value,
-            reference=reference,
-            paid=payment.paid,
-            refundable=payment.refundable,
-            status=payment.status,
-            receipt=payment.receipt_registration or False,
-            payment_id=payment.id,
-        )
-
-        if updated:
-            self.add_event(order=source.order, transaction=payment, updated=True)
-
-        return updated
-
-    def update_refund(self, refund, source):
-        refund_transactions = self.get_transactions(source).filter(txn_type="Refund")
-
-        if refund.id in refund_transactions.values_list("refund_id", flat=True):
-            self.create_refund_transaction(refund, source)
-            return True
-        else:
-            return self.update_refund_transaction(refund, source)
-
-    def create_refund_transaction(self, refund, source, amount=None):
-        if amount is None:
-            amount = refund.amount.value
-
-        source.new_refund(
-            amount=amount,
-            reference=str(source.reference) + " Refund",
-            status=refund.status,
-            receipt=refund.receipt_registration,
-            refund_id=refund.id,
-        )
-
-        self.add_event(
-            order=source.order,
-            transaction=refund,
-            transaction_status_list=self.refund_status_list(),
-        )
-
-    def update_refund_transaction(self, refund, source):
-        updated = source.update_refund(
-            amount=refund.amount.value,
-            reference=str(source.reference) + " Refund",
-            status=refund.status,
-            receipt=refund.receipt_registration or False,
-            refund_id=refund.id,
-        )
-
-        if updated:
-            self.add_event(order=source.order, transaction=refund, updated=True)
-
-        return updated
+    def refund_status_order(self):
+        return settings.REFUND_ORDER_STATUS
 
     def __str__(self) -> str:
         return self.payment_method
@@ -335,10 +170,16 @@ class Yoomoney(PaymentMethod):
         "ТБ": "terabyte",
     }
 
+    # Payment
+
     def pay(self, order, source, amount=None, email=None):
         try:
             if amount is None:
-                amount = order.total
+                amount_value = order.total
+                currency = order.currency
+            else:
+                amount_value = amount.money
+                currency = amount.currency
 
             if email is None:
                 email = order.user.email
@@ -353,7 +194,7 @@ class Yoomoney(PaymentMethod):
 
             builder = PaymentRequestBuilder()
             builder.set_amount(
-                {"value": amount.money, "currency": amount.currency}
+                {"value": amount_value, "currency": currency}
             ).set_confirmation(
                 {"type": ConfirmationType.REDIRECT, "return_url": self.success_url}
             ).set_capture(
@@ -375,6 +216,71 @@ class Yoomoney(PaymentMethod):
             raise UnableToTakePayment(f"Ошибка создания платежа ЮКасса {e}")
 
         return payment
+
+    def update_payment(self, payment, source):
+        payment_transactions = self.get_transactions(source).filter(txn_type="Payment")
+
+        if payment.id in payment_transactions.values_list("payment_id", flat=True):
+            return self.update_payment_transaction(payment, source)
+        else:
+            self.create_payment_transaction(payment, source)
+            return True
+
+    def create_payment_transaction(self, payment, source):
+        if payment.payment_method:
+            reference = payment.payment_method.title
+        elif self.user:
+            reference = "Сотрудник " + str(self.user.username)
+        else:
+            reference = str(source.reference) + " Payment"
+
+        transaction = source.new_payment(
+            amount=payment.amount.value,
+            reference=reference,
+            status=payment.status,
+            paid=payment.paid,
+            refundable=payment.refundable,
+            receipt=payment.receipt_registration,
+            payment_id=payment.id,
+        )
+
+        self.add_event(
+            order=source.order,
+            transaction=transaction,
+            transaction_status_list=self.payment_status_list(),
+        )
+
+    def update_payment_transaction(self, payment, source):
+        if payment.payment_method:
+            reference = payment.payment_method.title
+        else:
+            reference = str(source.reference) + " Payment"
+
+        transaction = source.update_payment(
+            amount=payment.amount.value,
+            reference=reference,
+            paid=payment.paid,
+            refundable=payment.refundable,
+            status=payment.status,
+            receipt=payment.receipt_registration or False,
+            payment_id=payment.id,
+        )
+
+        if transaction:
+            self.add_event(order=source.order, transaction=transaction, updated=True)
+            return True
+
+        return False
+
+    def get_payment_api(self, pay_id):
+        try:
+            responce = Payment.find_one(pay_id)
+        except Exception:
+            return None
+
+        return responce
+
+    # Refund
 
     def refund(self, transaction, amount=None):
         try:
@@ -431,13 +337,57 @@ class Yoomoney(PaymentMethod):
 
         return refund
 
-    def get_payment_api(self, pay_id):
-        try:
-            responce = Payment.find_one(pay_id)
-        except Exception:
-            return None
+    def update_refund(self, refund, source):
+        refund_transactions = self.get_transactions(source).filter(txn_type="Refund")
 
-        return responce
+        if refund.id in refund_transactions.values_list("refund_id", flat=True):
+            self.create_refund_transaction(refund, source)
+            return True
+        else:
+            return self.update_refund_transaction(refund, source)
+
+    def create_refund_transaction(self, refund, source, amount=None):
+        if amount is None:
+            amount = refund.amount.value
+
+        if self.user:
+            reference = "Сотрудник " + str(self.user.username)
+        else:
+            reference = str(source.reference) + " Refund"
+
+        transaction = source.new_refund(
+            amount=amount,
+            reference=reference,
+            status=refund.status,
+            receipt=refund.receipt_registration,
+            refund_id=refund.id,
+        )
+
+        self.add_event(
+            order=source.order,
+            transaction=transaction,
+            transaction_status_list=self.refund_status_list(),
+        )
+
+    def update_refund_transaction(self, refund, source):
+        if self.user:
+            reference = "Сотрудник " + str(self.user.username)
+        else:
+            reference = str(source.reference) + " Refund"
+
+        transaction = source.update_refund(
+            amount=refund.amount.value,
+            reference=reference,
+            status=refund.status,
+            receipt=refund.receipt_registration or False,
+            refund_id=refund.id,
+        )
+
+        if transaction:
+            self.add_event(order=source.order, transaction=transaction, updated=True)
+            return True
+
+        return False
 
     def get_refund_api(self, refund_id):
         try:
@@ -446,6 +396,31 @@ class Yoomoney(PaymentMethod):
             return None
 
         return responce
+
+    # Helpers
+
+    def update(self, source, payment=None, refund=None):
+        refund_updated = False
+        payment_updated = False
+
+        if isinstance(refund, RefundResponse):
+            refund_updated = self.update_refund(refund, source)
+
+        if isinstance(payment, PaymentResponse):
+            payment_updated = self.update_payment(payment, source)
+
+        if refund_updated:
+            self.change_order_status(
+                tnx_status=refund.status,
+                tnx_type="refund",
+                order=source.order,
+            )
+        elif payment_updated:
+            self.change_order_status(
+                tnx_status=payment.status,
+                tnx_type="payment",
+                order=source.order,
+            )
 
     def _receipt_items(self, order):
         item_list = []
@@ -487,44 +462,59 @@ class Yoomoney(PaymentMethod):
 
 class Cash(PaymentMethod):
     def pay(self, order, source, amount=None, email=None):
-        pass
+        if amount is None:
+            amount_value = order.total
+        else:
+            amount_value = amount.money
+
+        self.create_payment_transaction(order, source, amount_value)
+
+    def create_payment_transaction(self, order, source, amount):
+        if self.user:
+            reference = "Сотрудник " + str(self.user.username)
+        else:
+            reference = str(source.reference) + " Payment"
+
+        transaction = source.new_payment(
+            amount=amount,
+            reference=reference,
+            status="succeeded",
+        )
+
+        self.add_event(
+            order=order,
+            transaction=transaction,
+            transaction_status_list=self.payment_status_list(),
+        )
 
     def refund(self, transaction, amount=None):
         transaction.refundable = False
         transaction.save()
+
+        if amount is None:
+            amount = transaction.amount
+
+        self.create_refund_transaction(transaction.source, amount)
         return transaction
 
-    def create_refund_transaction(self, payment, source, amount):
-        refund = source.new_refund(
+    def create_refund_transaction(self, source, amount):
+        if self.user:
+            reference = "Сотрудник " + str(self.user.username)
+        else:
+            reference = str(source.reference) + " Refund"
+
+        transaction = source.new_refund(
             amount=amount,
-            reference=str(source.reference) + " Refund",
+            reference=reference,
             status="succeeded",
         )
 
         self.add_event(
             order=source.order,
-            transaction=refund,
+            transaction=transaction,
             transaction_status_list=self.refund_status_list(),
         )
 
 
-class CardOffline(PaymentMethod):
-    def pay(self, order, source, amount=None):
-        pass
-
-    def refund(self, transaction, amount=None):
-        transaction.refundable = False
-        transaction.save()
-
-    def create_refund_transaction(self, payment, source, amount):
-        refund = source.new_refund(
-            amount=amount,
-            reference=str(source.reference) + " Refund",
-            status="succeeded",
-        )
-
-        self.add_event(
-            order=source.order,
-            transaction=refund,
-            transaction_status_list=self.refund_status_list(),
-        )
+class CardOffline(Cash):
+    pass

@@ -88,7 +88,6 @@ class EvotorAPICloud:
         """
         self.cloud_token = cloud_token
         self.base_url = base_url
-
         self.headers = {
             "X-Authorization": self.cloud_token,
             "Authorization": f"Bearer {self.cloud_token}",
@@ -1834,20 +1833,18 @@ class EvotorDocClient(EvotorAPICloud):
         error_msgs = []
         try:
             json_valid = True
-            created = False
             try:
                 evotor_id = order_json.get("id")
                 order = Order.objects.get(evotor_id=evotor_id)
                 serializer = OrderSerializer(order, data=order_json)
             except Order.DoesNotExist:
-                created = True
                 serializer = OrderSerializer(data=order_json)
 
             if serializer.is_valid():
                 order = serializer.save()
 
                 for line in order.lines.all():
-                    if line.product.get_product_class().track_stock:
+                    if line.stockrecord.can_track_allocations:
                         if line.stockrecord and line.stockrecord.num_in_stock > 0:
                             line.stockrecord.update(
                                 num_in_stock=Greatest(

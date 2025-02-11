@@ -5902,17 +5902,19 @@ pre {
     box-shadow: 0 0 6px rgba(0, 0, 0, .07);
     overflow: hidden;
     border-radius: 10px;
+    max-width: 725px;
 }
 
 .alert::before {
-    content: ""; 
+    content: "";
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
-    width: 5px; 
+    width: 5px;
     background-color: transparent;
 }
+
 .alert-link {
     font-weight: 700;
 }
@@ -5920,80 +5922,92 @@ pre {
 .alert-primary {
     color: #002d5d;
 }
+
 .alert-primary::before {
     background-color: var(--color-info)
 }
+
 /* .alert-primary hr {
 border-top-color: #9fcdff;
 } */
 .alert-primary .alert-link {
-color: #002752;
+    color: #002752;
 }
-    
+
 .alert-success {
-color: #044813;
+    color: #044813;
 }
+
 .alert-success::before {
-background-color: var(--color-background-green)
+    background-color: var(--color-background-green)
 }
+
 /* .alert-success hr {
 border-top-color: #b1dfbb;
 } */
 .alert-success .alert-link {
-color: #0b2e13;
+    color: #0b2e13;
 }
-  
+
 .alert-light {
-color: #383d41;
+    color: #383d41;
 }
+
 .alert-light::before {
-background-color: var(--color-button-primary)
+    background-color: var(--color-button-primary)
 }
+
 /* .alert-light hr {
 border-top-color: #c8cbcf;
 } */
 .alert-light .alert-link {
-color: #202326;
+    color: #202326;
 }
 
 
 .alert-info {
-color: #0c5460;
+    color: #0c5460;
 }
+
 .alert-info::before {
-background-color: var(--color-info)
+    background-color: var(--color-info)
 }
+
 /* .alert-info hr {
 border-top-color: #abdde5;
 } */
 .alert-info .alert-link {
-color: #062c33;
+    color: #062c33;
 }
-  
+
 .alert-warning {
-color: #856404;
+    color: #856404;
 }
+
 .alert-warning::before {
-background-color: #ffc107;
+    background-color: #ffc107;
 }
+
 /* .alert-warning hr {
 border-top-color: #ffe8a1;
 } */
 .alert-warning .alert-link {
-color: #533f03;
+    color: #533f03;
 }
-  
+
 .alert-danger {
-color: #721c24;
+    color: #721c24;
 }
+
 .alert-danger::before {
-background-color: var(--color-secondary)
+    background-color: var(--color-secondary)
 }
+
 /* .alert-danger hr {
 border-top-color: #f1b0b7;
 } */
 .alert-danger .alert-link {
-color: #491217;
+    color: #491217;
 }
 
 
@@ -6184,7 +6198,7 @@ color: #491217;
     color: #fff;
     background-color: #242424;
     box-shadow: 0 4px 4px rgba(0, 0, 0, .04), 0 4px 20px rgba(0, 0, 0, .1);
-    pointer-events: all    
+    pointer-events: all
 }
 
 .app__mobile {
@@ -6199,7 +6213,7 @@ color: #491217;
 
 @media screen and (min-width:768px) {
 
-    .app__nav {        
+    .app__nav {
         background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(15px);
     }
@@ -6220,7 +6234,7 @@ color: #491217;
         padding-bottom: 76px;
     }
 
-    .app__cookies{
+    .app__cookies {
         bottom: 1rem;
         right: unset;
         max-width: 430px;
@@ -7225,20 +7239,25 @@ html.drawer .app__side {
     user-select: none
 }
 
-.image--unavailable::before{
+.image--unavailable::before {
     content: "";
     /* content: "Недоступно"; */
-    position: absolute; /* Абсолютное позиционирование относительно родителя */
+    position: absolute;
+    /* Абсолютное позиционирование относительно родителя */
     height: 100%;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.6); /* Полупрозрачный белый фон */
-    color: #555555; /* Цвет текста */
-    font-size: .9rem; /* Размер шрифта */
+    background-color: rgba(255, 255, 255, 0.6);
+    /* Полупрозрачный белый фон */
+    color: #555555;
+    /* Цвет текста */
+    font-size: .9rem;
+    /* Размер шрифта */
     font-weight: 500;
-    z-index: 10; /* Поверх изображения */
+    z-index: 10;
+    /* Поверх изображения */
     pointer-events: none;
 }
 
@@ -7367,7 +7386,7 @@ html.drawer .app__side {
 
 }
 
-.text-area{
+.text-area {
     scroll-padding-top: 10px;
 }
 
@@ -7540,7 +7559,7 @@ html.drawer .app__side {
 }
 
 
-.not-valid{
+.not-valid {
     border: 2px solid #ffe0e0 !important;
 }
 
@@ -7601,7 +7620,7 @@ html.drawer .app__side {
 }
 
 .button--main {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -7625,11 +7644,11 @@ html.drawer .app__side {
 }
 
 .button--map:disabled .button__value,
-.button__value--saved{
+.button__value--saved {
     display: none;
 }
 
-.button--map:disabled .button__value--saved{
+.button--map:disabled .button__value--saved {
     display: block;
 }
 
@@ -7673,7 +7692,7 @@ html.drawer .app__side {
     height: 30px
 }
 
-.button-order{
+.button-order {
     transition: border-color .7s linear;
 }
 
@@ -7683,20 +7702,21 @@ html.drawer .app__side {
     border-radius: 50%;
     background: none !important;
     border: 3px solid;
-    font-size:0;
-    border-color:#e0e0e09e;
-    border-left-color:#ac090b;
+    font-size: 0;
+    border-color: #e0e0e09e;
+    border-left-color: #ac090b;
     animation: sending 2s 0.25s linear infinite;
     margin: 0 auto;
 }
 
 @keyframes sending {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .button--empty-cart {
@@ -7729,7 +7749,7 @@ html.drawer .app__side {
 }
 
 .button--dish {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -7778,7 +7798,7 @@ html.drawer .app__side {
 }
 
 .button--outline {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -7884,7 +7904,7 @@ html.drawer .app__side {
 }
 
 .button--white {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -8032,7 +8052,7 @@ html.drawer .app__side {
 }
 
 .address-button {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -8139,7 +8159,7 @@ html.drawer .app__side {
 
 
 .app-nav__title {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -8193,7 +8213,7 @@ html.drawer .app__side {
 }
 
 .app-nav__button {
-    
+
     font-size: .9rem;
     line-height: 1.825rem;
     font-weight: 400;
@@ -8346,7 +8366,7 @@ html.drawer .app__side {
 
 .app-footer__link,
 .app-footer__name-block {
-    
+
     font-style: normal;
     color: #ffffff;
     opacity: 0.9;
@@ -8494,7 +8514,7 @@ html.drawer .app__side {
 }
 
 .app-footer__pickup {
-    
+
     font-size: 1rem;
     line-height: .875rem;
     font-weight: 500;
@@ -8633,7 +8653,7 @@ html.drawer .app__side {
 
 .app-mobile a span,
 .app-mobile button span {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -8661,7 +8681,7 @@ html.drawer .app__side {
 }
 
 .app__cookies__text {
-    
+
     font-size: .75rem;
     line-height: 1rem;
     font-weight: 400;
@@ -8738,7 +8758,7 @@ html.drawer .app__side {
 
 
 .dish-image__amount {
-    
+
     font-size: 2rem;
     line-height: 2.75rem;
     font-weight: 500;
@@ -8944,7 +8964,7 @@ html.drawer .app__side {
 .prices__price_discounts {
     display: flex;
     flex-direction: column;
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -8960,7 +8980,7 @@ html.drawer .app__side {
 
 .nav__title,
 .prices__price {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -8981,7 +9001,7 @@ html.drawer .app__side {
 
 .prices__base,
 .prices__price-before {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9010,7 +9030,7 @@ html.drawer .app__side {
 }
 
 .prices--big .prices__price {
-    
+
     font-size: 1.25rem;
     line-height: 1.625rem;
     font-weight: 500;
@@ -9024,7 +9044,7 @@ html.drawer .app__side {
 
 .prices--mobile .prices__price,
 .prices--mobile .prices__price-before {
-    
+
     font-weight: 400;
     font-style: normal;
     font-weight: 400 !important
@@ -9048,7 +9068,7 @@ html.drawer .app__side {
 
     .prices--big .prices__price,
     .prices__price {
-        
+
         font-weight: 500;
         font-style: normal
     }
@@ -9059,7 +9079,7 @@ html.drawer .app__side {
     }
 
     .prices--small .prices__price {
-        
+
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -9067,7 +9087,7 @@ html.drawer .app__side {
     }
 
     .prices--mobile .prices__price {
-        
+
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -9075,7 +9095,7 @@ html.drawer .app__side {
     }
 
     .prices--mobile .prices__price-before {
-        
+
         font-size: .75rem;
         line-height: .875rem;
         font-weight: 400;
@@ -9141,7 +9161,7 @@ html.drawer .app__side {
 }
 
 .dish__name {
-    
+
     font-size: 1rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9167,7 +9187,7 @@ html.drawer .app__side {
     color: #608d42
 }
 
-.dish__profit{
+.dish__profit {
     font-size: .75rem;
     line-height: .9rem;
     font-weight: 400;
@@ -9185,7 +9205,7 @@ html.drawer .app__side {
 }
 
 .dish__mobile-total-label {
-    
+
     font-size: .625rem;
     line-height: .75rem;
     font-weight: 400;
@@ -9206,7 +9226,7 @@ html.drawer .app__side {
 
     .dish__mobile-total-label,
     .dish__profit {
-        
+
         font-weight: 400;
         font-style: normal
     }
@@ -9228,7 +9248,7 @@ html.drawer .app__side {
 
 .cart-additional__title,
 .cart-additional__view-all {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -9275,7 +9295,7 @@ html.drawer .app__side {
 
     .cart-additional__title,
     .cart-additional__view-all {
-        
+
         font-weight: 500;
         font-style: normal
     }
@@ -9310,7 +9330,7 @@ html.drawer .app__side {
 
 .special-offer__text,
 .special-offer__text-percent {
-    
+
     font-size: .9rem;
     font-weight: 400;
     font-style: normal
@@ -9351,7 +9371,7 @@ html.drawer .app__side {
 }
 
 .error-list__error {
-    
+
     font-size: .9rem;
     line-height: 1rem;
     font-weight: 400;
@@ -9377,7 +9397,7 @@ html.drawer .app__side {
 
 @media screen and (min-width:768px) {
     .error-list__error {
-        
+
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -9469,7 +9489,7 @@ html.drawer .app__side {
 }
 
 .order-button--value {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -9535,7 +9555,7 @@ input[type="number"]:focus {
 }
 
 .dish-order__name {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9548,7 +9568,7 @@ input[type="number"]:focus {
 }
 
 .dish-order__toppings {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -9577,7 +9597,7 @@ input[type="number"]:focus {
 }
 
 .dish-order__unavailable-text {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9586,7 +9606,7 @@ input[type="number"]:focus {
 }
 
 .dish-order__count {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -9725,7 +9745,7 @@ input[type="number"]:focus {
 
 .cart__error-notification h2,
 .cart__title {
-    
+
     font-weight: 500;
     font-style: normal;
     color: #000
@@ -9738,7 +9758,7 @@ input[type="number"]:focus {
 
 .cart__clear {
     display: none;
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9776,7 +9796,7 @@ input[type="number"]:focus {
 }
 
 .cart__total-text {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9827,7 +9847,7 @@ input[type="number"]:focus {
 
 .auth-agreement__item-title,
 .auth-agreement__title {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9903,7 +9923,7 @@ input[type="number"]:focus {
 
 
 .modal__title {
-    
+
     font-size: 1.5rem;
     line-height: 1.625rem;
     font-weight: 500;
@@ -9920,7 +9940,7 @@ input[type="number"]:focus {
 
 .modal__message,
 .modal__repeat-text {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -9932,7 +9952,7 @@ input[type="number"]:focus {
 }
 
 .modal__repeat-button {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -10018,7 +10038,7 @@ input[type="number"]:focus {
 }
 
 .overlay__text {
-    
+
     font-size: 1.125rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10033,7 +10053,7 @@ input[type="number"]:focus {
     }
 
     .overlay__text {
-        
+
         font-size: 1.25rem;
         line-height: 1.625rem;
         font-weight: 500;
@@ -10063,7 +10083,7 @@ input[type="number"]:focus {
 }
 
 .confirm__text {
-    
+
     font-size: 1.125rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10082,7 +10102,7 @@ input[type="number"]:focus {
     }
 
     .confirm__text {
-        
+
         font-size: 1.25rem;
         line-height: 1.625rem;
         font-weight: 500;
@@ -10122,7 +10142,7 @@ input[type="number"]:focus {
 
 .order-dialog__text,
 .order-dialog__title {
-    
+
     font-weight: 500;
     font-style: normal
 }
@@ -10148,7 +10168,7 @@ input[type="number"]:focus {
     }
 
     .order-dialog__title {
-        
+
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -10188,7 +10208,7 @@ input[type="number"]:focus {
 }
 
 .categories__tab-name {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10234,7 +10254,7 @@ input[type="number"]:focus {
 
 @media screen and (min-width:1024px) {
     .categories__tab-name {
-        
+
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -10387,7 +10407,7 @@ input[type="number"]:focus {
     }
 }
 
-.error-badge{
+.error-badge {
     font-size: .75rem;
     font-weight: 400;
     font-style: normal;
@@ -10398,7 +10418,7 @@ input[type="number"]:focus {
 
 }
 
-.border-r15{
+.border-r15 {
     border-radius: 15px;
 }
 
@@ -10448,7 +10468,7 @@ input[type="number"]:focus {
 }
 
 .dish-info-modal__title {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10472,7 +10492,7 @@ input[type="number"]:focus {
 
 .dish-info-modal__group-item,
 .dish-info-modal__group-name {
-    
+
     font-weight: 400;
     font-style: normal
 }
@@ -10512,7 +10532,7 @@ input[type="number"]:focus {
     }
 
     .dish-info-modal__title {
-        
+
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -10525,7 +10545,7 @@ input[type="number"]:focus {
 
     .dish-info-modal__group-item,
     .dish-info-modal__group-name {
-        
+
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -10878,14 +10898,14 @@ html::-webkit-scrollbar-thumb {
 }
 
 .app h1 {
-    
+
     font-style: normal
 }
 
 
 
 .app .button--address {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -10908,7 +10928,7 @@ html::-webkit-scrollbar-thumb {
 }
 
 .app .button--info {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -10994,7 +11014,7 @@ html::-webkit-scrollbar-thumb {
 
 @media screen and (min-width:1024px) {
     .app .button--big {
-        
+
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -11011,7 +11031,7 @@ html::-webkit-scrollbar-thumb {
 /* --------------------------------2GIS-------------------------------- */
 
 
-.search__suggest{
+.search__suggest {
     border-radius: 15px !important;
     -webkit-box-shadow: 0px 0px 15px rgba(0, 0, 0, .09);
     box-shadow: 0px 0px 15px rgba(0, 0, 0, .09);
@@ -11028,14 +11048,14 @@ html::-webkit-scrollbar-thumb {
 }
 
 
-.search__suggest::-webkit-scrollbar{
+.search__suggest::-webkit-scrollbar {
     width: 0;
     height: 0;
 }
 
 
 .search__suggest-item {
-    
+
     font-size: .9rem;
     line-height: 1.25rem;
     font-weight: 400;
@@ -11052,14 +11072,14 @@ html::-webkit-scrollbar-thumb {
 }
 
 .search__suggest-item.hover,
-.search__suggest-item:hover{
+.search__suggest-item:hover {
     background-color: var(--color-button-primary) !important;
 }
 
 
 .search__suggest-item.selected {
     background-color: var(--color-background-green) !important;
-} 
+}
 
 
 
@@ -11148,7 +11168,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .suggest--list-item {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11166,7 +11186,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .suggest--list-item div {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11176,7 +11196,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .suggest--list-item div:last-child {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -11198,7 +11218,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .app .input input,
 .app .input textarea {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11239,7 +11259,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .input__label {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11257,7 +11277,7 @@ ymaps[class*="search__suggest-item_selected"] {
     top: 11px;
     /* top: calc(50% - .7rem); */
     -webkit-transform: scale(.8) translateY(-50%);
-    transform: scale(.8)  translateY(-50%)
+    transform: scale(.8) translateY(-50%)
 }
 
 .app .input__padding input,
@@ -11370,7 +11390,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .input-search input {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11387,7 +11407,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .input-search input::-webkit-input-placeholder {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11396,7 +11416,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .input-search input::-moz-placeholder {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11405,7 +11425,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .input-search input:-ms-input-placeholder {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11414,7 +11434,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .input-search input::-ms-input-placeholder {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11423,7 +11443,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .input-search input::placeholder {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11471,7 +11491,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .switch__label {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11509,7 +11529,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .app .switch__label {
-        
+
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -11597,7 +11617,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 }
 
-.error-code{
+.error-code {
     font-size: 3rem !important;
 }
 
@@ -11605,7 +11625,7 @@ ymaps[class*="search__suggest-item_selected"] {
     display: none;
 }
 
-.header_store{
+.header_store {
     font-weight: 500;
     transition: all .1s linear;
     cursor: pointer;
@@ -11616,7 +11636,7 @@ ymaps[class*="search__suggest-item_selected"] {
     transition: background-color 0.3s, border-color 0.3s;
 }
 
-.store_select.checked .header_store{
+.store_select.checked .header_store {
     color: var(--color-secondary);
 }
 
@@ -11625,7 +11645,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 
-.header_address{
+.header_address {
     font-size: .8rem;
     color: #888;
 }
@@ -11644,7 +11664,7 @@ ymaps[class*="search__suggest-item_selected"] {
     scrollbar-width: 10px;
 }
 
-.child-cats{
+.child-cats {
     overflow-x: auto;
     padding: .25rem 0;
 }
@@ -11677,7 +11697,7 @@ ymaps[class*="search__suggest-item_selected"] {
     text-wrap: nowrap;
 }
 
-.cat_item--child{
+.cat_item--child {
     background: var(--color-background-green);
     color: #004528;
 }
@@ -11810,7 +11830,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .app .main-phone__link,
 .app .main-phone__notification {
-    
+
     font-style: normal;
     color: #e5e5e5
 }
@@ -11836,7 +11856,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .app .working-hours__content,
 .app .working-hours__title {
-    
+
     font-style: normal;
     color: #e3e3e3
 }
@@ -11875,8 +11895,9 @@ ymaps[class*="search__suggest-item_selected"] {
     color: #fff;
 
 }
+
 .app .badge,
-.app .notif-badge{
+.app .notif-badge {
     font-size: .75rem;
     font-weight: 400;
     font-style: normal;
@@ -11886,6 +11907,7 @@ ymaps[class*="search__suggest-item_selected"] {
     width: 1.25rem;
     line-height: 1.25rem;
 }
+
 .app .badge {
     position: absolute;
     top: -.5rem;
@@ -11923,7 +11945,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .deferred__select {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11938,7 +11960,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .deferred .title {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -11968,7 +11990,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .app .deferred .day.h,
 .app .deferred .day span {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -12021,7 +12043,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .region-select__label {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -12088,7 +12110,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .region-select__list-button {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -12154,7 +12176,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .tab button {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -12249,7 +12271,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .bread {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -12388,7 +12410,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .weight {
-    
+
     font-size: .75rem;
     font-weight: 400;
     font-style: normal;
@@ -12400,7 +12422,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .short-description {
-    
+
     font-size: .8rem;
     line-height: 1rem;
     font-weight: 400;
@@ -12451,7 +12473,7 @@ ymaps[class*="search__suggest-item_selected"] {
         margin-top: 0;
     }
 
-    .app .weight--additional{
+    .app .weight--additional {
         margin-left: 0;
         margin-top: .5rem;
     }
@@ -12498,7 +12520,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .app .checkbox__name {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -12662,20 +12684,20 @@ ymaps[class*="search__suggest-item_selected"] {
 
 }
 
-.upsell-header{
+.upsell-header {
     display: flex;
     align-items: end;
     padding-top: 1rem;
     border-top: 1px solid #f3f3f7;
 }
 
-.upsell-messages h3{
+.upsell-messages h3 {
     color: var(--color-secondary);
     margin-left: .5rem;
     line-height: unset;
 }
 
-.upsell-scroll{
+.upsell-scroll {
     display: flex;
     margin-bottom: 1rem;
     overflow-x: scroll;
@@ -12689,7 +12711,7 @@ ymaps[class*="search__suggest-item_selected"] {
     width: 0;
 }
 
-.upsell-item{
+.upsell-item {
     padding: 1.25rem;
     background-color: rgb(243, 243, 247);
     border-radius: 15px;
@@ -12700,11 +12722,11 @@ ymaps[class*="search__suggest-item_selected"] {
     transition: .15s linear all;
 }
 
-.upsell-item:last-child{
+.upsell-item:last-child {
     margin-right: 0;
 }
 
-.upsell-item:hover{
+.upsell-item:hover {
     background-color: rgb(248, 248, 248);
     transform: scale(0.99);
 }
@@ -12765,7 +12787,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .page-not-found__text-bold,
 .page-not-found h1 {
-    
+
     font-weight: 500;
     font-style: normal
 }
@@ -12784,7 +12806,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .page-not-found__phone,
 .page-not-found__text {
-    
+
     font-style: normal;
     color: #000
 }
@@ -12797,7 +12819,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .page-not-found h1 {
-        
+
         font-size: 3rem;
         line-height: 4rem;
         font-weight: 800;
@@ -12811,7 +12833,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .page-not-found__phone,
     .page-not-found__text {
-        
+
         font-weight: 500;
         font-style: normal
     }
@@ -12892,7 +12914,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .news-item__content,
 .news-item__name,
 .news-item__published {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -12924,7 +12946,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .news-item__name,
     .news-item__published {
-        
+
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -12948,7 +12970,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .news__title,
 .news__view-all {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -12981,7 +13003,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .news__title,
     .news__view-all {
-        
+
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -13079,7 +13101,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .page-description__button {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -13139,7 +13161,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .page-description__button {
-        
+
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -13164,7 +13186,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .home__category-link,
 .home__subtitle h2 {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -13185,7 +13207,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .home__cat-title h2,
     .home__subtitle h2 {
-        
+
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -13289,7 +13311,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .dish-toppings__name {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -13300,7 +13322,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .dish-toppings__name {
-        
+
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -13309,7 +13331,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .dish-actions__block-name {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -13319,7 +13341,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .dish-actions__block-name {
-        
+
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -13344,7 +13366,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .accordion__description,
 .accordion__title {
-    
+
     font-style: normal
 }
 
@@ -13369,7 +13391,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .accordion__content {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -13390,7 +13412,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .accordion__description,
     .accordion__title {
-        
+
         line-height: 1.25rem;
         font-weight: 500;
         font-style: normal
@@ -13407,7 +13429,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .accordion__content {
-        
+
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -13430,7 +13452,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .dish-combo__dish-name {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -13466,7 +13488,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .dish-combo .accordion__title {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -13475,7 +13497,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .dish-combo .accordion__description {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -13510,7 +13532,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .dish-combo .accordion__title {
-        
+
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -13518,7 +13540,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .dish-combo .accordion__description {
-        
+
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -13575,7 +13597,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .dish-page h1,
 .dish-page h2,
 .dish-page h3 {
-    
+
     font-style: normal
 }
 
@@ -13615,7 +13637,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .dish-page__consist,
 .dish-page__nav .weight {
-    
+
     font-size: .9rem;
     font-weight: 400;
     font-style: normal
@@ -13636,13 +13658,14 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .dish-page__ingredients p {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
     font-style: normal;
     color: #717171
 }
+
 /* 
 .dish-page__nutritional {
     border: 1px solid #f3f3f7;
@@ -13794,7 +13817,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .dish-page h1 {
-        
+
         font-weight: 500;
         font-style: normal
     }
@@ -13816,7 +13839,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .dish-page__nav .weight {
-        
+
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -13853,12 +13876,12 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 @media screen and (min-width:1024px) {
-    
-    .cart-page__totals{
+
+    .cart-page__totals {
         width: 330px;
     }
 
-    .cart-page__wrapper{
+    .cart-page__wrapper {
         width: calc(100% - 346px);
     }
 
@@ -13922,7 +13945,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .menu__filter-button {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -13968,7 +13991,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .menu__filter-button {
-        
+
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -13991,7 +14014,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .page__block,
 .page h1 {
-    
+
     font-style: normal;
     color: #000
 }
@@ -14060,7 +14083,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .map__placemark-text {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14145,7 +14168,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .address-info__info-result p {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14189,7 +14212,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .checkout__detail-text {
-    
+
     font-size: .9rem;
     line-height: 1.2rem;
     font-weight: 400;
@@ -14266,7 +14289,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .delivery__info h1,
 .delivery__info h2,
 .delivery__info h3 {
-    
+
     font-size: 1.25rem;
     line-height: 1.625rem;
     font-weight: 500;
@@ -14281,7 +14304,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .delivery__regions-block,
 .delivery__text-block {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14325,10 +14348,10 @@ ymaps[class*="search__suggest-item_selected"] {
         max-width: 665px
     }
 
-    .delivery__info h1,f
-    .delivery__info h2,
+    .delivery__info h1,
+    f .delivery__info h2,
     .delivery__info h3 {
-        
+
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -14359,7 +14382,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .actions__actions-action-title {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -14368,7 +14391,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .actions__actions-action-description {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14392,7 +14415,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .offer-dish,
 .actions__action-detail-content h1 {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -14401,7 +14424,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .actions__action-detail-text {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14433,7 +14456,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .actions__action-detail-dishes-title h2 {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -14447,7 +14470,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .actions__actions-action-title {
-        
+
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -14469,7 +14492,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .offer-dish,
     .actions__action-detail-content h1 {
-        
+
         font-weight: 500;
         font-style: normal
     }
@@ -14495,7 +14518,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .actions__action-detail-dishes-title h2 {
-        
+
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -14517,7 +14540,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .search__not-found {
-    
+
     font-size: 1.25rem;
     line-height: 1.625rem;
     font-weight: 500;
@@ -14533,7 +14556,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .search__not-found {
-        
+
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -14582,7 +14605,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .gift-list__gift-notification,
 .gift-list__gift-title {
-    
+
     font-size: .75rem;
     line-height: .875rem;
     font-weight: 400;
@@ -14600,7 +14623,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .gift-list__gift-notification,
     .gift-list__gift-title {
-        
+
         font-size: .9rem;
         line-height: 1.125rem;
         font-weight: 400;
@@ -14621,7 +14644,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .delivery-balloon__minutes {
-    
+
     font-size: .9rem;
     line-height: 1rem;
     font-weight: 500;
@@ -14629,7 +14652,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .delivery-balloon__text {
-    
+
     color: #dfdfdf;
     font-size: .75rem;
     line-height: .75rem;
@@ -14666,16 +14689,18 @@ ymaps[class*="search__suggest-item_selected"] {
     transform: translateX(calc(-50% + 12px));
     background-color: #140e38;
     border-radius: 15px;
-    
-    font-size: .9rem;;
+
+    font-size: .9rem;
+    ;
     color: #fff;
     white-space: nowrap
 }
 
 .icon-delivery__title_error {
     background: var(--color-secondary);
-    
-    font-size: .9rem;;
+
+    font-size: .9rem;
+    ;
     white-space: normal;
     width: 120px
 }
@@ -14738,7 +14763,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .delivery-map--error {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -14766,7 +14791,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .delivery-map--address,
 .delivery-map--note {
-    
+
     font-style: normal;
     color: #000
 }
@@ -14845,7 +14870,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .delivery-map--placemark-text {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14894,7 +14919,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .delivery-map__engineering {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -14931,7 +14956,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .delivery-map--address {
-        
+
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -14950,7 +14975,7 @@ ymaps[class*="search__suggest-item_selected"] {
     .delivery-map--error,
     .delivery-map--note,
     .delivery-map__engineering {
-        
+
         line-height: 1.25rem;
         font-weight: 500;
         font-style: normal
@@ -14994,7 +15019,6 @@ ymaps[class*="search__suggest-item_selected"] {
     -webkit-box-flex: 1;
     -ms-flex: 1 0 100%;
     flex: 1 0 100%
-
 }
 
 .delivery--line1 {
@@ -15205,7 +15229,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .cutlery__text {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -15236,7 +15260,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .order__subtitle h2,
 .order__title,
 .order__title h1 {
-    
+
     font-weight: 500;
     font-style: normal;
     color: #000
@@ -15269,7 +15293,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .order__delivery-time,
 .order__info-list,
 .order__info-list .prices__price {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -15278,7 +15302,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .order__info-total {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -15299,7 +15323,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .order-checkout__items {
-    
+
     font-size: .9rem;
     line-height: 1.2rem;
     font-weight: 400;
@@ -15330,7 +15354,7 @@ ymaps[class*="search__suggest-item_selected"] {
     .order__delivery-time,
     .order__subtitle,
     .order__subtitle h2 {
-        
+
         line-height: 1.25rem;
         font-weight: 500;
         font-style: normal
@@ -15459,7 +15483,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .addresses-list__comment,
 .addresses-list__name {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -15481,7 +15505,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .addresses-list__comment,
     .addresses-list__name {
-        
+
         line-height: 1.25rem;
         font-weight: 500;
         font-style: normal
@@ -15521,7 +15545,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .orders-list-item__title {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -15532,7 +15556,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .orders-list-item__address,
 .orders-list-item__date,
 .orders-list-item__status {
-    
+
     font-size: .9rem;
     line-height: 1.175rem;
     font-weight: 400;
@@ -15559,7 +15583,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .orders-list-item__details {
-    
+
     font-size: .9rem;
     line-height: 1.175rem;
     color: #494949;
@@ -15599,7 +15623,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .orders-list-item__title {
-        
+
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -15609,7 +15633,7 @@ ymaps[class*="search__suggest-item_selected"] {
     .orders-list-item__address,
     .orders-list-item__date,
     .orders-list-item__status {
-        
+
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -15773,7 +15797,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .profile__user-name,
 .profile__user-phone {
-    
+
     font-style: normal;
     pointer-events: none;
     -webkit-user-select: none;
@@ -15819,7 +15843,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 .profile__menu-button,
 .profile__menu-icon {
-    
+
     font-size: .9rem;
     line-height: 1.125rem;
     font-weight: 400;
@@ -15889,7 +15913,7 @@ ymaps[class*="search__suggest-item_selected"] {
 }
 
 .profile__empty {
-    
+
     font-size: 1rem;
     line-height: 1.25rem;
     font-weight: 500;
@@ -15901,7 +15925,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .profile__user-name {
-        
+
         font-size: 1.375rem;
         line-height: 1.5rem;
         font-weight: 500;
@@ -15924,7 +15948,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .profile__menu-button {
-        
+
         font-size: 1rem;
         line-height: 1.25rem;
         font-weight: 500;
@@ -15951,7 +15975,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .profile__empty {
-        
+
         font-size: 1.125rem;
         line-height: 1.25rem;
         font-weight: 500;

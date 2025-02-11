@@ -408,6 +408,10 @@ class Order(models.Model):
             return note.message
 
     @property
+    def order_discounts(self):
+        return self.discounts.all()
+
+    @property
     def basket_discounts(self):
         # This includes both offer- and voucher- discounts.  For orders we
         # don't need to treat them differently like we do for baskets.
@@ -589,6 +593,12 @@ class Line(models.Model):
     An order line
     """
 
+    evotor_id = models.CharField(
+        "ID Эвотор",
+        max_length=128,
+        blank=True,
+        null=True,
+    )
     order = models.ForeignKey(
         "order.Order",
         on_delete=models.CASCADE,
@@ -612,7 +622,6 @@ class Line(models.Model):
         verbose_name="Магазин",
     )
     store_name = models.CharField("Название магазина", max_length=128, blank=True)
-    evotor_code = models.CharField("Артикул в магазине", max_length=128)
     store_line_notes = models.TextField("Примечание магазина", blank=True)
 
     # We keep a link to the stockrecord used for this line which allows us to
@@ -635,7 +644,7 @@ class Line(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        verbose_name="товар",
+        verbose_name="Товар",
     )
     name = models.CharField("Название товара", max_length=255)
     # article can be null because it's usually set as the product's article, and that
@@ -669,12 +678,6 @@ class Line(models.Model):
 
     # Stores often want to assign some status to each line to help with their
     # own business processes.
-    # is_active = models.BooleanField(
-    #     "Активен",
-    #     default=True,
-    #     db_index=True,
-    #     help_text="Активена позиция или нет",
-    # )
     status = models.CharField("Статус", max_length=255, blank=True)
 
     #: Order status pipeline.  This should be a dict where each (key, value)
@@ -773,8 +776,9 @@ class Line(models.Model):
     def additions(self):
         additions = [
             f"{attribute.additional.name} ({attribute.value} шт)"
-            for attribute in self.attributes.filter(additional__isnull=False)
-            if attribute.value > 0
+            for attribute in self.attributes.filter(
+                additional__isnull=False, value__gt=0
+            )
         ]
         return ", ".join(additions) if additions else ""
 
@@ -1265,8 +1269,9 @@ class OrderDiscount(models.Model):
 
     # We need to distinguish between basket discounts, shipping discounts and
     # 'deferred' discounts.
-    BASKET, SHIPPING, DEFERRED = "Корзина", "Доставка", "Отложенная"
+    ORDER, BASKET, SHIPPING, DEFERRED = "Заказ", "Корзина", "Доставка", "Отложенная"
     CATEGORY_CHOICES = (
+        (ORDER, "Скидка на элементы корзины"),
         (BASKET, "Скидка на элементы корзины"),
         (SHIPPING, "Скидка на доставку"),
         (DEFERRED, "Отложенная скидка"),
@@ -1287,6 +1292,14 @@ class OrderDiscount(models.Model):
     # Post-order offer applications can return a message to indicate what
     # action was taken after the order was placed.
     message = models.TextField(blank=True)
+
+    @property
+    def display_name(self):
+        offer_name = f"Предложение: {self.voucher_code}" if self.offer_name else self.offer_name
+        voucher_code = f"Промокод: {self.voucher_code}" if self.voucher_code else self.voucher_code
+        message = self.message
+        return " | ".join(filter(None, [offer_name, voucher_code, message]))
+        
 
     @property
     def is_basket_discount(self):

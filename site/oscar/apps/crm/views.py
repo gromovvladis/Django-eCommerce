@@ -354,7 +354,6 @@ class CRMDocsEndpointView(APIView):
             f"request: {json.dumps(request_info, ensure_ascii=False)}",
             TelegramMessage.TECHNICAL,
         )
-        logger.info(f"request: {json.dumps(request_info, ensure_ascii=False)}")
 
         not_allowed = is_valid_user_token(request)
         if not_allowed:

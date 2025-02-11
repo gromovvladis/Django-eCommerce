@@ -8,8 +8,8 @@
 {% load compress %}
 {% load static %}
 
-{% block title %}{{ page_title }}Заказ №{{ order.number }} | {{ block.super }}{% endblock %}
-{% block nav_title_center %}Заказ №{{ order.number }}{% endblock %}
+{% block title %}{{ page_title }} | {{ block.super }}{% endblock %}
+{% block nav_title_center %}{{ page_title }}{% endblock %}
 
 {% block breadcrumbs %}
     <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
@@ -94,7 +94,7 @@
                                         <a href="{{ product.get_absolute_url }}" aria-current="page"
                                         class="dish-order__name router-link-exact-active router-link-active"
                                         data-id="dish-order-link">
-                                        {{ line.name }} - {{ line.quantity }} {{ product.product_class.measure_name }}
+                                        {{ product.get_name }} - {{ line.quantity }} {{ product.get_product_class.measure_name }}
                                         </a><br>
                                     {% else %}
                                         <span>{{ line.name }} - {{ line.quantity }} шт.</span><br>

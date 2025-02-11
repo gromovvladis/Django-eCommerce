@@ -1,7 +1,7 @@
 import datetime
 
 from django.db import models, router
-from django.db.models import F, signals
+from django.db.models import F, signals, Value
 from django.db.models.functions import Coalesce, Least
 from django.utils.functional import cached_property
 from django.utils import timezone
@@ -310,6 +310,7 @@ class StockRecord(models.Model):
     #: Number of items in stock
     num_in_stock = models.PositiveIntegerField(
         "Количество в наличии",
+        default=0,
         blank=True,
         null=True,
         help_text="В наличии",
@@ -550,7 +551,7 @@ class StockRecordOperation(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    num = models.PositiveIntegerField(
+    num = models.IntegerField(
         "Количество",
         blank=False,
         null=False,
@@ -573,8 +574,8 @@ class StockRecordOperation(models.Model):
         verbose_name_plural = "Изменение товарных записей"
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
         self.create_operation()
+        super().save(*args, **kwargs)
 
     def create_operation(self):
         operation_methods = {
@@ -582,25 +583,35 @@ class StockRecordOperation(models.Model):
             self.WRITE_OFF: self.write_off,
             self.INVENTORY: self.inventory,
         }
-        return operation_methods.get(self.type, lambda: None)()
+        operation_method = operation_methods.get(self.type)
+        if operation_method:
+            return operation_method()
 
     def accept(self):
         return self._update_stock(abs(self.num))
 
     def write_off(self):
+        """Списание с учетом доступного количества"""
+        if self.num > self.stockrecord.net_stock_level:
+            raise ValueError(
+                f"Нельзя списать больше, чем доступно с учетом заказаных товаров. Доступно {self.stockrecord.net_stock_level}"
+            )
+
         return self._update_stock(-abs(self.num))
 
     def inventory(self):
-        old_num = self.stockrecord.num_in_stock
+        """Обновляет `num_in_stock` и фиксирует разницу в `num`"""
+        old_num = self.stockrecord.num_in_stock or 0
         self.stockrecord.num_in_stock = abs(self.num)
-        self.stockrecord.save()
-        self.num = abs(self.num) - old_num
-        self.save()
+        self.stockrecord.save(update_fields=["num_in_stock"])
+        self.num = self.num - old_num
         return self.stockrecord.num_in_stock
 
     def _update_stock(self, delta):
-        self.stockrecord.num_in_stock += delta
-        self.stockrecord.save()
+        """Обновление остатков на складе"""
+        old_num = self.stockrecord.num_in_stock or 0
+        self.stockrecord.num_in_stock = old_num + delta
+        self.stockrecord.save(update_fields=["num_in_stock"])
         return self.stockrecord.num_in_stock
 
 

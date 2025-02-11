@@ -198,7 +198,6 @@ class OrderCreator(object):
             # Store details
             "store": store,
             "store_name": store.name,
-            "evotor_code": stockrecord.evotor_code,
             "stockrecord": stockrecord,
             # Product details
             "product": product,
