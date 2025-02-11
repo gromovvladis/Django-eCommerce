@@ -15,6 +15,7 @@ PaymentManager = get_class("payment.methods", "PaymentManager")
 Yoomoney = get_class("payment.methods", "Yoomoney")
 
 Source = get_model("payment", "Source")
+Transaction = get_model("payment", "Transaction")
 
 logger = logging.getLogger("oscar.payment")
 
@@ -42,7 +43,11 @@ class UpdatePayment(APIView):
                         payment_api = payment_method.get_payment_api(pay_id)
                         refund_id = trx.refund_id
                         refund_api = payment_method.get_refund_api(refund_id)
-                        payment_method.update(source, payment_api, refund_api)
+                        payment_method.update(
+                            source=source,
+                            payment=payment_api,
+                            refund=refund_api,
+                        )
                     except Exception as e:
                         logger.error(
                             f"Failed to update payment for source {source.id}. Error: {e}"
@@ -111,7 +116,10 @@ class YookassaPaymentHandler(APIView):
             event_json = json.loads(request.body)
             notification = WebhookNotificationFactory().create(event_json)
             trans_id = notification.object.id
-            source = Source.objects.get(Q(payment_id=trans_id) | Q(refund_id=trans_id))
+            transaction = Transaction.objects.get(
+                Q(payment_id=trans_id) | Q(refund_id=trans_id)
+            )
+            source = transaction.source
             source_reference = source.reference
             payment = PaymentManager(source_reference).get_method()
 
@@ -134,10 +142,10 @@ class YookassaPaymentHandler(APIView):
                     {"error": "no refund | no payment"}, status=400
                 )
 
-        except Source.DoesNotExist:
-            logger.error("Источник не найден для trans_id: %s", trans_id)
-        except Source.MultipleObjectsReturned:
-            logger.error("Найдено несколько источников для trans_id: %s", trans_id)
+        except Transaction.DoesNotExist:
+            logger.error("Транзакция не найдена для trans_id: %s", trans_id)
+        except Transaction.MultipleObjectsReturned:
+            logger.error("Найдено несколько транзакций для trans_id: %s", trans_id)
         except json.JSONDecodeError as e:
             logger.error(
                 "Ошибка декодирования JSON: %s. Тело запроса: %s", e, request.body

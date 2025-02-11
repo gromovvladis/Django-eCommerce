@@ -21,10 +21,10 @@
 {% block layout %}
     {% block navbar %}
         <nav class="navbar navbar-expand-lg navbar-light navbar-accounts">
-            <div class="container-navbar fill-width fill-height d-flex justify-content-between">
+            <div class="container-navbar fill-width d-flex justify-content-between">
                 <div>
-                    <button class="navbar-toggler navbar-toggler--mobile" type="button" data-id="navbar-toggler">
-                        <i class="fa-solid fa-bars align-middle"></i>
+                    <button class="navbar-toggler navbar-toggler--mobile align-items-center fill-height" type="button" data-id="navbar-toggler">
+                        <i class="fa-solid fa-bars"></i>
                     </button>
                 </div>
                 <div class="badges-navbar position-relative">
@@ -44,13 +44,13 @@
         <div class="navbar-menu">
             {% block dashboard_nav %}
                 {% dashboard_navigation user request as nav_items %}
-                <div class="navbar-expand-lg navbar-light navbar-primary bg-light flex-column flex-shrink-0" data-id="navbar-primary">
-                    <div class="navbar-header py-3 px-1">
-                        {% comment %} <a class="navbar-brand" href="{{ homepage_url }}">
-                            {% icon file_name='footer/logo' size=20 fill="#838383" %}
-                        </a> {% endcomment %}
-                        <button class="navbar-toggler navbar-toggler--mobile p-0" data-id="navbar-toggler">
-                            {% icon file_name='interface/arrow-home' size=30 stroke='#007bff'%}
+                <div class="navbar-expand-lg navbar-light navbar-primary bg-dark flex-column flex-shrink-0" data-id="navbar-primary">
+                    <div class="navbar-header position-relative py-3 px-1">
+                        <a class="navbar-brand" href="{{ homepage_url }}">
+                            {% icon file_name='footer/logo' size=30 fill="#838383" %}
+                        </a>
+                        <button class="navbar-toggler navbar-toggler--mobile toggler-open p-0" data-id="navbar-toggler">
+                            {% icon file_name='interface/arrow-home' size=30 stroke='#fff'%}
                         </button>
                     </div>
                     <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
@@ -66,7 +66,7 @@
                                     </span>
                                     <div class="dropdown-item-badge dropdown-item-badge--nav" data-id="{{ item.label }}">{% if item.notif %}{{ item.notif }}{% endif %}</div>
                                 </button>
-                                <div class="dropdown-list collapse {% if request.path|tab:item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
+                                <div class="dropdown-list dropdown-list--nav collapse {% if request.path|tab:item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
                                     {% for subitem in item.children %}
                                         <a class="dropdown-item dropdown-item--nav nav-dropdown{% if request.path|subtab:subitem.url %} active{% endif %}" href="{{ subitem.url }}">
                                             {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
