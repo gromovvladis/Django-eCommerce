@@ -11,7 +11,7 @@
     {% elif record.source == 'CASH' %}
         Наличные
     {% else %}
-        {{ record.source }}
+        {{ record.source|default:"Нет оплаты" }}
     {% endif %}
     {% if record.amount_paid %}
         {{ record.amount_paid|currency:record.currency }}

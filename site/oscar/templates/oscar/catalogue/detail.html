@@ -119,12 +119,12 @@
                                     </div>
                                 </div>
                                 {% endif %}
-                                {% include "oscar/catalogue/partials/add_to_basket_form.html" with currency_symbol=currency_symbol session=session %}
+                                {% include "oscar/catalogue/partials/add_to_cart_form.html" with currency_symbol=currency_symbol session=session %}
                             </div>
                             {% if session.availability.is_available_to_buy %}
                                 <div itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/Offer" class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
                                     {% with price=session.price.money %}
-                                        <button id="add_to_cart_btn" type="submit" form="add_to_basket_form" data-id="dish-submit-button" class="button fill-width button--main justify-center shrink" {% if not price %}disabled{% endif %}>
+                                        <button id="add-to-cart-btn" type="submit" form="add-to-cart-form" data-id="dish-submit-button" class="button fill-width button--main justify-center shrink" {% if not price %}disabled{% endif %}>
                                             <span class="button__wrapper">
                                                 <span class="button__value {% if not price %}d-none{% endif %}" data-id="dish-price-value">В корзину за 
                                                     <span data-id="dish-price-button">

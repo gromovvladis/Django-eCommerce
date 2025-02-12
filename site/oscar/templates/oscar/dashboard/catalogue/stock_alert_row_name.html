@@ -3,10 +3,10 @@
 <div class="d-flex flex-column">
     {% if product_access %}
         <a href="{% url 'dashboard:catalogue-product' record.stockrecord.product.id %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
-            {{ record.name }}
+            {{ record.stockrecord.product.get_name }}
         </a>
     {% else %}
-        <span>{{ record.name }}</span>
+        <span>{{ record.stockrecord.product.get_name }}</span>
     {% endif %}
     {% if record.stockrecord.product.is_child and record.stockrecord.product.variant %}
         <span class="small">{{ record.stockrecord.product.variant }}</span>

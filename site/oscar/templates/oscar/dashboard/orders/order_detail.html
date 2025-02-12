@@ -207,7 +207,7 @@
                     <span id="dropdownOrderStatus" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-status dropdown-toggle {% if order.status == "Завершён" %}btn-success{% elif order.status == "Отменен" %}btn-danger{% elif order.status == "Готовится" %}btn-info{% else %}btn-warning{% endif %}">
                         {{ order.status|default:"N/A" }}
                     </span>
-                    <div class="dropdown-menu actions dropdown-menu-right dropdown-status" aria-labelledby="dropdownOrderStatus">
+                    <div class="dropdown-menu actions dropdown-menu-right text-right dropdown-status" aria-labelledby="dropdownOrderStatus">
                         <h6 class="dropdown-header">Изменить статус</h6>
                         <div class="dropdown-divider"></div>
                         {% if order.next_status %}
@@ -492,7 +492,7 @@
                                     <h3>Изменить статус заказа:</h3>
                                     {% if order_status_form.has_choices %}
                                         <div class="form-inline fill-width d-flex justify-content-between">
-                                            <div class="form-group form-flex-inline">
+                                            <div class="form-flex-inline">
                                                 {% include "oscar/dashboard/partials/form_fields.html" with form=order_status_form %}
                                             </div>
                                             <input type="hidden" value="change_order_status" name="order_action" />
@@ -538,8 +538,8 @@
                                     </tbody>
                                 {% else %}
                                     <tbody>
-                                        <tr>
-                                            <td class="empty">Нет изменений статуса</td>
+                                        <tr class="empty-tr">
+                                            <td class="empty-td">Нет изменений статуса.</td>
                                         </tr>
                                     </tbody>
                                 {% endif %}
@@ -655,8 +655,8 @@
                                     </tbody>
                                 {% else %}
                                     <tbody>
-                                        <tr>
-                                            <td class="empty">Нет событий доставки.</td>
+                                        <tr class="empty-tr">
+                                            <td class="empty-td">Нет событий доставки.</td>
                                         </tr>
                                     </tbody>
                                 {% endif %}
@@ -773,8 +773,8 @@
                                 </span>
                             </a>
                         </div>
-                        {% if payment_transactions %}
-                            <div class="mobile-table">
+                        <div class="mobile-table">
+                            {% if payment_transactions %}
                                 <table class="table table-striped table-bordered table-hover">
                                     <thead>
                                         <tr>
@@ -837,12 +837,12 @@
                                         {% endfor %}
                                     </tbody>
                                 </table>
-                            </div>
-                        {% else %}
-                            <table class="table table-striped table-bordered table-hover">
-                                <tr><td>Транзакции для этого заказа не найдены.</td></tr>
-                            </table>
-                        {% endif %}
+                            {% else %}
+                                <table class="table table-striped table-bordered table-hover">
+                                    <tr class="empty-tr"><td class="empty-td">Транзакции для этого заказа не найдены.</td></tr>
+                                </table>
+                            {% endif %}     
+                        </div>
                     {% endblock %}
                     {% block payment_events %}
                         {% with events=order.payment_events.all %}
@@ -906,7 +906,7 @@
                                         </tbody>
                                     {% else %}
                                         <tbody>
-                                            <tr><td class="empty">Нет платежных событий.</td></tr>
+                                            <tr class="empty-tr"><td class="empty-td">Нет платежных событий.</td></tr>
                                         </tbody>
                                     {% endif %}
                                 </table>
@@ -1034,8 +1034,8 @@
                                     <tbody>
                                 {% endfor %}
                             {% else %}
-                                <tr>
-                                    <td class="empty">Нет доступных заметок.</td>
+                                <tr class="empty-tr">
+                                    <td class="empty-td">Нет доступных заметок.</td>
                                 </tr>
                             {% endif %}
                         </table>

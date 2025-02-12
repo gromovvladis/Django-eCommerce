@@ -41,15 +41,15 @@ profileForm.addEventListener('submit', function (event) {
             'X-CSRFToken': csrf_token,
         }
     })
-    .then(response => response.json())
-    .then(responseData => {
-        profileMsg.textContent = responseData.message;
-        profileBtn.textContent = 'Сохранить настройки';
-        profileBtn.disabled = false;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        profileBtn.textContent = 'Сохранить настройки';
-        profileBtn.disabled = false;
-    });
+        .then(response => response.json())
+        .then(responseData => {
+            profileMsg.textContent = responseData.message;
+            profileBtn.textContent = 'Сохранить настройки';
+            profileBtn.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            profileBtn.textContent = 'Сохранить настройки';
+            profileBtn.disabled = false;
+        });
 });

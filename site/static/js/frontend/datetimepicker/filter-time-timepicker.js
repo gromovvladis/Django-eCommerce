@@ -34,18 +34,18 @@ datapicker_filter = new AirDatepicker('#id_date_range', {
 });
 
 var inputFields = document.querySelectorAll('[data-id="input-field"]');
-inputFields.forEach(function(wrapper) {
+inputFields.forEach(function (wrapper) {
     var inputField = wrapper.querySelector('[data-id="order-input"]');
 
     if (inputField.value !== "") {
         wrapper.classList.add('input__label-active');
     }
 
-    inputField.addEventListener('focusin', function() {
+    inputField.addEventListener('focusin', function () {
         wrapper.classList.add('input__label-active');
     });
 
-    inputField.addEventListener('focusout', function() {
+    inputField.addEventListener('focusout', function () {
         if (inputField.value === "") {
             wrapper.classList.remove('input__label-active');
         }

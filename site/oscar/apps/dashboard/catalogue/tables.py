@@ -38,27 +38,27 @@ class ProductClassTable(DashboardTable):
         verbose_name="Доп. товары",
         orderable=True,
         order_by="num_additionals",
+        attrs={
+            "th": {"class": "additionals"},
+        },
     )
     num_products = Column(
-        verbose_name="товары",
+        verbose_name="Товары",
         orderable=True,
         order_by="num_products",
+        attrs={
+            "th": {"class": "num_products"},
+        },
     )
     requires_shipping = TemplateColumn(
         verbose_name="Доставка",
         template_name="oscar/dashboard/table/boolean.html",
         order_by=("requires_shipping"),
-        attrs={
-            "th": {"class": "delivery"},
-        },
     )
     track_stock = TemplateColumn(
         verbose_name="Запасы",
         template_name="oscar/dashboard/table/boolean.html",
         order_by=("track_stock"),
-        attrs={
-            "th": {"class": "stock"},
-        },
     )
     actions = TemplateColumn(
         verbose_name="",
@@ -70,7 +70,7 @@ class ProductClassTable(DashboardTable):
     )
 
     icon = "fas fa-list"
-    caption = ngettext_lazy("%s Тип продуков", "%s Типов продуков")
+    caption = ngettext_lazy("%s Тип товара", "%s Типов товаров")
 
     class Meta(DashboardTable.Meta):
         model = ProductClass
@@ -109,7 +109,7 @@ class ProductTable(DashboardTable):
     name = TemplateColumn(
         verbose_name="Имя",
         template_name="oscar/dashboard/catalogue/product_row_name.html",
-        order_by="name",
+        orderable=True,
         attrs={
             "th": {"class": "title"},
         },
@@ -123,13 +123,15 @@ class ProductTable(DashboardTable):
     additionals = TemplateColumn(
         verbose_name="Доп. товары",
         template_name="oscar/dashboard/catalogue/product_row_additionals.html",
-        orderable=True,
         order_by="productadditional",
+        attrs={
+            "th": {"class": "additionals"},
+        },
     )
     options = TemplateColumn(
         verbose_name="Опции",
         template_name="oscar/dashboard/catalogue/product_row_options.html",
-        orderable=False,
+        order_by="product_options",
         attrs={
             "th": {"class": "options"},
         },
@@ -138,11 +140,17 @@ class ProductTable(DashboardTable):
         verbose_name="Варианты",
         template_name="oscar/dashboard/catalogue/product_row_variants.html",
         orderable=True,
+        attrs={
+            "th": {"class": "variants"},
+        },
     )
     cooking_time = TemplateColumn(
         verbose_name="Время приготовления",
         template_name="oscar/dashboard/catalogue/product_row_time.html",
         orderable=True,
+        attrs={
+            "th": {"class": "cooking_time"},
+        },
     )
     is_public = TemplateColumn(
         verbose_name="Доступен",
@@ -489,12 +497,12 @@ class StockAlertTable(DashboardTable):
     name = TemplateColumn(
         verbose_name="Товар",
         template_name="oscar/dashboard/catalogue/stock_alert_row_name.html",
-        orderable=True,
         order_by="name",
     )
-    store = Column(
+    store = TemplateColumn(
         verbose_name="Магазин",
         orderable=True,
+        template_name="oscar/dashboard/catalogue/stock_alert_row_store.html",
     )
     threshold = Column(
         verbose_name="Граница запасов",
@@ -516,7 +524,7 @@ class StockAlertTable(DashboardTable):
     date_created = TemplateColumn(
         verbose_name="Дата",
         template_name="oscar/dashboard/catalogue/stock_alert_row_date.html",
-        order_by="date_created",
+        orderable=True,
     )
     status = TemplateColumn(
         verbose_name="Статус",

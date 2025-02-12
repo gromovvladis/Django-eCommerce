@@ -82,15 +82,21 @@
         </div>
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
-                <div class="d-flex justify-content-end">  
+                <div class="container container-fluid">
+                    <div class="d-flex justify-content-end">
                     <a class="btn btn-secondary mr-2"  href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
                         <i class="fa-regular fa-circle-xmark"></i> 
-                        Отменить
-                    </a>             
-                    <button type="submit" class="btn btn-primary" data-loading-text="Сохранение...">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        Сохранить
+                        <span>
+                            Отменить
+                        </span>
+                    </a>
+                    <button class="btn btn-primary" type="submit" data-loading-text="Сохранение...">
+                        <i class="fa-regular fa-floppy-disk"></i>
+                        <span>
+                            Сохранить
+                        </span>
                     </button>
+                    </div>
                 </div>
             </div>
         {% endblock fixed_actions_group %}

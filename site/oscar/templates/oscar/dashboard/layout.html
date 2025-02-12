@@ -45,11 +45,11 @@
             {% block dashboard_nav %}
                 {% dashboard_navigation user request as nav_items %}
                 <div class="navbar-expand-lg navbar-light navbar-primary bg-dark flex-column flex-shrink-0" data-id="navbar-primary">
-                    <div class="navbar-header position-relative py-3 px-1">
+                    <div class="navbar-header d-flex">
                         <a class="navbar-brand" href="{{ homepage_url }}">
-                            {% icon file_name='footer/logo' size=30 fill="#838383" %}
+                            {% icon file_name='footer/logo' size=25 fill="#838383" %}
                         </a>
-                        <button class="navbar-toggler navbar-toggler--mobile toggler-open p-0" data-id="navbar-toggler">
+                        <button class="navbar-toggler toggler-open p-0" data-id="navbar-toggler">
                             {% icon file_name='interface/arrow-home' size=30 stroke='#fff'%}
                         </button>
                     </div>
@@ -87,19 +87,17 @@
                         </li>
                     {% endfor %}
                     </ul>
-                    <div class="dropdown border-top py-3 px-1"> 
+                    <div class="dropdown border-top pb-0 pt-2 px-1 pt-sm-1 pb-sm-1"> 
                         <button role="button" class="nav-account d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="nav-account" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <div class="rounded-circle">{{ user.get_img }}</div>
                             <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.username }}</span>
                         </button>
                         <ul class="dropdown-menu text-small actions mb-2" aria-labelledby="nav-account">
-                            <li><a class="dropdown-item" href="{% url 'customer:summary' %}">
+                            <li><a class="dropdown-item" href="{% url 'customer:notifications-inbox' %}">
                                     Уведомления
                                     <span class="dropdown-item-badge dropdown-item-badge--nav ml-1">{{ num_unread_notifications|default:"0" }}</span>
                                 </a>
                             </li>
-                            
-            
                             <li><a class="dropdown-item" href="{% url 'customer:summary' %}">Аккаунт</a></li>
                             <li><a class="dropdown-item" href="{{ homepage_url }}">Магазин</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -124,7 +122,7 @@
                 <div class="content">
                     {% include 'oscar/dashboard/partials/alert_messages.html' %}
                     {% block header %}
-                    <div class="page-header d-flex justify-content-between align-items-end">
+                    <div class="page-header d-flex justify-content-between align-items-center">
                         {% block navtext %}{% endblock %}
                     </div>
                     {% endblock %}

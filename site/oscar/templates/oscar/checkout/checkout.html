@@ -44,7 +44,7 @@
                         <h2>Ваш заказ</h2>
                     </div>
                     <div class="promo mb-3">
-                        <form class="promo__input-wrapper d-flex align-center g-1 g-sm-2" id="voucher_form" action="{% url 'checkout:vouchers-add' %}" method="post">
+                        <form class="promo__input-wrapper d-flex align-center g-1 g-sm-2" data-id="voucher-add" action="{% url 'checkout:vouchers-add' %}" method="post">
                             <div data-id="input-field" class="input d-flex align-center fill-width input__padding{% if voucher_form.initial.code %} input__label-active{% endif %}">
                                 <div class="input__wrapper">
                                     <div class="input__label">Промокод</div>
@@ -55,14 +55,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" id="voucher_btn" disabled="disabled" data-id="promo-submit-btn" class="button fill-width button--main button--second justify-center shrink">
+                            <button type="submit" data-id="voucher-btn" disabled="disabled" data-id="promo-submit-btn" class="button fill-width button--main button--second justify-center shrink">
                                 <span class="button__wrapper">
                                     <span class="button__value"> Применить </span>
                                 </span>
                             </button>
                         </form>
                     </div>
-                    <span id="voucher_message" class="info-message"></span>
+                    <span data-id="voucher-message" class="info-message"></span>
                     {% block order_contents %}
                         <div class="order-checkout__items">
                             {% for line in basket.all_lines %}

@@ -10,19 +10,19 @@ function loadAuthModal(redirect_url) {
             'X-CSRFToken': csrf_token,
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        modal.innerHTML = data.auth_modal;
-        authModalLoaded(redirect_url);
-        modal.classList.toggle('d-none');
-        document.body.classList.toggle('fixed');
-    })
-    .catch(error => {
-        console.error('Error fetching auth modal:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            modal.innerHTML = data.auth_modal;
+            authModalLoaded(redirect_url);
+            modal.classList.toggle('d-none');
+            document.body.classList.toggle('fixed');
+        })
+        .catch(error => {
+            console.error('Error fetching auth modal:', error);
+        });
 }
 
-function authModalLoaded(redirect_url=null) {
+function authModalLoaded(redirect_url = null) {
 
     var auth_form = document.getElementById('auth_form');
     var btnSms = auth_form.querySelector('#sms_form_btn');
@@ -32,8 +32,8 @@ function authModalLoaded(redirect_url=null) {
     var phoneInput = auth_form.querySelector('#id_username');
     var codeInput = auth_form.querySelector('#id_password');
     var passwordGroup = auth_form.querySelector('#auth_id_password');
-    
-    auth_form.addEventListener('submit', function(event) {
+
+    auth_form.addEventListener('submit', function (event) {
         event.preventDefault();
         auth_type = event.submitter.name
         btnClickFunc(auth_type);
@@ -52,17 +52,17 @@ function authModalLoaded(redirect_url=null) {
                 'X-CSRFToken': csrf_token,
             },
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status == 200) {
-                successFunc(auth_type, data);
-            } else {
-                errorFunc(auth_type, data);
-            }
-        })
-        .catch(error => {
-            errorFunc(auth_type, error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.status == 200) {
+                    successFunc(auth_type, data);
+                } else {
+                    errorFunc(auth_type, data);
+                }
+            })
+            .catch(error => {
+                errorFunc(auth_type, error);
+            });
     });
 
     function btnClickFunc(authType) {
@@ -90,7 +90,7 @@ function authModalLoaded(redirect_url=null) {
             btnAuth.classList.add('button', 'button--main');
             phoneInput.readOnly = true;
             var seconds = 30;
-            var intId = setInterval(function() {
+            var intId = setInterval(function () {
                 if (seconds > 0) {
                     seconds--;
                     btnSms.textContent = "Повторить SMS: " + seconds;
@@ -122,20 +122,20 @@ function authModalLoaded(redirect_url=null) {
     let phoneStr = '';
     let formattedStr = '';
     let deleteMode = false;
-    
+
     const defaultFormat = '+7 ({0}{1}{2}) {3}{4}{5}-{6}{7}{8}{9}';
 
     phoneInput.addEventListener('keydown', (e) => {
         deleteMode = (e.key === 'Backspace');
     });
-        
+
     phoneInput.addEventListener('input', (e) => {
         if (deleteMode) {
             phoneInput.value = phoneInput.value;
             phoneStr = parsePhoneString(phoneInput.value);
         } else {
             if (e.inputType == 'insertText' && !isNaN(parseInt(e.data))) {
-                if (phoneStr.length <= 10){
+                if (phoneStr.length <= 10) {
                     phoneStr += e.data;
                 }
             }
@@ -152,17 +152,17 @@ function authModalLoaded(redirect_url=null) {
         }
         return formattedStr.indexOf('{') === -1 ? formattedStr : formattedStr.substring(0, formattedStr.indexOf('{'));
     }
-    
+
     function parsePhoneString(str) {
         return str.replace('+7', '').replace(' ', '').replace(' ', '').replace('(', '').replace(')', '').replace('-', '');
     }
 
-    codeInput.addEventListener('input', function() {
+    codeInput.addEventListener('input', function () {
         codeInput.value = codeInput.value.replace(/\D/g, '');
         btnAuth.disabled = codeInput.value.length !== 4;
     });
 
-    codeInput.addEventListener('keypress', function(e) {
+    codeInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             btnAuth.click();

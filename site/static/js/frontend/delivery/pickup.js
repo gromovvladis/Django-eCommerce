@@ -10,13 +10,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function createPickupMap() {
     ymaps.ready(function () {
-
         if (!map) {
             map = new ymaps.Map(mapContainer, {
                 center: MAPCENTER,
                 zoom: 14,
                 controls: [],
-            }, {suppressMapOpenBlock: true});
+            }, { suppressMapOpenBlock: true });
 
             //кнопки зума
             ZoomLayout = ymaps.templateLayoutFactory.createClass(
@@ -25,48 +24,48 @@ function createPickupMap() {
                 ,
                 {
 
-                // Переопределяем методы макета, чтобы выполнять дополнительные действия
-                // при построении и очистке макета.
-                build: function () {
-                    // Вызываем родительский метод build.
-                    ZoomLayout.superclass.build.call(this);
+                    // Переопределяем методы макета, чтобы выполнять дополнительные действия
+                    // при построении и очистке макета.
+                    build: function () {
+                        // Вызываем родительский метод build.
+                        ZoomLayout.superclass.build.call(this);
 
-                    // Привязываем функции-обработчики к контексту и сохраняем ссылки
-                    // на них, чтобы потом отписаться от событий.
-                    this.zoomInCallback = ymaps.util.bind(this.zoomIn, this);
-                    this.zoomOutCallback = ymaps.util.bind(this.zoomOut, this);
+                        // Привязываем функции-обработчики к контексту и сохраняем ссылки
+                        // на них, чтобы потом отписаться от событий.
+                        this.zoomInCallback = ymaps.util.bind(this.zoomIn, this);
+                        this.zoomOutCallback = ymaps.util.bind(this.zoomOut, this);
 
-                    // Начинаем слушать клики на кнопках макета.
-                    document.querySelector('#zoom-in').addEventListener('click', this.zoomInCallback);
-                    document.querySelector('#zoom-out').addEventListener('click', this.zoomOutCallback);
-                },
+                        // Начинаем слушать клики на кнопках макета.
+                        document.querySelector('#zoom-in').addEventListener('click', this.zoomInCallback);
+                        document.querySelector('#zoom-out').addEventListener('click', this.zoomOutCallback);
+                    },
 
-                clear: function () {
-                    // Снимаем обработчики кликов.
-                    document.querySelector('#zoom-in').removeEventListener('click', this.zoomInCallback);
-                    document.querySelector('#zoom-out').removeEventListener('click', this.zoomOutCallback);
+                    clear: function () {
+                        // Снимаем обработчики кликов.
+                        document.querySelector('#zoom-in').removeEventListener('click', this.zoomInCallback);
+                        document.querySelector('#zoom-out').removeEventListener('click', this.zoomOutCallback);
 
-                    // Вызываем родительский метод clear.
-                    ZoomLayout.superclass.clear.call(this);
-                },
+                        // Вызываем родительский метод clear.
+                        ZoomLayout.superclass.clear.call(this);
+                    },
 
-                zoomIn: function () {
-                    var map = this.getData().control.getMap();
-                    map.setZoom(map.getZoom() + 1, {checkZoomRange: true});
-                },
+                    zoomIn: function () {
+                        var map = this.getData().control.getMap();
+                        map.setZoom(map.getZoom() + 1, { checkZoomRange: true });
+                    },
 
-                zoomOut: function () {
-                    var map = this.getData().control.getMap();
-                    map.setZoom(map.getZoom() - 1, {checkZoomRange: true});
-                }
+                    zoomOut: function () {
+                        var map = this.getData().control.getMap();
+                        map.setZoom(map.getZoom() - 1, { checkZoomRange: true });
+                    }
 
-            });
+                });
             var zoomControl = new ymaps.control.ZoomControl({
                 options: {
                     layout: ZoomLayout,
                     position: {
                         bottom: "245px",
-                        right:'10px',
+                        right: '10px',
                     },
                 }
             });
@@ -84,7 +83,7 @@ function createPickupMap() {
                 }
             });
             geolocationControl.events.add('locationchange', function (event) {
-                var geolocation = ymaps.geolocation;        
+                var geolocation = ymaps.geolocation;
                 geolocation.get({
                     provider: 'browser',
                     mapStateAutoApply: false
@@ -96,29 +95,29 @@ function createPickupMap() {
                 });
             });
 
-            var controlsPane = new ymaps.pane.StaticPane(map, { zIndex: 420});
-            map.panes.append('customControls', controlsPane); 
+            var controlsPane = new ymaps.pane.StaticPane(map, { zIndex: 420 });
+            map.panes.append('customControls', controlsPane);
             var placesPane = map.panes.get('controls').getElement();
             placesPane.classList.add('map-custom-controls', 'd-flex', 'flex-column', 'align-center', 'justify-center');
-    
+
             map.controls.add(zoomControl);
             map.controls.add(geolocationControl);
 
             store = new ymaps.Placemark(
                 [56.050918, 92.904378], {
-                    iconCaption: "Mikado",
-                },{
-                    iconLayout: 'default#imageWithContent',
-                    iconImageHref: '/static/svg/map/pin-pickup.svg',
+                iconCaption: "Mikado",
+            }, {
+                iconLayout: 'default#imageWithContent',
+                iconImageHref: '/static/svg/map/pin-pickup.svg',
 
-                    iconImageSize: [40, 40],
-                    iconImageOffset: [-30, -30],
+                iconImageSize: [40, 40],
+                iconImageOffset: [-30, -30],
 
-                    hasBalloon: false,
-                    hasHint: false,
-                });
+                hasBalloon: false,
+                hasHint: false,
+            });
             map.geoObjects.add(store);
 
-        } 
+        }
     });
 }

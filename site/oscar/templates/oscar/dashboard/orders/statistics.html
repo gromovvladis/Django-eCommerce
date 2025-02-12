@@ -89,8 +89,8 @@
             {% endif %}
         </div>
     </div>
-    <div class="page-header d-flex justify-content-between mb-2">
-        <h1>Заказы</h1>
+    <div class="page-header mb-4 mb-sm-3">
+        <h1>Статистика</h1>
     </div>
     <ul class="nav nav-tabs mb-3 mb-lg-4 p-0" role="tablist">
         {% block nav_tabs %}
@@ -339,9 +339,13 @@
                                 {% for prd in top_products_days %}
                                     <tr>
                                         <th class="col-md-9">
-                                            <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.name }}
-                                            </a>
+                                            {% if prd.product %}
+                                                <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
+                                                    {{ prd.name }}
+                                                </a>
+                                            {% else %}
+                                                <span>{{ prd.name }}</span>
+                                            {% endif %}
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
                                         <td class="col-md-3" >{{ prd.total_sum|currency }}</td>
@@ -607,9 +611,13 @@
                                 {% for prd in top_products_weeks %}
                                     <tr>
                                         <th class="col-md-9">
-                                            <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.name }}
-                                            </a>
+                                            {% if prd.product %}
+                                                <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
+                                                    {{ prd.name }}
+                                                </a>
+                                            {% else %}
+                                                <span>{{ prd.name }}</span>
+                                            {% endif %}
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
                                         <td class="col-md-3" >{{ prd.total_sum|currency }}</td>
@@ -874,9 +882,13 @@
                                 {% for prd in top_products_months %}
                                     <tr>
                                         <th class="col-md-9">
-                                            <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.name }}
-                                            </a>
+                                            {% if prd.product %}
+                                                <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
+                                                    {{ prd.name }}
+                                                </a>
+                                            {% else %}
+                                                <span>{{ prd.name }}</span>
+                                            {% endif %}
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
                                         <td class="col-md-3" >{{ prd.total_sum|currency }}</td>
@@ -1140,9 +1152,13 @@
                                 {% for prd in top_products_years %}
                                     <tr>
                                         <th class="col-md-9">
-                                            <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
-                                                {{ prd.name }}
-                                            </a>
+                                            {% if prd.product %}
+                                                <a href="{% url 'dashboard:catalogue-product' pk=prd.product %}">
+                                                    {{ prd.name }}
+                                                </a>
+                                            {% else %}
+                                                <span>{{ prd.name }}</span>
+                                            {% endif %}
                                         </th>
                                         <td class="col-md-3" >{{ prd.total_quantity }}</td>
                                         <td class="col-md-3" >{{ prd.total_sum|currency }}</td>

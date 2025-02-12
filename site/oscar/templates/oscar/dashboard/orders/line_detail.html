@@ -39,7 +39,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>Тип продукта</th><td>
+                    <th>Тип товара</th><td>
                         {% if line.product %}
                             {{ line.product.get_product_class }}
                         {% else %}
@@ -117,7 +117,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="2">Нет созданых событий доставки</td>
+                            <td colspan="2">Нет созданых событий доставки.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -148,7 +148,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="4">Нет созданых событий доставки</td>
+                            <td colspan="4">Нет созданых событий доставки.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -177,7 +177,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="3">Нет созданых событий оплаты</td>
+                            <td colspan="3">Нет созданых событий оплаты.</td>
                         </tr>
                     {% endfor %}
                 </tbody>

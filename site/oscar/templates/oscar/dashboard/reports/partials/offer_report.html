@@ -19,7 +19,7 @@
                 {% endfor %}
             </tbody>
         {% else %}
-            <tr><td class="empty">Нет примененных предложений за заданный период</td></tr>
+            <tr class="empty-tr"><td class="empty-td">Нет примененных предложений за заданный период.</td></tr>
         {% endif %}
     </table>
     {% include "oscar/dashboard/partials/pagination.html" %}

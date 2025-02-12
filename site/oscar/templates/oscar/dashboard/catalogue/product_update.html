@@ -398,8 +398,8 @@
                                                             </tr>
                                                         {% endfor %}
                                                     {% else %}
-                                                        <tr>
-                                                            <td class="empty">
+                                                        <tr class="empty-tr">
+                                                            <td class="empty-td">
                                                                 Товара нет в наличии ни в одном из магазинов.
                                                             </td>
                                                         </th>
@@ -530,8 +530,8 @@
                                                         </tbody>
                                                     {% else %}
                                                         <tbody>
-                                                            <tr>
-                                                                <td class="empty" colspan="6">
+                                                            <tr class="empty-tr">
+                                                                <td class="empty-td" colspan="6">
                                                                     Нет истории изменений.
                                                                 </td>
                                                             </th>
@@ -618,10 +618,10 @@
                                                     </tbody>
                                                 {% else %}
                                                     <tbody>
-                                                        <tr>
-                                                            <td class="p-3" colspan="5">
+                                                        <tr class="empty-tr">
+                                                            <td class="empty-td">
                                                                 {% if product.can_be_parent %}
-                                                                    У этого товара нет созданых варианий
+                                                                    У этого товара нет созданых вариаций.
                                                                 {% else %}
                                                                         На данный момент нельзя добавлять варианты к этому товару.
                                                                         <br><br>
@@ -632,7 +632,7 @@
                                                                         <br>
                                                                         Удалите товарные записи для создания вариативного товара.
                                                                     {% else %}
-                                                                        Нет подходящих атрибутов для создания вариаций 
+                                                                        Нет подходящих атрибутов для создания вариаций.
                                                                     {% endif %}
                                                                 {% endif %}
                                                             </td>

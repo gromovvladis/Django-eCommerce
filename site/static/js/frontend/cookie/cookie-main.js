@@ -33,13 +33,13 @@ if (!cookieAgree) {
 }
 
 // Agree to cookies
-function agree_cookie(){
+function agree_cookie() {
     setCookie('cookieAgree', true, 1000);
     weUseCookie.innerHTML = '';
 };
 
 // Go back or execute actionBack
-function getBack(){
+function getBack() {
     if (actionBack) {
         actionBack();
         actionBack = null;

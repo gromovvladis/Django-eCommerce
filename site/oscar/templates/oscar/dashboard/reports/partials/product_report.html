@@ -30,7 +30,7 @@
                 {% endfor %}
             </tbody>
         {% else %}
-            <tr><td class="empty">Товары не найдены за заданный период</td></tr>
+            <tr class="empty-tr"><td class="empty-td">Товары не найдены за заданный период.</td></tr>
         {% endif %}
     </table>
     {% include "oscar/dashboard/partials/pagination.html" %}

@@ -39,7 +39,7 @@ var deliveryTimeMethod = "now";
 
 // Инициализация адреса
 document.addEventListener('DOMContentLoaded', function () {
-    if (line1){
+    if (line1) {
         var addressInital = line1.value;
         if (addressInital) {
             line1.readOnly = true;
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
     validateCheckout();
-    textares.forEach(function(textarea) {
+    textares.forEach(function (textarea) {
         if (textarea.scrollHeight < 77) {
             textarea.style.height = textarea.scrollHeight + 'px';
         } else {
@@ -58,14 +58,14 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Смена метода доставки
-if (shippingMethodButtons.length > 0){
-    shippingMethodButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
+if (shippingMethodButtons.length > 0) {
+    shippingMethodButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
             shippingMethod = this.value;
             shipping.value = shippingMethod;
             let leftPosition = this.getBoundingClientRect().left - this.parentElement.getBoundingClientRect().left;
             methodSwaper.style.left = `${leftPosition}px`;
-            GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
+            GetTime({ address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod }).then(function (result) {
                 timeCaptured(result);
             });
             if (shippingMethod === "self-pick-up") {
@@ -81,19 +81,19 @@ if (shippingMethodButtons.length > 0){
 }
 
 // Выбрана доставка "самовывоз как можно скорее"
-deliveryTimeBtn.forEach(function(time_btn) {
-    time_btn.addEventListener('click', function() {
+deliveryTimeBtn.forEach(function (time_btn) {
+    time_btn.addEventListener('click', function () {
         let leftPosition = time_btn.getBoundingClientRect().left - time_btn.parentElement.getBoundingClientRect().left;
         timeSwaper.style.left = `${leftPosition}px`;
         deliveryTimeMethod = time_btn.getAttribute("data-type");
         if (deliveryTimeMethod === "now") {
-            if (addressFields){
-                GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
+            if (addressFields) {
+                GetTime({ address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod }).then(function (result) {
                     orderTime.value = result.timeUTC;
                     timeCaptured(result);
                 });
             } else {
-                GetTime({shippingMethod: shippingMethod}).then(function(result) {
+                GetTime({ shippingMethod: shippingMethod }).then(function (result) {
                     orderTime.value = result.timeUTC;
                     timeCaptured(result);
                 });
@@ -114,10 +114,10 @@ function getNewTotals(selectedMethod, zonaId = null) {
     console.log('getNewTotals');
 
     // Формируем параметры запроса в URL
-    const url = new URL(url_update_totals, baseURL); 
+    const url = new URL(url_update_totals, baseURL);
     url.searchParams.append('shippingMethod', selectedMethod);
     // if (zonaId) {
-        url.searchParams.append('zona_id', zonaId);
+    url.searchParams.append('zona_id', zonaId);
     // }
 
 
@@ -129,20 +129,20 @@ function getNewTotals(selectedMethod, zonaId = null) {
             'X-CSRFToken': csrf_token
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 202) {
-            checkoutTotals.innerHTML = data.totals;
-            errorAmount.innerHTML = data.min_order;
-        }
-    })
-    .finally(() => {
-        validateCheckout();
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 202) {
+                checkoutTotals.innerHTML = data.totals;
+                errorAmount.innerHTML = data.min_order;
+            }
+        })
+        .finally(() => {
+            validateCheckout();
+        });
 }
 
 // Сдача или чек
-paymentMethod.addEventListener('change', function() {
+paymentMethod.addEventListener('change', function () {
     if (OFFLINE_PAYMENT.includes(this.value)) {
         emailField.innerHTML = 'Нужна сдача с ...';
         emailBlock.classList.remove('d-none-i');
@@ -155,15 +155,15 @@ paymentMethod.addEventListener('change', function() {
 });
 
 // Лейблы при заполнении текста
-checkout_fields.forEach(function(wrapper) {
+checkout_fields.forEach(function (wrapper) {
     var input_field = wrapper.querySelector('.input');
     if (input_field.value !== "") {
         wrapper.classList.add('input__label-active');
     }
-    input_field.addEventListener('focusin', function() {
+    input_field.addEventListener('focusin', function () {
         wrapper.classList.add('input__label-active');
     });
-    input_field.addEventListener('focusout', function() {
+    input_field.addEventListener('focusout', function () {
         if (input_field.value === "") {
             wrapper.classList.remove('input__label-active');
         }
@@ -173,12 +173,12 @@ checkout_fields.forEach(function(wrapper) {
 });
 
 // Авторасширение текстовых полей
-textares.forEach(function(textarea) {
-    textarea.addEventListener('input', function() {
+textares.forEach(function (textarea) {
+    textarea.addEventListener('input', function () {
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
     });
-    textarea.addEventListener('scroll', function() {
+    textarea.addEventListener('scroll', function () {
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
     });
@@ -209,13 +209,13 @@ function checkValid() {
         checkoutErrors.classList.add('d-none');
     } else {
         submitBtn.disabled = true;
-        checkoutErrors.classList.remove('d-none');    
+        checkoutErrors.classList.remove('d-none');
     }
 }
 
 // Валидация по адресу
 function validateAddress() {
-    if (addressFields){
+    if (addressFields) {
         addressValid = true;
         shippingMethod = shipping.value;
         if (shippingMethod === "zona-shipping") {
@@ -227,7 +227,7 @@ function validateAddress() {
                 errorAddress.classList.add('d-none');
                 line1_container.classList.remove("not-valid");
             }
-    
+
             if (line2.value > 1000 || line2.value < 1) {
                 addressValid = false;
                 errorFlat.classList.remove('d-none');
@@ -236,7 +236,7 @@ function validateAddress() {
                 errorFlat.classList.add('d-none');
                 line2.classList.remove("not-valid");
             }
-    
+
             if (line3.value > 100 || line3.value < 1) {
                 addressValid = false;
                 errorEnter.classList.remove('d-none');
@@ -245,7 +245,7 @@ function validateAddress() {
                 errorEnter.classList.add('d-none');
                 line3.classList.remove("not-valid");
             }
-    
+
             if (line4.value > 100 || line4.value < 1) {
                 addressValid = false;
                 errorFloor.classList.remove('d-none');
@@ -275,20 +275,20 @@ function shippingCharge(zonaId = null) {
 }
 
 // Loading spinner
-submitBtn.addEventListener('click', function() {
+submitBtn.addEventListener('click', function () {
     this.classList.add('sending');
 });
 
 // Таймер обновления времени доставки к адресу каждые 2.5 минут
 function updateTimes() {
     if (deliveryTimeMethod === "now" && deliveryTimeLater.classList.contains("hidden")) {
-        if (addressFields){
-            GetTime({address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod}).then(function(result) {
+        if (addressFields) {
+            GetTime({ address: line1.value, coords: [lon.value, lat.value], shippingMethod: shippingMethod }).then(function (result) {
                 orderTime.value = result.timeUTC;
                 timeCaptured(result);
             });
         } else {
-            GetTime({shippingMethod: shippingMethod}).then(function(result) {
+            GetTime({ shippingMethod: shippingMethod }).then(function (result) {
                 orderTime.value = result.timeUTC;
                 timeCaptured(result);
             });
@@ -296,5 +296,5 @@ function updateTimes() {
     }
 }
 
-setInterval(function() {updateTimes()}, 300000);
+setInterval(function () { updateTimes() }, 300000);
 updateTimes();

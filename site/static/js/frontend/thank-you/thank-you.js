@@ -7,7 +7,7 @@ var interval;
 
 if (waitingPayment) {
     getPaymentInfo();
-    interval = setInterval(function() {
+    interval = setInterval(function () {
         if (waitingSeconds > 0) {
             waitingSeconds -= 3;
             getPaymentInfo();
@@ -29,11 +29,11 @@ function getPaymentInfo() {
             'X-CSRFToken': csrf_token,
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        closeModal(data);
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            closeModal(data);
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 function closeModal(response = null) {

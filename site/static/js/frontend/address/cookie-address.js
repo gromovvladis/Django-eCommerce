@@ -4,7 +4,7 @@ var orderNote = document.getElementById('id_order_note');
 var notes = document.getElementById('id_notes');
 
 // Обработчик для предупреждения при закрытии страницы
-window.onbeforeunload = function() {
+window.onbeforeunload = function () {
     if (line1.getAttribute('captured') === 'true') {
         setCookie("line1", line1.value)
     }
