@@ -1253,7 +1253,7 @@ class ProductClassUpdateView(ProductClassCreateUpdateView):
     creating = False
 
     def get_title(self):
-        return "Обновить тип товара '%s'" % self.object.name
+        return "Обновить '%s'" % self.object.name
 
     def get_success_url(self):
         messages.info(self.request, "Тип товара успешно обновлен.")

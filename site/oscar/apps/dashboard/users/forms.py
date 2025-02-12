@@ -23,7 +23,7 @@ logger = logging.getLogger("oscar.user")
 
 class UserSearchForm(forms.Form):
     username = forms.CharField(required=False, label="Номер телефона")
-    name = forms.CharField(required=False, label="Имя пользователя")
+    name = forms.CharField(required=False, label="Имя клиента")
 
 
 class StaffForm(forms.ModelForm):

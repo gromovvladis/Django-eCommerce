@@ -39,11 +39,9 @@
 {% block dashboard_content %}
     <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors">
         {% csrf_token %}
-
         <div class="row">
             {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="{{ is_popup }}" />{% endif %}
             {% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}" />{% endif %}
-
             {% block tab_nav %}
                 <div class="col-md-3">
                     <div class="tab-nav sticky-top">
@@ -130,7 +128,6 @@
                 </div>
             </div>
         </div>
-
         {% block fixed_actions_group %}
             <div class="fixed-actions-group">
                 <div class="container container-fluid">
@@ -151,9 +148,7 @@
                 </div>
             </div>
         {% endblock fixed_actions_group %}
-        
     </form>
-
 {% endblock dashboard_content %}
 
 {% block onbodyload %}

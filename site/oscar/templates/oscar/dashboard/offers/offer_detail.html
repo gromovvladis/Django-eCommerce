@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block header %}
-    <div class="page-header d-flex justify-content-between">
+    <div class="page-header d-flex justify-content-between align-items-center">
         <h1>{{ offer.name }}</h1>
         <form id="status_form" class="float-right" method="post">
             {% csrf_token %}

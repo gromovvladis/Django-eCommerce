@@ -35,7 +35,7 @@
                             {% endif %}
                         </td>
                         <td data-label="Доставка" class="delivery">{{ order.shipping_method }}</td>
-                        <td data-label="Оплата" class="payment">{{ order.sources.last }}</td>
+                        <td data-label="Оплата" class="payment">{{ order.sources.last|default:"Нет оплаты" }}</td>
                         <td data-label="Источник" class="site">{{ order.site }}</td>
                         <td data-label="Итого" class="total">{{ order.total|currency:order.currency }}</td>
                         <td class="order_time">{{ order.date_placed|date:"d.m.y H:i" }}</td>
@@ -49,7 +49,7 @@
                 {% endfor %}
             </tbody>
         {% else %}
-            <tr><td class="empty">Заказы не найдены за заданный период</td></tr>
+            <tr class="empty-tr"><td class="empty-td">Заказы не найдены за заданный период.</td></tr>
         {% endif %}
     </table>
     {% include "oscar/dashboard/partials/pagination.html" %}

@@ -6,8 +6,8 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-class-list' %}">Тип продукта</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Удалить этот тип продукта</li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:catalogue-class-list' %}">Тип товара</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Удалить этот тип товара</li>
         </ol>
     </nav>
 {% endblock %}
@@ -22,12 +22,12 @@
             <p>Перед удалением убедитесь, что всем продуктам присвоен другой тип.</p>
         {% else %}
             <div class="table-header">
-                <h2>Удалить тип продукта</h2>
+                <h2>Удалить тип товара</h2>
             </div>
             <div class="card card-body card-confirm bg-light">
                 {% csrf_token %}
                 {{ form }}
-                <p>Удалить тип продукта <strong>{{ object.name }}</strong> - вы уверены?</p>
+                <p>Удалить тип товара <strong>{{ object.name }}</strong> - вы уверены?</p>
             </div>
             <div class="table-footer">
                 <div class="form-actions fill-width">

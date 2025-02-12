@@ -28,7 +28,7 @@
 {% endblock %}
 
 {% block dashboard_content %}
-    <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors">
+    <form class="form-stacked half-wrapper fixed-actions" method="post" data-behaviour="tab-nav-errors">
         {% csrf_token %}
         <div class="row">
             <div class="col-md-12">
@@ -36,7 +36,10 @@
                     {% block group_details %}
                         <div class="tab-pane active" id="group_details">
                             <div class="table-header">
-                                <h3>Описание группы персонала</h3>
+                                <h3>
+                                    <i class="fa-solid fa-users-line"></i>
+                                    Описание группы персонала
+                                </h3>
                             </div>
                             <div class="card card-body bg-light option-details">
                                 {% if form.non_field_errors %}
@@ -48,20 +51,18 @@
                                 {% endif %}
                                 {% include 'oscar/dashboard/partials/form_field.html' with field=form.name %}
                                 <ul class="nav nav-tabs mb-3 mb-lg-4 p-0 fill-width" role="tablist">
-                                    <div class="half-wrapper">
-                                        <div class="nav tabs-button d-flex fill">
-                                            <div class="tabs-button__active-block" style="width: 20%; min-width: 130px; left: 0px;"><div class="fill-width fill-height"></div></div>
-                                            {% for app_label, permissions in form.permissions.field.choices %}
-                                                <button role="button" class="tabs-button__button tabs-button__icon {% if forloop.first %}active{% endif %}" href="#app_label_{{ forloop.counter }}" data-toggle="tab">
-                                                    <div class="no-wrap">
-                                                        <i class="fa-regular fa-circle-check"></i>
-                                                        <span>
-                                                            {{ app_label }}
-                                                        </span>
-                                                    </div>
-                                                </button>
-                                            {% endfor %}
-                                        </div>
+                                    <div class="nav tabs-button d-flex fill">
+                                        <div class="tabs-button__active-block" style="width: 20%; min-width: 130px; left: 0px;"><div class="fill-width fill-height"></div></div>
+                                        {% for app_label, permissions in form.permissions.field.choices %}
+                                            <button role="button" class="tabs-button__button tabs-button__icon {% if forloop.first %}active{% endif %}" href="#app_label_{{ forloop.counter }}" data-toggle="tab">
+                                                <div class="no-wrap">
+                                                    <i class="fa-regular fa-circle-check"></i>
+                                                    <span>
+                                                        {{ app_label }}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        {% endfor %}
                                     </div>
                                 </ul>
                                 <div class="tab-content">
