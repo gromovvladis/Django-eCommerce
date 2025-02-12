@@ -67,7 +67,7 @@ def record_products_in_order_task(order_data):
                 task.delay()
     except Exception as e:
         logger.error(
-            f"{e} при записи продуктов в заказе пользователя (date_placed={order_data["date_placed"]})"
+            f"{e} при записи продуктов в заказе пользователя (date_placed={order_data['date_placed']})"
         )
 
 
