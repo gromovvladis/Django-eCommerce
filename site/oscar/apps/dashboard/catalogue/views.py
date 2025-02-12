@@ -4,14 +4,13 @@ from typing import Any
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.contrib import messages
-from django.db.models import Q
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views import View, generic
 from django_tables2 import SingleTableMixin, SingleTableView
-from django.db.models import Count, Max, Min, Case, When, DecimalField, F
+from django.db.models import Count, Max, Min, Case, When, DecimalField, F, Q
 from django.utils.timezone import now
 
 from oscar.apps.crm.client import EvatorCloud

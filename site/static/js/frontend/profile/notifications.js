@@ -25,25 +25,25 @@ if (notificationsForm) {
                     "data-notification": dataNotification
                 }).toString()
             })
-            .then(response => response.json())
-            .then(data => {
-                li.remove();
-                if (data.action === "archive") {
-                    notificationsNums.forEach(function(element) {
-                        element.textContent = data.num_unread;
-                    });
-                    if (data.num_unread === 0) {
-                        document.querySelector('[data-id="notification-empty"]').textContent = 'Список уведомлений пуст';
+                .then(response => response.json())
+                .then(data => {
+                    li.remove();
+                    if (data.action === "archive") {
+                        notificationsNums.forEach(function (element) {
+                            element.textContent = data.num_unread;
+                        });
+                        if (data.num_unread === 0) {
+                            document.querySelector('[data-id="notification-empty"]').textContent = 'Список уведомлений пуст';
+                        }
+                    } else {
+                        if (data.nums_total === 0) {
+                            document.querySelector('[data-id="notification-empty"]').textContent = 'Список уведомлений пуст';
+                        }
                     }
-                } else {
-                    if (data.nums_total === 0) {
-                        document.querySelector('[data-id="notification-empty"]').textContent = 'Список уведомлений пуст';
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
 
             return false;
         });

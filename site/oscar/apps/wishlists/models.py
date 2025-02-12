@@ -13,16 +13,12 @@ class WishList(models.Model):
     """
 
     # Only authenticated users can have wishlists
-    owner = models.ForeignKey(
+    owner = models.OneToOneField(
         AUTH_USER_MODEL,
-        related_name="wishlists",
+        related_name="wishlist",
         on_delete=models.CASCADE,
         verbose_name="Владелец",
     )
-    # name = models.CharField(
-    #     verbose_name="Имя", default="По умолчанию", max_length=255
-    # )
-
     #: This key acts as primary key and is used instead of an int to make it
     #: harder to guess
     key = models.CharField(

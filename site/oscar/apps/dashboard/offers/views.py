@@ -6,10 +6,16 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import DeleteView, ListView
+from django_tables2 import SingleTableMixin, SingleTableView
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views import sort_queryset
 
+ConditionalOfferTable = get_class("dashboard.offers.tables", "ConditionalOfferTable")
+OfferWizardStepView = get_class("dashboard.offers.wizard_views", "OfferWizardStepView")
+OrderDiscountCSVFormatter = get_class(
+    "dashboard.offers.reports", "OrderDiscountCSVFormatter"
+)
 (
     MetaDataForm,
     ConditionForm,
@@ -26,10 +32,6 @@ from oscar.views import sort_queryset
         "OfferSearchForm",
     ],
 )
-OfferWizardStepView = get_class("dashboard.offers.wizard_views", "OfferWizardStepView")
-OrderDiscountCSVFormatter = get_class(
-    "dashboard.offers.reports", "OrderDiscountCSVFormatter"
-)
 
 ConditionalOffer = get_model("offer", "ConditionalOffer")
 Condition = get_model("offer", "Condition")
@@ -40,12 +42,21 @@ Benefit = get_model("offer", "Benefit")
 
 
 # pylint: disable=attribute-defined-outside-init
-class OfferListView(ListView):
-    model = ConditionalOffer
-    context_object_name = "offers"
+class OfferListView(SingleTableView):
     template_name = "oscar/dashboard/offers/offer_list.html"
     form_class = OfferSearchForm
-    paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+    table_class = ConditionalOfferTable
+    context_table_name = "offers"
+
+    def get_table(self, **kwargs):
+        table = super().get_table(**kwargs)
+        if self.form.is_valid() and any(self.form.cleaned_data.values()):
+            table.caption = "Результаты поиска: %s" % self.object_list.count()
+
+        return table
+
+    def get_table_pagination(self, table):
+        return dict(per_page=settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE)
 
     def get_queryset(self):
         self.search_filters = []

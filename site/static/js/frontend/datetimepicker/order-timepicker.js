@@ -46,7 +46,7 @@ datapicker = new AirDatepicker('#delivery_time_later', {
     onShow(isFinished) {
         AirDatepickerTime();
     },
-    onSelect({date, formattedDate, datepicker}) {
+    onSelect({ date, formattedDate, datepicker }) {
         orderTime.value = new Date(date).toISOString();
     },
 });
@@ -60,22 +60,22 @@ function AirDatepickerTime() {
             'X-CSRFToken': csrf_token,
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        const { minDate: minDateRaw, maxDate: maxDateRaw, minHours, maxHours } = data.datapicker;
-        minDate = new Date(minDateRaw);
-        maxDate = new Date(maxDateRaw);
-        selectedDate = new Date(minDate);
-        selectedTime = minDate.getTime();
-        datapicker.update({
-            minHours: minHours,
-            maxHours: maxHours,
-            selectedDates: selectedDate,
-            selectedTime: selectedTime,
-            minDate: minDate,
-            maxDate: maxDate,
-        }, false);
-        
-    })
-    .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            const { minDate: minDateRaw, maxDate: maxDateRaw, minHours, maxHours } = data.datapicker;
+            minDate = new Date(minDateRaw);
+            maxDate = new Date(maxDateRaw);
+            selectedDate = new Date(minDate);
+            selectedTime = minDate.getTime();
+            datapicker.update({
+                minHours: minHours,
+                maxHours: maxHours,
+                selectedDates: selectedDate,
+                selectedTime: selectedTime,
+                minDate: minDate,
+                maxDate: maxDate,
+            }, false);
+
+        })
+        .catch(error => console.error('Error:', error));
 }

@@ -45,11 +45,11 @@
             {% block dashboard_nav %}
                 {% dashboard_navigation user request as nav_items %}
                 <div class="navbar-expand-lg navbar-light navbar-primary bg-dark flex-column flex-shrink-0" data-id="navbar-primary">
-                    <div class="navbar-header position-relative py-3 px-1">
+                    <div class="navbar-header d-flex">
                         <a class="navbar-brand" href="{{ homepage_url }}">
-                            {% icon file_name='footer/logo' size=30 fill="#838383" %}
+                            {% icon file_name='footer/logo' size=25 fill="#838383" %}
                         </a>
-                        <button class="navbar-toggler navbar-toggler--mobile toggler-open p-0" data-id="navbar-toggler">
+                        <button class="navbar-toggler toggler-open p-0" data-id="navbar-toggler">
                             {% icon file_name='interface/arrow-home' size=30 stroke='#fff'%}
                         </button>
                     </div>

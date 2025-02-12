@@ -74,10 +74,9 @@ class WishListAddProduct(View):
                 WishList, key=kwargs["key"], owner=request.user
             )
         else:
-            wishlists = request.user.wishlists.all()[:1]
-            if not wishlists:
-                return request.user.wishlists.create()
-            wishlist = wishlists[0]
+            wishlist = request.user.wishlist
+            if not wishlist:
+                return request.user.wishlist.create()
 
         if not wishlist.is_allowed_to_edit(request.user):
             raise PermissionDenied

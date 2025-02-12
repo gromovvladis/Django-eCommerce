@@ -84,15 +84,16 @@ def receive_order_placed(sender, order, user, **kwargs):
             "total": order.total,
             "date_placed": order.date_placed,
             "num_lines": order.lines.count(),
+            "lines": list(order.lines.values_list("product_id", "quantity")),
             "num_items": order.lines.aggregate(total_items=Sum("quantity"))[
                 "total_items"
             ],
         }
 
         if settings.DEBUG:
-            record_products_in_order_task(order.id)
+            record_products_in_order_task(order_data)
         else:
-            record_products_in_order_task.delay(order.id)
+            record_products_in_order_task.delay(order_data)
 
         if user and user.is_authenticated:
             if settings.DEBUG:

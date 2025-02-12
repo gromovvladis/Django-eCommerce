@@ -15,7 +15,7 @@
         </header>
         {% if not basket.is_empty %}
             <div class="cart-wrapper d-flex flex-column justify-start fill-height scrollbar--white px-2 px-sm-0" data-id="cart-wrapper">
-                <div class="upsell-messages" id="upsell_messages">
+                <div class="upsell-messages" data-id="upsell-messages">
                     {% include 'oscar/basket/partials/upsell_messages.html' with editable=1 %}
                 </div>
                 {% block basket_form_main %}

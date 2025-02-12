@@ -20,15 +20,15 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Активируем метки в полях ввода и добавляем обработчики событий
-document.querySelectorAll('[data-id="input-field"]').forEach(function(wrapper) {
+document.querySelectorAll('[data-id="input-field"]').forEach(function (wrapper) {
     var inputField = wrapper.querySelector('.input');
     if (inputField.value !== "") {
         wrapper.classList.add('input__label-active');
     }
-    inputField.addEventListener('focusin', function() {
+    inputField.addEventListener('focusin', function () {
         wrapper.classList.add('input__label-active');
     });
-    inputField.addEventListener('focusout', function() {
+    inputField.addEventListener('focusout', function () {
         if (inputField.value === "") {
             wrapper.classList.remove('input__label-active');
         }
@@ -37,7 +37,7 @@ document.querySelectorAll('[data-id="input-field"]').forEach(function(wrapper) {
 });
 
 // Не отправлять форму при нажатии Enter
-document.getElementById('edit-address').addEventListener('keypress', function(event) {
+document.getElementById('edit-address').addEventListener('keypress', function (event) {
     if (event.target.tagName === 'INPUT' && event.key === 'Enter') {
         event.preventDefault();
     }
@@ -46,7 +46,7 @@ document.getElementById('edit-address').addEventListener('keypress', function(ev
 // Валидация адреса
 function validateAddress() {
     var valid = true;
-    
+
     // Проверка поля line1
     if (!line1.value || line1.getAttribute('captured') != "true" || line1.getAttribute('valid') != "true") {
         valid = false;

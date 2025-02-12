@@ -1,27 +1,27 @@
 var line1Container = document.getElementById('line1_container');
 var deliveryTime = document.getElementById('delivery_time');
 
-if (line1Container){
+if (line1Container) {
     var line1 = line1Container.querySelector('#id_line1');
     var suggests = line1Container.querySelector('#suggest_list');
     var cleanBtn = line1Container.querySelector('#clean_address');
     var open_map = line1Container.querySelector('#open_map');
-    
+
     var mapContainer = document.querySelector('.delivery__map');
     var mapDiv = mapContainer.querySelector('#map');
     var controls = mapContainer.querySelector('#map_controls');
     var saveButton = mapContainer.querySelector('#submit_address');
-    
+
     var lon = document.getElementById('id_coords_long');
     var lat = document.getElementById('id_coords_lat');
-    
+
     var hints = document.getElementById('line1_hints');
-    
+
     const MAPCENTER = [56.0435, 92.9075];
     const DELIVERYBOUNDS = [[56.043545, 92.6406], [55.9460, 93.2584]];
-    
-    var validate = () => {};
-    var shippingCharge = () => {};
+
+    var validate = () => { };
+    var shippingCharge = () => { };
     var map;
     var placemark;
     var addressInfo;
@@ -31,37 +31,37 @@ if (line1Container){
     var LayoutPin
     var shippingMethod = "zona-shipping";
     var offsetBtns = 150;
-    
+
     var selection = -1;
     var li_list = [];
-    
-    
+
+
     // ====================  SUGGEST + LAYOUT + MAP CONTROLS  ===========================
-    
-    
+
+
     // подсказки при поиске 2GIS
     document.addEventListener('DOMContentLoaded', function () {
         if (line1) { // проверяем, что элемент существует
             CreateSuggestView();
         }
     });
-    
+
     // строка с адресом на карте Яндекс и layout
     ymaps.ready(function () {
-    
+
         CustomControlClass = function (options) {
             CustomControlClass.superclass.constructor.call(this, options);
             this._$content = null;
             this._geocoderDeferred = null;
         };
-        
+
         ymaps.util.augment(CustomControlClass, ymaps.collection.Item, {
             onAddToMap: function (map) {
                 CustomControlClass.superclass.onAddToMap.call(this, map);
                 this._lastCenter = null;
                 this.getParent().getChildElement(this).then(this._readyToEvent, this);
             },
-        
+
             onRemoveFromMap: function (oldMap) {
                 this._lastCenter = null;
                 if (this._$content) {
@@ -70,72 +70,72 @@ if (line1Container){
                 }
                 CustomControlClass.superclass.onRemoveFromMap.call(this, oldMap);
             },
-        
+
             _readyToEvent: function (parentDomContainer) {
                 // Создаем HTML-элемент с текстом.
                 this._$content = document.querySelector('#map_address')?.appendChild(Object.assign(document.createElement('div'), { className: 'delivery-map--address' }));
             },
-        
+
             _addressSelected: function (address) {
                 // Создаем HTML-элемент с текстом.
                 this._$content.textContent = address;
             },
-        
+
         });
-        
+
         LayoutPin = ymaps.templateLayoutFactory.createClass(
             '<div class="wrapper-icon-delivery">' +
-                '{% if properties.loading  %}' +
-                    '<svg class="pin-icon pin-icon__loader" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-                        '<circle cx="12" cy="12" r="6" stroke-width="8" fill="none" stroke-dasharray="100" stroke-dashoffset="80"></circle>' +
-                        '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 0 0" to="360 0 0" dur="2s" repeatCount="indefinite"></animateTransform>' +
-                    '</svg>' +
-                '{% else %}' + 
-                    '<div class="icon-delivery__title {% if properties.error %}icon-delivery__title_error{% endif %}">' +
-                        '{% if properties.error %}' +
-                            '<span>{{ properties.error|default:"Адрес вне зоны доставки" }}</span> ' +
-                        '{% else %}' + 
-                            '<span class="delivery-balloon__minutes">{{ properties.order_minutes }}</span>' +
-                            '<br>' +
-                            '<span class="delivery-balloon__text"> Доставка<br> от&nbsp;{{ properties.min_order }}&nbsp;₽</span>' +
-                        '{% endif %}' +
-                    '</div>' +
-                '{% endif %}' +
-                '<svg class="pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                    '<circle cx="12" cy="10" r="10"></circle>' +
-                    '<circle cx="12" cy="10" r="5" fill="#c21313"></circle>' +
-                '</svg>' +
+            '{% if properties.loading  %}' +
+            '<svg class="pin-icon pin-icon__loader" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+            '<circle cx="12" cy="12" r="6" stroke-width="8" fill="none" stroke-dasharray="100" stroke-dashoffset="80"></circle>' +
+            '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 0 0" to="360 0 0" dur="2s" repeatCount="indefinite"></animateTransform>' +
+            '</svg>' +
+            '{% else %}' +
+            '<div class="icon-delivery__title {% if properties.error %}icon-delivery__title_error{% endif %}">' +
+            '{% if properties.error %}' +
+            '<span>{{ properties.error|default:"Адрес вне зоны доставки" }}</span> ' +
+            '{% else %}' +
+            '<span class="delivery-balloon__minutes">{{ properties.order_minutes }}</span>' +
+            '<br>' +
+            '<span class="delivery-balloon__text"> Доставка<br> от&nbsp;{{ properties.min_order }}&nbsp;₽</span>' +
+            '{% endif %}' +
+            '</div>' +
+            '{% endif %}' +
+            '<svg class="pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<circle cx="12" cy="10" r="10"></circle>' +
+            '<circle cx="12" cy="10" r="5" fill="#c21313"></circle>' +
+            '</svg>' +
             '</div>'
         )
     });
-    
+
     // Создание suggestView
-    function CreateSuggestView(){
-    
-        line1.addEventListener('focus', function() {
+    function CreateSuggestView() {
+
+        line1.addEventListener('focus', function () {
             suggests.classList.remove('d-none');
         });
-    
-        document.addEventListener('mousedown', function(event) {
+
+        document.addEventListener('mousedown', function (event) {
             if (!line1Container.contains(event.target)) {
                 suggests.classList.add('d-none');
-                if (selection > -1){
+                if (selection > -1) {
                     suggests[0].children[selection].classList.remove('hover');
                 }
                 selection = -1;
             }
         }, false);
-    
-        line1.addEventListener('input', function() {
+
+        line1.addEventListener('input', function () {
             getSuggestList(this.value);
         });
-    
-    
+
+
         // Клик по подсказке
-        line1.addEventListener('keydown', function(event) {
-    
+        line1.addEventListener('keydown', function (event) {
+
             if (event.keyCode === 38) {
-                event.preventDefault(); 
+                event.preventDefault();
                 if (selection > 0) {
                     suggests[0].children[selection].classList.remove('hover');
                     selection--;
@@ -143,9 +143,9 @@ if (line1Container){
                     scrollToElement(selection, false);
                 }
             } else if (event.keyCode === 40) {
-                event.preventDefault(); 
+                event.preventDefault();
                 if (selection < suggests[0].children.length - 1) {
-                    if (selection >= 0){
+                    if (selection >= 0) {
                         suggests[0].children[selection].classList.remove('hover');
                     }
                     selection++;
@@ -157,22 +157,22 @@ if (line1Container){
                 selection = 0;
             }
         });
-        
+
     }
-    
+
     // сдвиг скролла вниз или вверх при выборе подсказки
     function scrollToElement(element, down) {
         const itemHeight = suggests.children[0].offsetHeight;
 
-        if (element > 4 && down){
+        if (element > 4 && down) {
             suggests.scrollTop = suggests.scrollTop + itemHeight;
 
-        } else if (element < 5 && !down){
+        } else if (element < 5 && !down) {
             suggests.scrollTop = suggests.scrollTop - itemHeight;
 
-        } 
+        }
     }
-    
+
     // выдача списка подсказок
     function getSuggestList(query) {
         if (query.length > 1) {
@@ -190,49 +190,49 @@ if (line1Container){
                     'Accept': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                suggests.innerHTML = '';
-                let li_list = [];
-                let selection = -1;
-                if (data.result) {
-                    const suggestions = data.result.items;
-                    suggestions.forEach(suggestion => {
+                .then(response => response.json())
+                .then(data => {
+                    suggests.innerHTML = '';
+                    let li_list = [];
+                    let selection = -1;
+                    if (data.result) {
+                        const suggestions = data.result.items;
+                        suggestions.forEach(suggestion => {
+                            const li = document.createElement('li');
+                            li.className = 'search__suggest-item';
+                            li.textContent = suggestion.address_name || suggestion.name;
+
+                            li.addEventListener('click', () => {
+                                suggestViewSelected(suggestion);
+                            });
+
+                            li.addEventListener('mouseover', () => {
+                                if (selection >= 0) {
+                                    suggests.children[selection].classList.remove('hover');
+                                }
+                                selection = -1;
+                            });
+
+                            suggests.appendChild(li);
+                            li_list.push(suggestion);
+                        });
+                    } else {
                         const li = document.createElement('li');
                         li.className = 'search__suggest-item';
-                        li.textContent = suggestion.address_name || suggestion.name;
-    
-                        li.addEventListener('click', () => {
-                            suggestViewSelected(suggestion);
-                        });
-    
-                        li.addEventListener('mouseover', () => {
-                            if (selection >= 0) {
-                                suggests.children[selection].classList.remove('hover');
-                            }
-                            selection = -1;
-                        });
-    
+                        li.textContent = 'Адрес не найден';
                         suggests.appendChild(li);
-                        li_list.push(suggestion);
-                    });
-                } else {
-                    const li = document.createElement('li');
-                    li.className = 'search__suggest-item';
-                    li.textContent = 'Адрес не найден';
-                    suggests.appendChild(li);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching suggestions:', error);
-            });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                });
         } else {
             suggests.innerHTML = '';
         }
     }
-    
+
     // подсказка выбрана
-    function suggestViewSelected(suggestion){
+    function suggestViewSelected(suggestion) {
         var hint;
         switch (suggestion.type) {
             case 'building':
@@ -245,20 +245,20 @@ if (line1Container){
             default:
                 hint = 'Уточните адрес';
         }
-    
+
         var address;
-        if (suggestion.address_name){
+        if (suggestion.address_name) {
             address = suggestion.address_name;
         } else {
             address = suggestion.name;
         }
-    
+
         if (hint) {
             hints.innerHTML = hint;
             hints.classList.remove('d-none');
             line1.value = address + " ";
             getSuggestList(address);
-        } else  {
+        } else {
             line1.value = address;
             var coords = [suggestion.point['lat'], suggestion.point['lon']];
             suggests.innerHTML = '';
@@ -267,16 +267,16 @@ if (line1Container){
             map.setCenter(coords, 14);
         }
     }
-    
-    
+
+
     // ================================   MAP   ==========================================
-    
-    
+
+
     // создаем карту при вводе адреса, при расчете маршрута и предоставим возможность выбора адреса по карте
-    function createMap(address=null) {
+    function createMap(address = null) {
         console.log("createMap");
         ymaps.ready(function () {
-    
+
             if (!map) {
                 map = new ymaps.Map(mapDiv, {
                     center: MAPCENTER,
@@ -288,30 +288,30 @@ if (line1Container){
                     maxZoom: 18,
                     minZoom: 10,
                 });
-                
-                fetch(url_delivery_zones)
-                .then(response => response.json())
-                .then(json => {
-                    ZonesInit(json);
-                    if (address) {
-                        ymaps.geocode(address, { results: 1, boundedBy: DELIVERYBOUNDS })
-                        .then(res => {
-                            var coords = res.geoObjects.get(0).geometry.getCoordinates();
-                            movePlacemark(coords, res.geoObjects.get(0).properties._data.name, true);
-                            map.setCenter(coords, 14);
-                            document.querySelector(lon).value = coords[0];
-                            document.querySelector(lat).value = coords[1];
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching delivery zones:', error);
-                });
 
-    
-                if (mapDiv.getAttribute('data-full-screen')){
-    
-                    closeButton = new ymaps.control.Button({     
+                fetch(url_delivery_zones)
+                    .then(response => response.json())
+                    .then(json => {
+                        ZonesInit(json);
+                        if (address) {
+                            ymaps.geocode(address, { results: 1, boundedBy: DELIVERYBOUNDS })
+                                .then(res => {
+                                    var coords = res.geoObjects.get(0).geometry.getCoordinates();
+                                    movePlacemark(coords, res.geoObjects.get(0).properties._data.name, true);
+                                    map.setCenter(coords, 14);
+                                    document.querySelector(lon).value = coords[0];
+                                    document.querySelector(lat).value = coords[1];
+                                });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching delivery zones:', error);
+                    });
+
+
+                if (mapDiv.getAttribute('data-full-screen')) {
+
+                    closeButton = new ymaps.control.Button({
                         options: {
                             // noPlacemark: true,
                             layout: ymaps.templateLayoutFactory.createClass(
@@ -324,29 +324,29 @@ if (line1Container){
                             }
                         }
                     });
-    
+
                     map.controls.add(closeButton);
-    
+
                     closeButton.events.add('click', function (event) {
 
 
                         mapContainer.classList.remove('open');
                         map.geoObjects.remove(placemark);
                         controls.classList.add('d-none');
-                    
+
                         addressInfo = null;
                         placemark = null;
 
-                        
+
                         event.preventDefault();
                         event.stopPropagation();
-                        
+
                         setTimeout(() => {
                             actionBack = null;
-                          }, 700);
+                        }, 700);
                     });
-        
-                    cleanButton = new ymaps.control.Button({     
+
+                    cleanButton = new ymaps.control.Button({
                         options: {
                             // noPlacemark: true,
                             layout: ymaps.templateLayoutFactory.createClass(
@@ -357,70 +357,70 @@ if (line1Container){
                                 top: '10px',
                                 right: '16px'
                             }
-                        },            
+                        },
                     });
-    
+
                     map.controls.add(cleanButton);
                     cleanButton.events.add('click', function () {
-                        cleanAddress();  
+                        cleanAddress();
                     });
-    
+
                     offsetBtns = document.documentElement.clientHeight / 2 - 60;
                 }
-                
+
                 //кнопки зума
                 ZoomLayout = ymaps.templateLayoutFactory.createClass(
                     '<div id="zoom-in" class="map-custom-controls--zoom-in"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12H18M12 6V18" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
                     '<div id="zoom-out" class="map-custom-controls--zoom-out"><svg viewBox="0 0 24 24" fill="none"><path d="M6 12L18 12" stroke="#0a834f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
                     ,
                     {
-    
-                    // Переопределяем методы макета, чтобы выполнять дополнительные действия
-                    // при построении и очистке макета.
-                    build: function () {
-                        // Вызываем родительский метод build.
-                        ZoomLayout.superclass.build.call(this);
-    
-                        // Привязываем функции-обработчики к контексту и сохраняем ссылки
-                        // на них, чтобы потом отписаться от событий.
-                        this.zoomInCallback = ymaps.util.bind(this.zoomIn, this);
-                        this.zoomOutCallback = ymaps.util.bind(this.zoomOut, this);
-    
-                        // Начинаем слушать клики на кнопках макета.
-                        document.querySelector('#zoom-in').addEventListener('click', this.zoomInCallback);
-                        document.querySelector('#zoom-out').addEventListener('click', this.zoomOutCallback);
-                    },
-    
-                    clear: function () {
-                        // Снимаем обработчики кликов.
-                        document.querySelector('#zoom-in').removeEventListener('click', this.zoomInCallback);
-                        document.querySelector('#zoom-out').removeEventListener('click', this.zoomOutCallback);
-    
-                        // Вызываем родительский метод clear.
-                        ZoomLayout.superclass.clear.call(this);
-                    },
-    
-                    zoomIn: function () {
-                        var map = this.getData().control.getMap();
-                        map.setZoom(map.getZoom() + 1, {checkZoomRange: true, duration: 200});
-                    },
-    
-                    zoomOut: function () {
-                        var map = this.getData().control.getMap();
-                        map.setZoom(map.getZoom() - 1, {checkZoomRange: true, duration: 200});
-                    }
-    
-                });
+
+                        // Переопределяем методы макета, чтобы выполнять дополнительные действия
+                        // при построении и очистке макета.
+                        build: function () {
+                            // Вызываем родительский метод build.
+                            ZoomLayout.superclass.build.call(this);
+
+                            // Привязываем функции-обработчики к контексту и сохраняем ссылки
+                            // на них, чтобы потом отписаться от событий.
+                            this.zoomInCallback = ymaps.util.bind(this.zoomIn, this);
+                            this.zoomOutCallback = ymaps.util.bind(this.zoomOut, this);
+
+                            // Начинаем слушать клики на кнопках макета.
+                            document.querySelector('#zoom-in').addEventListener('click', this.zoomInCallback);
+                            document.querySelector('#zoom-out').addEventListener('click', this.zoomOutCallback);
+                        },
+
+                        clear: function () {
+                            // Снимаем обработчики кликов.
+                            document.querySelector('#zoom-in').removeEventListener('click', this.zoomInCallback);
+                            document.querySelector('#zoom-out').removeEventListener('click', this.zoomOutCallback);
+
+                            // Вызываем родительский метод clear.
+                            ZoomLayout.superclass.clear.call(this);
+                        },
+
+                        zoomIn: function () {
+                            var map = this.getData().control.getMap();
+                            map.setZoom(map.getZoom() + 1, { checkZoomRange: true, duration: 200 });
+                        },
+
+                        zoomOut: function () {
+                            var map = this.getData().control.getMap();
+                            map.setZoom(map.getZoom() - 1, { checkZoomRange: true, duration: 200 });
+                        }
+
+                    });
                 var zoomControl = new ymaps.control.ZoomControl({
                     options: {
                         layout: ZoomLayout,
                         position: {
                             bottom: (offsetBtns + 55) + "px",
-                            right:'16px',
+                            right: '16px',
                         },
                     }
                 });
-    
+
                 // Добавим элемент управления с собственной меткой геолокации на карте.
                 var geolocationControl = new ymaps.control.GeolocationControl({
                     options: {
@@ -434,7 +434,7 @@ if (line1Container){
                     }
                 });
                 geolocationControl.events.add('locationchange', function (event) {
-                    var geolocation = ymaps.geolocation;        
+                    var geolocation = ymaps.geolocation;
                     geolocation.get({
                         provider: 'browser',
                         mapStateAutoApply: false
@@ -445,38 +445,38 @@ if (line1Container){
                         map.setZoom(15);
                     });
                 });
-    
-                var controlsPane = new ymaps.pane.StaticPane(map, {zIndex: 420});
-                map.panes.append('customControls', controlsPane); 
+
+                var controlsPane = new ymaps.pane.StaticPane(map, { zIndex: 420 });
+                map.panes.append('customControls', controlsPane);
                 var placesPane = map.panes.get('controls').getElement();
                 placesPane.classList.add('map-custom-controls', 'd-flex', 'flex-column', 'align-center', 'justify-center');
-    
+
                 map.controls.add(zoomControl);
                 map.controls.add(geolocationControl);
-    
-                saveButton.addEventListener('click', function() {
+
+                saveButton.addEventListener('click', function () {
                     mapContainer.classList.remove('open');
                     if (addressInfo) {
                         line1.value = addressInfo.address;
                         addressCaptured(addressInfo.coords, addressInfo.address);
                         addressInfo = null;
                     }
-                });                
-    
+                });
+
                 store = new ymaps.Placemark(
                     [56.050918, 92.904378], {
-                        iconCaption: "Mikado",
-                    },{
-                        iconLayout: 'default#image',
-                        // Своё изображение иконки метки.
-                        iconImageHref: '/static/svg/map/pin-pickup.svg',
-                        // Размеры метки.
-                        iconImageSize: [40, 40],
-                        // Смещение левого верхнего угла иконки относительно
-                        // её "ножки" (точки привязки).
-                        iconImageOffset: [-30, -30],
-                        hasBalloon: false,
-                    });
+                    iconCaption: "Mikado",
+                }, {
+                    iconLayout: 'default#image',
+                    // Своё изображение иконки метки.
+                    iconImageHref: '/static/svg/map/pin-pickup.svg',
+                    // Размеры метки.
+                    iconImageSize: [40, 40],
+                    // Смещение левого верхнего угла иконки относительно
+                    // её "ножки" (точки привязки).
+                    iconImageOffset: [-30, -30],
+                    hasBalloon: false,
+                });
                 map.geoObjects.add(store);
                 mapControl = new CustomControlClass();
                 map.controls.add(mapControl, {
@@ -486,17 +486,17 @@ if (line1Container){
                         left: 400,
                     }
                 });
-    
+
                 map.events.add('click', function (e) {
                     movePlacemark(e.get('coords'));
                 });
             } else if (address) {
-                ymaps.geocode(address, {results: 1, boundedBy:DELIVERYBOUNDS}).then(function (res) {
+                ymaps.geocode(address, { results: 1, boundedBy: DELIVERYBOUNDS }).then(function (res) {
                     movePlacemark(res.geoObjects.get(0).geometry.getCoordinates(), res.geoObjects.get(0).properties._data.name);
                 });
             }
-    
-            if (line1.hasAttribute('captured')){
+
+            if (line1.hasAttribute('captured')) {
                 saveButton.disabled = true;
             } else {
                 controls.classList.add('d-none');
@@ -505,9 +505,9 @@ if (line1Container){
 
         });
     }
-    
+
     // переместить плейсмарк
-    function movePlacemark(coords, address=null, captured=false) {
+    function movePlacemark(coords, address = null, captured = false) {
         console.log("movePlacemark");
         if (placemark) {
             placemark.geometry.setCoordinates(coords);
@@ -516,7 +516,7 @@ if (line1Container){
                 hasBalloon: false,
                 hasHint: false,
                 draggable: false,
-                
+
                 iconLayout: 'default#imageWithContent',
                 iconImageHref: "",
                 iconImageSize: [25, 25],
@@ -526,48 +526,48 @@ if (line1Container){
             map.geoObjects.add(placemark);
         }
         placemark.properties.set('loading', true);
-        showBalloon(coords, address, captured); 
+        showBalloon(coords, address, captured);
     }
-    
+
     // Определяем адрес по координатам (обратное геокодирование).
-    function showBalloon(coords, address=null, captured=false) {
+    function showBalloon(coords, address = null, captured = false) {
         console.log("showBalloon");
         var zonaId = getZonaId(coords)
-        if (zonaId){
+        if (zonaId) {
             console.log("in zona");
-    
-            if (!address){
-                ymaps.geocode(coords, {results:1, kind:'house'}).then(function (res) {
+
+            if (!address) {
+                ymaps.geocode(coords, { results: 1, kind: 'house' }).then(function (res) {
                     address = res.geoObjects.get(0).properties._data.name;
                     balloonTime(coords, address, zonaId, captured);
                 });
             } else {
                 balloonTime(coords, address, zonaId, captured);
             }
-    
+
         } else {
             console.log("no in zona");
-    
+
             addressInfo = null;
             controls.classList.add('d-none');
             mapControl._addressSelected("");
             saveButton.disabled = true;
-    
+
             placemark.properties.set({
                 'error': "Адрес вне зоны доставки",
                 'loading': false,
             });
-    
+
             if (captured) {
-                timeCaptured({"error": "Адрес вне зоны доставки"});
+                timeCaptured({ "error": "Адрес вне зоны доставки" });
             }
         }
     }
-    
+
     // показ балуна и захват или нет времени
-    function balloonTime(coords, address, zonaId, captured){
-        GetTime({coords:coords, address:address, shippingMethod:"zona-shipping", zonaId:zonaId}).then(function(result) {
-            if (captured){
+    function balloonTime(coords, address, zonaId, captured) {
+        GetTime({ coords: coords, address: address, shippingMethod: "zona-shipping", zonaId: zonaId }).then(function (result) {
+            if (captured) {
                 timeCaptured(result);
             }
             placemark.properties.set({
@@ -576,19 +576,19 @@ if (line1Container){
                 'order_minutes': result.order_minutes,
                 'min_order': result.min_order,
             });
-    
-            if (result.error){
+
+            if (result.error) {
                 controls.classList.add('d-none');
                 saveButton.disabled = true;
             } else {
-                addressInfo = {"address": result.address, "coords": result.coords.split(",")};
+                addressInfo = { "address": result.address, "coords": result.coords.split(",") };
                 mapControl._addressSelected(result.address);
                 controls.classList.remove('d-none');
                 saveButton.disabled = false;
-            } 
+            }
         });
     }
-    
+
     // создание зон доставки
     function ZonesInit(json) {
         console.log("ZonesInit");
@@ -607,19 +607,19 @@ if (line1Container){
                 strokeColor: color,
                 fillOpacity: 0.1,
                 strokeWidth: 0,
-                strokeOpacity:0,
+                strokeOpacity: 0,
             });
-            zona.options.set({'hasBalloon': false, 'hasHint': false});
+            zona.options.set({ 'hasBalloon': false, 'hasHint': false });
             zona.events.add('click', function (e) {
                 movePlacemark(e.get('coords'));
             });
         });
     }
-    
-    
+
+
     // ====================  ADDRESS RESOLVER  ===========================
-    
-     
+
+
     // проверка адреса в зоне доставки
     function getZonaId(coords) {
         console.log("getZonaId");
@@ -629,88 +629,88 @@ if (line1Container){
         }
         return zona.properties._data.number;
     }
-    
+
     // адрес получен
-    function addressCaptured(coords, address){
+    function addressCaptured(coords, address) {
         console.log("addressCaptured");
 
         line1.readOnly = true;
         suggests.classList.add('d-none');
         line1Container.classList.remove('not-valid');
-    
-        GetTime({coords: coords, address: address, shippingMethod: shippingMethod, zonaId:getZonaId(coords)}).then(function(result) {
+
+        GetTime({ coords: coords, address: address, shippingMethod: shippingMethod, zonaId: getZonaId(coords) }).then(function (result) {
             timeCaptured(result);
         });
-    
+
         saveButton.disabled = true;
         line1.setAttribute('captured', true);
         lon.value = coords[0];
-        lat.value = coords[1];        
-    
+        lat.value = coords[1];
+
     }
-    
-    
+
+
     // ====================  HELPERS  ===========================
-    
-    
+
+
     // очистить адрес
-    function cleanAddress(){
+    function cleanAddress() {
         console.log("cleanAddress");
         line1.value = '';
         line1.readOnly = false;
         hints.classList.add('d-none');
-        if (deliveryTime){
+        if (deliveryTime) {
             deliveryTime.classList.remove('active');
         }
         controls.classList.add('d-none');
-        saveButton.disabled = true;        
+        saveButton.disabled = true;
         suggests.classList.add('d-none');
-    
-        if (map){
+
+        if (map) {
             map.geoObjects.remove(placemark);
             map.setCenter(MAPCENTER, 12);
             mapControl._addressSelected("");
         }
-    
-        if (cleanButton){
-            cleanButton.state.set({disabled:false});
+
+        if (cleanButton) {
+            cleanButton.state.set({ disabled: false });
         }
-    
+
         hints.innerHTML = "";
-        if (deliveryTime){ 
+        if (deliveryTime) {
             deliveryTime.innerHTML = "";
         }
         line1.setAttribute('captured', 'false');
         line1.setAttribute('valid', 'false');
         lon.value = '';
-        lat.value = '';        
+        lat.value = '';
         placemark = null;
         shippingCharge();
     }
-    
+
     // кнопка очистить адрес
-    cleanBtn.addEventListener('click', function() {
+    cleanBtn.addEventListener('click', function () {
         cleanAddress();
         validate();
     });
-    
+
     // кнопка открыть карту
-    if (open_map){
-        open_map.addEventListener('click', function() {
+    if (open_map) {
+        open_map.addEventListener('click', function () {
             console.log("map open");
             addressInfo = null;
             createMap(line1.value);
             mapContainer.classList.add('open');
-            actionBack = function() {};
+            actionBack = function () { };
         });
     }
 }
 
- // запрос времени доставки на сервере со временем
- function GetTime({coords='', address='', shippingMethod='', zonaId=''} = {}){
+// запрос времени доставки на сервере со временем
+function GetTime({ coords = '', address = '', shippingMethod = '', zonaId = '' } = {}) {
     console.log('GetTime');
-    
-    if (Array.isArray(coords)){
+
+    if (Array.isArray(coords)) {
         coords = coords.join(",")
     }
 
@@ -726,52 +726,52 @@ if (line1Container){
             "address": address,
             "shipping_method": shippingMethod,
             "zonaId": zonaId,
-        }).toString() 
+        }).toString()
     })
-    .then(response => response.json())
-    .then(response => {
-        return new Promise((resolve, reject) => {
-            resolve(response);
+        .then(response => response.json())
+        .then(response => {
+            return new Promise((resolve, reject) => {
+                resolve(response);
+            });
+        })
+        .catch(error => {
+            console.log('error GetTime', error);
+            if (deliveryTime) {
+                deliveryTime.classList.remove('active');
+            }
         });
-    })
-    .catch(error => {
-        console.log('error GetTime', error);
-        if (deliveryTime){
-            deliveryTime.classList.remove('active');
-        }
-    });
 }
 
 // время можно показывать пользователю на странице и менять в ордер тайм
-function timeCaptured(result){
+function timeCaptured(result) {
     console.log("timeCaptured");
-    
-    if (result.error){
-        if (hints){
+
+    if (result.error) {
+        if (hints) {
             hints.innerHTML = result.error;
             hints.classList.remove('d-none');
         }
-        if (deliveryTime){
+        if (deliveryTime) {
             deliveryTime.innerHTML = '';
             deliveryTime.classList.remove('active');
             deliveryTime.classList.add('hidden');
         }
-        if (line1){
+        if (line1) {
             line1.setAttribute('valid', 'false');
         }
         controls.classList.add('d-none');
         validate();
     } else {
-        if (hints){
+        if (hints) {
             hints.innerHTML = "";
             hints.classList.add('d-none');
         }
-        if (deliveryTime){
+        if (deliveryTime) {
             deliveryTime.classList.add('active');
             deliveryTime.classList.remove('hidden');
             deliveryTime.innerHTML = result.delivery_time_text;
         }
-        if (line1){
+        if (line1) {
             line1.setAttribute('valid', 'true');
             shippingCharge(result.zonaId);
         }

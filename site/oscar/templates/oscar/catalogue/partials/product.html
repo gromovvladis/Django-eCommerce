@@ -48,7 +48,7 @@
                             {% include "oscar/catalogue/partials/product_price.html" %}
                             <div role="separator" class="spacer"></div>
                             {% if not product.is_parent and not product.has_options %}
-                                {% include "oscar/catalogue/partials/add_to_basket_form_compact.html" %}
+                                {% include "oscar/catalogue/partials/add_to_cart_form_compact.html" %}
                             {% else %}
                                 <a href="{{ product.get_absolute_url }}" data-id="dish-item-submit-button-0" class="button button--dish justify-center" aria-label="Выбрать вариант">
                                     <span class="button__wrapper">

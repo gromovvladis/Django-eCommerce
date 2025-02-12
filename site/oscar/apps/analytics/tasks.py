@@ -2,7 +2,7 @@ import logging
 from celery import shared_task
 
 from django.conf import settings
-from django.db.models import F, Count, Sum
+from django.db.models import F
 from django.apps import apps
 
 from oscar.core.loading import get_model
@@ -46,22 +46,19 @@ def update_counter_task(model_name, field_name, filter_kwargs, increment=1):
 
 
 @shared_task
-def record_products_in_order_task(order_id):
+def record_products_in_order_task(order_data):
     """
     Записывает данные о товарах в заказе.
     """
     try:
-        order = Order.objects.prefetch_related("lines", "lines__product").get(
-            id=order_id
-        )
         updates = [
             update_counter_task.s(
                 "ProductRecord",
                 "num_purchases",
-                {"product_id": line.product.id},
-                line.quantity,
+                {"product_id": product_id},
+                line_quantity,
             )
-            for line in order.lines.all()
+            for product_id, line_quantity in order_data["lines"]
         ]
         for task in updates:
             if settings.DEBUG:
@@ -70,7 +67,7 @@ def record_products_in_order_task(order_id):
                 task.delay()
     except Exception as e:
         logger.error(
-            f"{e} при записи продуктов в заказе пользователя (order_id={order_id})"
+            f"{e} при записи продуктов в заказе пользователя (date_placed={order_data["date_placed"]})"
         )
 
 
