@@ -9,9 +9,10 @@ ConditionalOffer = get_model("offer", "ConditionalOffer")
 
 
 class ConditionalOfferTable(DashboardTable):
-    image = LinkColumn(
-        "dashboard:offer-detail",
-        args=[A("pk")],
+    image = TemplateColumn(
+        verbose_name="",
+        template_name="oscar/dashboard/offers/offer_row_image.html",
+        orderable=False,
     )
     name = LinkColumn(
         "dashboard:offer-detail",
@@ -27,11 +28,11 @@ class ConditionalOfferTable(DashboardTable):
     )
     start_datetime = TemplateColumn(
         verbose_name="Дата начала",
-        template_code='{{ record.date_updated|date:"d.m.y H:i"|default:"-" }}',
+        template_code='{{ record.start_datetime|date:"d.m.y H:i"|default:"-" }}',
     )
     end_datetime = TemplateColumn(
         verbose_name="Дата окончания",
-        template_code='{{ record.date_updated|date:"d.m.y H:i"|default:"-" }}',
+        template_code='{{ record.end_datetime|date:"d.m.y H:i"|default:"-" }}',
     )
     priority = Column(
         verbose_name="Приоритет",
@@ -39,11 +40,11 @@ class ConditionalOfferTable(DashboardTable):
     )
     benefit = TemplateColumn(
         verbose_name="Стимул",
-        template_code="{{ offer.benefit.description|safe }}",
+        template_code="{{ record.benefit.description|safe }}",
     )
     condition = TemplateColumn(
         verbose_name="Условие",
-        template_code="{{ offer.condition.description|safe }}",
+        template_code="{{ record.condition.description|safe }}",
     )
     is_available = TemplateColumn(
         verbose_name="Активен",
@@ -51,22 +52,22 @@ class ConditionalOfferTable(DashboardTable):
         order_by=("is_available"),
     )
     restrictions = TemplateColumn(
-        verbose_name="Активен",
-        template_name="oscar/dashboard/offer/offer_row_restrictions.html",
+        verbose_name="Ограничения",
+        template_name="oscar/dashboard/offers/offer_row_restrictions.html",
         order_by=("availability_restrictions"),
     )
     num_applications = Column(
-        verbose_name="Активен",
+        verbose_name="Количество применений",
         orderable=True,
     )
     total_discount = TemplateColumn(
-        verbose_name="Активен",
-        template_name="oscar/dashboard/offer/offer_row_total_discount.html",
+        verbose_name="Суммарная скидка",
+        template_name="oscar/dashboard/offers/offer_row_total_discount.html",
         order_by=("total_discount"),
     )
     actions = TemplateColumn(
         verbose_name="",
-        template_name="oscar/dashboard/offer/offer_row_actions.html",
+        template_name="oscar/dashboard/offers/offer_row_actions.html",
         orderable=False,
         attrs={
             "th": {"class": "actions"},
@@ -82,15 +83,28 @@ class ConditionalOfferTable(DashboardTable):
             "image",
             "name",
             "offer_type",
+            "start_datetime",
+            "end_datetime",
+            "num_applications",
+            "benefit",
+            "condition",
+            "priority",
+            "total_discount",
         )
         sequence = (
+            "image",
             "name",
-            "class_options",
-            "class_attributes",
-            "class_additionals",
-            "num_products",
-            "requires_shipping",
-            "track_stock",
+            "offer_type",
+            "voucher_count",
+            "start_datetime",
+            "end_datetime",
+            "priority",
+            "benefit",
+            "condition",
+            "is_available",
+            "restrictions",
+            "num_applications",
+            "total_discount",
             "...",
             "actions",
         )

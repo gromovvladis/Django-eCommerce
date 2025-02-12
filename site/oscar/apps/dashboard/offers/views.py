@@ -60,7 +60,7 @@ class OfferListView(SingleTableView):
 
     def get_queryset(self):
         self.search_filters = []
-        qs = self.model._default_manager.annotate(
+        qs = ConditionalOffer._default_manager.annotate(
             voucher_count=Count("vouchers")
         ).select_related("benefit", "condition")
         qs = sort_queryset(
