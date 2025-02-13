@@ -10,7 +10,7 @@
               <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
             {% endfor %}
           {% endblock %}
-          {% render_field field='form-control' %}
+          {% render_field field class='form-control' %}
           {% block help_text %}
             {% if field.help_text %}
               <small class="form-text text-muted">{{ field.help_text|safe }}</small>

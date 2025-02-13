@@ -58,32 +58,14 @@
                     data-toggle="collapse"
                     aria-controls="navbar_{{ forloop.counter }}"
                     type="button"
-                    aria-expanded="{% if request.path|tab:item.paths %}
-                      
-                      
-                      
-                      true
-
-
-
-                    {% else %}
-                      
-                      
-                      
-                      false
-
-
-
-                    {% endif %}">
+                    aria-expanded="{% if request.path|tab:item.paths %}true{% else %}false{% endif %}">
                     <span>
                       {% if item.icon %}
                         <i class="{{ item.icon }}" style="width:15px"></i>
                       {% endif %}
                       <span class="item_text arrow-dropdown ml-sm-2">{{ item.label }}</span>
                     </span>
-                    <div class="dropdown-item-badge dropdown-item-badge--nav" data-id="{{ item.label }}">
-                      {% if item.notif %}{{ item.notif }}{% endif %}
-                    </div>
+                    <div class="dropdown-item-badge dropdown-item-badge--nav" data-id="{{ item.label }}">{% if item.notif %}{{ item.notif }}{% endif %}</div>
                   </button>
                   <div class="dropdown-list dropdown-list--nav collapse {% if request.path|tab:item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
                     {% for subitem in item.children %}
@@ -92,9 +74,7 @@
                           <i class="{{ subitem.icon }}"></i>
                         {% endif %}
                         <span>{{ subitem.label }}</span>
-                        <div class="dropdown-item-badge ml-1" data-id="{{ subitem.label }}">
-                          {% if subitem.notif %}{{ subitem.notif }}{% endif %}
-                        </div>
+                        <div class="dropdown-item-badge ml-1" data-id="{{ subitem.label }}">{% if subitem.notif %}{{ subitem.notif }}{% endif %}</div>
                       </a>
                     {% endfor %}
                   </div>
@@ -106,9 +86,7 @@
                       {% endif %}
                       <span class="item_text ml-sm-2">{{ item.label }}</span>
                     </span>
-                    <div class="dropdown-item-badge dropdown-item-badge--nav">
-                      {% if item.notif %}{{ item.notif }}{% endif %}
-                    </div>
+                    <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>
                   </a>
                 {% endif %}
               </li>

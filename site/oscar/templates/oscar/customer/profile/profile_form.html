@@ -41,7 +41,6 @@
           <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
         {% endfor %}
       {% endblock %}
-
       <div data-id="input-wrapper" class="input d-flex align-center{% if request.user.name %} input__label-active{% endif %} input__padding">
         <div class="input__wrapper">
           <div class="input__label">Имя</div>
@@ -53,7 +52,6 @@
       {% if form.name.errors %}
         <span class="error-block mt-2 info-message">{{ form.name.errors }}</span>
       {% endif %}
-
       <div class="input d-flex align-center mt-2 input__label-active input__padding readonly">
         <div class="input__wrapper">
           <div class="input__label">Телефон</div>
@@ -62,7 +60,6 @@
           </div>
         </div>
       </div>
-
       <div data-id="input-wrapper" class="input d-flex align-center{% if request.user.email %} input__label-active{% endif %} mt-2 input__padding">
         <div class="input__wrapper">
           <div class="input__label">Почта</div>
@@ -74,7 +71,6 @@
       {% if form.email.errors %}
         <span class="error-block mt-2 info-message">{{ form.email.errors }}</span>
       {% endif %}
-
       <div class="profile-personal__submit pos-relative d-flex justify-end pt-4 pt-sm-0 px-sm-0 mt-sm-3">
         <button type="submit" data-id="profile-personal-submit-button" class="button fill-width button--main justify-center shrink"><span class="button__wrapper"><span class="button__value">Сохранить настройки</span></span></button>
       </div>

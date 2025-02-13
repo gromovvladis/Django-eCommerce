@@ -19,7 +19,7 @@
                 {{ field.label|safe }}
               </label>
             {% else %}
-              {% render_field field='form-control' %}
+              {% render_field field class='form-control' %}
             {% endif %}
           {% endblock %}
           {% block errors %}

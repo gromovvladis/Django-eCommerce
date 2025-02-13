@@ -33,7 +33,7 @@
       <i class="fa-solid fa-store mx-1"></i>
       {% for field in form %}
         {% if 'store' in field.id_for_label %}
-          {% render_field field='store-point' %}
+          {% render_field field class='store-point' %}
           {% for error in field.errors %}
             <ul class="error-block">
               <li>{{ error }}</li>
@@ -57,11 +57,11 @@
         {% for field in form %}
           {% if 'order' in field.id_for_label %}
             {% if field.is_hidden %}
-              {% render_field field='form-control' %}
+              {% render_field field class='form-control' %}
             {% else %}
               <div class="form-group form-flex-inline">
                 {{ field.label_tag }}
-                {% render_field field='form-control' %}
+                {% render_field field class='form-control' %}
                 {% for error in field.errors %}
                   <ul class="error-block">
                     <li>{{ error }}</li>

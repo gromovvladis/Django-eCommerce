@@ -50,12 +50,7 @@
       {% endif %}
     {% endblock %}
     {% order_totals_and_shipping basket shipping_charge as basket_totals %}
-    <div class="order__info-total d-flex align-end total"
-      data-min-order="{% if basket_totals >= min_order %}
-        true
-      {% else %}
-        false
-      {% endif %}">
+    <div class="order__info-total d-flex align-end total" data-min-order="{% if basket_totals >= min_order %}true{% else %}false{% endif %}">
       Итого<div role="separator" class="spacer"></div>
       <span class="prices d-flex flex-column align-start prices--big"><span class="prices__price no-wrap">{{ basket_totals|currency:basket.currency }}</span></span>
     </div>

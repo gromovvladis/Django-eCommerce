@@ -67,7 +67,6 @@
                     <span>{{ shipping_address.notes }}</span>
                   </div>
                 {% endif %}
-
                 {% if order_note %}
                   <div class="checkout__detail-text mb-2">
                     <span>Коментарий к заказу:</span>
@@ -133,7 +132,7 @@
           <div id="checkout_totals">
             {% include 'oscar/checkout/checkout_totals.html' with order_total=submission.order_total %}
           </div>
-          <a href="#" class="button fill-width button--main justify-center shrink mt-3">Связаться с поддержкой</a>
+          <a href="{{ support_link }}" class="button fill-width button--main justify-center shrink mt-3">Связаться с поддержкой</a>
         </div>
       </div>
     </div>

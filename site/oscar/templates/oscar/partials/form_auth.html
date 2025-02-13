@@ -18,16 +18,11 @@
   {% if field.is_hidden %}
     {{ field }}
   {% else %}
-    <div id="auth_{{ field.auto_id }}"
-      class="align-center {% if field.auto_id == 'id_password' %}
-        d-none mt-2
-      {% else %}
-        input input__label-active
-      {% endif %}">
+    <div id="auth_{{ field.auto_id }}" class="align-center {% if field.auto_id == 'id_password' %}d-none mt-2{% else %}input input__label-active{% endif %}">
       <div class="input__wrapper">
         <div class="input__control d-flex align-center">
           {% block widget %}
-            {% render_field field='form-control' %}
+            {% render_field field class='form-control' %}
           {% endblock %}
         </div>
       </div>

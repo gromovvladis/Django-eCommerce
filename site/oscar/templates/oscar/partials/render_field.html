@@ -6,15 +6,15 @@
 {% else %}
   {% block widget %}
     {% if field.name == 'line1' %}
-      {% render_field field data - id=data_id class='delivery--line1' autocomplete='off' %}
+      {% render_field field data-id=data_id class='delivery--line1' autocomplete='off' %}
       <button type="button" id="open_map" data-id="delivery-map-button" class="delivery--map shrink d-flex align-center justify-center" style="width: 55px;">{% icon file_name='map/location-arrow' size=22 stroke='#0a834f' %}</button>
       <div role="separator" class="spacer" style="border: solid 1px #c8c8c8; margin: 10px 0;"></div>
       <button type="button" id="clean_address" data-id="delivery-clear-button" class="delivery--clear shrink d-flex align-center justify-center" style="width: 55px;">{% icon file_name='interface/close' size=22 stroke='#d32225' %}</button>
     {% else %}
       {% if form_id %}
-        {% render_field field data - id=data_id form=form_id %}
+        {% render_field field data-id=data_id form=form_id %}
       {% else %}
-        {% render_field field data - id=data_id %}
+        {% render_field field data-id=data_id %}
       {% endif %}
     {% endif %}
   {% endblock %}

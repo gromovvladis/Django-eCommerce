@@ -47,7 +47,6 @@
         </div>
       </div>
     </div>
-
     <div class="actions__action-detail-content fill-width d-flex flex-column mt-2 mt-sm-4">
       <h1>{{ offer.name }}</h1>
       {% if offer.description %}
@@ -62,7 +61,6 @@
         {% endif %}
       </div>
     </div>
-
     {% if products %}
       <div class="dishes row fill-width mt-2 mt-sm-4">
         {% for product in products %}
@@ -72,7 +70,6 @@
         {% endfor %}
       </div>
     {% endif %}
-
     <div class="d-flex fill-width my-2 mt-sm-4">
       <a class="button button--main mt-md-0" href="{% url 'home:actions' %}">Смотреть все акции</a>
     </div>

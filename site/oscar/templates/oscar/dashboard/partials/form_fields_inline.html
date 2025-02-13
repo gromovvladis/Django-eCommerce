@@ -6,7 +6,7 @@
   {% else %}
     <div class="form-group form-flex-inline{% if field.errors %} error{% endif %}">
       {{ field.label_tag }}
-      {% render_field field='form-control' %}
+      {% render_field field class='form-control' %}
       {% for error in field.errors %}
         <ul class="error-block">
           <li>{{ error }}</li>

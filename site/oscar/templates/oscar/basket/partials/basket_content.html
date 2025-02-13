@@ -57,7 +57,7 @@
                           </div>
                         {% endif %}
                         {% if line.critical_warning %}
-                          {% render_field form.quantity readonly='true' type='hidden' data - id='quantity-input' %}
+                          {% render_field form.quantity readonly='true' type='hidden' data-id='quantity-input' %}
                         {% else %}
                           <div role="separator" class="spacer"></div>
                           <div class="d-flex fill-width pos-relative align-center">
@@ -67,7 +67,7 @@
                                   <path d="M6 12L18 12" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                               </button>
-                              {% render_field form.quantity class='order-button--elem order-button--value' readonly='true' data - id='quantity-input' %}
+                              {% render_field form.quantity class='order-button--elem order-button--value' readonly='true' data-id='quantity-input' %}
                               <button type="button" data-id="order-button-plus" class="order-button--elem" aria-label="Увеличить">
                                 <svg viewBox="0 0 24 24" fill="none">
                                   <path d="M6 12H18M12 6V18" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />

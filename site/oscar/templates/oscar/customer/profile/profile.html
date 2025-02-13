@@ -15,49 +15,47 @@
             {% include 'oscar/customer/partials/standard_tabs.html' %}
           {% endblock %}
         </div>
-        <div class="fill-width pl-0 pl-sm-4 d-none d-sm-block">
-          <form class="profile-personal d-flex flex-column fill-height fill-width grow-1">
-            <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
-              <div class="input d-flex align-center input__label-active input__padding">
-                <div class="input__wrapper">
-                  <div class="input__label">Имя</div>
-                  <div class="input__control d-flex align-center">
-                    <label><input maxlength="30" data-id="profile-name-input" type="text" /></label>
-                  </div>
-                </div>
-              </div>
-              <div class="input d-flex align-center mt-2 input__label-active input__padding readonly">
-                <div class="input__wrapper">
-                  <div class="input__label">Телефон</div>
-                  <div class="input__control d-flex align-center">
-                    <label><input readonly data-id="profile-phone-input" type="text" /></label>
-                  </div>
-                </div>
-              </div>
-              <div class="input d-flex align-center mt-2 input__padding">
-                <div class="input__wrapper">
-                  <div class="input__label">Дата рождения</div>
-                  <div class="input__control d-flex align-center">
-                    <label><input data-id="profile-birthday-input" type="text" /></label>
-                  </div>
-                </div>
-              </div>
-              <div class="input d-flex align-center mt-2 input__label-active input__padding">
-                <div class="input__wrapper">
-                  <div class="input__label">Почта</div>
-                  <div class="input__control d-flex align-center">
-                    <label><input maxlength="30" data-id="profile-email-input" type="text" /></label>
-                  </div>
+        <form class="profile-personal d-flex flex-column fill-height fill-width grow-1 pl-0 pl-sm-4 d-none d-sm-block">
+          <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
+            <div class="input d-flex align-center input__label-active input__padding">
+              <div class="input__wrapper">
+                <div class="input__label">Имя</div>
+                <div class="input__control d-flex align-center">
+                  <label><input maxlength="30" data-id="profile-name-input" type="text" /></label>
                 </div>
               </div>
             </div>
-            <div class="d-none d-sm-flex justify-end mt-4">
-              <div class="profile-personal__button-wrap d-flex mr-2">
-                <a data-id="profile-logout-btn" href="{% url 'dashboard:logout' %}" class="button fill-width button--outline justify-center shrink"><span class="button__wrapper"><span class="button__value">Выйти из аккаунта</span></span></a>
+            <div class="input d-flex align-center mt-2 input__label-active input__padding readonly">
+              <div class="input__wrapper">
+                <div class="input__label">Телефон</div>
+                <div class="input__control d-flex align-center">
+                  <label><input readonly data-id="profile-phone-input" type="text" /></label>
+                </div>
               </div>
             </div>
-          </form>
-        </div>
+            <div class="input d-flex align-center mt-2 input__padding">
+              <div class="input__wrapper">
+                <div class="input__label">Дата рождения</div>
+                <div class="input__control d-flex align-center">
+                  <label><input data-id="profile-birthday-input" type="text" /></label>
+                </div>
+              </div>
+            </div>
+            <div class="input d-flex align-center mt-2 input__label-active input__padding">
+              <div class="input__wrapper">
+                <div class="input__label">Почта</div>
+                <div class="input__control d-flex align-center">
+                  <label><input maxlength="30" data-id="profile-email-input" type="text" /></label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-none d-sm-flex justify-end mt-4">
+            <div class="profile-personal__button-wrap d-flex mr-2">
+              <a data-id="profile-logout-btn" href="{% url 'dashboard:logout' %}" class="button fill-width button--outline justify-center shrink"><span class="button__wrapper"><span class="button__value">Выйти из аккаунта</span></span></a>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>

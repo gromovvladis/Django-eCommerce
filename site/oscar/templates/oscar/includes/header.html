@@ -15,7 +15,7 @@
   {% endcache %}
 </div>
 <div class="app__header-right d-flex">
-  {% cache 3600 header_right delivery_available %}
+  {% cache 3600 header_right %}
   <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button" class="app-header__button d-flex flex-column mr-4 align-center">
     <span class="app-header__button-picture">{% icon file_name='header/search' size=26 fill='#111' %}</span>
     Поиск

@@ -47,11 +47,11 @@
           {% for field in form %}
             {% if 'date_range' in field.id_for_label %}
               {% if field.is_hidden %}
-                {% render_field field='form-control' %}
+                {% render_field field class='form-control' %}
               {% else %}
                 <div class="form-group form-flex-inline date-form">
                   {{ field.label_tag }}
-                  {% render_field field='form-control' %}
+                  {% render_field field class='form-control' %}
                   {% for error in field.errors %}
                     <ul class="error-block">
                       <li>{{ error }}</li>

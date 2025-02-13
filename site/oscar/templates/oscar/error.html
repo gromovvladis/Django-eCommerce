@@ -14,11 +14,9 @@
 {% block content %}
   <div class="error-container d-flex flex-column justify-center align-center my-6">
     <h1 class="error-code mb-1">
-      {% block error_code %}
-      {% endblock %}
+      {% block error_code %}{% endblock %}
     </h1>
-    {% block error_message %}
-    {% endblock %}
+    {% block error_message %}{% endblock %}
     <div class="d-flex mt-2">
       <a class="button button--main button--second" href="{{ homepage_url }}">На главную страницу</a>
     </div>
