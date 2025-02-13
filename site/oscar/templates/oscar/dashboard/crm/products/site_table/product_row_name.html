@@ -1,27 +1,19 @@
 {% load django_tables2 %}
 <div class="d-flex flex-column">
-    <div>
-        {% if record.wrong_evotor_id %}
-            <span class="text-danger">
-                <i class="fa-solid fa-circle-xmark"></i>&nbsp; 
-            </span>
-        {% elif record.is_valid %}
-            <span class="text-success">
-                <i class="fa-solid fa-circle-check"></i>&nbsp; 
-            </span>
-        {% elif not record.evotor_id %}
-            <span class="text-primary">
-                <i class="fa-solid fa-circle-exclamation"></i>&nbsp;
-            </span>
-        {% else %}
-            <span class="text-warning">
-                <i class="fa-solid fa-triangle-exclamation"></i>&nbsp; 
-            </span>
-        {% endif %}
-        <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ record.get_name }}</a>
-    </div>
-    {% if record.is_child %}
-        <span class="text-muted small">{{ record.get_variants }}</span>
+  <div>
+    {% if record.wrong_evotor_id %}
+      <span class="text-danger"><i class="fa-solid fa-circle-xmark"></i>&nbsp;</span>
+    {% elif record.is_valid %}
+      <span class="text-success"><i class="fa-solid fa-circle-check"></i>&nbsp;</span>
+    {% elif not record.evotor_id %}
+      <span class="text-primary"><i class="fa-solid fa-circle-exclamation"></i>&nbsp;</span>
+    {% else %}
+      <span class="text-warning"><i class="fa-solid fa-triangle-exclamation"></i>&nbsp;</span>
     {% endif %}
-    <span class="text-muted small">Артикул: {{ record.article|default:"-" }}</span>
+    <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ record.get_name }}</a>
+  </div>
+  {% if record.is_child %}
+    <span class="text-muted small">{{ record.get_variants }}</span>
+  {% endif %}
+  <span class="text-muted small">Артикул: {{ record.article|default:'-' }}</span>
 </div>

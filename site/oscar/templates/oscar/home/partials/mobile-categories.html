@@ -1,24 +1,23 @@
-
 {% load category_tags %}
 {% load image_tags %}
 
 {% root_categories as root_categories %}
 {% if root_categories %}
-    <div class="categories d-flex flex-wrap pd-sm-3{% if not is_mobile %} d-sm-none{% endif %}">
-        {% for root_category in root_categories %} 
-            <div class="categories__tab-wrapper d-flex align-center">
-                <a href="{{ root_category.url }}" class="categories__tab fill-width pos-relative" data-id="dish-item-image-link">
-                    <p class="categories__tab-name">{{ root_category.name }}</p>
-                    <div class="categories__icon dish-image fill-width fill-height pos-relative none-select">
-                        <div class="image__inner image__inner--category">
-                            {% with image=root_category.primary_image %}
-                                {% oscar_thumbnail image.original "x320" upscale=False as thumb %}
-                                <img src="{{ thumb.url }}" alt="Изображение {{ root_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
-                            {% endwith %}
-                        </div>
-                    </div>
-                </a>
+  <div class="categories d-flex flex-wrap pd-sm-3{% if not is_mobile %} d-sm-none{% endif %}">
+    {% for root_category in root_categories %}
+      <div class="categories__tab-wrapper d-flex align-center">
+        <a href="{{ root_category.url }}" class="categories__tab fill-width pos-relative" data-id="dish-item-image-link">
+          <p class="categories__tab-name">{{ root_category.name }}</p>
+          <div class="categories__icon dish-image fill-width fill-height pos-relative none-select">
+            <div class="image__inner image__inner--category">
+              {% with image=root_category.primary_image %}
+                {% oscar_thumbnail image.original 'x320' upscale=False as thumb %}
+                <img src="{{ thumb.url }}" alt="Изображение {{ root_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0" />
+              {% endwith %}
             </div>
-        {% endfor %}
-    </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
 {% endif %}

@@ -2,70 +2,62 @@
 {% load shipping_tags %}
 
 {% with offer_discounts=basket.offer_discounts voucher_discounts=basket.grouped_voucher_discounts %}
-    <div class="order__total_and_discounts d-flex flex-column mt-3">
-        {% block discount_totals %}
-            {% if offer_discounts or voucher_discounts or shipping_charge != 0 %}
-                <div class="prices__price_discounts">
-                    <span class="d-flex justify-space-between no-wrap">
-                        Заказ
-                        <span class="prices__price-before">
-                            {{ basket.total_excl_discounts|currency:basket.currency }}
-                        </span>
-                    </span>
-                    {% if offer_discounts or voucher_discounts %}
-                        {% for discount in offer_discounts %}
-                            <span class="d-flex justify-space-between no-wrap">
-                                {{ discount.name|default:"Скидка" }} 
-                                {% if discount.description %}
-                                    <br/><small>{{ discount.description }}</small>
-                                {% endif %}
-                                <span class="prices__price-before">
-                                    - {{ discount.discount|currency:basket.currency }}
-                                </span>
-                            </span>
-                        {% endfor %}
-                        {% if voucher_discounts %}
-                            {% for discount in voucher_discounts %}
-                                <div class="d-flex justify-space-between no-wrap">
-                                    {% if discount.voucher.voucher_set %}
-                                        {{ discount.voucher.voucher_set.name|default:"Скидка" }} ({{ discount.voucher.code }})
-                                    {% else %}
-                                        {{ discount.voucher.name }} ({{ discount.voucher.code }})
-                                    {% endif %}
-                                    <span class="d-flex">
-                                        <span class="prices__price-before">
-                                            - {{ discount.discount|currency:basket.currency }}
-                                        </span>
-                                        {% if editable %}
-                                            <form class="d-flex align-end ml-1" action="{% url 'checkout:vouchers-remove' pk=discount.voucher.id %}" method="POST" data-id="voucher-remove">
-                                                <input type="submit" value="Удалить" class="text--red" />
-                                            </form>
-                                        {% endif %}
-                                    </span>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
+  <div class="order__total_and_discounts d-flex flex-column mt-3">
+    {% block discount_totals %}
+      {% if offer_discounts or voucher_discounts or shipping_charge != 0 %}
+        <div class="prices__price_discounts">
+          <span class="d-flex justify-space-between no-wrap">
+            Заказ
+            <span class="prices__price-before">{{ basket.total_excl_discounts|currency:basket.currency }}</span>
+          </span>
+          {% if offer_discounts or voucher_discounts %}
+            {% for discount in offer_discounts %}
+              <span class="d-flex justify-space-between no-wrap">
+                {{ discount.name|default:'Скидка' }}
+                {% if discount.description %}
+                  <br /><small>{{ discount.description }}</small>
+                {% endif %}
+                <span class="prices__price-before">- {{ discount.discount|currency:basket.currency }}</span>
+              </span>
+            {% endfor %}
+            {% if voucher_discounts %}
+              {% for discount in voucher_discounts %}
+                <div class="d-flex justify-space-between no-wrap">
+                  {% if discount.voucher.voucher_set %}
+                    {{ discount.voucher.voucher_set.name|default:'Скидка' }} ({{ discount.voucher.code }})
+                  {% else %}
+                    {{ discount.voucher.name }} ({{ discount.voucher.code }})
+                  {% endif %}
+                  <span class="d-flex">
+                    <span class="prices__price-before">- {{ discount.discount|currency:basket.currency }}</span>
+                    {% if editable %}
+                      <form class="d-flex align-end ml-1" action="{% url 'checkout:vouchers-remove' pk=discount.voucher.id %}" method="POST" data-id="voucher-remove">
+                        <input type="submit" value="Удалить" class="text--red" />
+                      </form>
                     {% endif %}
-                    {% if shipping_charge != 0 %}
-                        <span class="d-flex justify-space-between no-wrap">
-                            {{ shipping_method.name }}
-                            <span class="prices__price-before">
-                                {{ shipping_charge|currency:basket.currency }}
-                            </span>
-                        </span>
-                    {% endif %} 
+                  </span>
                 </div>
-            {% endif %} 
-        {% endblock %}
-        {% order_totals_and_shipping basket shipping_charge as basket_totals %}
-        <div class="order__info-total d-flex align-end total" data-min-order="{% if basket_totals >= min_order %}true{% else %}false{% endif %}">
-            Итого
-            <div role="separator" class="spacer"></div>
-            <span class="prices d-flex flex-column align-start prices--big">
-                <span class="prices__price no-wrap">
-                    {{ basket_totals|currency:basket.currency }}
-                </span>
+              {% endfor %}
+            {% endif %}
+          {% endif %}
+          {% if shipping_charge != 0 %}
+            <span class="d-flex justify-space-between no-wrap">
+              {{ shipping_method.name }}
+              <span class="prices__price-before">{{ shipping_charge|currency:basket.currency }}</span>
             </span>
+          {% endif %}
         </div>
+      {% endif %}
+    {% endblock %}
+    {% order_totals_and_shipping basket shipping_charge as basket_totals %}
+    <div class="order__info-total d-flex align-end total"
+      data-min-order="{% if basket_totals >= min_order %}
+        true
+      {% else %}
+        false
+      {% endif %}">
+      Итого<div role="separator" class="spacer"></div>
+      <span class="prices d-flex flex-column align-start prices--big"><span class="prices__price no-wrap">{{ basket_totals|currency:basket.currency }}</span></span>
     </div>
+  </div>
 {% endwith %}

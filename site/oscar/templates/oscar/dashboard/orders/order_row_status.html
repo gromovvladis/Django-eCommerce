@@ -1,3 +1,15 @@
-<span data-id="order-status" data-number="{{ record.number }}" class="badge badge-96 pointer {% if record.status == "Завершён" %}badge-success{% elif record.status == "Отменен" %}badge-danger{% elif record.status == "Готовится" %}badge-info{% elif record.status == "Доставляется" %}badge-primary{% else %}badge-warning{% endif %}">
-    {{ record.status }}
+<span data-id="order-status"
+  data-number="{{ record.number }}"
+  class="badge badge-96 pointer {% if record.status == 'Завершён' %}
+    badge-success
+  {% elif record.status == 'Отменен' %}
+    badge-danger
+  {% elif record.status == 'Готовится' %}
+    badge-info
+  {% elif record.status == 'Доставляется' %}
+    badge-primary
+  {% else %}
+    badge-warning
+  {% endif %}">
+  {{ record.status }}
 </span>

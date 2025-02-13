@@ -1,4 +1,4 @@
-{% extends "oscar/dashboard/base.html" %}
+{% extends 'oscar/dashboard/base.html' %}
 
 {% load category_tags %}
 {% load currency_filters %}
@@ -8,197 +8,223 @@
 {% load static %}
 
 {% block styles %}
-    {% compress css %}   
-        <link rel="stylesheet" href="{% static "css/thirdpaty/select2/select2.min.css" %}"/>
-        <link rel="stylesheet" href="{% static "css/thirdpaty/select2/select2-bootstrap.min.css" %}"/>
-        <link rel="stylesheet" href="{% static "css/thirdpaty/datetimepicker/air-datepicker.css" %}"/>
-        <link rel="stylesheet" href="{% static "css/dashboard/dashboard.css" %}"/>
-    {% endcompress %}
+  {% compress css %}
+  <link rel="stylesheet" href="{% static 'css/thirdpaty/select2/select2.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/thirdpaty/select2/select2-bootstrap.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/thirdpaty/datetimepicker/air-datepicker.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/dashboard/dashboard.css' %}" />
+  {% endcompress %}
 {% endblock %}
 
-{% block title %}Панель управления {{ block.super }}{% endblock %}
+{% block title %}
+  Панель управления {{ block.super }}
+{% endblock %}
 
 {% block layout %}
-    {% block navbar %}
-        <nav class="navbar navbar-expand-lg navbar-light navbar-accounts">
-            <div class="container-navbar fill-width d-flex justify-content-between">
-                <div>
-                    <button class="navbar-toggler navbar-toggler--mobile align-items-center fill-height" type="button" data-id="navbar-toggler">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                </div>
-                <div class="badges-navbar position-relative">
-                    <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1{% if not active_orders %} d-none{% endif %}" data-id="active-navbar">
-                        <i class="fas fa-shopping-cart"></i>
-                        <div class="dropdown-item-badge item-badge-navbar">{{ active_orders }}</div>
-                    </a>
-                    <span class="badge badge-info pointer" id="navbarCash" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ revenue_today|currency:"RUB" }}</span>
-                    <div class="dropdown-menu dropdown-menu-right" id="navbarCashModal" aria-labelledby="navbarCash">
-                        <div id="navbarCashModalContent" class="navbar-loading"></div>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    {% endblock navbar %}
-    <div class="dashboard-wrapper">
-        <div class="navbar-menu">
-            {% block dashboard_nav %}
-                {% dashboard_navigation user request as nav_items %}
-                <div class="navbar-expand-lg navbar-light navbar-primary bg-dark flex-column flex-shrink-0" data-id="navbar-primary">
-                    <div class="navbar-header d-flex">
-                        <a class="navbar-brand" href="{{ homepage_url }}">
-                            {% icon file_name='footer/logo' size=25 fill="#838383" %}
-                        </a>
-                        <button class="navbar-toggler toggler-open p-0" data-id="navbar-toggler">
-                            {% icon file_name='interface/arrow-home' size=30 stroke='#fff'%}
-                        </button>
-                    </div>
-                    <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
-                        {% for item in nav_items %}
-                        <li class="nav-item{% if request.path|tab:item.paths %} current-tab{% endif %}">
-                            {% if item.has_children %}
-                                <button class="nav-link position-relative" data-target="#navbar_{{ forloop.counter }}"
-                                    data-toggle="collapse" aria-controls="navbar_{{ forloop.counter }}" type="button"
-                                    aria-expanded="{% if request.path|tab:item.paths %}true{% else %}false{% endif %}">
-                                    <span>
-                                        {% if item.icon %}<i class="{{ item.icon }}" style="width:15px"></i>{% endif %}
-                                        <span class="item_text arrow-dropdown ml-sm-2">{{ item.label }}</span>
-                                    </span>
-                                    <div class="dropdown-item-badge dropdown-item-badge--nav" data-id="{{ item.label }}">{% if item.notif %}{{ item.notif }}{% endif %}</div>
-                                </button>
-                                <div class="dropdown-list dropdown-list--nav collapse {% if request.path|tab:item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
-                                    {% for subitem in item.children %}
-                                        <a class="dropdown-item dropdown-item--nav nav-dropdown{% if request.path|subtab:subitem.url %} active{% endif %}" href="{{ subitem.url }}">
-                                            {% if subitem.icon %}<i class="{{ subitem.icon }}"></i>{% endif %}
-                                            <span>{{ subitem.label }}</span>
-                                            <div class="dropdown-item-badge ml-1" data-id="{{ subitem.label }}">{% if subitem.notif %}{{ subitem.notif }}{% endif %}</div>
-                                        </a>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
-                                    <span>
-                                        {% if item.icon %}<i class="{{ item.icon }}" style="width:15px"></i>{% endif %}
-                                        <span class="item_text ml-sm-2">{{ item.label }}</span>
-                                    </span>
-                                    <div class="dropdown-item-badge dropdown-item-badge--nav">{% if item.notif %}{{ item.notif }}{% endif %}</div>
-                                </a>
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                    </ul>
-                    <div class="dropdown border-top pb-0 pt-2 px-1 pt-sm-1 pb-sm-1"> 
-                        <button role="button" class="nav-account d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="nav-account" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <div class="rounded-circle">{{ user.get_img }}</div>
-                            <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.username }}</span>
-                        </button>
-                        <ul class="dropdown-menu text-small actions mb-2" aria-labelledby="nav-account">
-                            <li><a class="dropdown-item" href="{% url 'customer:notifications-inbox' %}">
-                                    Уведомления
-                                    <span class="dropdown-item-badge dropdown-item-badge--nav ml-1">{{ num_unread_notifications|default:"0" }}</span>
-                                </a>
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'customer:summary' %}">Аккаунт</a></li>
-                            <li><a class="dropdown-item" href="{{ homepage_url }}">Магазин</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'dashboard:logout' %}">Выйти</a></li>
-                        </ul>
-                    </div>
-                </div>
-            {% endblock %}
+  {% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-light navbar-accounts">
+      <div class="container-navbar fill-width d-flex justify-content-between">
+        <div>
+          <button class="navbar-toggler navbar-toggler--mobile align-items-center fill-height" type="button" data-id="navbar-toggler"><i class="fa-solid fa-bars"></i></button>
         </div>
+        <div class="badges-navbar position-relative">
+          <a href="{% url 'dashboard:order-active-list' %}" class="navbar-active mr-1{% if not active_orders %} d-none{% endif %}" data-id="active-navbar">
+            <i class="fas fa-shopping-cart"></i>
+            <div class="dropdown-item-badge item-badge-navbar">{{ active_orders }}</div>
+          </a>
+          <span class="badge badge-info pointer" id="navbarCash" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ revenue_today|currency:'RUB' }}</span>
+          <div class="dropdown-menu dropdown-menu-right" id="navbarCashModal" aria-labelledby="navbarCash">
+            <div id="navbarCashModalContent" class="navbar-loading"></div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  {% endblock %}
+  <div class="dashboard-wrapper">
+    <div class="navbar-menu">
+      {% block dashboard_nav %}
+        {% dashboard_navigation user request as nav_items %}
+        <div class="navbar-expand-lg navbar-light navbar-primary bg-dark flex-column flex-shrink-0" data-id="navbar-primary">
+          <div class="navbar-header d-flex">
+            <a class="navbar-brand" href="{{ homepage_url }}">{% icon file_name='footer/logo' size=25 fill='#838383' %}</a>
+            <button class="navbar-toggler toggler-open p-0" data-id="navbar-toggler">{% icon file_name='interface/arrow-home' size=30 stroke='#fff' %}</button>
+          </div>
+          <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
+            {% for item in nav_items %}
+              <li class="nav-item{% if request.path|tab:item.paths %} current-tab{% endif %}">
+                {% if item.has_children %}
+                  <button class="nav-link position-relative"
+                    data-target="#navbar_{{ forloop.counter }}"
+                    data-toggle="collapse"
+                    aria-controls="navbar_{{ forloop.counter }}"
+                    type="button"
+                    aria-expanded="{% if request.path|tab:item.paths %}
+                      
+                      
+                      
+                      true
 
-        <div class="dashboard-content">
-            <div class="container container-fluid">
-                {% block breadcrumbs %}
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item active" aria-current="page">
-                                <a href="{% url 'dashboard:index' %}">Панель управления</a>
-                            </li>
-                        </ol>
-                    </nav>
-                {% endblock %}
-                <div class="content">
-                    {% include 'oscar/dashboard/partials/alert_messages.html' %}
-                    {% block header %}
-                    <div class="page-header d-flex justify-content-between align-items-center">
-                        {% block navtext %}{% endblock %}
+
+
+                    {% else %}
+                      
+                      
+                      
+                      false
+
+
+
+                    {% endif %}">
+                    <span>
+                      {% if item.icon %}
+                        <i class="{{ item.icon }}" style="width:15px"></i>
+                      {% endif %}
+                      <span class="item_text arrow-dropdown ml-sm-2">{{ item.label }}</span>
+                    </span>
+                    <div class="dropdown-item-badge dropdown-item-badge--nav" data-id="{{ item.label }}">
+                      {% if item.notif %}{{ item.notif }}{% endif %}
                     </div>
-                    {% endblock %}
-                    <div class="page-content">
-                        {% block content %}
-                            {% block dashboard_content %}{% endblock dashboard_content %}
-                        {% endblock content %}
+                  </button>
+                  <div class="dropdown-list dropdown-list--nav collapse {% if request.path|tab:item.paths %}show{% endif %}" id="navbar_{{ forloop.counter }}">
+                    {% for subitem in item.children %}
+                      <a class="dropdown-item dropdown-item--nav nav-dropdown{% if request.path|subtab:subitem.url %} active{% endif %}" href="{{ subitem.url }}">
+                        {% if subitem.icon %}
+                          <i class="{{ subitem.icon }}"></i>
+                        {% endif %}
+                        <span>{{ subitem.label }}</span>
+                        <div class="dropdown-item-badge ml-1" data-id="{{ subitem.label }}">
+                          {% if subitem.notif %}{{ subitem.notif }}{% endif %}
+                        </div>
+                      </a>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}">
+                    <span>
+                      {% if item.icon %}
+                        <i class="{{ item.icon }}" style="width:15px"></i>
+                      {% endif %}
+                      <span class="item_text ml-sm-2">{{ item.label }}</span>
+                    </span>
+                    <div class="dropdown-item-badge dropdown-item-badge--nav">
+                      {% if item.notif %}{{ item.notif }}{% endif %}
                     </div>
-                </div>  
-            </div>
+                  </a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+          <div class="dropdown border-top pb-0 pt-2 px-1 pt-sm-1 pb-sm-1">
+            <button role="button" class="nav-account d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="nav-account" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <div class="rounded-circle">{{ user.get_img }}</div>
+              <span class="ml-2 flex-fill">{{ user.get_full_name|default:request.user.username }}</span>
+            </button>
+            <ul class="dropdown-menu text-small actions mb-2" aria-labelledby="nav-account">
+              <li>
+                <a class="dropdown-item" href="{% url 'customer:notifications-inbox' %}">
+                  Уведомления
+                  <span class="dropdown-item-badge dropdown-item-badge--nav ml-1">{{ num_unread_notifications|default:'0' }}</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'customer:summary' %}">Аккаунт</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ homepage_url }}">Магазин</a>
+              </li>
+              <li>
+                <hr class="dropdown-divider" />
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'dashboard:logout' %}">Выйти</a>
+              </li>
+            </ul>
+          </div>
         </div>
+      {% endblock %}
     </div>
+    <div class="dashboard-content">
+      <div class="container container-fluid">
+        {% block breadcrumbs %}
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item active" aria-current="page">
+                <a href="{% url 'dashboard:index' %}">Панель управления</a>
+              </li>
+            </ol>
+          </nav>
+        {% endblock %}
+        <div class="content">
+          {% include 'oscar/dashboard/partials/alert_messages.html' %}
+          {% block header %}
+            <div class="page-header d-flex justify-content-between align-items-center">
+              {% block navtext %}
+
+              {% endblock %}
+            </div>
+          {% endblock %}
+          <div class="page-content">
+            {% block content %}
+              {% block dashboard_content %}
+
+              {% endblock %}
+            {% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block cdn_scripts %}
-    {{ block.super }}
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block templatescripts %}
-    var csrf_token = "{{ csrf_token }}";
-    var navbar_cash_url = "{% url 'dashboard:navbar-cash' %}";
+  var csrf_token = "{{ csrf_token }}"; var navbar_cash_url = "{% url 'dashboard:navbar-cash' %}";
 {% endblock %}
 
 {% block scripts %}
-        <script src="{% static "js/thirdpaty/tinymce/tinymce.min.js" %}"></script>
-        {% compress js %}
-            <script src="{% static "js/thirdpaty/bootstrap4/bootstrap.bundle.min.js" %}"></script>
-            <script src="{% static "js/thirdpaty/mousewheel/jquery.mousewheel.js" %}"></script>
-            <script src="{% static "js/thirdpaty/inputmask/jquery.inputmask.min.js" %}"></script>
-            <script src="{% static "js/thirdpaty/select2/select2.min.js" %}"></script>
-            <script src="{% static "js/thirdpaty/jquery-draggable/jquery-draggable-min.js" %}"></script>
-            <script src="{% static "js/thirdpaty/slider/slider.js" %}"></script>
-            <script src="{% static "js/thirdpaty/datetimepicker/air-datepicker.js" %}"></script>
-            <script src="{% static "js/thirdpaty/tinymce/jquery.tinymce.min.js" %}"></script>
+  <script src="{% static 'js/thirdpaty/tinymce/tinymce.min.js' %}"></script>
+  {% compress js %}
+  <script src="{% static 'js/thirdpaty/bootstrap4/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/thirdpaty/mousewheel/jquery.mousewheel.js' %}"></script>
+  <script src="{% static 'js/thirdpaty/inputmask/jquery.inputmask.min.js' %}"></script>
+  <script src="{% static 'js/thirdpaty/select2/select2.min.js' %}"></script>
+  <script src="{% static 'js/thirdpaty/jquery-draggable/jquery-draggable-min.js' %}"></script>
+  <script src="{% static 'js/thirdpaty/slider/slider.js' %}"></script>
+  <script src="{% static 'js/thirdpaty/datetimepicker/air-datepicker.js' %}"></script>
+  <script src="{% static 'js/thirdpaty/tinymce/jquery.tinymce.min.js' %}"></script>
 
-            <script src="{% static "js/dashboard/oscar/dashboard.js" %}"></script>
-            <script src="{% static "js/dashboard/oscar/RelatedObjectLookups.js" %}"></script>
+  <script src="{% static 'js/dashboard/oscar/dashboard.js' %}"></script>
+  <script src="{% static 'js/dashboard/oscar/RelatedObjectLookups.js' %}"></script>
 
-            <script src="{% static "js/dashboard/index/navbar-cash.js" %}"></script>
-            <script src="{% static "js/dashboard/index/dashboard-sliders.js" %}"></script>
-            <script src="{% static "js/dashboard/utils/navi.js" %}"></script>
-            <script src="{% static "js/dashboard/utils/table.js" %}"></script>
-            <script src="{% static "js/dashboard/utils/photo.js" %}"></script>
-            <script src="{% static "js/dashboard/utils/meta.js" %}"></script>
-            <script src="{% static "js/dashboard/utils/datepicker.js" %}"></script>
-            <script src="{% static "js/dashboard/utils/phone-mask.js" %}"></script>
-            <script src="{% static "js/dashboard/utils/map.js" %}"></script>
+  <script src="{% static 'js/dashboard/index/navbar-cash.js' %}"></script>
+  <script src="{% static 'js/dashboard/index/dashboard-sliders.js' %}"></script>
+  <script src="{% static 'js/dashboard/utils/navi.js' %}"></script>
+  <script src="{% static 'js/dashboard/utils/table.js' %}"></script>
+  <script src="{% static 'js/dashboard/utils/photo.js' %}"></script>
+  <script src="{% static 'js/dashboard/utils/meta.js' %}"></script>
+  <script src="{% static 'js/dashboard/utils/datepicker.js' %}"></script>
+  <script src="{% static 'js/dashboard/utils/phone-mask.js' %}"></script>
+  <script src="{% static 'js/dashboard/utils/map.js' %}"></script>
 
-            <script src="{% static "js/dashboard/utils/webpush.js" %}"></script>
+  <script src="{% static 'js/dashboard/utils/webpush.js' %}"></script>
 
-        {% endcompress %}
-        {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script> {% endcomment %}
+  {% endcompress %}
+  {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script> {% endcomment %}
 {% endblock %}
 
 {% block onbodyload %}
-    {{ block.super }}
+  {{ block.super }}
 
-    var url = document.location.toString();
-    if (url.match('#')) {
-        $('.bs-docs-sidenav a[href="#' + url.split('#')[1] + '"]').tab('show');
-        tab = $('.nav.tabs-button button[href="#' + url.split('#')[1] + '"]').tab('show');
-        if ($(tab).length > 0) {
-            $('.tabs-button__active-block').css('left', $(tab).position().left + 'px');
-        }
-    }
+  var url = document.location.toString(); if (url.match('#')) { $('.bs-docs-sidenav a[href="#' + url.split('#')[1] + '"]').tab('show'); tab = $('.nav.tabs-button button[href="#' + url.split('#')[1] + '"]').tab('show'); if ($(tab).length > 0) { $('.tabs-button__active-block').css('left', $(tab).position().left + 'px'); } }
 
-    $('.nav-list a').on('shown.bs.tab', function (e) {
-        history.replaceState(null, null, e.target.hash);
-    });
-    
-    $('.tabs-button__button').on('shown.bs.tab', function (e) {
-        history.replaceState(null, null, e.target.attributes.href.value); 
-    });
+  $('.nav-list a').on('shown.bs.tab', function (e) { history.replaceState(null, null, e.target.hash); });
 
-    oscar.dashboard.init({'languageCode': 'ru'});
-    
+  $('.tabs-button__button').on('shown.bs.tab', function (e) { history.replaceState(null, null, e.target.attributes.href.value); });
+
+  oscar.dashboard.init({'languageCode': 'ru'});
 {% endblock %}

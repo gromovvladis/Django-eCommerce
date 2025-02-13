@@ -3,106 +3,109 @@
 {% load static %}
 
 {% block title %}
-    {{ title }} | {{ block.super }}
+  {{ title }} | {{ block.super }}
 {% endblock %}
 
-{% block body_class %}{{ block.super }} create-page{% endblock %}
+{% block body_class %}
+  {{ block.super }} create-page
+{% endblock %}
 
 {% block navbar %}
-    {% if not is_popup %}
-        {{ block.super }}
-    {% endif %}
+  {% if not is_popup %}
+    {{ block.super }}
+  {% endif %}
 {% endblock %}
 
 {% block dashboard_nav %}
-    {% if not is_popup %}
-        {{ block.super }}
-    {% endif %}
+  {% if not is_popup %}
+    {{ block.super }}
+  {% endif %}
 {% endblock %}
 
 {% block breadcrumbs %}
-    {% if not is_popup %}
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
-                <li class="breadcrumb-item">
-                    <a href="{% url 'dashboard:catalogue-attribute-list' %}">Атрибут</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
-            </ol>
-        </nav>
-    {% endif %}
+  {% if not is_popup %}
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard:index' %}">Главная</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard:catalogue-attribute-list' %}">Атрибут</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+      </ol>
+    </nav>
+  {% endif %}
 {% endblock %}
 
 {% block navtext %}
-    <h1>{{ title }}</h1>
-    {% if attribute %}
-        <a class="btn btn-danger mr-2" href="{% url 'dashboard:catalogue-attribute-delete' pk=attribute.id %}">
-            <i class="fa-solid fa-trash"></i>
-            <span>Удалить</span>
-        </a>
-    {% endif %}
+  <h1>{{ title }}</h1>
+  {% if attribute %}
+    <a class="btn btn-danger ml-2" href="{% url 'dashboard:catalogue-attribute-delete' pk=attribute.id %}">
+      <i class="fa-solid fa-trash"></i>
+      <span>Удалить</span>
+    </a>
+  {% endif %}
 {% endblock %}
 
 {% block dashboard_content %}
-    <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors" enctype="multipart/form-data">
-        {% csrf_token %}
+  <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors" enctype="multipart/form-data">
+    {% csrf_token %}
 
-        <div class="row">
-            {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="{{ is_popup }}" />{% endif %}
-            {% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}" />{% endif %}
-            <div class="col-md-12">
-                <div class="tab-content">
-                    {% block additional_details %}
-                        <div class="tab-pane active">
-                            <div class="table-header">
-                                <h3>Описание</h3>
-                            </div>
-                            <div class="card card-body">
-                                {% if form.non_field_errors %}
-                                    {% for error in form.non_field_errors %}
-                                        <div class="alert alert-danger">
-                                            <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
-                                        </div>
-                                    {% endfor %}
-                                {% endif %}
-                                {% for field in form %}
-                                    {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endblock %}
-                </div>
-            </div>
-        </div>
-        {% block fixed_actions_group %}
-            <div class="fixed-actions-group">
-                <div class="container container-fluid">
-                    <div class="d-flex justify-content-end">
-                        <div class="float-right">  
-                            <a class="btn btn-secondary mr-2" href="{% url 'dashboard:catalogue-additional-list' %}">
-                                <i class="fa-regular fa-circle-xmark"></i> 
-                                <span>
-                                    Отменить
-                                </span>
-                            </a>             
-                            <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
-                                <i class="fa-regular fa-floppy-disk"></i>
-                                <span>
-                                    Сохранить
-                                </span>
-                            </button>
-                        </div>
+    <div class="row">
+      {% if is_popup %}
+        <input type="hidden" name="{{ is_popup_var }}" value="{{ is_popup }}" />
+      {% endif %}
+      {% if to_field %}
+        <input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}" />
+      {% endif %}
+      <div class="col-md-12">
+        <div class="tab-content">
+          {% block additional_details %}
+            <div class="tab-pane active">
+              <div class="table-header">
+                <h3>Описание</h3>
+              </div>
+              <div class="card card-body">
+                {% if form.non_field_errors %}
+                  {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                      <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
                     </div>
-                </div>
+                  {% endfor %}
+                {% endif %}
+                {% for field in form %}
+                  {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
+                {% endfor %}
+              </div>
             </div>
-        {% endblock fixed_actions_group %}
-    </form>
-{% endblock dashboard_content %}
-
-{% block extrascripts %}
-    {% compress js %}
-        <script src="{% static "js/dashboard/catalogue/attribute_form.js" %}" async></script>
-    {% endcompress %}
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+    {% block fixed_actions_group %}
+      <div class="fixed-actions-group">
+        <div class="container container-fluid">
+          <div class="d-flex justify-content-end">
+            <div class="float-right">
+              <a class="btn btn-secondary mr-2" href="{% url 'dashboard:catalogue-additional-list' %}">
+                <i class="fa-regular fa-circle-xmark"></i>
+                <span>Отменить</span>
+              </a>
+              <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+                <i class="fa-regular fa-floppy-disk"></i>
+                <span>Сохранить</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+  </form>
 {% endblock %}
 
+{% block extrascripts %}
+  {% compress js %}
+  <script src="{% static 'js/dashboard/catalogue/attribute_form.js' %}" async></script>
+  {% endcompress %}
+{% endblock %}

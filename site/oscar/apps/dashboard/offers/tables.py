@@ -41,10 +41,16 @@ class ConditionalOfferTable(DashboardTable):
     benefit = TemplateColumn(
         verbose_name="Стимул",
         template_code="{{ record.benefit.description|safe }}",
+        attrs={
+            "th": {"class": "benefit"},
+        },
     )
     condition = TemplateColumn(
         verbose_name="Условие",
         template_code="{{ record.condition.description|safe }}",
+        attrs={
+            "th": {"class": "condition"},
+        },
     )
     is_available = TemplateColumn(
         verbose_name="Активен",
@@ -55,6 +61,9 @@ class ConditionalOfferTable(DashboardTable):
         verbose_name="Ограничения",
         template_name="oscar/dashboard/offers/offer_row_restrictions.html",
         order_by=("availability_restrictions"),
+        attrs={
+            "th": {"class": "restrictions"},
+        },
     )
     num_applications = Column(
         verbose_name="Количество применений",

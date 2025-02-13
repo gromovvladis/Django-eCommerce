@@ -1,32 +1,32 @@
 {% load currency_filters %}
 
 <div class="d-flex flex-column">
-    {% for store in stores %}
-        <div class="d-flex flex-column px-2 py-1">
-            <div class="d-flex flex-column mb-2">
-                <a href="{% url 'dashboard:store-manage' pk=store.id %}">
-                    <span class="navbar-store">{{ store.name|default:"Магазин" }}</span>
-                    <span class="badge badge-info">{{ store.cash.sum|currency:"RUB" }}</span>
-                </a>
-                <span class="text-muted small">{{ store.primary_address }}</span>
-            </div>
-            <div class="d-flex justify-content-between badge badge-navbar">
-                <span class="text-success mr-3">
-                    <i class="fa-solid fa-sack-dollar"></i>
-                    {{ store.orders_today.revenue_today|default:"0"|currency:"RUB" }}
-                </span>
-                <span class="text-primary mr-3">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    {{ store.orders_today.total_orders }}
-                </span>
-                <span class="text-info">
-                    <i class="fa-solid fa-globe"></i>
-                    {{ store.orders_today.online_orders|default:"0" }}
-                </span>
-            </div>
-        </div>
-        {% if not forloop.last %}
-            <div class="dropdown-divider"></div>
-        {% endif %}
-    {% endfor %}
+  {% for store in stores %}
+    <div class="d-flex flex-column px-2 py-1">
+      <div class="d-flex flex-column mb-2">
+        <a href="{% url 'dashboard:store-manage' pk=store.id %}">
+          <span class="navbar-store">{{ store.name|default:'Магазин' }}</span>
+          <span class="badge badge-info">{{ store.cash.sum|currency:'RUB' }}</span>
+        </a>
+        <span class="text-muted small">{{ store.primary_address }}</span>
+      </div>
+      <div class="d-flex justify-content-between badge badge-navbar">
+        <span class="text-success mr-3">
+          <i class="fa-solid fa-sack-dollar"></i>
+          {{ store.orders_today.revenue_today|default:'0'|currency:'RUB' }}
+        </span>
+        <span class="text-primary mr-3">
+          <i class="fa-solid fa-cart-shopping"></i>
+          {{ store.orders_today.total_orders }}
+        </span>
+        <span class="text-info">
+          <i class="fa-solid fa-globe"></i>
+          {{ store.orders_today.online_orders|default:'0' }}
+        </span>
+      </div>
+    </div>
+    {% if not forloop.last %}
+      <div class="dropdown-divider"></div>
+    {% endif %}
+  {% endfor %}
 </div>

@@ -10,9 +10,7 @@
         <link rel="shortcut icon" href="{% static "favicon.ico" %}"/>
         {% block styles %}{% endblock %}
         {% block extrastyles %}{% endblock %}    
-        {% block tracking %}
-            {% include "oscar/partials/analytics.html" %}
-        {% endblock %}
+        {% block tracking %}{% include "oscar/partials/analytics.html" %}{% endblock %}
     </head>
     <body>
         {% block layout %}{% endblock %}

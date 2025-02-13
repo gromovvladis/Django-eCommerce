@@ -1,7 +1,7 @@
 {% load currency_filters %}
 
 {% if not record.order_price %}
-    -
+  -
 {% else %}
-        {{ record.order_price|currency }}
+  {{ record.order_price|currency }}
 {% endif %}

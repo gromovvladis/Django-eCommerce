@@ -1,26 +1,20 @@
 {% load django_tables2 %}
 
 <span>
-    {% if not record.is_created %}
-        <span class="text-danger">
-            <i class="fa-solid fa-circle-xmark"></i>&nbsp; 
-        </span>
-    {% elif not record.is_valid %}
-        <span class="text-warning">
-            <i class="fa-solid fa-triangle-exclamation"></i>&nbsp; 
-        </span>
-    {% else %}
-        <span class="text-success">
-            <i class="fa-solid fa-circle-check"></i>&nbsp; 
-        </span>
-    {% endif %}
-    {% if record.name %}
-        {{ record.name }}
-        <br>
-        <span class="text-muted small">Артикул: {{ record.article_number|default:"-" }}</span>
-        <br>
-        <span class="text-muted small">Код: {{ record.code|default:"-" }}</span>
-    {% else %}
-        -
-    {% endif %}
+  {% if not record.is_created %}
+    <span class="text-danger"><i class="fa-solid fa-circle-xmark"></i>&nbsp;</span>
+  {% elif not record.is_valid %}
+    <span class="text-warning"><i class="fa-solid fa-triangle-exclamation"></i>&nbsp;</span>
+  {% else %}
+    <span class="text-success"><i class="fa-solid fa-circle-check"></i>&nbsp;</span>
+  {% endif %}
+  {% if record.name %}
+    {{ record.name }}
+    <br />
+    <span class="text-muted small">Артикул: {{ record.article_number|default:'-' }}</span>
+    <br />
+    <span class="text-muted small">Код: {{ record.code|default:'-' }}</span>
+  {% else %}
+    -
+  {% endif %}
 </span>

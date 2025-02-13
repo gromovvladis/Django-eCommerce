@@ -5,145 +5,121 @@
 {% load static %}
 
 <div class="cart-page__wrapper d-flex flex-column flex-md-row pd-0 pd-sm-2">
-    <div class="cart__block pos-relative d-flex flex-column fill-width">
-        <header class="cart__header d-sm-flex justify-space-between align-center pb-2">
-            <p class="cart__title">Корзина</p>
-            <button data-id="modal-open-close" class="cart__clear" aria-label="Очистить корзину">
-                {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
-                <span style="margin-left: .25rem;">Очистить</span>
-            </button>
-        </header>
-        {% if not basket.is_empty %}
-            <div class="cart-wrapper d-flex flex-column justify-start fill-height scrollbar--white px-2 px-sm-0" data-id="cart-wrapper">
-                <div class="upsell-messages" data-id="upsell-messages">
-                    {% include 'oscar/basket/partials/upsell_messages.html' with editable=1 %}
-                </div>
-                {% block basket_form_main %}
-                    <form data-id="basket-formset" method="post" class="cart-form d-flex flex-column fill-width">
-                        <div class="cart-items d-flex flex-column fill-width shrink">
-                            {{ formset.management_form }}
-                            {% for form in formset %}
-                                {% with line=form.instance product=form.instance.product %}
-                                    <div data-id="cart-item-form" class="cart-items--item">
-                                        {{ form.id }}
-                                        <div class="dish-order d-flex fill-width">
-                                            <div class="dish-order__picture">
-                                                <a href="{{ product.get_absolute_url }}" aria-label="{{ product.get_name }}"
-                                                    class="dish-image fill-width"
-                                                    data-id="dish-order-image-link">
-                                                    <div class="image {% if line.warning %}image--unavailable{% endif %}">
-                                                        <div class="image__inner" style="padding-bottom: 72.072%;">
-                                                            {% with image=product.primary_image %}
-                                                                {% oscar_thumbnail image.original "220x" upscale=False as thumb %}
-                                                                <img src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy"/>
-                                                            {% endwith %}
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                            <div class="dish-order__content d-flex flex-column fill-width ml-1">
-                                                <div class="dish-order__title s d-flex align-start fill-width">
-                                                    <div class="dish-order__name-wrapper d-flex fill-width">
-                                                        <a href="{{ product.get_absolute_url }}" aria-current="page"
-                                                            class="dish-order__name router-link-exact-active router-link-active"
-                                                            data-id="dish-order-link"> 
-                                                            {{ line.name }}
-                                                        </a>
-                                                    </div>
-                                                    <button type="button" data-id="dish-order-delete-link" class="dish-order__delete d-flex shrink pd-0">
-                                                        {% icon file_name='interface/close' size=22 stroke='#999'%}
-                                                    </button>
-                                                </div>
-                                                <div class="dish-order__toppings d-flex flex-column {% if not line.has_topping %}d-none{% endif %}" data-id="dish-order-toppings">
-                                                    <span class="d-flex">{{ line.variants }}</span>
-                                                    <span class="d-flex">{{ line.options }}</span>
-                                                    <span class="d-flex">{{ line.additions }}</span>
-                                                </div>
-                                                {% if line.warning %}
-                                                    <div class="mb-1"><span class="error-mark">{{ line.warning }}</span></div>
-                                                {% endif %}
-                                                {% if line.critical_warning %}
-                                                    {% render_field form.quantity readonly="true" type="hidden" data-id="quantity-input" %}
-                                                {% else %}
-                                                    <div role="separator" class="spacer"></div>
-                                                    <div class="d-flex fill-width pos-relative align-center">
-                                                        <div class="order-button pos-relative" data-id="order-buttons">
-                                                            <button type="button" data-id="order-button-minus" class="order-button--elem" aria-label="Уменьшить">
-                                                                <svg viewBox="0 0 24 24" fill="none">
-                                                                    <path d="M6 12L18 12" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                                </svg>
-                                                            </button>
-                                                            {% render_field form.quantity class="order-button--elem order-button--value" readonly="true" data-id="quantity-input" %}
-                                                            <button type="button" data-id="order-button-plus" class="order-button--elem" aria-label="Увеличить">
-                                                                <svg viewBox="0 0 24 24" fill="none">
-                                                                    <path d="M6 12H18M12 6V18" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                                </svg>
-                                                            </button>
-                                                        </div>
-                                                        <div role="separator" class="spacer"></div>
-                                                        <span class="prices d-flex flex-column align-start">
-                                                            <span class="prices__price no-wrap">
-                                                                {{ line.unit_price|currency:line.price_currency }}
-                                                            </span>
-                                                        </span>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>  
-                                {% endwith %}
-                            {% endfor %}                             
+  <div class="cart__block pos-relative d-flex flex-column fill-width">
+    <header class="cart__header d-sm-flex justify-space-between align-center pb-2">
+      <p class="cart__title">Корзина</p>
+      <button data-id="modal-open-close" class="cart__clear" aria-label="Очистить корзину">
+        {% icon file_name='interface/empty' size=20 stroke='#d32225' %}
+        <span style="margin-left: .25rem;">Очистить</span>
+      </button>
+    </header>
+    {% if not basket.is_empty %}
+      <div class="cart-wrapper d-flex flex-column justify-start fill-height scrollbar--white px-2 px-sm-0" data-id="cart-wrapper">
+        <div class="upsell-messages" data-id="upsell-messages">
+          {% include 'oscar/basket/partials/upsell_messages.html' with editable=1 %}
+        </div>
+        {% block basket_form_main %}
+          <form data-id="basket-formset" method="post" class="cart-form d-flex flex-column fill-width">
+            <div class="cart-items d-flex flex-column fill-width shrink">
+              {{ formset.management_form }}
+              {% for form in formset %}
+                {% with line=form.instance product=form.instance.product %}
+                  <div data-id="cart-item-form" class="cart-items--item">
+                    {{ form.id }}
+                    <div class="dish-order d-flex fill-width">
+                      <div class="dish-order__picture">
+                        <a href="{{ product.get_absolute_url }}" aria-label="{{ product.get_name }}" class="dish-image fill-width" data-id="dish-order-image-link">
+                          <div class="image {% if line.warning %}image--unavailable{% endif %}">
+                            <div class="image__inner" style="padding-bottom: 72.072%;">
+                              {% with image=product.primary_image %}
+                                {% oscar_thumbnail image.original '220x' upscale=False as thumb %}
+                                <img src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy" />
+                              {% endwith %}
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                      <div class="dish-order__content d-flex flex-column fill-width ml-1">
+                        <div class="dish-order__title s d-flex align-start fill-width">
+                          <div class="dish-order__name-wrapper d-flex fill-width">
+                            <a href="{{ product.get_absolute_url }}" aria-current="page" class="dish-order__name router-link-exact-active router-link-active" data-id="dish-order-link">{{ line.name }}</a>
+                          </div>
+                          <button type="button" data-id="dish-order-delete-link" class="dish-order__delete d-flex shrink pd-0">{% icon file_name='interface/close' size=22 stroke='#999' %}</button>
                         </div>
-                    </form>
-                {% endblock %}   
-            </div>
-            <div class="cart__info pd-2 pb-sm-0 px-sm-0" data-id="cart-info">
-                <div class="cart__submit d-flex align-end">
-                    <div class="cart__total d-flex flex-column">
-                        <span class="cart__total-text">Сумма заказа</span>
-                        <div class="prices d-flex flex-column align-start prices--big" data-id="cart-totals">
-                            {% include 'oscar/basket/partials/basket_totals.html' with editable=1 %}
+                        <div class="dish-order__toppings d-flex flex-column {% if not line.has_topping %}d-none{% endif %}" data-id="dish-order-toppings">
+                          <span class="d-flex">{{ line.variants }}</span>
+                          <span class="d-flex">{{ line.options }}</span>
+                          <span class="d-flex">{{ line.additions }}</span>
                         </div>
+                        {% if line.warning %}
+                          <div class="mb-1">
+                            <span class="error-mark">{{ line.warning }}</span>
+                          </div>
+                        {% endif %}
+                        {% if line.critical_warning %}
+                          {% render_field form.quantity readonly='true' type='hidden' data - id='quantity-input' %}
+                        {% else %}
+                          <div role="separator" class="spacer"></div>
+                          <div class="d-flex fill-width pos-relative align-center">
+                            <div class="order-button pos-relative" data-id="order-buttons">
+                              <button type="button" data-id="order-button-minus" class="order-button--elem" aria-label="Уменьшить">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                  <path d="M6 12L18 12" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                              </button>
+                              {% render_field form.quantity class='order-button--elem order-button--value' readonly='true' data - id='quantity-input' %}
+                              <button type="button" data-id="order-button-plus" class="order-button--elem" aria-label="Увеличить">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                  <path d="M6 12H18M12 6V18" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div role="separator" class="spacer"></div>
+                            <span class="prices d-flex flex-column align-start"><span class="prices__price no-wrap">{{ line.unit_price|currency:line.price_currency }}</span></span>
+                          </div>
+                        {% endif %}
+                      </div>
                     </div>
-                    <div role="separator" class="spacer"></div>
-                    <button {% if not basket.has_valid_lines %}disabled{% endif %} onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="button button--main justify-center shrink">
-                        <span class="button__value">
-                             Оформить заказ
-                        </span>
-                    </button>
-                </div>
+                  </div>
+                {% endwith %}
+              {% endfor %}
             </div>
-            {% include "oscar/basket/partials/empty_cart.html" %}    
-        {% else %}
-            <div data-test-id="alert-modal-overlay" class="overlay overlay--blur d-flex align-center justify-center">
-                <div class="overlay__block d-flex flex-column justify-center align-center pd-2 pd-sm-3">
-                    <span class="overlay__text text-center">
-                        У вас пока нет<br>товаров в корзине
-                    </span>
-                    <button type="button" onclick="window.location.href='{{ homepage_url }}'" data-id="alert-modal-submit-button" class="button fill-width mt-3 button--main justify-center shrink">
-                        <span class="button__value">
-                            На главную страницу 
-                        </span>
-                    </button>
-                </div>
+          </form>
+        {% endblock %}
+      </div>
+      <div class="cart__info pd-2 pb-sm-0 px-sm-0" data-id="cart-info">
+        <div class="cart__submit d-flex align-end">
+          <div class="cart__total d-flex flex-column">
+            <span class="cart__total-text">Сумма заказа</span>
+            <div class="prices d-flex flex-column align-start prices--big" data-id="cart-totals">
+              {% include 'oscar/basket/partials/basket_totals.html' with editable=1 %}
             </div>
-        {% endif %}
-    </div>
+          </div>
+          <div role="separator" class="spacer"></div>
+          <button type="button" {% if not basket.has_valid_lines %}disabled{% endif %}onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" data-id="cart-submit-button" class="button button--main justify-center shrink"><span class="button__value">Оформить заказ</span></button>
+        </div>
+      </div>
+      {% include 'oscar/basket/partials/empty_cart.html' %}
+    {% else %}
+      <div data-test-id="alert-modal-overlay" class="overlay overlay--blur d-flex align-center justify-center">
+        <div class="overlay__block d-flex flex-column justify-center align-center pd-2 pd-sm-3">
+          <span class="overlay__text text-center">У вас пока нет<br />товаров в корзине</span>
+          <button type="button" onclick="window.location.href='{{ homepage_url }}'" data-id="alert-modal-submit-button" class="button fill-width mt-3 button--main justify-center shrink"><span class="button__value">На главную страницу</span></button>
+        </div>
+      </div>
+    {% endif %}
+  </div>
 </div>
 <div class="cart-page__totals d-flex flex-column flex-md-row pd-0 pd-sm-2">
-    <div class="cart__submit d-flex align-end fill-width">
-        <div class="cart__total d-flex flex-column fill-width">
-            <span class="cart__title pd-0 pd-sm-2" style="border-bottom: 1px solid #f3f3f7;">Сумма заказа</span>
-            <div class="prices d-flex flex-column align-start prices--big pd-0 pd-sm-2" data-id="cart-totals">
-                {% include 'oscar/basket/partials/basket_totals.html' with editable=1 %}
-            </div>
-        </div>
+  <div class="cart__submit d-flex align-end fill-width">
+    <div class="cart__total d-flex flex-column fill-width">
+      <span class="cart__title pd-0 pd-sm-2" style="border-bottom: 1px solid #f3f3f7;">Сумма заказа</span>
+      <div class="prices d-flex flex-column align-start prices--big pd-0 pd-sm-2" data-id="cart-totals">
+        {% include 'oscar/basket/partials/basket_totals.html' with editable=1 %}
+      </div>
     </div>
-    <div class="px-2 pt-1 pb-2 fill-width">
-        <button {% if not basket.has_valid_lines %}disabled{% endif %} onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="button button--main justify-center shrink fill-width">        
-            <span class="button__value">
-                 Оформить заказ
-            </span>
-        </button>
-    </div>
+  </div>
+  <div class="px-2 pt-1 pb-2 fill-width">
+    <button {% if not basket.has_valid_lines %}disabled{% endif %} onclick="{% if not user.is_authenticated %}openAuthModal('{% url 'checkout:index' %}'){% else %}window.location.href='{% url 'checkout:index' %}'{% endif %}" type="button" data-id="cart-submit-button" class="button button--main justify-center shrink fill-width"><span class="button__value">Оформить заказ</span></button>
+  </div>
 </div>

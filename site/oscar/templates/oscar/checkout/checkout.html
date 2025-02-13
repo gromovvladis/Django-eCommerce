@@ -1,4 +1,4 @@
-{% extends "oscar/layout.html" %}
+{% extends 'oscar/layout.html' %}
 
 {% load currency_filters %}
 {% load image_tags %}
@@ -6,119 +6,116 @@
 {% load compress %}
 {% load static %}
 
-{% block title %}Оформление заказа | {{ block.super }}{% endblock %}
-{% block nav_title %}Оформление заказа{% endblock %}
-{% block nav_title_center %}Оформление заказа{% endblock %}
-{% block wrapper_class %}checkout fill-width pd-2 pb-sm-4 checkout__container{% endblock %}
-{% block app_class %}app---checkout{% endblock %}
-{% block nav_class %}app__nav--checkout{% endblock %}
+{% block title %}
+  Оформление заказа | {{ block.super }}
+{% endblock %}
+{% block nav_title %}
+  Оформление заказа
+{% endblock %}
+{% block nav_title_center %}
+  Оформление заказа
+{% endblock %}
+{% block wrapper_class %}
+  checkout fill-width pd-2 pb-sm-4 checkout__container
+{% endblock %}
+{% block app_class %}
+  app---checkout
+{% endblock %}
+{% block nav_class %}
+  app__nav--checkout
+{% endblock %}
 
 {% block breadcrumbs %}
-    <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-1 mx-md-0">
-        <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">
-            {% icon file_name='interface/arrow-back' size=22 stroke="#111"%}
-        </button>
-        <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
-        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <a href="{% url 'basket:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Корзина</a>
-        {% icon file_name='interface/arrow-left' size=24 stroke='#999'%}
-        <span class="bread__link" aria-current="page">Оформление заказа</span>
-    </div>
+  <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-1 mx-md-0">
+    <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">{% icon file_name='interface/arrow-back' size=22 stroke='#111' %}</button>
+    <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <a href="{% url 'basket:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Корзина</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <span class="bread__link" aria-current="page">Оформление заказа</span>
+  </div>
 {% endblock %}
 
 {% block extrastyles %}
-    {{ block.super }}
-    {% compress css %}  
-        <link rel="stylesheet" href="{% static "css/thirdpaty/datetimepicker/air-datepicker.css" %}"/>
-    {% endcompress %}
+  {{ block.super }}
+  {% compress css %}
+  <link rel="stylesheet" href="{% static 'css/thirdpaty/datetimepicker/air-datepicker.css' %}" />
+  {% endcompress %}
 {% endblock %}
 
 {% block content %}
-    <div class="d-flex flex-column">
-        <div class="order d-flex flex-column flex-md-row align-md-start">
-            {% block chekout_form %}{% endblock chekout_form %}
-            <div class="order__info ml-md-4">
-                <div class="order__info-wrapper pt-4">
-                    <p class="order__title d-none d-md-block mb-4"> Ваш заказ </p>
-                    <div class="order__subtitle d-md-none mb-1 mb-sm-2">
-                        <h2>Ваш заказ</h2>
-                    </div>
-                    <div class="promo mb-3">
-                        <form class="promo__input-wrapper d-flex align-center g-1 g-sm-2" data-id="voucher-add" action="{% url 'checkout:vouchers-add' %}" method="post">
-                            <div data-id="input-field" class="input d-flex align-center fill-width input__padding{% if voucher_form.initial.code %} input__label-active{% endif %}">
-                                <div class="input__wrapper">
-                                    <div class="input__label">Промокод</div>
-                                    <div id="voucher_form_container" class="input__control d-flex align-center">
-                                        {% if voucher_form %}
-                                            {% include "oscar/partials/render_field.html" with field=voucher_form.code data_id="voucher-input-code" %}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit" data-id="voucher-btn" disabled="disabled" data-id="promo-submit-btn" class="button fill-width button--main button--second justify-center shrink">
-                                <span class="button__wrapper">
-                                    <span class="button__value"> Применить </span>
-                                </span>
-                            </button>
-                        </form>
-                    </div>
-                    <span data-id="voucher-message" class="info-message"></span>
-                    {% block order_contents %}
-                        <div class="order-checkout__items">
-                            {% for line in basket.all_lines %}
-                                <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br>
-                            {% endfor %}
-                        </div>
-                    {% endblock order_contents %}
-                    <div id="checkout_totals">
-                        {% include 'oscar/checkout/checkout_totals.html' with editable=True %}
-                    </div>
-                    <div class="error-list d-flex flex-column mt-2 error-list--frame d-none" data-id="checkout-error-list">
-                        <div class="d-flex flex-column fill-width">
-                            <span data-error="address" class="error-list__error d-flex fill-width d-none">Укажите адрес доставки</span>
-                            <span data-error="flat" class="error-list__error d-flex fill-width d-none">Укажите номер квартиры</span>
-                            <span data-error="enter" class="error-list__error d-flex fill-width d-none">Укажите подъезд</span>
-                            <span data-error="floor" class="error-list__error d-flex fill-width d-none">Укажите этаж</span>
-                            <span data-error="amount" class="error-list__error d-flex fill-width d-none">Минимальная сумма заказа для доставки {{ min_order }} ₽</span>
-                        </div>
-                    </div>      
-                    <div class="mt-3">
-                        <button id="submit_order" disabled form="place_order_form" type="submit" data-test-id="order-submit-btn" class="button fill-width button--main button-order justify-center shrink">
-                            <span class="button__wrapper">
-                                <span class="button__value"> 
-                                    Оформить заказ
-                                </span>
-                            </span>
-                        </button>
-                    </div>
+  <div class="d-flex flex-column">
+    <div class="order d-flex flex-column flex-md-row align-md-start">
+      {% block chekout_form %}
+      {% endblock %}
+      <div class="order__info ml-md-4">
+        <div class="order__info-wrapper pt-4">
+          <p class="order__title d-none d-md-block mb-4">Ваш заказ</p>
+          <div class="order__subtitle d-md-none mb-1 mb-sm-2">
+            <h2>Ваш заказ</h2>
+          </div>
+          <div class="promo mb-3">
+            <form class="promo__input-wrapper d-flex align-center g-1 g-sm-2" data-id="voucher-add" action="{% url 'checkout:vouchers-add' %}" method="post">
+              <div data-id="input-field" class="input d-flex align-center fill-width input__padding{% if voucher_form.initial.code %} input__label-active{% endif %}">
+                <div class="input__wrapper">
+                  <div class="input__label">Промокод</div>
+                  <div id="voucher_form_container" class="input__control d-flex align-center">
+                    {% if voucher_form %}
+                      {% include 'oscar/partials/render_field.html' with field=voucher_form.code data_id='voucher-input-code' %}
+                    {% endif %}
+                  </div>
                 </div>
+              </div>
+              <button type="submit" data-id="voucher-btn" disabled="disabled" data-id="promo-submit-btn" class="button fill-width button--main button--second justify-center shrink"><span class="button__wrapper"><span class="button__value">Применить</span></span></button>
+            </form>
+          </div>
+          <span data-id="voucher-message" class="info-message"></span>
+          {% block order_contents %}
+            <div class="order-checkout__items">
+              {% for line in basket.all_lines %}
+                <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br />
+              {% endfor %}
             </div>
+          {% endblock %}
+          <div id="checkout_totals">
+            {% include 'oscar/checkout/checkout_totals.html' with editable=True %}
+          </div>
+          <div class="error-list d-flex flex-column mt-2 error-list--frame d-none" data-id="checkout-error-list">
+            <div class="d-flex flex-column fill-width">
+              <span data-error="address" class="error-list__error d-flex fill-width d-none">Укажите адрес доставки</span>
+              <span data-error="flat" class="error-list__error d-flex fill-width d-none">Укажите номер квартиры</span>
+              <span data-error="enter" class="error-list__error d-flex fill-width d-none">Укажите подъезд</span>
+              <span data-error="floor" class="error-list__error d-flex fill-width d-none">Укажите этаж</span>
+              <span data-error="amount" class="error-list__error d-flex fill-width d-none">Минимальная сумма заказа для доставки {{ min_order }} ₽</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button id="submit_order" disabled form="place_order_form" type="submit" data-test-id="order-submit-btn" class="button fill-width button--main button-order justify-center shrink"><span class="button__wrapper"><span class="button__value">Оформить заказ</span></span></button>
+          </div>
         </div>
+      </div>
     </div>
-{% endblock content %}
+  </div>
+{% endblock %}
 
 {% block templatescripts %}
-    {{ block.super }}
-    var url_voucher = "{% url 'checkout:vouchers-add' %}";
-    var url_update_totals = "{% url 'checkout:update-totals' %}";
-    var url_time = "{% url 'delivery:order-now' %}";
-    var url_delivery_later = "{% url 'delivery:order-later' %}";
-    var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
+  {{ block.super }}
+  var url_voucher = "{% url 'checkout:vouchers-add' %}"; var url_update_totals = "{% url 'checkout:update-totals' %}"; var url_time = "{% url 'delivery:order-now' %}"; var url_delivery_later = "{% url 'delivery:order-later' %}"; var url_delivery_zones = "{% url 'delivery:delivery-zones' %}";
 {% endblock %}
 
 {% block externalscripts %}
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
 {% endblock %}
 
 {% block extrascripts %}
-    {{ block.super }}
-    {% compress js %}
-        <script src="{% static "js/thirdpaty/datetimepicker/air-datepicker.js" %}" defer></script>
-    {% endcompress %}
-    {% compress js %}
-        <script src="{% static "js/frontend/checkout/checkout-main.js" %}" defer></script>
-        <script src="{% static "js/frontend/datetimepicker/order-timepicker.js" %}" defer></script>
-        <script src="{% static "js/frontend/checkout/voucher.js" %}" defer></script>
-        <script src="{% static "js/frontend/checkout/cookie-checkout.js" %}" defer></script>
-    {% endcompress %}
+  {{ block.super }}
+  {% compress js %}
+  <script src="{% static 'js/thirdpaty/datetimepicker/air-datepicker.js' %}" defer></script>
+  {% endcompress %}
+  {% compress js %}
+  <script src="{% static 'js/frontend/checkout/checkout-main.js' %}" defer></script>
+  <script src="{% static 'js/frontend/datetimepicker/order-timepicker.js' %}" defer></script>
+  <script src="{% static 'js/frontend/checkout/voucher.js' %}" defer></script>
+  <script src="{% static 'js/frontend/checkout/cookie-checkout.js' %}" defer></script>
+  {% endcompress %}
 {% endblock %}

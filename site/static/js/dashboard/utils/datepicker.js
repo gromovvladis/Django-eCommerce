@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             autoClose: true,
             range: true,
-        
+            isMobile: true,
             dateFormat: 'dd.MM.yyyy',
         
             buttons: ['clear'],
@@ -56,42 +56,14 @@ document.addEventListener('DOMContentLoaded', function() {
       // Инициализация Air Datepicker для текущего input
       var datepicker = new AirDatepicker(input, {
           autoClose: true,
-          isMobile: false,
+          isMobile: true,
 
           dateFormat: 'dd.MM.yyyy',
 
           toggleSelected: false,
           locale: localLang,
 
-          container: '.modal-body',
-
-          // position({$datepicker, $target, $pointer, done}) {
-          //   let popper = createPopper($target, $datepicker, {
-          //       placement: 'top',
-          //       modifiers: [
-          //           {
-          //               name: 'flip',
-          //               options: {
-          //                   padding: {
-          //                       top: 64
-          //                   }
-          //               }
-          //           },
-          //           {
-          //               name: 'offset',
-          //               options: {
-          //                   offset: [0, 20]
-          //               }
-          //           },
-          //           {
-          //               name: 'arrow',
-          //               options: {
-          //                   element: $pointer
-          //               }
-          //           }
-          //       ]
-          //   })
-          // }
+          // container: '.modal',
 
       });
 
@@ -123,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
           dateTimeSeparator: " ",
           
-          container: '.modal-body',
+          // container: '.modal',
 
       });
 
@@ -154,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
           dateTimeSeparator: " ",
           
-          container: '.modal-body',
+          // container: '.modal',
 
       });
 

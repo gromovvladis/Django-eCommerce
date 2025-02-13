@@ -2,95 +2,89 @@
 {% load category_tags %}
 
 <footer class="app__footer">
-    <div class="app-footer">
-      <div class="app-footer__head">
-        <div class="app-footer__pickup d-flex flex-md-row justify-center container ">
-          <div class="app-footer__pickup_desktop align-center">
-            <p class="mt-md-0 mr-3">Самовывоз доступен по адресу {{ store.primary_address|default:"ул. 9 Мая 77, ТРЦ Планета" }}</p>
-          </div>
-          <a href="{% url 'address:pickup-address' %}" class="app-footer__pickup_mobile d-flex align-center">
-            <p class="mt-md-0">Адрес самовывоза</p>
-            {% icon file_name='interface/arrow-left' size=24 stroke="#fff"%}
-          </a>
-          <button onclick="window.location.href='{% url 'address:pickup-address' %}'" class="button button--main mt-md-0" aria-label="Адрес самовывоза">
-            <span class="app-footer__pickup_desktop ml-1">Смотреть на карте</span>
-            {% icon file_name='map/location-pin' size=32 fill="#fff" %}
-          </button>
+  <div class="app-footer">
+    <div class="app-footer__head">
+      <div class="app-footer__pickup d-flex flex-md-row justify-center container">
+        <div class="app-footer__pickup_desktop align-center">
+          <p class="mt-md-0 mr-3">Самовывоз доступен по адресу {{ store.primary_address|default:'ул. 9 Мая 77, ТРЦ Планета' }}</p>
         </div>
+        <a href="{% url 'address:pickup-address' %}" class="app-footer__pickup_mobile d-flex align-center">
+          <p class="mt-md-0">Адрес самовывоза</p>
+          {% icon file_name='interface/arrow-left' size=24 stroke='#fff' %}
+        </a>
+        <button onclick="window.location.href='{% url 'address:pickup-address' %}'" class="button button--main mt-md-0" aria-label="Адрес самовывоза">
+          <span class="app-footer__pickup_desktop ml-1">Смотреть на карте</span>
+          {% icon file_name='map/location-pin' size=32 fill='#fff' %}
+        </button>
       </div>
-      <div class="d-flex flex-column flex-md-row align-center align-md-start py-1 pt-3 pr-md-3 pt-md-5 container"> 
-        <div class="app-footer__main-block d-flex align-center align-md-start mr-md-2">
-          <div class="app-footer__main-block_section d-flex flex-column align-start align-start" data-id="footer-block">
-            <div class="d-flex" data-id="footer-title">
-              <h2 class="app-footer__name-block">Компания</h2>
-              {% icon file_name='interface/arrow-left' size=25 stroke="#fff"%}
-            </div>
-            <div class="app-footer__link-block d-flex flex-column justify-center align-start shrink my-1" data-id="footer-links">
-              <a class="app-footer__link" href="/about">О нас</a>
-              <a class="app-footer__link" href="{% url 'address:pickup-address' %}">Местоположение</a>
-              <a class="app-footer__link" href="{% url 'address:delivery-address' %}">Доставка и оплата</a>
-            </div>
+    </div>
+    <div class="d-flex flex-column flex-md-row align-center align-md-start py-1 pt-3 pr-md-3 pt-md-5 container">
+      <div class="app-footer__main-block d-flex align-center align-md-start mr-md-2">
+        <div class="app-footer__main-block_section d-flex flex-column align-start align-start" data-id="footer-block">
+          <div class="d-flex" data-id="footer-title">
+            <h2 class="app-footer__name-block">Компания</h2>
+            {% icon file_name='interface/arrow-left' size=25 stroke='#fff' %}
           </div>
-          <div class="app-footer__main-block_section d-flex flex-column align-start align-start" data-id="footer-block">
-            <div class="d-flex" data-id="footer-title">
-              <h2 class="app-footer__name-block">Документы</h2>
-              {% icon file_name='interface/arrow-left' size=25 stroke="#fff"%}
-            </div>
-            <div class="app-footer__link-block d-flex flex-column justify-center align-start shrink my-1" data-id="footer-links">
-              <a class="app-footer__link" href="/oferta">Публичная оферта</a>
-              <a class="app-footer__link" href="/politic">Политика конфиденциальности</a>
-              <a class="app-footer__link" href="/soglasie">Согласие на обработку ПД</a>
-            </div>
-          </div>
-          <div class="app-footer__main-block_section d-flex flex-column align-start align-start" data-id="footer-block">
-            <div class="d-flex" data-id="footer-title">
-              <h2 class="app-footer__name-block">Карьера</h2>
-              {% icon file_name='interface/arrow-left' size=25 stroke="#fff"%}
-            </div>
-            <div class="app-footer__link-block d-flex flex-column justify-center align-start shrink my-1" data-id="footer-links">
-              <a class="app-footer__link" href="#">Работа в Микадо</a>
-            </div>
+          <div class="app-footer__link-block d-flex flex-column justify-center align-start shrink my-1" data-id="footer-links">
+            <a class="app-footer__link" href="/about">О нас</a>
+            <a class="app-footer__link" href="{% url 'address:pickup-address' %}">Местоположение</a>
+            <a class="app-footer__link" href="{% url 'address:delivery-address' %}">Доставка и оплата</a>
           </div>
         </div>
-        <div role="separator" class="d-none d-md-flex spacer"></div>
-        <div class="app-footer__work-time d-flex flex-column shrink">
-          <h2 class="app-footer__name-block d-md-block">Время работы</h2>
-          <div class="d-flex flex-md-column flex-wrap shrink mt-md-1">
-            <span data-id="footer-actions-link" class="working-hours__content mt-1">Ежедневно {{ store.work_time|default:"9:00-23:00" }}</span>
+        <div class="app-footer__main-block_section d-flex flex-column align-start align-start" data-id="footer-block">
+          <div class="d-flex" data-id="footer-title">
+            <h2 class="app-footer__name-block">Документы</h2>
+            {% icon file_name='interface/arrow-left' size=25 stroke='#fff' %}
+          </div>
+          <div class="app-footer__link-block d-flex flex-column justify-center align-start shrink my-1" data-id="footer-links">
+            <a class="app-footer__link" href="/oferta">Публичная оферта</a>
+            <a class="app-footer__link" href="/politic">Политика конфиденциальности</a>
+            <a class="app-footer__link" href="/soglasie">Согласие на обработку ПД</a>
+          </div>
+        </div>
+        <div class="app-footer__main-block_section d-flex flex-column align-start align-start" data-id="footer-block">
+          <div class="d-flex" data-id="footer-title">
+            <h2 class="app-footer__name-block">Карьера</h2>
+            {% icon file_name='interface/arrow-left' size=25 stroke='#fff' %}
+          </div>
+          <div class="app-footer__link-block d-flex flex-column justify-center align-start shrink my-1" data-id="footer-links">
+            <a class="app-footer__link" href="#">Работа в Микадо</a>
           </div>
         </div>
       </div>
-      <div class="app-footer__after container">
-        <div class="app-footer__copyright d-flex flex-column align-start justify-center pt-2">
-          <div class="app-footer__bootom_links fill-width d-flex justify-space-between align-end">
-            <div class="app-footer__bootom_links_and_social d-flex">
-              <a href="{{ homepage_url }}" class="app-footer__bootom_logo mr-2" aria-label="Домашняя страница">
-                {% icon file_name='footer/logo' size=25 fill="#fff"%}
-              </a>
-              <a href="{{ support_link }}" data-id="footer-actions-link" class="mr-2">Служба поддержики</a>
-              <a href="#" data-id="footer-about-link">Сотрудничество</a>
-            </div>
-            <div class="d-flex">
-              <a href="{{ support_link }}" class="app-footer__bootom_social d-flex align-center justify-center mr-1" aria-label="Телеграм">
-                {% icon file_name='footer/telegram' size=24 fill="#fff"%}
-              </a>
-              <a href="#" class="app-footer__bootom_social d-flex align-center justify-center" aria-label="Вконтакте">
-                {% icon file_name='footer/vk' size=24 fill="#fff"%}
-              </a>
-            </div>
+      <div role="separator" class="d-none d-md-flex spacer"></div>
+      <div class="app-footer__work-time d-flex flex-column shrink">
+        <h2 class="app-footer__name-block d-md-block">Время работы</h2>
+        <div class="d-flex flex-md-column flex-wrap shrink mt-md-1">
+          <span data-id="footer-actions-link" class="working-hours__content mt-1">Ежедневно {{ store.work_time|default:'9:00-23:00' }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="app-footer__after container">
+      <div class="app-footer__copyright d-flex flex-column align-start justify-center pt-2">
+        <div class="app-footer__bootom_links fill-width d-flex justify-space-between align-end">
+          <div class="app-footer__bootom_links_and_social d-flex">
+            <a href="{{ homepage_url }}" class="app-footer__bootom_logo mr-2" aria-label="Домашняя страница">{% icon file_name='footer/logo' size=25 fill='#fff' %}</a>
+            <a href="{{ support_link }}" data-id="footer-actions-link" class="mr-2">Служба поддержики</a>
+            <a href="#" data-id="footer-about-link">Сотрудничество</a>
           </div>
-          <div class="d-flex justify-space-between fill-width align-end">
-            <div class="app-footer__organization-details mt-3"> 
-              <span data-id="footer-actions-link mr-2">info@mikado-sushi.ru</span>
-              <p>ИП ХХХХХХХХХ ХХХХХХХ</p>
-              <p>000000, Красноясркий край, г. Красноясрк, улица 9 Мая, д. 77</p>
-              <p>ОГРН 000000000000, ИНН 0000000000</p>
-            </div>
-            <div class="app-footer__organization-details">
-                <a class="text--info" href="#">Разработка сайта ХХХХХХХХ</a>
-            </div>
+          <div class="d-flex">
+            <a href="{{ support_link }}" class="app-footer__bootom_social d-flex align-center justify-center mr-1" aria-label="Телеграм">{% icon file_name='footer/telegram' size=24 fill='#fff' %}</a>
+            <a href="#" class="app-footer__bootom_social d-flex align-center justify-center" aria-label="Вконтакте">{% icon file_name='footer/vk' size=24 fill='#fff' %}</a>
+          </div>
+        </div>
+        <div class="d-flex justify-space-between fill-width align-end">
+          <div class="app-footer__organization-details mt-3">
+            <span data-id="footer-actions-link mr-2">info@mikado-sushi.ru</span>
+            <p>ИП ХХХХХХХХХ ХХХХХХХ</p>
+            <p>000000, Красноясркий край, г. Красноясрк, улица 9 Мая, д. 77</p>
+            <p>ОГРН 000000000000, ИНН 0000000000</p>
+          </div>
+          <div class="app-footer__organization-details">
+            <a class="text--info" href="#">Разработка сайта ХХХХХХХХ</a>
           </div>
         </div>
       </div>
     </div>
-  </footer>
+  </div>
+</footer>

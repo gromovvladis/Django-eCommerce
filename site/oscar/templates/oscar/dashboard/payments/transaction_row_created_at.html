@@ -2,8 +2,8 @@
 {% load dashboard_tags %}
 
 {% if not record.created_at %}
--
+  -
 {% else %}
-    {% payment_date record.created_at as date %}
-    {{ date }}
+  {% payment_date record.created_at as date %}
+  {{ date }}
 {% endif %}

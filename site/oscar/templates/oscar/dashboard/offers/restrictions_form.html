@@ -2,13 +2,13 @@
 {% load i18n %}
 
 {% block summary %}
-    {% include 'oscar/dashboard/offers/summary.html' %}
+  {% include 'oscar/dashboard/offers/summary.html' %}
 {% endblock %}
 
 {% block progress %}
-    {% include 'oscar/dashboard/offers/progress.html' with step=4 %}
+  {% include 'oscar/dashboard/offers/progress.html' with step=4 %}
 {% endblock %}
 
 {% block form_actions_buttons %}
-    <button class="btn btn-primary" type="submit" data-loading-text="{% trans 'Saving...' %}">{% trans "Save this offer" %}</button>
+  <button class="btn btn-primary" type="submit" data-loading-text="{% trans 'Saving...' %}">{% trans 'Save this offer' %}</button>
 {% endblock %}

@@ -1,12 +1,10 @@
 {% with stores=record.user.stores.all %}
-    {% if stores %}
-        {% for store in stores %}
-            <a href="{% url 'dashboard:store-manage' pk=store.id %}">
-                {{ store.name }}
-            </a>
-            {% if not forloop.last %},{% endif %}
-        {% endfor %}
-    {% else %}
-        -
-    {% endif %}
+  {% if stores %}
+    {% for store in stores %}
+      <a href="{% url 'dashboard:store-manage' pk=store.id %}">{{ store.name }}</a>
+      {% if not forloop.last %},{% endif %}
+    {% endfor %}
+  {% else %}
+    -
+  {% endif %}
 {% endwith %}

@@ -1,17 +1,13 @@
 {% load django_tables2 %}
 
 {% if record.stores %}
-    {% for store in record.stores %}
+  {% for store in record.stores %}
     {% if store.id %}
-        <a href="{% url 'dashboard:store-manage' pk=store.id %}">
-            {{ store.name|default:"Магазин" }}
-        </a>
+      <a href="{% url 'dashboard:store-manage' pk=store.id %}">{{ store.name|default:'Магазин' }}</a>
     {% else %}
-        <span>
-            {{ store }}{% if not forloop.last %},{% endif %}<br>
-        </span>
+      <span>{{ store }}{% if not forloop.last %},{% endif %}<br /></span>
     {% endif %}
-    {% endfor %}
+  {% endfor %}
 {% else %}
-    -
+  -
 {% endif %}

@@ -7,174 +7,165 @@
 {% load compress %}
 {% load static %}
 
-{% block body_class %}{{ block.super }} orders{% endblock %}
+{% block body_class %}
+  {{ block.super }} orders
+{% endblock %}
 
-{% block title %}{{ title }} | {{ block.super }}{% endblock %}
+{% block title %}
+  {{ title }} | {{ block.super }}
+{% endblock %}
 
 {% block breadcrumbs %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
-        </ol>
-    </nav>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+    </ol>
+  </nav>
 {% endblock %}
 
 {% block header %}
-    <div class="page-header d-flex justify-content-start store-select">
-        <h1 class="mr-2">Заказы</h1>
-        <form method="get" class="btn d-flex align-items-center no-widget-init" id="store_form">
-            <i class="fa-solid fa-store mx-1"></i>
-            {% for field in form %}
-                {% if "store" in field.id_for_label %}
-                    {% render_field field class+='store-point' %}
-                    {% for error in field.errors %}
-                        <ul class="error-block">
-                            <li>{{ error }}</li>
-                        </ul>
-                    {% endfor %}
-                {% endif %}
-            {% endfor %}
-        </form>
-    </div>
-{% endblock header %}
+  <div class="page-header d-flex justify-content-start store-select">
+    <h1 class="mr-2">Заказы</h1>
+    <form method="get" class="btn d-flex align-items-center no-widget-init" id="store_form">
+      <i class="fa-solid fa-store mx-1"></i>
+      {% for field in form %}
+        {% if 'store' in field.id_for_label %}
+          {% render_field field='store-point' %}
+          {% for error in field.errors %}
+            <ul class="error-block">
+              <li>{{ error }}</li>
+            </ul>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </form>
+  </div>
+{% endblock %}
 
 {% block dashboard_content %}
-    <div class="table-wrapper mb-4">
-        <div class="table-header d-flex justify-space-between" data-target="#search-body" 
-        data-toggle="collapse" aria-controls="search-body" aria-expanded="false">
-            <h3><i class="fas fa-search"></i> Поиск</h3>
+  <div class="table-wrapper mb-4">
+    <div class="table-header d-flex justify-space-between" data-target="#search-body" data-toggle="collapse" aria-controls="search-body" aria-expanded="false">
+      <h3><i class="fas fa-search"></i> Поиск</h3>
+      <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+      <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+    </div>
+    <div class="card card-body bg-light {% if form.is_valid %}collapse{% endif %}" id="search-body">
+      <form method="get" class="form-inline fill-width d-flex justify-content-between" id="search_form">
+        {% for field in form %}
+          {% if 'order' in field.id_for_label %}
+            {% if field.is_hidden %}
+              {% render_field field='form-control' %}
+            {% else %}
+              <div class="form-group form-flex-inline">
+                {{ field.label_tag }}
+                {% render_field field='form-control' %}
+                {% for error in field.errors %}
+                  <ul class="error-block">
+                    <li>{{ error }}</li>
+                  </ul>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        <div class="btn-form d-flex my-2">
+          <button class="btn btn-primary flex-fill" type="submit">
+            <i class="fas fa-search"></i>
+            <span class="ml-2">Поиск</span>
+          </button>
+          <a data-toggle="modal" class="btn btn-third ml-2" data-target="#SearchModal" href="#"><i class="fa-solid fa-bars"></i></a>
+          {% if search_filters %}
+            <a href="{% url 'dashboard:order-list' %}" class="btn btn-danger ml-2"><i class="fa-solid fa-trash"></i></a>
+          {% endif %}
+        </div>
+      </form>
+      {% include 'oscar/dashboard/partials/advanced_search_modal.html' with form=form style='horizontal' %}
+      {% if search_filters %}
+        <div class="search-filter-list mt-4">
+          <label class="mr-2">Фильтры:</label>
+          {% for filter, param in search_filters %}
+            <span class="badge badge-filter mb-2 mr-1">
+              {{ filter }}
+              <a class="delete-filter text-danger ml-1" href="{% delete_filter request param %}"><i class="fa-solid fa-xmark"></i></a>
+            </span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <form method="post" id="orders_form" class="mobile-table order-table">
+    {% csrf_token %}
+    {% if orders %}
+      {% render_table orders %}
+      {% if orders.paginated_rows %}
+        <div class="table-wrapper mb-4 d-none" id="actions_lines">
+          <div class="table-header d-flex justify-space-between" data-target="#status-body" data-toggle="collapse" aria-controls="status-body" aria-expanded="true">
+            <h3><i class="fa-solid fa-list-check"></i>Изменить статус заказа и скачать заказы</h3>
             <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
             <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
-        </div>
-        <div class="card card-body bg-light {% if form.is_valid %}collapse{% endif %}" id="search-body">
-            <form method="get" class="form-inline fill-width d-flex justify-content-between" id="search_form">
-                {% for field in form %}
-                    {% if "order" in field.id_for_label %}
-                        {% if field.is_hidden %}
-                            {% render_field field class+='form-control' %}
-                        {% else %}
-                            <div class="form-group form-flex-inline">
-                                {{ field.label_tag }}
-                                {% render_field field class+='form-control' %}
-                                {% for error in field.errors %}
-                                    <ul class="error-block">
-                                        <li>{{ error }}</li>
-                                    </ul>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-                <div class="btn-form d-flex">
-                    <button class="btn btn-primary flex-fill" type="submit">
-                        <i class="fas fa-search"></i>
-                        <span class="ml-2">
-                            Поиск
-                        </span>
-                    </button>
-                    <a data-toggle="modal" class="btn btn-third ml-2" data-target="#SearchModal" href="#">
-                        <i class="fa-solid fa-bars"></i>
-                    </a>
-                    {% if search_filters %}
-                        <a href="{% url 'dashboard:order-list' %}" class="btn btn-danger ml-2">
-                            <i class="fa-solid fa-trash"></i>
-                        </a>
-                    {% endif %}
-                </div>
-            </form>
-            {% include "oscar/dashboard/partials/advanced_search_modal.html" with form=form style='horizontal' %}
-            {% if search_filters %}
-                <div class="search-filter-list mt-4">
-                    <label class="mr-2">Фильтры:</label>
-                    {% for filter, param in search_filters %}
-                        <span class="badge badge-filter mb-2 mr-1">{{ filter }}
-                            <a class="delete-filter text-danger ml-1" href="{% delete_filter request param %}">
-                                <i class="fa-solid fa-xmark"></i>
-                            </a>    
-                        </span>
+          </div>
+          <div class="card card-body dropdown-list" id="status-body">
+            <h2 class="mb-3">Изменить статус заказа</h2>
+            {% if order_statuses %}
+              <div class="form-inline fill-width justify-space-between">
+                <div class="form-group form-flex-inline">
+                  <label for="new_status_id">Новый статус</label>
+                  <select id="new_status_id" name="new_status">
+                    <option value="">-- Новый статус --</option>
+                    {% for status in order_statuses %}
+                      <option>{{ status }}</option>
                     {% endfor %}
+                  </select>
                 </div>
-            {% endif %}
-        </div>
-    </div>
-    <form method="post" id="orders_form" class="mobile-table order-table">
-        {% csrf_token %}
-        {% if orders %} 
-            {% render_table orders %}  
-            {% if orders.paginated_rows %}
-                <div class="table-wrapper mb-4 d-none" id="actions_lines">
-                    <div class="table-header d-flex justify-space-between" data-target="#status-body" 
-                    data-toggle="collapse" aria-controls="status-body" aria-expanded="true">
-                        <h3><i class="fa-solid fa-list-check"></i>Изменить статус заказа и скачать заказы</h3>
-                        <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
-                        <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
-                    </div>
-                    <div class="card card-body dropdown-list" id="status-body">
-                        <h2 class="mb-3">Изменить статус заказа</h2>
-                        {% if order_statuses %}
-                            <div class="form-inline fill-width justify-space-between">
-                                <div class="form-group form-flex-inline">
-                                    <label for="new_status_id">Новый статус</label>
-                                    <select id="new_status_id" name="new_status">
-                                        <option value=""> -- Новый статус -- </option>
-                                        {% for status in order_statuses %}
-                                            <option>{{ status }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="btn-form d-flex">
-                                    <button type="submit" name="action" value="change_order_statuses" class="btn btn-primary" data-loading-text="Смена статуса...">
-                                        Изменить статус заказа
-                                    </button>
-                                </div>
-                            </div>
-                        {% endif %}
-                        <div class="form-inline fill-width justify-space-between">
-                            <h2 class="mt-4">Cкачать выбранные заказы CSV</h2>
-                            <div class="btn-form d-flex">
-                                <button class="btn btn-success flex-fill"  name="action" value="download_selected_orders" type="submit" data-loading-text="Скачивание...">
-                                    <i class="fa-solid fa-down-long"></i>
-                                    <span class="ml-2">
-                                        Скачать
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="btn-form d-flex my-2">
+                  <button type="submit" name="action" value="change_order_statuses" class="btn btn-primary" data-loading-text="Смена статуса...">Изменить статус заказа</button>
                 </div>
+              </div>
             {% endif %}
-        {% else %}
-            <p class="empty">Заказы не найдены.</p>
-        {% endif %}
-    </form>
-    <div class="modal fade justify-content-center" data-id="order-modal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div data-id="order-modal-content" class="d-flex flex-column fill-height content-loading"></div>
+            <div class="form-inline fill-width justify-space-between">
+              <h2 class="mt-4">Cкачать выбранные заказы CSV</h2>
+              <div class="btn-form d-flex my-2">
+                <button class="btn btn-success flex-fill" name="action" value="download_selected_orders" type="submit" data-loading-text="Скачивание...">
+                  <i class="fa-solid fa-down-long"></i>
+                  <span class="ml-2">Скачать</span>
+                </button>
+              </div>
             </div>
+          </div>
         </div>
+      {% endif %}
+    {% else %}
+      <p class="empty">Заказы не найдены.</p>
+    {% endif %}
+  </form>
+  <div class="modal fade justify-content-center" data-id="order-modal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div data-id="order-modal-content" class="d-flex flex-column fill-height content-loading"></div>
+      </div>
     </div>
-{% endblock dashboard_content %}
+  </div>
+{% endblock %}
 
 {% block templatescripts %}
-    {{ block.super }}
-    var order_modal_url = "{% url 'dashboard:order-modal' %}";
-    var next_status_url = "{% url 'dashboard:order-next-status' %}";
+  {{ block.super }}
+  var order_modal_url = "{% url 'dashboard:order-modal' %}"; var next_status_url = "{% url 'dashboard:order-next-status' %}";
 {% endblock %}
 
 {% block extrascripts %}
-    {{ block.super }}
-    {% compress js %}
-        <script type="application/javascript" src="{% static "js/dashboard/orders/before-order.js" %}"></script>
-        <script type="application/javascript" src="{% static "js/dashboard/orders/order-modal.js" %}"></script>
-    {% endcompress %}
+  {{ block.super }}
+  {% compress js %}
+  <script type="application/javascript" src="{% static 'js/dashboard/orders/before-order.js' %}"></script>
+  <script type="application/javascript" src="{% static 'js/dashboard/orders/order-modal.js' %}"></script>
+  {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}
-    {{ block.super }}
-    oscar.dashboard.orders.initTable();
-    {% if form.errors %}
-        $('#SearchModal').modal('show');
-    {% endif %}
-{% endblock onbodyload %}
+  {{ block.super }}
+  oscar.dashboard.orders.initTable();{% if form.errors %}
+    $('#SearchModal').modal('show');
+  {% endif %}
+{% endblock %}

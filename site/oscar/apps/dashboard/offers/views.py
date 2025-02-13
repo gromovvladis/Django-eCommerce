@@ -92,7 +92,12 @@ class OfferListView(SingleTableView):
 
         if name:
             qs = qs.filter(name__icontains=name)
-            self.search_filters.append('Имя соответствует "%s"' % name)
+            self.search_filters.append(
+                (
+                    f"Имя соответствует {name}",
+                    (("name", name),),
+                )
+            )
         if is_active is not None:
             now = timezone.now()
             if is_active:
@@ -101,28 +106,47 @@ class OfferListView(SingleTableView):
                     & (Q(end_datetime__gte=now) | Q(end_datetime__isnull=True)),
                     status=ConditionalOffer.OPEN,
                 )
-                self.search_filters.append("Активен")
+                self.search_filters.append(
+                    (
+                        f"Активен",
+                        (("is_active", is_active),),
+                    )
+                )
             else:
                 qs = qs.filter(
                     Q(start_datetime__gt=now)
                     | Q(end_datetime__lt=now)
                     | Q(status=ConditionalOffer.SUSPENDED)
                 )
-                self.search_filters.append("Неактивен")
+                self.search_filters.append(
+                    (
+                        f"Неактивен",
+                        (("is_active", is_active),),
+                    )
+                )
         if offer_type:
             qs = qs.filter(offer_type=offer_type)
             self.search_filters.append(
-                'Тип товара "%s"' % dict(ConditionalOffer.TYPE_CHOICES)[offer_type]
+                (
+                    'Тип товара "%s"' % dict(ConditionalOffer.TYPE_CHOICES)[offer_type],
+                    (("offer_type", offer_type),),
+                )
             )
         if has_vouchers is not None:
             qs = qs.filter(vouchers__isnull=not has_vouchers).distinct()
             self.search_filters.append(
-                "Есть промокод" if has_vouchers else "Нет промокода"
+                (
+                    "Есть промокод" if has_vouchers else "Нет промокода",
+                    (("has_vouchers", has_vouchers),),
+                )
             )
         if voucher_code:
             qs = qs.filter(vouchers__code__icontains=voucher_code).distinct()
             self.search_filters.append(
-                'Промокод соответствует коду: "%s"' % voucher_code
+                (
+                    'Промокод соответствует коду: "%s"' % voucher_code,
+                    (("voucher_code", voucher_code),),
+                )
             )
 
         return qs

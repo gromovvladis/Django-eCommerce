@@ -1,9 +1,7 @@
 {% if record.status == 1 %}
-<span class="badge badge-success">
+  <span class="badge badge-success">{{ record.get_status_display }}</span>
 {% elif record.status == 2 %}
-<span class="badge badge-danger">
+  <span class="badge badge-danger">{{ record.get_status_display }}</span>
 {% else %}
-<span class="badge badge-info">
+  <span class="badge badge-info">{{ record.get_status_display }}</span>
 {% endif %}
-{{ record.get_status_display }}
-</span>

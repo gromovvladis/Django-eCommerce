@@ -1,35 +1,41 @@
 {% extends 'oscar/dashboard/layout.html' %}
 
-{% block body_class %}{{ block.super }} create-page{% endblock %}
+{% block body_class %}
+  {{ block.super }} create-page
+{% endblock %}
 
 {% block breadcrumbs %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Главная</a></li>
-            <li class="breadcrumb-item">
-                <a href="{% url 'dashboard:store-list' %}">Персонал</a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">Удалить точку продажи?</li>
-        </ol>
-    </nav>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:store-list' %}">Персонал</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Удалить точку продажи?</li>
+    </ol>
+  </nav>
 {% endblock %}
 
 {% block navtext %}
-    <h1>{{ store.name }}</h1>
+  <h1>{{ store.name }}</h1>
 {% endblock %}
 
 {% block dashboard_content %}
-    <div class="table-header">
-        <h2>Удалить точку продажи?</h2>
+  <div class="table-header">
+    <h2>Удалить точку продажи?</h2>
+  </div>
+  <form method="post" class="card card-body bg-light">
+    {% csrf_token %}
+    {{ form }}
+    <p>
+      Удалить точку продажи <strong>{{ store.name }}</strong> - Вы уверены?
+    </p>
+    <p>{{ description }}</p>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">Удалить</button>
+      <a class="btn btn-secondary ml-2" href="{% url 'dashboard:store-list' %}">Отмена</a>
     </div>
-    <form method="post" class="card card-body bg-light">
-        {% csrf_token %}
-        {{ form }}
-            <p>Удалить точку продажи <strong>{{ store.name }}</strong> - Вы уверены?</p>
-            <p>{{ description }}</p>
-        <div class="form-actions">
-            <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">Удалить</button>
-            <a class="btn btn-secondary ml-2"href="{% url 'dashboard:store-list' %}">Отмена</a>
-        </div>
-    </form>
+  </form>
 {% endblock %}

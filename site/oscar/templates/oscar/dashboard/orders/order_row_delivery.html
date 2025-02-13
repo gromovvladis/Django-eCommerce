@@ -1,9 +1,7 @@
 {% load django_tables2 %}
 
 {% if record.shipping_address %}
-    {{ record.shipping_address.line1 }}
+  {{ record.shipping_address.line1 }}
 {% else %}
-    <span class="text-muted">
-        {{ record.shipping_method }}
-    </span>
+  <span class="text-muted">{{ record.shipping_method }}</span>
 {% endif %}
