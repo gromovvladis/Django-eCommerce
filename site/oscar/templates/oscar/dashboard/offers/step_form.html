@@ -10,19 +10,19 @@
   {% if offer.pk %}
     {{ offer.name }}:
   {% else %}
-    {% trans 'Create new offer' %}:
+    Create new offer:
   {% endif %}
-  {{ title }} |{% trans 'Offers' %}| {{ block.super }}
+  {{ title }} | Offers | {{ block.super }}
 {% endblock %}
 
 {% block breadcrumbs %}
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item">
-        <a href="{% url 'dashboard:index' %}">{% trans 'Dashboard' %}</a>
+        <a href="{% url 'dashboard:index' %}">Главная</a>
       </li>
       <li class="breadcrumb-item">
-        <a href="{% url 'dashboard:offer-list' %}">{% trans 'Offers' %}</a>
+        <a href="{% url 'dashboard:offer-list' %}">Акции</a>
       </li>
       {% if offer.pk %}
         <li class="breadcrumb-item">
@@ -30,7 +30,7 @@
         </li>
       {% else %}
         <li class="breadcrumb-item">
-          {% trans 'Create new offer' %}
+          Создать новую акцию
         </li>
       {% endif %}
       <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
@@ -41,7 +41,7 @@
 {% block navtext %}
   <h1>
     {% if not offer.pk %}
-      {% trans 'Create new offer' %}
+      Создать новую акцию
     {% else %}
       {{ offer.name }}
     {% endif %}
@@ -55,15 +55,7 @@
         {% include 'oscar/dashboard/offers/progress.html' %}
       {% endblock %}
     </div>
-    <div class="{% if session_offer %}
-        
-        col-md-6
-
-      {% else %}
-        
-        col-md-9
-
-      {% endif %}">
+    <div class="{% if session_offer %}col-md-6{% else %}col-md-9{% endif %}">
       <form method="post" class="form-stacked wysiwyg fixed-actions">
         <div class="table-header">
           <h3>{{ title }}</h3>
@@ -74,27 +66,25 @@
             {% include 'oscar/dashboard/partials/form_fields.html' with form=form %}
           {% endblock %}
           {% block form_extradata %}
-
           {% endblock %}
         </div>
-
         {% block form_actions %}
           <div class="fixed-actions-group">
             <div class="form-actions">
               <div class="float-right">
                 {% block form_actions_buttons %}
-                  <button class="btn btn-primary" type="submit" data-loading-text="{% trans 'Submitting...' %}">
+                  <button class="btn btn-primary" type="submit" data-loading-text="Submitting...">
                     {% block submittext %}
-                      {% trans 'Continue' %}
+                      продолжить
                     {% endblock %}
                   </button>
                   {% if offer %}
                     {# When editing offer, show saving button #}
-                    <button class="btn btn-secondary" name="save" type="submit" data-loading-text="{% trans 'Saving...' %}">{% trans 'Save changes' %}</button>
+                    <button class="btn btn-secondary" name="save" type="submit" data-loading-text="сохранение">Сохранить изменения</button>
                   {% endif %}
                 {% endblock %}
               </div>
-              <a class="btn btn-secondary" href="{% url 'dashboard:offer-list' %}">{% trans 'cancel' %}</a>
+              <a class="btn btn-secondary" href="{% url 'dashboard:offer-list' %}">отмена</a>
             </div>
           </div>
         {% endblock %}
