@@ -1,19 +1,10 @@
 {% load django_tables2 %}
-{% load currency_filters %}
 {% load dashboard_tags %}
 
-<span class="time">
-    {{ record.order_time|date:"d.m.y H:i" }}
-</span>
+<span class="time">{{ record.order_time|date:'d.m.y H:i' }}</span>
 {% if record.before_order %}
-    <br>
-    {% with before_order=record|before_order_badge %}
-        <span data-id="order-badge" data-seconds="{{ before_order.2 }}" class="badge {{ before_order.1 }}">{{ before_order.0 }}</span>
-    {% endwith %}
+  <br />
+  {% with before_order=record|before_order_badge %}
+    <span data-id="order-badge" data-seconds="{{ before_order.2 }}" class="badge {{ before_order.1 }}">{{ before_order.0 }}</span>
+  {% endwith %}
 {% endif %}
-
-{% comment %} {% if record.before_order %}
-    {% with before_order=record|before_order_badge %}
-        <span data-id="order-badge" data-seconds="{{ before_order.2 }}" class="badge {{ before_order.1 }}">{{ before_order.0 }}</span>
-    {% endwith %}
-{% endif %} {% endcomment %}

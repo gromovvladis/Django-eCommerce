@@ -1,7 +1,7 @@
 {% load django_tables2 %}
 
 {% if record.date_updated %}
-    {{ record.date_updated|date:"d.m.y H:i" }}
+  {{ record.date_updated|date:'d.m.y H:i' }}
 {% else %}
-    -
+  -
 {% endif %}

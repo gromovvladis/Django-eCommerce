@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Sum
 from django.utils.timezone import now
+from django.contrib import messages
 
 from oscar.core.utils import datetime_combine
 from oscar.core.loading import get_model
@@ -19,6 +20,12 @@ class DashboardMiddleware:
     def __call__(self, request):
         if not request.path.startswith("/dashboard") or not request.user.is_authenticated:
             return self.get_response(request)
+
+        cache_key = f"user_message_{request.user.id}"
+        message = cache.get(cache_key)
+        if message:
+            messages.info(request, message)
+            cache.delete(cache_key)
 
         stores = cache.get("stores")
         if stores is None:

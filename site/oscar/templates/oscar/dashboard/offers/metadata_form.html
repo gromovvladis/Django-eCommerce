@@ -2,7 +2,9 @@
 {% load i18n %}
 
 {% block progress %}
-    {% include 'oscar/dashboard/offers/progress.html' with step=1 %}
+  {% include 'oscar/dashboard/offers/progress.html' with step=1 %}
 {% endblock %}
 
-{% block submittext %}{% trans "Continue to step 2" %}{% endblock %}
+{% block submittext %}
+  {% trans 'Continue to step 2' %}
+{% endblock %}

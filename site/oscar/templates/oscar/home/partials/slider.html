@@ -2,43 +2,35 @@
 {% load svg_tags %}
 
 {% if action_list %}
-    <div class="container container--carousel">
-        <div class="main-carousel">
-            <div class="carousel__wrap banners main-carousel__banners pos-relative" data-id="slider-homepage">
-                
-                <div class="carousel">
-                    <div class="carousel__inner" data-id="slider-swiper">
-                        <div class="swiper-wrapper d-flex">
-                            {% for slider_item in action_list %} 
-                                <a class="swiper-slide carousel__item" href="{{ slider_item.get_absolute_url }}" aria-label="{{ slider_item.get_name }}">
-                                    <div class="image fill-width">
-                                        <div class="image__inner">
-                                            {% with image=slider_item.primary_image %}
-                                                {% oscar_thumbnail image.original "x450" upscale=False as thumb %}
-                                                <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0">
-                                            {% endwith %}
-                                        </div>
-                                    </div>
-                                </a>
-                            {% endfor %}
-                        </div>
+  <div class="container container--carousel">
+    <div class="main-carousel">
+      <div class="carousel__wrap banners main-carousel__banners pos-relative" data-id="slider-homepage">
+        <div class="carousel">
+          <div class="carousel__inner" data-id="slider-swiper">
+            <div class="swiper-wrapper d-flex">
+              {% for slider_item in action_list %}
+                <a class="swiper-slide carousel__item" href="{{ slider_item.get_absolute_url }}" aria-label="{{ slider_item.get_name }}">
+                  <div class="image fill-width">
+                    <div class="image__inner">
+                      {% with image=slider_item.primary_image %}
+                        {% oscar_thumbnail image.original 'x450' upscale=False as thumb %}
+                        <img src="{{ thumb.url }}" alt="{{ tree_category.name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0" />
+                      {% endwith %}
                     </div>
-                </div>
-                    
-                <div class="carousel__buttons d-flex justify-center">
-                    <ul class="d-flex justify-center" data-id="slider-pagination"></ul>
-                </div>
-
-                <div class="carousel__navs align-center">
-                    <button class="home-nav--button right" data-id="swiper-next">
-                        {% icon file_name='interface/arrow-home' size=32 stroke="#222" %}
-                    </button>
-                    <button class="home-nav--button left" data-id="swiper-prev">
-                        {% icon file_name='interface/arrow-home' size=32 stroke="#222" %}
-                    </button>
-                </div>
-
+                  </div>
+                </a>
+              {% endfor %}
             </div>
+          </div>
         </div>
+        <div class="carousel__buttons d-flex justify-center">
+          <ul class="d-flex justify-center" data-id="slider-pagination"></ul>
+        </div>
+        <div class="carousel__navs align-center">
+          <button class="home-nav--button right" data-id="swiper-next">{% icon file_name='interface/arrow-home' size=32 stroke='#222' %}</button>
+          <button class="home-nav--button left" data-id="swiper-prev">{% icon file_name='interface/arrow-home' size=32 stroke='#222' %}</button>
+        </div>
+      </div>
     </div>
+  </div>
 {% endif %}

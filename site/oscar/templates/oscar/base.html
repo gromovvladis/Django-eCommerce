@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"ru" }}">
     <head>
-        <title>{% block title %}{{ shop_name }} {{ primary_title }}{% endblock %}</title>
+        <title>{% block title %}{{ primary_title }}{% endblock %}</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <meta name="description" content="{% block description %}{% endblock %}" />
         <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
@@ -10,9 +10,7 @@
         <link rel="shortcut icon" href="{% static "favicon.ico" %}"/>
         {% block styles %}{% endblock %}
         {% block extrastyles %}{% endblock %}    
-        {% block tracking %}
-            {% include "oscar/partials/analytics.html" %}
-        {% endblock %}
+        {% block tracking %}{% include "oscar/partials/analytics.html" %}{% endblock %}
     </head>
     <body>
         {% block layout %}{% endblock %}

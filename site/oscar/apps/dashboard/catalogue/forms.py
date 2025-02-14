@@ -5,7 +5,6 @@ from django import forms
 from django.core import exceptions
 from django.db.models.query import QuerySet
 
-from oscar.apps.crm.client import EvatorCloud
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import slugify
 from oscar.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
@@ -106,17 +105,6 @@ class CategoryForm(SEOFormMixin, BaseCategoryForm):
             self.fields["slug"].help_text = (
                 "Оставьте пустым, чтобы сгенерировать на основе названия категории"
             )
-
-    def update_or_create_evotor_group(self, category):
-        try:
-            return EvatorCloud().update_or_create_evotor_group(category)
-        except Exception as e:
-            error = (
-                "Ошибка при отправке созданной / измененной категории в Эвотор. Ошибка %s",
-                e,
-            )
-            logger.error(error)
-            return error
 
 
 class ProductClassSelectForm(forms.Form):
@@ -562,17 +550,6 @@ class ProductForm(SEOFormMixin, forms.ModelForm):
 
         super()._post_clean()
 
-    def update_or_create_evotor_product(self, product):
-        try:
-            return EvatorCloud().update_or_create_evotor_product(product)
-        except Exception as e:
-            error = (
-                "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s",
-                e,
-            )
-            logger.error(error)
-            return error
-
 
 class ProductCategoryForm(forms.ModelForm):
     class Meta:
@@ -643,17 +620,6 @@ class AdditionalForm(forms.ModelForm):
         widgets = {
             "image": ThumbnailInput(),
         }
-
-    def update_or_create_evotor_additional(self, additional):
-        try:
-            return EvatorCloud().update_or_create_evotor_additional(additional)
-        except Exception as e:
-            error = (
-                "Ошибка при отправке созданного / измененного дополнительного товара в Эвотор. Ошибка %s",
-                e,
-            )
-            logger.error(error)
-            return error
 
 
 class ProductAdditionalForm(forms.ModelForm):

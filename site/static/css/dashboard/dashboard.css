@@ -519,6 +519,14 @@ pre code {
   margin: 0;
 }
 
+
+/* .modal .row.form-group  {
+  margin-top: .5rem;
+  margin-bottom: .5rem;
+} */
+
+
+
 .col-xl,
 .col-xl-auto,
 .col-xl-12,
@@ -591,8 +599,9 @@ pre code {
 .col-1 {
   position: relative;
   width: 100%;
-  padding-right: .5rem;
-  padding-left: .5rem;
+  padding: .5rem;
+  /* padding-right: .5rem; */
+  /* padding-left: .5rem; */
 }
 
 .col {
@@ -961,17 +970,10 @@ pre code {
 .table {
   background-color: #fff;
   width: 100%;
-  margin-bottom: 1rem;
   color: #212529;
   border-radius: 0 0 10px 10px;
   -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .05);
   box-shadow: 0 0 5px rgba(0, 0, 0, .05);
-}
-
-@media (min-width: 992px) {
-  .table {
-    margin-bottom: 1.5rem;
-  }
 }
 
 .empty-report {
@@ -995,19 +997,17 @@ pre code {
 }
 
 
-
-
 .mobile-table .table thead,
 .mobile-table .table tbody {
   text-align: center;
 }
 
-.mobile-table thead {
+/* .mobile-table thead {
   position: sticky;
-  top: 39px;
+  top: 36px;
   z-index: 2;
   background-color: #fff;
-}
+} */
 
 .table th,
 .table td {
@@ -3899,9 +3899,9 @@ input[type=button].btn-block {
   margin-bottom: 0.75rem;
 }
 
-.form-group {
-  margin-bottom: 1rem;
-
+.form-flex-inline.form-group {
+  margin-top: .5rem;
+  margin-bottom: .5rem;
 }
 
 @media (min-width: 576px) {
@@ -4991,7 +4991,7 @@ a.close.disabled {
 
 .modal {
   position: fixed;
-  z-index: 560;
+  z-index: 509;
   display: none;
   width: 100%;
   height: 100%;
@@ -5194,7 +5194,7 @@ a.close.disabled {
   }
 
   .modal-content {
-    border-radius: 10px;
+    border-radius: 5px;
     height: unset;
   }
 
@@ -18095,8 +18095,8 @@ readers do not read off random characters that represent icons */
 }
 
 .alert .alertinner.wicon {
-  padding-left: 0.5em;
-  margin-left: 0.5em;
+  padding-left: 0.5rem;
+  margin-left: 0.75rem;
 }
 
 .alert .alertinner [class*=fa-] {
@@ -18699,6 +18699,14 @@ h3.app-ico:before {
 .table-container {
   position: relative;
   width: 100%;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 992px) {
+  .table-container {
+    margin-bottom: 1.5rem;
+  }
 }
 
 .asc .filter:before {
@@ -18902,7 +18910,9 @@ caption {
 
 @media screen and (max-width: 1200px) {
 
-  .table .tax,
+  .table .benefit,
+  .table .condition,
+  .table .restrictions,
   .table .measure_name,
   .table .additionals,
   .table .cooking_time,
@@ -18947,9 +18957,9 @@ caption {
     display: none;
   }
 
-  .date_updated .column-header::before {
+  /* .date_updated .column-header::before {
     content: "Date";
-  }
+  } */
 
   .variants .header-text {
     display: none;
@@ -19663,6 +19673,7 @@ caption {
 
 caption .btn,
 .table-header .btn,
+.statistic .btn,
 .actions .btn,
 .toggle-row .btn {
   border-radius: 15px;
@@ -19998,13 +20009,10 @@ input[type="number"]:focus {
 
   .mobile-table {
     width: 100%;
-    /* display: block; */
-    /* overflow-x: auto; */
   }
 
   .mobile-table thead {
     display: none;
-    /* Скрываем заголовки колонок */
   }
 
   .mobile-table tbody tr {
@@ -20112,10 +20120,14 @@ input[type="number"]:focus {
     padding: 1.5rem 1rem !important;
   }
 
+  .table .benefit,
+  .table .condition,
+  .table .restrictions,
+  .table .measure_name,
+  .table .additionals,
   .table .cooking_time,
   .table .options,
   .table .variants,
-  .table .additionals,
   .sort-table {
     display: block;
   }

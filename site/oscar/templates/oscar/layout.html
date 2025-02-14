@@ -1,4 +1,4 @@
-{% extends "oscar/base.html" %}
+{% extends 'oscar/base.html' %}
 
 {% load store_tags %}
 {% load svg_tags %}
@@ -8,132 +8,115 @@
 {% load cache %}
 
 {% block styles %}
-    {{ block.super }}
-    {% compress css %}   
-        <link rel="stylesheet" href="{% static "css/frontend/variables.css" %}"/>
-        <link rel="stylesheet" href="{% static "css/frontend/planet-styles.css" %}"/>
-    {% endcompress %}
+  {{ block.super }}
+  {% compress css %}
+  <link rel="stylesheet" href="{% static 'css/frontend/variables.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/frontend/planet-styles.css' %}" />
+  {% endcompress %}
 {% endblock %}
 
 {% block layout %}
-    {% selected_store request as store %}
-    <div id="app" class="app {% block app_class %}{% endblock %}"> 
-        {% block main_header %}
-            <header class="app__header container py-3">
-                <div class="app__header-wrapper d-flex align-center py-0 fill-height justify-space-between">
-                    {% include 'oscar/includes/header.html' %}
-                </div>
-            </header>
-            <nav class="app__nav {% block nav_class %}{% endblock %}"> 
-                <div class="app-nav d-flex align-center py-0 fill-height">
-                    <button onclick="getBack(); return false" data-id="back-main-btn" class="button app-nav__back button--small justify-center mx-2 shrink" aria-label="Назад">
-                        <span class="button__wrapper d-flex">
-                            {% icon file_name='interface/arrow-home' size=24 stroke='#000'%}
-                        </span>
-                    </button>
-                    <div class="cats_header fill-height fill-width">
-                        <div class="app-nav__title d-flex d-sm-none text-center d-flex">
-                            {% block nav_title %}{% endblock %}
-                        </div>
-                        {% cache 3600 root_category %}
-                            <ul class="d-flex align-center fill-height">
-                                {% root_categories as root_categories %}
-                                {% if root_categories %}
-                                    {% for root_category in root_categories %}
-                                    <li>
-                                        <a class="cat_item {% if root_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ root_category.url }}" data-id="categories-tabs-item-hits">
-                                        {{ root_category.name }}
-                                        </a>
-                                    </li>
-                                    {% endfor %}
-                                {% endif %}
-                            </ul>
-                            <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button"
-                                class="button app-nav__button--search button--small justify-center mr-sm-0 mr-2 shrink" aria-label="Поиск">
-                                <span class="button__wrapper d-flex">
-                                    {% icon file_name='header/search' size=20 fill='#111'%}
-                                </span>
-                            </a>
-                        {% endcache %}
-                    </div>
-                    <a data-id="nav-basket-btn" class="app-nav__button d-none d-sm-flex ml-3" href='{% url 'basket:summary' %}'>
-                        <div class="d-flex aling-center mr-1">
-                            {% icon file_name='header/cart' size=17 stroke='#fff'%}
-                        </div>
-                        Корзина
-                        <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
-                    </a>
-                    <div class="app-nav__title app-nav__title--center d-flex d-sm-none text-center">
-                        {% block nav_title_center %}{% endblock %}
-                    </div>
-                    <div role="separator" class="spacer"></div>
-                    <button type="button" data-id="modal-open-close" class="button button--small button--empty-cart ml-2 justify-center shrink mr-2" aria-label="Очистить корзину">
-                        <span class="button__wrapper d-flex">
-                            {% icon file_name='interface/empty' size=20 stroke="#d32225"%}
-                        </span>
-                    </button>
-                </div> 
-            </nav>
-        {% endblock main_header %}
-        {% block app_mobile_sticker %}
-            {% include 'oscar/includes/app_mobile_sticker.html' %}
-        {% endblock app_mobile_sticker %}
-        <div class="app__wrapper">
-            <main class="app__content">
-                {% block carousel %}{% endblock %}
-                <div class="d-flex align-start pd-0 fill-height container">
-                    <div class="{% block wrapper_class %}{% endblock %}">
-                        {% include "oscar/partials/alert_messages.html" %}
-                        {% block breadcrumbs %}{% endblock %}
-                        {% if delivery_available %}
-                            {% block sticky_address %}{% endblock %}
-                        {% endif %}
-                        {% block content %}{% endblock %}
-                    </div>
-                </div>
-            </main>
-            {% cache 3600 footer store %}
-                {% block main_footer %}
-                    {% include 'oscar/includes/footer.html' %}
-                {% endblock %}
-            {% endcache %}
+  {% selected_store request as store %}
+  <div id="app"
+    class="app {% block app_class %}
+    {% endblock %}">
+    {% block main_header %}
+      <header class="app__header container py-3">
+        <div class="app__header-wrapper d-flex align-center py-0 fill-height justify-space-between">
+          {% include 'oscar/includes/header.html' %}
         </div>
+      </header>
+      <nav class="app__nav {% block nav_class %}{% endblock %}">
+        <div class="app-nav d-flex align-center py-0 fill-height">
+          <button onclick="getBack(); return false" data-id="back-main-btn" class="button app-nav__back button--small justify-center mx-2 shrink" aria-label="Назад"><span class="button__wrapper d-flex">{% icon file_name='interface/arrow-home' size=24 stroke='#000' %}</span></button>
+          <div class="cats_header fill-height fill-width">
+            <div class="app-nav__title d-flex d-sm-none text-center d-flex">
+              {% block nav_title %}{% endblock %}
+            </div>
+            {% cache 3600 root_category %}
+            <ul class="d-flex align-center fill-height">
+              {% root_categories as root_categories %}
+              {% if root_categories %}
+                {% for root_category in root_categories %}
+                  <li>
+                    <a class="cat_item {% if root_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ root_category.url }}" data-id="categories-tabs-item-hits">{{ root_category.name }}</a>
+                  </li>
+                {% endfor %}
+              {% endif %}
+            </ul>
+            <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button" class="button app-nav__button--search button--small justify-center mr-sm-0 mr-2 shrink" aria-label="Поиск"><span class="button__wrapper d-flex">{% icon file_name='header/search' size=20 fill='#111' %}</span></a>
+            {% endcache %}
+          </div>
+          <a data-id="nav-basket-btn" class="app-nav__button d-none d-sm-flex ml-3" href="{% url 'basket:summary' %}">
+            <div class="d-flex aling-center mr-1">
+              {% icon file_name='header/cart' size=17 stroke='#fff' %}
+            </div>Корзина
+            <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
+          </a>
+          <div class="app-nav__title app-nav__title--center d-flex d-sm-none text-center">
+            {% block nav_title_center %}{% endblock %}
+          </div>
+          <div role="separator" class="spacer"></div>
+          <button type="button" data-id="modal-open-close" class="button button--small button--empty-cart ml-2 justify-center shrink mr-2" aria-label="Очистить корзину"><span class="button__wrapper d-flex">{% icon file_name='interface/empty' size=20 stroke='#d32225' %}</span></button>
+        </div>
+      </nav>
+    {% endblock %}
+    {% block app_mobile_sticker %}
+      {% include 'oscar/includes/app_mobile_sticker.html' %}
+    {% endblock %}
+    <div class="app__wrapper">
+      <main class="app__content">
+        {% block carousel %}
+        {% endblock %}
+        <div class="d-flex align-start pd-0 fill-height container">
+          <div class="{% block wrapper_class %}{% endblock %}">
+            {% include 'oscar/partials/alert_messages.html' %}
+            {% block breadcrumbs %}{% endblock %}
+            {% if delivery_available %}
+              {% block sticky_address %}{% endblock %}
+            {% endif %}
+            {% block content %}{% endblock %}
+          </div>
+        </div>
+      </main>
+      {% cache 3600 footer store %}
+      {% block main_footer %}
+        {% include 'oscar/includes/footer.html' %}
+      {% endblock %}
+      {% endcache %}
     </div>
-    {% block auth %}
-        <div id="modal" class="d-none"></div>
-    {% endblock %}
-    {% block cookie %}
-        <div data-id="cookie"></div>
-    {% endblock %}
+  </div>
+  {% block auth %}
+    <div id="modal" class="d-none"></div>
+  {% endblock %}
+  {% block cookie %}
+    <div data-id="cookie"></div>
+  {% endblock %}
 {% endblock %}
 
 {% block templatescripts %}
-    var csrf_token = "{{ csrf_token }}";
-    var url_get_cookie = "{% url 'home:cookies' %}";
-    var url_store_api = "{% url 'store:select' %}";
-    var url_auth_api = "{% url 'customer:api-login' %}";
-    var url_auth = "{% url 'customer:login' %}";
+  var csrf_token = "{{ csrf_token }}"; var url_get_cookie = "{% url 'home:cookies' %}"; var url_store_api = "{% url 'store:select' %}"; var url_auth_api = "{% url 'customer:api-login' %}"; var url_auth = "{% url 'customer:login' %}";
 {% endblock %}
 
 {% block scripts %}
-    {% compress js %}
-        <script src="{% static "js/thirdpaty/slider/slider.js" %}" defer></script>
+  {% compress js %}
+  <script src="{% static 'js/thirdpaty/slider/slider.js' %}" defer></script>
 
-        <script src="{% static "js/frontend/cookie/cookie-main.js" %}" defer></script>
-        <script src="{% static "js/frontend/homepage/homepage-sliders.js" %}" defer></script>
-        <script src="{% static "js/frontend/delivery/delivery.js" %}" defer></script>
-        
-        <script src="{% static "js/frontend/catalogue/add-to-cart-compact.js" %}" defer></script>
-        <script src="{% static "js/frontend/catalogue/add-to-cart.js" %}" defer></script>
-        <script src="{% static "js/frontend/catalogue/add-to-wishlist.js" %}" defer></script>
-        <script src="{% static "js/frontend/basket/basket.js" %}" defer></script>
+  <script src="{% static 'js/frontend/cookie/cookie-main.js' %}" defer></script>
+  <script src="{% static 'js/frontend/homepage/homepage-sliders.js' %}" defer></script>
+  <script src="{% static 'js/frontend/delivery/delivery.js' %}" defer></script>
 
-        <script src="{% static "js/frontend/auth/auth.js" %}" defer></script>
-        <script src="{% static "js/frontend/store/store.js" %}" defer></script>
-        <script src="{% static "js/frontend/footer/footer.js" %}" defer></script>
-    {% endcompress %}
+  <script src="{% static 'js/frontend/catalogue/add-to-cart-compact.js' %}" defer></script>
+  <script src="{% static 'js/frontend/catalogue/add-to-cart.js' %}" defer></script>
+  <script src="{% static 'js/frontend/catalogue/add-to-wishlist.js' %}" defer></script>
+  <script src="{% static 'js/frontend/basket/basket.js' %}" defer></script>
+
+  <script src="{% static 'js/frontend/auth/auth.js' %}" defer></script>
+  <script src="{% static 'js/frontend/store/store.js' %}" defer></script>
+  <script src="{% static 'js/frontend/footer/footer.js' %}" defer></script>
+  {% endcompress %}
 {% endblock %}
 
 {% block onbodyload %}
-    initStore();
+  initStore();
 {% endblock %}

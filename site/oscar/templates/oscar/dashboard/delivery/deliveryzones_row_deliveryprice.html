@@ -1,7 +1,7 @@
 {% load currency_filters %}
 
 {% if not record.delivery_price %}
-    -
+  -
 {% else %}
-        {{ record.delivery_price|currency }}
+  {{ record.delivery_price|currency }}
 {% endif %}

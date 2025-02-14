@@ -1,14 +1,22 @@
-{% extends "oscar/error.html" %}
+{% extends 'oscar/error.html' %}
 
-{% block title %} Нет доступа | {{ block.super }}{% endblock %}
+{% block title %}
+  Нет доступа | {{ block.super }}
+{% endblock %}
 
-{% block nav_title %}Нет доступа{% endblock %}
-{% block nav_title_center %}Нет доступа{% endblock %}
+{% block nav_title %}
+  Нет доступа
+{% endblock %}
+{% block nav_title_center %}
+  Нет доступа
+{% endblock %}
 
-{% block error_code %}403{% endblock %}
+{% block error_code %}
+  403
+{% endblock %}
 
 {% block error_message %}
-    <p class="font-bold mb-2">Ошибка доступа</p>
-    <p class="text--grey">У вас нет доступа к этой странице</p>
-    <p class="text--grey">И здесь нет ничего вкусного :)</p>
+  <p class="font-bold mb-2">Ошибка доступа</p>
+  <p class="text--grey">У вас нет доступа к этой странице</p>
+  <p class="text--grey">И здесь нет ничего вкусного :)</p>
 {% endblock %}

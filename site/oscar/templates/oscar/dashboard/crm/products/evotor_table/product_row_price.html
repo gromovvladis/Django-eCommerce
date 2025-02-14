@@ -1,9 +1,7 @@
 {% load currency_filters %}
 
 {% if record.price %}
-    <span>
-        {{ record.price|currency:"RUB" }}
-    </span>
+  <span>{{ record.price|currency:'RUB' }}</span>
 {% else %}
-    -
+  -
 {% endif %}

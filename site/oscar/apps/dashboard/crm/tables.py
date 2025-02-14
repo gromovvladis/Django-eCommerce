@@ -465,6 +465,9 @@ class CRMProductEvotorTable(DashboardTable):
     measure_name = Column(
         verbose_name="Ед.изм.",
         order_by="measure_name",
+        attrs={
+            "th": {"class": "measure_name"},
+        },
     )
     allow_to_sell = TemplateColumn(
         verbose_name="Доступен",

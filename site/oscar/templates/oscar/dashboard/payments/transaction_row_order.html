@@ -2,7 +2,13 @@
 {% payment_order record.description as number %}
 
 <div class="d-flex align-items-center mb-1">
-    <span class="spinner-border-sm {% if record.paid and record.refundable %}badge-success{% else %}badge-danger{% endif %} rounded-circle mr-2">&nbsp;</span>
-    <a href="{% url 'dashboard:order-detail' number=number %}">{{ record.description }}</a>
+  <span class="spinner-border-sm {% if record.paid and record.refundable %}
+      badge-success
+    {% else %}
+      badge-danger
+    {% endif %} rounded-circle mr-2">
+    &nbsp;
+  </span>
+  <a href="{% url 'dashboard:order-detail' number=number %}">{{ record.description }}</a>
 </div>
 <span class="text-muted" href="{% url 'dashboard:order-detail' number=number %}">{{ record.id }}</span>

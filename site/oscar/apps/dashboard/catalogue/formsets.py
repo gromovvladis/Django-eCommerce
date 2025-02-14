@@ -1,9 +1,8 @@
 import logging
 
 from django import forms
-from django.forms.models import inlineformset_factory, modelformset_factory
+from django.forms.models import inlineformset_factory
 
-from oscar.apps.crm.client import EvatorCloud
 from oscar.core.loading import get_classes, get_model
 
 logger = logging.getLogger("oscar.catalogue")
@@ -75,28 +74,6 @@ class StockRecordFormSet(BaseStockRecordFormSet):
         kwargs["product_class"] = self.product_class
         kwargs["user"] = self.user
         return super()._construct_form(i, **kwargs)
-
-    def update_evotor_stockrecord(self, product):
-        try:
-            return EvatorCloud().update_evotor_stockrecord(product)
-        except Exception as e:
-            error = (
-                "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
-                e,
-            )
-            logger.error(error)
-            return error
-
-    def delete_evotor_stockrecord(self, product, store_id):
-        try:
-            return EvatorCloud().delete_evotor_product_by_store(product, store_id)
-        except Exception as e:
-            error = (
-                "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
-                e,
-            )
-            logger.error(error)
-            return error
 
 
 BaseStockRecordStockFormSet = inlineformset_factory(

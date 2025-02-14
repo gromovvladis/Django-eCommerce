@@ -165,6 +165,7 @@ class ProductTable(DashboardTable):
         orderable=True,
     )
     date_updated = TemplateColumn(
+        verbose_name="Изменен",
         template_code='{{ record.date_updated|date:"d.m.y H:i" }}',
     )
     actions = TemplateColumn(

@@ -58,11 +58,9 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
             ids = self.request.POST.getlist(
                 "selected_%s" % self.get_checkbox_object_name()
             )
-            models = self.model.objects.filter(id__in=ids)
+            return ids
         else:
-            models = self.model.objects.all()
-
-        return models
+            return self.model.objects.values_list("id", flat=True)
 
     def update_models(self, data_items, is_filtered):
         raise NotImplementedError(

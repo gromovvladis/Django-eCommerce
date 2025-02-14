@@ -1,62 +1,46 @@
 {% load widget_tweaks %}
 
 {% if field.is_hidden %}
-    {{ field }}
+  {{ field }}
 {% else %}
-    {% block control_group %}
-        <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width" id="form-group_{{ field.auto_id }}">
-            {% block label %}
-                {% if field.name == "line1" %}
-                <div class="d-flex align-items-center justify-content-between">
-                    <label for="{{ field.auto_id }}" class="{% if style|default:"stacked" != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">
-                        {{ field.label|safe }}
-                    </label>
-                    <button type="button" id="clean_address" class="delivery--clear text-danger col-form-label">
-                        <i class="fa-solid fa-trash"></i> Очистить
-                    </button>
-                </div>
-                {% elif not nolabel %}
-                    <label for="{{ field.auto_id }}" class="{% if style|default:"stacked" != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">
-                        {{ field.label|safe }}
-                    </label>
-                {% endif %}
-            {% endblock %}
-            {% block controls %}
-                <div class="{% if style|default:"stacked" != 'stacked' %}col-sm-8{% endif %}{% if field.widget_type == 'checkbox' or field.widget_type == 'radioselect' %} form-check{% endif %}">
-                    {% block widget %}
-                        {% if field.widget_type == 'checkbox' %}
-                            {% comment %} <div class="d-flex align-items-center"> {% endcomment %}
-                                {% render_field field class+="form-check-input" %}
-                                {% if not nolabel %}
-                                    <label for="{{ field.auto_id }}" class="form-check-label{% if field.field.required %} required{% endif %}">
-                                        {{ field.label|safe }}
-                                    </label>
-                                {% endif %}
-                            {% comment %} </div> {% endcomment %}
-                        {% elif field.widget_type == 'radioselect' %}
-                            {% render_field field class+="form-check-input position-static controls mt-2" %}
-                        {% else %}
-                            {% render_field field class+="form-control" %}
-                        {% endif %}
-                    {% endblock %}
-
-                    {% block errors %}
-                        {% for error in field.errors %}
-                            <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
-                        {% endfor %}
-                    {% endblock %}
-
-                    {% block help_text %}
-                        {% if field.help_text %}
-                            <small class="form-text text-muted">
-                                {# We allow HTML within form help fields #}
-                                {{ field.help_text|safe }}
-                            </small>
-                        {% endif %}
-                    {% endblock %}
-
-                </div>
-            {% endblock %}
+  {% block control_group %}
+    <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width" id="form-group_{{ field.auto_id }}">
+      {% block label %}
+        {% if field.name == 'line1' %}
+          <div class="d-flex align-items-center justify-content-between">
+            <label for="{{ field.auto_id }}" class="{% if style|default:'stacked' != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">{{ field.label|safe }}</label>
+            <button type="button" id="clean_address" class="delivery--clear text-danger col-form-label"><i class="fa-solid fa-trash"></i> Очистить</button>
+          </div>
+        {% elif not nolabel %}
+          <label for="{{ field.auto_id }}" class="{% if style|default:'stacked' != 'stacked' %}col-sm-4{% endif %} col-form-label{% if field.field.required %} required{% endif %}">{{ field.label|safe }}</label>
+        {% endif %}
+      {% endblock %}
+      {% block controls %}
+        <div class="{% if style|default:'stacked' != 'stacked' %}col-sm-8{% endif %}{% if field.widget_type == 'checkbox' or field.widget_type == 'radioselect' %} form-check{% endif %}">
+          {% block widget %}
+            {% if field.widget_type == 'checkbox' %}
+              {% render_field field class='form-check-input' %}
+              {% if not nolabel %}
+                <label for="{{ field.auto_id }}" class="form-check-label{% if field.field.required %} required{% endif %}">{{ field.label|safe }}</label>
+              {% endif %}
+            {% elif field.widget_type == 'radioselect' %}
+              {% render_field field class='form-check-input position-static controls' %}
+            {% else %}
+              {% render_field field class='form-control' %}
+            {% endif %}
+          {% endblock %}
+          {% block errors %}
+            {% for error in field.errors %}
+              <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+            {% endfor %}
+          {% endblock %}
+          {% block help_text %}
+            {% if field.help_text %}
+              <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+            {% endif %}
+          {% endblock %}
         </div>
-    {% endblock %}
+      {% endblock %}
+    </div>
+  {% endblock %}
 {% endif %}

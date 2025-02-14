@@ -1,5 +1,9 @@
 {% load django_tables2 %}
 
-<span class="badge {% if record.status == "Закрыто" %}badge-success{% else %}badge-warning{% endif %}">
-    {{ record.status }}
+<span class="badge {% if record.status == 'Закрыто' %}
+    badge-success
+  {% else %}
+    badge-warning
+  {% endif %}">
+  {{ record.status }}
 </span>

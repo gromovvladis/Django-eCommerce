@@ -1,9 +1,7 @@
 {% load django_tables2 %}
 
 {% if record.user.id %}
-    <a href="{% url 'dashboard:user-detail' pk=record.user.id %}">
-        {{ record.user.username }}
-    </a>
+  <a href="{% url 'dashboard:user-detail' pk=record.user.id %}">{{ record.user.username }}</a>
 {% else %}
-    -    
+  -
 {% endif %}

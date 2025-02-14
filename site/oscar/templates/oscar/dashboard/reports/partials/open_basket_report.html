@@ -2,51 +2,53 @@
 {% load datetime_filters %}
 
 {% block report %}
-    <table class="table table-striped table-bordered table-hover">
-        {% if objects %}
-            <thead>
-                <tr>
-                    <th class="name">Номер телефона</th>
-                    <th>Имя клиента</th>
-                    <th>Позиций</th>
-                    <th>Товаров</th>
-                    <th>Дата создания</th>
-                    <th>Время с момента создания</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for basket in objects %}
-                    <tr>
-                        <td class="name">
-                            {% if basket.owner %}
-                                <a href="{% url 'dashboard:user-detail' basket.owner.id %}">{{ basket.owner.username }}</a>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td data-label="Имя клиента">
-                            {% if basket.owner %}
-                                {{ basket.owner.get_full_name|default:"-" }}</td>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td data-label="Позиций">{{ basket.num_lines }}</td>
-                        <td data-label="Товаров">{{ basket.num_items }}</td>
-                        <td data-label="Дата создания">{{ basket.date_created }}</td>
-                        <td data-label="Время с момента создания">{{ basket.time_since_creation|timedelta }}</td>
-                        <td class="toggle-row">
-                            <button class="btn btn-secondary" type="button">
-                                <i class="fa-solid fa-chevron-up"></i>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        {% else %}
-            <tr class="empty-tr"><td class="empty-td">Нет открытых корзин за заданный период.</td></tr>
-        {% endif %}
-    </table>
-    {% include "oscar/dashboard/partials/pagination.html" %}
+  <table class="table table-striped table-bordered table-hover">
+    {% if objects %}
+      <thead>
+        <tr>
+          <th class="name">Номер телефона</th>
+          <th>Имя клиента</th>
+          <th>Позиций</th>
+          <th>Товаров</th>
+          <th>Дата создания</th>
+          <th>Время с момента создания</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for basket in objects %}
+          <tr>
+            <td class="name">
+              {% if basket.owner %}
+                <a href="{% url 'dashboard:user-detail' basket.owner.id %}">{{ basket.owner.username }}</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td data-label="Имя клиента">
+              {% if basket.owner %}
+                {{ basket.owner.get_full_name|default:'-' }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td data-label="Позиций">{{ basket.num_lines }}</td>
+            <td data-label="Товаров">{{ basket.num_items }}</td>
+            <td data-label="Дата создания">{{ basket.date_created }}</td>
+            <td data-label="Время с момента создания">{{ basket.time_since_creation|timedelta }}</td>
+            <td class="toggle-row">
+              <button class="btn btn-secondary" type="button">
+                <i class="fa-solid fa-chevron-up"></i>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    {% else %}
+      <tr class="empty-tr">
+        <td class="empty-td">Нет открытых корзин за заданный период.</td>
+      </tr>
+    {% endif %}
+  </table>
+  {% include 'oscar/dashboard/partials/pagination.html' %}
 {% endblock %}

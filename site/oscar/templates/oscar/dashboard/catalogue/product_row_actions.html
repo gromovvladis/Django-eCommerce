@@ -1,23 +1,13 @@
 {% load django_tables2 %}
 
 <div class="btn-toolbar dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-edit"></i>
-    </button>
-    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item statistic-desctop" href="{% url 'dashboard:index' %}?product={{ record.slug }}">
-            Статистика
-        </a>
-        <a class="dropdown-item" href="{{ record.get_absolute_url }}">
-            Смотреть на сайте
-        </a>
-        {% if product_access %}
-            <a class="dropdown-item" href="{% url 'dashboard:catalogue-product' pk=record.id %}{% querystring %}">
-                Изменить
-            </a>
-            <a class="dropdown-item" href="{% url 'dashboard:catalogue-product-delete' pk=record.id %}">
-                Удалить
-            </a>
-        {% endif %}
-    </div>
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-edit"></i></button>
+  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+    <a class="dropdown-item statistic-desctop" href="{% url 'dashboard:index' %}?product={{ record.slug }}">Статистика</a>
+    <a class="dropdown-item" href="{{ record.get_absolute_url }}">Смотреть на сайте</a>
+    {% if product_access %}
+      <a class="dropdown-item" href="{% url 'dashboard:catalogue-product' pk=record.id %}{% querystring %}">Изменить</a>
+      <a class="dropdown-item" href="{% url 'dashboard:catalogue-product-delete' pk=record.id %}">Удалить</a>
+    {% endif %}
+  </div>
 </div>

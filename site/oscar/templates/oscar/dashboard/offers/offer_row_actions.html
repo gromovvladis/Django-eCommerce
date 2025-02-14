@@ -1,25 +1,15 @@
 {% load django_tables2 %}
 
 <div class="btn-toolbar">
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-edit"></i>
-        </button>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="{% url 'offer:detail' slug=record.slug %}">
-                Открыть
-            </a>
-            <a class="dropdown-item" href="{% url 'dashboard:offer-detail' pk=record.pk %}">
-                Статистика
-            </a>
-            <a class="dropdown-item" href="{% url 'dashboard:offer-metadata' pk=record.pk %}">
-                Редактировать
-            </a>
-            {% if not offer.voucher_count %}
-                <a class="dropdown-item" href="{% url 'dashboard:offer-delete' pk=record.pk %}">
-                    Удалить
-                </a>
-            {% endif %}
-        </div>
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-edit"></i></button>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" href="{% url 'offer:detail' slug=record.slug %}">На сайте</a>
+      <a class="dropdown-item" href="{% url 'dashboard:offer-detail' pk=record.pk %}">Статистика</a>
+      <a class="dropdown-item" href="{% url 'dashboard:offer-metadata' pk=record.pk %}">Редактировать</a>
+      {% if not offer.voucher_count %}
+        <a class="dropdown-item" href="{% url 'dashboard:offer-delete' pk=record.pk %}">Удалить</a>
+      {% endif %}
     </div>
+  </div>
 </div>
