@@ -91,7 +91,7 @@
             <div>
               {% with evotor_field=form.evotor_update %}
                 <label for="{{ evotor_field.auto_id }}" class="checkbox-ios">
-                  {% render_field evotor_field='form-control' %}
+                  {% render_field evotor_field class='form-control' %}
                   <span class="checkbox-ios-switch"></span>
                 </label>
                 {% for error in evotor_field.errors %}
