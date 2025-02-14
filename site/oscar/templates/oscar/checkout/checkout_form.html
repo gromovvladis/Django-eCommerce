@@ -32,18 +32,16 @@
             </div>
           </div>
         </div>
-        <div class="d-flex flex-column fill-width mb-4">
-          <div class="deferred--wrapper">
-            <div class="deferred">
-              <div class="deferred-tabs fill-width">
-                <div class="tabs-button d-flex fill">
-                  <div data-id="delivery-method-block" class="tabs-button__active-block" style="width: 50%; left: 0px;">
-                    <div class="fill-width fill-height"></div>
-                  </div>
-                  {% for method in methods %}
-                    <button class="tabs-button__button" data-id="delivery-method-button" name="method_code" value="{{ method.code }}">{{ method.name }}</button>
-                  {% endfor %}
+        <div class="deferred--wrapper d-flex flex-column fill-width mb-4">
+          <div class="deferred">
+            <div class="deferred-tabs fill-width">
+              <div class="tabs-button d-flex fill">
+                <div data-id="delivery-method-block" class="tabs-button__active-block" style="width: 50%; left: 0px;">
+                  <div class="fill-width fill-height"></div>
                 </div>
+                {% for method in methods %}
+                  <button class="tabs-button__button" data-id="delivery-method-button" name="method_code" value="{{ method.code }}">{{ method.name }}</button>
+                {% endfor %}
               </div>
             </div>
           </div>
@@ -124,18 +122,16 @@
             <h2 data-id="order-time-title">Время самовывоза</h2>
           </div>
         {% endif %}
-        <div class="d-flex flex-column fill-width">
-          <div class="deferred--wrapper">
-            <div class="deferred">
-              <div class="deferred-tabs fill-width">
-                <div class="tabs-button d-flex fill">
-                  {% include 'oscar/partials/render_field.html' with field=form.order_time %}
-                  <div data-id="delivery-time-block" class="tabs-button__active-block" style="width: 50%; left: 0px;">
-                    <div class="fill-width fill-height"></div>
-                  </div>
-                  <button data-id="delivery-time" data-type="now" type="button" class="tabs-button__button">Ближайшее</button>
-                  <label data-id="delivery-time" data-type="later" for="delivery_time_later" class="tabs-button__button label">Ко времени</label>
+        <div class="deferred--wrapper d-flex flex-column fill-width">
+          <div class="deferred">
+            <div class="deferred-tabs fill-width">
+              <div class="tabs-button d-flex fill">
+                {% include 'oscar/partials/render_field.html' with field=form.order_time %}
+                <div data-id="delivery-time-block" class="tabs-button__active-block" style="width: 50%; left: 0px;">
+                  <div class="fill-width fill-height"></div>
                 </div>
+                <button data-id="delivery-time" data-type="now" type="button" class="tabs-button__button">Ближайшее</button>
+                <label data-id="delivery-time" data-type="later" for="delivery_time_later" class="tabs-button__button label">Ко времени</label>
               </div>
             </div>
           </div>

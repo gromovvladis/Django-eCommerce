@@ -10528,7 +10528,7 @@ input[type="number"]:focus {
 
     .dish-info-modal__block {
         max-width: 500px;
-        border-radius: 40px
+        border-radius: 30px
     }
 
     .dish-info-modal__title {
@@ -11511,7 +11511,7 @@ ymaps[class*="search__suggest-item_selected"] {
 .app .switch i {
     background-color: #f3f3f7;
     height: 30px;
-    border-radius: 40px;
+    border-radius: 30px;
     border: 0 solid #f3f3f7;
     -webkit-box-flex: 0;
     -ms-flex: 0 0 50px;
@@ -12875,7 +12875,7 @@ ymaps[class*="search__suggest-item_selected"] {
     }
 
     .collection__banner-wrapper {
-        border-radius: 40px
+        border-radius: 30px
     }
 
     .collection__slider {
@@ -12956,7 +12956,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:1024px) {
     .news-item__picture {
-        border-radius: 40px
+        border-radius: 30px
     }
 
     .news-item__content {
@@ -13799,7 +13799,7 @@ ymaps[class*="search__suggest-item_selected"] {
         display: block;
         width: 300px;
         background: #fff;
-        border-radius: 40px;
+        border-radius: 30px;
         overflow: hidden;
         -webkit-box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
         box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
@@ -13829,7 +13829,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
     .cart-page__wrapper {
         background: #fff;
-        border-radius: 40px;
+        border-radius: 30px;
         overflow: hidden;
         -webkit-box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
         box-shadow: 4px 4px 30px rgba(0, 0, 0, .05);
@@ -13930,7 +13930,7 @@ ymaps[class*="search__suggest-item_selected"] {
 
 @media screen and (min-width:768px) {
     .banner-image {
-        border-radius: 40px
+        border-radius: 30px
     }
 }
 

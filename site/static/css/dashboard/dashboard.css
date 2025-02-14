@@ -1002,12 +1002,12 @@ pre code {
   text-align: center;
 }
 
-.mobile-table thead {
+/* .mobile-table thead {
   position: sticky;
-  top: 39px;
+  top: 36px;
   z-index: 2;
   background-color: #fff;
-}
+} */
 
 .table th,
 .table td {
@@ -18957,9 +18957,9 @@ caption {
     display: none;
   }
 
-  .date_updated .column-header::before {
+  /* .date_updated .column-header::before {
     content: "Date";
-  }
+  } */
 
   .variants .header-text {
     display: none;
@@ -19673,6 +19673,7 @@ caption {
 
 caption .btn,
 .table-header .btn,
+.statistic .btn,
 .actions .btn,
 .toggle-row .btn {
   border-radius: 15px;
@@ -20008,13 +20009,10 @@ input[type="number"]:focus {
 
   .mobile-table {
     width: 100%;
-    /* display: block; */
-    /* overflow-x: auto; */
   }
 
   .mobile-table thead {
     display: none;
-    /* Скрываем заголовки колонок */
   }
 
   .mobile-table tbody tr {

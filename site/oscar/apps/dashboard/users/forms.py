@@ -8,10 +8,8 @@ from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.apps import apps
-from django.contrib import messages
 
 from oscar.forms.widgets import DatePickerInput
-from oscar.apps.crm.client import EvatorCloud
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_model
 
@@ -196,18 +194,18 @@ class StaffForm(forms.ModelForm):
 
         user.save()
 
-        evotor_update = self.cleaned_data.get("evotor_update")
-        if evotor_update:
-            try:
-                if created or not staff.evotor_id:
-                    staff, error = EvatorCloud().create_evotor_staff(staff)
-                    if error:
-                        messages.warning(self.request, error)
-            except Exception as e:
-                logger.error(
-                    "Ошибка при отправке созданного / измененного пользователя в Эвотор. Ошибка %s",
-                    e,
-                )
+        # evotor_update = self.cleaned_data.get("evotor_update")
+        # if evotor_update:
+        #     try:
+        #         if created or not staff.evotor_id:
+        #             staff, error = EvatorCloud().create_evotor_staff(staff)
+        #             if error:
+        #                 messages.warning(self.request, error)
+        #     except Exception as e:
+        #         logger.error(
+        #             "Ошибка при отправке созданного / измененного пользователя в Эвотор. Ошибка %s",
+        #             e,
+        #         )
 
         return staff
 

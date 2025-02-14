@@ -319,10 +319,10 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Страницы",
                 "url_name": "dashboard:page-list",
             },
-            {
-                "label": "Шаблоны Email",
-                "url_name": "dashboard:email-list",
-            },
+            # {
+            #     "label": "Шаблоны Email",
+            #     "url_name": "dashboard:email-list",
+            # },
             # {
             #     "label": "Шаблоны SMS",
             #     "url_name": "dashboard:sms-list",

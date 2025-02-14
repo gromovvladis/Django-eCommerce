@@ -18,6 +18,17 @@ from oscar.apps.catalogue.serializers import (
     ProductGroupsSerializer,
     ProductsSerializer,
 )
+from oscar.apps.crm.signals import (
+    update_site_stores,
+    update_site_terminals,
+    update_site_staffs,
+    update_site_groups,
+    update_site_products,
+    update_site_additionals,
+    send_evotor_categories,
+    send_evotor_products,
+    send_evotor_additionals,
+)
 
 logger = logging.getLogger("oscar.dashboard")
 
@@ -124,15 +135,16 @@ class CRMStoreListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_site_stores(
-            data_items, is_filtered
+        update_site_stores.send(
+            sender=self,
+            data_items=data_items,
+            is_filtered=is_filtered,
+            user_id=self.request.user.id,
         )
-
-        if success:
-            messages.success(self.request, msg)
-        else:
-            messages.error(self.request, msg)
-
+        messages.info(
+            self.request,
+            "Список магазинов обновляется! Это может занять некоторое время.",
+        )
         return redirect(self.url_redirect)
 
 
@@ -200,15 +212,16 @@ class CRMTerminalListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_site_terminals(
-            data_items, is_filtered
+        update_site_terminals.send(
+            sender=self,
+            data_items=data_items,
+            is_filtered=is_filtered,
+            user_id=self.request.user.id,
         )
-
-        if success:
-            messages.success(self.request, msg)
-        else:
-            messages.error(self.request, msg)
-
+        messages.info(
+            self.request,
+            "Список терминалов обновляется! Это может занять некоторое время.",
+        )
         return redirect(self.url_redirect)
 
 
@@ -295,15 +308,16 @@ class CRMStaffListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_site_staffs(
-            data_items, is_filtered
+        update_site_staffs.send(
+            sender=self,
+            data_items=data_items,
+            is_filtered=is_filtered,
+            user_id=self.request.user.id,
         )
-
-        if success:
-            messages.success(self.request, msg)
-        else:
-            messages.error(self.request, msg)
-
+        messages.info(
+            self.request,
+            "Список сотрудников обновляется! Это может занять некоторое время.",
+        )
         return redirect(self.url_redirect)
 
 
@@ -407,33 +421,29 @@ class CRMGroupsListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_site_groups(
-            data_items, is_filtered
+        update_site_groups.send(
+            sender=self,
+            data_items=data_items,
+            is_filtered=is_filtered,
+            user_id=self.request.user.id,
         )
-
-        if success:
-            messages.success(self.request, msg)
-        else:
-            messages.error(self.request, msg)
-
+        messages.info(
+            self.request,
+            "Список категорий и товаров с вариациями обновляется! Это может занять некоторое время.",
+        )
         return redirect(self.url_redirect)
 
     def send_models(self, is_filtered):
-        models = super().send_models(is_filtered)
-        try:
-            error = EvatorCloud().update_or_create_evotor_groups(models)
-        except Exception as e:
-            error = (
-                "Ошибка при отправке созданной / измененной категории или модификации в Эвотор. Ошибка %s",
-                e,
-            )
-            logger.error(error)
-
-        if error:
-            messages.error(self.request, error)
-        else:
-            messages.success(self.request, "Товары успешно отправлены в Эвотор.")
-
+        category_ids = super().send_models(is_filtered)
+        send_evotor_categories.send(
+            sender=self,
+            category_ids=category_ids,
+            user_id=self.request.user.id,
+        )
+        messages.info(
+            self.request,
+            "Список категорий и товаров с вариациями отправляется в Эвотор! Это может занять некоторое время.",
+        )
         return redirect(self.url_redirect)
 
     def get_context_data(self, **kwargs):
@@ -614,33 +624,29 @@ class CRMProductListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_site_products(
-            data_items, is_filtered
+        update_site_products.send(
+            sender=self,
+            data_items=data_items,
+            is_filtered=is_filtered,
+            user_id=self.request.user.id,
         )
-
-        if success:
-            messages.success(self.request, msg)
-        else:
-            messages.error(self.request, msg)
-
+        messages.info(
+            self.request,
+            "Список товаров обновляется! Это может занять некоторое время.",
+        )
         return self.redirect_with_get_params(self.url_redirect, self.request)
 
     def send_models(self, is_filtered):
-        models = super().send_models(is_filtered)
-        try:
-            error = EvatorCloud().update_or_create_evotor_products(models)
-        except Exception as e:
-            error = (
-                "Ошибка при отправке созданного / измененного товара в Эвотор. Ошибка %s",
-                e,
-            )
-            logger.error(error)
-
-        if error:
-            messages.error(self.request, error)
-        else:
-            messages.success(self.request, "Товары успешно отправлены в Эвотор.")
-
+        product_ids = super().send_models(is_filtered)
+        send_evotor_products.send(
+            sender=self,
+            product_ids=product_ids,
+            user_id=self.request.user.id,
+        )
+        messages.info(
+            self.request,
+            "Список категорий и товаров с вариациями отправляется в Эвотор! Это может занять некоторое время.",
+        )
         return redirect(self.url_redirect)
 
     def get_context_data(self, **kwargs):
@@ -773,32 +779,29 @@ class CRMAdditionalListView(CRMTablesMixin):
             return self.queryset
 
     def update_models(self, data_items, is_filtered):
-        msg, success = EvatorCloud().create_or_update_site_additionals(
-            data_items, is_filtered
+        update_site_additionals.send(
+            sender=self,
+            data_items=data_items,
+            is_filtered=is_filtered,
+            user_id=self.request.user.id,
         )
-
-        if success:
-            messages.success(self.request, msg)
-        else:
-            messages.error(self.request, msg)
-
+        messages.info(
+            self.request,
+            "Список дополнительных товаров обновляется! Это может занять некоторое время.",
+        )
         return self.redirect_with_get_params(self.url_redirect, self.request)
 
     def send_models(self, is_filtered):
-        models = super().send_models(is_filtered)
-        try:
-            error = EvatorCloud().update_or_create_evotor_additionals(models)
-        except Exception as e:
-            error = "Ошибка при отправке дополнительных товаров в Эвотор. Ошибка %s", e
-            logger.error(error)
-
-        if error:
-            messages.error(self.request, error)
-        else:
-            messages.success(
-                self.request, "Дополнительные товары успешно отправлены в Эвотор."
-            )
-
+        additional_ids = super().send_models(is_filtered)
+        send_evotor_products.send(
+            sender=self,
+            additional_ids=additional_ids,
+            user_id=self.request.user.id,
+        )
+        messages.info(
+            self.request,
+            "Список дополнительных товаров отправляется в Эвотор! Это может занять некоторое время.",
+        )
         return redirect(self.url_redirect)
 
     def get_context_data(self, **kwargs):

@@ -27,49 +27,43 @@
 {% block tabcontent %}
   <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
     <div class="order__title d-flex justify-space-between mb-2 align-center">
-      <div class="d-flex justify-space-between">
-        <div>
-          <div class="d-flex align-center">
-            <div class="notification-list-item__status notification-list-item__status{% if notification.status == 'Canceled' %}--canceled{% elif notification.status == 'Success' %}--success{% elif notification.status == 'Warning' %}--warning{% else %}--info{% endif %} mr-1"></div>
-            <h1>
-              {% if notification.subject %}
-                {{ notification.subject|safe }}
-              {% endif %}
-            </h1>
-          </div>
-        </div>
+      <div class="d-flex justify-space-between align-center">
+        <div class="notification-list-item__status notification-list-item__status{% if notification.status == 'Canceled' %}--canceled{% elif notification.status == 'Success' %}--success{% elif notification.status == 'Warning' %}--warning{% else %}--info{% endif %} mr-1"></div>
+        <h1>
+          {% if notification.subject %}
+            {{ notification.subject|safe }}
+          {% endif %}
+        </h1>
       </div>
     </div>
-    <div class="fill-width mb-2">
-      <div class="cabinet-orders fill-width grow-1">
-        <div class="cabinet__promo-wrapper fill-width d-flex flex-column">
-          <ul class="orders-list d-flex flex-column fill-width fill-width">
-            <li class="orders-list-item fill-width" data-id="profile-notifications-item">
-              <div class="notification-list-item fill-width">
-                <div class="d-flex flex-column fill-width py-1">
-                  <div class="d-flex justify-space-between align-center fill-width">
-                    <div class="d-flex flex-column">
-                      {% if notification.description %}
-                        <span class="orders-list-item__details mt-1">{{ notification.description|safe }}</span>
-                      {% endif %}
-                    </div>
-                  </div>
-                  {% if notification.body %}
-                    <div>{{ notification.body|safe }}</div>
-                  {% endif %}
-                  <div class="d-flex justify-space-between align-center fill-width pt-2">
-                    <div class="orders-list-item__status d-flex align-center text--grey">
-                      {% if notification.sender %}
-                        {{ notification.sender }}
-                      {% endif %}
-                    </div>
-                    <span class="orders-list-item__date text--grey">{{ notification.date_sent }}</span>
+    <div class="cabinet-orders fill-width grow-1 mb-2">
+      <div class="cabinet__promo-wrapper fill-width d-flex flex-column">
+        <ul class="orders-list d-flex flex-column fill-width fill-width">
+          <li class="orders-list-item fill-width" data-id="profile-notifications-item">
+            <div class="notification-list-item fill-width">
+              <div class="d-flex flex-column fill-width py-1">
+                <div class="d-flex justify-space-between align-center fill-width">
+                  <div class="d-flex flex-column">
+                    {% if notification.description %}
+                      <span class="orders-list-item__details mt-1">{{ notification.description|safe }}</span>
+                    {% endif %}
                   </div>
                 </div>
+                {% if notification.body %}
+                  <div>{{ notification.body|safe }}</div>
+                {% endif %}
+                <div class="d-flex justify-space-between align-center fill-width pt-2">
+                  <div class="orders-list-item__status d-flex align-center text--grey">
+                    {% if notification.sender %}
+                      {{ notification.sender }}
+                    {% endif %}
+                  </div>
+                  <span class="orders-list-item__date text--grey">{{ notification.date_sent }}</span>
+                </div>
               </div>
-            </li>
-          </ul>
-        </div>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </div>

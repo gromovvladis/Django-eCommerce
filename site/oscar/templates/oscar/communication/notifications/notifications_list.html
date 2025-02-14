@@ -42,40 +42,38 @@
       </div>
     </div>
     {% if notifications %}
-      <form action="{% url 'customer:notifications-update' %}" method="post" class="fill-width mb-2" data-id="profile-notifications-form">
-        <div class="cabinet-orders fill-width grow-1">
-          <div class="cabinet__promo-wrapper fill-width d-flex flex-column">
-            <ul class="orders-list d-flex flex-column fill-width fill-width">
-              {% for notification in notifications %}
-                <li class="orders-list-item fill-width" data-id="profile-notifications-item">
-                  <div class="notification-list-item fill-width">
-                    <div class="d-flex flex-column fill-width py-3">
-                      <div class="d-flex justify-space-between align-start fill-width">
-                        <a href="{% url 'customer:notifications-detail' pk=notification.pk %}" class="d-flex flex-column">
-                          <div class="d-flex align-center">
-                            <div class="notification-list-item__status notification-list-item__status{% if notification.status == 'Canceled' %}--canceled{% elif notification.status == 'Success' %}--success{% elif notification.status == 'Warning' %}--warning{% else %}--info{% endif %} mr-1"></div>
-                            <span class="orders-list-item__title">{{ notification.subject|safe }}</span>
-                          </div>
-                          {% if notification.description %}
-                            <span class="orders-list-item__details mt-1">{{ notification.description|safe }}</span>
-                          {% endif %}
-                        </a>
-                        {% if list_type == 'inbox' %}
-                          <button type="button" data-id="notification-btn" class="pr-0 pt-0 pl-1 pb-1" data-behaviours="archive" data-notification="{{ notification.id }}">{% icon file_name='interface/close' size=22 stroke='#c50000' %}</button>
-                        {% else %}
-                          <button type="button" data-id="notification-btn" class="pr-0 pt-0 pl-1 pb-1" data-behaviours="delete" data-notification="{{ notification.id }}">{% icon file_name='interface/empty' size=20 stroke='#c50000' %}</button>
+      <form action="{% url 'customer:notifications-update' %}" method="post" class="cabinet-orders fill-width grow-1 mb-2" data-id="profile-notifications-form">
+        <div class="cabinet__promo-wrapper fill-width">
+          <ul class="orders-list d-flex flex-column fill-width fill-width">
+            {% for notification in notifications %}
+              <li class="orders-list-item fill-width" data-id="profile-notifications-item">
+                <div class="notification-list-item fill-width">
+                  <div class="d-flex flex-column fill-width py-3">
+                    <div class="d-flex justify-space-between align-start fill-width">
+                      <a href="{% url 'customer:notifications-detail' pk=notification.pk %}" class="d-flex flex-column">
+                        <div class="d-flex align-center">
+                          <div class="notification-list-item__status notification-list-item__status{% if notification.status == 'Canceled' %}--canceled{% elif notification.status == 'Success' %}--success{% elif notification.status == 'Warning' %}--warning{% else %}--info{% endif %} mr-1"></div>
+                          <span class="orders-list-item__title">{{ notification.subject|safe }}</span>
+                        </div>
+                        {% if notification.description %}
+                          <span class="orders-list-item__details mt-1">{{ notification.description|safe }}</span>
                         {% endif %}
-                      </div>
-                      <div class="d-flex justify-space-between align-start fill-width pt-2">
-                        <div class="orders-list-item__status d-flex align-center"></div>
-                        <span class="orders-list-item__date text--grey">{{ notification.date_sent }}</span>
-                      </div>
+                      </a>
+                      {% if list_type == 'inbox' %}
+                        <button type="button" data-id="notification-btn" class="pr-0 pt-0 pl-1 pb-1" data-behaviours="archive" data-notification="{{ notification.id }}">{% icon file_name='interface/close' size=22 stroke='#c50000' %}</button>
+                      {% else %}
+                        <button type="button" data-id="notification-btn" class="pr-0 pt-0 pl-1 pb-1" data-behaviours="delete" data-notification="{{ notification.id }}">{% icon file_name='interface/empty' size=20 stroke='#c50000' %}</button>
+                      {% endif %}
+                    </div>
+                    <div class="d-flex justify-space-between align-start fill-width pt-2">
+                      <div class="orders-list-item__status d-flex align-center"></div>
+                      <span class="orders-list-item__date text--grey">{{ notification.date_sent }}</span>
                     </div>
                   </div>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
         </div>
       </form>
       <p data-id="notification-empty"></p>

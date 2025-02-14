@@ -27,7 +27,6 @@ from oscar.apps.store.serializers import (
     StoreCashTransactionSerializer,
     StockRecordOperationSerializer,
 )
-from .tasks import process_bulk_task
 
 CRMEvent = get_model("crm", "CRMEvent")
 CRMBulk = get_model("crm", "CRMBulk")
@@ -149,6 +148,8 @@ class EvotorAPICloud:
         return bulk
 
     def create_periodic_task(self, bulk):
+        from .tasks import process_bulk_task
+
         process_bulk_task.apply_async(
             kwargs={"bulk_evotor_id": bulk.evotor_id}, countdown=5
         )
@@ -907,6 +908,24 @@ class EvotorGroupClient(EvotorAPICloud):
 
         return ", ".join(errors)
 
+    # ========= Задачи celery
+
+    def update_or_create_evotor_category_by_id(self, category_id):
+        try:
+            category = Category.objects.get(evotor_id=category_id)
+            return self.update_or_create_evotor_group(category)
+        except Exception as e:
+            logger.error(
+                f"Ошибка при выполнении update_or_create_evotor_category_by_id {e}"
+            )
+
+    def delete_evotor_category_by_id(self, category_id):
+        try:
+            category = Category.objects.get(evotor_id=category_id)
+            return self.delete_evotor_group(category)
+        except Exception as e:
+            logger.error(f"Ошибка при выполнении delete_evotor_category_by_id {e}")
+
     # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
     def create_or_update_site_groups(self, groups_json, is_filtered=False):
@@ -1397,7 +1416,6 @@ class EvotorProductClient(EvotorGroupClient):
         for product in products:
             if product.is_parent:
                 groups_to_delete.append(product)
-                # подразумевается, что удаление модификации влечет удаление дочерних элементов
             else:
                 product_id = product.evotor_id
                 if product_id:
@@ -1415,6 +1433,42 @@ class EvotorProductClient(EvotorGroupClient):
             self.handle_response_errors(response, errors)
 
         return ", ".join(errors)
+
+    # ========= Задачи celery
+
+    def delete_evotor_product_by_id(self, product_id):
+        try:
+            product = Product.objects.get(evotor_id=product_id)
+            return self.delete_evotor_product(product)
+        except Exception as e:
+            logger.error(
+                f"Ошибка при выполнении delete_evotor_product_by_store_by_id {e}"
+            )
+
+    def delete_evotor_product_by_store_by_id(self, product_id, store_id):
+        try:
+            product = Product.objects.get(evotor_id=product_id)
+            return self.delete_evotor_product_by_store(product, store_id)
+        except Exception as e:
+            logger.error(
+                f"Ошибка при выполнении delete_evotor_product_by_store_by_id {e}"
+            )
+
+    def update_or_create_evotor_product_by_id(self, product_id):
+        try:
+            product = Product.objects.get(evotor_id=product_id)
+            return self.update_or_create_evotor_product(product)
+        except Exception as e:
+            logger.error(
+                f"Ошибка при выполнении update_or_create_evotor_product_by_id {e}"
+            )
+
+    def update_evotor_stockrecord_by_id(self, product_id):
+        try:
+            product = Product.objects.get(evotor_id=product_id)
+            return self.update_evotor_stockrecord(product)
+        except Exception as e:
+            logger.error(f"Ошибка при выполнении update_evotor_stockrecord_by_id {e}")
 
     # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
@@ -1665,6 +1719,24 @@ class EvotorAdditionalClient(EvotorProductClient):
             self.handle_response_errors(response, errors)
 
         return ", ".join(errors)
+
+    # ========= Задачи celery
+
+    def update_or_create_evotor_additional_by_id(self, additional_id):
+        try:
+            additional = Additional.objects.get(evotor_id=additional_id)
+            return self.update_or_create_evotor_additional(additional)
+        except Exception as e:
+            logger.error(
+                f"Ошибка при выполнении update_or_create_evotor_additional_by_id {e}"
+            )
+
+    def delete_evotor_additional_by_id(self, additional_id):
+        try:
+            additional = Additional.objects.get(evotor_id=additional_id)
+            return self.delete_evotor_additional(additional)
+        except Exception as e:
+            logger.error(f"Ошибка при выполнении delete_evotor_additional_by_id {e}")
 
     # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 

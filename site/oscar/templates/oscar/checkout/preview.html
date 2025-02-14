@@ -38,102 +38,100 @@
 {% endblock %}
 
 {% block content %}
-  <div class="d-flex flex-column mt-md-4">
-    <div class="order d-flex flex-column flex-md-row align-md-start">
-      <div class="order__wrapper d-flex flex-column">
-        <div class="order__info-wrapper d-flex flex-column fill-width">
-          <div class="order__title d-flex mb-1 justify-start align-center">
-            <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
-              <use xlink:href="#svg-order-cancel"></use>
-            </svg>
-            <h1>Oшибка!</h1>
-          </div>
-          <span class="mb-3 info-message text--red">{{ error }}</span>
-          {% block shipping_info %}
-            <div class="checkout__datail pb-2">
-              {% if shipping_address %}
-                <div class="order__subtitle mb-1 mb-sm-2">
-                  <h2>Адрес доставки</h2>
-                </div>
-                <address class="checkout__detail-text mb-2">
-                  {% for field in shipping_address.active_address_fields_and_labels %}
-                    {{ field.label }}: {{ field.value }}{% if not forloop.last %},{% endif %}
-                    <br />
-                  {% endfor %}
-                </address>
-                {% if shipping_address.notes %}
-                  <div class="checkout__detail-text mb-1">
-                    <span>Инструкции курьеру:</span>
-                    <span>{{ shipping_address.notes }}</span>
-                  </div>
-                {% endif %}
-                {% if order_note %}
-                  <div class="checkout__detail-text mb-2">
-                    <span>Коментарий к заказу:</span>
-                    <span>{{ order_note }}</span>
-                  </div>
-                {% endif %}
-              {% else %}
-                <div class="order__subtitle mb-1 mb-sm-2">
-                  <h2>Адрес самовывоза</h2>
-                </div>
-                <a href="{% url 'address:pickup-address' %}" class="checkout__detail-text mb-2"><address>{{ order.store.primary_address }}</address></a>
-              {% endif %}
-            </div>
-            <div class="checkout__datail">
+  <div class="order d-flex flex-column flex-md-row align-md-start mt-md-4">
+    <div class="order__wrapper d-flex flex-column">
+      <div class="order__info-wrapper d-flex flex-column fill-width">
+        <div class="order__title d-flex mb-1 justify-start align-center">
+          <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
+            <use xlink:href="#svg-order-cancel"></use>
+          </svg>
+          <h1>Oшибка!</h1>
+        </div>
+        <span class="mb-3 info-message text--red">{{ error }}</span>
+        {% block shipping_info %}
+          <div class="checkout__datail pb-2">
+            {% if shipping_address %}
               <div class="order__subtitle mb-1 mb-sm-2">
-                <h2>Телефон для связи</h2>
+                <h2>Адрес доставки</h2>
               </div>
-              <div class="mb-2 checkout__detail-text">
-                <p>{{ request.user.username }}</p>
+              <address class="checkout__detail-text mb-2">
+                {% for field in shipping_address.active_address_fields_and_labels %}
+                  {{ field.label }}: {{ field.value }}{% if not forloop.last %},{% endif %}
+                  <br />
+                {% endfor %}
+              </address>
+              {% if shipping_address.notes %}
+                <div class="checkout__detail-text mb-1">
+                  <span>Инструкции курьеру:</span>
+                  <span>{{ shipping_address.notes }}</span>
+                </div>
+              {% endif %}
+              {% if order_note %}
+                <div class="checkout__detail-text mb-2">
+                  <span>Коментарий к заказу:</span>
+                  <span>{{ order_note }}</span>
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="order__subtitle mb-1 mb-sm-2">
+                <h2>Адрес самовывоза</h2>
               </div>
-            </div>
-          {% endblock %}
-          {% block payment_info %}
+              <a href="{% url 'address:pickup-address' %}" class="checkout__detail-text mb-2"><address>{{ order.store.primary_address }}</address></a>
+            {% endif %}
+          </div>
+          <div class="checkout__datail">
             <div class="order__subtitle mb-1 mb-sm-2">
-              <h2>Оплата</h2>
+              <h2>Телефон для связи</h2>
             </div>
-            <div class="checkout__detail-text mr-2">
-              <span>Способ оплаты:</span>
-              <span>
-                {% if payment_method == 'CASH' %}
-                  Наличные
-                {% elif payment_method == 'SBP' %}
-                  СБП (Система быстрых платежей)
-                {% elif payment_method == 'ONLINECARD' %}
-                  Картой Онлайн
-                {% elif payment_method == 'ELECTRON' %}
-                  Картой в магазине
-                {% else %}
-                  Неизвестный способ оплаты
-                {% endif %}
-              </span>
+            <div class="mb-2 checkout__detail-text">
+              <p>{{ request.user.username }}</p>
             </div>
-          {% endblock %}
-        </div>
+          </div>
+        {% endblock %}
+        {% block payment_info %}
+          <div class="order__subtitle mb-1 mb-sm-2">
+            <h2>Оплата</h2>
+          </div>
+          <div class="checkout__detail-text mr-2">
+            <span>Способ оплаты:</span>
+            <span>
+              {% if payment_method == 'CASH' %}
+                Наличные
+              {% elif payment_method == 'SBP' %}
+                СБП (Система быстрых платежей)
+              {% elif payment_method == 'ONLINECARD' %}
+                Картой Онлайн
+              {% elif payment_method == 'ELECTRON' %}
+                Картой в магазине
+              {% else %}
+                Неизвестный способ оплаты
+              {% endif %}
+            </span>
+          </div>
+        {% endblock %}
       </div>
-      <div class="order__info ml-md-4">
-        <div class="order__info-wrapper pt-4">
-          <p class="order__title d-none d-md-block mb-2">Ваш заказ</p>
-          <div class="order__subtitle d-md-none mb-1 mb-sm-2">
-            <h2>Ваш заказ</h2>
-          </div>
-          <div class="order__subtitle mb-1 mb-sm-1 d-none d-md-block">
-            <h2>Состав заказа</h2>
-          </div>
-          {% block order_contents %}
-            <div class="order-checkout__items">
-              {% for line in submission.basket.all_lines %}
-                {% purchase_info_for_line request line as session %}
-                <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br />
-              {% endfor %}
-            </div>
-          {% endblock %}
-          <div id="checkout_totals">
-            {% include 'oscar/checkout/checkout_totals.html' with order_total=submission.order_total %}
-          </div>
-          <a href="{{ support_link }}" class="button fill-width button--main justify-center shrink mt-3">Связаться с поддержкой</a>
+    </div>
+    <div class="order__info ml-md-4">
+      <div class="order__info-wrapper pt-4">
+        <p class="order__title d-none d-md-block mb-2">Ваш заказ</p>
+        <div class="order__subtitle d-md-none mb-1 mb-sm-2">
+          <h2>Ваш заказ</h2>
         </div>
+        <div class="order__subtitle mb-1 mb-sm-1 d-none d-md-block">
+          <h2>Состав заказа</h2>
+        </div>
+        {% block order_contents %}
+          <div class="order-checkout__items">
+            {% for line in submission.basket.all_lines %}
+              {% purchase_info_for_line request line as session %}
+              <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br />
+            {% endfor %}
+          </div>
+        {% endblock %}
+        <div id="checkout_totals">
+          {% include 'oscar/checkout/checkout_totals.html' with order_total=submission.order_total %}
+        </div>
+        <a href="{{ support_link }}" class="button fill-width button--main justify-center shrink mt-3">Связаться с поддержкой</a>
       </div>
     </div>
   </div>

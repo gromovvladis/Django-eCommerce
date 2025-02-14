@@ -13,6 +13,8 @@ class CRMConfig(OscarConfig):
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
+        from . import receivers
+
         super().ready()
 
         self.crm_api_store_view = get_class("crm.views", "CRMStoreEndpointView")

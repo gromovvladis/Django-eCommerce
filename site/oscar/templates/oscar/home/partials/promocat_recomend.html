@@ -19,27 +19,23 @@
               <div class="home-nav--item home-nav--width swiper-slide">
                 <a href="{{ product.get_absolute_url }}" class="dish-order d-flex fill-width fill-height mb-1 dish-order--info" aria-label="{{ product.get_title }}">
                   <div class="dish-order__picture">
-                    <div class="d-block" data-id="dish-order-image-link">
-                      <div class="dish-image fill-width pos-relative">
-                        <div class="image">
-                          <div class="image__inner" style="padding-bottom: 100%;">
-                            {% with image=product.primary_image %}
-                              {% oscar_thumbnail image.original 'x450' upscale=False as thumb %}
-                              <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0" />
-                            {% endwith %}
-                          </div>
+                    <div class="dish-image d-block fill-width pos-relative" data-id="dish-order-image-link">
+                      <div class="image">
+                        <div class="image__inner" style="padding-bottom: 100%;">
+                          {% with image=product.primary_image %}
+                            {% oscar_thumbnail image.original 'x450' upscale=False as thumb %}
+                            <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0" />
+                          {% endwith %}
                         </div>
                       </div>
                     </div>
                   </div>
                   <div class="dish-order__content d-flex flex-column fill-width">
-                    <div class="d-flex align-start fill-width">
-                      <div class="dish-order__name-wrapper d-flex flex-column fill-width">
-                        <span class="dish-order__name mb-1" data-id="dish-order-link">{{ product.get_title }}</span>
-                        {% if product.short_description %}
-                          <span class="short-description">{{ product.short_description }}</span>
-                        {% endif %}
-                      </div>
+                    <div class="dish-order__name-wrapper d-flex flex-column align-start fill-width">
+                      <span class="dish-order__name mb-1" data-id="dish-order-link">{{ product.get_title }}</span>
+                      {% if product.short_description %}
+                        <span class="short-description">{{ product.short_description }}</span>
+                      {% endif %}
                     </div>
                     <div role="separator" class="spacer"></div>
                     {% purchase_info_for_product request product as session %}

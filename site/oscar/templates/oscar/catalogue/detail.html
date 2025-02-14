@@ -68,7 +68,7 @@
           {% endcache %}
           {% include 'oscar/catalogue/partials/add_to_wishlist.html' %}
         </div>
-        <div class="dish-page__content d-flex flex-column shrink px-2 mt-2 px-sm-0 mt-sm-0 pl-md-2">
+        <div class="dish-page__content shrink px-2 mt-2 px-sm-0 mt-sm-0 pl-md-2">
           <div class="dish-page__content-wrapper d-flex flex-column fill-width fill-height">
             {% cache 3600 product_detail_desc product %}
             <header class="dish-page__header d-flex shrink align-end align-md-end pt-sm-1">
@@ -150,7 +150,7 @@
                 <span data-id="add-to-cart-errors" class="add-to-cart-error"></span>
               </div>
             {% else %}
-              <div class="dish-page__button pos-fixed pos-md-relative d-flex flex-column pt-2 px-2 px-md-0">
+              <div class="dish-page__button pos-fixed pos-md-relative pt-2 px-2 px-md-0">
                 <span class="button fill-width button--main button--main--disabled justify-center shrink"><span class="button__wrapper">Временно недоступно</span></span>
               </div>
             {% endif %}

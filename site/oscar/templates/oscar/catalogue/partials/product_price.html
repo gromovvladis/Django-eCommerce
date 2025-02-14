@@ -6,12 +6,12 @@
     <span class="prices d-flex flex-column align-start"><span class="prices__price no-wrap">от {{ session.price.money|currency:session.price.currency }}</span></span>
   </div>
 {% else %}
-  <span class="prices d-flex flex-column align-start mr-1">
+  <div class="prices d-flex flex-column align-start mr-1">
     {% if session.price.old_price %}
       <span class="dish__mobile-total-price prices__price shrink no-wrap py-1">{{ session.price.money|currency:session.price.currency }}</span>
       <span class="dish__mobile-total-label dish__profit d-flex align-center mt-05">Цена по акции</span>
     {% else %}
       <span class="prices__price no-wrap py-1">{{ session.price.money|currency:session.price.currency }}</span>
     {% endif %}
-  </span>
+  </div>
 {% endif %}

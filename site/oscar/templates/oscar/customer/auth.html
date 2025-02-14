@@ -49,28 +49,26 @@
           <form id="auth_form" action="{{ request.get_full_path }}" method="post" class="card card-body bg-light">
             {% include 'oscar/partials/form_auth.html' with form=auth_form %}
             <div class="d-flex flex-column fill-height mt-3 mt-sm-2">
-              <div>
-                <div class="modal__submit flex-column align-center px-2 px-sm-0 py-2 py-sm-0">
-                  <button id="sms_form_btn" type="submit" name="sms" disabled="disabled" data-id="auth-submit-btn" class="button fill-width button--main justify-center shrink"><span class="button__wrapper"><span class="button__value">Отправить код</span></span></button>
-                  <button id="auth_form_btn" type="submit" name="auth" disabled="disabled" data-id="auth-submit-btn" class="fill-width d-none justify-center shrink mt-2"><span class="button__wrapper"><span class="button__value">Подтвердить и войти</span></span></button>
-                </div>
-                <div class="d-flex justify-center mt-sm-3">
-                  <div class="auth-agreement d-flex flex-column fill-width">
-                    <p class="auth-agreement__title filll-width">Нажимая на кнопку «Отправить код» вы даете своё согласие:</p>
-                    <ul class="d-flex flex-column align-center fill-width mt-1">
-                      <li class="fill-width">
-                        <span data-id="auth-privacy-btn" class="checkbox checkbox--active">
-                          <span class="auth-agreement__item-title checkbox__name">
-                            с
-                            <a href="#" class="auth-agreement__link">политикой конфиденциальности</a>,
-                            <a href="#" class="auth-agreement__link">согласием на обработку ПД</a>
-                            и
-                            <a href="#" class="auth-agreement__link">публичной офертой</a>
-                          </span>
+              <div class="modal__submit flex-column align-center px-2 px-sm-0 py-2 py-sm-0">
+                <button id="sms_form_btn" type="submit" name="sms" disabled="disabled" data-id="auth-submit-btn" class="button fill-width button--main justify-center shrink"><span class="button__wrapper"><span class="button__value">Отправить код</span></span></button>
+                <button id="auth_form_btn" type="submit" name="auth" disabled="disabled" data-id="auth-submit-btn" class="fill-width d-none justify-center shrink mt-2"><span class="button__wrapper"><span class="button__value">Подтвердить и войти</span></span></button>
+              </div>
+              <div class="d-flex justify-center mt-sm-3">
+                <div class="auth-agreement d-flex flex-column fill-width">
+                  <p class="auth-agreement__title filll-width">Нажимая на кнопку «Отправить код» вы даете своё согласие:</p>
+                  <ul class="d-flex flex-column align-center fill-width mt-1">
+                    <li class="fill-width">
+                      <span data-id="auth-privacy-btn" class="checkbox checkbox--active">
+                        <span class="auth-agreement__item-title checkbox__name">
+                          с
+                          <a href="#" class="auth-agreement__link">политикой конфиденциальности</a>,
+                          <a href="#" class="auth-agreement__link">согласием на обработку ПД</a>
+                          и
+                          <a href="#" class="auth-agreement__link">публичной офертой</a>
                         </span>
-                      </li>
-                    </ul>
-                  </div>
+                      </span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>

@@ -96,12 +96,10 @@
                 </div>
               </div>
               {% if product %}
-                <div class="dish-order__toppings d-flex fill-width">
-                  <div class="d-flex flex-wrap" data-id="dish-order-toppings">
-                    <span class="d-flex">{{ line.variants }}</span>
-                    <span class="d-flex">{{ line.options }}</span>
-                    <span class="d-flex">{{ line.additions }}</span>
-                  </div>
+                <div class="dish-order__toppings d-flex fill-width flex-wrap" data-id="dish-order-toppings">
+                  <span>{{ line.variants }}</span>
+                  <span>{{ line.options }}</span>
+                  <span>{{ line.additions }}</span>
                 </div>
               {% endif %}
               {% if order.status == 'Завершён' %}

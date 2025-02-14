@@ -19,7 +19,7 @@
           {% include 'oscar/basket/partials/upsell_messages.html' with editable=1 %}
         </div>
         {% block basket_form_main %}
-          <form data-id="basket-formset" method="post" class="cart-form d-flex flex-column fill-width">
+          <form data-id="basket-formset" method="post" class="cart-form">
             <div class="cart-items d-flex flex-column fill-width shrink">
               {{ formset.management_form }}
               {% for form in formset %}
@@ -40,16 +40,16 @@
                         </a>
                       </div>
                       <div class="dish-order__content d-flex flex-column fill-width ml-1">
-                        <div class="dish-order__title s d-flex align-start fill-width">
+                        <div class="dish-order__title s d-flex align-start">
                           <div class="dish-order__name-wrapper d-flex fill-width">
                             <a href="{{ product.get_absolute_url }}" aria-current="page" class="dish-order__name router-link-exact-active router-link-active" data-id="dish-order-link">{{ line.name }}</a>
                           </div>
                           <button type="button" data-id="dish-order-delete-link" class="dish-order__delete d-flex shrink pd-0">{% icon file_name='interface/close' size=22 stroke='#999' %}</button>
                         </div>
                         <div class="dish-order__toppings d-flex flex-column {% if not line.has_topping %}d-none{% endif %}" data-id="dish-order-toppings">
-                          <span class="d-flex">{{ line.variants }}</span>
-                          <span class="d-flex">{{ line.options }}</span>
-                          <span class="d-flex">{{ line.additions }}</span>
+                          <span>{{ line.variants }}</span>
+                          <span>{{ line.options }}</span>
+                          <span>{{ line.additions }}</span>
                         </div>
                         {% if line.warning %}
                           <div class="mb-1">
