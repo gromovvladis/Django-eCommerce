@@ -1,4 +1,15 @@
-А="breadcrumb">
+{% extends 'oscar/dashboard/layout.html' %}
+{% load i18n %}
+{% load currency_filters %}
+
+{% block body_class %}{{ block.super }} users{% endblock %}
+
+{% block title %}
+    {% trans "Product alerts" %} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
             <li class="breadcrumb-item active" aria-current="page">{% trans "Product alerts" %}</li>
