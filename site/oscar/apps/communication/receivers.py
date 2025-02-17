@@ -38,7 +38,7 @@ def notify_about_new_order(sender, view, **kwargs):
         "staff_url": order.get_staff_url(),
     }
 
-    if not settings.DEBUG:
+    if settings.CELERY:
         _send_site_notification_new_order_to_customer.delay(ctx)
     else:
         _send_site_notification_new_order_to_customer(ctx)
@@ -59,7 +59,7 @@ def notify_customer_about_order_status(sender, order, **kwargs):
             "order_id": order.id,
         }
 
-        if not settings.DEBUG:
+        if settings.CELERY:
             _send_site_notification_order_status_to_customer.delay(ctx)
             _send_sms_notification_order_status_to_customer.delay(ctx)
         else:
@@ -94,7 +94,7 @@ def active_order_created(sender, order, **kwargs):
         "staff_url": order.get_staff_url(),
     }
 
-    if not settings.DEBUG:
+    if settings.CELERY:
         _send_order_to_evotor.delay(order_json)
         _send_site_notification_new_order_to_staff.delay(ctx)
         _send_push_notification_new_order_to_staff.delay(ctx)

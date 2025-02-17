@@ -24,7 +24,7 @@ def send_push_notification(subscription, title, body, icon=None, url=None):
             "auth": subscription.auth,
         },
     }
-    if not settings.DEBUG:
+    if settings.CELERY:
         _send_push_notification.delay(subscription_info, payload)
     else:
         _send_push_notification(subscription_info, payload)

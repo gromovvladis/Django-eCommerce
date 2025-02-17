@@ -263,7 +263,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Send an sms to this user.
         """
-        if not settings.DEBUG:
+        if settings.CELERY:
             return send_sms_async.delay(message)
         else:
             return send_sms_async(message)

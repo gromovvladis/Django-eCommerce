@@ -18,6 +18,7 @@ location = lambda x: os.path.join(
 # =============
 
 DEBUG = config("DEBUG", default=False, cast=bool)
+CELERY = config("CELERY", default=False, cast=bool)
 INTERNAL_IPS = ['127.0.0.1', '::1']
 
 # =============

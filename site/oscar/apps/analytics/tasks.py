@@ -61,10 +61,10 @@ def record_products_in_order_task(order_data):
             for product_id, line_quantity in order_data["lines"]
         ]
         for task in updates:
-            if settings.DEBUG:
-                task()
-            else:
+            if settings.CELERY:
                 task.delay()
+            else:
+                task()
     except Exception as e:
         logger.error(
             f"{e} при записи продуктов в заказе пользователя (date_placed={order_data['date_placed']})"
