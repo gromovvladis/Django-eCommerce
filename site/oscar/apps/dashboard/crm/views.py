@@ -1,10 +1,9 @@
 import logging
+from itertools import chain
 from datetime import datetime
 
 from django.contrib import messages
-from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import View
 from django.db.models import Count, Max, Min, Case, When, DecimalField, BooleanField, Q
 from django_tables2 import SingleTableView
 
@@ -27,6 +26,7 @@ from oscar.apps.crm.signals import (
     update_site_additionals,
     send_evotor_categories,
     send_evotor_products,
+    send_evotor_additionals,
 )
 
 logger = logging.getLogger("oscar.dashboard")
@@ -85,61 +85,41 @@ class CRMStoreListView(CRMTablesMixin):
     url_redirect = reverse_lazy("dashboard:crm-stores")
 
     def get_json(self):
+        """Получает JSON-данные от EvatorCloud"""
         return EvatorCloud().get_stores()
 
-    def get_queryset(self):
-        data_json = self.get_json()
-        error = data_json.get("error")
-        if error:
-            self.queryset = []
-            logger.error(f"Ошибка {error}")
-            messages.error(self.request, error)
-            return self.queryset
+    def process_items(self, data_items):
+        """Обрабатывает список магазинов, включая преобразование даты и проверку существования"""
+        evotor_ids = set()
+        for data_item in data_items:
+            evotor_ids.add(data_item["id"])
 
-        serializer = self.serializer(data=data_json)
-
-        if serializer.is_valid():
-            data_items = serializer.initial_data["items"]
-
-            for data_item in data_items:
-                evotor_id = data_item["id"]
-                data_item["updated_at"] = datetime.strptime(
-                    data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
-                )
-                name = data_item["name"]
-                address = data_item.get("address", "")
-                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
-
-                if model_instance:
-                    # Партнер существует: проверяем совпадение полей
-                    data_item["is_created"] = True
-                    # Проверка совпадения полей
-                    address_matches = address == getattr(model_instance, "address", "")
-                    data_item["is_valid"] = (
-                        model_instance.name == name and address_matches
-                    )
-                else:
-                    # Партнер не существует
-                    data_item["is_created"] = False
-                    data_item["is_valid"] = False
-
-            self.queryset = sorted(
-                data_items, key=lambda x: (x["is_created"], x["is_valid"])
+        stores = {
+            obj.evotor_id: obj for obj in Store.objects.filter(evotor_id__in=evotor_ids)
+        }
+        for data_item in data_items:
+            data_item["updated_at"] = datetime.strptime(
+                data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )
-            return self.queryset
-        else:
-            self.queryset = []
-            logger.error(f"Ошибка при сериализации данных {serializer.errors}")
-            messages.error(
-                self.request,
-                (f"Ошибка при сериализации данных {serializer.errors}"),
-            )
-            return self.queryset
+            evotor_id, name = data_item["id"], data_item["name"]
+            address = data_item.get("address", "")
 
-    def update_models(self, data_items, is_filtered):
+            model_instance = stores.get(evotor_id)
+
+            if model_instance:
+                data_item["is_created"] = True
+                data_item["is_valid"] = self._is_equal(
+                    model_instance.name, name
+                ) and self._is_equal(address, getattr(model_instance, "address", ""))
+            else:
+                data_item["is_created"], data_item["is_valid"] = False, False
+
+        return data_items
+
+    def update_models(self, serializer, is_filtered):
         update_site_stores.send(
             sender=self,
-            data_items=data_items,
+            data_items=serializer.initial_data["items"],
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -147,7 +127,6 @@ class CRMStoreListView(CRMTablesMixin):
             self.request,
             "Список магазинов обновляется! Это может занять некоторое время.",
         )
-        return redirect(self.url_redirect)
 
 
 class CRMTerminalListView(CRMTablesMixin):
@@ -163,63 +142,47 @@ class CRMTerminalListView(CRMTablesMixin):
     def get_json(self):
         return EvatorCloud().get_terminals()
 
-    def get_queryset(self):
-        data_json = self.get_json()
-        error = data_json.get("error")
-        if error:
-            self.queryset = []
-            logger.error(f"Ошибка {error}")
-            messages.error(self.request, error)
-            return self.queryset
+    def process_items(self, data_items):
+        """Обрабатывает список терминалов, включая преобразование даты и проверку существования"""
+        evotor_ids = set()
+        for data_item in data_items:
+            evotor_ids.add(data_item["id"])
 
-        serializer = self.serializer(data=data_json)
+        terminals = {
+            obj.evotor_id: obj
+            for obj in Terminal.objects.filter(evotor_id__in=evotor_ids)
+        }
 
-        if serializer.is_valid():
-            data_items = serializer.initial_data["items"]
-
-            for data_item in data_items:
-                evotor_id = data_item["id"]
-                data_item["updated_at"] = datetime.strptime(
-                    data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+        for data_item in data_items:
+            data_item["updated_at"] = datetime.strptime(
+                data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+            )
+            evotor_id, name = data_item["id"], data_item["name"]
+            store_id = data_item.get("store_id")
+            model_instance = terminals.get(evotor_id)
+            if model_instance:
+                store_list = list(
+                    model_instance.stores.values_list("evotor_id", flat=True)
                 )
-                name = data_item["name"]
-                store_id = data_item.get("store_id")
-                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
+                data_item["is_created"], data_item["is_valid"], data_item["stores"] = (
+                    True,
+                    self._is_equal(name, model_instance.name)
+                    and store_id in store_list,
+                    store_list,
+                )
+            else:
+                data_item["is_created"], data_item["is_valid"], data_item["stores"] = (
+                    False,
+                    False,
+                    [store_id],
+                )
 
-                if model_instance:
-                    # Партнер существует: проверяем совпадение полей
-                    data_item["is_created"] = True
-                    data_item["stores"] = model_instance.stores.all()
-                    # Проверка совпадения полей
-                    store_matches = store_id in model_instance.stores.values_list(
-                        "evotor_id", flat=True
-                    )
-                    data_item["is_valid"] = (
-                        model_instance.name == name and store_matches
-                    )
-                else:
-                    # Партнер не существует
-                    data_item["stores"] = [store_id]
-                    data_item["is_created"] = False
-                    data_item["is_valid"] = False
+        return data_items
 
-            self.queryset = sorted(
-                data_items, key=lambda x: (x["is_created"], x["is_valid"])
-            )
-            return self.queryset
-        else:
-            self.queryset = []
-            logger.error(f"Ошибка при сериализации данных {serializer.errors}")
-            messages.error(
-                self.request,
-                (f"Ошибка при сериализации данных {serializer.errors}"),
-            )
-            return self.queryset
-
-    def update_models(self, data_items, is_filtered):
+    def update_models(self, serializer, is_filtered):
         update_site_terminals.send(
             sender=self,
-            data_items=data_items,
+            data_items=serializer.initial_data["items"],
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -227,7 +190,6 @@ class CRMTerminalListView(CRMTablesMixin):
             self.request,
             "Список терминалов обновляется! Это может занять некоторое время.",
         )
-        return redirect(self.url_redirect)
 
 
 class CRMStaffListView(CRMTablesMixin):
@@ -243,82 +205,62 @@ class CRMStaffListView(CRMTablesMixin):
     def get_json(self):
         return EvatorCloud().get_staffs()
 
-    def get_queryset(self):
-        data_json = self.get_json()
-        error = data_json.get("error")
-        if error:
-            self.queryset = []
-            logger.error(f"Ошибка {error}")
-            messages.error(self.request, error)
-            return self.queryset
+    def process_items(self, data_items):
+        """Обрабатывает данные магазинов, проверяя их на создание и корректность"""
+        evotor_ids = set()
+        for data_item in data_items:
+            evotor_ids.add(data_item["id"])
 
-        serializer = self.serializer(data=data_json)
+        staffs = {
+            obj.evotor_id: obj for obj in Staff.objects.filter(evotor_id__in=evotor_ids)
+        }
 
-        if serializer.is_valid():
-            data_items = serializer.initial_data["items"]
+        for data_item in data_items:
+            evotor_id = data_item["id"]
+            data_item["updated_at"] = datetime.strptime(
+                data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+            )
+            first_name = data_item.get("name")
+            last_name = data_item.get("last_name")
+            middle_name = data_item.get("patronymic_name")
+            stores_ids = data_item.get("stores")
 
-            for data_item in data_items:
-                evotor_id = data_item["id"]
-                data_item["updated_at"] = datetime.strptime(
-                    data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+            model_instance = staffs.get(evotor_id)
+
+            if model_instance:
+                # Партнер существует: проверяем совпадение полей
+                data_item["is_created"] = True
+                data_item["stores"] = (
+                    model_instance.user.stores.all() if model_instance.user else []
                 )
-                first_name = data_item.get("name", None)
-                last_name = data_item.get("last_name", None)
-                middle_name = data_item.get("patronymic_name", None)
-                stores_ids = data_item.get("stores", None)
-                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
 
-                if model_instance:
-                    data_item["is_created"] = True
-                    data_item["stores"] = (
-                        model_instance.user.stores.all() if model_instance.user else []
-                    )
-                    store_evotor_ids = (
-                        set(
-                            model_instance.user.stores.values_list(
-                                "evotor_id", flat=True
-                            )
-                        )
-                        if model_instance.user
-                        else set()
-                    )
+                store_evotor_ids = (
+                    set(model_instance.user.stores.values_list("evotor_id", flat=True))
+                    if model_instance.user
+                    else set()
+                )
 
-                    def is_equal(value1, value2):
-                        return (
-                            value1 in [None, ""]
-                            if value2 in [None, ""]
-                            else value1 == value2
-                        )
+                store_matches = bool(store_evotor_ids.intersection(stores_ids))
 
-                    store_matches = bool(store_evotor_ids.intersection(stores_ids))
-                    data_item["is_valid"] = (
-                        is_equal(model_instance.first_name, first_name)
-                        and is_equal(model_instance.last_name, last_name)
-                        and is_equal(model_instance.middle_name, middle_name)
-                        and store_matches
-                    )
-                else:
-                    data_item.update(
-                        {"stores": stores_ids, "is_created": False, "is_valid": False}
-                    )
+                # Проверка совпадения данных
+                data_item["is_valid"] = (
+                    self._is_equal(model_instance.first_name, first_name)
+                    and self._is_equal(model_instance.last_name, last_name)
+                    and self._is_equal(model_instance.middle_name, middle_name)
+                    and store_matches
+                )
+            else:
+                # Партнер не существует
+                data_item.update(
+                    {"stores": stores_ids, "is_created": False, "is_valid": False}
+                )
 
-            self.queryset = sorted(
-                data_items, key=lambda x: (x["is_created"], x["is_valid"])
-            )
-            return self.queryset
-        else:
-            self.queryset = []
-            logger.error(f"Ошибка при сериализации данных {serializer.errors}")
-            messages.error(
-                self.request,
-                (f"Ошибка при сериализации данных {serializer.errors}"),
-            )
-            return self.queryset
+        return data_items
 
-    def update_models(self, data_items, is_filtered):
+    def update_models(self, serializer, is_filtered):
         update_site_staffs.send(
             sender=self,
-            data_items=data_items,
+            data_items=serializer.initial_data["items"],
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -326,7 +268,6 @@ class CRMStaffListView(CRMTablesMixin):
             self.request,
             "Список сотрудников обновляется! Это может занять некоторое время.",
         )
-        return redirect(self.url_redirect)
 
 
 class CRMGroupsListView(CRMTablesMixin):
@@ -341,99 +282,89 @@ class CRMGroupsListView(CRMTablesMixin):
     url_redirect = reverse_lazy("dashboard:crm-groups")
 
     def get_json(self):
-        self.form = self.form_class(self.request.GET)
-        if not self.form.is_valid():
-            messages.error(
-                self.request,
-                "Ошибка при формировании запроса к Эвотор. Неверные данные формы",
-            )
-            return []
-
-        data = self.form.cleaned_data
-        store_evotor_id = data.get("store") or self.form.fields.get("store").initial
-
-        if not store_evotor_id:
+        store_evotor_id = self.get_store_evotor_id()
+        if store_evotor_id:
+            return EvatorCloud().get_groups(store_evotor_id)
+        else:
             messages.error(
                 self.request,
                 "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список точек продаж",
             )
             return []
 
-        return EvatorCloud().get_groups(store_evotor_id)
+    def process_items(self, data_items):
+        parent_ids = set()
+        store_ids = set()
+        evotor_ids = set()
 
-    def get_queryset(self):
-        data_json = self.get_json()
-        error = data_json.get("error")
-        if error:
-            self.queryset = []
-            logger.error(f"Ошибка {error}")
-            messages.error(
-                self.request,
-                error,
+        for data_item in data_items:
+            parent_id = data_item.get("parent_id", None)
+            if parent_id is not None:
+                parent_ids.add(parent_id)
+
+            store_id = data_item.get("store_id", None)
+            if store_id is not None:
+                store_ids.add(store_id)
+
+            evotor_ids.add(data_item["id"])
+
+        # Получаем все объекты за один запрос для каждого типа модели
+        parents = {
+            obj.evotor_id: obj
+            for obj in Category.objects.filter(evotor_id__in=parent_ids)
+        }
+        stores = {
+            obj.evotor_id: obj for obj in Store.objects.filter(evotor_id__in=store_ids)
+        }
+        categories = {
+            obj.evotor_id: obj
+            for obj in Category.objects.filter(evotor_id__in=evotor_ids)
+        }
+        products = {
+            obj.evotor_id: obj
+            for obj in Product.objects.filter(evotor_id__in=evotor_ids)
+        }
+
+        # Обрабатываем каждый data_item
+        for data_item in data_items:
+            evotor_id = data_item["id"]
+            data_item["updated_at"] = datetime.strptime(
+                data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )
-            return self.queryset
 
-        serializer = self.serializer(data=data_json)
+            parent_id = data_item.get("parent_id", None)
+            if parent_id is not None:
+                data_item["parent"] = parents.get(parent_id) or products.get(parent_id)
 
-        if serializer.is_valid():
-            data_items = serializer.initial_data["items"]
+            store_id = data_item.get("store_id", None)
+            if store_id is not None:
+                data_item["store"] = stores.get(store_id)
 
-            for data_item in data_items:
-                evotor_id = data_item["id"]
-                data_item["updated_at"] = datetime.strptime(
-                    data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+            model_instance = categories.get(evotor_id) or products.get(evotor_id)
+
+            if model_instance:
+                data_item["is_created"] = True
+                name = data_item.get("name", None)
+                parent_match = (
+                    model_instance.get_parent() is None
+                    or parent_id is None
+                    or self._is_equal(model_instance.get_parent().evotor_id, parent_id)
                 )
-
-                parent_id = data_item.get("parent_id", None)
-                if parent_id is not None:
-                    data_item["parent"] = (
-                        Category.objects.filter(evotor_id=parent_id).first()
-                        or Product.objects.filter(evotor_id=parent_id).first()
-                    )
-
-                store_id = data_item.get("store_id", None)
-                if store_id is not None:
-                    data_item["store"] = Store.objects.filter(
-                        evotor_id=store_id
-                    ).first()
-
-                try:
-                    model_instance = Category.objects.get(evotor_id=evotor_id)
-                except Category.DoesNotExist:
-                    model_instance = Product.objects.filter(evotor_id=evotor_id).first()
-
-                if model_instance:
-                    data_item["is_created"] = True
-                    name = data_item.get("name", None)
-                    parent_match = (
-                        model_instance.get_parent() is None
-                        or parent_id is None
-                        or model_instance.get_parent().evotor_id == parent_id
-                    )
-                    data_item["is_valid"] = model_instance.name == name and parent_match
+                data_item["is_valid"] = (
+                    self._is_equal(model_instance.name, name) and parent_match
+                )
+            else:
+                if evotor_id == Additional.parent_id:
+                    data_item.update({"is_created": True, "is_valid": True})
                 else:
-                    if evotor_id == Additional.parent_id:
-                        data_item.update({"is_created": True, "is_valid": True})
-                    else:
-                        data_item.update({"is_created": False, "is_valid": False})
+                    data_item.update({"is_created": False, "is_valid": False})
 
-            self.queryset = sorted(
-                data_items, key=lambda x: (x["is_created"], x["is_valid"])
-            )
-            return self.queryset
-        else:
-            self.queryset = []
-            logger.error(f"Ошибка при сериализации данных {serializer.errors}")
-            messages.error(
-                self.request,
-                (f"Ошибка при сериализации данных {serializer.errors}"),
-            )
-            return self.queryset
+        return data_items
 
-    def update_models(self, data_items, is_filtered):
+    def update_models(self, serializer, is_filtered):
         update_site_groups.send(
             sender=self,
-            data_items=data_items,
+            data_items=serializer.initial_data["items"],
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -441,25 +372,17 @@ class CRMGroupsListView(CRMTablesMixin):
             self.request,
             "Список категорий и товаров с вариациями обновляется! Это может занять некоторое время.",
         )
-        return redirect(self.url_redirect)
 
-    def send_models(self, is_filtered):
-        category_ids = super().send_models(is_filtered)
+    def send_models(self, ids):
         send_evotor_categories.send(
             sender=self,
-            category_ids=category_ids,
+            category_ids=ids,
             user_id=self.request.user.id,
         )
         messages.info(
             self.request,
             "Список категорий и товаров с вариациями отправляется в Эвотор! Это может занять некоторое время.",
         )
-        return redirect(self.url_redirect)
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["form"] = self.form
-        return ctx
 
 
 class CRMProductListView(CRMTablesMixin):
@@ -474,116 +397,120 @@ class CRMProductListView(CRMTablesMixin):
     url_redirect = reverse_lazy("dashboard:crm-products")
 
     def get_json(self):
-        self.form = self.form_class(self.request.GET)
-        if not self.form.is_valid():
-            messages.error(
-                self.request,
-                "Ошибка при формировании запроса к Эвотор. Неверные данные формы",
-            )
-            return []
-
-        data = self.form.cleaned_data
-        store_evotor_id = data.get("store") or self.form.fields.get("store").initial
-
-        if not store_evotor_id:
+        store_evotor_id = self.get_store_evotor_id()
+        if store_evotor_id:
+            return EvatorCloud().get_primary_products(store_evotor_id)
+        else:
             messages.error(
                 self.request,
                 "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список точек продаж",
             )
             return []
 
-        return EvatorCloud().get_primary_products(store_evotor_id)
+    def process_items(self, data_items):
+        # Собираем все уникальные ID для каждого типа модели
+        store_ids = set()
+        parent_ids = set()
+        evotor_ids = set()
 
-    def get_queryset(self):
-        data_json = self.get_json()
-        error = data_json.get("error")
+        for data_item in data_items:
+            store_ids.add(data_item["store_id"])
+            parent_id = data_item.get("parent_id", None)
+            if parent_id:
+                parent_ids.add(parent_id)
+            evotor_ids.add(data_item["id"])
 
-        if error:
-            self.queryset = []
-            logger.error(f"Ошибка {error}")
-            messages.error(self.request, error)
-            return self.queryset
+        # Получаем все объекты за один запрос для каждого типа модели
+        stores = {
+            obj.evotor_id: obj for obj in Store.objects.filter(evotor_id__in=store_ids)
+        }
+        parent_categories = Category.objects.filter(evotor_id__in=parent_ids)
+        parent_products = Product.objects.filter(evotor_id__in=parent_ids)
+        parents = {
+            obj.evotor_id: obj
+            for obj in list(chain(parent_categories, parent_products))
+        }
+        model_instances = {
+            obj.evotor_id: obj
+            for obj in self.model.objects.filter(evotor_id__in=evotor_ids)
+        }
 
-        serializer = self.serializer(data=data_json)
-        if serializer.is_valid():
-            data_items = serializer.initial_data["items"]
+        # Обрабатываем каждый data_item
+        for data_item in data_items:
+            data_item["updated_at"] = datetime.strptime(
+                data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+            )
 
-            for data_item in data_items:
-                data_item["updated_at"] = datetime.strptime(
-                    data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+            evotor_id = data_item["id"]
+            store_id = data_item["store_id"]
+
+            store = stores.get(store_id)
+            data_item["store"] = store
+            data_item["is_valid"] = bool(store)
+
+            parent_id = data_item.get("parent_id", None)
+            if parent_id:
+                data_item["parent"] = (
+                    parents.get(parent_id) or Additional.parent_id == parent_id
                 )
 
-                evotor_id = data_item["id"]
-                store_id = data_item["store_id"]
+            model_instance = model_instances.get(evotor_id)
 
-                store = Store.objects.filter(evotor_id=store_id).first()
-                data_item["store"] = store
-                data_item["is_valid"] = bool(store)
+            if not model_instance:
+                data_item.update({"is_created": False, "is_valid": False})
+            else:
+                data_item["is_created"] = True
+                if store:
+                    stockrecord = model_instance.stockrecords.filter(
+                        store__evotor_id=store_id
+                    ).first()
+                    stockrecord_match = (
+                        stockrecord
+                        and self._is_equal(stockrecord.price, data_item.get("price", 0))
+                        and self._is_equal(
+                            stockrecord.cost_price, data_item.get("cost_price", 0)
+                        )
+                        and self._is_equal(
+                            stockrecord.num_in_stock, data_item.get("quantity", 0)
+                        )
+                        and self._is_equal(stockrecord.tax, data_item.get("tax"))
+                        and self._is_equal(
+                            stockrecord.is_public, data_item.get("allow_to_sell", False)
+                        )
+                    ) or False
 
-                parent_id = data_item.get("parent_id", None)
-                if parent_id:
-                    data_item["parent"] = (
-                        Category.objects.filter(evotor_id=parent_id).first()
-                        or Product.objects.filter(evotor_id=parent_id).first()
-                        or Additional.parent_id == parent_id
+                    product_class_match = self._is_equal(
+                        model_instance.get_product_class().measure_name,
+                        data_item.get("measure_name"),
                     )
-
-                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
-
-                if not model_instance:
-                    data_item.update({"is_created": False, "is_valid": False})
+                    data_item["is_valid"] = (
+                        self._is_equal(
+                            model_instance.name, data_item.get("name", "").strip()
+                        )
+                        and self._is_equal(
+                            model_instance.article,
+                            data_item.get("article_number", "").strip(),
+                        )
+                        and self._is_equal(
+                            model_instance.short_description,
+                            data_item.get("description", None),
+                        )
+                        and self._is_equal(
+                            model_instance.get_evotor_parent_id(),
+                            data_item.get("parent_id", None),
+                        )
+                        and stockrecord_match
+                        and product_class_match
+                    )
                 else:
-                    data_item["is_created"] = True
-                    if store:
-                        stockrecord = model_instance.stockrecords.filter(
-                            store__evotor_id=store_id
-                        ).first()
-                        stockrecord_match = (
-                            stockrecord
-                            # and stockrecord.evotor_code == data_item.get("code")
-                            and stockrecord.price == data_item.get("price", 0)
-                            and stockrecord.cost_price == data_item.get("cost_price", 0)
-                            and stockrecord.num_in_stock == data_item.get("quantity", 0)
-                            and stockrecord.tax == data_item.get("tax")
-                            and stockrecord.is_public
-                            == data_item.get("allow_to_sell", False)
-                        ) or False
+                    data_item["is_valid"] = False
 
-                        product_class_match = (
-                            model_instance.get_product_class().measure_name
-                            == data_item.get("measure_name")
-                        )
-                        data_item["is_valid"] = (
-                            model_instance.name == data_item.get("name", "").strip()
-                            and model_instance.article
-                            == data_item.get("article_number", "").strip()
-                            and model_instance.short_description
-                            == data_item.get("description", None)
-                            and model_instance.get_evotor_parent_id()
-                            == data_item.get("parent_id", None)
-                            and stockrecord_match
-                            and product_class_match
-                        )
-                    else:
-                        data_item["is_valid"] = False
+        return data_items
 
-            self.queryset = sorted(
-                data_items, key=lambda x: (x["is_created"], x["is_valid"])
-            )
-
-            return self.queryset
-        else:
-            self.queryset = []
-            logger.error(f"Ошибка при сериализации данных {serializer.errors}")
-            messages.error(
-                self.request, (f"Ошибка при сериализации данных {serializer.errors}")
-            )
-            return self.queryset
-
-    def update_models(self, data_items, is_filtered):
+    def update_models(self, serializer, is_filtered):
         update_site_products.send(
             sender=self,
-            data_items=data_items,
+            data_items=serializer.initial_data["items"],
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -591,25 +518,17 @@ class CRMProductListView(CRMTablesMixin):
             self.request,
             "Список товаров обновляется! Это может занять некоторое время.",
         )
-        return self.redirect_with_get_params(self.url_redirect, self.request)
 
-    def send_models(self, is_filtered):
-        product_ids = super().send_models(is_filtered)
+    def send_models(self, ids):
         send_evotor_products.send(
             sender=self,
-            product_ids=product_ids,
+            product_ids=ids,
             user_id=self.request.user.id,
         )
         messages.info(
             self.request,
-            "Список категорий и товаров с вариациями отправляется в Эвотор! Это может занять некоторое время.",
+            "Список товаров отправляется в Эвотор! Это может занять некоторое время.",
         )
-        return redirect(self.url_redirect)
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["form"] = self.form
-        return ctx
 
     def get_site_table(self):
         evotor_ids = [model_qs["id"] for model_qs in self.queryset]
@@ -680,93 +599,93 @@ class CRMAdditionalListView(CRMTablesMixin):
     url_redirect = reverse_lazy("dashboard:crm-additionals")
 
     def get_json(self):
-        self.form = self.form_class(self.request.GET)
-        if not self.form.is_valid():
-            messages.error(
-                self.request,
-                "Ошибка при формировании запроса к Эвотор. Неверные данные формы",
-            )
-            return []
-
-        data = self.form.cleaned_data
-        store_evotor_id = data.get("store") or self.form.fields.get("store").initial
-
-        if not store_evotor_id:
+        store_evotor_id = self.get_store_evotor_id()
+        if store_evotor_id:
+            return EvatorCloud().get_additionals_products(store_evotor_id)
+        else:
             messages.error(
                 self.request,
                 "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список точек продаж",
             )
             return []
 
-        return EvatorCloud().get_additionals_products(store_evotor_id)
+    def process_items(self, data_items):
+        # Собираем все уникальные ID для каждого типа модели
+        store_ids = set()
+        evotor_ids = set()
 
-    def get_queryset(self):
-        data_json = self.get_json()
-        error = data_json.get("error")
+        for data_item in data_items:
+            store_ids.add(data_item["store_id"])
+            evotor_ids.add(data_item["id"])
 
-        if error:
-            self.queryset = []
-            logger.error(f"Ошибка {error}")
-            messages.error(self.request, error)
-            return self.queryset
+        # Получаем все объекты за один запрос для каждого типа модели
+        stores = {
+            obj.evotor_id: obj for obj in Store.objects.filter(evotor_id__in=store_ids)
+        }
+        model_instances = {
+            obj.evotor_id: obj
+            for obj in self.model.objects.filter(evotor_id__in=evotor_ids)
+        }
 
-        serializer = self.serializer(data=data_json)
-        if serializer.is_valid():
-            data_items = serializer.initial_data["items"]
+        # Предварительно собираем store_id для каждого model_instance
+        model_stores = {
+            instance.evotor_id: set(instance.stores.values_list("evotor_id", flat=True))
+            for instance in model_instances.values()
+        }
 
-            for data_item in data_items:
-                data_item["updated_at"] = datetime.strptime(
-                    data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
-                )
+        # Обрабатываем каждый data_item
+        for data_item in data_items:
+            data_item["updated_at"] = datetime.strptime(
+                data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
+            )
 
-                evotor_id = data_item["id"]
-                store_id = data_item["store_id"]
+            evotor_id = data_item["id"]
+            store_id = data_item["store_id"]
 
-                store = Store.objects.filter(evotor_id=store_id).first()
-                data_item["store"] = store
-                data_item["is_valid"] = bool(store)
+            store = stores.get(store_id)
+            data_item["store"] = store
+            data_item["is_valid"] = bool(store)
 
-                model_instance = self.model.objects.filter(evotor_id=evotor_id).first()
+            model_instance = model_instances.get(evotor_id)
 
-                if not model_instance:
-                    data_item.update({"is_created": False, "is_valid": False})
-                else:
-                    data_item["is_created"] = True
-                    if store:
-                        data_item["is_valid"] = (
-                            model_instance.name == data_item.get("name", "").strip()
-                            and model_instance.article
-                            == data_item.get("article_number", "").strip()
-                            and model_instance.description
-                            == data_item.get("description", None)
-                            and model_instance.parent_id
-                            == data_item.get("parent_id", None)
-                            and data_item.get("store_id", None)
-                            in model_instance.stores.values_list("evotor_id", flat=True)
-                            and model_instance.is_public
-                            == data_item.get("allow_to_sell", None)
-                            and model_instance.tax == data_item.get("tax", None)
+            if not model_instance:
+                data_item.update({"is_created": False, "is_valid": False})
+            else:
+                data_item["is_created"] = True
+                if store:
+                    data_item["is_valid"] = (
+                        self._is_equal(
+                            model_instance.name, data_item.get("name", "").strip()
                         )
-                    else:
-                        data_item["is_valid"] = False
+                        and self._is_equal(
+                            model_instance.article,
+                            data_item.get("article_number", "").strip(),
+                        )
+                        and self._is_equal(
+                            model_instance.description,
+                            data_item.get("description", None),
+                        )
+                        and self._is_equal(
+                            model_instance.parent_id, data_item.get("parent_id", None)
+                        )
+                        and self._is_equal(
+                            model_instance.is_public,
+                            data_item.get("allow_to_sell", None),
+                        )
+                        and self._is_equal(
+                            model_instance.tax, data_item.get("tax", None)
+                        )
+                        and store_id in model_stores.get(evotor_id, set())
+                    )
+                else:
+                    data_item["is_valid"] = False
 
-            self.queryset = sorted(
-                data_items, key=lambda x: (x["is_created"], x["is_valid"])
-            )
+        return data_items
 
-            return self.queryset
-        else:
-            self.queryset = []
-            logger.error(f"Ошибка при сериализации данных {serializer.errors}")
-            messages.error(
-                self.request, (f"Ошибка при сериализации данных {serializer.errors}")
-            )
-            return self.queryset
-
-    def update_models(self, data_items, is_filtered):
+    def update_models(self, serializer, is_filtered):
         update_site_additionals.send(
             sender=self,
-            data_items=data_items,
+            data_items=serializer.initial_data["items"],
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -774,25 +693,17 @@ class CRMAdditionalListView(CRMTablesMixin):
             self.request,
             "Список дополнительных товаров обновляется! Это может занять некоторое время.",
         )
-        return self.redirect_with_get_params(self.url_redirect, self.request)
 
-    def send_models(self, is_filtered):
-        additional_ids = super().send_models(is_filtered)
-        send_evotor_products.send(
+    def send_models(self, ids):
+        send_evotor_additionals.send(
             sender=self,
-            additional_ids=additional_ids,
+            additional_ids=ids,
             user_id=self.request.user.id,
         )
         messages.info(
             self.request,
             "Список дополнительных товаров отправляется в Эвотор! Это может занять некоторое время.",
         )
-        return redirect(self.url_redirect)
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["form"] = self.form
-        return ctx
 
     def get_site_table(self):
         evotor_ids = [model_qs["id"] for model_qs in self.queryset]
