@@ -21,32 +21,32 @@ from oscar.apps.analytics.tasks import (
 def receive_product_view(sender, product, user, **kwargs):
     if kwargs.get("raw", False):
         return
-    if settings.DEBUG:
-        update_counter_task("ProductRecord", "num_views", {"product_id": product.id})
-    else:
+    if settings.CELERY:
         update_counter_task.delay(
             "ProductRecord", "num_views", {"product_id": product.id}
         )
+    else:
+        update_counter_task("ProductRecord", "num_views", {"product_id": product.id})
 
     if user and user.is_authenticated:
-        if settings.DEBUG:
-            update_counter_task("UserRecord", "num_product_views", {"user_id": user.id})
-            user_viewed_product_task(product.id, user.id)
-        else:
+        if settings.CELERY:
             update_counter_task.delay(
                 "UserRecord", "num_product_views", {"user_id": user.id}
             )
             user_viewed_product_task.delay(product.id, user.id)
+        else:
+            update_counter_task("UserRecord", "num_product_views", {"user_id": user.id})
+            user_viewed_product_task(product.id, user.id)
 
 
 # pylint: disable=unused-argument
 @receiver(user_search)
 def receive_product_search(sender, query, user, **kwargs):
     if user and user.is_authenticated and not kwargs.get("raw", False):
-        if settings.DEBUG:
-            user_searched_product_task(user.id, query)
-        else:
+        if settings.CELERY:
             user_searched_product_task.delay(user.id, query)
+        else:
+            user_searched_product_task(user.id, query)
 
 
 # pylint: disable=unused-argument
@@ -54,22 +54,22 @@ def receive_product_search(sender, query, user, **kwargs):
 def receive_basket_addition(sender, product, user, **kwargs):
     if kwargs.get("raw", False):
         return
-    if settings.DEBUG:
-        update_counter_task(
+    if settings.CELERY:
+        update_counter_task.delay(
             "ProductRecord", "num_basket_additions", {"product_id": product.id}
         )
     else:
-        update_counter_task.delay(
+        update_counter_task(
             "ProductRecord", "num_basket_additions", {"product_id": product.id}
         )
 
     if user and user.is_authenticated:
-        if settings.DEBUG:
-            update_counter_task(
+        if settings.CELERY:
+            update_counter_task.delay(
                 "UserRecord", "num_basket_additions", {"user_id": user.id}
             )
         else:
-            update_counter_task.delay(
+            update_counter_task(
                 "UserRecord", "num_basket_additions", {"user_id": user.id}
             )
 
@@ -90,15 +90,15 @@ def receive_order_placed(sender, order, user, **kwargs):
             ],
         }
 
-        if settings.DEBUG:
-            record_products_in_order_task(order_data)
-        else:
+        if settings.CELERY:
             record_products_in_order_task.delay(order_data)
+        else:
+            record_products_in_order_task(order_data)
 
         if user and user.is_authenticated:
-            if settings.DEBUG:
-                record_user_order_task(user.id, order_data)
-            else:
+            if settings.CELERY:
                 record_user_order_task.delay(user.id, order_data)
+            else:
+                record_user_order_task(user.id, order_data)
 
     transaction.on_commit(execute_tasks)
