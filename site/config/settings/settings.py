@@ -18,6 +18,7 @@ location = lambda x: os.path.join(
 # =============
 
 DEBUG = config("DEBUG", default=False, cast=bool)
+TOOLBAR = config("TOOLBAR", default=False, cast=bool)
 INTERNAL_IPS = ['127.0.0.1', '::1']
 
 # =============
@@ -99,7 +100,7 @@ MIDDLEWARE = [
     'oscar.apps.dashboard.middleware.DashboardMiddleware',
 ]
 
-if DEBUG:
+if TOOLBAR:
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 # =============
