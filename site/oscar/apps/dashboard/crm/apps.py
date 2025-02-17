@@ -31,28 +31,6 @@ class CRMDashboardConfig(OscarDashboardConfig):
         )
         self.crm_docs_list_view = get_class("dashboard.crm.views", "CRMDocsListView")
 
-        self.crm_accept_list_view = get_class(
-            "dashboard.crm.views", "CRMAcceptListView"
-        )
-        self.crm_revaluation_list_view = get_class(
-            "dashboard.crm.views", "CRMRevaluationListView"
-        )
-        self.crm_write_off_list_view = get_class(
-            "dashboard.crm.views", "CRMWriteOffListView"
-        )
-        self.crm_inventory_list_view = get_class(
-            "dashboard.crm.views", "CRMInventoryListView"
-        )
-        self.crm_session_list_view = get_class(
-            "dashboard.crm.views", "CRMSessionListView"
-        )
-        self.crm_cash_list_view = get_class("dashboard.crm.views", "CRMCashListView")
-        self.crm_report_list_view = get_class(
-            "dashboard.crm.views", "CRMReportListView"
-        )
-
-        self.crm_event_list_view = get_class("dashboard.crm.views", "CRMEventListView")
-
     def get_urls(self):
         urls = [
             path("stores/", self.crm_stores_list_view.as_view(), name="crm-stores"),
@@ -72,27 +50,5 @@ class CRMDashboardConfig(OscarDashboardConfig):
                 name="crm-additionals",
             ),
             path("docs/", self.crm_docs_list_view.as_view(), name="crm-docs"),
-            path("accepts/", self.crm_accept_list_view.as_view(), name="crm-accept"),
-            path(
-                "revaluations/",
-                self.crm_revaluation_list_view.as_view(),
-                name="crm-revaluation",
-            ),
-            path(
-                "write-offs/",
-                self.crm_write_off_list_view.as_view(),
-                name="crm-write-off",
-            ),
-            path(
-                "inventories/",
-                self.crm_inventory_list_view.as_view(),
-                name="crm-inventory",
-            ),
-            path(
-                "sessions/", self.crm_session_list_view.as_view(), name="crm-sessions"
-            ),
-            path("cashs/", self.crm_cash_list_view.as_view(), name="crm-cash"),
-            path("reports/", self.crm_report_list_view.as_view(), name="crm-report"),
-            path("events/", self.crm_event_list_view.as_view(), name="crm-events"),
         ]
         return self.post_process_urls(urls)

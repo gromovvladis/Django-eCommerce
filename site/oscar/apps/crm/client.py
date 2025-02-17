@@ -311,8 +311,8 @@ class EvotorStoreClient(EvotorAPICloud):
             for store_json in stores_json:
                 evotor_id = store_json.get("id")
                 evotor_ids.append(evotor_id)
-                prt, created = Store.objects.get_or_create(evotor_id=evotor_id)
-                serializer = StoreSerializer(prt, data=store_json)
+                store, created = Store.objects.get_or_create(evotor_id=evotor_id)
+                serializer = StoreSerializer(store, data=store_json)
 
                 if serializer.is_valid():
                     serializer.save()

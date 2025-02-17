@@ -13,13 +13,6 @@ logger = logging.getLogger("oscar.dashboard")
 
 class CRMTablesMixin(MultiTableMixin, TemplateView):
 
-    def redirect_with_get_params(self, url, request):
-        """
-        Перенаправляет на указанный URL, сохраняя GET-параметры из запроса.
-        """
-        url += "?" + request.GET.urlencode()
-        return redirect(url)
-
     def dispatch(self, request, *args, **kwargs):
         self.queryset = self.get_queryset()
         return super().dispatch(request, *args, **kwargs)
@@ -39,7 +32,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
 
         update_site = request.POST.get("update_site", "False")
         if update_site == "True":
-            return self.update_models(self.queryset, False)
+            return self.update_models(self.get_json(), False)
 
         ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
         ids = [id for id in map(str, ids) if id.strip()]
@@ -53,6 +46,19 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         qs = self.get_filtered_queryset(ids)
         return self.update_models(qs, True)
 
+    def get_json(self, data_items, is_filtered):
+        raise NotImplementedError("A CRMTablesMixin must define a 'get_json' method")
+
+    def get_queryset(self, data_items, is_filtered):
+        raise NotImplementedError(
+            "A CRMTablesMixin must define a 'get_queryset' method"
+        )
+
+    def update_models(self, data_items, is_filtered):
+        raise NotImplementedError(
+            "A CRMTablesMixin must define a 'update_models' method"
+        )
+
     def send_models(self, is_filtered):
         if is_filtered:
             ids = self.request.POST.getlist(
@@ -61,11 +67,6 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
             return ids
         else:
             return self.model.objects.values_list("id", flat=True)
-
-    def update_models(self, data_items, is_filtered):
-        raise NotImplementedError(
-            "A CRMTablesMixin must define a 'update_models' method"
-        )
 
     def delete_models(self, delete_invalid):
         try:
@@ -98,7 +99,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         return self.redirect_with_get_params(self.url_redirect, self.request)
 
     def get_filtered_queryset(self, ids):
-        data_list = self.get_queryset()
+        data_list = self.get_json()
         return [data_item for data_item in data_list if data_item["id"] in ids]
 
     def get_checkbox_object_name(self):
@@ -171,3 +172,10 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         ).order_by("-wrong_evotor_id", "is_valid", "evotor_id", "-is_valid")
 
         return self.table_site(site_models)
+
+    def redirect_with_get_params(self, url, request):
+        """
+        Перенаправляет на указанный URL, сохраняя GET-параметры из запроса.
+        """
+        url += "?" + request.GET.urlencode()
+        return redirect(url)
