@@ -1,7 +1,9 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load currency_filters %}
-{% load sorting_tags %}
+
 {% load render_table from django_tables2 %}
+{% load currency_filters %}
+{% load dashboard_tags %}
+{% load sorting_tags %}
 
 {% block body_class %}
   {{ block.super }} reviews
