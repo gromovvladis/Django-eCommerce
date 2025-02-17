@@ -4,9 +4,6 @@
 {% load compress %}
 {% load static %}
 
-{% block body_class %}
-  {{ block.super }} create-page stores
-{% endblock %}
 {% block title %}
   {{ store.name|default:'Магазин' }} | Магазин | {{ block.super }}
 {% endblock %}

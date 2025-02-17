@@ -1,9 +1,6 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load image_tags %}
 
-{% block body_class %}
-  {{ block.super }} create-page
-{% endblock %}
+{% load image_tags %}
 
 {% block title %}
   Ассортимент '{{ range.name }}' | {{ block.super }}

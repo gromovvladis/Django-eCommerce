@@ -1,9 +1,6 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load l10n %}
 
-{% block body_class %}
-  refund-money
-{% endblock %}
+{% load l10n %}
 
 {% block title %}
   Осуществить возврат у заказа №{{ transaction.source.order.number }}? | {{ block.super }}

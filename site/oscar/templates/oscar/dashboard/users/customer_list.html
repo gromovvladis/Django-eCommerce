@@ -1,11 +1,7 @@
 {% extends 'oscar/dashboard/layout.html' %}
+
 {% load render_table from django_tables2 %}
 {% load dashboard_tags %}
-{% load dashboard_tags %}
-
-{% block body_class %}
-  {{ block.super }} users
-{% endblock %}
 
 {% block title %}
   Клиенты | {{ block.super }}

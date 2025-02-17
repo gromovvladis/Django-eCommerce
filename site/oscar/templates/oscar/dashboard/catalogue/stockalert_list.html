@@ -1,9 +1,6 @@
 {% extends 'oscar/dashboard/layout.html' %}
-{% load render_table from django_tables2 %}
 
-{% block body_class %}
-  {{ block.super }} catalogue
-{% endblock %}
+{% load render_table from django_tables2 %}
 
 {% block title %}
   Уведомления о наличии | {{ block.super }}

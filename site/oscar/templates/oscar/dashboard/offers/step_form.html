@@ -2,10 +2,6 @@
 
 {% load currency_filters %}
 
-{% block body_class %}
-  {{ block.super }} create-page
-{% endblock %}
-
 {% block title %}
   {% if offer.pk %}
     {{ offer.name }}:
