@@ -115,7 +115,7 @@ class PaymentsDashboardConfig(OscarDashboardConfig):
                 name="refund-transaction",
             ),
             path(
-                "payments/<str:code>/refund/",
+                "payments/<str:payment_id>/refund/",
                 self.refund_transaction_view.as_view(),
                 name="refund-transaction",
             ),

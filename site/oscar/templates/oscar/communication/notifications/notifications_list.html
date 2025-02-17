@@ -83,13 +83,3 @@
     {% endif %}
   </div>
 {% endblock %}
-
-{% block extrascripts %}
-  {{ block.super }}
-  {% compress js %}
-  <script src="{% static 'js/frontend/profile/profile.js' %}"></script>
-  {% endcompress %}
-  {% compress js %}
-  <script src="{% static 'js/frontend/profile/notifications.js' %}"></script>
-  {% endcompress %}
-{% endblock %}

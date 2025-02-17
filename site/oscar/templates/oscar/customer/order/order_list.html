@@ -13,13 +13,6 @@
   {{ page_title }}
 {% endblock %}
 
-{% block extrastyles %}
-  {{ block.super }}
-  {% compress css %}
-  <link rel="stylesheet" href="{% static 'css/thirdpaty/datetimepicker/air-datepicker.css' %}" />
-  {% endcompress %}
-{% endblock %}
-
 {% block breadcrumbs %}
   <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
     <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">{% icon file_name='interface/arrow-back' size=22 stroke='#111' %}</button>
@@ -44,7 +37,7 @@
         <div class="card card-body bg-light d-flex">
           <form method="get" class="d-flex fill-width justify-space-between mb-3 mb-sm-2">
             <div class="d-flex">
-              <div data-id="input-field" class="input mr-1 text-area d-flex align-center input__padding{% if form.initial.order_number %} input__label-active{% endif %}">
+              <div data-id="order-filter" class="input mr-1 text-area d-flex align-center input__padding{% if form.initial.order_number %} input__label-active{% endif %}">
                 <div class="input__wrapper">
                   <div class="input__label">Номер</div>
                   <div class="input__control d-flex align-center">
@@ -52,7 +45,7 @@
                   </div>
                 </div>
               </div>
-              <div data-id="input-field" class="input mr-1 text-area d-flex align-center input__padding{% if form.initial.date_range %} input__label-active{% endif %}">
+              <div data-id="order-filter" class="input mr-1 text-area d-flex align-center input__padding{% if form.initial.date_range %} input__label-active{% endif %}">
                 <div class="input__wrapper">
                   <div class="input__label">Дата</div>
                   <div class="input__control d-flex align-center">
@@ -62,8 +55,10 @@
               </div>
             </div>
             <div class="d-flex">
-              <button type="submit" class="button fill-width button--main button--profile justify-center mr-1">{% icon file_name='interface/search' size=20 fill='#fff' %}</button>
-              <a href="{% url 'customer:order-list' %}" class="button fill-width button--white button--profile justify-center">{% icon file_name='interface/close' size=20 stroke='#c21313' %}</a>
+              <button type="submit" class="button fill-width button--main button--profile justify-center">{% icon file_name='interface/search' size=20 fill='#fff' %}</button>
+              {% if request.GET %}
+                <a href="{% url 'customer:order-list' %}" class="button fill-width button--white button--profile justify-center ml-1">{% icon file_name='interface/close' size=20 stroke='#c21313' %}</a>
+              {% endif %}
             </div>
           </form>
         </div>
@@ -113,12 +108,10 @@
       {% include 'oscar/partials/pagination.html' %}
     {% else %}
       {% if form.is_bound %}
-        <div class="order__title d-flex mb-2 justify-start align-center">
-          <div class="d-flex">
-            <a href="{% url 'customer:order-list' %}" class="button fill-width button--white button--profile justify-center">{% icon file_name='interface/close' size=20 stroke='#c21313' %}</a>
-          </div>
+        <div class="order__title d-flex align-center justify-space-between mb-2">
+          <h3>{{ form.description }}</h3>
+          <a href="{% url 'customer:order-list' %}" class="button fill-width button--white button--profile justify-center ml-1">{% icon file_name='interface/close' size=20 stroke='#c21313' %}</a>
         </div>
-        <h3 class="mb-2">{{ form.description }}</h3>
         <p class="text--red">Заказы не найдены</p>
       {% else %}
         <p>Список заказов пуст</p>
@@ -154,12 +147,6 @@
 {% block extrascripts %}
   {{ block.super }}
   {% compress js %}
-  <script src="{% static 'js/frontend/profile/profile.js' %}" defer></script>
-  {% endcompress %}
-  {% compress js %}
-  <script src="{% static 'js/thirdpaty/datetimepicker/air-datepicker.js' %}" defer></script>
-  {% endcompress %}
-  {% compress js %}
-  <script src="{% static 'js/frontend/datetimepicker/filter-time-timepicker.js' %}" defer></script>
+  <script src="{% static 'js/frontend/profile/filter-orders.js' %}" defer></script>
   {% endcompress %}
 {% endblock %}

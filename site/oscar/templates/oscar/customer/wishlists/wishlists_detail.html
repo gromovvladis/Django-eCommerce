@@ -103,10 +103,3 @@
     {% endif %}
   </div>
 {% endblock %}
-
-{% block extrascripts %}
-  {{ block.super }}
-  {% compress js %}
-  <script src="{% static 'js/frontend/profile/profile.js' %}" defer></script>
-  {% endcompress %}
-{% endblock %}

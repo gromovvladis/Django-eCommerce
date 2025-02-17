@@ -1,8 +1,6 @@
-{% load i18n %}
-
 {% if form.is_bound and not form.is_valid %}
   <div class="alert alert-danger">
-    <strong>{% trans 'Oops! We found some errors' %}</strong> -{% trans 'please check the error messages below and try again' %}
+    <strong>Упс! Что-то пошло не так</strong> - пожалуйста, проверьте ошибки ниже и поторите снова
   </div>
 {% endif %}
 

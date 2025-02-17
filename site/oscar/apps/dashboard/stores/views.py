@@ -44,6 +44,7 @@ StoreCashTransactionListTable = get_class(
 User = get_user_model()
 Staff = get_model("user", "Staff")
 Store = get_model("store", "Store")
+StoreAddress = get_model("store", "StoreAddress")
 StoreCashTransaction = get_model("store", "StoreCashTransaction")
 Terminal = get_model("store", "Terminal")
 
@@ -74,7 +75,7 @@ class StoreListView(SingleTableView):
 
     def get_queryset(self):
         qs = Store._default_manager.prefetch_related(
-            "addresses", "users", "users__staff_profile"
+            "address", "users", "users__staff_profile"
         ).all()
 
         self.description = "Все магазины"
@@ -134,7 +135,7 @@ class StoreCreateView(CreateView):
 
     def form_valid(self, form):
         self.object = form.save()
-        address = self.object.addresses.model(
+        address = self.object.address.model(
             store=self.object,
             line1=form.cleaned_data["line1"],
             coords_long=form.cleaned_data["coords_long"],
@@ -157,9 +158,7 @@ class StoreManageView(UpdateView):
 
     def get_object(self, queryset=None):
         self.store = get_object_or_404(Store, pk=self.kwargs["pk"])
-        self.address = self.store.address
-        if self.address is None:
-            self.address = self.store.addresses.model(store=self.store)
+        self.address = getattr(self.store, "address", StoreAddress(store=self.store))
         return self.store
 
     def get_context_data(self, **kwargs):

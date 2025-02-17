@@ -1,11 +1,11 @@
 
 var waitingPayment = document.querySelector('[data-id="waiting-payment"]');
-var paymentStatus = document.querySelector('[data-id="payment-status"]');
-var paymentSvg = document.querySelector('[data-id="payment-icon-svg"]');
-var waitingSeconds = 15;
-var interval;
 
 if (waitingPayment) {
+    var paymentStatus = document.querySelector('[data-id="payment-status"]');
+    var paymentSvg = document.querySelector('[data-id="payment-icon-svg"]');
+    var waitingSeconds = 15;
+    var interval;
     getPaymentInfo();
     interval = setInterval(function () {
         if (waitingSeconds > 0) {

@@ -2,9 +2,7 @@
 
 <div class="d-flex flex-column">
   {% if product_access %}
-    <a href="{% url 'dashboard:catalogue-product' record.stockrecord.product.id %}{% if request.GET.urlencode %}
-        ?{{ request.GET.urlencode }}
-      {% endif %}">
+    <a href="{% url 'dashboard:catalogue-product' record.stockrecord.product.id %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
       {{ record.stockrecord.product.get_name }}
     </a>
   {% else %}

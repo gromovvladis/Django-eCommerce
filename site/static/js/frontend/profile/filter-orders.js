@@ -1,4 +1,5 @@
-let datapicker_filter;
+
+var inputFields = document.querySelectorAll('[data-id="order-filter"]');
 
 var localLang = {
     days: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
@@ -13,27 +14,21 @@ var localLang = {
     firstDay: 1
 };
 
+let datapicker_filter;
 datapicker_filter = new AirDatepicker('#id_date_range', {
-
     autoClose: false,
     isMobile: true,
     range: true,
-
     altField: "#id_order_time",
     altFieldDateFormat: "dd.MM.yyyy",
-
     dateFormat: 'dd.MM.yyyy',
-
     buttons: ['clear'],
-
     multipleDatesSeparator: ' - ',
-
     toggleSelected: false,
     locale: localLang,
 
 });
 
-var inputFields = document.querySelectorAll('[data-id="input-field"]');
 inputFields.forEach(function (wrapper) {
     var inputField = wrapper.querySelector('[data-id="order-input"]');
 

@@ -599,9 +599,8 @@ pre code {
 .col-1 {
   position: relative;
   width: 100%;
-  padding: .5rem;
-  /* padding-right: .5rem; */
-  /* padding-left: .5rem; */
+  padding-right: .5rem;
+  padding-left: .5rem;
 }
 
 .col {
@@ -974,6 +973,7 @@ pre code {
   border-radius: 0 0 10px 10px;
   -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .05);
   box-shadow: 0 0 5px rgba(0, 0, 0, .05);
+  margin-bottom: 1rem;
 }
 
 .empty-report {
@@ -1002,12 +1002,12 @@ pre code {
   text-align: center;
 }
 
-/* .mobile-table thead {
+.mobile-table thead {
   position: sticky;
   top: 36px;
   z-index: 2;
   background-color: #fff;
-} */
+}
 
 .table th,
 .table td {
@@ -1953,13 +1953,6 @@ fieldset:disabled a.btn {
 .btn-info:not(:disabled):not(.disabled).active:focus,
 .show>.btn-info.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.1rem rgba(58, 176, 195, 0.3);
-}
-
-.btn-status {
-  padding: .4rem .5rem;
-  min-height: unset;
-  line-height: 1rem;
-  border-radius: 5px;
 }
 
 .btn-warning {
@@ -18161,8 +18154,8 @@ h3.app-ico:before {
   background: #fff;
   -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .05);
   box-shadow: 0 0 5px rgba(0, 0, 0, .05);
-  margin-bottom: 20px;
-  padding: 15px;
+  margin-bottom: 1rem;
+  padding: 1rem;
   border-radius: 0 0 10px 10px;
   background: #fff;
 }
@@ -18699,8 +18692,8 @@ h3.app-ico:before {
 .table-container {
   position: relative;
   width: 100%;
-  overflow-x: auto;
-  margin-bottom: 1rem;
+  /* overflow-x: auto; */
+  /* margin-bottom: 1rem; */
 }
 
 @media (min-width: 992px) {
@@ -19335,7 +19328,7 @@ caption {
 @media (max-width: 768px) {
 
   .content-block {
-    padding: 10px;
+    padding: .7rem;
   }
 
   .carousel__navs button {
@@ -19754,7 +19747,6 @@ input[type="number"]:focus {
     content: attr(data-label);
     position: absolute;
     left: 0;
-    /* width: 50%; */
     width: 50%;
     min-width: 180px;
     padding-left: 1rem;

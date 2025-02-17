@@ -1,9 +1,9 @@
+var codeInput = document.getElementById('id_code');
+
 var addVoucherForm = document.querySelector('[data-id="voucher-add"]');
 var removeVoucherForm = document.querySelector('[data-id="voucher-remove"]');
 var voucherBtn = addVoucherForm.querySelector('[data-id="voucher-btn"]');
-
-var codeInput = document.getElementById('id_code');
-var voucherMessage = document.getElementById('[data-id="voucher-message"]');
+var voucherMessage = document.querySelector('[data-id="voucher-message"]');
 
 document.addEventListener('DOMContentLoaded', function () {
     if (removeVoucherForm) {

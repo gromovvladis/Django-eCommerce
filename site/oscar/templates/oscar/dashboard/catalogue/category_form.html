@@ -35,9 +35,7 @@
 {% endblock %}
 
 {% block dashboard_content %}
-  <form action="{% if request.GET.urlencode %}
-      ?{{ request.GET.urlencode }}
-    {% endif %}"
+  <form action="{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
     method="post"
     class="form-stacked wysiwyg fixed-actions"
     enctype="multipart/form-data"

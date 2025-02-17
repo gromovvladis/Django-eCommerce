@@ -1614,7 +1614,7 @@ class Option(models.Model):
         (FLOAT, "Дробное число"),
         (SELECT, "Селект"),
         (RADIO, "Радио кнопка"),
-        (MULTI_SELECT, "Multi select"),
+        (MULTI_SELECT, "Несколько из списка"),
         (CHECKBOX, "Флажок"),
     )
 

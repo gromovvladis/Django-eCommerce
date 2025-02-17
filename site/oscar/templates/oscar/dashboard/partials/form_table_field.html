@@ -35,7 +35,6 @@
           {% block help_text %}
             {% if field.help_text %}
               <small class="form-text text-muted">
-                {# We allow HTML within form help fields #}
                 {{ field.help_text|safe }}
               </small>
             {% endif %}

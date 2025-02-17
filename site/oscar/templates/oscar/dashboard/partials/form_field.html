@@ -4,7 +4,7 @@
   {{ field }}
 {% else %}
   {% block control_group %}
-    <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width" id="form-group_{{ field.auto_id }}">
+    <div class="form-group{% if style == 'horizontal' %} row{% endif %}{% if field.errors %} error{% endif %} fill-width mb-1 mb-sm-3" id="form-group_{{ field.auto_id }}">
       {% block label %}
         {% if field.name == 'line1' %}
           <div class="d-flex align-items-center justify-content-between">

@@ -13,7 +13,7 @@ def selected_store(request):
     try:
         stores = cache.get("stores")
         if stores is None:
-            stores = Store.objects.prefetch_related("addresses", "users").all()
+            stores = Store.objects.prefetch_related("address", "users").all()
             cache.set("stores", stores, 21600)
 
         store_id = request.store.id or store_default

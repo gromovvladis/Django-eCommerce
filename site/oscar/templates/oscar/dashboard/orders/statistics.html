@@ -94,7 +94,7 @@
     {% block nav_tabs %}
       <div class="half-wrapper">
         <div class="nav tabs-button d-flex fill">
-          <div class="tabs-button__active-block" style="width: 25%; min-width: 130px; left: 0px;">
+          <div class="tabs-button__active-block" style="width: 25%; left: 0px;">
             <div class="fill-width fill-height"></div>
           </div>
           <button role="button" class="tabs-button__button {% if active_tab == 'day' %}active{% endif %}" href="#statistic_day" data-toggle="tab">День</button>
@@ -138,7 +138,7 @@
           </div>
         {% else %}
           <div class="d-flex justify-content-center fill-width my-2">
-            <h2>Заказы |<span class="text-primary">{{ start_date_days|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span></h2>
+            <h2>Заказы | <span class="text-primary">{{ start_date_days|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span></h2>
           </div>
           <div class="empty-report" style="min-height: 350px;">
             <span>Нет созданных заказов</span>
@@ -149,7 +149,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Все заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Все заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -188,7 +188,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Эвотор заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Эвотор заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -227,7 +227,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Онлайн заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Онлайн заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -416,7 +416,7 @@
           </div>
         {% else %}
           <div class="d-flex justify-content-center fill-width my-2">
-            <h2>Заказы |<span class="text-primary">{{ start_date_weeks|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span></h2>
+            <h2>Заказы | <span class="text-primary">{{ start_date_weeks|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span></h2>
           </div>
           <div class="empty-report" style="min-height: 350px;">
             <span>Нет созданных заказов</span>
@@ -427,7 +427,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Все заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Все заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -466,7 +466,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Эвотор заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Эвотор заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -505,7 +505,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Онлайн заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Онлайн заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -694,7 +694,7 @@
           </div>
         {% else %}
           <div class="d-flex justify-content-center fill-width my-2">
-            <h2>Заказы |<span class="text-primary">{{ start_date_months|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span></h2>
+            <h2>Заказы | <span class="text-primary">{{ start_date_months|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span></h2>
           </div>
           <div class="empty-report" style="min-height: 350px;">
             <span>Нет созданных заказов</span>
@@ -705,7 +705,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Все заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Все заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -744,7 +744,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Эвотор заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Эвотор заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -783,7 +783,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Онлайн заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Онлайн заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -971,7 +971,7 @@
           </div>
         {% else %}
           <div class="d-flex justify-content-center fill-width my-2">
-            <h2>Заказы |<span class="text-primary">{{ start_date_years|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span></h2>
+            <h2>Заказы | <span class="text-primary">{{ start_date_years|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span></h2>
           </div>
           <div class="empty-report" style="min-height: 350px;">
             <span>Нет созданных заказов</span>
@@ -982,7 +982,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Все заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Все заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -1021,7 +1021,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Эвотор заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Эвотор заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>
@@ -1060,7 +1060,7 @@
         <div class="col-md-4">
           <table class="table table-striped table-bordered table-hover table-text-right">
             <caption>
-              <i class="fas fa-shopping-cart"></i> Онлайн заказы |<span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
+              <i class="fas fa-shopping-cart"></i> Онлайн заказы | <span class="text-primary">{{ start_date|date:'d.m.y' }} - {{ end_date|date:'d.m.y' }}</span>
             </caption>
             <tr>
               <th class="col-md-10">Всего заказов</th>

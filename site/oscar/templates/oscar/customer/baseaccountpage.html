@@ -19,9 +19,7 @@
         <div class="profile__menu fill-width">
           <div class="d-flex flex-column fill-width pb-sm-3 ml-sm-2">
             <p class="profile__user-name">
-              Привет{% if request.user.name %}
-                , {{ request.user.name }}
-              {% endif %}!
+              Привет{% if request.user.name %}, {{ request.user.name }}{% endif %}!
             </p>
             <p class="profile__user-phone mt-1">{{ request.user.username }}</p>
           </div>

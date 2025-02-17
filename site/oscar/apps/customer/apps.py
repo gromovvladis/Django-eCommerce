@@ -97,22 +97,22 @@ class CustomerConfig(OscarConfig):
             ),
             # Address book
             path(
-                "addresses/",
+                "address/",
                 login_required(self.address_list_view.as_view()),
                 name="address-list",
             ),
             path(
-                "addresses/add/",
+                "address/add/",
                 login_required(self.address_create_view.as_view()),
                 name="address-create",
             ),
             path(
-                "addresses/<int:pk>/",
+                "address/<int:pk>/",
                 login_required(self.address_update_view.as_view()),
                 name="address-detail",
             ),
             path(
-                "addresses/<int:pk>/delete/",
+                "address/<int:pk>/delete/",
                 login_required(self.address_delete_view.as_view()),
                 name="address-delete",
             ),

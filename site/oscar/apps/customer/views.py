@@ -360,9 +360,6 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
         return "%s №%s" % ("Заказ", self.object.number)
 
     def get_object(self, queryset=None):
-        dfbdfb = get_object_or_404(
-            self.model, user=self.request.user, number=self.kwargs["order_number"]
-        )
         return get_object_or_404(
             self.model, user=self.request.user, number=self.kwargs["order_number"]
         )
@@ -431,11 +428,11 @@ class AddressListView(PageTitleMixin, generic.ListView):
     context_object_name = "addresses"
     template_name = "oscar/customer/address/address_list.html"
     paginate_by = settings.OSCAR_ADDRESSES_PER_PAGE
-    active_tab = "addresses"
+    active_tab = "address"
     page_title = "Адрес доставки"
 
     def get_queryset(self):
-        """Return customer's addresses"""
+        """Return customer's address"""
         return UserAddress._default_manager.filter(user=self.request.user)
 
     def get_context_data(self, *args, **kwargs):
@@ -449,7 +446,7 @@ class AddressCreateView(PageTitleMixin, generic.CreateView):
     form_class = UserAddressForm
     model = UserAddress
     template_name = "oscar/customer/address/address_form.html"
-    active_tab = "addresses"
+    active_tab = "address"
     page_title = "Добавить новый адрес"
     success_url = reverse_lazy("customer:address-list")
 
@@ -470,7 +467,6 @@ class AddressCreateView(PageTitleMixin, generic.CreateView):
         return ctx
 
     def get_success_url(self):
-        # messages.success(self.request, _("Address '%s' created") % self.object.summary)
         return super().get_success_url()
 
 
@@ -478,7 +474,7 @@ class AddressUpdateView(PageTitleMixin, generic.UpdateView):
     form_class = UserAddressForm
     model = UserAddress
     template_name = "oscar/customer/address/address_form.html"
-    active_tab = "addresses"
+    active_tab = "address"
     page_title = "Изменить адрес"
     success_url = reverse_lazy("customer:address-list")
 
@@ -494,8 +490,8 @@ class AddressUpdateView(PageTitleMixin, generic.UpdateView):
         ctx["content_open"] = True
         return ctx
 
-    def get_queryset(self):
-        return self.request.user.addresses.all()
+    def get_object(self):
+        return self.request.user.address
 
     def get_success_url(self):
         return super().get_success_url()
@@ -505,7 +501,7 @@ class AddressDeleteView(PageTitleMixin, generic.DeleteView):
     model = UserAddress
     template_name = "oscar/customer/address/address_delete.html"
     page_title = "Удалить адрес?"
-    active_tab = "addresses"
+    active_tab = "address"
     context_object_name = "address"
     success_url = reverse_lazy("customer:address-list")
 

@@ -20,7 +20,7 @@ class SetAddressView(PageTitleMixin, generic.CreateView):
     form_class = UserLiteAddressForm
     model = UserAddress
     template_name = "oscar/address/delivery-address.html"
-    active_tab = "addresses"
+    active_tab = "address"
     page_title = "Добавить адрес"
     context_object_name = "address"
     success_url = reverse_lazy("customer:address-list")
@@ -47,7 +47,7 @@ class SetAddressView(PageTitleMixin, generic.CreateView):
         context["readonly"] = False
         user_address = False
         if self.request.user.is_authenticated:
-            user_address = self.request.user.addresses.first()
+            user_address = self.request.user.address
         if user_address:
             context["line1"] = user_address.line1
             context["readonly"] = True

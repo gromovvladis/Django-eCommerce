@@ -92,7 +92,7 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
                 unquote(self.request.COOKIES.get("orderNote"))
             )
 
-        user_address = self.get_available_addresses()
+        user_address = self.get_available_address()
 
         if user_address:
             initial["line1"] = user_address.line1
@@ -146,8 +146,8 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
         # shipping method form
         if self.request.user.is_authenticated:
             # Look up address book data
-            address = self.get_available_addresses()
-            ctx["addresses"] = address
+            address = self.get_available_address()
+            ctx["address"] = address
             if address and address.coords_lat and address.coords_long:
                 shipping_charge, min_order = method.calculate(
                     self.request.basket, address
@@ -173,8 +173,8 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
     def get_success_response(self):
         return redirect(self.get_success_url())
 
-    def get_available_addresses(self):
-        return self.request.user.addresses.first()
+    def get_available_address(self):
+        return self.request.user.address
 
     def get_available_shipping_methods(self):
         """
