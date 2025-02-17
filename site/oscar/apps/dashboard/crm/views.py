@@ -27,7 +27,6 @@ from oscar.apps.crm.signals import (
     update_site_additionals,
     send_evotor_categories,
     send_evotor_products,
-    send_evotor_additionals,
 )
 
 logger = logging.getLogger("oscar.dashboard")
@@ -85,8 +84,11 @@ class CRMStoreListView(CRMTablesMixin):
     table_site = CRMStoreSiteTable
     url_redirect = reverse_lazy("dashboard:crm-stores")
 
+    def get_json(self):
+        return EvatorCloud().get_stores()
+
     def get_queryset(self):
-        data_json = EvatorCloud().get_stores()
+        data_json = self.get_json()
         error = data_json.get("error")
         if error:
             self.queryset = []
@@ -112,7 +114,7 @@ class CRMStoreListView(CRMTablesMixin):
                     # Партнер существует: проверяем совпадение полей
                     data_item["is_created"] = True
                     # Проверка совпадения полей
-                    address_matches = address == model_instance.primary_address
+                    address_matches = address == getattr(model_instance, "address", "")
                     data_item["is_valid"] = (
                         model_instance.name == name and address_matches
                     )
@@ -158,8 +160,11 @@ class CRMTerminalListView(CRMTablesMixin):
     table_site = CRMTerminalSiteTable
     url_redirect = reverse_lazy("dashboard:crm-terminals")
 
+    def get_json(self):
+        return EvatorCloud().get_terminals()
+
     def get_queryset(self):
-        data_json = EvatorCloud().get_terminals()
+        data_json = self.get_json()
         error = data_json.get("error")
         if error:
             self.queryset = []
@@ -235,8 +240,11 @@ class CRMStaffListView(CRMTablesMixin):
     table_site = CRMStaffSiteTable
     url_redirect = reverse_lazy("dashboard:crm-staffs")
 
+    def get_json(self):
+        return EvatorCloud().get_staffs()
+
     def get_queryset(self):
-        data_json = EvatorCloud().get_staffs()
+        data_json = self.get_json()
         error = data_json.get("error")
         if error:
             self.queryset = []
@@ -332,7 +340,7 @@ class CRMGroupsListView(CRMTablesMixin):
     table_site = CRMGroupSiteTable
     url_redirect = reverse_lazy("dashboard:crm-groups")
 
-    def get_queryset(self):
+    def get_json(self):
         self.form = self.form_class(self.request.GET)
         if not self.form.is_valid():
             messages.error(
@@ -351,8 +359,10 @@ class CRMGroupsListView(CRMTablesMixin):
             )
             return []
 
-        data_json = EvatorCloud().get_groups(store_evotor_id)
+        return EvatorCloud().get_groups(store_evotor_id)
 
+    def get_queryset(self):
+        data_json = self.get_json()
         error = data_json.get("error")
         if error:
             self.queryset = []
@@ -463,63 +473,7 @@ class CRMProductListView(CRMTablesMixin):
     table_site = CRMProductSiteTable
     url_redirect = reverse_lazy("dashboard:crm-products")
 
-    def get_site_table(self):
-        evotor_ids = [model_qs["id"] for model_qs in self.queryset]
-        correct_ids = [
-            model_qs["id"] for model_qs in self.queryset if model_qs["is_valid"] == True
-        ]
-
-        data = self.form.cleaned_data
-        store_id = data.get("store") or self.form.fields.get("store").initial
-
-        site_models = (
-            self.model.objects.filter(
-                Q(stockrecords__store__evotor_id=store_id)
-                | Q(children__stockrecords__store__evotor_id=store_id)
-            )
-            .annotate(
-                is_valid=Case(
-                    When(
-                        Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids),
-                        then=True,
-                    ),
-                    default=False,
-                    output_field=BooleanField(),
-                ),
-                wrong_evotor_id=Case(
-                    When(
-                        Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
-                        then=True,
-                    ),
-                    default=False,
-                    output_field=BooleanField(),
-                ),
-                min_price=Case(
-                    When(structure="parent", then=Min("children__stockrecords__price")),
-                    default=Min("stockrecords__price"),
-                    output_field=DecimalField(),
-                ),
-                max_price=Case(
-                    When(structure="parent", then=Max("children__stockrecords__price")),
-                    default=Max("stockrecords__price"),
-                    output_field=DecimalField(),
-                ),
-                old_price=Case(
-                    When(
-                        structure="parent",
-                        then=Max("children__stockrecords__old_price"),
-                    ),
-                    default=Max("stockrecords__old_price"),
-                    output_field=DecimalField(),
-                ),
-                variants=Count("children"),
-            )
-            .order_by("-wrong_evotor_id", "is_valid", "evotor_id", "-is_valid")
-        )
-
-        return self.table_site(site_models)
-
-    def get_queryset(self):
+    def get_json(self):
         self.form = self.form_class(self.request.GET)
         if not self.form.is_valid():
             messages.error(
@@ -538,7 +492,10 @@ class CRMProductListView(CRMTablesMixin):
             )
             return []
 
-        data_json = EvatorCloud().get_primary_products(store_evotor_id)
+        return EvatorCloud().get_primary_products(store_evotor_id)
+
+    def get_queryset(self):
+        data_json = self.get_json()
         error = data_json.get("error")
 
         if error:
@@ -654,26 +611,20 @@ class CRMProductListView(CRMTablesMixin):
         ctx["form"] = self.form
         return ctx
 
-
-class CRMAdditionalListView(CRMTablesMixin):
-    template_name = "oscar/dashboard/crm/additionals/additional_list.html"
-    model = Additional
-    form_class = CRMStoreForm
-    serializer = AdditionalsSerializer
-    context_table_name = "tables"
-    table_prefix = "additional_{}-"
-    table_evotor = CRMAdditionalEvotorTable
-    table_site = CRMAdditionalSiteTable
-    url_redirect = reverse_lazy("dashboard:crm-additionals")
-
     def get_site_table(self):
         evotor_ids = [model_qs["id"] for model_qs in self.queryset]
         correct_ids = [
             model_qs["id"] for model_qs in self.queryset if model_qs["is_valid"] == True
         ]
 
+        data = self.form.cleaned_data
+        store_id = data.get("store") or self.form.fields.get("store").initial
+
         site_models = (
-            self.model.objects.all()
+            self.model.objects.filter(
+                Q(stockrecords__store__evotor_id=store_id)
+                | Q(children__stockrecords__store__evotor_id=store_id)
+            )
             .annotate(
                 is_valid=Case(
                     When(
@@ -691,13 +642,44 @@ class CRMAdditionalListView(CRMTablesMixin):
                     default=False,
                     output_field=BooleanField(),
                 ),
+                min_price=Case(
+                    When(structure="parent", then=Min("children__stockrecords__price")),
+                    default=Min("stockrecords__price"),
+                    output_field=DecimalField(),
+                ),
+                max_price=Case(
+                    When(structure="parent", then=Max("children__stockrecords__price")),
+                    default=Max("stockrecords__price"),
+                    output_field=DecimalField(),
+                ),
+                old_price=Case(
+                    When(
+                        structure="parent",
+                        then=Max("children__stockrecords__old_price"),
+                    ),
+                    default=Max("stockrecords__old_price"),
+                    output_field=DecimalField(),
+                ),
+                variants=Count("children"),
             )
             .order_by("-wrong_evotor_id", "is_valid", "evotor_id", "-is_valid")
         )
 
         return self.table_site(site_models)
 
-    def get_queryset(self):
+
+class CRMAdditionalListView(CRMTablesMixin):
+    template_name = "oscar/dashboard/crm/additionals/additional_list.html"
+    model = Additional
+    form_class = CRMStoreForm
+    serializer = AdditionalsSerializer
+    context_table_name = "tables"
+    table_prefix = "additional_{}-"
+    table_evotor = CRMAdditionalEvotorTable
+    table_site = CRMAdditionalSiteTable
+    url_redirect = reverse_lazy("dashboard:crm-additionals")
+
+    def get_json(self):
         self.form = self.form_class(self.request.GET)
         if not self.form.is_valid():
             messages.error(
@@ -716,7 +698,10 @@ class CRMAdditionalListView(CRMTablesMixin):
             )
             return []
 
-        data_json = EvatorCloud().get_additionals_products(store_evotor_id)
+        return EvatorCloud().get_additionals_products(store_evotor_id)
+
+    def get_queryset(self):
+        data_json = self.get_json()
         error = data_json.get("error")
 
         if error:
@@ -809,6 +794,37 @@ class CRMAdditionalListView(CRMTablesMixin):
         ctx["form"] = self.form
         return ctx
 
+    def get_site_table(self):
+        evotor_ids = [model_qs["id"] for model_qs in self.queryset]
+        correct_ids = [
+            model_qs["id"] for model_qs in self.queryset if model_qs["is_valid"] == True
+        ]
+
+        site_models = (
+            self.model.objects.all()
+            .annotate(
+                is_valid=Case(
+                    When(
+                        Q(evotor_id__in=evotor_ids) & Q(evotor_id__in=correct_ids),
+                        then=True,
+                    ),
+                    default=False,
+                    output_field=BooleanField(),
+                ),
+                wrong_evotor_id=Case(
+                    When(
+                        Q(evotor_id__isnull=False) & ~Q(evotor_id__in=evotor_ids),
+                        then=True,
+                    ),
+                    default=False,
+                    output_field=BooleanField(),
+                ),
+            )
+            .order_by("-wrong_evotor_id", "is_valid", "evotor_id", "-is_valid")
+        )
+
+        return self.table_site(site_models)
+
 
 class CRMDocsListView(SingleTableView):
     template_name = "oscar/dashboard/crm/docs/doc_list.html"
@@ -817,35 +833,3 @@ class CRMDocsListView(SingleTableView):
     context_table_name = "table"
     # table_site = CRMDocSiteTable
     url_redirect = reverse_lazy("dashboard:crm-docs")
-
-
-class CRMAcceptListView(View):
-    pass
-
-
-class CRMRevaluationListView(View):
-    pass
-
-
-class CRMWriteOffListView(View):
-    pass
-
-
-class CRMInventoryListView(View):
-    pass
-
-
-class CRMSessionListView(View):
-    pass
-
-
-class CRMCashListView(View):
-    pass
-
-
-class CRMReportListView(View):
-    pass
-
-
-class CRMEventListView(View):
-    pass
