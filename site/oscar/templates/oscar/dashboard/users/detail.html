@@ -6,10 +6,6 @@
 {% load compress %}
 {% load static %}
 
-{% block body_class %}
-  {{ block.super }} users
-{% endblock %}
-
 {% block title %}
   Пользователь {{ customer.username }} | {{ block.super }}
 {% endblock %}

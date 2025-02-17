@@ -1,9 +1,5 @@
 {% extends 'oscar/dashboard/layout.html' %}
 
-{% block body_class %}
-  delete-source
-{% endblock %}
-
 {% block title %}
   Удалить способ оплаты "{{ source.source_type.name }}" у заказа №{{ source.order.number }}? | {{ block.super }}
 {% endblock %}
