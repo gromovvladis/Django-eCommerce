@@ -7,11 +7,7 @@
     <a class="dropdown-item" href="{% url 'dashboard:catalogue-category-update' pk=record.id %}">Редактировать категорию</a>
     <a class="dropdown-item" href="{% url 'dashboard:catalogue-category-create-child' parent=record.pk %}">Добавить дочернюю категорию</a>
     <a class="dropdown-item {% if not record.has_children %}disabled{% endif %}"
-      href="{% if not record.has_children %}
-        #
-      {% else %}
-        {% url 'dashboard:catalogue-category-detail-list' pk=record.pk %}
-      {% endif %}">
+      href="{% if not record.has_children %}#{% else %}{% url 'dashboard:catalogue-category-detail-list' pk=record.pk %}{% endif %}">
       Редактировать дочерние категории
     </a>
     <a class="dropdown-item" href="{% url 'dashboard:catalogue-category-delete' pk=record.id %}">Удалить</a>

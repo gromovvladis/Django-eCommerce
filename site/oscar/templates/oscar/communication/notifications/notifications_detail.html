@@ -68,10 +68,3 @@
     </div>
   </div>
 {% endblock %}
-
-{% block extrascripts %}
-  {{ block.super }}
-  {% compress js inline %}
-  <script src="{% static 'js/frontend/profile/profile-links.js' %}" defer></script>
-  {% endcompress %}
-{% endblock %}

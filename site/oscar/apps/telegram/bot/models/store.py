@@ -7,7 +7,7 @@ Store = get_model("store", "Store")
 
 @sync_to_async
 def get_stores(user):
-    return Store.objects.filter(users=user).prefetch_related("addresses")
+    return Store.objects.filter(users=user).prefetch_related("address")
 
 
 @sync_to_async

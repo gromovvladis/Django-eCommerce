@@ -214,14 +214,14 @@
             data-toggle="dropdown"
             aria-haspopup="true"
             aria-expanded="false"
-            class="btn btn-status dropdown-toggle {% if order.status == 'Завершён' %}
-              btn-success
+            class="badge {% if order.status == 'Завершён' %}
+              badge-success
             {% elif order.status == 'Отменен' %}
-              btn-danger
+              badge-danger
             {% elif order.status == 'Готовится' %}
-              btn-info
+              badge-info
             {% else %}
-              btn-warning
+              badge-warning
             {% endif %}">
             {{ order.status|default:'N/A' }}
           </span>
@@ -265,11 +265,7 @@
                             {% oscar_thumbnail image.original '90x90' upscale=False as thumb %}
                             <img class="img-dashboard"
                               src="{{ thumb.url }}"
-                              alt="{% if image.caption %}
-                                {{ image.caption }}
-                              {% else %}
-                                {{ line.name }}
-                              {% endif %}"
+                              alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}"
                               loading="lazy" />
                           {% endwith %}
                         {% else %}
@@ -277,11 +273,7 @@
                             {% oscar_thumbnail image.original '90x90' upscale=False as thumb %}
                             <img class="img-dashboard"
                               src="{{ thumb.url }}"
-                              alt="{% if image.caption %}
-                                {{ image.caption }}
-                              {% else %}
-                                {{ line.name }}
-                              {% endif %}"
+                              alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}"
                               loading="lazy" />
                           {% endwith %}
                         {% endif %}

@@ -35,63 +35,71 @@
 {% block dashboard_content %}
   {% block user_general_info %}
     <div class="half-wrapper">
-      <div class="table-header d-flex">
-        <h2>Основное</h2>
-        <span class="badge badge-info ml-2">{{ customer.date_joined|from_now }} / {{ user_info.order_count|default:'0' }} зак.</span>
-      </div>
       <table class="table table-bordered">
-        <tr>
-          <th>Имя</th>
-          <td>{{ customer.get_full_name|default:'-' }}</td>
-        </tr>
-        <tr>
-          <th>Email</th>
-          <td>{{ customer.email|default:'-' }}</td>
-        </tr>
-        <tr>
-          <th>Телеграм</th>
-          <td>{{ customer.telegram_id|yesno:'✔️,❌' }}</td>
-        </tr>
-        <tr>
-          <th>Активен</th>
-          <td>{{ customer.is_active|yesno:'✔️,❌' }}</td>
-        </tr>
-        <tr>
-          <th>Сотрудник</th>
-          <td>{{ customer.is_staff|yesno:'✔️,❌' }}</td>
-        </tr>
-        <tr>
-          <th>Последний вход</th>
-          <td>{{ customer.last_login|date:'d.m H:i' }}</td>
-        </tr>
-        <tr>
-          <th>Дата регистрации</th>
-          <td>{{ customer.date_joined|date:'d.m H:i' }}</td>
-        </tr>
-        {% if customer.userrecord %}
-          {% with record=customer.userrecord %}
-            <tr>
-              <th>Товаров просмотренно</th>
-              <td>{{ record.num_product_views|default:0 }}</td>
-            </tr>
-            <tr>
-              <th>Количество заказов</th>
-              <td>{{ record.num_orders|default:0 }}</td>
-            </tr>
-            <tr>
-              <th>Количество заказанных товаров</th>
-              <td>{{ record.num_order_items|default:0 }}</td>
-            </tr>
-            <tr>
-              <th>Всего потрачено</th>
-              <td>{{ record.total_spent|default:0|currency }}</td>
-            </tr>
-          {% endwith %}
-        {% endif %}
-        <tr>
-          <th>Написанные отзывы</th>
-          <td>{{ customer.total_reviews }}</td>
-        </tr>
+        <caption class="table-caption" data-target="#client-body" data-toggle="collapse" aria-controls="client-body" aria-expanded="true">
+          <div class="d-flex justify-space-between">
+            <h2>
+              Основное
+              <span class="badge badge-info ml-2">{{ customer.date_joined|from_now }} / {{ user_info.order_count|default:'0' }} зак.</span>
+            </h2>
+            <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+            <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+          </div>
+        </caption>
+        <tbody id="client-body">
+          <tr>
+            <th>Имя</th>
+            <td>{{ customer.get_full_name|default:'-' }}</td>
+          </tr>
+          <tr>
+            <th>Email</th>
+            <td>{{ customer.email|default:'-' }}</td>
+          </tr>
+          <tr>
+            <th>Телеграм</th>
+            <td>{{ customer.telegram_id|yesno:'✔️,❌' }}</td>
+          </tr>
+          <tr>
+            <th>Активен</th>
+            <td>{{ customer.is_active|yesno:'✔️,❌' }}</td>
+          </tr>
+          <tr>
+            <th>Сотрудник</th>
+            <td>{{ customer.is_staff|yesno:'✔️,❌' }}</td>
+          </tr>
+          <tr>
+            <th>Последний вход</th>
+            <td>{{ customer.last_login|date:'d.m H:i' }}</td>
+          </tr>
+          <tr>
+            <th>Дата регистрации</th>
+            <td>{{ customer.date_joined|date:'d.m H:i' }}</td>
+          </tr>
+          {% if customer.userrecord %}
+            {% with record=customer.userrecord %}
+              <tr>
+                <th>Товаров просмотренно</th>
+                <td>{{ record.num_product_views|default:0 }}</td>
+              </tr>
+              <tr>
+                <th>Количество заказов</th>
+                <td>{{ record.num_orders|default:0 }}</td>
+              </tr>
+              <tr>
+                <th>Количество заказанных товаров</th>
+                <td>{{ record.num_order_items|default:0 }}</td>
+              </tr>
+              <tr>
+                <th>Всего потрачено</th>
+                <td>{{ record.total_spent|default:0|currency }}</td>
+              </tr>
+            {% endwith %}
+          {% endif %}
+          <tr>
+            <th>Написанные отзывы</th>
+            <td>{{ customer.total_reviews }}</td>
+          </tr>
+        </tbody>
       </table>
     </div>
   {% endblock %}
@@ -115,14 +123,12 @@
                   {% endwith %}
                 {% endif %}
               </button>
-              <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_addresses' %}active{% endif %}" href="#user_addresses" data-toggle="tab">
+              <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_address' %}active{% endif %}" href="#user_address" data-toggle="tab">
                 <i class="fa-solid fa-truck-fast"></i>
                 <span>Доставка</span>
-                {% with address=customer.addresses.count %}
-                  {% if address %}
-                    <div class="dropdown-item-badge">{{ address }}</div>
-                  {% endif %}
-                {% endwith %}
+                {% if customer.address %}
+                  <div class="dropdown-item-badge">1</div>
+                {% endif %}
               </button>
               <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_reviews' %}active{% endif %}" href="#user_reviews" data-toggle="tab">
                 <i class="fa-regular fa-note-sticky"></i>
@@ -152,11 +158,11 @@
             </div>
           </div>
         {% endblock %}
-        {% block user_addresses %}
-          <div id="user_addresses" class="tab-pane fade" role="tabpanel">
+        {% block user_address %}
+          <div id="user_address" class="tab-pane fade" role="tabpanel">
             <table class="table table-striped table-bordered table-hover half-wrapper">
               <caption>Адрес доставки</caption>
-              {% with address=customer.addresses.first %}
+              {% with address=customer.address %}
                 {% if address %}
                   {% for field in address.active_address_fields_and_labels %}
                     <tr>

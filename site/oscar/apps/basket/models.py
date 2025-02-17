@@ -258,12 +258,10 @@ class Basket(models.Model):
                 raise ValueError(
                     ("Данный товар не доступен в %s, закажите его в %s")
                     % (
-                        Store.objects.get(store_id=self.store_id)
-                        .addresses.first()
-                        .line1,
-                        Store.objects.get(store_id=line.stockrecord.store_id)
-                        .addresses.first()
-                        .line1,
+                        Store.objects.get(store_id=self.store_id).primary_address,
+                        Store.objects.get(
+                            store_id=line.stockrecord.store_id
+                        ).primary_address,
                     )
                 )
 

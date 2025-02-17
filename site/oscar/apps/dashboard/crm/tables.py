@@ -100,7 +100,7 @@ class CRMStoreSiteTable(DashboardTable):
     address = TemplateColumn(
         verbose_name="Адрес",
         template_name="oscar/dashboard/stores/store_row_address.html",
-        order_by="addresses",
+        order_by="address",
     )
     actions = TemplateColumn(
         verbose_name="",

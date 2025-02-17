@@ -79,8 +79,6 @@
                   <h3>Название атрибута</h3>
                 </div>
                 <div class="card card-body attribute-option-group-details">
-                  {% comment %}If the AttributeOptionGroup form has field_errors, partials/form_fields.html will render an error message. This means that there'll be 2 error messages, one from the partial and one from the view. Perhaps there should be an option allowing hiding of the error message in the template. For now we copy paste what we need from the template.{% endcomment %}
-
                   {% if form.non_field_errors %}
                     {% for error in form.non_field_errors %}
                       <div class="alert alert-danger">
@@ -88,14 +86,12 @@
                       </div>
                     {% endfor %}
                   {% endif %}
-
                   {% for field in form %}
                     {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
                   {% endfor %}
                 </div>
               </div>
             {% endblock %}
-
             {% block attribute_options %}
               <div class="tab-pane" id="attribute_options">
                 <div class="table-header">

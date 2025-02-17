@@ -85,11 +85,7 @@
                               <a href="#" data-original="{{ image.original.url }}" class="sub-image">
                                 <img class="img-dashboard"
                                   src="{{ thumb.url }}"
-                                  alt="{% if image.caption %}
-                                    {{ image.caption }}
-                                  {% else %}
-                                    {{ record.name }}
-                                  {% endif %}"
+                                  alt="{% if image.caption %}{{ image.caption }}{% else %}{{ record.name }}{% endif %}"
                                   loading="lazy" />
                               </a>
                             {% endwith %}
@@ -99,9 +95,9 @@
                         </td>
                         <td class="name">
                           <a href="{% url 'dashboard:catalogue-product' pk=product.id %}">{{ product.get_name }}</a>
-                          {% if product.is_child and product.variant %}
+                          {% if product.is_child %}
                             <br />
-                            <span class="small">{{ product.variant }}</span>
+                            <span class="small">{{ product.get_variants }}</span>
                           {% endif %}
                           <br />
                           <span class="text-muted small">Артикул: {{ product.article|default:'-' }}</span>
@@ -230,11 +226,7 @@
                             <a href="#" data-original="{{ image.original.url }}" class="sub-image">
                               <img class="img-dashboard"
                                 src="{{ thumb.url }}"
-                                alt="{% if image.caption %}
-                                  {{ image.caption }}
-                                {% else %}
-                                  {{ record.name }}
-                                {% endif %}"
+                                alt="{% if image.caption %}{{ image.caption }}{% else %}{{ record.name }}{% endif %}"
                                 loading="lazy" />
                             </a>
                           {% endwith %}

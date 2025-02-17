@@ -13,7 +13,15 @@ def transaction_created(sender, instance, created, **kwargs):
     """
     Запускает задачу при обновлении объекта Source.
     """
-    if settings.DEBUG:
-        create_store_cash_transaction_task(instance.id)
-    else:
-        create_store_cash_transaction_task.delay(instance.id)
+    if instance.source.reference in settings.CASH_PAYMENTS:
+        order = instance.source.order
+        store = order.store
+        txn_type = instance.txn_type
+        if settings.DEBUG:
+            create_store_cash_transaction_task(
+                instance.amount, order.id, store.id, txn_type
+            )
+        else:
+            create_store_cash_transaction_task.delay(
+                instance.amount, order.id, store.id, txn_type
+            )

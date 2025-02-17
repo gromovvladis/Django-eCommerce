@@ -4,20 +4,20 @@
   {% if error %}
     <div class="alert alert-danger">{{ error }}</div>
   {% endif %}
-  <div class="order__wrapper d-flex flex-column">
+  <div class="order__wrapper">
     <div class="order__form d-flex flex-column fill-width">
       <div class="order__title d-none d-sm-block mb-4">
         <h1>Оформление заказа</h1>
       </div>
-      {% if basket.is_shipping_required %}
-        <div data-id="input-field" class="input input-textarea d-flex align-center mb-1 mb-sm-2 input__padding{% if form.initial.order_note %} input__label-active{% endif %}">
-          <div class="input__wrapper">
-            <div class="input__label">Комментарий к заказу</div>
-            <div class="input__control d-flex align-center" contenteditable>
-              {% include 'oscar/partials/render_field.html' with field=form.order_note form_id='place_order_form' data_id='order-input-comment' %}
-            </div>
+      <div data-id="input-field" class="input input-textarea d-flex align-center mb-1 mb-sm-2 input__padding{% if form.initial.order_note %} input__label-active{% endif %}">
+        <div class="input__wrapper">
+          <div class="input__label">Комментарий к заказу</div>
+          <div class="input__control d-flex align-center" contenteditable>
+            {% include 'oscar/partials/render_field.html' with field=form.order_note form_id='place_order_form' data_id='order-input-comment' %}
           </div>
         </div>
+      </div>
+      {% if basket.is_shipping_required %}
         <div class="delivery__map full-screen">
           <div class="map fill-width fill-height">
             <div id="map" data-full-screen="true" class="fill-width fill-height"></div>
@@ -43,15 +43,6 @@
                   <button class="tabs-button__button" data-id="delivery-method-button" name="method_code" value="{{ method.code }}">{{ method.name }}</button>
                 {% endfor %}
               </div>
-            </div>
-          </div>
-        </div>
-      {% else %}
-        <div data-id="input-field" class="input input-textarea d-flex align-center mb-4 mb-sm-3 input__padding{% if form.initial.order_note %} input__label-active{% endif %}">
-          <div class="input__wrapper">
-            <div class="input__label">Комментарий к заказу</div>
-            <div class="input__control d-flex align-center" contenteditable>
-              {% include 'oscar/partials/render_field.html' with field=form.order_note form_id='place_order_form' data_id='order-input-comment' %}
             </div>
           </div>
         </div>

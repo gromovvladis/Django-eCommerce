@@ -26,7 +26,7 @@
           </button>
         </div>
       </form>
-      {% comment %} {% if search_filters %}
+      {% if search_filters %}
         <div class="search-filter-list mt-4">
           <label class="mr-2">Фильтры:</label>
           {% for filter, param in search_filters %}
@@ -36,7 +36,7 @@
             </span>
           {% endfor %}
         </div>
-      {% endif %} {% endcomment %}
+      {% endif %}
     </div>
   </div>
   <form method="post" class="mobile-table">

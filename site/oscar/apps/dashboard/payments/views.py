@@ -391,16 +391,16 @@ class RefundTransactionView(DetailView):
 
         # Next, try looking up by primary key.
         pk = self.kwargs.get("pk")
-        code = self.kwargs.get("code")
         if pk is not None:
             queryset = queryset.filter(pk=pk)
 
         # Next, try looking up by slug.
-        if code is not None and pk is None:
-            queryset = queryset.filter(code=code)
+        payment_id = self.kwargs.get("payment_id")
+        if payment_id is not None and pk is None:
+            queryset = queryset.filter(payment_id=payment_id)
 
         # If none of those are defined, it's an error.
-        if pk is None and code is None:
+        if pk is None and payment_id is None:
             raise AttributeError(
                 "Generic detail view %s must be called with either an object "
                 "pk or a slug in the URLconf." % self.__class__.__name__

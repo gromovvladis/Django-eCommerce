@@ -42,9 +42,6 @@
 {% block extrascripts %}
   {{ block.super }}
   {% compress js %}
-  <script src="{% static 'js/frontend/address/edit-address.js' %}" defer></script>
-  {% endcompress %}
-  {% compress js inline %}
-  <script src="{% static 'js/frontend/profile/profile-links.js' %}" defer></script>
+  <script src="{% static 'js/frontend/profile/edit-address.js' %}" defer></script>
   {% endcompress %}
 {% endblock %}

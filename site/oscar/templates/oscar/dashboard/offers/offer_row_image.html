@@ -5,11 +5,7 @@
   <a href="#" data-original="{{ image.original.url }}" class="sub-image">
     <img class="img-dashboard"
       src="{{ thumb.url }}"
-      alt="{% if image.caption %}
-        {{ image.caption }}
-      {% else %}
-        {{ record.get_name }}
-      {% endif %}"
+      alt="{% if image.caption %}{{ image.caption }}{% else %}{{ record.get_name }}{% endif %}"
       loading="lazy" />
   </a>
 {% endwith %}

@@ -36,13 +36,6 @@
   </div>
 {% endblock %}
 
-{% block extrastyles %}
-  {{ block.super }}
-  {% compress css %}
-  <link rel="stylesheet" href="{% static 'css/thirdpaty/datetimepicker/air-datepicker.css' %}" />
-  {% endcompress %}
-{% endblock %}
-
 {% block content %}
   <div class="order d-flex flex-column flex-md-row align-md-start">
     {% block chekout_form %}
@@ -106,11 +99,8 @@
 {% block extrascripts %}
   {{ block.super }}
   {% compress js %}
-  <script src="{% static 'js/thirdpaty/datetimepicker/air-datepicker.js' %}" defer></script>
-  {% endcompress %}
-  {% compress js %}
   <script src="{% static 'js/frontend/checkout/checkout-main.js' %}" defer></script>
-  <script src="{% static 'js/frontend/datetimepicker/order-timepicker.js' %}" defer></script>
+  <script src="{% static 'js/frontend/checkout/order-timepicker.js' %}" defer></script>
   <script src="{% static 'js/frontend/checkout/voucher.js' %}" defer></script>
   <script src="{% static 'js/frontend/checkout/cookie-checkout.js' %}" defer></script>
   {% endcompress %}

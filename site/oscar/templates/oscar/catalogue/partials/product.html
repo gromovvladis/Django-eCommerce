@@ -4,7 +4,7 @@
 
 {% block product %}
   {% purchase_info_for_product request product as session %}
-  <div class="dish card elevation-none{% if not session.availability.is_available_to_buy %} dish unavailable{% endif %}">
+  <div class="dish card elevation-none{% if not session.availability.is_available_to_buy %} unavailable{% endif %}">
     <div class="dish-wrapper grow-1">
       {% cache 3600 product_compact_img product %}
       {% block product_image %}
@@ -22,26 +22,24 @@
       {% endcache %}
       <div class="pos-relative product-description d-flex flex-column">
         {% cache 3600 product_compact_desc product %}
-        <div class="grow-1 pd-0 card__text mt-2">
-          <a href="{{ product.get_absolute_url }}" title="{{ product.get_name }}" class="d-flex flex-column fill-height fill-width px-2 py-0 px-sm-2" data-id="dish-item-link">
-            <div class="dish_name-wrapper d-flex align-start">
-              <h3 class="dish__name">{{ product.get_name|truncatewords:4 }}</h3>
-              <div role="separator" class="spacer"></div>
-              {% if product.has_weight %}
-                <div class="weight">{{ product.weight }} г</div>
-              {% endif %}
-            </div>
-            {% if product.short_description %}
-              <div class="d-flex align-center mt-1">
-                <span class="short-description">{{ product.short_description }}</span>
-              </div>
-            {% endif %}
+        <a href="{{ product.get_absolute_url }}" title="{{ product.get_name }}" class="d-flex flex-column fill-height fill-width px-2 py-0 px-sm-2 mt-2" data-id="dish-item-link">
+          <div class="dish_name-wrapper d-flex align-start">
+            <h3 class="dish__name">{{ product.get_name|truncatewords:4 }}</h3>
             <div role="separator" class="spacer"></div>
-          </a>
-        </div>
+            {% if product.has_weight %}
+              <div class="weight">{{ product.weight }} г</div>
+            {% endif %}
+          </div>
+          {% if product.short_description %}
+            <div class="d-flex align-center mt-1">
+              <span class="short-description">{{ product.short_description }}</span>
+            </div>
+          {% endif %}
+          <div role="separator" class="spacer"></div>
+        </a>
         {% endcache %}
         {% cache 1200 product_compact_price product.date_updated session.stockrecords.latest.date_updated %}
-        <div class="align-center fill-width px-sm-2 pb-sm-2 card__actions d-flex align-end">
+        <div class="card__actions fill-width px-sm-2 pb-sm-2 align-end">
           {% if session.availability.is_available_to_buy and session.price.exists %}
             {% include 'oscar/catalogue/partials/product_price.html' %}
             <div role="separator" class="spacer"></div>

@@ -18,7 +18,7 @@ class StoreSelectForm(forms.Form):
 
         stores = cache.get("stores")
         if not stores:
-            stores = Store.objects.prefetch_related("addresses", "users").all()
+            stores = Store.objects.prefetch_related("address", "users").all()
             cache.set("stores", stores, 21600)
 
         self.fields["store_id"].choices = [

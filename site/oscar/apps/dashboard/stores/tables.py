@@ -31,7 +31,7 @@ class StoreListTable(DashboardTable):
     address = TemplateColumn(
         verbose_name="Адрес",
         template_name="oscar/dashboard/stores/store_row_address.html",
-        order_by="addresses",
+        order_by="address",
     )
     is_active = TemplateColumn(
         verbose_name="Активен",

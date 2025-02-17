@@ -12,6 +12,7 @@
   {% compress css %}
   <link rel="stylesheet" href="{% static 'css/frontend/variables.css' %}" />
   <link rel="stylesheet" href="{% static 'css/frontend/planet-styles.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/thirdpaty/datetimepicker/air-datepicker.css' %}" />
   {% endcompress %}
 {% endblock %}
 
@@ -26,12 +27,14 @@
           {% include 'oscar/includes/header.html' %}
         </div>
       </header>
-      <nav class="app__nav {% block nav_class %}{% endblock %}">
+      <nav class="app__nav {% block nav_class %}
+        {% endblock %}">
         <div class="app-nav d-flex align-center py-0 fill-height">
           <button onclick="getBack(); return false" data-id="back-main-btn" class="button app-nav__back button--small justify-center mx-2 shrink" aria-label="Назад"><span class="button__wrapper d-flex">{% icon file_name='interface/arrow-home' size=24 stroke='#000' %}</span></button>
           <div class="cats_header fill-height fill-width">
             <div class="app-nav__title d-flex d-sm-none text-center d-flex">
-              {% block nav_title %}{% endblock %}
+              {% block nav_title %}
+              {% endblock %}
             </div>
             {% cache 3600 root_category %}
             <ul class="d-flex align-center fill-height">
@@ -39,7 +42,7 @@
               {% if root_categories %}
                 {% for root_category in root_categories %}
                   <li>
-                    <a class="cat_item {% if root_category.pk == category.pk %} cat_item--active{% endif %} mr-2" href="{{ root_category.url }}" data-id="categories-tabs-item-hits">{{ root_category.name }}</a>
+                    <a class="cat_item {% if root_category.pk == category.pk %}cat_item--active{% endif %} mr-2" href="{{ root_category.url }}" data-id="categories-tabs-item-hits">{{ root_category.name }}</a>
                   </li>
                 {% endfor %}
               {% endif %}
@@ -54,7 +57,8 @@
             <span>&nbsp;&nbsp;|&nbsp;&nbsp;<span data-id="cart-nums">{{ request.basket.num_items }}</span></span>
           </a>
           <div class="app-nav__title app-nav__title--center d-flex d-sm-none text-center">
-            {% block nav_title_center %}{% endblock %}
+            {% block nav_title_center %}
+            {% endblock %}
           </div>
           <div role="separator" class="spacer"></div>
           <button type="button" data-id="modal-open-close" class="button button--small button--empty-cart ml-2 justify-center shrink mr-2" aria-label="Очистить корзину"><span class="button__wrapper d-flex">{% icon file_name='interface/empty' size=20 stroke='#d32225' %}</span></button>
@@ -67,15 +71,20 @@
     <div class="app__wrapper">
       <main class="app__content">
         {% block carousel %}
+
         {% endblock %}
         <div class="d-flex align-start pd-0 fill-height container">
-          <div class="{% block wrapper_class %}{% endblock %}">
+          <div class="{% block wrapper_class %}
+            {% endblock %}">
             {% include 'oscar/partials/alert_messages.html' %}
-            {% block breadcrumbs %}{% endblock %}
+            {% block breadcrumbs %}
+            {% endblock %}
             {% if delivery_available %}
-              {% block sticky_address %}{% endblock %}
+              {% block sticky_address %}
+              {% endblock %}
             {% endif %}
-            {% block content %}{% endblock %}
+            {% block content %}
+            {% endblock %}
           </div>
         </div>
       </main>
@@ -102,18 +111,26 @@
   {% compress js %}
   <script src="{% static 'js/thirdpaty/slider/slider.js' %}" defer></script>
 
-  <script src="{% static 'js/frontend/cookie/cookie-main.js' %}" defer></script>
   <script src="{% static 'js/frontend/homepage/homepage-sliders.js' %}" defer></script>
-  <script src="{% static 'js/frontend/delivery/delivery.js' %}" defer></script>
+  <script src="{% static 'js/frontend/cookie/cookie-main.js' %}" defer></script>
 
   <script src="{% static 'js/frontend/catalogue/add-to-cart-compact.js' %}" defer></script>
   <script src="{% static 'js/frontend/catalogue/add-to-cart.js' %}" defer></script>
   <script src="{% static 'js/frontend/catalogue/add-to-wishlist.js' %}" defer></script>
-  <script src="{% static 'js/frontend/basket/basket.js' %}" defer></script>
 
   <script src="{% static 'js/frontend/auth/auth.js' %}" defer></script>
   <script src="{% static 'js/frontend/store/store.js' %}" defer></script>
   <script src="{% static 'js/frontend/footer/footer.js' %}" defer></script>
+
+  <script src="{% static 'js/frontend/basket/basket.js' %}" defer></script>
+
+  <script src="{% static 'js/frontend/delivery/delivery.js' %}" defer></script>
+
+  <script src="{% static 'js/frontend/profile/profile.js' %}" defer></script>
+  <script src="{% static 'js/frontend/profile/profile-edit.js' %}" defer></script>
+  <script src="{% static 'js/frontend/profile/notifications.js' %}" defer></script>
+
+  <script src="{% static 'js/thirdpaty/datetimepicker/air-datepicker.js' %}" defer></script>
   {% endcompress %}
 {% endblock %}
 

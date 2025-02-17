@@ -1,6 +1,4 @@
-<form {% if form_id %}id="{{ form_id }}"{% endif %} class="form-{{ style|default:"stacked" }} {{ class }}" method="{{ method|default:"post" }}"
-{% if action %}action="{{ action }}"{% endif %}
-{% if includes_files %}enctype="multipart/form-data"{% endif %}>
+<form {% if form_id %}id="{{ form_id }}"{% endif %} class="form-{{ style|default:"stacked" }} {{ class }}" method="{{ method|default:"post" }}" {% if action %}action="{{ action }}"{% endif %} {% if includes_files %}enctype="multipart/form-data"{% endif %}>
   {% if not method == 'get' %}{% csrf_token %}{% endif %}
   {% include 'oscar/dashboard/partials/form_fields.html' %}
   <div class="form-group form-actions fill-width my-2">

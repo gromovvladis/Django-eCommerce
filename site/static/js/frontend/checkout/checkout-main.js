@@ -1,3 +1,4 @@
+
 var addressFields = document.getElementById('address_fields');
 var submitBtn = document.getElementById('submit_order');
 
@@ -19,15 +20,15 @@ var shippingMethodButtons = document.querySelectorAll('[data-id="delivery-method
 var methodSwaper = document.querySelector('[data-id="delivery-method-block"]');
 var timeSwaper = document.querySelector('[data-id="delivery-time-block"]');
 var timeTitle = document.querySelector('[data-id="order-time-title"]');
-var shipping = document.querySelector('#id_method_code');
+var shipping = document.getElementById('id_method_code');
 
 var checkoutTotals = document.getElementById('checkout_totals');
 var checkout_fields = document.querySelectorAll('[data-id="input-field"]');
 var textares = document.querySelectorAll('textarea');
 var paymentMethod = document.getElementById('id_payment_method');
-var line2 = document.querySelector('#id_line2');
-var line3 = document.querySelector('#id_line3');
-var line4 = document.querySelector('#id_line4');
+var line2 = document.getElementById('id_line2');
+var line3 = document.getElementById('id_line3');
+var line4 = document.getElementById('id_line4');
 var emailBlock = document.querySelector('[data-field="email-field"]');
 var emailField = emailBlock.querySelector('#email_field_label');
 

@@ -163,7 +163,7 @@ class OrderNowView(APIView):
         try:
             line = basket.lines.first()
             store = line.stockrecord.store
-            store_address = store.addresses.first()
+            store_address = store.address
             start_point = [store_address.coords_long, store_address.coords_lat]
         except Exception:
             start_point = [56.050918, 92.904378]

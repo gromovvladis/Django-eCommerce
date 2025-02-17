@@ -214,22 +214,14 @@ class UserAddress(ShippingAddress):
     book without affecting orders already placed.
     """
 
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="addresses",
+        related_name="address",
         verbose_name="Пользователь",
     )
 
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        try:
-            self.__class__._default_manager.get(user=self.user).delete()
-        except Exception:
-            pass
-
-        super().save(*args, **kwargs)
 
     class Meta:
         app_label = "address"
@@ -243,10 +235,10 @@ class StoreAddress(Address):
     determining US which depends on the origin of the shipment.
     """
 
-    store = models.ForeignKey(
+    store = models.OneToOneField(
         "store.Store",
         on_delete=models.CASCADE,
-        related_name="addresses",
+        related_name="address",
         verbose_name="Магазин",
     )
 

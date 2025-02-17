@@ -13,7 +13,6 @@
             Пожалуйста, проверьте сообщения об ошибках ниже и попробуйте еще раз
           </div>
         {% endif %}
-
         {% if form.non_field_errors %}
           {% for error in form.non_field_errors %}
             <div class="alert alert-danger form-group">
@@ -21,7 +20,6 @@
             </div>
           {% endfor %}
         {% endif %}
-
         {% for field in form %}
           {% if field.name != 'date_range' %}
             {% include 'oscar/dashboard/partials/form_field.html' with field=field style=style %}
