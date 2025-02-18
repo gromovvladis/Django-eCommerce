@@ -47,7 +47,7 @@ class SetAddressView(PageTitleMixin, generic.CreateView):
         context["readonly"] = False
         user_address = False
         if self.request.user.is_authenticated:
-            user_address = self.request.user.address
+            user_address = getattr(self.request.user, "address", None)
         if user_address:
             context["line1"] = user_address.line1
             context["readonly"] = True
