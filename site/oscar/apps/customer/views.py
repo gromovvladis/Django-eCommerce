@@ -491,7 +491,7 @@ class AddressUpdateView(PageTitleMixin, generic.UpdateView):
         return ctx
 
     def get_object(self):
-        return self.request.user.address
+        return getattr(self.request.user, "address", None)
 
     def get_success_url(self):
         return super().get_success_url()

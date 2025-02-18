@@ -174,7 +174,7 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
         return redirect(self.get_success_url())
 
     def get_available_address(self):
-        return self.request.user.address
+        return getattr(self.request.user, "address", None)
 
     def get_available_shipping_methods(self):
         """
