@@ -1,6 +1,7 @@
 {% extends 'oscar/layout.html' %}
-{% load static %}
+
 {% load svg_tags %}
+{% load static %}
 
 {% block title %}
   {{ flatpage.title }} | {{ block.super }}
@@ -13,6 +14,7 @@
 {% block app_class %}
   app---flatpage
 {% endblock %}
+
 {% block nav_class %}
   app__nav--flatpage
 {% endblock %}

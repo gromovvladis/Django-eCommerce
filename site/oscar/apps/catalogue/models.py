@@ -1,27 +1,27 @@
-import logging
-import uuid
 import os
+import uuid
+import logging
 from treebeard.mp_tree import MP_Node
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.staticfiles.finders import find
+from django.db import models
+from django.db.models import Count, Exists, OuterRef, Sum
+from django.db.models.fields import Field
+from django.db.models.lookups import StartsWith
+from django.urls import reverse
+from django.utils.functional import cached_property
+from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
+from django.template.defaultfilters import striptags
+from django.core.files.base import File
 from django.core.cache import cache
 from django.core.exceptions import (
     ImproperlyConfigured,
     ValidationError,
     ObjectDoesNotExist,
 )
-from django.core.files.base import File
-from django.db import models
-from django.db.models import Count, Exists, OuterRef, Sum
-from django.db.models.fields import Field
-from django.db.models.lookups import StartsWith
-from django.template.defaultfilters import striptags
-from django.urls import reverse
-from django.utils.functional import cached_property
-from django.utils.html import strip_tags
-from django.utils.safestring import mark_safe
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import get_default_currency, slugify
@@ -185,13 +185,6 @@ class Category(MP_Node):
     COMPARISON_FIELDS = ("pk", "path", "depth")
 
     name = models.CharField("Имя", max_length=255, db_index=True)
-    # code = NullCharField(
-    #     "Код",
-    #     max_length=255,
-    #     blank=True,
-    #     null=True,
-    #     unique=True,
-    # )
     description = models.TextField("Описание", blank=True)
     meta_title = models.CharField(
         "Мета заголовок", max_length=255, blank=True, null=True
@@ -289,7 +282,15 @@ class Category(MP_Node):
         Generates a slug for a category. This makes no attempt at generating
         a unique slug.
         """
-        return slugify(self.name)
+        original_slug = slugify(self.name)
+        slug = original_slug
+        counter = 1
+
+        # Проверка на уникальность slug
+        while self.__class__.objects.filter(slug=slug).exclude(id=self.id).exists():
+            slug = f"{original_slug}-{counter}"
+            counter += 1
+        return slug
 
     def save(self, *args, **kwargs):
         """
@@ -378,6 +379,10 @@ class Category(MP_Node):
                 "category_slug": self.get_full_slug(parent_slug=parent_slug),
             },
         )
+
+    def get_evotor_parent_id(self):
+        parent = self.get_parent()
+        return parent.evotor_id if parent else ""
 
     def get_absolute_url(self):
         return self._get_absolute_url()
@@ -470,7 +475,8 @@ class Product(models.Model):
         unique=True,
         help_text=(
             "Универсальный код товара (Артикул) является идентификатором для "
-            "товара, который является специфичным для конкретного товара."
+            "товара, который является специфичным для конкретного товара. "
+            "Оставьте пустым, чтобы заполнить автоматически."
         ),
     )
     parent = models.ForeignKey(
@@ -493,9 +499,17 @@ class Product(models.Model):
     name = models.CharField("Название", max_length=255, blank=True)
 
     slug = SlugField("Ярлык", max_length=255, unique=True)
-    description = models.TextField("Описание", blank=True)
+    description = models.TextField(
+        "Описание",
+        blank=True,
+        help_text=("Описание которое отображается в списке товаров."),
+    )
     short_description = models.CharField(
-        "Краткое описание", max_length=255, null=True, blank=True
+        "Краткое описание",
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=("Описание которое отображается в списке товаров."),
     )
 
     meta_title = models.CharField(
@@ -964,11 +978,8 @@ class Product(models.Model):
     get_categories.short_description = "Категории"
 
     def get_evotor_parent_id(self):
-        if self.is_child:
-            return self.parent.evotor_id
-
-        category = self.categories.first()
-        return category.evotor_id if category else None
+        parent = self.get_parent()
+        return parent.evotor_id if parent else ""
 
     def get_attribute_values(self):
         if not self.pk:
@@ -1158,6 +1169,7 @@ class Attribute(models.Model):
         default=TYPE_CHOICES[0][0],
         max_length=20,
         verbose_name="Тип",
+        help_text="Для создания атрибута вариации выберите «Множество атрибутов группы».",
     )
     option_group = models.ForeignKey(
         "catalogue.AttributeOptionGroup",
@@ -1548,6 +1560,7 @@ class AttributeOption(models.Model):
     Provides an option within an option group for an attribute type
     Examples: In a Language group, English, Greek, French
     """
+
     evotor_id = models.CharField(
         "ID Эвотор",
         max_length=128,
@@ -1769,7 +1782,8 @@ class Additional(models.Model):
         unique=True,
         help_text=(
             "Универсальный код товара (Артикул) является идентификатором для "
-            "товара, который является специфичным для конкретного товара."
+            "товара, который является специфичным для конкретного товара. "
+            "Оставьте пустым, чтобы заполнить автоматически."
         ),
     )
     evotor_id = models.CharField(
@@ -1889,6 +1903,9 @@ class Additional(models.Model):
 
     def get_name(self):
         return self.name
+
+    def get_evotor_parent_id(self):
+        return self.parent_id
 
     def __str__(self):
         return self.name

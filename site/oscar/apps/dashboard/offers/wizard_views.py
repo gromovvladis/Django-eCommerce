@@ -169,7 +169,7 @@ class OfferWizardStepView(FormView):
         self._flush_session()
 
         if self.update:
-            msg = "Предложение '%s' обновлено" % offer.name
+            msg = "Предложение '%s' обновлено." % offer.name
         else:
             msg = "Предложение '%s' создано!" % offer.name
         messages.success(self.request, msg)

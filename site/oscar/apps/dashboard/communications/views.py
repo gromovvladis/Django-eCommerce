@@ -38,7 +38,7 @@ class UpdateView(generic.UpdateView):
     def form_invalid(self, form):
         messages.error(
             self.request,
-            "Отправленная форма недействительна, пожалуйста, исправьте ошибки и повторите отправку",
+            "Отправленные данные недействительны, пожалуйста, исправьте ошибки и повторите отправку.",
         )
         return super().form_invalid(form)
 
@@ -88,7 +88,7 @@ class UpdateView(generic.UpdateView):
         dispatch.send_email_messages(email, msgs)
         messages.success(
             self.request,
-            "Письмо с предварительным просмотром было отправлено на адрес %s" % email,
+            "Письмо с предварительным просмотром было отправлено на адрес %s." % email,
         )
 
         return self.render_to_response(ctx)

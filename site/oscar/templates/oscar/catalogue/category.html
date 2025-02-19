@@ -8,18 +8,23 @@
 {% block title %}
   {{ category.name }} | {{ block.super }}
 {% endblock %}
+
 {% block wrapper_class %}
   menu fill-width fill-height grow-1 pd-2 pb-sm-4
 {% endblock %}
+
 {% block app_class %}
   app---category
 {% endblock %}
+
 {% block nav_class %}
   app__nav--category
 {% endblock %}
+
 {% block nav_title %}
   {{ category.name }}
 {% endblock %}
+
 {% block description %}
   {{ category.get_description }}
 {% endblock %}

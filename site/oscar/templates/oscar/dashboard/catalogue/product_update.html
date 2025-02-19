@@ -500,13 +500,11 @@
                           <div class="d-flex justify-space-between">
                             Варианты
                             <div class="ml-3">
-                              {% if full_access %}
-                                {% if product.can_be_parent %}
-                                  <button class="btn btn-success" name="action" type="submit" value="create-all-child" data-loading-text="Создание...">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                    <span class="caption-button">Создать все вариации</span>
-                                  </button>
-                                {% endif %}
+                              {% if product.can_be_parent and full_access %}
+                                <button class="btn btn-success" name="action" type="submit" value="create-all-child" data-loading-text="Создание...">
+                                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                  <span class="caption-button">Создать все вариации</span>
+                                </button>
                                 <button class="btn btn-primary ml-2" {% if not product.can_be_parent %}disabled{% endif %}name="action" type="submit" value="create-child" data-loading-text="Добавление...">
                                   <i class="fas fa-plus"></i>
                                   <span class="caption-button">Добавить вариант</span>
@@ -560,7 +558,7 @@
                                   У этого товара нет созданых вариаций.
                                 {% else %}
                                   На данный момент нельзя добавлять варианты к этому товару.
-                                  <br /><br />
+                                  <br />
                                   {% if product.pk is None %}
                                     Пожалуйста, сохраните товар, прежде чем пытаться добавить варианты.
                                   {% elif product.has_stockrecords %}

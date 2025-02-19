@@ -138,7 +138,7 @@ class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
         return context
 
     def make_nothing(self, request, users):
-        messages.info(self.request, "Выберите статус 'Активен' или 'Не активен'")
+        messages.info(self.request, "Выберите статус 'Активен' или 'Не активен'.")
         return redirect("dashboard:customer-list")
 
     def make_inactive(self, request, users):
@@ -152,7 +152,7 @@ class CustomerListView(BulkEditMixin, FormMixin, SingleTableView):
             if not user.is_superuser:
                 user.is_active = value
                 user.save()
-        messages.info(self.request, "Пользовательский статус был успешно изменен")
+        messages.info(self.request, "Пользовательский статус был успешно изменен.")
         return redirect("dashboard:customer-list")
 
 

@@ -83,7 +83,7 @@
             <td class="date" data-label="Дата">{{ date }}</td>
             <td class="refund" data-label="Возврат">
               {% if payment.status == 'succeeded' and payment.refundable %}
-                <a class="badge badge-danger" href="{% url 'dashboard:refund-transaction' code=payment.id %}">Оформить возврат</a>
+                <a class="badge badge-danger" href="{% url 'dashboard:refund-transaction' payment_id=payment.id %}">Оформить возврат</a>
               {% elif payment.status == 'succeeded' and not payment.refundable %}
                 <span>Возвращено: {{ payment.refunded_amount.value|currency }}</span>
               {% else %}

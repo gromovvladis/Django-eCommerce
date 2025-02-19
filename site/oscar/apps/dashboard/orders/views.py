@@ -934,11 +934,11 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         # OrderDetailView.change_order_status does. Ripe for refactoring.
         new_status = request.POST["new_status"].strip()
         if not new_status:
-            messages.error(request, "Новый статус '%s' не действительный" % new_status)
+            messages.error(request, "Новый статус '%s' недействительный." % new_status)
         elif new_status not in order.available_statuses():
             messages.error(
                 request,
-                "Новый статус '%s' недействительно для этого заказа" % new_status,
+                "Новый статус '%s' недействительный для этого заказа." % new_status,
             )
         else:
             handler = self.get_handler(user=request.user)
@@ -948,7 +948,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
             except PaymentError as e:
                 messages.error(
                     request,
-                    "Невозможно изменить статус заказа из-за ошибки оплаты.: %s" % e,
+                    "Невозможно изменить статус заказа из-за ошибки оплаты: %s" % e,
                 )
             else:
                 msg = (
@@ -1321,7 +1321,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         form = self.get_order_note_form()
         if form.is_valid():
             form.save()
-            messages.success(self.request, "Заметка сохранена")
+            messages.success(self.request, "Заметка сохранена.")
             return self.reload_page(fragment="notes")
 
         ctx = self.get_context_data(note_form=form, active_tab="notes")
@@ -1331,9 +1331,9 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         try:
             note = order.notes.get(id=request.POST.get("note_id", None))
         except ObjectDoesNotExist:
-            messages.error(request, "Примечание не может быть удалено")
+            messages.error(request, "Примечание не может быть удалено.")
         else:
-            messages.info(request, "Примечание удалено")
+            messages.info(request, "Примечание удалено.")
             note.delete()
         return self.reload_page()
 
@@ -1353,14 +1353,14 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         except PaymentError as e:
             messages.error(
                 request,
-                ("Невозможно изменить статус заказа из-за ошибки оплаты.: %s") % e,
+                ("Невозможно изменить статус заказа из-за ошибки оплаты: %s") % e,
             )
         except order_exceptions.InvalidOrderStatus:
             # The form should validate against this, so we should only end up
             # here during race conditions.
             messages.error(
                 request,
-                "Невозможно изменить статус заказа в соответствии с запрошенным - новый статус недействителен",
+                "Невозможно изменить статус заказа в соответствии с запрошенным - новый статус недействителен.",
             )
         else:
             messages.info(request, success_msg)
@@ -1374,7 +1374,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         try:
             amount = D(amount_str)
         except InvalidOperation:
-            messages.error(request, "Пожалуйста, выберите действительную сумму")
+            messages.error(request, "Пожалуйста, выберите действительную сумму.")
             return self.reload_page()
         return self._create_payment_event(request, order, amount)
 
@@ -1384,13 +1384,13 @@ class OrderDetailView(EventHandlerMixin, DetailView):
     def change_line_statuses(self, request, order, lines, quantities):
         new_status = request.POST["new_status"].strip()
         if not new_status:
-            messages.error(request, "Новый статус '%s' не действует" % new_status)
+            messages.error(request, "Новый статус '%s' не действует." % new_status)
             return self.reload_page()
         errors = []
         for line in lines:
             if new_status not in line.available_statuses():
                 errors.append(
-                    ("'%(status)s' недопустимый новый статус для позиции %(line_id)d")
+                    ("'%(status)s' недопустимый новый статус для позиции %(line_id)d.")
                     % {"status": new_status, "line_id": line.id}
                 )
         if errors:
@@ -1421,7 +1421,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         try:
             event_type = ShippingEventType._default_manager.get(code=code)
         except ShippingEventType.DoesNotExist:
-            messages.error(request, "Тип события '%s' не действительный" % code)
+            messages.error(request, "Тип события '%s' недействительный." % code)
             return self.reload_page()
 
         reference = request.POST.get("reference", None)
@@ -1430,16 +1430,16 @@ class OrderDetailView(EventHandlerMixin, DetailView):
                 order, event_type, lines, quantities, reference=reference
             )
         except order_exceptions.InvalidShippingEvent as e:
-            messages.error(request, "Не удалось создать событие доставки.: %s" % e)
+            messages.error(request, "Не удалось создать событие доставки. Недействительное событие: %s" % e)
         except order_exceptions.InvalidStatus as e:
-            messages.error(request, "Не удалось создать событие доставки.: %s" % e)
+            messages.error(request, "Не удалось создать событие доставки. Недействительный статус: %s" % e)
         except PaymentError as e:
             messages.error(
                 request,
-                "Невозможно создать событие доставки из-за ошибки платежа.: %s" % e,
+                "Невозможно создать событие доставки из-за ошибки платежа: %s" % e,
             )
         else:
-            messages.success(request, "Событие доставки создано")
+            messages.success(request, "Событие доставки создано.")
         return self.reload_page()
 
     def create_payment_event(self, request, order, lines, quantities):
@@ -1455,7 +1455,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
             try:
                 amount = D(amount_str)
             except InvalidOperation:
-                messages.error(request, "Пожалуйста, выберите корректную сумму")
+                messages.error(request, "Пожалуйста, выберите корректную сумму.")
                 return self.reload_page()
 
         return self._create_payment_event(request, order, amount, lines, quantities)
@@ -1467,7 +1467,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         try:
             event_type = PaymentEventType._default_manager.get(code=code)
         except PaymentEventType.DoesNotExist:
-            messages.error(request, "Тип события '%s' не действительный" % code)
+            messages.error(request, "Тип события '%s' недействительный." % code)
             return self.reload_page()
         try:
             self.get_handler().handle_payment_event(
@@ -1481,7 +1481,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
         except order_exceptions.InvalidPaymentEvent as e:
             messages.error(request, "Невозможно создать событие платежа: %s" % e)
         else:
-            messages.info(request, "Событие платежа создано")
+            messages.info(request, "Событие платежа создано.")
         return self.reload_page()
 
 
@@ -1644,7 +1644,7 @@ class ShippingAddressUpdateView(UpdateView):
         return response
 
     def get_success_url(self):
-        messages.info(self.request, "Адрес доставки обновлен")
+        messages.info(self.request, "Адрес доставки обновлен.")
         return reverse(
             "dashboard:order-detail",
             kwargs={

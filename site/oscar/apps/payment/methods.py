@@ -101,7 +101,7 @@ class PaymentMethod(object):
                     tnx_type, order.number
                 )
             )
-            return messages.error(self.request, "Неизвестный тип транзакции")
+            return messages.error(self.request, "Неизвестный тип транзакции.")
 
         new_status = self.get_status(
             status_list=status_list, tnx_status=tnx_status, updated=False

@@ -207,7 +207,6 @@ class CRMTerminalEvotorTable(DashboardTable):
 
 
 class CRMTerminalSiteTable(DashboardTable):
-
     check = TemplateColumn(
         template_name="oscar/dashboard/crm/terminals/site_table/terminal_row_checkbox.html",
         verbose_name="",
@@ -349,7 +348,6 @@ class CRMStaffEvotorTable(DashboardTable):
 
 
 class CRMStaffSiteTable(DashboardTable):
-
     check = TemplateColumn(
         template_name="oscar/dashboard/crm/staffs/site_table/staff_row_checkbox.html",
         verbose_name="",
@@ -457,6 +455,10 @@ class CRMProductEvotorTable(DashboardTable):
         template_name="oscar/dashboard/crm/products/evotor_table/product_row_price.html",
         order_by="price",
     )
+    quantity = Column(
+        verbose_name="В наличии",
+        order_by="quantity",
+    )
     tax = TemplateColumn(
         verbose_name="Налог",
         template_name="oscar/dashboard/crm/products/evotor_table/product_row_tax.html",
@@ -503,6 +505,7 @@ class CRMProductEvotorTable(DashboardTable):
             "parent",
             "stores",
             "price",
+            "quantity",
             "tax",
             "measure_name",
             "allow_to_sell",
@@ -614,7 +617,6 @@ class CRMProductSiteTable(DashboardTable):
 
 
 class CRMAdditionalEvotorTable(DashboardTable):
-
     check = TemplateColumn(
         template_name="oscar/dashboard/crm/additionals/evotor_table/additional_row_checkbox.html",
         verbose_name="",
@@ -687,7 +689,7 @@ class CRMAdditionalEvotorTable(DashboardTable):
         attrs = {
             "class": "table table-striped table-bordered table-hover",
         }
-        empty_text = "Список товаров пуст."
+        empty_text = "Список дополнительных товаров пуст."
 
 
 class CRMAdditionalSiteTable(DashboardTable):
@@ -781,9 +783,7 @@ class CRMAdditionalSiteTable(DashboardTable):
         empty_text = "Нет созданых дополнительных товаров."
 
 
-
 class CRMGroupEvotorTable(DashboardTable):
-
     check = TemplateColumn(
         template_name="oscar/dashboard/crm/groups/evotor_table/group_row_checkbox.html",
         verbose_name="",

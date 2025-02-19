@@ -3116,7 +3116,7 @@ input[type=button].btn-block {
 }
 
 .table .empty-td {
-  text-align: start;
+  text-align: start !important;
   padding: 1rem !important;
 }
 

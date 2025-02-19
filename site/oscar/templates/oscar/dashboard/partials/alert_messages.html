@@ -3,7 +3,7 @@
 <div id="messages">
   {% if messages %}
     {% for message in messages %}
-      <div class="alert {% for tag in message.tags|split %}alert-{% if tag == 'error' %}danger{% else %}{{ tag }}{% endif %}{% endfor %} alert-dismissible fade show" role="alert">
+      <div class="alert{% for tag in message.tags|split %} alert-{% if tag == 'error' %}danger{% else %}{{ tag }}{% endif %}{% endfor %} alert-dismissible fade show" role="alert">
         <div class="alertinner {% if 'noicon' not in message.tags %}wicon{% endif %}">
           {% if 'noicon' not in message.tags %}
             {% if 'success' in message.tags %}

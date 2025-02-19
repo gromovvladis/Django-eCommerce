@@ -5,26 +5,25 @@ import tempfile
 import zipfile
 import zlib
 
-from django.core.exceptions import FieldError
-from django.core.files import File
-from django.db.transaction import atomic
+from io import BytesIO
+from PIL import Image, UnidentifiedImageError
 from PIL import Image
 
+from django.core.files import File
+from django.db.transaction import atomic
+
 from oscar.core.loading import get_model
-from oscar.apps.catalogue.exceptions import (
-    IdenticalImageError,
-    ImageImportError,
-    InvalidImageArchive,
-)
+from oscar.apps.catalogue.exceptions import InvalidImageArchive
+
 
 Product = get_model("catalogue", "product")
 ProductImage = get_model("catalogue", "productimage")
 
 
-# This is an old class only really intended to be used by the internal sandbox
-# site. It's not recommended to be used by your project.
 class Importer(object):
-    allowed_extensions = [".jpeg", ".jpg", ".gif", ".png"]
+
+    allowed_extensions = {".jpeg", ".jpg", ".png", ".webp", ".gif", ".tiff", ".bmp"}
+    preferred_format = "WEBP"  # Используем WEBP для эффективности
 
     def __init__(self, logger, field):
         self.logger = logger
@@ -40,34 +39,18 @@ class Importer(object):
                     lookup_value = self._get_lookup_value_from_filename(filename)
                     self._process_image(image_dir, filename, lookup_value)
                     stats["num_processed"] += 1
-                except Product.MultipleObjectsReturned:
-                    self.logger.warning(
-                        "Multiple products matching %s='%s',"
-                        " skipping" % (self._field, lookup_value)
-                    )
+                except (Product.MultipleObjectsReturned, Product.DoesNotExist):
+                    self.logger.warning(f"Skipping {filename}, no matching product.")
                     stats["num_skipped"] += 1
-                except Product.DoesNotExist:
-                    self.logger.warning(
-                        "No item matching %s='%s'" % (self._field, lookup_value)
-                    )
-                    stats["num_skipped"] += 1
-                except IdenticalImageError:
-                    self.logger.warning(
-                        "Identical image already exists for"
-                        " %s='%s', skipping" % (self._field, lookup_value)
-                    )
-                    stats["num_skipped"] += 1
-                except IOError as e:
+                except (IOError, UnidentifiedImageError) as e:
                     stats["num_invalid"] += 1
-                    raise ImageImportError(
-                        ("%(filename)s - некорректное изображение (%(error)s)")
-                        % {"filename": filename, "error": e}
-                    )
-                except FieldError as e:
-                    raise ImageImportError(e)
-            if image_dir != dirname:
-                shutil.rmtree(image_dir)
+                    self.logger.error(f"Invalid image {filename}: {e}")
+                except Exception as e:
+                    stats["num_invalid"] += 1
+                    self.logger.error(f"Unexpected error with {filename}: {e}")
+            shutil.rmtree(image_dir)
         else:
+            self.logger.error(f"Invalid image archive: {dirname}")
             raise InvalidImageArchive(("%s некорректное изображение архива") % dirname)
         self.logger.info(
             "Файл импортирован: %(num_processed)d,"
@@ -78,72 +61,79 @@ class Importer(object):
         filenames = []
         image_dir = self._extract_images(dirname)
         if image_dir:
-            for filename in os.listdir(image_dir):
-                ext = os.path.splitext(filename)[1]
-                if (
-                    os.path.isfile(os.path.join(image_dir, filename))
-                    and ext in self.allowed_extensions
-                ):
-                    filenames.append(filename)
+            filenames = [
+                f
+                for f in os.listdir(image_dir)
+                if os.path.splitext(f)[1].lower() in self.allowed_extensions
+            ]
         return image_dir, filenames
 
     def _extract_images(self, dirname):
-        """
-        Returns path to directory containing images in dirname if successful.
-        Returns empty string if dirname does not exist, or could not be opened.
-        Assumes that if dirname is a directory, then it contains images.
-        If dirname is an archive (tar/zip file) then the path returned is to a
-        temporary directory that should be deleted when no longer required.
-        """
         if os.path.isdir(dirname):
             return dirname
-
-        ext = os.path.splitext(dirname)[1]
-        if ext in [".gz", ".tar"]:
-            image_dir = tempfile.mkdtemp()
-            try:
-                tar_file = tarfile.open(dirname)
-                tar_file.extractall(image_dir)
-                tar_file.close()
-                return image_dir
-            except (tarfile.TarError, zlib.error):
+        ext = os.path.splitext(dirname)[1].lower()
+        temp_dir = tempfile.mkdtemp()
+        try:
+            if ext in [".gz", ".tar"]:
+                with tarfile.open(dirname) as tar:
+                    tar.extractall(temp_dir)
+            elif ext == ".zip":
+                with zipfile.ZipFile(dirname) as zipf:
+                    zipf.extractall(temp_dir)
+            else:
                 return ""
-        elif ext == ".zip":
-            image_dir = tempfile.mkdtemp()
-            try:
-                zip_file = zipfile.ZipFile(dirname)
-                zip_file.extractall(image_dir)
-                zip_file.close()
-                return image_dir
-            except (zlib.error, zipfile.BadZipfile, zipfile.LargeZipFile):
-                return ""
-        # unknown archive - perhaps this should be treated differently
-        return ""
+            return temp_dir
+        except (tarfile.TarError, zipfile.BadZipFile, zlib.error):
+            return ""
 
     def _process_image(self, dirname, filename, lookup_value):
         file_path = os.path.join(dirname, filename)
         trial_image = Image.open(file_path)
         trial_image.verify()
+        image = Image.open(file_path)
+        image = self._optimize_image(image)
+        new_filename = f"{lookup_value}.{self.preferred_format.lower()}"
+        new_path = os.path.join(dirname, new_filename)
+        image.save(new_path, self.preferred_format, quality=85, optimize=True)
+        self._save_image_to_db(new_path, lookup_value, new_filename)
 
-        kwargs = {self._field: lookup_value}
-        item = Product._default_manager.get(**kwargs)
+    def _optimize_image(self, image):
+        # Конвертация в RGB (если изображение имеет альфа-канал)
+        if image.mode in ("RGBA", "P"):
+            image = image.convert("RGB")
 
-        new_data = open(file_path, "rb").read()
-        next_index = 0
-        for existing in item.images.all():
-            next_index = existing.display_order + 1
-            try:
-                if new_data == existing.original.read():
-                    raise IdenticalImageError()
-            except IOError:
-                # File probably doesn't exist
-                existing.delete()
+        # Ограничение разрешения (с сохранением пропорций)
+        max_size = (1080, 1080)
+        image.thumbnail(max_size, Image.LANCZOS)
 
+        # Ограничение размера файла (2MB)
+        quality = 100
+        output = BytesIO()
+
+        while True:
+            output.seek(0)
+            output.truncate()
+            image.save(output, format=self.preferred_format, quality=quality)
+
+            # Проверяем размер в байтах
+            if output.tell() <= 2 * 1080 * 1080 or quality <= 50:
+                break
+
+            quality -= 5  # Уменьшаем качество
+
+        output.seek(0)
+        optimized_image = Image.open(output).copy()
+        output.close()
+
+        return optimized_image
+
+    def _save_image_to_db(self, file_path, lookup_value, filename):
+        product = Product._default_manager.get(**{self._field: lookup_value})
         new_file = File(open(file_path, "rb"))
-        im = ProductImage(product=item, display_order=next_index)
+        im = ProductImage(product=product, display_order=product.images.count())
         im.original.save(filename, new_file, save=False)
         im.save()
-        self.logger.debug('Image added to "%s"' % item)
+        self.logger.debug(f"Image added to {product}")
 
     def _fetch_item(self, filename):
         kwargs = {self._field: self._get_lookup_value_from_filename(filename)}

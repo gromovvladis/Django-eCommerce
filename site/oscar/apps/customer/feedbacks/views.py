@@ -90,7 +90,7 @@ class AddOrderFeedbackView(PageTitleMixin, CreateView):
         self.order = get_object_or_404(self.order_model, number=kwargs["order_number"])
         if not self.order.is_review_permitted(request.user):
             if self.order.has_review_by(request.user):
-                message = "Вы уже оставили отзыв об этом заказе!"
+                message = "Вы уже оставили отзыв об этом заказе."
             else:
                 message = "Вы не можете оставить отзыв об этом заказе."
             messages.warning(self.request, message)

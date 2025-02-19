@@ -213,7 +213,7 @@ class LogoutView(generic.RedirectView):
 
 class ProfileView(PageTitleMixin, generic.UpdateView):
     form_class = ProfileForm
-    template_name = "oscar/customer/profile/profile_form.html"
+    template_name = "oscar/customer/profile/profile.html"
     page_title = "Профиль"
     active_tab = "profile"
     model = User

@@ -131,7 +131,7 @@ class VoucherCreateView(generic.CreateView):
         return response
 
     def get_success_url(self):
-        messages.success(self.request, "Промокод создан")
+        messages.success(self.request, "Промокод создан.")
         return super().get_success_url()
 
 
@@ -159,7 +159,7 @@ class VoucherUpdateView(generic.UpdateView):
         voucher_set = self.get_object().voucher_set
         if voucher_set is not None:
             messages.warning(
-                request, "Промокод можно редактировать только как часть его набора"
+                request, "Промокод можно редактировать только как часть его набора."
             )
             return redirect("dashboard:voucher-set-update", pk=voucher_set.pk)
         return super().dispatch(request, *args, **kwargs)
@@ -181,7 +181,7 @@ class VoucherUpdateView(generic.UpdateView):
         return response
 
     def get_success_url(self):
-        messages.success(self.request, "Промокод обновлен")
+        messages.success(self.request, "Промокод обновлен.")
         return super().get_success_url()
 
 
@@ -201,7 +201,7 @@ class VoucherDeleteView(generic.DeleteView):
         return self.delete(request, *args, **kwargs)
 
     def get_success_url(self):
-        messages.warning(self.request, "Промокод удален")
+        messages.warning(self.request, "Промокод удален.")
         if self.object.voucher_set is not None:
             return reverse(
                 "dashboard:voucher-set-detail",
@@ -227,7 +227,7 @@ class VoucherSetCreateView(generic.CreateView):
         return initial
 
     def get_success_url(self):
-        messages.success(self.request, "Набор промокодов создан")
+        messages.success(self.request, "Набор промокодов создан.")
         return reverse("dashboard:voucher-set-list")
 
 
@@ -253,7 +253,7 @@ class VoucherSetUpdateView(generic.UpdateView):
         return initial
 
     def get_success_url(self):
-        messages.success(self.request, "Промокод обновлен")
+        messages.success(self.request, "Промокод обновлен.")
         return reverse("dashboard:voucher-set-detail", kwargs={"pk": self.object.pk})
 
 
@@ -355,5 +355,5 @@ class VoucherSetDeleteView(generic.DeleteView):
     context_object_name = "voucher_set"
 
     def get_success_url(self):
-        messages.warning(self.request, "Набор промокодо удален")
+        messages.warning(self.request, "Набор промокодо удален.")
         return reverse("dashboard:voucher-set-list")
