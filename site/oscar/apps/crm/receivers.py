@@ -40,59 +40,59 @@ from oscar.apps.crm.signals import (
 
 
 @receiver(send_evotor_category)
-def send_evotor_category_receiver(sender, category_id, **kwargs):
+def send_evotor_category_receiver(sender, category_id, user_id, **kwargs):
     if settings.CELERY:
-        send_evotor_category_task.delay(category_id)
+        send_evotor_category_task.delay(category_id, user_id)
     else:
-        send_evotor_category_task(category_id)
+        send_evotor_category_task(category_id, user_id)
 
 
 @receiver(send_evotor_product)
-def send_evotor_product_receiver(sender, product_id, **kwargs):
+def send_evotor_product_receiver(sender, product_id, user_id, **kwargs):
     if settings.CELERY:
-        send_evotor_product_task.delay(product_id)
+        send_evotor_product_task.delay(product_id, user_id)
     else:
-        send_evotor_product_task(product_id)
+        send_evotor_product_task(product_id, user_id)
 
 
 @receiver(send_evotor_additional)
-def send_evotor_additional_receiver(sender, additional_id, **kwargs):
+def send_evotor_additional_receiver(sender, additional_id, user_id, **kwargs):
     if settings.CELERY:
-        send_evotor_additional_task.delay(additional_id)
+        send_evotor_additional_task.delay(additional_id, user_id)
     else:
-        send_evotor_additional_task(additional_id)
+        send_evotor_additional_task(additional_id, user_id)
 
 
 @receiver(update_evotor_stockrecord)
-def update_evotor_stockrecord(sender, product_id, **kwargs):
+def update_evotor_stockrecord(sender, product_id, user_id, **kwargs):
     if settings.CELERY:
-        update_evotor_stockrecord_task.delay(product_id)
+        update_evotor_stockrecord_task.delay(product_id, user_id)
     else:
-        update_evotor_stockrecord_task(product_id)
+        update_evotor_stockrecord_task(product_id, user_id)
 
 
 @receiver(delete_evotor_category)
-def delete_evotor_category(sender, category_id, **kwargs):
+def delete_evotor_category(sender, category_id, user_id, **kwargs):
     if settings.CELERY:
-        delete_evotor_category_task.delay(category_id)
+        delete_evotor_category_task.delay(category_id, user_id)
     else:
-        delete_evotor_category_task(category_id)
+        delete_evotor_category_task(category_id, user_id)
 
 
 @receiver(delete_evotor_product)
-def delete_evotor_product(sender, product_id, store_id=None, **kwargs):
+def delete_evotor_product(sender, product_id, user_id, store_id=None, **kwargs):
     if settings.CELERY:
-        delete_evotor_product_task.delay(product_id, store_id)
+        delete_evotor_product_task.delay(product_id, user_id, store_id)
     else:
-        delete_evotor_product_task(product_id, store_id)
+        delete_evotor_product_task(product_id, user_id, store_id)
 
 
 @receiver(delete_evotor_additional)
-def delete_evotor_additional(sender, additional_id, **kwargs):
+def delete_evotor_additional(sender, additional_id, user_id, **kwargs):
     if settings.CELERY:
-        delete_evotor_additional_task.delay(additional_id)
+        delete_evotor_additional_task.delay(additional_id, user_id)
     else:
-        delete_evotor_additional_task(additional_id)
+        delete_evotor_additional_task(additional_id, user_id)
 
 
 @receiver(update_site_stores)
@@ -164,6 +164,6 @@ def send_evotor_products_receiver(sender, product_ids, user_id, **kwargs):
 @receiver(send_evotor_additionals)
 def send_evotor_additionals_receiver(sender, additional_ids, user_id, **kwargs):
     if settings.CELERY:
-        send_evotor_products_task.delay(additional_ids, user_id)
+        send_evotor_additionals_task.delay(additional_ids, user_id)
     else:
-        send_evotor_products_task(additional_ids, user_id)
+        send_evotor_additionals_task(additional_ids, user_id)

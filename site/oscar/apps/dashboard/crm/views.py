@@ -110,7 +110,7 @@ class CRMStoreListView(CRMTablesMixin):
                 data_item["is_created"] = True
                 data_item["is_valid"] = self._is_equal(
                     model_instance.name, name
-                ) and self._is_equal(address, getattr(model_instance, "address", ""))
+                ) and self._is_equal(address, model_instance.primary_address)
             else:
                 data_item["is_created"], data_item["is_valid"] = False, False
 
@@ -220,11 +220,7 @@ class CRMStaffListView(CRMTablesMixin):
             data_item["updated_at"] = datetime.strptime(
                 data_item["updated_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
             )
-            first_name = data_item.get("name")
-            last_name = data_item.get("last_name")
-            middle_name = data_item.get("patronymic_name")
             stores_ids = data_item.get("stores")
-
             model_instance = staffs.get(evotor_id)
 
             if model_instance:
@@ -233,20 +229,19 @@ class CRMStaffListView(CRMTablesMixin):
                 data_item["stores"] = (
                     model_instance.user.stores.all() if model_instance.user else []
                 )
-
-                store_evotor_ids = (
-                    set(model_instance.user.stores.values_list("evotor_id", flat=True))
-                    if model_instance.user
-                    else set()
-                )
-
+                store_evotor_ids = {store.evotor_id for store in data_item["stores"]}
                 store_matches = bool(store_evotor_ids.intersection(stores_ids))
 
                 # Проверка совпадения данных
                 data_item["is_valid"] = (
-                    self._is_equal(model_instance.first_name, first_name)
-                    and self._is_equal(model_instance.last_name, last_name)
-                    and self._is_equal(model_instance.middle_name, middle_name)
+                    self._is_equal(model_instance.first_name, data_item.get("name"))
+                    and self._is_equal(
+                        model_instance.last_name, data_item.get("last_name")
+                    )
+                    and self._is_equal(
+                        model_instance.middle_name,
+                        data_item.get("patronymic_name"),
+                    )
                     and store_matches
                 )
             else:
@@ -288,7 +283,7 @@ class CRMGroupsListView(CRMTablesMixin):
         else:
             messages.error(
                 self.request,
-                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список точек продаж",
+                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список магазинов.",
             )
             return []
 
@@ -344,14 +339,12 @@ class CRMGroupsListView(CRMTablesMixin):
 
             if model_instance:
                 data_item["is_created"] = True
-                name = data_item.get("name", None)
-                parent_match = (
-                    model_instance.get_parent() is None
-                    or parent_id is None
-                    or self._is_equal(model_instance.get_parent().evotor_id, parent_id)
+                parent_match = self._is_equal(
+                    model_instance.get_evotor_parent_id(), parent_id
                 )
                 data_item["is_valid"] = (
-                    self._is_equal(model_instance.name, name) and parent_match
+                    self._is_equal(model_instance.name, data_item.get("name"))
+                    and parent_match
                 )
             else:
                 if evotor_id == Additional.parent_id:
@@ -403,22 +396,22 @@ class CRMProductListView(CRMTablesMixin):
         else:
             messages.error(
                 self.request,
-                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список точек продаж",
+                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список магазинов.",
             )
             return []
 
     def process_items(self, data_items):
         # Собираем все уникальные ID для каждого типа модели
+        evotor_ids = set()
         store_ids = set()
         parent_ids = set()
-        evotor_ids = set()
 
         for data_item in data_items:
+            evotor_ids.add(data_item["id"])
             store_ids.add(data_item["store_id"])
             parent_id = data_item.get("parent_id", None)
             if parent_id:
                 parent_ids.add(parent_id)
-            evotor_ids.add(data_item["id"])
 
         # Получаем все объекты за один запрос для каждого типа модели
         stores = {
@@ -432,7 +425,7 @@ class CRMProductListView(CRMTablesMixin):
         }
         model_instances = {
             obj.evotor_id: obj
-            for obj in self.model.objects.filter(evotor_id__in=evotor_ids)
+            for obj in Product.objects.filter(evotor_id__in=evotor_ids)
         }
 
         # Обрабатываем каждый data_item
@@ -446,13 +439,10 @@ class CRMProductListView(CRMTablesMixin):
 
             store = stores.get(store_id)
             data_item["store"] = store
-            data_item["is_valid"] = bool(store)
 
             parent_id = data_item.get("parent_id", None)
             if parent_id:
-                data_item["parent"] = (
-                    parents.get(parent_id) or Additional.parent_id == parent_id
-                )
+                data_item["parent"] = parents.get(parent_id)
 
             model_instance = model_instances.get(evotor_id)
 
@@ -466,16 +456,16 @@ class CRMProductListView(CRMTablesMixin):
                     ).first()
                     stockrecord_match = (
                         stockrecord
-                        and self._is_equal(stockrecord.price, data_item.get("price", 0))
+                        and self._is_equal(stockrecord.price, data_item.get("price"))
                         and self._is_equal(
-                            stockrecord.cost_price, data_item.get("cost_price", 0)
+                            stockrecord.cost_price, data_item.get("cost_price")
                         )
                         and self._is_equal(
-                            stockrecord.num_in_stock, data_item.get("quantity", 0)
+                            stockrecord.num_in_stock, data_item.get("quantity")
                         )
                         and self._is_equal(stockrecord.tax, data_item.get("tax"))
                         and self._is_equal(
-                            stockrecord.is_public, data_item.get("allow_to_sell", False)
+                            stockrecord.is_public, data_item.get("allow_to_sell")
                         )
                     ) or False
 
@@ -483,21 +473,23 @@ class CRMProductListView(CRMTablesMixin):
                         model_instance.get_product_class().measure_name,
                         data_item.get("measure_name"),
                     )
+
                     data_item["is_valid"] = (
                         self._is_equal(
-                            model_instance.name, data_item.get("name", "").strip()
+                            model_instance.get_name(),
+                            data_item.get("name"),
                         )
                         and self._is_equal(
                             model_instance.article,
-                            data_item.get("article_number", "").strip(),
+                            data_item.get("article_number"),
                         )
                         and self._is_equal(
                             model_instance.short_description,
-                            data_item.get("description", None),
+                            data_item.get("description"),
                         )
                         and self._is_equal(
                             model_instance.get_evotor_parent_id(),
-                            data_item.get("parent_id", None),
+                            data_item.get("parent_id"),
                         )
                         and stockrecord_match
                         and product_class_match
@@ -605,7 +597,7 @@ class CRMAdditionalListView(CRMTablesMixin):
         else:
             messages.error(
                 self.request,
-                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список точек продаж",
+                "Ошибка при формировании запроса к Эвотор. Не передан Эвотор ID Магазина. Обновите список магазинов.",
             )
             return []
 
@@ -627,12 +619,6 @@ class CRMAdditionalListView(CRMTablesMixin):
             for obj in self.model.objects.filter(evotor_id__in=evotor_ids)
         }
 
-        # Предварительно собираем store_id для каждого model_instance
-        model_stores = {
-            instance.evotor_id: set(instance.stores.values_list("evotor_id", flat=True))
-            for instance in model_instances.values()
-        }
-
         # Обрабатываем каждый data_item
         for data_item in data_items:
             data_item["updated_at"] = datetime.strptime(
@@ -644,7 +630,6 @@ class CRMAdditionalListView(CRMTablesMixin):
 
             store = stores.get(store_id)
             data_item["store"] = store
-            data_item["is_valid"] = bool(store)
 
             model_instance = model_instances.get(evotor_id)
 
@@ -653,29 +638,32 @@ class CRMAdditionalListView(CRMTablesMixin):
             else:
                 data_item["is_created"] = True
                 if store:
+                    model_stores = set(
+                        model_instance.stores.values_list("evotor_id", flat=True)
+                    )
                     data_item["is_valid"] = (
                         self._is_equal(
-                            model_instance.name, data_item.get("name", "").strip()
+                            model_instance.get_name(),
+                            data_item.get("name"),
                         )
                         and self._is_equal(
                             model_instance.article,
-                            data_item.get("article_number", "").strip(),
+                            data_item.get("article_number"),
                         )
                         and self._is_equal(
                             model_instance.description,
-                            data_item.get("description", None),
+                            data_item.get("description"),
                         )
                         and self._is_equal(
-                            model_instance.parent_id, data_item.get("parent_id", None)
+                            model_instance.get_evotor_parent_id(),
+                            data_item.get("parent_id"),
                         )
                         and self._is_equal(
                             model_instance.is_public,
-                            data_item.get("allow_to_sell", None),
+                            data_item.get("allow_to_sell"),
                         )
-                        and self._is_equal(
-                            model_instance.tax, data_item.get("tax", None)
-                        )
-                        and store_id in model_stores.get(evotor_id, set())
+                        and self._is_equal(model_instance.tax, data_item.get("tax"))
+                        and store_id in model_stores
                     )
                 else:
                     data_item["is_valid"] = False

@@ -1,3 +1,4 @@
+from functools import cached_property
 from phonenumber_field.modelfields import PhoneNumberField
 
 from django.db import models
@@ -252,6 +253,18 @@ class User(AbstractBaseUser, PermissionsMixin):
             return "%s (%s)" % (name, self.username)
 
         return "%s" % self.username
+    
+    @cached_property
+    def primary_address(self):
+        """
+        Returns a user primary delivery address. Usually that will be the
+        headquarters or similar..
+        """
+        address = getattr(self, "address", "")
+        if not address:
+            return ""
+        else:
+            return address.line1
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         """

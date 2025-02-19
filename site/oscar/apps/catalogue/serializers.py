@@ -36,7 +36,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     # класс товара
     type = serializers.CharField(write_only=True, required=False)
-    measure_name = serializers.CharField(write_only=True, required=False)
+    measure_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     # товарная запись
     code = serializers.CharField(write_only=True, required=False, allow_blank=True)

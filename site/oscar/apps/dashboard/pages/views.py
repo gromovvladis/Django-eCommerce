@@ -138,5 +138,5 @@ class PageDeleteView(generic.DeleteView):
     model = FlatPage
 
     def get_success_url(self):
-        messages.success(self.request, "Удалить страницу '%s'" % self.object.title)
+        messages.success(self.request, "Удалить страницу '%s'." % self.object.title)
         return reverse("dashboard:page-list")

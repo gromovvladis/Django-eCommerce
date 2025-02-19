@@ -7,19 +7,21 @@
 {% load cache %}
 
 {% block title %}
-  {% if summary %}
-    {{ summary }} |
-  {% endif %} {{ block.super }}
+  {{ summary }} | {{ block.super }}
 {% endblock %}
+
 {% block wrapper_class %}
   actions d-flex flex-column pd-2 pb-sm-4 container pd-0
 {% endblock %}
+
 {% block app_class %}
   app---action
 {% endblock %}
+
 {% block nav_class %}
   app__nav--action
 {% endblock %}
+
 {% block nav_title_center %}
   {{ summary }}
 {% endblock %}

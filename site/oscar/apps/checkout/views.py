@@ -202,7 +202,7 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
             # No shipping methods available for given address
             messages.warning(
                 request,
-                "Доставка недоступна по выбранному вами адресу — пожалуйста выберете другой адрес",
+                "Доставка недоступна по выбранному вами адресу — пожалуйста выберете другой адрес.",
             )
             return redirect("checkout:checkoutview")
 
@@ -217,17 +217,17 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
 
         # нужна проверак полей алреса
         if not self.is_shipping_address_set(address_fields, shipping_method):
-            messages.error(self.request, "Введенный адрес некорректен")
+            messages.error(self.request, "Введенный адрес некорректен.")
             return redirect("checkout:checkoutview")
 
         # нужна проверка суммы минимального заказа при доставке
         if not self.is_min_order_set(form.instance, shipping_method):
-            messages.error(self.request, "Сумма заказа меньше минимальной")
+            messages.error(self.request, "Сумма заказа меньше минимальной.")
             return redirect("checkout:checkoutview")
 
         # нужна проверка корректности времени
         if not self.is_time_set(form.cleaned_data["order_time"]):
-            messages.error(self.request, "Данное время заказа более не доступно")
+            messages.error(self.request, "Данное время заказа более не доступно.")
             return redirect("checkout:checkoutview")
 
         # Store payment method in the CheckoutSessionMixin.checkout_session (a CheckoutSessionData object)

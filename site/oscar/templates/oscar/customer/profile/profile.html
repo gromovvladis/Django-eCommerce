@@ -1,62 +1,80 @@
 {% extends 'oscar/customer/baseaccountpage.html' %}
 
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
+
+{% block title %}
+  {{ page_title }} | {{ block.super }}
+{% endblock %}
+
+{% block nav_title_center %}
+  {{ page_title }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+    <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">{% icon file_name='interface/arrow-back' size=22 stroke='#111' %}</button>
+    <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Личный кабинет</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <span class="bread__link" aria-current="page">{{ page_title }}</span>
+  </div>
+{% endblock %}
+
 {% block tabcontent %}
-  <div class="profile wrapper--small d-flex flex-column fill-width fill-height">
-    <div class="profile__wrapper d-flex flex-column fill-width grow-1">
-      <div class="d-flex flex-column fill-width pt-sm-4 ml-2">
-        <p class="profile__user-name">
-          Привет!{% if request.user.name %}{{ request.user.name }}{% endif %}
-        </p>
-        <p class="profile__user-phone mt-1">{{ request.user.username }}</p>
+  <div class="profile-personal d-flex flex-column fill-height fill-width grow-1">
+    <form id="profile_form" class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4" method="post" action="{% url 'customer:profile-view' %}">
+      <div class="d-none d-sm-flex mb-1">
+        <h1>Редактировать профиль</h1>
       </div>
-      <div class="d-flex fill-width pt-0 pt-sm-3">
-        <div class="profile__menu fill-width pt-3 pt-sm-0 pb-sm-0">
-          {% block standard_tabs %}
-            {% include 'oscar/customer/partials/standard_tabs.html' %}
-          {% endblock %}
+      {% if form.is_bound and not form.is_valid %}
+        <div class="alert alert-danger mb-2">
+          <strong>Что-то пошло не так :&#40;</strong>
         </div>
-        <form class="profile-personal d-flex flex-column fill-height fill-width grow-1 pl-0 pl-sm-4 d-none d-sm-block">
-          <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
-            <div class="input d-flex align-center input__label-active input__padding">
-              <div class="input__wrapper">
-                <div class="input__label">Имя</div>
-                <div class="input__control d-flex align-center">
-                  <label><input maxlength="30" data-id="profile-name-input" type="text" /></label>
-                </div>
-              </div>
-            </div>
-            <div class="input d-flex align-center mt-2 input__label-active input__padding readonly">
-              <div class="input__wrapper">
-                <div class="input__label">Телефон</div>
-                <div class="input__control d-flex align-center">
-                  <label><input readonly data-id="profile-phone-input" type="text" /></label>
-                </div>
-              </div>
-            </div>
-            <div class="input d-flex align-center mt-2 input__padding">
-              <div class="input__wrapper">
-                <div class="input__label">Дата рождения</div>
-                <div class="input__control d-flex align-center">
-                  <label><input data-id="profile-birthday-input" type="text" /></label>
-                </div>
-              </div>
-            </div>
-            <div class="input d-flex align-center mt-2 input__label-active input__padding">
-              <div class="input__wrapper">
-                <div class="input__label">Почта</div>
-                <div class="input__control d-flex align-center">
-                  <label><input maxlength="30" data-id="profile-email-input" type="text" /></label>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="d-none d-sm-flex justify-end mt-4">
-            <div class="profile-personal__button-wrap d-flex mr-2">
-              <a data-id="profile-logout-btn" href="{% url 'dashboard:logout' %}" class="button fill-width button--outline justify-center shrink"><span class="button__wrapper"><span class="button__value">Выйти из аккаунта</span></span></a>
-            </div>
-          </div>
-        </form>
+      {% endif %}
+      <div class="mb-1">
+        <span class="info-message" data-id="profile-message"></span>
       </div>
-    </div>
+      {% block errors %}
+        {% for error in field.errors %}
+          <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+        {% endfor %}
+      {% endblock %}
+      <div data-id="input-wrapper" class="input d-flex align-center{% if request.user.name %} input__label-active{% endif %} input__padding">
+        <div class="input__wrapper">
+          <div class="input__label">Имя</div>
+          <div class="input__control d-flex align-center">
+            <label>{% include 'oscar/partials/render_field.html' with field=form.name data_id='profile-input' %}</label>
+          </div>
+        </div>
+      </div>
+      {% if form.name.errors %}
+        <span class="error-block mt-2 info-message">{{ form.name.errors }}</span>
+      {% endif %}
+      <div class="input d-flex align-center mt-2 input__label-active input__padding readonly">
+        <div class="input__wrapper">
+          <div class="input__label">Телефон</div>
+          <div class="input__control d-flex align-center">
+            <label><input value="{{ request.user.username }}" readonly data-id="profile-phone-input" type="text" /></label>
+          </div>
+        </div>
+      </div>
+      <div data-id="input-wrapper" class="input d-flex align-center{% if request.user.email %} input__label-active{% endif %} mt-2 input__padding">
+        <div class="input__wrapper">
+          <div class="input__label">Почта</div>
+          <div class="input__control d-flex align-center">
+            <label>{% include 'oscar/partials/render_field.html' with field=form.email data_id='profile-input' %}</label>
+          </div>
+        </div>
+      </div>
+      {% if form.email.errors %}
+        <span class="error-block mt-2 info-message">{{ form.email.errors }}</span>
+      {% endif %}
+      <div class="profile-personal__submit pos-relative d-flex justify-end pt-4 pt-sm-0 px-sm-0 mt-sm-3">
+        <button type="submit" data-id="profile-personal-submit-button" class="button fill-width button--main justify-center shrink"><span class="button__wrapper"><span class="button__value">Сохранить настройки</span></span></button>
+      </div>
+    </form>
   </div>
 {% endblock %}

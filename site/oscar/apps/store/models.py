@@ -86,11 +86,11 @@ class Store(models.Model):
         addresses, you will likely need to extend StoreAddress to have some
         field or flag to base your decision on.
         """
-        address = self.address
+        address = getattr(self, "address", "")
         if not address:
             return ""
         else:
-            return address
+            return address.line1
 
     # pylint: disable=unused-argument
     def get_address_for_stockrecord(self, stockrecord):

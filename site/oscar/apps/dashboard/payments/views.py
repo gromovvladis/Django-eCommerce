@@ -202,9 +202,9 @@ class UpdateSourceView(UpdateView):
                     self.object, self.request.user.id, e
                 )
             )
-            messages.error(request, "Ошибка обновления. Попробуйте позже")
+            messages.error(request, "Ошибка обновления. Попробуйте позже.")
         else:
-            messages.info(request, "Информация об источнике оплаты успешно обновлена")
+            messages.info(request, "Информация об источнике оплаты успешно обновлена.")
 
         return HttpResponseRedirect(
             reverse("dashboard:order-detail", args=(self.object.order.number,))
@@ -297,7 +297,7 @@ class AddSourceView(FormView):
                     self.order, self.request.user.id, e
                 )
             )
-            messages.error(self.request, f"Ошибка при добавлении способа оплаты: {e}")
+            messages.error(self.request, f"Ошибка при добавлении способа оплаты: {e}.")
 
         return HttpResponseRedirect(self.get_success_url())
 

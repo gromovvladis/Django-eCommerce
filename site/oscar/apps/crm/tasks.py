@@ -68,9 +68,11 @@ def process_bulk_task(self, bulk_evotor_id):
 
 
 @shared_task
-def send_evotor_category_task(category_id):
+def send_evotor_category_task(category_id, user_id):
     try:
-        return EvatorCloud().update_or_create_evotor_category_by_id(category_id)
+        msg = EvatorCloud().update_or_create_evotor_category_by_id(category_id)
+        cache_key = f"user_message_{user_id}"
+        cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
         logger.error(
             "Ошибка при отправке созданной / измененной категории в Эвотор. Ошибка %s",
@@ -79,9 +81,11 @@ def send_evotor_category_task(category_id):
 
 
 @shared_task
-def send_evotor_product_task(product_id):
+def send_evotor_product_task(product_id, user_id):
     try:
-        return EvatorCloud().update_or_create_evotor_product_by_id(product_id)
+        msg = EvatorCloud().update_or_create_evotor_product_by_id(product_id)
+        cache_key = f"user_message_{user_id}"
+        cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
         logger.error(
             "Ошибка при отправке созданной / измененной категории в Эвотор. Ошибка %s",
@@ -90,9 +94,11 @@ def send_evotor_product_task(product_id):
 
 
 @shared_task
-def send_evotor_additional_task(additional_id):
+def send_evotor_additional_task(additional_id, user_id):
     try:
-        return EvatorCloud().update_or_create_evotor_additional_by_id(additional_id)
+        msg = EvatorCloud().update_or_create_evotor_additional_by_id(additional_id)
+        cache_key = f"user_message_{user_id}"
+        cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
         logger.error(
             "Ошибка при отправке созданной / измененной категории в Эвотор. Ошибка %s",
@@ -101,9 +107,11 @@ def send_evotor_additional_task(additional_id):
 
 
 @shared_task
-def update_evotor_stockrecord_task(product_id):
+def update_evotor_stockrecord_task(product_id, user_id):
     try:
-        return EvatorCloud().update_evotor_stockrecord_by_id(product_id)
+        msg = EvatorCloud().update_evotor_stockrecord_by_id(product_id)
+        cache_key = f"user_message_{user_id}"
+        cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
         logger.error(
             "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
@@ -112,10 +120,11 @@ def update_evotor_stockrecord_task(product_id):
 
 
 @shared_task
-def delete_evotor_category_task(category_id):
+def delete_evotor_category_task(category_id, user_id):
     try:
-        return EvatorCloud().delete_evotor_category_by_id(category_id)
-
+        msg = EvatorCloud().delete_evotor_category_by_id(category_id)
+        cache_key = f"user_message_{user_id}"
+        cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
         logger.error(
             "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
@@ -124,14 +133,16 @@ def delete_evotor_category_task(category_id):
 
 
 @shared_task
-def delete_evotor_product_task(product_id, store_id=None):
+def delete_evotor_product_task(product_id, user_id, store_id=None):
     try:
         if store_id is not None:
-            return EvatorCloud().delete_evotor_product_by_store_by_id(
+            msg = EvatorCloud().delete_evotor_product_by_store_by_id(
                 product_id, store_id
             )
 
-        return EvatorCloud().delete_evotor_product_by_id(product_id)
+        msg = EvatorCloud().delete_evotor_product_by_id(product_id)
+        cache_key = f"user_message_{user_id}"
+        cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
         logger.error(
             "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
@@ -140,10 +151,11 @@ def delete_evotor_product_task(product_id, store_id=None):
 
 
 @shared_task
-def delete_evotor_additional_task(additional_id):
+def delete_evotor_additional_task(additional_id, user_id):
     try:
-        return EvatorCloud().delete_evotor_additional_by_id(additional_id)
-
+        msg = EvatorCloud().delete_evotor_additional_by_id(additional_id)
+        cache_key = f"user_message_{user_id}"
+        cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
         logger.error(
             "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
@@ -157,9 +169,7 @@ def delete_evotor_additional_task(additional_id):
 @shared_task
 def update_site_stores_task(data_items, is_filtered, user_id):
     try:
-        msg, success = EvatorCloud().create_or_update_site_stores(
-            data_items, is_filtered
-        )
+        msg = EvatorCloud().create_or_update_site_stores(data_items, is_filtered)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
@@ -172,9 +182,7 @@ def update_site_stores_task(data_items, is_filtered, user_id):
 @shared_task
 def update_site_terminals_task(data_items, is_filtered, user_id):
     try:
-        msg, success = EvatorCloud().create_or_update_site_terminals(
-            data_items, is_filtered
-        )
+        msg = EvatorCloud().create_or_update_site_terminals(data_items, is_filtered)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
@@ -187,9 +195,7 @@ def update_site_terminals_task(data_items, is_filtered, user_id):
 @shared_task
 def update_site_staffs_task(data_items, is_filtered, user_id):
     try:
-        msg, success = EvatorCloud().create_or_update_site_staffs(
-            data_items, is_filtered
-        )
+        msg = EvatorCloud().create_or_update_site_staffs(data_items, is_filtered)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
@@ -202,9 +208,7 @@ def update_site_staffs_task(data_items, is_filtered, user_id):
 @shared_task
 def update_site_groups_task(data_items, is_filtered, user_id):
     try:
-        msg, success = EvatorCloud().create_or_update_site_groups(
-            data_items, is_filtered
-        )
+        msg = EvatorCloud().create_or_update_site_groups(data_items, is_filtered)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
@@ -217,9 +221,7 @@ def update_site_groups_task(data_items, is_filtered, user_id):
 @shared_task
 def update_site_products_task(data_items, is_filtered, user_id):
     try:
-        msg, success = EvatorCloud().create_or_update_site_products(
-            data_items, is_filtered
-        )
+        msg = EvatorCloud().create_or_update_site_products(data_items, is_filtered)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
@@ -232,9 +234,7 @@ def update_site_products_task(data_items, is_filtered, user_id):
 @shared_task
 def update_site_additionals_task(data_items, is_filtered, user_id):
     try:
-        msg, success = EvatorCloud().create_or_update_site_additionals(
-            data_items, is_filtered
-        )
+        msg = EvatorCloud().create_or_update_site_additionals(data_items, is_filtered)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
@@ -251,16 +251,9 @@ def update_site_additionals_task(data_items, is_filtered, user_id):
 def send_evotor_categories_task(category_ids, user_id):
     try:
         categories = Category.objects.filter(id__in=category_ids)
-        error = EvatorCloud().update_or_create_evotor_groups(categories)
-
-        if error:
-            msg = error
-        else:
-            msg = "Категории были успешно отправлены в Эвотор!"
-
+        msg = EvatorCloud().update_or_create_evotor_groups(categories)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
-
     except Exception as e:
         logger.error(
             "Ошибка при отправке созданной / измененной категории или модификации в Эвотор. Ошибка %s",
@@ -272,16 +265,9 @@ def send_evotor_categories_task(category_ids, user_id):
 def send_evotor_products_task(product_ids, user_id):
     try:
         products = Product.objects.filter(id__in=product_ids)
-        error = EvatorCloud().update_or_create_evotor_products(products)
-
-        if error:
-            msg = error
-        else:
-            msg = "Товары были успешно отправлены в Эвотор!"
-
+        msg = EvatorCloud().update_or_create_evotor_products(products)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
-
     except Exception as e:
         logger.error(
             "Ошибка при отправке созданной / измененной категории или модификации в Эвотор. Ошибка %s",
@@ -293,16 +279,9 @@ def send_evotor_products_task(product_ids, user_id):
 def send_evotor_additionals_task(additional_ids, user_id):
     try:
         additionals = Additional.objects.filter(id__in=additional_ids)
-        error = EvatorCloud().update_or_create_evotor_additionals(additionals)
-
-        if error:
-            msg = error
-        else:
-            msg = "Дополнительные товары были успешно отправлены в Эвотор!"
-
+        msg = EvatorCloud().update_or_create_evotor_additionals(additionals)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
-
     except Exception as e:
         logger.error(
             "Ошибка при отправке созданной / измененной категории или модификации в Эвотор. Ошибка %s",

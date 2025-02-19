@@ -357,27 +357,24 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
 
     def get_formsets(self):
         product = self.get_object()
-        if product.is_parent and self.full_access:
-            self.formsets = {
+        self.formsets = {}
+
+        if self.full_access:
+            common_formsets = {
                 "category_formset": self.category_formset,
                 "image_formset": self.image_formset,
                 "recommended_formset": self.recommendations_formset,
                 "additional_formset": self.additional_formset,
                 "attribute_formset": self.attribute_formset,
             }
-        elif self.full_access:
-            self.formsets = {
-                "category_formset": self.category_formset,
-                "image_formset": self.image_formset,
-                "recommended_formset": self.recommendations_formset,
-                "additional_formset": self.additional_formset,
-                "attribute_formset": self.attribute_formset,
-                "stockrecord_formset": self.stockrecord_formset,
-            }
+
+            if not product:
+                self.formsets.update(common_formsets)
+            elif not product.is_parent:
+                self.formsets["stockrecord_formset"] = self.stockrecord_formset
+
         elif self.stock_access:
-            self.formsets = {
-                "stockrecord_formset": self.stockrecordstock_formset,
-            }
+            self.formsets["stockrecord_formset"] = self.stockrecordstock_formset
 
         return self.formsets
 
@@ -518,7 +515,9 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                     )
                 )
 
-        if not self.full_access:
+        if self.creating and form.is_valid() and self.full_access:
+            self.object = form.save()
+        elif self.stock_access:
             self.object = self.get_object()
 
         formsets = {}
@@ -655,48 +654,59 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
             max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
         )
 
-        if form is not None and self.evotor_update:
-            stockrecord_formset = formsets["stockrecord_formset"]
-            stores_to_delete = [
-                form.cleaned_data.get("store")
-                for form in stockrecord_formset.forms
-                if form.cleaned_data.get("DELETE", False)
-                and form.cleaned_data.get("store")
-                and form.cleaned_data.get("store").evotor_id
-            ]
-            updated_formsets = [
-                "category_formset",
-                "attribute_formset",
-                "stockrecord_formset",
-            ]
-            product_updated = bool(form.changed_data) or any(
-                bool(formsets[name].changed_objects)
-                for name in updated_formsets
-                if name in formsets
+        if self.evotor_update:
+            stockrecord_formset = formsets.get("stockrecord_formset")
+
+            stores_to_delete = (
+                {
+                    stk_form.cleaned_data["store"].evotor_id
+                    for stk_form in stockrecord_formset.forms
+                    if stk_form.cleaned_data.get("DELETE")
+                    and stk_form.cleaned_data.get("store")
+                    and stk_form.cleaned_data["store"].evotor_id
+                }
+                if stockrecord_formset
+                else set()
             )
 
-            if product_updated:
-                send_evotor_product.send(
+            for store_id in stores_to_delete:
+                delete_evotor_product.send(
                     sender=self,
-                    product_id=self.object.evotor_id,
-                    request=self.request,
+                    product_id=self.object.id,
+                    user_id=self.request.user.id,
+                    store_id=store_id,
                 )
 
-            if stores_to_delete:
-                for store in stores_to_delete:
-                    delete_evotor_product.send(
-                        sender=self,
-                        product_id=self.object.evotor_id,
-                        store_id=store.evotor_id,
-                        request=self.request,
-                    )
+            product_updated = bool(form.changed_data) if form else False
 
-        elif stockrecord_form is not None and self.evotor_update:
-            update_evotor_stockrecord.send(
-                sender=self,
-                product_id=self.object.evotor_id,
-                request=self.request,
+            stockrecord_updated = (
+                any(
+                    stk_form.changed_data
+                    and stk_form.cleaned_data.get("store")
+                    and stk_form.cleaned_data["store"].evotor_id not in stores_to_delete
+                    for stk_form in stockrecord_formset.forms
+                )
+                if stockrecord_formset
+                else False
             )
+
+            formsets_updated = any(
+                formsets[name].changed_objects if formsets.get(name) else False
+                for name in ["category_formset", "attribute_formset"]
+            )
+
+            if product_updated or stockrecord_updated or formsets_updated:
+                send_evotor_product.send(
+                    sender=self,
+                    product_id=self.object.id,
+                    user_id=self.request.user.id,
+                )
+            elif stockrecord_form:
+                update_evotor_stockrecord.send(
+                    sender=self,
+                    product_id=self.object.id,
+                    user_id=self.request.user.id,
+                )
 
         return response
 
@@ -852,8 +862,8 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
             self.object = self.get_object()
             delete_evotor_product.send(
                 sender=self,
-                product_id=self.object.evotor_id,
-                request=self.request,
+                product_id=self.object.id,
+                user_id=self.request.user.id,
             )
 
     def get_context_data(self, **kwargs):
@@ -1070,8 +1080,8 @@ class CategoryListMixin(object):
         if evotor_update and category_updated:
             send_evotor_category.send(
                 sender=self,
-                category_id=self.object.evotor_id,
-                request=self.request,
+                category_id=self.object.id,
+                user_id=self.request.user.id,
             )
 
         return response
@@ -1088,7 +1098,7 @@ class CategoryCreateView(CategoryListMixin, generic.CreateView):
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, "Категория успешно создана")
+        messages.info(self.request, "Категория успешно создана.")
         return super().get_success_url()
 
     def get_initial(self):
@@ -1110,7 +1120,7 @@ class CategoryUpdateView(CategoryListMixin, generic.UpdateView):
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, "Категория успешно обновлена")
+        messages.info(self.request, "Категория успешно обновлена.")
         action = self.request.POST.get("action")
         if action == "continue":
             return reverse(
@@ -1130,7 +1140,7 @@ class CategoryDeleteView(CategoryListMixin, generic.DeleteView):
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, "Категория успешно удалена")
+        messages.info(self.request, "Категория успешно удалена.")
         return super().get_success_url()
 
     def form_valid(self, form):
@@ -1146,8 +1156,8 @@ class CategoryDeleteView(CategoryListMixin, generic.DeleteView):
             self.object = self.get_object()
             delete_evotor_category.send(
                 sender=self,
-                category_id=self.object.evotor_id,
-                request=self.request,
+                category_id=self.object.id,
+                user_id=self.request.user.id,
             )
 
 
@@ -1245,7 +1255,7 @@ class ProductClassCreateView(ProductClassCreateUpdateView):
         return "Добавить новый тип товара"
 
     def get_success_url(self):
-        messages.info(self.request, "Тип товара успешно создан")
+        messages.info(self.request, "Тип товара успешно создан.")
         return reverse("dashboard:catalogue-class-list")
 
 
@@ -1304,12 +1314,12 @@ class ProductClassDeleteView(generic.DeleteView):
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             messages.error(
                 self.request,
-                "%i товар(ов) по-прежнему относятся к этому типу" % product_count,
+                "%i товар(ов) по-прежнему относятся к этому типу." % product_count,
             )
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, "Тип товара успешно удален")
+        messages.info(self.request, "Тип товара успешно удален.")
         return reverse("dashboard:catalogue-class-list")
 
 
@@ -1448,14 +1458,17 @@ class AttributeOptionGroupDeleteView(PopUpWindowDeleteMixin, generic.DeleteView)
         product_attribute_count = product_attributes.count()
         if product_attribute_count > 0:
             product_attribute_names = product_attributes.values_list(
-                "product__name", flat=True
+                "product", flat=True
             )
             ctx["disallow"] = True
             ctx["title"] = "Невозможно удалить '%s'" % self.object.name
             messages.error(
                 self.request,
                 "%i aтрибут(а) назначены товарам. %s"
-                % (product_attribute_count, ", ".join(product_attribute_names)),
+                % (
+                    product_attribute_count,
+                    ", ".join(product_attribute_names.get_name()),
+                ),
             )
 
         ctx["http_get_params"] = self.request.GET
@@ -1562,13 +1575,13 @@ class OptionDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             if products_count:
                 messages.error(
                     self.request,
-                    "%i товар(ы) по-прежнему относятся к этой опции. Список товаров: %s. Удалите опцию у товара(ов), прежде чем удалять опцию"
+                    "%i товар(ы) по-прежнему относятся к этой опции. Список товаров: %s. Удалите опцию у товара(ов), прежде чем удалять опцию."
                     % (products_count, list(products.values_list("name", flat=True))),
                 )
             if product_classes_count:
                 messages.error(
                     self.request,
-                    "%i класс(ы) товар(ов) по-прежнему присвоен(ы) этой опции. Список классов: %s. Удалите опцию у класса(ов), прежде чем удалять опцию"
+                    "%i класс(ы) товар(ов) по-прежнему присвоен(ы) этой опции. Список классов: %s. Удалите опцию у класса(ов), прежде чем удалять опцию."
                     % (
                         product_classes_count,
                         list(product_classes.values_list("name", flat=True)),
@@ -1618,8 +1631,8 @@ class AdditionalCreateUpdateView(generic.UpdateView):
         if evotor_update and additional_updated:
             send_evotor_additional.send(
                 sender=self,
-                additional_id=self.object.evotor_id,
-                request=self.request,
+                additional_id=self.object.id,
+                user_id=self.request.user.id,
             )
 
         return response
@@ -1690,8 +1703,8 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             self.object = self.get_object()
             delete_evotor_additional.send(
                 sender=self,
-                category_id=self.object.evotor_id,
-                request=self.request,
+                category_id=self.object.id,
+                user_id=self.request.user.id,
             )
 
     def get_context_data(self, **kwargs):
@@ -1709,13 +1722,13 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             if products_count:
                 messages.error(
                     self.request,
-                    "%i товар(ы) по-прежнему содержит этот доп товар. Список товаров с этим доп. товаром: %s. Удалите доп.товар у основного товара(ов), прежде чем удалять доп. товар"
+                    "%i товар(ы) по-прежнему содержит этот доп товар. Список товаров с этим доп. товаром: %s. Удалите доп.товар у основного товара(ов), прежде чем удалять дополнительный товар."
                     % (products_count, list(products.values_list("name", flat=True))),
                 )
             if product_classes_count:
                 messages.error(
                     self.request,
-                    "%i класс(ы) по-прежнему содержит этот доп товар. Список класснов с этим доп. товаром: %s. Удалите доп.товар у класса(ов), прежде чем удалять доп. товар"
+                    "%i класс(ы) по-прежнему содержит этот доп товар. Список класснов с этим доп. товаром: %s. Удалите доп.товар у класса(ов), прежде чем удалять дополнительный товар."
                     % (
                         product_classes_count,
                         list(product_classes.values_list("name", flat=True)),
@@ -1820,13 +1833,13 @@ class AttributeDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
             if products_count:
                 messages.error(
                     self.request,
-                    "%i товар(ы) по-прежнему содержит этот атрибут. Список товаров с этим доп. атрибутом: %s. Удалите атрибут у основного товара(ов), прежде чем удалять атрибут"
+                    "%i товар(ы) по-прежнему содержит этот атрибут. Список товаров с этим доп. атрибутом: %s. Удалите атрибут у основного товара(ов), прежде чем удалять атрибут."
                     % (products_count, list(products.values_list("name", flat=True))),
                 )
             if product_classes_count:
                 messages.error(
                     self.request,
-                    "%i класс(ы) по-прежнему содержит этот атрибут. Список класснов с этим атрибутом: %s. Удалите атрибут у класса(ов), прежде чем удалять атрибут"
+                    "%i класс(ы) по-прежнему содержит этот атрибут. Список класснов с этим атрибутом: %s. Удалите атрибут у класса(ов), прежде чем удалять атрибут."
                     % (
                         product_classes_count,
                         list(product_classes.values_list("name", flat=True)),

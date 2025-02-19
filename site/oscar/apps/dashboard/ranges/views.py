@@ -97,7 +97,7 @@ class RangeDeleteView(DeleteView):
     context_object_name = "range"
 
     def get_success_url(self):
-        messages.warning(self.request, "Диапазон удален")
+        messages.warning(self.request, "Диапазон удален.")
         return reverse("dashboard:range-list")
 
 
@@ -171,8 +171,8 @@ class RangeProductListView(BulkEditMixin, ListView):
         messages.success(
             request,
             ngettext(
-                "Удален %d товар из ассортимента",
-                "Удалено %d товаров из ассортимента",
+                "Удален %d товар из ассортимента.",
+                "Удалено %d товаров из ассортимента.",
                 num_products,
             )
             % num_products,
@@ -225,8 +225,8 @@ class RangeProductListView(BulkEditMixin, ListView):
         messages.success(
             request,
             ngettext(
-                "Добавлен %d товар из исключенного списка",
-                "Добавлен %d товаров из исключенного списка",
+                "Добавлен %d товар из исключенного списка.",
+                "Добавлен %d товаров из исключенного списка.",
                 num_products,
             )
             % num_products,
@@ -254,8 +254,8 @@ class RangeProductListView(BulkEditMixin, ListView):
         messages.success(
             request,
             (
-                "%(num_products)d товар был %(action)s",
-                "%(num_products)d товаров было %(action)s",
+                "%(num_products)d товар был в %(action)s.",
+                "%(num_products)d товаров было в %(action)s.",
                 num_products,
             )
             % {"num_products": num_products, "action": action},
@@ -264,7 +264,7 @@ class RangeProductListView(BulkEditMixin, ListView):
         if dupe_skus:
             messages.warning(
                 request,
-                "товары с артикулами, соответствующими %(skus)s, уже были %(action)s."
+                "Товары с артикулами, соответствующими %(skus)s, уже были в %(action)s."
                 % {"skus": ", ".join(dupe_skus), "action": action},
             )
 
@@ -272,7 +272,7 @@ class RangeProductListView(BulkEditMixin, ListView):
         if missing_skus:
             messages.warning(
                 request,
-                "Не найдено ни одного товара(ов), соответствующего артикулу %s"
+                "Не найдено ни одного товара(ов), соответствующего артикулу %s."
                 % ", ".join(missing_skus),
             )
         self.check_imported_products_sku_duplicates(request, products)
@@ -323,7 +323,7 @@ class RangeProductListView(BulkEditMixin, ListView):
             dupe_skus = [p["stockrecords__evotor_code"] for p in dupe_sku_products]
             messages.warning(
                 request,
-                "Есть более одного товара с SKU %s" % ", ".join(dupe_skus),
+                "Есть более одного товара с артикулом: %s." % ", ".join(dupe_skus),
             )
 
 

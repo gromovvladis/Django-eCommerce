@@ -40,7 +40,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         if not ids:
             messages.error(
                 self.request,
-                ("Вам нужно выбрать хотя бы одну позицую для обновления"),
+                ("Вам нужно выбрать хотя бы одну позицую для обновления."),
             )
             return self.redirect_with_get_params(self.url_redirect, request)
 
@@ -104,7 +104,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         """Логирует и отправляет сообщение при ошибке сериализации"""
         self.queryset = []
         logger.error(f"Ошибка сериализации: {errors}")
-        messages.error(self.request, f"Ошибка при сериализации данных: {errors}")
+        messages.error(self.request, f"Ошибка при сериализации данных: {errors}.")
         return self.queryset
 
     def update_models(self, serializer, is_filtered):
@@ -160,7 +160,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
 
         messages.success(
             self.request,
-            ("Записи на сайте были успешно удалены"),
+            ("Записи на сайте были успешно удалены."),
         )
         return self.redirect_with_get_params(self.url_redirect, self.request)
 

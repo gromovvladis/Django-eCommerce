@@ -304,15 +304,22 @@ class EvotorStoreClient(EvotorAPICloud):
     # ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (РАБОТА С JSON)
 
     def create_or_update_site_stores(self, stores_json, is_filtered=False):
-        error_msgs = []
         try:
+            error_msgs = []
             evotor_ids = []
             json_valid = True
+            created = False
+            stores = {obj.evotor_id: obj for obj in Store.objects.all()}
             for store_json in stores_json:
                 evotor_id = store_json.get("id")
                 evotor_ids.append(evotor_id)
-                store, created = Store.objects.get_or_create(evotor_id=evotor_id)
-                serializer = StoreSerializer(store, data=store_json)
+                store = stores.get(evotor_id)
+
+                if store:
+                    serializer = StoreSerializer(store, data=store_json)
+                else:
+                    created = True
+                    serializer = StoreSerializer(data=store_json)
 
                 if serializer.is_valid():
                     serializer.save()
@@ -330,30 +337,38 @@ class EvotorStoreClient(EvotorAPICloud):
                     )
 
             if not json_valid:
-                return ", ".join(error_msgs), False
+                logger.error(f"Ошибка json: {error_msgs}")
+                return ", ".join(error_msgs)
 
             if not is_filtered:
-                for store in Store.objects.all():
+                for store in stores.values():
                     if store.evotor_id not in evotor_ids:
                         store.evotor_id = None
                         store.save()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении магазина: {e}", exc_info=True)
-            return f"Ошибка при обновлении магазина: {e}", False
+            return f"Ошибка при обновлении магазина: {e}"
 
-        return "Магазины были успешно обновлены", True
+        return "Магазины были успешно обновлены"
 
     def create_or_update_site_terminals(self, terminals_json, is_filtered=False):
-        error_msgs = []
         try:
+            error_msgs = []
             evotor_ids = []
             json_valid = True
+            created = False
+            terminals = {obj.evotor_id: obj for obj in Terminal.objects.all()}
             for terminal_json in terminals_json:
                 evotor_id = terminal_json.get("id")
                 evotor_ids.append(evotor_id)
-                trm, created = Terminal.objects.get_or_create(evotor_id=evotor_id)
-                serializer = TerminalSerializer(trm, data=terminal_json)
+
+                trm = terminals.get(evotor_id)
+                if trm:
+                    serializer = TerminalSerializer(trm, data=terminal_json)
+                else:
+                    created = True
+                    serializer = TerminalSerializer(data=terminal_json)
 
                 if serializer.is_valid():
                     serializer.save()
@@ -371,18 +386,19 @@ class EvotorStoreClient(EvotorAPICloud):
                     )
 
             if not json_valid:
-                return ", ".join(error_msgs), False
+                logger.error(f"Ошибка json: {error_msgs}")
+                return ", ".join(error_msgs)
 
             if not is_filtered:
-                for terminal in Terminal.objects.all():
+                for terminal in terminals.values():
                     if terminal.evotor_id not in evotor_ids:
                         terminal.delete()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении терминалов: {e}", exc_info=True)
-            return f"Ошибка при обновлении терминалов: {e}", False
+            return f"Ошибка при обновлении терминалов: {e}"
 
-        return "Терминалы были успешно обновлены", True
+        return "Терминалы были успешно обновлены"
 
 
 class EvotorStaffClient(EvotorAPICloud):
@@ -519,17 +535,21 @@ class EvotorStaffClient(EvotorAPICloud):
     # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
     def create_or_update_site_roles(self, roles_json, is_filtered=False):
-        error_msgs = []
         try:
+            error_msgs = []
             evotor_ids = []
             json_valid = True
+            created = False
+            roles = {obj.evotor_id: obj for obj in Group.objects.all()}
             for role_json in roles_json:
-                name = role_json.get("name")
-                role, created = Group.objects.get_or_create(name=name)
-                serializer = UserGroupSerializer(role, data=role_json)
-
                 evotor_id = role_json.get("id")
-                evotor_ids.append((evotor_id, role.id))
+                evotor_ids.append(evotor_id)
+                role = roles.get(evotor_id)
+                if role:
+                    serializer = UserGroupSerializer(role, data=role_json)
+                else:
+                    created = True
+                    serializer = UserGroupSerializer(data=role_json)
 
                 if serializer.is_valid():
                     serializer.save()
@@ -547,36 +567,35 @@ class EvotorStaffClient(EvotorAPICloud):
                     )
 
             if not json_valid:
-                return ", ".join(error_msgs), False
+                logger.error(f"Ошибка json: {error_msgs}")
+                return ", ".join(error_msgs)
 
             if not is_filtered:
-                for group_evotor in GroupEvotor.objects.all():
-                    if (
-                        group_evotor.evotor_id,
-                        group_evotor.group_id,
-                    ) not in evotor_ids:
-                        group_evotor.delete()
+                for role in roles.values():
+                    if role.evotor_id not in evotor_ids:
+                        role.evotor_id = None
+                        role.save()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении ролей персонала: {e}")
-            return f"Ошибка при обновлении ролей персонала: {e}", False
+            return f"Ошибка при обновлении ролей персонала: {e}"
 
-        return "Роли сотрудников были успешно обновлены", True
+        return "Роли сотрудников были успешно обновлены"
 
     def create_or_update_site_staffs(self, staffs_json, is_filtered=False):
-        error_msgs = []
-        staffs = Staff.objects.all()
         try:
+            error_msgs = []
             evotor_ids = []
             json_valid = True
             created = False
+            staffs = {obj.evotor_id: obj for obj in Staff.objects.all()}
             for staff_json in staffs_json:
                 evotor_id = staff_json.get("id")
                 evotor_ids.append(evotor_id)
-                try:
-                    staff = staffs.get(evotor_id=evotor_id)
+                staff = staffs.get(evotor_id)
+                if staff:
                     serializer = StaffSerializer(staff, data=staff_json)
-                except Staff.DoesNotExist:
+                else:
                     created = True
                     serializer = StaffSerializer(data=staff_json)
 
@@ -596,19 +615,20 @@ class EvotorStaffClient(EvotorAPICloud):
                     )
 
             if not json_valid:
-                return ", ".join(error_msgs), False
+                logger.error(f"Ошибка json: {error_msgs}")
+                return ", ".join(error_msgs)
 
             if not is_filtered:
-                for staff in staffs:
+                for staff in staffs.values():
                     if staff.evotor_id not in evotor_ids:
                         staff.evotor_id = None
                         staff.save()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении списка сотрудников: {e}")
-            return f"Ошибка при обновлении списка сотрудников: {e}", False
+            return f"Ошибка при обновлении списка сотрудников: {e}"
 
-        return "Сотрудники были успешно обновлены", True
+        return "Сотрудники были успешно обновлены!"
 
 
 class EvotorGroupClient(EvotorAPICloud):
@@ -830,7 +850,10 @@ class EvotorGroupClient(EvotorAPICloud):
             if error:
                 errors.append(error)
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Категории были успешно отправлены в Эвотор!"
 
     def delete_evotor_group(self, group):
         """
@@ -863,7 +886,10 @@ class EvotorGroupClient(EvotorAPICloud):
                 f"Категория или родительский товар - {group.get_name()} не имеет идентификатора Эвотор"
             )
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Группа Эвотор была успешно удалена в Эвотор!"
 
     def delete_evotor_groups(self, groups):
         """
@@ -906,13 +932,16 @@ class EvotorGroupClient(EvotorAPICloud):
             response = self.send_request(endpoint, "DELETE")
             self.handle_response_errors(response, errors)
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Группы Эвотор были успешно удалены в Эвотор!"
 
     # ========= Задачи celery
 
     def update_or_create_evotor_category_by_id(self, category_id):
         try:
-            category = Category.objects.get(evotor_id=category_id)
+            category = Category.objects.get(id=category_id)
             return self.update_or_create_evotor_group(category)
         except Exception as e:
             logger.error(
@@ -921,7 +950,7 @@ class EvotorGroupClient(EvotorAPICloud):
 
     def delete_evotor_category_by_id(self, category_id):
         try:
-            category = Category.objects.get(evotor_id=category_id)
+            category = Category.objects.get(id=category_id)
             return self.delete_evotor_group(category)
         except Exception as e:
             logger.error(f"Ошибка при выполнении delete_evotor_category_by_id {e}")
@@ -929,41 +958,42 @@ class EvotorGroupClient(EvotorAPICloud):
     # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
     def create_or_update_site_groups(self, groups_json, is_filtered=False):
-        error_msgs = []
         try:
-            evotor_ids = []
+            error_msgs = []
+            category_evotor_ids = []
+            product_evotor_ids = []
+            created = False
             json_valid = True
+            categories = {obj.evotor_id: obj for obj in Category.objects.all()}
+            products = {obj.evotor_id: obj for obj in Product.objects.all()}
             for group_json in groups_json:
                 evotor_id = group_json.get("id")
-                evotor_ids.append(evotor_id)
+                if evotor_id == Additional.parent_id:
+                    continue
+
                 attributes = group_json.get("attributes")
+
                 if attributes:
-                    try:
-                        instance = Product.objects.get(evotor_id=evotor_id)
-                    except Product.DoesNotExist:
-                        instance = None
+                    instance = products.get(evotor_id)
+                    product_evotor_ids.append(evotor_id)
                 else:
-                    try:
-                        instance = Category.objects.get(evotor_id=evotor_id)
-                    except Category.DoesNotExist:
-                        instance = None
+                    instance = categories.get(evotor_id)
+                    category_evotor_ids.append(evotor_id)
 
                 if instance:
                     serializer = ProductGroupSerializer(instance, data=group_json)
-                    created = False
                 else:
-                    serializer = ProductGroupSerializer(data=group_json)
                     created = True
+                    serializer = ProductGroupSerializer(data=group_json)
 
                 if serializer.is_valid():
-                    if evotor_id != Additional.parent_id:
-                        group = serializer.save()
-                        event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
-                        CRMEvent.objects.create(
-                            body=f"ProductGroup created / or updated - { group.name }",
-                            sender=CRMEvent.GROUP,
-                            event_type=event_type,
-                        )
+                    group = serializer.save()
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body=f"ProductGroup created / or updated - { group.name }",
+                        sender=CRMEvent.GROUP,
+                        event_type=event_type,
+                    )
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
@@ -972,11 +1002,16 @@ class EvotorGroupClient(EvotorAPICloud):
                     )
 
             if not json_valid:
-                return ", ".join(error_msgs), False
+                logger.error(f"Ошибка json: {error_msgs}")
+                return ", ".join(error_msgs)
 
             if not is_filtered:
-                for category in Category.objects.all():
-                    if category.evotor_id not in evotor_ids:
+                for category in categories.values():
+                    if category.evotor_id not in category_evotor_ids:
+                        category.evotor_id = None
+                        category.save()
+                for product in products.values():
+                    if category.evotor_id not in product_evotor_ids:
                         category.evotor_id = None
                         category.save()
 
@@ -985,12 +1020,9 @@ class EvotorGroupClient(EvotorAPICloud):
                 f"Ошибка при обновлении группы товаров или модификации товаров: {e}",
                 exc_info=True,
             )
-            return (
-                f"Ошибка при обновлении группы товаров или модификации товаров: {e}",
-                False,
-            )
+            return f"Ошибка при обновлении группы товаров или модификации товаров: {e}"
 
-        return "Группы товаров и модификаций были успешно обновлены", True
+        return "Группы товаров и модификаций были успешно обновлены"
 
 
 class EvotorProductClient(EvotorGroupClient):
@@ -1268,7 +1300,10 @@ class EvotorProductClient(EvotorGroupClient):
             if error:
                 errors.append(error)
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Товары были успешно отправлены в Эвотор!"
 
     def update_evotor_stockrecord(self, product):
         """
@@ -1342,7 +1377,10 @@ class EvotorProductClient(EvotorGroupClient):
         else:
             errors.append(f"Товар {product.get_name()} не имеет идентификатора Эвотор")
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Товар был успешно обновлен в Эвотор!"
 
     def delete_evotor_product_by_store(self, product, store_id):
         """
@@ -1365,7 +1403,10 @@ class EvotorProductClient(EvotorGroupClient):
         else:
             errors.append(f"Товар {product.get_name()} не имеет идентификатора Эвотор")
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Товар был успешно удален в Эвотор!"
 
     def delete_evotor_product(self, product):
         """
@@ -1395,7 +1436,10 @@ class EvotorProductClient(EvotorGroupClient):
         else:
             errors.append(f"Товар {product.get_name()} не имеет идентификатора Эвотор")
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Товар был успешно удален в Эвотор!"
 
     def delete_evotor_products(self, products):
         """
@@ -1432,13 +1476,16 @@ class EvotorProductClient(EvotorGroupClient):
 
             self.handle_response_errors(response, errors)
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Товары были успешно удалены в Эвотор!"
 
     # ========= Задачи celery
 
     def delete_evotor_product_by_id(self, product_id):
         try:
-            product = Product.objects.get(evotor_id=product_id)
+            product = Product.objects.get(id=product_id)
             return self.delete_evotor_product(product)
         except Exception as e:
             logger.error(
@@ -1447,7 +1494,7 @@ class EvotorProductClient(EvotorGroupClient):
 
     def delete_evotor_product_by_store_by_id(self, product_id, store_id):
         try:
-            product = Product.objects.get(evotor_id=product_id)
+            product = Product.objects.get(id=product_id)
             return self.delete_evotor_product_by_store(product, store_id)
         except Exception as e:
             logger.error(
@@ -1456,7 +1503,7 @@ class EvotorProductClient(EvotorGroupClient):
 
     def update_or_create_evotor_product_by_id(self, product_id):
         try:
-            product = Product.objects.get(evotor_id=product_id)
+            product = Product.objects.get(id=product_id)
             return self.update_or_create_evotor_product(product)
         except Exception as e:
             logger.error(
@@ -1465,7 +1512,7 @@ class EvotorProductClient(EvotorGroupClient):
 
     def update_evotor_stockrecord_by_id(self, product_id):
         try:
-            product = Product.objects.get(evotor_id=product_id)
+            product = Product.objects.get(id=product_id)
             return self.update_evotor_stockrecord(product)
         except Exception as e:
             logger.error(f"Ошибка при выполнении update_evotor_stockrecord_by_id {e}")
@@ -1473,31 +1520,34 @@ class EvotorProductClient(EvotorGroupClient):
     # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
     def create_or_update_site_products(self, products_json, is_filtered=False):
-        error_msgs = []
         try:
+            error_msgs = []
             evotor_ids = []
             json_valid = True
             created = False
+            products = {obj.evotor_id: obj for obj in Product.objects.all()}
             for product_json in products_json:
+                parent_id = product_json.get("parent_id", None)
+                if parent_id == Additional.parent_id:
+                    continue
+
                 evotor_id = product_json.get("id")
                 evotor_ids.append(evotor_id)
-                try:
-                    prd = Product.objects.get(evotor_id=evotor_id)
+                prd = products.get(evotor_id)
+                if prd:
                     serializer = ProductSerializer(prd, data=product_json)
-                except Product.DoesNotExist:
+                else:
                     created = True
                     serializer = ProductSerializer(data=product_json)
 
                 if serializer.is_valid():
-                    parent_id = product_json.get("parent_id")
-                    if parent_id != Additional.parent_id:
-                        product = serializer.save()
-                        event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
-                        CRMEvent.objects.create(
-                            body=f"Product created / updated - { product.name }",
-                            sender=CRMEvent.PRODUCT,
-                            event_type=event_type,
-                        )
+                    product = serializer.save()
+                    event_type = CRMEvent.CREATION if created else CRMEvent.UPDATE
+                    CRMEvent.objects.create(
+                        body=f"Product created / updated - { product.name }",
+                        sender=CRMEvent.PRODUCT,
+                        event_type=event_type,
+                    )
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
@@ -1506,19 +1556,20 @@ class EvotorProductClient(EvotorGroupClient):
                     )
 
             if not json_valid:
-                return ", ".join(error_msgs), False
+                logger.error(f"Ошибка json: {error_msgs}")
+                return ", ".join(error_msgs)
 
             if not is_filtered:
-                for product in Product.objects.all():
+                for product in products.values():
                     if product.evotor_id not in evotor_ids:
                         product.evotor_id = None
                         product.save()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении товара: {e}", exc_info=True)
-            return f"Ошибка при обновлении товара: {e}", False
+            return f"Ошибка при обновлении товара: {e}"
 
-        return "Товары были успешно обновлены", True
+        return "Товары были успешно обновлены!"
 
 
 class EvotorAdditionalClient(EvotorProductClient):
@@ -1634,7 +1685,10 @@ class EvotorAdditionalClient(EvotorProductClient):
             if error:
                 errors.append(error)
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Дополнительные товары были успешно отправлены в Эвотор!"
 
     def delete_evotor_additional_by_store(self, additional, store_id):
         """
@@ -1659,7 +1713,10 @@ class EvotorAdditionalClient(EvotorProductClient):
                 f"Товар {additional.get_name()} не имеет идентификатора Эвотор"
             )
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Дополнительный товар был успешно удален в Эвотор!"
 
     def delete_evotor_additional(self, additional):
         """
@@ -1687,7 +1744,10 @@ class EvotorAdditionalClient(EvotorProductClient):
                 f"Товар {additional.get_name()} не имеет идентификатора Эвотор"
             )
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Дополнительный товар был успешно удален в Эвотор!"
 
     def delete_evotor_additionals(self, additionals):
         """
@@ -1718,13 +1778,16 @@ class EvotorAdditionalClient(EvotorProductClient):
 
             self.handle_response_errors(response, errors)
 
-        return ", ".join(errors)
+        if errors:
+            return ", ".join(errors)
+        else:
+            return "Дополнительные товары были успешно удалены в Эвотор!"
 
     # ========= Задачи celery
 
     def update_or_create_evotor_additional_by_id(self, additional_id):
         try:
-            additional = Additional.objects.get(evotor_id=additional_id)
+            additional = Additional.objects.get(id=additional_id)
             return self.update_or_create_evotor_additional(additional)
         except Exception as e:
             logger.error(
@@ -1733,7 +1796,7 @@ class EvotorAdditionalClient(EvotorProductClient):
 
     def delete_evotor_additional_by_id(self, additional_id):
         try:
-            additional = Additional.objects.get(evotor_id=additional_id)
+            additional = Additional.objects.get(id=additional_id)
             return self.delete_evotor_additional(additional)
         except Exception as e:
             logger.error(f"Ошибка при выполнении delete_evotor_additional_by_id {e}")
@@ -1741,19 +1804,24 @@ class EvotorAdditionalClient(EvotorProductClient):
     # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
     def create_or_update_site_additionals(self, additionals_json, is_filtered=False):
-        error_msgs = []
-        additionals = Additional.objects.all()
         try:
+            error_msgs = []
             evotor_ids = []
             json_valid = True
             created = False
+            additionals = {obj.evotor_id: obj for obj in Additional.objects.all()}
             for additional_json in additionals_json:
+                parent_id = additionals_json.get("parent_id", None)
+                if parent_id != Additional.parent_id:
+                    continue
+
                 evotor_id = additional_json.get("id")
                 evotor_ids.append(evotor_id)
-                try:
-                    addit = additionals.get(evotor_id=evotor_id)
+                addit = additionals.get(evotor_id)
+
+                if addit:
                     serializer = AdditionalSerializer(addit, data=additional_json)
-                except Additional.DoesNotExist:
+                else:
                     created = True
                     serializer = AdditionalSerializer(data=additional_json)
 
@@ -1773,10 +1841,11 @@ class EvotorAdditionalClient(EvotorProductClient):
                     )
 
             if not json_valid:
-                return ", ".join(error_msgs), False
+                logger.error(f"Ошибка json: {error_msgs}")
+                return ", ".join(error_msgs)
 
             if not is_filtered:
-                for additional in additionals:
+                for additional in additionals.values():
                     if additional.evotor_id not in evotor_ids:
                         additional.evotor_id = None
                         additional.save()
@@ -1785,9 +1854,9 @@ class EvotorAdditionalClient(EvotorProductClient):
             logger.error(
                 f"Ошибка при обновлении дополнительного товара: {e}", exc_info=True
             )
-            return f"Ошибка при обновлении дополнительного товара: {e}", False
+            return f"Ошибка при обновлении дополнительного товара: {e}"
 
-        return "Дополнительные товары были успешно обновлены", True
+        return "Дополнительные товары были успешно обновлены!"
 
 
 class EvotorDocClient(EvotorAPICloud):
@@ -1933,13 +2002,14 @@ class EvotorDocClient(EvotorAPICloud):
                 error_msgs.append(f"Ошибка сериализации заказа: {serializer.errors}")
 
             if not json_valid:
-                return ", ".join(error_msgs), False
+                logger.error(f"Ошибка json: {error_msgs}")
+                return ", ".join(error_msgs)
 
         except Exception as e:
             logger.error(f"Ошибка при создании / обновлении заказа: {e}", exc_info=True)
-            return f"Ошибка при создании / обновлении заказа: {e}", False
+            return f"Ошибка при создании / обновлении заказа: {e}"
 
-        return "Заказ был успешно обновлен", True
+        return "Заказ был успешно обновлен"
 
     def refund_site_order(self, order_json):
         error_msgs = []
@@ -1978,13 +2048,14 @@ class EvotorDocClient(EvotorAPICloud):
                 )
 
             if not json_valid:
-                return ", ".join(error_msgs), False
+                logger.error(f"Ошибка json: {error_msgs}")
+                return ", ".join(error_msgs)
 
         except Exception as e:
             logger.error(f"Ошибка при возврате заказа: {e}", exc_info=True)
-            return f"Ошибка при возврате заказа: {e}", False
+            return f"Ошибка при возврате заказа: {e}"
 
-        return "Заказ был успешно обновлен", True
+        return "Заказ был успешно обновлен"
 
     def cash_transaction(self, trs_json):
         try:
@@ -2005,19 +2076,16 @@ class EvotorDocClient(EvotorAPICloud):
             else:
                 logger.error("Ошибка при сериализации %s" % serializer.errors)
                 error_msg = f"Ошибка сериализации внесения / изъятия наличных: {serializer.errors}"
-                return error_msg, False
+                return error_msg
 
         except Exception as e:
             logger.error(
                 f"Ошибка при создании / обновлении внесения / изъятия наличных: {e}",
                 exc_info=True,
             )
-            return (
-                f"Ошибка при создании / обновлении внесения / изъятия наличных: {e}",
-                False,
-            )
+            return f"Ошибка при создании / обновлении внесения / изъятия наличных: {e}"
 
-        return "Внесение / изъятие наличных было успешно обновлено", True
+        return "Внесение / изъятие наличных было успешно обновлено"
 
     def stockrecord_operation(self, sro_json):
         try:
@@ -2037,20 +2105,16 @@ class EvotorDocClient(EvotorAPICloud):
 
             else:
                 logger.error("Ошибка при сериализации %s" % serializer.errors)
-                error_msg = f"Ошибка сериализации события инвентаризации наличных: {serializer.errors}"
-                return error_msg, False
+                return f"Ошибка сериализации события инвентаризации наличных: {serializer.errors}"
 
         except Exception as e:
             logger.error(
                 f"Ошибка при создании / обновлении события инвентаризации: {e}",
                 exc_info=True,
             )
-            return (
-                f"Ошибка при создании / обновлении события инвентаризации: {e}",
-                False,
-            )
+            return f"Ошибка при создании / обновлении события инвентаризации: {e}"
 
-        return "Событие инвентаризации было успешно обновлено", True
+        return "Событие инвентаризации было успешно обновлено"
 
 
 class EvotorPushNotifClient(EvotorAPICloud):

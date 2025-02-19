@@ -135,13 +135,12 @@ class StoreCreateView(CreateView):
 
     def form_valid(self, form):
         self.object = form.save()
-        address = self.object.address.model(
+        StoreAddress.objects.create(
             store=self.object,
             line1=form.cleaned_data["line1"],
             coords_long=form.cleaned_data["coords_long"],
             coords_lat=form.cleaned_data["coords_lat"],
         )
-        address.save()
         return super().form_valid(form)
 
 
@@ -385,7 +384,7 @@ class StaffListView(CustomerListView):
         return queryset
 
     def make_nothing(self, request, users):
-        messages.info(self.request, "Выберите статус 'Активен' или 'Не активен'")
+        messages.info(self.request, "Выберите статус 'Активен' или 'Не активен'.")
         return redirect("dashboard:staff-list")
 
     def _change_users_active_status(self, staffs, value):
@@ -393,7 +392,7 @@ class StaffListView(CustomerListView):
             if not staff.user.is_superuser:
                 staff.is_active = value
                 staff.save()
-        messages.info(self.request, "Cтатус персонала был успешно изменен")
+        messages.info(self.request, "Cтатус персонала был успешно изменен.")
         return redirect("dashboard:staff-list")
 
 
@@ -414,11 +413,11 @@ class StaffStatusView(UpdateView):
             return self.get_error_url()
 
     def get_success_url(self):
-        messages.info(self.request, "Статус сотрудника успешно изменен")
+        messages.info(self.request, "Статус сотрудника успешно изменен.")
         return redirect("dashboard:staff-list")
 
     def get_error_url(self):
-        messages.warning(self.request, "Статус сотрудника не был изменен")
+        messages.warning(self.request, "Статус сотрудника не был изменен.")
         return redirect("dashboard:staff-list")
 
 
@@ -472,7 +471,7 @@ class StaffDeleteView(DeleteView):
     context_object_name = "staff"
 
     def get_success_url(self):
-        messages.success(self.request, "Сотрудник успешно удален")
+        messages.success(self.request, "Сотрудник успешно удален.")
         return reverse("dashboard:staff-list")
 
 
@@ -538,13 +537,13 @@ class StoreStaffLinkView(View):
         if self.link_user(user, store):
             messages.success(
                 request,
-                "Пользователь '%(name)s' был прикреплен к магазину - '%(store_name)s'"
+                "Пользователь '%(name)s' был прикреплен к магазину - '%(store_name)s.'"
                 % {"name": name, "store_name": store.name},
             )
         else:
             messages.info(
                 request,
-                "Пользователь '%(name)s' уже прикреплен к магазину - '%(store_name)s'"
+                "Пользователь '%(name)s' уже прикреплен к магазину - '%(store_name)s.'"
                 % {"name": name, "store_name": store.name},
             )
         return redirect("dashboard:store-user-select", store_pk=store_pk)
@@ -607,7 +606,7 @@ class StoreStaffUnlinkView(View):
         else:
             messages.error(
                 request,
-                "Пользователь '%(name)s' не прикреплен к магазину - '%(store_name)s'"
+                "Пользователь '%(name)s' не прикреплен к магазину - '%(store_name)s'."
                 % {"name": name, "store_name": store.name},
             )
         return redirect("dashboard:store-user-select", store_pk=store_pk)
@@ -675,5 +674,5 @@ class GroupDeleteView(DeleteView):
     context_object_name = "group"
 
     def get_success_url(self):
-        messages.success(self.request, "Группы персонала успешно удалена")
+        messages.success(self.request, "Группа персонала успешно удалена.")
         return reverse("dashboard:group-list")

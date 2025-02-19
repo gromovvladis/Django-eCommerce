@@ -26,14 +26,14 @@ class PostActionMixin:
                 getattr(self, method_name)(model)
                 return self.response
             else:
-                messages.error(request, "Неверная отправка формы")
+                messages.error(request, "Неверная отправка формы.")
                 return self.get(request, *args, **kwargs)
 
         # There may be no fallback implementation at super().post
         try:
             return super().post(request, *args, **kwargs)
         except AttributeError:
-            messages.error(request, "Неверная отправка формы")
+            messages.error(request, "Неверная отправка формы.")
             return self.get(request, *args, **kwargs)
 
 
@@ -62,14 +62,14 @@ class NotifEditMixin:
         # whitelist to avoid security issues.
         action = request.POST.get("data-behaviours").lower()
         if not action or action not in self.actions:
-            messages.error(self.request, "Недопустимое действие")
+            messages.error(self.request, "Недопустимое действие.")
             return redirect(self.get_error_url(request))
         
         id = request.POST.get("data-notification")
         if not id:
             messages.error(
                 self.request,
-                "Вам нужно выбрать несколько %ss" % id,
+                "Вам нужно выбрать несколько %s." % id,
             )
             return redirect(self.get_error_url(request))
 
@@ -107,7 +107,7 @@ class BulkEditMixin:
         # whitelist to avoid security issues.
         action = request.POST.get(self.action_param, "").lower()
         if not self.actions or action not in self.actions:
-            messages.error(self.request, "Неверное действие")
+            messages.error(self.request, "Неверное действие.")
             return redirect(self.get_error_url(request))
 
         ids = request.POST.getlist("selected_%s" % self.get_checkbox_object_name())
@@ -115,7 +115,7 @@ class BulkEditMixin:
         if not ids:
             messages.error(
                 self.request,
-                ("Вам нужно выбрать несколько %ss") % self.get_checkbox_object_name(),
+                ("Вам нужно выбрать несколько %s.") % self.get_checkbox_object_name(),
             )
             return redirect(self.get_error_url(request))
 

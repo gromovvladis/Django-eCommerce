@@ -235,7 +235,7 @@ class OfferDeleteView(DeleteView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
-        messages.success(self.request, "Предложение удалено.!")
+        messages.success(self.request, "Предложение удалено!")
         return reverse("dashboard:offer-list")
 
 
@@ -260,10 +260,10 @@ class OfferDetailView(ListView):
 
     def suspend(self):
         if self.offer.is_suspended:
-            messages.error(self.request, "Предложение уже приостановлено")
+            messages.error(self.request, "Предложение уже приостановлено.")
         else:
             self.offer.suspend()
-            messages.success(self.request, "Предложение приостановлено")
+            messages.success(self.request, "Предложение приостановлено.")
         return HttpResponseRedirect(
             reverse("dashboard:offer-detail", kwargs={"pk": self.offer.pk})
         )
@@ -276,7 +276,7 @@ class OfferDetailView(ListView):
             )
         else:
             self.offer.unsuspend()
-            messages.success(self.request, "Предложение восстановлено")
+            messages.success(self.request, "Предложение восстановлено.")
         return HttpResponseRedirect(
             reverse("dashboard:offer-detail", kwargs={"pk": self.offer.pk})
         )

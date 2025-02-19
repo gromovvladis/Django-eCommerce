@@ -18,9 +18,7 @@
 
 {% block layout %}
   {% selected_store request as store %}
-  <div id="app"
-    class="app {% block app_class %}
-    {% endblock %}">
+  <div id="app" class="app {% block app_class %}{% endblock %}">
     {% block main_header %}
       <header class="app__header container py-3">
         <div class="app__header-wrapper d-flex align-center py-0 fill-height justify-space-between">
@@ -71,7 +69,6 @@
     <div class="app__wrapper">
       <main class="app__content">
         {% block carousel %}
-
         {% endblock %}
         <div class="d-flex align-start pd-0 fill-height container">
           <div class="{% block wrapper_class %}

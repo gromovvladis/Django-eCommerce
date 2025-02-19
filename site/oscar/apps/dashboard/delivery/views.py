@@ -109,7 +109,7 @@ class DeliveryZonesCreateView(CreateView):
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, "Зона доставки успешно создана")
+        messages.info(self.request, "Зона доставки успешно создана.")
         return reverse("dashboard:delivery-zones")
 
 
@@ -125,7 +125,7 @@ class DeliveryZonesUpdateView(UpdateView):
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, "Зона доставки успешно обновлена")
+        messages.info(self.request, "Зона доставки успешно обновлена.")
         return reverse("dashboard:delivery-zones")
 
 
@@ -141,7 +141,7 @@ class DeliveryZonesDeleteView(CategoryListMixin, DeleteView):
         return ctx
 
     def get_success_url(self):
-        messages.info(self.request, "Зона доставки успешно удалена")
+        messages.info(self.request, "Зона доставки успешно удалена.")
         return reverse("dashboard:delivery-zones")
 
 
@@ -159,11 +159,11 @@ class DeliveryZonesHideView(UpdateView):
             return self.get_error_url()
 
     def get_success_url(self):
-        messages.info(self.request, "Зона доставки успешно обновлена")
+        messages.info(self.request, "Зона доставки успешно обновлена.")
         return redirect("dashboard:delivery-zones")
 
     def get_error_url(self):
-        messages.warning(self.request, "Зона доставки не была обновлена")
+        messages.error(self.request, "Зона доставки не была обновлена.")
         return redirect("dashboard:delivery-zones")
 
 
@@ -181,11 +181,11 @@ class DeliveryZonesAvailableView(View):
             return self.get_error_url()
 
     def get_success_url(self):
-        messages.info(self.request, "Зона доставки успешно обновлена")
+        messages.info(self.request, "Зона доставки успешно обновлена.")
         return redirect("dashboard:delivery-zones")
 
     def get_error_url(self):
-        messages.warning(self.request, "Зона доставки не была обновлена")
+        messages.error(self.request, "Зона доставки не была обновлена.")
         return redirect("dashboard:delivery-zones")
 
 
