@@ -360,7 +360,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         self.formsets = {}
 
         if self.full_access:
-            common_formsets = {
+            base_formsets = {
                 "category_formset": self.category_formset,
                 "image_formset": self.image_formset,
                 "recommended_formset": self.recommendations_formset,
@@ -368,10 +368,27 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                 "attribute_formset": self.attribute_formset,
             }
 
-            if not product:
-                self.formsets.update(common_formsets)
-            elif not product.is_parent:
-                self.formsets["stockrecord_formset"] = self.stockrecord_formset
+            if product:
+                self.formsets = (
+                    base_formsets
+                    if product.is_parent
+                    else (
+                        {
+                            "stockrecord_formset": self.stockrecord_formset,
+                            "image_formset": self.image_formset,
+                        }
+                        if product.is_child
+                        else {
+                            **base_formsets,
+                            "stockrecord_formset": self.stockrecord_formset,
+                        }
+                    )
+                )
+            else:
+                self.formsets = {
+                    **base_formsets,
+                    "stockrecord_formset": self.stockrecord_formset,
+                }
 
         elif self.stock_access:
             self.formsets["stockrecord_formset"] = self.stockrecordstock_formset
@@ -1328,6 +1345,7 @@ class AttributeOptionGroupCreateUpdateView(generic.UpdateView):
     model = AttributeOptionGroup
     form_class = AttributeOptionGroupForm
     attribute_option_formset = AttributeOptionFormSet
+    context_object_name = "attribute_option_group"
 
     def process_all_forms(self, form):
         """

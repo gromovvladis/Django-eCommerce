@@ -37,7 +37,12 @@
 {% endblock %}
 
 {% block navtext %}
-  <h1>{{ title }}</h1>
+  <h1>
+    {% if attribute_option_group.evotor_id %}
+      <i class="text-success fa-solid fa-circle-check"></i>
+    {% endif %}
+    {{ title }}
+  </h1>
 {% endblock %}
 
 {% block dashboard_content %}

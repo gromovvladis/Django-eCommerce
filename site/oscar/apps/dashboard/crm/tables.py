@@ -541,22 +541,34 @@ class CRMProductSiteTable(DashboardTable):
         verbose_name="Варианты",
         template_name="oscar/dashboard/catalogue/product_row_variants.html",
         orderable=True,
+        attrs={
+            "th": {"class": "variants"},
+        },
     )
     additionals = TemplateColumn(
         verbose_name="Доп. товары",
         template_name="oscar/dashboard/catalogue/product_row_additionals.html",
         orderable=True,
         order_by="productadditional",
+        attrs={
+            "th": {"class": "additionals"},
+        },
     )
     options = TemplateColumn(
         verbose_name="Опции",
         template_name="oscar/dashboard/catalogue/product_row_options.html",
-        orderable=False,
+        order_by="product_options",
+        attrs={
+            "th": {"class": "options"},
+        },
     )
     cooking_time = TemplateColumn(
         verbose_name="Время приготовления",
         template_name="oscar/dashboard/catalogue/product_row_time.html",
         orderable=True,
+        attrs={
+            "th": {"class": "cooking_time"},
+        },
     )
     categories = TemplateColumn(
         verbose_name="Категории",
