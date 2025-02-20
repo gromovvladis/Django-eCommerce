@@ -44,6 +44,7 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 DATE_FORMAT = 'd E Y'
+DATETIME_FORMAT = 'd E Y H:i,'
 LOCALE_PATHS = (location('locale'),)
 
 # =============
