@@ -1992,9 +1992,7 @@ class EvotorDocClient(EvotorAPICloud):
                                     (Coalesce(F("num_in_stock"), 0) - line.quantity), 0
                                 ),
                             )
-                            line.stockrecord.refresh_from_db(
-                                fields=["num_allocated", "num_in_stock"]
-                            )
+                            line.stockrecord.refresh_from_db(field="num_in_stock")
 
             else:
                 json_valid = False

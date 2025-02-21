@@ -5,9 +5,9 @@ from django.http import HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views import generic
-from django.views.generic import ListView
+from django_tables2 import SingleTableView
 
-from oscar.core.loading import get_classes, get_model
+from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import slugify
 from oscar.core.validators import URLDoesNotExistValidator
 
@@ -18,17 +18,23 @@ PageSearchForm, PageUpdateForm = get_classes(
 FlatPage = get_model("flatpages", "FlatPage")
 Site = get_model("sites", "Site")
 
+PagesTable = get_class("dashboard.pages.tables", "PagesTable")
 
-class PageListView(ListView):
+
+class PageListView(SingleTableView):
     """
     View for listing all existing flatpages.
     """
 
-    template_name = "oscar/dashboard/pages/index.html"
+    template_name = "oscar/dashboard/pages/pages_list.html"
     model = FlatPage
     form_class = PageSearchForm
-    paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+    table_class = PagesTable
+    context_table_name = "flatpages"
     desc_template = "%(main_filter)s %(title_filter)s"
+
+    def get_table_pagination(self, table):
+        return dict(per_page=settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE)
 
     def get_queryset(self):
         """
@@ -67,6 +73,13 @@ class PageListView(ListView):
         context["form"] = self.form
         context["queryset_description"] = self.desc_template % self.desc_ctx
         return context
+
+    def get_table(self, **kwargs):
+        table = super().get_table(**kwargs)
+        if self.form.is_valid():
+            table.caption = "Результаты поиска: %s" % self.object_list.count()
+
+        return table
 
 
 class PageCreateUpdateMixin(object):
@@ -135,8 +148,14 @@ class PageUpdateView(PageCreateUpdateMixin, generic.UpdateView):
 
 class PageDeleteView(generic.DeleteView):
     template_name = "oscar/dashboard/pages/delete.html"
+    context_object_name = "page"
     model = FlatPage
 
     def get_success_url(self):
         messages.success(self.request, "Удалить страницу '%s'." % self.object.title)
         return reverse("dashboard:page-list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = self.object.title
+        return ctx

@@ -1,6 +1,7 @@
 from decimal import Decimal as D
 from rest_framework import serializers
 
+from django.db import transaction
 from django.conf import settings
 from django.utils.timezone import now
 
@@ -302,35 +303,37 @@ class OrderSerializer(serializers.Serializer):
     body = serializers.DictField(write_only=True)
 
     def create(self, validated_data):
-        evotor_id = validated_data.get("evotor_id")
-        type = validated_data.get("type")
-        number = validated_data.get("number")
-        store_id = validated_data.get("store_id")
-        body = validated_data.get("body")
+        with transaction.atomic():
+            evotor_id = validated_data.get("evotor_id")
+            type = validated_data.get("type")
+            number = validated_data.get("number")
+            store_id = validated_data.get("store_id")
+            body = validated_data.get("body")
 
-        store = Store.objects.get(evotor_id=store_id)
-        order = self._create_order(evotor_id, number, type, body, store)
-        self._create_extra_note(validated_data.get("extras", None), order)
+            store = Store.objects.get(evotor_id=store_id)
+            order = self._create_order(evotor_id, number, type, body, store)
+            self._create_extra_note(validated_data.get("extras", None), order)
 
-        self._process_discounts(body.get("doc_discounts", []), order)
-        self._process_positions(body.get("positions", []), order, store)
-        self._process_payments(body.get("payments", []), order, type)
+            self._process_discounts(body.get("doc_discounts", []), order)
+            self._process_positions(body.get("positions", []), order, store)
+            self._process_payments(body.get("payments", []), order, type)
 
-        return order
+            return order
 
     def update(self, order, validated_data):
-        store_id = validated_data.get("store_id")
-        type = validated_data.get("type")
-        body = validated_data.get("body")
+        with transaction.atomic():
+            store_id = validated_data.get("store_id")
+            type = validated_data.get("type")
+            body = validated_data.get("body")
 
-        store = Store.objects.get(evotor_id=store_id)
-        self._check_type(order, type, body)
+            store = Store.objects.get(evotor_id=store_id)
+            self._check_type(order, type, body)
 
-        self._process_discounts(body.get("doc_discounts", []), order)
-        self._process_positions(body.get("positions", []), order, store)
-        self._process_payments(body.get("payments", []), order, type)
+            self._process_discounts(body.get("doc_discounts", []), order)
+            self._process_positions(body.get("positions", []), order, store)
+            self._process_payments(body.get("payments", []), order, type)
 
-        return order
+            return order
 
     def _create_extra_note(self, extras, order):
         if extras:

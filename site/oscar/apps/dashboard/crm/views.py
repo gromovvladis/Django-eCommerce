@@ -116,10 +116,10 @@ class CRMStoreListView(CRMTablesMixin):
 
         return data_items
 
-    def update_models(self, serializer, is_filtered):
+    def update_models(self, data_items, is_filtered):
         update_site_stores.send(
             sender=self,
-            data_items=serializer.initial_data["items"],
+            data_items=data_items,
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -179,10 +179,10 @@ class CRMTerminalListView(CRMTablesMixin):
 
         return data_items
 
-    def update_models(self, serializer, is_filtered):
+    def update_models(self, data_items, is_filtered):
         update_site_terminals.send(
             sender=self,
-            data_items=serializer.initial_data["items"],
+            data_items=data_items,
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -252,10 +252,10 @@ class CRMStaffListView(CRMTablesMixin):
 
         return data_items
 
-    def update_models(self, serializer, is_filtered):
+    def update_models(self, data_items, is_filtered):
         update_site_staffs.send(
             sender=self,
-            data_items=serializer.initial_data["items"],
+            data_items=data_items,
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -354,10 +354,10 @@ class CRMGroupsListView(CRMTablesMixin):
 
         return data_items
 
-    def update_models(self, serializer, is_filtered):
+    def update_models(self, data_items, is_filtered):
         update_site_groups.send(
             sender=self,
-            data_items=serializer.initial_data["items"],
+            data_items=data_items,
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -499,10 +499,10 @@ class CRMProductListView(CRMTablesMixin):
 
         return data_items
 
-    def update_models(self, serializer, is_filtered):
+    def update_models(self, data_items, is_filtered):
         update_site_products.send(
             sender=self,
-            data_items=serializer.initial_data["items"],
+            data_items=data_items,
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
@@ -670,10 +670,10 @@ class CRMAdditionalListView(CRMTablesMixin):
 
         return data_items
 
-    def update_models(self, serializer, is_filtered):
+    def update_models(self, data_items, is_filtered):
         update_site_additionals.send(
             sender=self,
-            data_items=serializer.initial_data["items"],
+            data_items=data_items,
             is_filtered=is_filtered,
             user_id=self.request.user.id,
         )
