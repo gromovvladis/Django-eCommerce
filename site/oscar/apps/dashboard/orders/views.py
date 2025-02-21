@@ -1430,9 +1430,15 @@ class OrderDetailView(EventHandlerMixin, DetailView):
                 order, event_type, lines, quantities, reference=reference
             )
         except order_exceptions.InvalidShippingEvent as e:
-            messages.error(request, "Не удалось создать событие доставки. Недействительное событие: %s" % e)
+            messages.error(
+                request,
+                "Не удалось создать событие доставки. Недействительное событие: %s" % e,
+            )
         except order_exceptions.InvalidStatus as e:
-            messages.error(request, "Не удалось создать событие доставки. Недействительный статус: %s" % e)
+            messages.error(
+                request,
+                "Не удалось создать событие доставки. Недействительный статус: %s" % e,
+            )
         except PaymentError as e:
             messages.error(
                 request,

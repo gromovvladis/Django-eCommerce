@@ -583,10 +583,6 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
         surcharges,
         **order_kwargs,
     ):
-        # Finalize the order that PaymentDetailsView.submit() started
-        # If all is ok with payment, try and place order
-        logger.info("Заказ #%s: оплата началась, идет размещение заказа", order_number)
-
         if payment_method in settings.ONLINE_PAYMENTS:
             order_kwargs["status"] = settings.OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS
         else:

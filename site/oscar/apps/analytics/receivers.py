@@ -79,26 +79,23 @@ def receive_order_placed(sender, order, user, **kwargs):
     if kwargs.get("raw", False):
         return
 
-    def execute_tasks():
-        order_data = {
-            "total": order.total,
-            "date_placed": order.date_placed,
-            "num_lines": order.lines.count(),
-            "lines": list(order.lines.values_list("product_id", "quantity")),
-            "num_items": order.lines.aggregate(total_items=Sum("quantity"))[
-                "total_items"
-            ],
-        }
+    order_data = {
+        "total": order.total,
+        "date_placed": order.date_placed,
+        "num_lines": order.lines.count(),
+        "lines": list(order.lines.values_list("product_id", "quantity")),
+        "num_items": order.lines.aggregate(total_items=Sum("quantity"))[
+            "total_items"
+        ],
+    }
 
+    if settings.CELERY:
+        record_products_in_order_task.delay(order_data)
+    else:
+        record_products_in_order_task(order_data)
+
+    if user and user.is_authenticated:
         if settings.CELERY:
-            record_products_in_order_task.delay(order_data)
+            record_user_order_task.delay(user.id, order_data)
         else:
-            record_products_in_order_task(order_data)
-
-        if user and user.is_authenticated:
-            if settings.CELERY:
-                record_user_order_task.delay(user.id, order_data)
-            else:
-                record_user_order_task(user.id, order_data)
-
-    transaction.on_commit(execute_tasks)
+            record_user_order_task(user.id, order_data)

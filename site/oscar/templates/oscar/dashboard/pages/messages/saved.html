@@ -1,7 +1,7 @@
 <p>
-    Страница <strong>{{ page.title }}</strong> сохранена!
+  Страница <strong>{{ page.title }}</strong> сохранена!
 </p>
 <p>
-    <a href="{{ page.url }}" class="btn btn-success">Смотреть на сайте</a>
-    <a href="{% url 'dashboard:page-update' pk=page.pk %}" class="btn btn-success">Редактировать снова</a>
+  <a href="{{ page.url }}" class="btn btn-success">Смотреть на сайте</a>
+  <a href="{% url 'dashboard:page-update' pk=page.pk %}" class="btn btn-success">Редактировать снова</a>
 </p>

@@ -21,19 +21,19 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         delete_invalid = request.POST.get("delete_invalid", "False")
         if delete_invalid == "True":
-            return self.delete_models(True)
+            return self.delete_models(delete_invalid=True)
 
         delete_selected = request.POST.get("delete_selected", "False")
         if delete_selected == "True":
-            return self.delete_models(False)
+            return self.delete_models(delete_invalid=False)
 
-        update_evotor = request.POST.get("update_evotor", None)
+        update_evotor = request.POST.get("update_evotor")
         if update_evotor:
             return self._send_models(update_evotor == "False")
 
         update_site = request.POST.get("update_site", "False")
         if update_site == "True":
-            return self._update_models(self.get_json(), False)
+            return self._update_models(self.get_items_json(), False)
 
         ids = request.POST.getlist("selected_%s" % self._get_checkbox_object_name())
         ids = [id for id in map(str, ids) if id.strip()]
@@ -47,8 +47,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         qs = self._get_filtered_queryset(ids)
         return self._update_models(qs, True)
 
-    def get_queryset(self):
-        """Получает и сериализует данные, затем возвращает отсортированный список"""
+    def get_items_json(self):
         data_json = self.get_json()
 
         if error := data_json.get("error"):
@@ -58,8 +57,14 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
         if not serializer.is_valid():
             return self._handle_serialization_error(serializer.errors)
 
+        return serializer.initial_data["items"]
+
+    def get_queryset(self):
+        """Получает и сериализует данные, затем возвращает отсортированный список"""
+        items_json = self.get_items_json()
+
         self.queryset = sorted(
-            self.process_items(serializer.initial_data["items"]),
+            self.process_items(items_json),
             key=lambda x: (x["is_created"], x["is_valid"]),
         )
         return self.queryset
@@ -114,15 +119,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
 
     def _update_models(self, data_items, is_filtered):
         """Отправляет обновление магазинов, если сериализация успешна"""
-        if error := data_items.get("error"):
-            return self._handle_error(error)
-
-        serializer = self.serializer(data=data_items)
-        if serializer.is_valid():
-            self.update_models(serializer, is_filtered)
-        else:
-            self._handle_serialization_error(serializer.errors)
-
+        self.update_models(data_items, is_filtered)
         return self.redirect_with_get_params(self.url_redirect, self.request)
 
     def send_models(self, serializer, is_filtered):
@@ -178,7 +175,7 @@ class CRMTablesMixin(MultiTableMixin, TemplateView):
             return self.model.objects.values_list("id", flat=True)
 
     def _get_filtered_queryset(self, ids):
-        data_list = self.get_json()
+        data_list = self.get_items_json()
         return [data_item for data_item in data_list if data_item["id"] in ids]
 
     def _get_checkbox_object_name(self):
