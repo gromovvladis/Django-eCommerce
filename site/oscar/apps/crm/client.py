@@ -950,6 +950,7 @@ class EvotorGroupClient(EvotorAPICloud):
 
     def delete_evotor_category_by_id(self, category_id):
         try:
+            logger.warning(f"id={category_id}")
             category = Category.objects.get(id=category_id)
             return self.delete_evotor_group(category)
         except Exception as e:
