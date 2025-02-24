@@ -64,9 +64,9 @@ def process_bulk_task(self, bulk_evotor_id):
         raise self.retry(exc=exc, countdown=30)
 
 
-# ====
+# ==== Добавление данных на сайт из Эвотор при изменении. Атомарность важна!
 
-
+# transaction.on_commit
 @shared_task
 def send_evotor_category_task(category_id, user_id):
     try:
@@ -79,7 +79,7 @@ def send_evotor_category_task(category_id, user_id):
             e,
         )
 
-
+# transaction.on_commit
 @shared_task
 def send_evotor_product_task(product_id, user_id):
     try:
@@ -92,7 +92,7 @@ def send_evotor_product_task(product_id, user_id):
             e,
         )
 
-
+# transaction.on_commit
 @shared_task
 def send_evotor_additional_task(additional_id, user_id):
     try:
@@ -105,7 +105,7 @@ def send_evotor_additional_task(additional_id, user_id):
             e,
         )
 
-
+# transaction.on_commit
 @shared_task
 def update_evotor_stockrecord_task(product_id, user_id):
     try:
@@ -118,11 +118,37 @@ def update_evotor_stockrecord_task(product_id, user_id):
             e,
         )
 
-
+# send evotor_id
 @shared_task
-def delete_evotor_category_task(category_id, user_id):
+def delete_evotor_category_task(category_evotor_id, user_id):
     try:
-        msg = EvatorCloud().delete_evotor_category_by_id(category_id)
+        msg = EvatorCloud().delete_evotor_category_by_id(category_evotor_id)
+        cache_key = f"user_message_{user_id}"
+        cache.set(cache_key, msg, timeout=3600)
+    except Exception as e:
+        logger.error(
+            "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
+            e,
+        )
+
+# send evotor_id 
+@shared_task
+def delete_evotor_product_task(product_evotor_id, is_parent, user_id, store_ids):
+    try:
+        msg = EvatorCloud().delete_evotor_product_by_id(product_evotor_id, is_parent, store_ids)
+        cache_key = f"user_message_{user_id}"
+        cache.set(cache_key, msg, timeout=3600)
+    except Exception as e:
+        logger.error(
+            "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
+            e,
+        )
+
+# send evotor_id
+@shared_task
+def delete_evotor_additional_task(additional_evotor_id, store_ids, user_id):
+    try:
+        msg = EvatorCloud().delete_evotor_additional_by_id(additional_evotor_id, store_ids)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
@@ -132,38 +158,7 @@ def delete_evotor_category_task(category_id, user_id):
         )
 
 
-@shared_task
-def delete_evotor_product_task(product_id, user_id, store_id=None):
-    try:
-        if store_id is not None:
-            msg = EvatorCloud().delete_evotor_product_by_store_by_id(
-                product_id, store_id
-            )
-
-        msg = EvatorCloud().delete_evotor_product_by_id(product_id)
-        cache_key = f"user_message_{user_id}"
-        cache.set(cache_key, msg, timeout=3600)
-    except Exception as e:
-        logger.error(
-            "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
-            e,
-        )
-
-
-@shared_task
-def delete_evotor_additional_task(additional_id, user_id):
-    try:
-        msg = EvatorCloud().delete_evotor_additional_by_id(additional_id)
-        cache_key = f"user_message_{user_id}"
-        cache.set(cache_key, msg, timeout=3600)
-    except Exception as e:
-        logger.error(
-            "Ошибка при отправке измененной товароной записи товара в Эвотор. Ошибка %s",
-            e,
-        )
-
-
-# ====
+# ==== Добавление данных на сайт из Эвотор. Атомарность не важна.
 
 
 @shared_task
@@ -244,7 +239,7 @@ def update_site_additionals_task(data_items, is_filtered, user_id):
         )
 
 
-# ====
+# ==== Отправка данных в Эвотор по запросу. Атомарность не важна.
 
 
 @shared_task

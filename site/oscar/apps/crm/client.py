@@ -826,9 +826,9 @@ class EvotorGroupClient(EvotorAPICloud):
         """
         errors = []
         groups_filtered = defaultdict(list)
-        evotor_store_ids = Store.objects.filter(is_active=True).values_list(
-            "evotor_id", flat=True
-        )
+        evotor_store_ids = Store.objects.filter(
+            is_active=True, evotor_id__isnull=False
+        ).values_list("evotor_id", flat=True)
 
         for group in groups:
             if isinstance(group, Product):
@@ -873,9 +873,9 @@ class EvotorGroupClient(EvotorAPICloud):
                             if store_id:
                                 store_ids.add(store_id)
             else:
-                store_ids = Store.objects.filter(is_active=True, evotor_id__isnull=False).values_list(
-                    "evotor_id", flat=True
-                )
+                store_ids = Store.objects.filter(
+                    is_active=True, evotor_id__isnull=False
+                ).values_list("evotor_id", flat=True)
 
             for store_id in store_ids:
                 endpoint = f"stores/{store_id}/product-groups/{group.evotor_id}"
@@ -918,7 +918,7 @@ class EvotorGroupClient(EvotorAPICloud):
                 else:
                     if not evotor_store_ids:
                         evotor_store_ids = Store.objects.filter(
-                            is_active=True
+                            is_active=True, evotor_id__isnull=False
                         ).values_list("evotor_id", flat=True)
                     for store_id in evotor_store_ids:
                         groups_to_delete[store_id].append(group)
@@ -948,15 +948,25 @@ class EvotorGroupClient(EvotorAPICloud):
                 f"Ошибка при выполнении update_or_create_evotor_category_by_id {e}"
             )
 
-    def delete_evotor_category_by_id(self, category_id):
+    def delete_evotor_category_by_id(self, category_evotor_id):
         try:
-            logger.info(f"id={category_id}")
-            category = Category.objects.get(id=category_id)
-            return self.delete_evotor_group(category)
+            errors = []
+            store_ids = Store.objects.filter(
+                is_active=True, evotor_id__isnull=False
+            ).values_list("evotor_id", flat=True)
+
+            for store_id in store_ids:
+                endpoint = f"stores/{store_id}/product-groups/{category_evotor_id}"
+                response = self.send_request(endpoint, "DELETE")
+                self.handle_response_errors(response, errors)
+
+            if errors:
+                return ", ".join(errors)
+            else:
+                return "Категория была успешно удалена в Эвотор!"
+
         except Exception as e:
             logger.error(f"Ошибка при выполнении delete_evotor_category_by_id {e}")
-
-        logger.info("end")
 
     # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
@@ -1486,19 +1496,23 @@ class EvotorProductClient(EvotorGroupClient):
 
     # ========= Задачи celery
 
-    def delete_evotor_product_by_id(self, product_id):
+    def delete_evotor_product_by_id(self, product_evotor_id, is_parent, store_ids):
         try:
-            product = Product.objects.get(id=product_id)
-            return self.delete_evotor_product(product)
-        except Exception as e:
-            logger.error(
-                f"Ошибка при выполнении delete_evotor_product_by_store_by_id {e}"
-            )
+            errors = []
+            for store_id in store_ids:
+                if is_parent:
+                    endpoint = f"stores/{store_id}/product-groups/{product_evotor_id}"
+                else:
+                    endpoint = f"stores/{store_id}/products/{product_evotor_id}"
 
-    def delete_evotor_product_by_store_by_id(self, product_id, store_id):
-        try:
-            product = Product.objects.get(id=product_id)
-            return self.delete_evotor_product_by_store(product, store_id)
+                response = self.send_request(endpoint, "DELETE")
+                self.handle_response_errors(response, errors)
+
+            if errors:
+                return ", ".join(errors)
+            else:
+                return "Товар был успешно удален в Эвотор!"
+
         except Exception as e:
             logger.error(
                 f"Ошибка при выполнении delete_evotor_product_by_store_by_id {e}"
@@ -1662,9 +1676,9 @@ class EvotorAdditionalClient(EvotorProductClient):
         errors = []
         additionals_filtered = defaultdict(list)
 
-        active_stores = Store.objects.filter(is_active=True).values_list(
-            "id", "evotor_id"
-        )
+        active_stores = Store.objects.filter(
+            is_active=True, evotor_id__isnull=False
+        ).values_list("id", "evotor_id")
 
         for store_id, store_evotor_id in active_stores:
             additional_parent = {
@@ -1797,10 +1811,19 @@ class EvotorAdditionalClient(EvotorProductClient):
                 f"Ошибка при выполнении update_or_create_evotor_additional_by_id {e}"
             )
 
-    def delete_evotor_additional_by_id(self, additional_id):
+    def delete_evotor_additional_by_id(self, additional_evotor_id, store_ids):
         try:
-            additional = Additional.objects.get(id=additional_id)
-            return self.delete_evotor_additional(additional)
+            errors = []
+            for store_id in store_ids:
+                endpoint = f"stores/{store_id}/products/{additional_evotor_id}"
+                response = self.send_request(endpoint, "DELETE")
+                self.handle_response_errors(response, errors)
+
+            if errors:
+                return ", ".join(errors)
+            else:
+                return "Дополнительный товар был успешно удален в Эвотор!"
+
         except Exception as e:
             logger.error(f"Ошибка при выполнении delete_evotor_additional_by_id {e}")
 
