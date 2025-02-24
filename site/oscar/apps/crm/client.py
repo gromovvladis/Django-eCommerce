@@ -873,7 +873,7 @@ class EvotorGroupClient(EvotorAPICloud):
                             if store_id:
                                 store_ids.add(store_id)
             else:
-                store_ids = Store.objects.filter(is_active=True).values_list(
+                store_ids = Store.objects.filter(is_active=True, evotor_id__isnull=False).values_list(
                     "evotor_id", flat=True
                 )
 
@@ -950,11 +950,13 @@ class EvotorGroupClient(EvotorAPICloud):
 
     def delete_evotor_category_by_id(self, category_id):
         try:
-            logger.warning(f"id={category_id}")
+            logger.info(f"id={category_id}")
             category = Category.objects.get(id=category_id)
             return self.delete_evotor_group(category)
         except Exception as e:
             logger.error(f"Ошибка при выполнении delete_evotor_category_by_id {e}")
+
+        logger.info("end")
 
     # ========= СОЗДАНИЕ ЗАПИСЕЙ САЙТА (РАБОТА С JSON)
 
