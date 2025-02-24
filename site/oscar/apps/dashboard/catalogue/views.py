@@ -1,6 +1,7 @@
 # pylint: disable=attribute-defined-outside-init
 from typing import Any
 
+from django.db import transaction
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -649,81 +650,87 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         When creating the first child product, this method also sets the new
         parent's structure accordingly.
         """
-        if self.creating:
-            self.handle_adding_child(self.parent)
+        with transaction.atomic():
+            if self.creating:
+                self.handle_adding_child(self.parent)
 
-        # Save formsets
-        for formset in formsets.values():
-            formset.save()
+            # Save formsets
+            for formset in formsets.values():
+                formset.save()
 
-        for idx, image in enumerate(self.object.images.all()):
-            image.display_order = idx
-            image.save()
+            for idx, image in enumerate(self.object.images.all()):
+                image.display_order = idx
+                image.save()
 
-        action = self.request.POST.get("action")
-        if action == "create-all-child":
-            self.create_all_child()
+            action = self.request.POST.get("action")
+            if action == "create-all-child":
+                self.create_all_child()
 
-        response = HttpResponseRedirect(self.get_success_url(action))
-        response.set_cookie(
-            "evotor_update",
-            self.evotor_update,
-            max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
-        )
-
-        if self.evotor_update:
-            stockrecord_formset = formsets.get("stockrecord_formset")
-
-            stores_to_delete = (
-                {
-                    stk_form.cleaned_data["store"].evotor_id
-                    for stk_form in stockrecord_formset.forms
-                    if stk_form.cleaned_data.get("DELETE")
-                    and stk_form.cleaned_data.get("store")
-                    and stk_form.cleaned_data["store"].evotor_id
-                }
-                if stockrecord_formset
-                else set()
+            response = HttpResponseRedirect(self.get_success_url(action))
+            response.set_cookie(
+                "evotor_update",
+                self.evotor_update,
+                max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
             )
 
-            for store_id in stores_to_delete:
-                delete_evotor_product.send(
-                    sender=self,
-                    product_id=self.object.id,
-                    user_id=self.request.user.id,
-                    store_id=store_id,
+            if self.evotor_update:
+                stockrecord_formset = formsets.get("stockrecord_formset")
+
+                stores_to_delete = (
+                    [
+                        stk_form.cleaned_data["store"].evotor_id
+                        for stk_form in stockrecord_formset.forms
+                        if stk_form.cleaned_data.get("DELETE")
+                        and stk_form.cleaned_data.get("store")
+                        and stk_form.cleaned_data["store"].evotor_id
+                    ]
+                    if stockrecord_formset
+                    else set()
                 )
 
-            product_updated = bool(form.changed_data) if form else False
+                if stores_to_delete:
+                    delete_evotor_product.send(
+                        sender=self,
+                        product=self.object,
+                        user_id=self.request.user.id,
+                        store_ids=stores_to_delete,
+                    )
 
-            stockrecord_updated = (
-                any(
-                    stk_form.changed_data
-                    and stk_form.cleaned_data.get("store")
-                    and stk_form.cleaned_data["store"].evotor_id not in stores_to_delete
-                    for stk_form in stockrecord_formset.forms
-                )
-                if stockrecord_formset
-                else False
-            )
+                product_updated = bool(form.changed_data) if form else False
 
-            formsets_updated = any(
-                formsets[name].changed_objects if formsets.get(name) else False
-                for name in ["category_formset", "attribute_formset"]
-            )
+                stockrecord_updated = (
+                    any(
+                        stk_form.changed_data
+                        and stk_form.cleaned_data.get("store")
+                        and stk_form.cleaned_data["store"].evotor_id
+                        not in stores_to_delete
+                        for stk_form in stockrecord_formset.forms
+                    )
+                    if stockrecord_formset
+                    else False
+                )
 
-            if product_updated or stockrecord_updated or formsets_updated:
-                send_evotor_product.send(
-                    sender=self,
-                    product_id=self.object.id,
-                    user_id=self.request.user.id,
+                formsets_updated = any(
+                    formsets[name].changed_objects if formsets.get(name) else False
+                    for name in ["category_formset", "attribute_formset"]
                 )
-            elif stockrecord_form:
-                update_evotor_stockrecord.send(
-                    sender=self,
-                    product_id=self.object.id,
-                    user_id=self.request.user.id,
-                )
+
+                if product_updated or stockrecord_updated or formsets_updated:
+                    transaction.on_commit(
+                        lambda: send_evotor_product.send(
+                            sender=self,
+                            product_id=self.object.id,
+                            user_id=self.request.user.id,
+                        )
+                    )
+                elif stockrecord_form:
+                    transaction.on_commit(
+                        lambda: update_evotor_stockrecord.send(
+                            sender=self,
+                            product_id=self.object.id,
+                            user_id=self.request.user.id,
+                        )
+                    )
 
         return response
 
@@ -875,11 +882,11 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
         Perform custom deletion logic.
         """
         evotor_update = form.data.get("evotor_update", "off")
-        if evotor_update == "on":
+        if evotor_update == "on" and self.object.evotor_id:
             self.object = self.get_object()
             delete_evotor_product.send(
                 sender=self,
-                product_id=self.object.id,
+                product=self.object,
                 user_id=self.request.user.id,
             )
 
@@ -1085,21 +1092,24 @@ class CategoryListMixin(object):
             )
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        evotor_update = form.cleaned_data.get("evotor_update")
-        category_updated = bool(form.changed_data)
-        response.set_cookie(
-            "evotor_update",
-            evotor_update,
-            max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
-        )
-
-        if evotor_update and category_updated:
-            send_evotor_category.send(
-                sender=self,
-                category_id=self.object.id,
-                user_id=self.request.user.id,
+        with transaction.atomic():
+            response = super().form_valid(form)
+            evotor_update = form.cleaned_data.get("evotor_update")
+            category_updated = bool(form.changed_data)
+            response.set_cookie(
+                "evotor_update",
+                evotor_update,
+                max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
             )
+
+            if evotor_update and category_updated:
+                transaction.on_commit(
+                    lambda: send_evotor_category.send(
+                        sender=self,
+                        category_id=self.object.id,
+                        user_id=self.request.user.id,
+                    )
+                )
 
         return response
 
@@ -1169,11 +1179,11 @@ class CategoryDeleteView(CategoryListMixin, generic.DeleteView):
         Perform custom deletion logic.
         """
         evotor_update = form.data.get("evotor_update", "off")
-        if evotor_update == "on":
-            self.object = self.get_object()
+        self.object = self.get_object()
+        if evotor_update == "on" and self.object.evotor_id:
             delete_evotor_category.send(
                 sender=self,
-                category_id=self.object.id,
+                category=self.object,
                 user_id=self.request.user.id,
             )
 
@@ -1633,25 +1643,29 @@ class AdditionalCreateUpdateView(generic.UpdateView):
 
     # pylint: disable=no-member
     def form_valid(self, form):
-        self.object = form.save()
-        if self.is_popup:
-            response = self.popup_response(form.instance)
-        else:
-            response = HttpResponseRedirect(self.get_success_url())
+        with transaction.atomic():
+            self.object = form.save()
+            if self.is_popup:
+                response = self.popup_response(form.instance)
+            else:
+                response = HttpResponseRedirect(self.get_success_url())
 
-        evotor_update = form.cleaned_data.get("evotor_update")
-        additional_updated = bool(form.changed_data)
-        response.set_cookie(
-            "evotor_update",
-            evotor_update,
-            max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
-        )
-        if evotor_update and additional_updated:
-            send_evotor_additional.send(
-                sender=self,
-                additional_id=self.object.id,
-                user_id=self.request.user.id,
+            evotor_update = form.cleaned_data.get("evotor_update")
+            additional_updated = bool(form.changed_data)
+            response.set_cookie(
+                "evotor_update",
+                evotor_update,
+                max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
             )
+
+            if evotor_update and additional_updated:
+                transaction.on_commit(
+                    lambda: send_evotor_additional.send(
+                        sender=self,
+                        additional_id=self.object.id,
+                        user_id=self.request.user.id,
+                    )
+                )
 
         return response
 
@@ -1717,11 +1731,11 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
         Perform custom deletion logic.
         """
         evotor_update = data.get("evotor_update", "off")
-        if evotor_update == "on":
+        if evotor_update == "on" and self.object.evotor_id:
             self.object = self.get_object()
             delete_evotor_additional.send(
                 sender=self,
-                category_id=self.object.id,
+                additional=self.object,
                 user_id=self.request.user.id,
             )
 

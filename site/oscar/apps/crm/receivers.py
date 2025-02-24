@@ -64,7 +64,7 @@ def send_evotor_additional_receiver(sender, additional_id, user_id, **kwargs):
 
 
 @receiver(update_evotor_stockrecord)
-def update_evotor_stockrecord(sender, product_id, user_id, **kwargs):
+def update_evotor_stockrecord_receiver(sender, product_id, user_id, **kwargs):
     if settings.CELERY:
         update_evotor_stockrecord_task.delay(product_id, user_id)
     else:
@@ -72,27 +72,39 @@ def update_evotor_stockrecord(sender, product_id, user_id, **kwargs):
 
 
 @receiver(delete_evotor_category)
-def delete_evotor_category(sender, category_id, user_id, **kwargs):
+def delete_evotor_category_receiver(sender, category, user_id, **kwargs):
     if settings.CELERY:
-        delete_evotor_category_task.delay(category_id, user_id)
+        delete_evotor_category_task.delay(category.evotor_id, user_id)
     else:
-        delete_evotor_category_task(category_id, user_id)
+        delete_evotor_category_task(category.evotor_id, user_id)
 
 
 @receiver(delete_evotor_product)
-def delete_evotor_product(sender, product_id, user_id, store_id=None, **kwargs):
+def delete_evotor_product_receiver(sender, product, user_id, store_ids=None, **kwargs):
+    store_ids = (
+        [s.store.evotor_id for s in product.stockrecords.all() if s.store.evotor_id]
+        if store_ids is None
+        else store_ids
+    )
+
     if settings.CELERY:
-        delete_evotor_product_task.delay(product_id, user_id, store_id)
+        delete_evotor_product_task.delay(
+            product.evotor_id, product.is_parent, user_id, store_ids
+        )
     else:
-        delete_evotor_product_task(product_id, user_id, store_id)
+        delete_evotor_product_task(
+            product.evotor_id, product.is_parent, user_id, store_ids
+        )
 
 
 @receiver(delete_evotor_additional)
-def delete_evotor_additional(sender, additional_id, user_id, **kwargs):
+def delete_evotor_additional_receiver(sender, additional, user_id, **kwargs):
+    store_ids = [s.evotor_id for s in additional.stores.all() if s.evotor_id]
+
     if settings.CELERY:
-        delete_evotor_additional_task.delay(additional_id, user_id)
+        delete_evotor_additional_task.delay(additional.evotor_id, store_ids, user_id)
     else:
-        delete_evotor_additional_task(additional_id, user_id)
+        delete_evotor_additional_task(additional.evotor_id, store_ids, user_id)
 
 
 @receiver(update_site_stores)
