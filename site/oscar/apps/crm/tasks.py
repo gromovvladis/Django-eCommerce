@@ -70,6 +70,7 @@ def process_bulk_task(self, bulk_evotor_id):
 @shared_task
 def send_evotor_category_task(category_id, user_id):
     try:
+        print(f"send_evotor_category_task={category_id}")
         logger.info(f"send_evotor_category_task={category_id}")
         msg = EvatorCloud().update_or_create_evotor_category_by_id(category_id)
         cache_key = f"user_message_{user_id}"
