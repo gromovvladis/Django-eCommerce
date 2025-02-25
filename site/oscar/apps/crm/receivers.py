@@ -1,5 +1,3 @@
-import logging
-
 from django.dispatch import receiver
 from django.conf import settings
 
@@ -40,11 +38,9 @@ from oscar.apps.crm.signals import (
     update_site_additionals,
 )
 
-logger = logging.getLogger("oscar.crm")
 
 @receiver(send_evotor_category)
 def send_evotor_category_receiver(sender, category_id, user_id, **kwargs):
-    logger.info(f"send_evotor_category_receiver {category_id}")
     if settings.CELERY:
         send_evotor_category_task.delay(category_id, user_id)
     else:
@@ -77,20 +73,18 @@ def update_evotor_stockrecord_receiver(sender, product_id, user_id, **kwargs):
 
 @receiver(delete_evotor_category)
 def delete_evotor_category_receiver(sender, category, user_id, **kwargs):
-    category_evotor_id = category.evotor_id
-    logger.info(f"delete_evotor_category_receiver {category_evotor_id}")
     if settings.CELERY:
-        delete_evotor_category_task.delay(category_evotor_id, user_id)
+        delete_evotor_category_task.delay(category.evotor_id, user_id)
     else:
-        delete_evotor_category_task(category_evotor_id, user_id)
+        delete_evotor_category_task(category.evotor_id, user_id)
 
 
 @receiver(delete_evotor_product)
 def delete_evotor_product_receiver(sender, product, user_id, store_ids=None, **kwargs):
     store_ids = (
         [
-            s.store.evotor_id
-            for s in product.stockrecords.filter(evotor_id__isnull=False)
+            stc.store.evotor_id
+            for stc in product.stockrecords.filter(store__evotor_id__isnull=False)
         ]
         if store_ids is None
         else store_ids
@@ -111,7 +105,7 @@ def delete_evotor_product_receiver(sender, product, user_id, store_ids=None, **k
 
 @receiver(delete_evotor_additional)
 def delete_evotor_additional_receiver(sender, additional, user_id, **kwargs):
-    store_ids = [s.evotor_id for s in additional.stores.all() if s.evotor_id]
+    store_ids = [s.evotor_id for s in additional.stores.filter(evotor_id__isnull=False)]
 
     if settings.CELERY:
         delete_evotor_additional_task.delay(additional.evotor_id, store_ids, user_id)

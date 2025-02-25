@@ -136,7 +136,7 @@ def delete_evotor_category_task(category_evotor_id, user_id):
             e,
         )
 
-# send evotor_id 
+# send evotor_id and store_ids
 @shared_task
 def delete_evotor_product_task(product_evotor_id, is_parent, store_ids, user_id):
     try:
@@ -150,7 +150,7 @@ def delete_evotor_product_task(product_evotor_id, is_parent, store_ids, user_id)
             e,
         )
 
-# send evotor_id
+# send evotor_id and store_ids
 @shared_task
 def delete_evotor_additional_task(additional_evotor_id, store_ids, user_id):
     try:
