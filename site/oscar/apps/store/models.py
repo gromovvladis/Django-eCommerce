@@ -679,6 +679,12 @@ class StoreCashTransaction(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+    transaction = models.ForeignKey(
+        "payment.Transaction",
+        related_name="cash_transactions",
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     CASH_INCOME, CASH_OUTCOME, PAYMENT, REFUND = (
         "Внесение наличных",
         "Изъятие наличных",
