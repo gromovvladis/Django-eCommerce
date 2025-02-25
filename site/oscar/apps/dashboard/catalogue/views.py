@@ -882,8 +882,8 @@ class ProductDeleteView(StoreProductFilterMixin, generic.DeleteView):
         Perform custom deletion logic.
         """
         evotor_update = form.data.get("evotor_update", "off")
+        self.object = self.get_object()
         if evotor_update == "on" and self.object.evotor_id:
-            self.object = self.get_object()
             delete_evotor_product.send(
                 sender=self,
                 product=self.object,
@@ -1067,8 +1067,8 @@ class CategoryListView(SingleTableView):
 class CategoryDetailListView(SingleTableMixin, generic.DetailView):
     template_name = "oscar/dashboard/catalogue/category_list.html"
     model = Category
-    context_object_name = "category"
     table_class = CategoryTable
+    context_object_name = "category"
     context_table_name = "categories"
 
     def get_table_data(self):
@@ -1093,7 +1093,9 @@ class CategoryListMixin(object):
 
     def form_valid(self, form):
         with transaction.atomic():
-            response = super().form_valid(form)
+            self.object = form.save()
+            response = HttpResponseRedirect(self.get_success_url())
+            # response = super().form_valid(form)
             evotor_update = form.cleaned_data.get("evotor_update")
             category_updated = bool(form.changed_data)
             response.set_cookie(
@@ -1657,7 +1659,6 @@ class AdditionalCreateUpdateView(generic.UpdateView):
                 evotor_update,
                 max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
             )
-
             if evotor_update and additional_updated:
                 transaction.on_commit(
                     lambda: send_evotor_additional.send(
@@ -1731,8 +1732,8 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
         Perform custom deletion logic.
         """
         evotor_update = data.get("evotor_update", "off")
+        self.object = self.get_object()
         if evotor_update == "on" and self.object.evotor_id:
-            self.object = self.get_object()
             delete_evotor_additional.send(
                 sender=self,
                 additional=self.object,

@@ -82,18 +82,24 @@ def delete_evotor_category_receiver(sender, category, user_id, **kwargs):
 @receiver(delete_evotor_product)
 def delete_evotor_product_receiver(sender, product, user_id, store_ids=None, **kwargs):
     store_ids = (
-        [s.store.evotor_id for s in product.stockrecords.all() if s.store.evotor_id]
+        [
+            s.store.evotor_id
+            for s in product.stockrecords.filter(evotor_id__isnull=False)
+        ]
         if store_ids is None
         else store_ids
     )
 
     if settings.CELERY:
         delete_evotor_product_task.delay(
-            product.evotor_id, product.is_parent, user_id, store_ids
+            product.evotor_id,
+            product.is_parent,
+            store_ids,
+            user_id,
         )
     else:
         delete_evotor_product_task(
-            product.evotor_id, product.is_parent, user_id, store_ids
+            product.evotor_id, product.is_parent, store_ids, user_id
         )
 
 

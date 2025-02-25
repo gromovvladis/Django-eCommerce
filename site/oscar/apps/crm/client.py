@@ -1496,7 +1496,7 @@ class EvotorProductClient(EvotorGroupClient):
 
     # ========= Задачи celery
 
-    def delete_evotor_product_by_id(self, product_evotor_id, is_parent, store_ids):
+    def delete_evotor_product_by_id(self, product_evotor_id, store_ids, is_parent):
         try:
             errors = []
             for store_id in store_ids:
