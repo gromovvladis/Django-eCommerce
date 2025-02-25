@@ -1,3 +1,5 @@
+import logging
+
 from django.dispatch import receiver
 from django.conf import settings
 
@@ -38,9 +40,11 @@ from oscar.apps.crm.signals import (
     update_site_additionals,
 )
 
+logger = logging.getLogger("oscar.crm")
 
 @receiver(send_evotor_category)
 def send_evotor_category_receiver(sender, category_id, user_id, **kwargs):
+    logger.info(f"send_evotor_category_receiver {category_id}")
     if settings.CELERY:
         send_evotor_category_task.delay(category_id, user_id)
     else:
@@ -73,10 +77,12 @@ def update_evotor_stockrecord_receiver(sender, product_id, user_id, **kwargs):
 
 @receiver(delete_evotor_category)
 def delete_evotor_category_receiver(sender, category, user_id, **kwargs):
+    category_evotor_id = category.evotor_id
+    logger.info(f"send_evotor_category_receiver {category_evotor_id}")
     if settings.CELERY:
-        delete_evotor_category_task.delay(category.evotor_id, user_id)
+        delete_evotor_category_task.delay(category_evotor_id, user_id)
     else:
-        delete_evotor_category_task(category.evotor_id, user_id)
+        delete_evotor_category_task(category_evotor_id, user_id)
 
 
 @receiver(delete_evotor_product)
