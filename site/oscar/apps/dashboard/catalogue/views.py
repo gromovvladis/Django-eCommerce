@@ -1,5 +1,4 @@
 # pylint: disable=attribute-defined-outside-init
-import logging
 from typing import Any
 
 from django.db import transaction
@@ -124,8 +123,6 @@ Store = get_model("store", "Store")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
-
-logger = logging.getLogger("oscar.catalogue")
 
 
 class ProductListView(StoreProductFilterMixin, SingleTableView):
@@ -1086,32 +1083,21 @@ class CategoryDetailListView(SingleTableMixin, generic.DetailView):
 
 class CategoryListMixin(object):
     def form_valid(self, form):
-        logger.info(f"form_valid CategoryListMixin")
         with transaction.atomic():
-            logger.info(f"form_valid categ 1")
-            response = super().form_valid(form)
-            logger.info(f"form_valid categ 2")
             evotor_update = form.cleaned_data.get("evotor_update")
+            response = super().form_valid(form)
             response.set_cookie(
                 "evotor_update",
                 evotor_update,
                 max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
             )
-            logger.info(f"form_valid categ 3")
             if evotor_update and bool(form.changed_data):
-                logger.info(f"evotor_update catr list")
-                logger.info(f"form_valid self.object.id {self.object.id}")
                 transaction.on_commit(
                     lambda: send_evotor_category.send(
                         sender=self,
                         category_id=self.object.id,
                         user_id=self.request.user.id,
                     )
-                )
-                logger.info(f"Signal sent for category_id: {self.object.id}")
-            else:
-                logger.info(
-                    f"Signal not sent: evotor_update={evotor_update}, category_updated={bool(form.changed_data)}"
                 )
 
         return response
@@ -1195,9 +1181,7 @@ class CategoryDeleteView(generic.DeleteView):
         """
         evotor_update = form.data.get("evotor_update", "off")
         self.object = self.get_object()
-        logger.info(f"perform_deletion CategoryDeleteView")
         if evotor_update == "on" and self.object.evotor_id:
-            logger.info(f"evotor_update perform_deletion CategoryDeleteView")
             delete_evotor_category.send(
                 sender=self,
                 category=self.object,
