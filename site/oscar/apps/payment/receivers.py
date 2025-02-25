@@ -14,7 +14,7 @@ def transaction_created(sender, instance, created, **kwargs):
     """
     Запускает задачу при обновлении объекта Source.
     """
-    if instance.source.reference in settings.CASH_PAYMENTS:
+    if instance.source.reference in settings.CASH_PAYMENTS and not instance.cash_transactions.exists():
         order = instance.source.order
         store = order.store
         txn_type = instance.txn_type
@@ -22,11 +22,11 @@ def transaction_created(sender, instance, created, **kwargs):
         transaction.on_commit(
             lambda: (
                 create_store_cash_transaction_task.delay(
-                    instance.amount, order.id, store.id, txn_type
+                    instance.amount, order.id, instance.id, store.id, txn_type
                 )
                 if settings.CELERY
                 else create_store_cash_transaction_task(
-                    instance.amount, order.id, store.id, txn_type
+                    instance.amount, order.id, instance.id, store.id, txn_type
                 )
             )
         )
