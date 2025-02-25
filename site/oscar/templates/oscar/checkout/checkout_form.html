@@ -9,7 +9,7 @@
       <div class="order__title d-none d-sm-block mb-4">
         <h1>Оформление заказа</h1>
       </div>
-      <div data-id="input-field" class="input input-textarea d-flex align-center mb-1 mb-sm-2 input__padding{% if form.initial.order_note %} input__label-active{% endif %}">
+      <div data-id="input-field" class="input input-textarea d-flex align-center mb-4 input__padding {% if form.initial.order_note %}input__label-active{% endif %}">
         <div class="input__wrapper">
           <div class="input__label">Комментарий к заказу</div>
           <div class="input__control d-flex align-center" contenteditable>
@@ -59,7 +59,7 @@
             </div>
             <div id="line1_container" class="delivery__address-wrapper input alternative">
               <div class="d-flex delivery--input">
-                {% include 'oscar/partials/render_field.html' with field=form.line1 data_id='address-input' %}
+                {% include 'oscar/partials/render_line1.html' with field=form.line1 data_id='address-input' %}
               </div>
               <div id="suggest_list" class="search__suggest d-none"></div>
             </div>

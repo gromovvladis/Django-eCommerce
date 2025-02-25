@@ -70,7 +70,7 @@
         {% block order_contents %}
           <div class="order-checkout__items">
             {% for line in basket.all_lines %}
-              <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.product_class.measure_name }}</span><br />
+              <span>{{ line.get_full_name }} - {{ line.quantity }} {{ line.product.get_product_class.measure_name }}</span><br />
             {% endfor %}
           </div>
         {% endblock %}
