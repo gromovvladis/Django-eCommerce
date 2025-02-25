@@ -1,4 +1,5 @@
 # pylint: disable=attribute-defined-outside-init
+import logging
 from typing import Any
 
 from django.db import transaction
@@ -124,9 +125,7 @@ AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
 
-
-import logging
-logger = logging.getLogger("oscar.crm")
+logger = logging.getLogger("oscar.catalogue")
 
 class ProductListView(StoreProductFilterMixin, SingleTableView):
     """
@@ -653,7 +652,6 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
         When creating the first child product, this method also sets the new
         parent's structure accordingly.
         """
-        logger.info(f"forms_valid prodc")
         with transaction.atomic():
             if self.creating:
                 self.handle_adding_child(self.parent)
@@ -693,7 +691,6 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                 )
 
                 if stores_to_delete:
-                    logger.info(f"stores_to_delete prodc")
                     delete_evotor_product.send(
                         sender=self,
                         product=self.object,
@@ -1099,16 +1096,18 @@ class CategoryListMixin(object):
     def form_valid(self, form):
         logger.info(f"form_valid CategoryListMixin")
         with transaction.atomic():
+            logger.info(f"form_valid categ 1")
             response = super().form_valid(form)
+            logger.info(f"form_valid categ 2")
             evotor_update = form.cleaned_data.get("evotor_update")
-            category_updated = bool(form.changed_data)
             response.set_cookie(
                 "evotor_update",
                 evotor_update,
                 max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
             )
-            logger.info(f"form_valid categ")
-            if evotor_update and category_updated:
+            logger.info(f"form_valid categ 3")
+            if evotor_update and bool(form.changed_data):
+                logger.info(f"evotor_update catr list")
                 logger.info(f"form_valid self.object.id {self.object.id}")
                 transaction.on_commit(
                     lambda: send_evotor_category.send(
@@ -1117,9 +1116,10 @@ class CategoryListMixin(object):
                         user_id=self.request.user.id,
                     )
                 )
-
-        logger.info(f"form_valid end")
-
+                logger.info(f"Signal sent for category_id: {self.object.id}")
+            else:
+                logger.info(f"Signal not sent: evotor_update={evotor_update}, category_updated={bool(form.changed_data)}")
+                
         return response
 
 
@@ -1654,7 +1654,6 @@ class AdditionalCreateUpdateView(generic.UpdateView):
 
     # pylint: disable=no-member
     def form_valid(self, form):
-        logger.info(f"form_valid AdditionalCreateUpdateView")
         with transaction.atomic():
             self.object = form.save()
             if self.is_popup:
@@ -1669,9 +1668,7 @@ class AdditionalCreateUpdateView(generic.UpdateView):
                 evotor_update,
                 max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
             )
-            logger.info(f"evotor_update form_valid AdditionalCreateUpdateView")
             if evotor_update and additional_updated:
-                logger.info(f"evotor_update form_valid AdditionalCreateUpdateView id{self.object.id}")
                 transaction.on_commit(
                     lambda: send_evotor_additional.send(
                         sender=self,
@@ -1745,9 +1742,7 @@ class AdditionalDeleteView(PopUpWindowDeleteMixin, generic.DeleteView):
         """
         evotor_update = data.get("evotor_update", "off")
         self.object = self.get_object()
-        logger.info(f"perform_deletion AdditionalDeleteView")
         if evotor_update == "on" and self.object.evotor_id:
-            logger.info(f"evotor_update perform_deletion AdditionalDeleteView")
             delete_evotor_additional.send(
                 sender=self,
                 additional=self.object,

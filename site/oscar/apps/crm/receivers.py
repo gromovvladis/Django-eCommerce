@@ -113,6 +113,9 @@ def delete_evotor_additional_receiver(sender, additional, user_id, **kwargs):
         delete_evotor_additional_task(additional.evotor_id, store_ids, user_id)
 
 
+# ===========
+
+
 @receiver(update_site_stores)
 def update_site_stores_receiver(sender, data_items, is_filtered, user_id, **kwargs):
     if settings.CELERY:
@@ -161,6 +164,9 @@ def update_site_additionals_receiver(
         update_site_additionals_task.delay(data_items, is_filtered, user_id)
     else:
         update_site_additionals_task(data_items, is_filtered, user_id)
+
+
+# ===========
 
 
 @receiver(send_evotor_categories)

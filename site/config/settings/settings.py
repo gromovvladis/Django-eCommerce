@@ -268,14 +268,9 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django": {
+        "": {
             "handlers": ["console", "file"],
             "level": "INFO",
-            "propagate": True,
-        },
-        "celery": {
-            "handlers": ["console", "file"],
-            "level": "DEBUG",
             "propagate": True,
         },
     },
