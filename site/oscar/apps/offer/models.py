@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.timezone import get_current_timezone, now
 
-from oscar.apps.catalogue.models import MissingProductImage
+from oscar.apps.catalogue.models import MissingImage
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import cached_import_string, get_class, get_classes, get_model
 from oscar.models import fields
@@ -306,7 +306,7 @@ class ConditionalOffer(models.Model):
         img = self.image
         caption = self.name
         if not img:
-            mis_img = MissingProductImage()
+            mis_img = MissingImage()
             return {"original": mis_img, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}

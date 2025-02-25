@@ -23,7 +23,7 @@
 
 {% block navtext %}
   <h1>
-    {% if category.evotor_id %}
+    {% if category and category.evotor_id %}
       <i class="text-success fa-solid fa-circle-check"></i>
     {% endif %}
     {{ title }}

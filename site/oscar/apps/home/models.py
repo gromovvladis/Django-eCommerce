@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.template.defaultfilters import striptags
 
 from oscar.core.utils import slugify
-from oscar.apps.catalogue.models import MissingProductImage
+from oscar.apps.catalogue.models import MissingImage
 from oscar.models.fields import AutoSlugField
 
 
@@ -86,7 +86,7 @@ class Action(models.Model):
         img = self.image
         caption = self.title
         if not img:
-            mis_img = MissingProductImage()
+            mis_img = MissingImage()
             return {"original": mis_img, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}
@@ -201,7 +201,7 @@ class PromoCategory(models.Model):
         img = self.image
         caption = self.title
         if not img:
-            mis_img = MissingProductImage()
+            mis_img = MissingImage()
             return {"original": mis_img, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}
