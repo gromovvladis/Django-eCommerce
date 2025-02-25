@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 
-from oscar.apps.catalogue.models import MissingProductImage
+from oscar.apps.catalogue.models import MissingImage
 from oscar.models.fields import AutoSlugField
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import get_model
@@ -887,7 +887,7 @@ class Line(models.Model):
         Returns the primary image for a product. Usually used when one can
         only display one product image, e.g. in a list of products.
         """
-        mis_img = MissingProductImage()
+        mis_img = MissingImage()
         caption = self.name
         return {"original": mis_img, "caption": caption, "is_missing": True}
 

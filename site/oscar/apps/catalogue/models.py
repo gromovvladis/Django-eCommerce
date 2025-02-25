@@ -232,7 +232,7 @@ class Category(MP_Node):
         img = self.image
         caption = self.name
         if not img:
-            mis_img = MissingProductImage()
+            mis_img = MissingImage()
             return {"original": mis_img, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}
@@ -400,7 +400,7 @@ class Category(MP_Node):
         verbose_name_plural = "Категории"
 
     def has_children(self):
-        return self.get_num_children() > 0
+        return self.get_children_count() > 0
 
 
 class ProductCategory(models.Model):
@@ -1020,13 +1020,14 @@ class Product(models.Model):
         if self.is_child and not self.images.exists() and self.parent_id is not None:
             return self.parent.images.all()
         return self.images.all()
+        # return self.images.all().order_by("display_order")
 
     def primary_image(self):
         """
         Returns the primary image for a product. Usually used when one can
         only display one product image, e.g. in a list of products.
         """
-        images = self.get_all_images().order_by("display_order")
+        images = self.get_all_images()
         # ordering = self.images.model.Meta.ordering
         # if not ordering or ordering[0] != "display_order":
         # Only apply order_by() if a custom model doesn't use default
@@ -1039,7 +1040,7 @@ class Product(models.Model):
             # We return a dict with fields that mirror the key properties of
             # the ProductImage class so this missing image can be used
             # interchangeably in templates.  Strategy pattern ftw!
-            mis_img = MissingProductImage()
+            mis_img = MissingImage()
             caption = self.name
             return {"original": mis_img, "caption": caption, "is_missing": True}
 
@@ -1890,7 +1891,7 @@ class Additional(models.Model):
         img = self.image
         caption = self.name
         if not img:
-            mis_img = MissingProductImage()
+            mis_img = MissingImage()
             return {"original": mis_img, "caption": caption, "is_missing": True}
 
         return {"original": img, "caption": caption, "is_missing": False}
@@ -1911,7 +1912,7 @@ class Additional(models.Model):
         return self.name
 
 
-class MissingProductImage(object):
+class MissingImage(object):
     """
     Mimics a Django file field by having a name property.
 
@@ -1958,6 +1959,10 @@ class MissingProductImage(object):
                     static_file_path,
                     settings.MEDIA_ROOT,
                 )
+
+    @property
+    def url(self):
+        return os.path.join(settings.MEDIA_URL, self.name)
 
 
 class ProductImage(models.Model):
