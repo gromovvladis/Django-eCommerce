@@ -78,7 +78,7 @@ def update_evotor_stockrecord_receiver(sender, product_id, user_id, **kwargs):
 @receiver(delete_evotor_category)
 def delete_evotor_category_receiver(sender, category, user_id, **kwargs):
     category_evotor_id = category.evotor_id
-    logger.info(f"send_evotor_category_receiver {category_evotor_id}")
+    logger.info(f"delete_evotor_category_receiver {category_evotor_id}")
     if settings.CELERY:
         delete_evotor_category_task.delay(category_evotor_id, user_id)
     else:

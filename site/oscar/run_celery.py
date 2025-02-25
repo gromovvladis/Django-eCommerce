@@ -7,8 +7,7 @@ from django.conf import settings
 from celery.signals import setup_logging
 from celery import Celery
 
-BROKER_URL = "redis://127.0.0.1:6379"
-
+BROKER_URL = "redis://127.0.0.1:6379/10"
 CELERY_LOGGER_NAME = "celery"
 
 
@@ -19,11 +18,10 @@ def setup_celery_logging(loglevel=None, **kwargs):
     Will rely on Django to set up the base root logger.
     Celery loglevel will be set if provided as Celery command argument.
     """
-    # if loglevel:
-    #     logging.getLogger(CELERY_LOGGER_NAME).setLevel(loglevel)
-    # else:
-    #     logging.getLogger(CELERY_LOGGER_NAME).setLevel(logging.DEBUG)
-    logging.getLogger(CELERY_LOGGER_NAME).setLevel(logging.DEBUG)
+    if loglevel:
+        logging.getLogger(CELERY_LOGGER_NAME).setLevel(loglevel)
+    else:
+        logging.getLogger(CELERY_LOGGER_NAME).setLevel(logging.DEBUG)
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", config("DJANGO_SETTINGS_MODULE"))
