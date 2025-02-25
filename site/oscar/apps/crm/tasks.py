@@ -70,6 +70,7 @@ def process_bulk_task(self, bulk_evotor_id):
 @shared_task
 def send_evotor_category_task(category_id, user_id):
     try:
+        logger.info(f"send_evotor_category_task={category_id}")
         msg = EvatorCloud().update_or_create_evotor_category_by_id(category_id)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
@@ -83,6 +84,7 @@ def send_evotor_category_task(category_id, user_id):
 @shared_task
 def send_evotor_product_task(product_id, user_id):
     try:
+        logger.info(f"send_evotor_product_task={product_id}")
         msg = EvatorCloud().update_or_create_evotor_product_by_id(product_id)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
@@ -96,6 +98,7 @@ def send_evotor_product_task(product_id, user_id):
 @shared_task
 def send_evotor_additional_task(additional_id, user_id):
     try:
+        logger.info(f"send_evotor_additional_task={additional_id}")
         msg = EvatorCloud().update_or_create_evotor_additional_by_id(additional_id)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
@@ -109,6 +112,7 @@ def send_evotor_additional_task(additional_id, user_id):
 @shared_task
 def update_evotor_stockrecord_task(product_id, user_id):
     try:
+        logger.info(f"update_evotor_stockrecord_task={product_id}")
         msg = EvatorCloud().update_evotor_stockrecord_by_id(product_id)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
@@ -122,6 +126,7 @@ def update_evotor_stockrecord_task(product_id, user_id):
 @shared_task
 def delete_evotor_category_task(category_evotor_id, user_id):
     try:
+        logger.info(f"delete_evotor_category_task={category_evotor_id}")
         msg = EvatorCloud().delete_evotor_category_by_id(category_evotor_id)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
@@ -133,9 +138,10 @@ def delete_evotor_category_task(category_evotor_id, user_id):
 
 # send evotor_id 
 @shared_task
-def delete_evotor_product_task(product_evotor_id, is_parent, user_id, store_ids):
+def delete_evotor_product_task(product_evotor_id, is_parent, store_ids, user_id):
     try:
-        msg = EvatorCloud().delete_evotor_product_by_id(product_evotor_id, is_parent, store_ids)
+        logger.info(f"delete_evotor_product_task={product_evotor_id}, {is_parent}, {user_id}")
+        msg = EvatorCloud().delete_evotor_product_by_id(product_evotor_id, store_ids, is_parent)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)
     except Exception as e:
@@ -148,6 +154,7 @@ def delete_evotor_product_task(product_evotor_id, is_parent, user_id, store_ids)
 @shared_task
 def delete_evotor_additional_task(additional_evotor_id, store_ids, user_id):
     try:
+        logger.info(f"delete_evotor_additional_task={additional_evotor_id}, {store_ids}")
         msg = EvatorCloud().delete_evotor_additional_by_id(additional_evotor_id, store_ids)
         cache_key = f"user_message_{user_id}"
         cache.set(cache_key, msg, timeout=3600)

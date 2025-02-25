@@ -13,7 +13,6 @@ from django.urls import reverse
 from django.views.generic import UpdateView, DeleteView, CreateView, View
 from django_tables2 import SingleTableView
 
-from oscar.apps.dashboard.catalogue.views import CategoryListMixin
 from oscar.core.loading import get_class, get_model
 
 DeliveryZonaForm = get_class("dashboard.delivery.forms", "DeliveryZonaForm")
@@ -129,7 +128,7 @@ class DeliveryZonesUpdateView(UpdateView):
         return reverse("dashboard:delivery-zones")
 
 
-class DeliveryZonesDeleteView(CategoryListMixin, DeleteView):
+class DeliveryZonesDeleteView(DeleteView):
     template_name = "oscar/dashboard/delivery/delivery_zona_delete.html"
     model = DeliveryZona
 
