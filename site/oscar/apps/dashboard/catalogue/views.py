@@ -1104,10 +1104,12 @@ class CategoryListMixin(object):
                 evotor_update,
                 max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
             )
+            logger.info(f"form_valid")
             logger.info(f"form_valid={self.object}")
             logger.info(f"form_valid id={self.object.id}")
 
             if evotor_update and category_updated:
+                logger.info(f"evotor_update category")
                 transaction.on_commit(
                     lambda: send_evotor_category.send(
                         sender=self,
