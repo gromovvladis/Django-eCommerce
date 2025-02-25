@@ -125,6 +125,9 @@ Option = get_model("catalogue", "Option")
 Additional = get_model("catalogue", "Additional")
 
 
+import logging
+logger = logging.getLogger("oscar.crm")
+
 class ProductListView(StoreProductFilterMixin, SingleTableView):
     """
     Dashboard view of the product list.
@@ -1093,9 +1096,7 @@ class CategoryListMixin(object):
 
     def form_valid(self, form):
         with transaction.atomic():
-            self.object = form.save()
-            response = HttpResponseRedirect(self.get_success_url())
-            # response = super().form_valid(form)
+            response = super().form_valid(form)
             evotor_update = form.cleaned_data.get("evotor_update")
             category_updated = bool(form.changed_data)
             response.set_cookie(
@@ -1103,6 +1104,8 @@ class CategoryListMixin(object):
                 evotor_update,
                 max_age=settings.OSCAR_DEFAULT_COOKIE_LIFETIME,
             )
+            logger.info(f"form_valid={self.object}")
+            logger.info(f"form_valid id={self.object.id}")
 
             if evotor_update and category_updated:
                 transaction.on_commit(
