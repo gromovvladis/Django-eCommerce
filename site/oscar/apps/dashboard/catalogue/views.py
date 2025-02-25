@@ -127,6 +127,7 @@ Additional = get_model("catalogue", "Additional")
 
 logger = logging.getLogger("oscar.catalogue")
 
+
 class ProductListView(StoreProductFilterMixin, SingleTableView):
     """
     Dashboard view of the product list.
@@ -576,7 +577,7 @@ class ProductCreateUpdateView(StoreProductFilterMixin, generic.UpdateView):
                         ),
                     }.items()
                     if v
-                }
+                },
             )
 
         return self.forms_invalid(formsets, form, stockrecord_form)
@@ -1084,15 +1085,6 @@ class CategoryDetailListView(SingleTableMixin, generic.DetailView):
 
 
 class CategoryListMixin(object):
-    def get_success_url(self):
-        parent = self.object.get_parent(update=True)
-        if parent is None:
-            return reverse("dashboard:catalogue-category-list")
-        else:
-            return reverse(
-                "dashboard:catalogue-category-detail-list", args=(parent.pk,)
-            )
-
     def form_valid(self, form):
         logger.info(f"form_valid CategoryListMixin")
         with transaction.atomic():
@@ -1118,8 +1110,10 @@ class CategoryListMixin(object):
                 )
                 logger.info(f"Signal sent for category_id: {self.object.id}")
             else:
-                logger.info(f"Signal not sent: evotor_update={evotor_update}, category_updated={bool(form.changed_data)}")
-                
+                logger.info(
+                    f"Signal not sent: evotor_update={evotor_update}, category_updated={bool(form.changed_data)}"
+                )
+
         return response
 
 
@@ -1135,7 +1129,13 @@ class CategoryCreateView(CategoryListMixin, generic.CreateView):
 
     def get_success_url(self):
         messages.info(self.request, "Категория успешно создана.")
-        return super().get_success_url()
+        parent = self.object.get_parent(update=True)
+        if parent is None:
+            return reverse("dashboard:catalogue-category-list")
+        else:
+            return reverse(
+                "dashboard:catalogue-category-detail-list", args=(parent.pk,)
+            )
 
     def get_initial(self):
         # set child category if set in the URL kwargs
@@ -1162,10 +1162,16 @@ class CategoryUpdateView(CategoryListMixin, generic.UpdateView):
             return reverse(
                 "dashboard:catalogue-category-update", kwargs={"pk": self.object.id}
             )
-        return super().get_success_url()
+        parent = self.object.get_parent(update=True)
+        if parent is None:
+            return reverse("dashboard:catalogue-category-list")
+        else:
+            return reverse(
+                "dashboard:catalogue-category-detail-list", args=(parent.pk,)
+            )
 
 
-class CategoryDeleteView(CategoryListMixin, generic.DeleteView):
+class CategoryDeleteView(generic.DeleteView):
     template_name = "oscar/dashboard/catalogue/category_delete.html"
     model = Category
 
@@ -1177,7 +1183,7 @@ class CategoryDeleteView(CategoryListMixin, generic.DeleteView):
 
     def get_success_url(self):
         messages.info(self.request, "Категория успешно удалена.")
-        return super().get_success_url()
+        return reverse("dashboard:catalogue-category-list")
 
     def form_valid(self, form):
         self.perform_deletion(form)
