@@ -38,7 +38,25 @@
   </div>
   <div class="card card-body bg-light">
     <form method="get" class="form-inline">
-      {% include 'oscar/partials/form_fields_inline.html' with form=form %}
+      {% comment %} {% include 'oscar/partials/form_fields_inline.html' with form=form %} {% endcomment %}
+      {% load widget_tweaks %}
+      <span class="error-block">{{ form.non_field_errors }}</span>
+      {% for field in form %}
+        {% if field.is_hidden %}
+          {{ field }}
+        {% else %}
+          <span class="form-group {% if field.errors %}error{% endif %}">
+            <span class="mr-sm-1">{{ field.label_tag }}</span>
+            {% render_field field class='form-control mr-sm-2' %}
+            {% for error in field.errors %}
+              <ul class="error-block">
+                <li>{{ error }}</li>
+              </ul>
+            {% endfor %}
+          </span>
+        {% endif %}
+      {% endfor %}
+
       <button type="submit" class="btn btn-primary">{% trans 'Search' %}</button>
       <a href="{% url 'dashboard:voucher-set-detail' pk=voucher_set.pk %}" class="btn">{% trans 'Reset' %}</a>
     </form>
