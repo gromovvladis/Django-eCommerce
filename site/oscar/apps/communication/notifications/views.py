@@ -24,7 +24,7 @@ class NotificationListView(PageTitleMixin, generic.ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["list_type"] = self.list_type
         ctx["content_open"] = True
-        ctx["summary"] = "Профиль"
+        ctx["summary"] = "profile"
         return ctx
 
 
@@ -89,7 +89,7 @@ class DetailView(PageTitleMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "Профиль"
+        ctx["summary"] = "profile"
         return ctx
 
     def get_object(self, queryset=None):

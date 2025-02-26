@@ -49,7 +49,7 @@ class WishListDetailView(PageTitleMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["wishlist"] = self.object
         ctx["content_open"] = True
-        ctx["summary"] = "Профиль"
+        ctx["summary"] = "profile"
         return ctx
 
 
@@ -129,7 +129,6 @@ class LineMixin(object):
 
 
 class WishListRemoveProduct(LineMixin, View):
-
     def get_object(self, queryset=None):
         self.fetch_line(
             self.request.user,

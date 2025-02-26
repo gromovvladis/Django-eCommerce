@@ -18646,6 +18646,7 @@ h3.app-ico:before {
 .form-stacked .error-block {
   display: block;
   color: #dc3545;
+  margin-top: .5rem;
 }
 
 .errorlist {

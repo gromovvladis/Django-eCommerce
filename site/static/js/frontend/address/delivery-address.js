@@ -24,18 +24,15 @@ setAddressForm.addEventListener('submit', function (event) {
         },
         body: new URLSearchParams(new FormData(setAddressForm)).toString()
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.text(); // или response.json(), если ожидается JSON
-    })
-    .then(data => {
-        console.log(data); // обработка успешного ответа
-    })
-    .catch(error => {
-        console.error('Error:', error); // обработка ошибок
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text(); // или response.json(), если ожидается JSON
+        })
+        .catch(error => {
+            console.error('Error:', error); // обработка ошибок
+        });
 });
 
 // Запрет отправки формы при нажатии Enter

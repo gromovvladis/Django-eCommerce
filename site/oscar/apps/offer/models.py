@@ -8,16 +8,18 @@ from django.conf import settings
 from django.core import exceptions
 from django.db import models
 from django.db.models.query import Q
-from django.template.defaultfilters import date as date_filter
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.timezone import get_current_timezone, now
+from django.template.defaultfilters import date as date_filter
 
-from oscar.apps.catalogue.models import MissingImage
+from oscar.models import fields
 from oscar.core.compat import AUTH_USER_MODEL
 from oscar.core.loading import cached_import_string, get_class, get_classes, get_model
-from oscar.models import fields
 from oscar.templatetags.currency_filters import currency
+from oscar.apps.catalogue.models import MissingImage
+from oscar.utils.image_processor import ImageProcessor
+from oscar.utils.models import get_image_offers_upload_path
 
 ExpandDownwardsCategoryQueryset = get_class(
     "catalogue.expressions", "ExpandDownwardsCategoryQueryset"
@@ -93,7 +95,9 @@ class ConditionalOffer(models.Model):
         unique=True,
         help_text="Это отображается в корзине клиента",
     )
-    image = models.ImageField("Изображение", upload_to="Offers", blank=True)
+    image = models.ImageField(
+        "Изображение", upload_to=get_image_offers_upload_path, blank=True
+    )
     slug = fields.AutoSlugField(
         "Ярлык", max_length=128, unique=True, populate_from="name"
     )
@@ -273,6 +277,11 @@ class ConditionalOffer(models.Model):
 
     def save(self, *args, **kwargs):
         # Check to see if consumption thresholds have been broken
+        if self.image:
+            processor = ImageProcessor()
+            optimized_image = processor.optimize_image(self.image)
+            self.image.save(optimized_image.name, optimized_image, save=False)
+
         if not self.is_suspended:
             if self.get_max_applications() == 0:
                 self.status = self.CONSUMED

@@ -29,7 +29,7 @@ const updateBadge = (badge) => {
         } else {
             const minutes = Math.floor(absSeconds / 60);
             badgeText = `${minutes} мин.`;
-            badgeClass = inFuture 
+            badgeClass = inFuture
                 ? (minutes < 5 ? "badge-warning" : "badge-success")
                 : "badge-danger";
         }

@@ -721,7 +721,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         max_length=255,
                         null=True,
-                        upload_to=oscar.utils.models.get_image_upload_path,
+                        upload_to=oscar.utils.models.get_image_products_upload_path,
                     ),
                 ),
                 (
@@ -730,7 +730,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         max_length=255,
                         null=True,
-                        upload_to=oscar.utils.models.get_image_upload_path,
+                        upload_to=oscar.utils.models.get_image_products_upload_path,
                     ),
                 ),
                 (
@@ -839,7 +839,7 @@ class Migration(migrations.Migration):
                     "original",
                     models.ImageField(
                         max_length=255,
-                        upload_to=oscar.utils.models.get_image_upload_path,
+                        upload_to=oscar.utils.models.get_image_products_upload_path,
                         verbose_name="Оригинал",
                     ),
                 ),

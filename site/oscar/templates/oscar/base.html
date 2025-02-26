@@ -2,12 +2,15 @@
 <!DOCTYPE html>
 <html lang="ru">
     <head>
-        <title>{% block title %}{{ primary_title }}{% endblock %}</title>
+        <title>{% block title %}{{ page_title }} | {{ primary_title }}{% endblock %}</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <meta name="description" content="{% block description %}{% endblock %}" />
         <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+        <meta name="theme-color" content="#298eff">
+        <link rel="manifest" href="{% static 'manifest.json' %}">
         <link href="https://fonts.googleapis.com/css2?family=Galada&family=Onest:wght@100..700&display=swap" rel="stylesheet">
         <link rel="shortcut icon" href="{% static "favicon.ico" %}"/>
+        <link rel="apple-touch-icon" href="{% static "favicon.ico" %}">
         {% block styles %}{% endblock %}
         {% block extrastyles %}{% endblock %}    
         {% block tracking %}{% include "oscar/partials/analytics.html" %}{% endblock %}

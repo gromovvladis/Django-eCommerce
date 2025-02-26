@@ -4,14 +4,6 @@
 {% load image_tags %}
 {% load cache %}
 
-{% block title %}
-  {{ summary }} | {{ block.super }}
-{% endblock %}
-
-{% block wrapper_class %}
-  actions d-flex flex-column pd-2 pb-4 pb-sm-4 container
-{% endblock %}
-
 {% block app_class %}
   app---action
 {% endblock %}
@@ -20,8 +12,8 @@
   app__nav--action
 {% endblock %}
 
-{% block nav_title_center %}
-  {{ summary }}
+{% block wrapper_class %}
+  actions d-flex flex-column pd-2 pb-4 pb-sm-4 container
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -30,7 +22,7 @@
     <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">{% icon file_name='interface/arrow-back' size=22 stroke='#111' %}</button>
     <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
     {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
-    <span class="bread__link" aria-current="page">{{ summary }}</span>
+    <span class="bread__link" aria-current="page">{{ page_title }}</span>
   </div>
   {% endcache %}
 {% endblock %}

@@ -5,19 +5,30 @@ from django.urls import reverse
 from django.template.defaultfilters import striptags
 
 from oscar.core.utils import slugify
-from oscar.apps.catalogue.models import MissingImage
 from oscar.models.fields import AutoSlugField
+from oscar.apps.catalogue.models import MissingImage
+from oscar.utils.image_processor import ImageProcessor
+from oscar.utils.models import (
+    get_image_actions_upload_path,
+    get_image_promocategory_upload_path,
+)
 
 
 class Action(models.Model):
-
     slug = AutoSlugField("Ярлык", max_length=128, unique=True, populate_from="title")
-    image = models.ImageField(blank=False, upload_to="actions", null=False)
-
+    image = models.ImageField(
+        blank=False, upload_to=get_image_actions_upload_path, null=False
+    )
     title = models.CharField("Заголовок", max_length=128, blank=False, null=False)
     description = models.TextField("Описание", blank=True)
-
     order = models.IntegerField("Порядок", null=False, blank=False, default=0)
+    is_active = models.BooleanField(default=True)
+    products_related = models.ManyToManyField(
+        "catalogue.Product",
+        blank=True,
+        verbose_name="Связаные товары",
+        help_text=("Товары которые будут показаны на странице акции."),
+    )
 
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True)
@@ -26,15 +37,6 @@ class Action(models.Model):
         "Мета заголовок", max_length=255, blank=True, null=True
     )
     meta_description = models.TextField("Мета описание", blank=True, null=True)
-
-    is_active = models.BooleanField(default=True)
-
-    products_related = models.ManyToManyField(
-        "catalogue.Product",
-        blank=True,
-        verbose_name="Связаные товары",
-        help_text=("товары которые стоит показать на странице акции"),
-    )
 
     class Meta:
         db_table = "actions_action"
@@ -65,11 +67,14 @@ class Action(models.Model):
         return slugify(self.title)
 
     def save(self, *args, **kwargs):
+        if self.image:
+            processor = ImageProcessor()
+            optimized_image = processor.optimize_image(self.image)
+            self.image.save(optimized_image.name, optimized_image, save=False)
+
         if not self.slug:
             self.slug = self.generate_slug()
         super().save(*args, **kwargs)
-
-    # Image
 
     @cached_property
     def has_image(self):
@@ -113,14 +118,18 @@ class Action(models.Model):
 
 
 class PromoCategory(models.Model):
-
     slug = AutoSlugField("Ярлык", max_length=128, unique=True, populate_from="title")
-    image = models.ImageField(blank=True, upload_to="promocats")
-
+    image = models.ImageField(blank=True, upload_to=get_image_promocategory_upload_path)
     title = models.CharField("Заголовок", max_length=128, blank=False, null=False)
     description = models.TextField("Описание", blank=True)
-
     order = models.IntegerField("Порядок", null=False, blank=False, default=0)
+    is_active = models.BooleanField(default=True)
+    products_related = models.ManyToManyField(
+        "catalogue.Product",
+        blank=True,
+        verbose_name="Связаные товары",
+        help_text=("Товары которые будут показаны в продвигаемой категории."),
+    )
 
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
     date_updated = models.DateTimeField("Дата изменения", auto_now=True)
@@ -130,27 +139,17 @@ class PromoCategory(models.Model):
     )
     meta_description = models.TextField("Мета описание", blank=True, null=True)
 
-    is_active = models.BooleanField(default=True)
-
     PROMO, RECOMENDATION, ACTION = "PROMO", "RECOMEND", "ACTION"
-
     choices = (
         (PROMO, "Промо-категория"),
-        (RECOMENDATION, "Рекомендоданые товары"),
+        (RECOMENDATION, "Рекомендованные товары"),
         (ACTION, "Акция на товары"),
     )
     type = models.CharField(
         max_length=255,
         choices=choices,
-        verbose_name="Тип категории товаров",
+        verbose_name="Тип категории",
         default=RECOMENDATION,
-    )
-
-    products_related = models.ManyToManyField(
-        "catalogue.Product",
-        blank=True,
-        verbose_name="Связаные товары",
-        help_text=("товары которые стоит показать на странице акции"),
     )
 
     class Meta:
@@ -182,6 +181,11 @@ class PromoCategory(models.Model):
         return slugify(self.title)
 
     def save(self, *args, **kwargs):
+        if self.image:
+            processor = ImageProcessor()
+            optimized_image = processor.optimize_image(self.image)
+            self.image.save(optimized_image.name, optimized_image, save=False)
+
         if not self.slug:
             self.slug = self.generate_slug()
         super().save(*args, **kwargs)
@@ -192,7 +196,7 @@ class PromoCategory(models.Model):
             return True
         return False
 
-    # Image
+    @cached_property
     def primary_image(self):
         """
         Returns the primary image for a product. Usually used when one can

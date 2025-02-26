@@ -10,20 +10,20 @@
 {% load static %}
 {% load cache %}
 
-{% block title %}
-  {{ product.get_name }} | {{ block.super }}
-{% endblock %}
-
-{% block wrapper_class %}
-  menu fill-width fill-height grow-1 pb-2 px-sm-2 pt-sm-2 pb-sm-4
-{% endblock %}
-
 {% block app_class %}
   app---dish
 {% endblock %}
 
 {% block nav_class %}
   app__nav--dish
+{% endblock %}
+
+{% block wrapper_class %}
+  menu fill-width fill-height grow-1 pb-2 px-sm-2 pt-sm-2 pb-sm-4
+{% endblock %}
+
+{% block description %}
+  {{ product.get_meta_description }}
 {% endblock %}
 
 {% block breadcrumbs %}

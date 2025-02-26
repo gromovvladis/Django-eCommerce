@@ -5,25 +5,20 @@ import tempfile
 import zipfile
 import zlib
 
-from io import BytesIO
 from PIL import Image, UnidentifiedImageError
-from PIL import Image
 
 from django.core.files import File
 from django.db.transaction import atomic
 
 from oscar.core.loading import get_model
 from oscar.apps.catalogue.exceptions import InvalidImageArchive
+from oscar.utils.image_processor import ImageProcessor
+
+Product = get_model("catalogue", "Product")
+ProductImage = get_model("catalogue", "ProductImage")
 
 
-Product = get_model("catalogue", "product")
-ProductImage = get_model("catalogue", "productimage")
-
-
-class Importer(object):
-
-    allowed_extensions = {".jpeg", ".jpg", ".png", ".webp", ".gif", ".tiff", ".bmp"}
-    preferred_format = "WEBP"  # Используем WEBP для эффективности
+class ProductImporter(ImageProcessor):
 
     def __init__(self, logger, field):
         self.logger = logger
@@ -37,7 +32,10 @@ class Importer(object):
             for filename in filenames:
                 try:
                     lookup_value = self._get_lookup_value_from_filename(filename)
-                    self._process_image(image_dir, filename, lookup_value)
+                    new_path, new_filename = self._process_image(
+                        image_dir, filename, lookup_value
+                    )
+                    self._save_image_to_db(new_path, lookup_value, new_filename)
                     stats["num_processed"] += 1
                 except (Product.MultipleObjectsReturned, Product.DoesNotExist):
                     self.logger.warning(f"Skipping {filename}, no matching product.")
@@ -56,6 +54,26 @@ class Importer(object):
             "Файл импортирован: %(num_processed)d,"
             " %(num_skipped)d пропустить" % stats
         )
+
+    def _process_image(self, dirname, filename, lookup_value):
+        file_path = os.path.join(dirname, filename)
+
+        try:
+            # Проверяем, что файл является изображением
+            trial_image = Image.open(file_path)
+            trial_image.verify()  # Проверка целостности файла
+        except (UnidentifiedImageError, IOError):
+            raise ValueError("Загруженный файл не является изображением или поврежден.")
+
+        image = Image.open(file_path)
+        image = self.optimize_image(image)
+        new_filename = f"{lookup_value}.{self.preferred_format.lower()}"
+        new_path = os.path.join(dirname, new_filename)
+
+        with open(new_path, "wb") as f:
+            image.save(f, self.preferred_format, optimize=True)
+
+        return new_path, new_filename
 
     def _get_image_files(self, dirname):
         filenames = []
@@ -85,47 +103,6 @@ class Importer(object):
             return temp_dir
         except (tarfile.TarError, zipfile.BadZipFile, zlib.error):
             return ""
-
-    def _process_image(self, dirname, filename, lookup_value):
-        file_path = os.path.join(dirname, filename)
-        trial_image = Image.open(file_path)
-        trial_image.verify()
-        image = Image.open(file_path)
-        image = self._optimize_image(image)
-        new_filename = f"{lookup_value}.{self.preferred_format.lower()}"
-        new_path = os.path.join(dirname, new_filename)
-        image.save(new_path, self.preferred_format, quality=85, optimize=True)
-        self._save_image_to_db(new_path, lookup_value, new_filename)
-
-    def _optimize_image(self, image):
-        # Конвертация в RGB (если изображение имеет альфа-канал)
-        if image.mode in ("RGBA", "P"):
-            image = image.convert("RGB")
-
-        # Ограничение разрешения (с сохранением пропорций)
-        max_size = (1080, 1080)
-        image.thumbnail(max_size, Image.LANCZOS)
-
-        # Ограничение размера файла (2MB)
-        quality = 100
-        output = BytesIO()
-
-        while True:
-            output.seek(0)
-            output.truncate()
-            image.save(output, format=self.preferred_format, quality=quality)
-
-            # Проверяем размер в байтах
-            if output.tell() <= 2 * 1080 * 1080 or quality <= 50:
-                break
-
-            quality -= 5  # Уменьшаем качество
-
-        output.seek(0)
-        optimized_image = Image.open(output).copy()
-        output.close()
-
-        return optimized_image
 
     def _save_image_to_db(self, file_path, lookup_value, filename):
         product = Product._default_manager.get(**{self._field: lookup_value})

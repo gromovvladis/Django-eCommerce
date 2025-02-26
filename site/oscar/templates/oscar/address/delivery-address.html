@@ -4,14 +4,6 @@
 {% load compress %}
 {% load static %}
 
-{% block title %}
-  Адрес доставки | {{ block.super }}
-{% endblock %}
-
-{% block wrapper_class %}
-  delivery wrapper--small fill-width pd-2 pb-sm-4 delivery-address
-{% endblock %}
-
 {% block app_class %}
   app---delivery
 {% endblock %}
@@ -20,8 +12,8 @@
   app__nav--delivery
 {% endblock %}
 
-{% block nav_title %}
-  Адрес доставки
+{% block wrapper_class %}
+  delivery wrapper--small fill-width pd-2 pb-sm-4 delivery-address
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -50,11 +42,9 @@
                 {% icon file_name='interface/search' size=20 fill='#8a8a8a' %}
                 <div id="line1_container" class="delivery fill-width input fill-width">
                   <div class="delivery--input d-flex">
-                    <input type="text" name="line1" id="id_line1" placeholder="Введите улицу и дом" data-id="address-input" value="{{ address.line1 }}" autocomplete="off" {% if address.readonly %}readonly{% endif %} />
+                    <input type="text" name="line1" id="id_line1" placeholder="Введите улицу и дом" data-id="address-input" value="{{ address.line1 }}" autocomplete="off" {% if address.readonly %}readonly{% endif %}/>
                     <div class="delivery--btn d-flex align-center justify-end">
-                      <button id="clean_address" type="button" class="delivery--clear shrink d-flex align-center justify-center fill-height fill-width">
-                        {% icon file_name='interface/close' size=24 stroke='#d32225' %}
-                      </button>
+                      <button id="clean_address" type="button" class="delivery--clear shrink d-flex align-center justify-center fill-height fill-width">{% icon file_name='interface/close' size=24 stroke='#d32225' %}</button>
                     </div>
                     <input type="hidden" name="coords_long" id="id_coords_long" value="{{ address.coords_long }}" />
                     <input type="hidden" name="coords_lat" id="id_coords_lat" value="{{ address.coords_lat }}" />
@@ -85,32 +75,32 @@
       </div>
       <div class="delivery__info mt-4 pd-md-0">
         <div class="delivery__regions-block mt-4">
-            <div>
-                <span class="mb-1"><strong>Время работы фудкорта в ТРЦ "Планета":</strong></span>
-                <br />
-                <span>С 09:00 до 23:00</span>
-                <br /><br />
-                <span class="mb-1"><strong>Время работы доставки:</strong></span>
-                <br />
-                <span>С 09:00 до 23:00</span>
-                <br /><br />
-                <span>Оформить заказ можно на сайте mikado-sushi.ru или в ТРЦ "Планета" по адресу ул. 9 Мая 77.</span>
-                <br /><br />
-                <span>Минимальная сумма заказа — 700 рублей.</span>
-                <br /><br />
-                <span><strong>Оплатить заказ можно любым удобным вам способом:</strong></span>
-                <br /><br />
-                <ul>
-                    <li>Онлайн с помощью карт МИР, VISA и MASTERCARD;</li>
-                    <li>Банковскими картами этих же платежных систем через систему быстрых платежей (СБП);</li>
-                    <li>Наличными курьеру при получении заказа.</li>
-                </ul>
-                <br />
-                <span><strong>Порядок возврата:</strong></span>
-                <br /><br />
-                <span>Возврат средств производится на ваш банковский счёт в течение 10 рабочих дней (срок зависит от банка, который выдал вашу банковскую карту).</span>
-                <br /><br />
-              </div>
+          <div>
+            <span class="mb-1"><strong>Время работы фудкорта в ТРЦ "Планета":</strong></span>
+            <br />
+            <span>С 09:00 до 23:00</span>
+            <br /><br />
+            <span class="mb-1"><strong>Время работы доставки:</strong></span>
+            <br />
+            <span>С 09:00 до 23:00</span>
+            <br /><br />
+            <span>Оформить заказ можно на сайте mikado-sushi.ru или в ТРЦ "Планета" по адресу ул. 9 Мая 77.</span>
+            <br /><br />
+            <span>Минимальная сумма заказа — 700 рублей.</span>
+            <br /><br />
+            <span><strong>Оплатить заказ можно любым удобным вам способом:</strong></span>
+            <br /><br />
+            <ul>
+              <li>Онлайн с помощью карт МИР, VISA и MASTERCARD;</li>
+              <li>Банковскими картами этих же платежных систем через систему быстрых платежей (СБП);</li>
+              <li>Наличными курьеру при получении заказа.</li>
+            </ul>
+            <br />
+            <span><strong>Порядок возврата:</strong></span>
+            <br /><br />
+            <span>Возврат средств производится на ваш банковский счёт в течение 10 рабочих дней (срок зависит от банка, который выдал вашу банковскую карту).</span>
+            <br /><br />
+          </div>
         </div>
       </div>
     {% endblock %}

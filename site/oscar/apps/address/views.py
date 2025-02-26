@@ -2,7 +2,6 @@
 from urllib.parse import unquote
 
 from django import http
-from django.template.response import TemplateResponse
 from django.urls import reverse_lazy
 from django.views import generic
 
@@ -16,11 +15,9 @@ UserAddress = get_model("address", "UserAddress")
 
 
 class SetAddressView(PageTitleMixin, generic.CreateView):
-
-    form_class = UserLiteAddressForm
     model = UserAddress
+    form_class = UserLiteAddressForm
     template_name = "oscar/address/delivery-address.html"
-    active_tab = "address"
     page_title = "Добавить адрес"
     context_object_name = "address"
     success_url = reverse_lazy("customer:address-list")
@@ -30,20 +27,13 @@ class SetAddressView(PageTitleMixin, generic.CreateView):
             return super().post(request, *args, **kwargs)
         return http.JsonResponse({"saved": "cookies"}, status=200)
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
-        return TemplateResponse(
-            request, self.template_name, {self.context_object_name: context}
-        )
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = {}
-        context["title"] = "Добавить новый адрес"
+        context = super().get_context_data(**kwargs)
         context["readonly"] = False
         user_address = False
         if self.request.user.is_authenticated:
@@ -56,22 +46,8 @@ class SetAddressView(PageTitleMixin, generic.CreateView):
             context["readonly"] = True
         return context
 
-    def get_success_url(self):
-        return super().get_success_url()
 
-
-class PickUpView(generic.View):
+class PickUpView(PageTitleMixin, generic.TemplateView):
     template_name = "oscar/address/pickup-address.html"
     page_title = "Самовывоз"
     context_object_name = "address"
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
-        return TemplateResponse(
-            request, self.template_name, {self.context_object_name: context}
-        )
-
-    def get_context_data(self, **kwargs):
-        context = {}
-        context["title"] = "Самовывоз"
-        return context

@@ -4,14 +4,6 @@
 {% load static %}
 {% load cache %}
 
-{% block title %}
-  {{ summary }}
-{% endblock %}
-
-{% block wrapper_class %}
-  menu fill-width fill-height grow-1 pd-2 pd-sm-0 pt-sm-2 pb-sm-4
-{% endblock %}
-
 {% block app_class %}
   app---home
 {% endblock %}
@@ -20,8 +12,11 @@
   app__nav--home
 {% endblock %}
 
-{% block breadcrumbs %}
+{% block wrapper_class %}
+  menu fill-width fill-height grow-1 pd-2 pd-sm-0 pt-sm-2 pb-sm-4
 {% endblock %}
+
+{% block title %}{{ primary_title }}{% endblock %}
 
 {% block nav_title %}
   {% cache 3600 homepage_title store.id %}
@@ -35,6 +30,9 @@
     </button>
   {% endif %}
   {% endcache %}
+{% endblock %}
+
+{% block breadcrumbs %}
 {% endblock %}
 
 {% block carousel %}
