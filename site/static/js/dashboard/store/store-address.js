@@ -69,32 +69,32 @@ ymaps.ready(function () {
 
     LayoutPin = ymaps.templateLayoutFactory.createClass(
         '<div class="wrapper-icon-delivery">' +
-            
-            '{% if properties.loading  %}' +
 
-                '<svg class="pin-icon pin-icon__loader" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-                    '<circle cx="12" cy="12" r="6" stroke-width="8" fill="none" stroke-dasharray="100" stroke-dashoffset="80"></circle>' +
-                    '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 0 0" to="360 0 0" dur="2s" repeatCount="indefinite"></animateTransform>' +
-                '</svg>' +
+        '{% if properties.loading  %}' +
 
-            '{% else %}' + 
+        '<svg class="pin-icon pin-icon__loader" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+        '<circle cx="12" cy="12" r="6" stroke-width="8" fill="none" stroke-dasharray="100" stroke-dashoffset="80"></circle>' +
+        '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 0 0" to="360 0 0" dur="2s" repeatCount="indefinite"></animateTransform>' +
+        '</svg>' +
 
-                '<div class="icon-delivery__title {% if properties.error %}icon-delivery__title_error{% endif %}">' +
-                    '{% if properties.error %}' +
-                        '<span>{{ properties.error|default:"Адрес вне зоны доставки" }}</span> ' +
-                    '{% else %}' + 
-                        '<span class="delivery-balloon__minutes">{{ properties.address }}</span>' +
-                        '<br>' +
-                        '<span class="delivery-balloon__text">Адрес магазина</span>' +
-                    '{% endif %}' +
-                '</div>' +
+        '{% else %}' +
 
-            '{% endif %}' +
+        '<div class="icon-delivery__title {% if properties.error %}icon-delivery__title_error{% endif %}">' +
+        '{% if properties.error %}' +
+        '<span>{{ properties.error|default:"Адрес вне зоны доставки" }}</span> ' +
+        '{% else %}' +
+        '<span class="delivery-balloon__minutes">{{ properties.address }}</span>' +
+        '<br>' +
+        '<span class="delivery-balloon__text">Адрес магазина</span>' +
+        '{% endif %}' +
+        '</div>' +
 
-            '<svg class="pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                '<circle cx="12" cy="10" r="10"></circle>' +
-                '<circle cx="12" cy="10" r="5" fill="#c21313"></circle>' +
-            '</svg>' +
+        '{% endif %}' +
+
+        '<svg class="pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<circle cx="12" cy="10" r="10"></circle>' +
+        '<circle cx="12" cy="10" r="5" fill="#c21313"></circle>' +
+        '</svg>' +
 
         '</div>'
     )
@@ -105,7 +105,7 @@ ymaps.ready(function () {
 
 
 // создаем карту при вводе адреса, при расчете маршрута и предоставим возможность выбора адреса по карте
-function createMap(address=null) {
+function createMap(address = null) {
     console.log("createMap");
     ymaps.ready(function () {
 
@@ -120,14 +120,14 @@ function createMap(address=null) {
                 maxZoom: 18,
                 minZoom: 10,
             });
-            
+
             $.ajax({
                 url: url_delivery_zones,
                 dataType: 'json',
-                success: function(json){
+                success: function (json) {
                     ZonesInit(json);
                     if (address) {
-                        ymaps.geocode(address, {results: 1, boundedBy:DELIVERYBOUNDS}).then(function (res) {
+                        ymaps.geocode(address, { results: 1, boundedBy: DELIVERYBOUNDS }).then(function (res) {
                             var coords = res.geoObjects.get(0).geometry.getCoordinates();
                             movePlacemark(coords, res.geoObjects.get(0).properties._data.name, true);
                             map.setCenter(coords, 14);
@@ -145,48 +145,48 @@ function createMap(address=null) {
                 ,
                 {
 
-                // Переопределяем методы макета, чтобы выполнять дополнительные действия
-                // при построении и очистке макета.
-                build: function () {
-                    // Вызываем родительский метод build.
-                    ZoomLayout.superclass.build.call(this);
+                    // Переопределяем методы макета, чтобы выполнять дополнительные действия
+                    // при построении и очистке макета.
+                    build: function () {
+                        // Вызываем родительский метод build.
+                        ZoomLayout.superclass.build.call(this);
 
-                    // Привязываем функции-обработчики к контексту и сохраняем ссылки
-                    // на них, чтобы потом отписаться от событий.
-                    this.zoomInCallback = ymaps.util.bind(this.zoomIn, this);
-                    this.zoomOutCallback = ymaps.util.bind(this.zoomOut, this);
+                        // Привязываем функции-обработчики к контексту и сохраняем ссылки
+                        // на них, чтобы потом отписаться от событий.
+                        this.zoomInCallback = ymaps.util.bind(this.zoomIn, this);
+                        this.zoomOutCallback = ymaps.util.bind(this.zoomOut, this);
 
-                    // Начинаем слушать клики на кнопках макета.
-                    $('#zoom-in').bind('click', this.zoomInCallback);
-                    $('#zoom-out').bind('click', this.zoomOutCallback);
-                },
+                        // Начинаем слушать клики на кнопках макета.
+                        $('#zoom-in').bind('click', this.zoomInCallback);
+                        $('#zoom-out').bind('click', this.zoomOutCallback);
+                    },
 
-                clear: function () {
-                    // Снимаем обработчики кликов.
-                    $('#zoom-in').unbind('click', this.zoomInCallback);
-                    $('#zoom-out').unbind('click', this.zoomOutCallback);
+                    clear: function () {
+                        // Снимаем обработчики кликов.
+                        $('#zoom-in').unbind('click', this.zoomInCallback);
+                        $('#zoom-out').unbind('click', this.zoomOutCallback);
 
-                    // Вызываем родительский метод clear.
-                    ZoomLayout.superclass.clear.call(this);
-                },
+                        // Вызываем родительский метод clear.
+                        ZoomLayout.superclass.clear.call(this);
+                    },
 
-                zoomIn: function () {
-                    var map = this.getData().control.getMap();
-                    map.setZoom(map.getZoom() + 1, {checkZoomRange: true, duration: 200});
-                },
+                    zoomIn: function () {
+                        var map = this.getData().control.getMap();
+                        map.setZoom(map.getZoom() + 1, { checkZoomRange: true, duration: 200 });
+                    },
 
-                zoomOut: function () {
-                    var map = this.getData().control.getMap();
-                    map.setZoom(map.getZoom() - 1, {checkZoomRange: true, duration: 200});
-                }
+                    zoomOut: function () {
+                        var map = this.getData().control.getMap();
+                        map.setZoom(map.getZoom() - 1, { checkZoomRange: true, duration: 200 });
+                    }
 
-            });
+                });
             var zoomControl = new ymaps.control.ZoomControl({
                 options: {
                     layout: ZoomLayout,
                     position: {
                         bottom: (offsetBtns + 55) + "px",
-                        right:'16px',
+                        right: '16px',
                     },
                 }
             });
@@ -204,7 +204,7 @@ function createMap(address=null) {
                 }
             });
             geolocationControl.events.add('locationchange', function (event) {
-                var geolocation = ymaps.geolocation;        
+                var geolocation = ymaps.geolocation;
                 geolocation.get({
                     provider: 'browser',
                     mapStateAutoApply: false
@@ -216,8 +216,8 @@ function createMap(address=null) {
                 });
             });
 
-            var controlsPane = new ymaps.pane.StaticPane(map, {zIndex: 420});
-            map.panes.append('customControls', controlsPane); 
+            var controlsPane = new ymaps.pane.StaticPane(map, { zIndex: 420 });
+            map.panes.append('customControls', controlsPane);
             var placesPane = map.panes.get('controls').getElement();
             $(placesPane).addClass('v-map-custom-controls d-flex flex-column align-center justify-center');
 
@@ -229,7 +229,7 @@ function createMap(address=null) {
             });
 
         } else if (address) {
-            ymaps.geocode(address, {results: 1, boundedBy:DELIVERYBOUNDS}).then(function (res) {
+            ymaps.geocode(address, { results: 1, boundedBy: DELIVERYBOUNDS }).then(function (res) {
                 movePlacemark(res.geoObjects.get(0).geometry.getCoordinates(), res.geoObjects.get(0).properties._data.name);
             });
         }
@@ -237,7 +237,7 @@ function createMap(address=null) {
 }
 
 // переместить плейсмарк
-function movePlacemark(coords, address=null, captured=false) {
+function movePlacemark(coords, address = null, captured = false) {
     console.log("movePlacemark");
     if (placemark) {
         placemark.geometry.setCoordinates(coords);
@@ -246,7 +246,7 @@ function movePlacemark(coords, address=null, captured=false) {
             hasBalloon: false,
             hasHint: false,
             draggable: true,
-            
+
             iconLayout: 'default#imageWithContent',
             iconImageHref: "",
             iconImageSize: [25, 25],
@@ -256,13 +256,13 @@ function movePlacemark(coords, address=null, captured=false) {
         map.geoObjects.add(placemark);
     }
     placemark.properties.set('loading', true);
-    showBalloon(coords, address, captured); 
+    showBalloon(coords, address, captured);
 }
 
 // Определяем адрес по координатам (обратное геокодирование).
-function showBalloon(coords, address=null, captured=false) {
+function showBalloon(coords, address = null, captured = false) {
     console.log("showBalloon");
-    ymaps.geocode(coords, {results: 1, boundedBy:DELIVERYBOUNDS}).then(function (result) {
+    ymaps.geocode(coords, { results: 1, boundedBy: DELIVERYBOUNDS }).then(function (result) {
         console.log("balloonTime");
         var coords = result.geoObjects.get(0).geometry.getCoordinates();
         var address = result.geoObjects.get(0).properties._data.name;
@@ -281,7 +281,7 @@ function showBalloon(coords, address=null, captured=false) {
 // создание зон доставки
 function ZonesInit(json) {
     console.log("ZonesInit");
-    
+
     // Добавляем зоны на карту.
     deliveryZones = ymaps.geoQuery(json).addToMap(map);
     // Задаём цвет и контент балунов полигонов.
@@ -297,9 +297,9 @@ function ZonesInit(json) {
             strokeColor: color,
             fillOpacity: 0.1,
             strokeWidth: 0,
-            strokeOpacity:0,
+            strokeOpacity: 0,
         });
-        zona.options.set({'hasBalloon': false, 'hasHint': false});
+        zona.options.set({ 'hasBalloon': false, 'hasHint': false });
         zona.events.add('click', function (e) {
             movePlacemark(e.get('coords'));
         });
@@ -307,13 +307,13 @@ function ZonesInit(json) {
 }
 
 // кнопка очистить адрес
-$(cleanAddress).on('click', function(){
+$(cleanAddress).on('click', function () {
     console.log("cleanAddress");
     $(line1).val('');
     $(lon).val('');
     $(lat).val('');
 
-    if (map){
+    if (map) {
         map.geoObjects.remove(placemark);
         map.setCenter(MAPCENTER, 12);
     }

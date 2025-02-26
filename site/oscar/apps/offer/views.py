@@ -10,20 +10,6 @@ ConditionalOffer = get_model("offer", "ConditionalOffer")
 Range = get_model("offer", "Range")
 
 
-class OfferListView(ListView):
-    model = ConditionalOffer
-    context_object_name = "offers"
-    template_name = "oscar/offer/list.html"
-
-    def get_queryset(self):
-        """
-        Return a queryset of active :py:class:`ConditionalOffer <oscar.apps.offer.models.ConditionalOffer>`
-        instances with an :py:attr:`offer_type <oscar.apps.offer.models.ConditionalOffer.offer_type>`
-        of :py:const:`ConditionalOffer.SITE <oscar.apps.offer.models.ConditionalOffer.SITE>`.
-        """
-        return ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE)
-
-
 class OfferDetailView(ListView):
     context_object_name = "products"
     template_name = "oscar/offer/detail.html"
@@ -42,6 +28,8 @@ class OfferDetailView(ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["offer"] = self.offer
+        ctx["summary"] = "actions"
+        ctx["page_title"] = self.offer.name
         ctx["upsell_message"] = self.offer.get_upsell_message(self.request.basket)
         return ctx
 
@@ -74,11 +62,12 @@ class RangeDetailView(ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["range"] = self.range
+        ctx["summary"] = "actions"
+        ctx["page_title"] = self.offer.name
         return ctx
 
 
 class GetUpsellMasseges(View):
-
     def get(self, request, *args, **kwargs):
         try:
             self.offer = ConditionalOffer.active.select_related().get(

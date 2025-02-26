@@ -1,13 +1,13 @@
 Chart.defaults.font.family = 'Onest';
 var i = 0
 
-document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
+document.querySelectorAll('[data-id="report-tab"]').forEach(function (tab) {
 
     var products_name = products_names[i];
     var products_sum = products_sums[i];
     var products_quantity = products_quantities[i];
     var orders_data = orders_datas[i];
-    
+
     i++;
 
     if (Array.isArray(products_name) && products_name.length > 0) {
@@ -15,58 +15,58 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
             console.log(DataID)
             const legendContainer = tab.querySelector(DataID);
             let listContainer = legendContainer.querySelector('ul');
-          
+
             if (!listContainer) {
-              listContainer = document.createElement('ul');          
-              legendContainer.appendChild(listContainer);
+                listContainer = document.createElement('ul');
+                legendContainer.appendChild(listContainer);
             }
-          
+
             return listContainer;
         };
         const htmlLegendPlugin = {
             id: 'htmlLegend',
             afterUpdate(chart, args, options) {
                 console.log(options);
-            const ul = getOrCreateLegendList(chart, options.containerDataID);
-        
-            // Remove old legend items
-            while (ul.firstChild) {
-                ul.firstChild.remove();
-            }
-        
-            // Reuse the built-in legendItems generator
-            const items = chart.options.plugins.legend.labels.generateLabels(chart);
-        
-            items.forEach(item => {
-                const li = document.createElement('li');
-        
-                li.onclick = () => {
-                const {type} = chart.config;
-                if (type === 'pie' || type === 'doughnut') {
-                    // Pie and doughnut charts only have a single dataset and visibility is per item
-                    chart.toggleDataVisibility(item.index);
-                } else {
-                    chart.setDatasetVisibility(item.datasetIndex, !chart.isDatasetVisible(item.datasetIndex));
+                const ul = getOrCreateLegendList(chart, options.containerDataID);
+
+                // Remove old legend items
+                while (ul.firstChild) {
+                    ul.firstChild.remove();
                 }
-                chart.update();
-                };
-        
-                // Color box
-                const boxSpan = document.createElement('span');
-                boxSpan.style.background = item.fillStyle;
-                boxSpan.style.borderColor = item.strokeStyle
-        
-                // Text
-                const textContainer = document.createElement('p');
-                textContainer.style.textDecoration = item.hidden ? 'line-through' : '';
-        
-                const text = document.createTextNode(item.text);
-                textContainer.appendChild(text);
-        
-                li.appendChild(boxSpan);
-                li.appendChild(textContainer);
-                ul.appendChild(li);
-            });
+
+                // Reuse the built-in legendItems generator
+                const items = chart.options.plugins.legend.labels.generateLabels(chart);
+
+                items.forEach(item => {
+                    const li = document.createElement('li');
+
+                    li.onclick = () => {
+                        const { type } = chart.config;
+                        if (type === 'pie' || type === 'doughnut') {
+                            // Pie and doughnut charts only have a single dataset and visibility is per item
+                            chart.toggleDataVisibility(item.index);
+                        } else {
+                            chart.setDatasetVisibility(item.datasetIndex, !chart.isDatasetVisible(item.datasetIndex));
+                        }
+                        chart.update();
+                    };
+
+                    // Color box
+                    const boxSpan = document.createElement('span');
+                    boxSpan.style.background = item.fillStyle;
+                    boxSpan.style.borderColor = item.strokeStyle
+
+                    // Text
+                    const textContainer = document.createElement('p');
+                    textContainer.style.textDecoration = item.hidden ? 'line-through' : '';
+
+                    const text = document.createTextNode(item.text);
+                    textContainer.appendChild(text);
+
+                    li.appendChild(boxSpan);
+                    li.appendChild(textContainer);
+                    ul.appendChild(li);
+                });
             }
         };
 
@@ -106,7 +106,7 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(tooltipItem) {
+                            label: function (tooltipItem) {
                                 return tooltipItem.label + ': ' + tooltipItem.raw.toFixed(0) + " ₽";
                             }
                         }
@@ -118,7 +118,7 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
             },
             plugins: [htmlLegendPlugin],
         });
-        
+
         // Данные для диаграммы по количеству
         const CountCtx = tab.querySelector('[data-id="count-chart"]').getContext('2d');
         const CountChart = new Chart(CountCtx, {
@@ -157,7 +157,7 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(tooltipItem) {
+                            label: function (tooltipItem) {
                                 return tooltipItem.label + ': ' + tooltipItem.raw.toFixed(0) + " шт.";
                             }
                         }
@@ -173,12 +173,12 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
         // Данные для диаграммы по количеству
         let itemsPerPage = 20;
         let currentPage = Math.ceil(orders_data.labels.length / itemsPerPage);
-    
+
         var mobile = window.matchMedia('(min-width:768px)');
-        if (!mobile.matches){
+        if (!mobile.matches) {
             itemsPerPage = 10;
         }
-    
+
         const GraphCtx = tab.querySelector('[data-id="graph-chart"]').getContext('2d');
         const GraphChart = new Chart(GraphCtx, {
             type: 'bar',
@@ -201,8 +201,8 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
                     // },
                     tooltip: {
                         callbacks: {
-                            label: function(tooltipItem) {
-                                if (tooltipItem.dataset.label == "Сумма заказов"){
+                            label: function (tooltipItem) {
+                                if (tooltipItem.dataset.label == "Сумма заказов") {
                                     return tooltipItem.dataset.label + ': ' + tooltipItem.raw.toFixed(0) + ' ₽';
                                 }
                                 return tooltipItem.dataset.label + ': ' + tooltipItem.raw.toFixed(0) + ' шт.';
@@ -211,7 +211,7 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
                     }
                 },
                 responsive: true,
-                maintainAspectRatio: false, 
+                maintainAspectRatio: false,
                 scales: {
                     x: {
                         beginAtZero: true,
@@ -250,28 +250,28 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
                 interaction: {
                     intersect: false,
                 },
-            
+
             },
             plugins: [htmlLegendPlugin],
         });
-    
+
         function updateChart(page) {
             const start = (page - 1) * itemsPerPage;
             const end = page * itemsPerPage;
-    
+
             const pageLabels = orders_data.labels.slice(start, end);
             const pageData = orders_data.datasets.map(dataset => ({
                 ...dataset,
                 data: dataset.data.slice(start, end)
             }));
-    
+
             GraphChart.data.labels = pageLabels;
             GraphChart.data.datasets = pageData;
             GraphChart.update();
-            
+
             tab.querySelector('[data-id="page-info"]').textContent = pageLabels[0] + ' - ' + pageLabels[pageLabels.length - 1];
         }
-    
+
         var prev_btn = tab.querySelector('[data-id="prev-page"]');
         prev_btn.addEventListener('click', () => {
             if (currentPage > 1) {
@@ -279,7 +279,7 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
                 updateChart(currentPage);
             }
         });
-    
+
         var next_btn = tab.querySelector('[data-id="next-page"]');
         next_btn.addEventListener('click', () => {
             if (currentPage * itemsPerPage < orders_data.labels.length) {
@@ -293,22 +293,22 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function(tab) {
         var range_input = range_container.querySelector('[data-id="graph-range"]');
         range_input.value = itemsPerPage;
         range_value.textContent = itemsPerPage;
-        range_input.addEventListener('input', function() {
+        range_input.addEventListener('input', function () {
             itemsPerPage = range_input.value;
             range_value.textContent = itemsPerPage;
             currentPage = Math.ceil(orders_data.labels.length / itemsPerPage);
             updateChart(currentPage);
         });
-    
-        if (orders_data.labels.length <= itemsPerPage){
+
+        if (orders_data.labels.length <= itemsPerPage) {
             prev_btn.classList.add('d-none');
             next_btn.classList.add('d-none');
             range_container.classList.add('d-none');
-        } else if (range_input.max > orders_data.labels.length){
+        } else if (range_input.max > orders_data.labels.length) {
             range_input.max = orders_data.labels.length;
             range_container.querySelector('[data-id="range-max"]').textContent = orders_data.labels.length;
         }
-        
+
         // Инициализируем график с первой страницей данных
         updateChart(currentPage);
     }

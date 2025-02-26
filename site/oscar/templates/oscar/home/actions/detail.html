@@ -6,14 +6,6 @@
 {% load static %}
 {% load cache %}
 
-{% block title %}
-  {{ summary }} | {{ block.super }}
-{% endblock %}
-
-{% block wrapper_class %}
-  actions d-flex flex-column pd-2 pb-sm-4 container pd-0
-{% endblock %}
-
 {% block app_class %}
   app---action
 {% endblock %}
@@ -22,8 +14,8 @@
   app__nav--action
 {% endblock %}
 
-{% block nav_title_center %}
-  {{ summary }}
+{% block wrapper_class %}
+  actions d-flex flex-column pd-2 pb-sm-4 container pd-0
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -34,7 +26,7 @@
     {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
     <a href="{% url 'home:actions' %}" data-id="back-bread-btn" class="bread__link router-link-active">Акции</a>
     {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
-    <span class="bread__link" aria-current="page">{{ summary }}</span>
+    <span class="bread__link" aria-current="page">{{ page_title }}</span>
   </div>
   {% endcache %}
 {% endblock %}

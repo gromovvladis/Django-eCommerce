@@ -4,13 +4,14 @@ from urllib.parse import quote
 from django.contrib import messages
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, redirect
-
 from django.core.cache import cache
+
 from oscar.core.loading import get_class, get_model
 
 BrowseCategoryForm = get_class("search.forms", "BrowseCategoryForm")
 CategoryForm = get_class("search.forms", "CategoryForm")
 BaseSearchView = get_class("search.views.base", "BaseSearchView")
+
 Category = get_model("catalogue", "Category")
 
 
@@ -18,7 +19,6 @@ class CatalogueView(BaseSearchView):
     """
     Browse all products in the catalogue
     """
-
     form_class = BrowseCategoryForm
     context_object_name = "products"
     template_name = "oscar/catalogue/browse.html"
@@ -34,7 +34,7 @@ class CatalogueView(BaseSearchView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["summary"] = "Меню"
+        ctx["page_title"] = "Меню"
         return ctx
 
 
@@ -42,7 +42,6 @@ class ProductCategoryView(BaseSearchView):
     """
     Browse products in a given category
     """
-
     form_class = CategoryForm
     enforce_paths = True
     context_object_name = "products"
@@ -92,6 +91,7 @@ class ProductCategoryView(BaseSearchView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["category"] = self.category
+        context["page_title"] = self.category.get_name()
         return context
 
     def get_form_kwargs(self):

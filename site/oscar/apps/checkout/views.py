@@ -22,7 +22,7 @@ from oscar.core.utils import redirect_to_referrer
 
 from . import signals
 
-
+PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
 Repository = get_class("shipping.repository", "Repository")
 CheckoutForm = get_class("checkout.forms", "CheckoutForm")
 RepositoryShipping = get_class("shipping.repository", "Repository")
@@ -73,11 +73,12 @@ class IndexView(CheckoutSessionMixin, generic.FormView):
 # =========
 
 
-class CheckoutView(CheckoutSessionMixin, generic.FormView):
-    template_name = "oscar/checkout/checkout_form.html"
+class CheckoutView(PageTitleMixin, CheckoutSessionMixin, generic.FormView):
     form_class = CheckoutForm
-    success_url = reverse_lazy("checkout:payment-details")
+    template_name = "oscar/checkout/checkout_form.html"
     context_object_name = "order"
+    page_title = "Оформление заказа"
+    success_url = reverse_lazy("checkout:payment-details")
     pre_conditions = [
         "check_basket_is_not_empty",
         "check_basket_is_valid",
@@ -85,7 +86,6 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
     ]
 
     def get_initial(self):
-
         initial = {}
         if self.request.COOKIES.get("orderNote"):
             initial["order_note"] = unquote(
@@ -112,7 +112,6 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
             if self.request.COOKIES.get("line4"):
                 initial["notes"] = unquote(unquote(self.request.COOKIES.get("notes")))
 
-        # initial['order_time'] = format(now() + datetime.timedelta(hours=2),'%d.%m.%Y %H:%M')
         initial["order_time"] = now() + datetime.timedelta(hours=2)
 
         return initial
@@ -130,7 +129,6 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
         return CheckoutVoucherForm()
 
     def get_context_data(self, **kwargs):
-
         ctx = super().get_context_data(**kwargs)
 
         shipping_charge = prices.Price(
@@ -209,7 +207,6 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
-
         address_fields = dict(
             (k, v) for (k, v) in form.instance.__dict__.items() if not k.startswith("_")
         )
@@ -280,7 +277,7 @@ class CheckoutView(CheckoutSessionMixin, generic.FormView):
         return str(self.success_url)
 
 
-class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
+class PaymentDetailsView(PageTitleMixin, OrderPlacementMixin, generic.TemplateView):
     """
     The final step to submit the payment.
     This includes an additional form to input comments, and proceeds to the payment provider.
@@ -298,6 +295,7 @@ class PaymentDetailsView(OrderPlacementMixin, generic.TemplateView):
     """
 
     template_name_preview = "oscar/checkout/preview.html"
+    page_title = "Заказ не оформлен"
     preview = False
     # If preview=True, then we render a preview template that shows all order
     # details ready for submission.
@@ -743,7 +741,6 @@ class ThankYouView(generic.DetailView):
     """
     Displays the 'thank you' page which summarises the order just submitted.
     """
-
     template_name = "oscar/checkout/thank_you.html"
     context_object_name = "order"
 
@@ -777,6 +774,7 @@ class ThankYouView(generic.DetailView):
         # Remember whether this view has been loaded.
         # Only send tracking information on the first load.
         pk = ctx["order"].pk
+        ctx["page_title"] = f"Заказ №{self.object.number}"
         key = "order_{}_thankyou_viewed".format(pk)
         if not self.request.session.get(key, False):
             self.request.session[key] = True

@@ -13,7 +13,7 @@
 
 // Handles related-objects functionality: Add Another links.
 
-(function(o, $) {
+(function (o, $) {
     'use strict';
 
     /*!
@@ -28,11 +28,11 @@
      *
      * Date: 2017-08-25T12:16:21+03:00
      */
-    o.interpolate = function(fmt, obj, named) {
+    o.interpolate = function (fmt, obj, named) {
         if (named) {
-            return fmt.replace(/%\(\w+\)s/g, function(match){return String(obj[match.slice(2,-2)]);});
+            return fmt.replace(/%\(\w+\)s/g, function (match) { return String(obj[match.slice(2, -2)]); });
         } else {
-            return fmt.replace(/%s/g, function(){return String(obj.shift());});
+            return fmt.replace(/%s/g, function () { return String(obj.shift()); });
         }
     };
 
@@ -40,19 +40,19 @@
     // we use to generate popup window names may contain them, therefore we map them
     // to allowed characters in a reversible way so that we can locate the correct
     // element when the popup window is dismissed.
-    o.id_to_windowname = function(text) {
+    o.id_to_windowname = function (text) {
         text = text.replace(/\./g, '__dot__');
         text = text.replace(/-/g, '__dash__');
         return text;
     };
 
-    o.windowname_to_id = function(text) {
+    o.windowname_to_id = function (text) {
         text = text.replace(/__dot__/g, '.');
         text = text.replace(/__dash__/g, '-');
         return text;
     };
 
-    o.showDashboardPopup = function(triggeringLink, name_regexp, add_popup) {
+    o.showDashboardPopup = function (triggeringLink, name_regexp, add_popup) {
         var name = triggeringLink.id.replace(name_regexp, '');
         name = o.id_to_windowname(name);
         var href = triggeringLink.href;
@@ -68,11 +68,11 @@
         return false;
     };
 
-    o.showRelatedObjectPopup = function(triggeringLink) {
+    o.showRelatedObjectPopup = function (triggeringLink) {
         return o.showDashboardPopup(triggeringLink, /^(update|create|delete)_/, false);
     };
 
-    o.updateRelatedObjectLinks = function(triggeringLink) {
+    o.updateRelatedObjectLinks = function (triggeringLink) {
         console.log(triggeringLink);
         var $this = $(triggeringLink);
         var siblings = $this.nextAll('.change-related, .delete-related');
@@ -82,7 +82,7 @@
         }
         var value = $this.val();
         if (value) {
-            siblings.each(function() {
+            siblings.each(function () {
                 var elm = $(this);
                 elm.attr('href', elm.attr('data-href-template').replace('__fk__', value));
             });
@@ -91,7 +91,7 @@
         }
     };
 
-    o.dismissAddRelatedObjectPopup = function(win, newId, newRepr) {
+    o.dismissAddRelatedObjectPopup = function (win, newId, newRepr) {
         var name = o.windowname_to_id(win.name);
         var elem = document.getElementById(name);
         var elemName = elem.nodeName.toUpperCase();
@@ -103,11 +103,11 @@
         win.close();
     };
 
-    o.dismissChangeRelatedObjectPopup = function(win, objId, newRepr, newId) {
+    o.dismissChangeRelatedObjectPopup = function (win, objId, newRepr, newId) {
         var id = o.windowname_to_id(win.name).replace(/^change_/, '');
         var selectsSelector = o.interpolate('#%s, #%s_from, #%s_to', [id, id, id]);
         var selects = $(selectsSelector);
-        selects.find('option').each(function() {
+        selects.find('option').each(function () {
             if (this.value === objId) {
                 this.textContent = newRepr;
                 this.value = newId;
@@ -116,11 +116,11 @@
         win.close();
     };
 
-    o.dismissDeleteRelatedObjectPopup = function(win, objId) {
+    o.dismissDeleteRelatedObjectPopup = function (win, objId) {
         var id = o.windowname_to_id(win.name).replace(/^delete_/, '');
         var selectsSelector = o.interpolate('#%s, #%s_from, #%s_to', [id, id, id]);
         var selects = $(selectsSelector);
-        selects.find('option').each(function() {
+        selects.find('option').each(function () {
             if (this.value === objId) {
                 $(this).remove();
             }
@@ -128,17 +128,17 @@
         win.close();
     };
 
-    $('body').on('click', '.related-widget-wrapper-link', function(e) {
+    $('body').on('click', '.related-widget-wrapper-link', function (e) {
         e.preventDefault();
         if (this.href) {
-            var event = $.Event('oscar:show-related', {href: this.href});
+            var event = $.Event('oscar:show-related', { href: this.href });
             $(this).trigger(event);
             if (!event.isDefaultPrevented()) {
                 o.showRelatedObjectPopup(this);
             }
         }
     });
-    $('body').on('change', '.related-widget-wrapper select', function() {
+    $('body').on('change', '.related-widget-wrapper select', function () {
         var event = $.Event('oscar:update-related');
         $(this).trigger(event);
         if (!event.isDefaultPrevented()) {

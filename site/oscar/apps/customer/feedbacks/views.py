@@ -45,7 +45,7 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "Профиль"
+        ctx["summary"] = "profile"
         return ctx
 
 
@@ -71,7 +71,7 @@ class OrderFeedbackListView(PageTitleMixin, ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "Профиль"
+        ctx["summary"] = "profile"
         return ctx
 
 
@@ -107,7 +107,6 @@ class AddOrderFeedbackView(PageTitleMixin, CreateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["order"] = self.order
-        ctx["title"] = "Создание отзыва"
-        ctx["summary"] = "Профиль"
+        ctx["summary"] = "profile"
         ctx["content_open"] = True
         return ctx

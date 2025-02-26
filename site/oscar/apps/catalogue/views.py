@@ -14,7 +14,8 @@ class ProductDetailView(DetailView):
     context_object_name = "product"
     model = Product
     view_signal = product_viewed
-    template_folder = "catalogue"
+    template_name = "oscar/catalogue/detail.html"
+    # template_folder = "catalogue"
 
     # Whether to redirect to the URL with the right path
     enforce_paths = True
@@ -77,29 +78,34 @@ class ProductDetailView(DetailView):
             response=response,
         )
 
-    def get_template_names(self):
-        """
-        Return a list of possible templates.
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["page_title"] = self.object.get_name()
+        return ctx
 
-        If an overriding class sets a template name, we use that. Otherwise,
-        we try 2 options before defaulting to :file:`catalogue/detail.html`:
+    # def get_template_names(self):
+    #     """
+    #     Return a list of possible templates.
 
-            1. :file:`detail-for-article-{article}.html`
-            2. :file:`detail-for-class-{classname}.html`
+    #     If an overriding class sets a template name, we use that. Otherwise,
+    #     we try 2 options before defaulting to :file:`catalogue/detail.html`:
 
-        This allows alternative templates to be provided for a per-product
-        and a per-item-class basis.
-        """
-        if self.template_name:
-            return [self.template_name]
+    #         1. :file:`detail-for-article-{article}.html`
+    #         2. :file:`detail-for-class-{classname}.html`
 
-        return [
-            "oscar/%s/detail-for-article-%s.html"
-            % (self.template_folder, self.object.article),
-            "oscar/%s/detail-for-class-%s.html"
-            % (self.template_folder, self.object.get_product_class().slug),
-            "oscar/%s/detail.html" % self.template_folder,
-        ]
+    #     This allows alternative templates to be provided for a per-product
+    #     and a per-item-class basis.
+    #     """
+    #     if self.template_name:
+    #         return [self.template_name]
+
+    #     return [
+    #         "oscar/%s/detail-for-article-%s.html"
+    #         % (self.template_folder, self.object.article),
+    #         "oscar/%s/detail-for-class-%s.html"
+    #         % (self.template_folder, self.object.get_product_class().slug),
+    #         "oscar/%s/detail.html" % self.template_folder,
+    #     ]
 
 
 ProductCategoryView = get_class("search.views", "ProductCategoryView")

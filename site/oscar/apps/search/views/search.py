@@ -1,8 +1,10 @@
 from haystack.query import SearchQuerySet
 
 from django import http
-from django.template.response import TemplateResponse
+
+# from django.template.response import TemplateResponse
 from django.template.loader import render_to_string
+from django.views.generic import TemplateView
 
 from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication
@@ -11,6 +13,7 @@ from rest_framework.permissions import AllowAny
 from oscar.core.loading import get_class
 from oscar.apps.search.signals import user_search
 
+PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
 SearchForm = get_class("search.forms", "SearchForm")
 BaseSearchView = get_class("search.views.base", "BaseSearchView")
 
@@ -46,12 +49,10 @@ class FacetedSearchView(BaseSearchView):
         )
 
 
-class SearchView(BaseSearchView):
+class SearchView(PageTitleMixin, BaseSearchView, TemplateView):
     form_class = SearchForm
     template_name = "oscar/search/search.html"
-
-    def get(self, request, *args, **kwargs):
-        return TemplateResponse(request, self.template_name)
+    page_title = "Поиск"
 
 
 class SuggestionsView(APIView, BaseSearchView):

@@ -33,7 +33,12 @@ OSCAR_CURRENCY_FORMAT = {
 }
 
 # Paths
-OSCAR_IMAGE_FOLDER = "images/products/%Y/%m/"
+OSCAR_IMAGE_CATEGORIES_FOLDER = "images/categories/%Y/%m/"
+OSCAR_IMAGE_PRODUCTS_FOLDER = "images/products/%Y/%m/"
+OSCAR_IMAGE_ADDITIONALS_FOLDER = "images/additionals/%Y/%m/"
+OSCAR_IMAGE_ACTIONS_FOLDER = "images/actions/%Y/%m/"
+OSCAR_IMAGE_PROMOCATEGORIES_FOLDER = "images/promo-categories/%Y/%m/"
+OSCAR_IMAGE_OFFERS_FOLDER = "images/offers/%Y/%m/"
 
 # Copy this image from oscar/static/img to your MEDIA_ROOT folder.
 # It needs to be there so Sorl can resize it.

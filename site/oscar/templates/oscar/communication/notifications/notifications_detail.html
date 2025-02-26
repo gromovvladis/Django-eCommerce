@@ -4,16 +4,8 @@
 {% load compress %}
 {% load static %}
 
-{% block title %}
-  {{ page_title }} | {{ block.super }}
-{% endblock %}
-
 {% block app_class %}
   {{ block.super }} app---profile-link
-{% endblock %}
-
-{% block nav_title_center %}
-  {{ page_title }}
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -50,12 +42,12 @@
                 <div class="d-flex justify-space-between align-center fill-width">
                   <div class="d-flex flex-column">
                     {% if notification.description %}
-                      <span class="orders-list-item__details mt-1">{{ notification.description|safe }}</span>
+                      <span class="orders-list-item__details mt-1 mb-2">{{ notification.description|safe }}</span>
                     {% endif %}
                   </div>
                 </div>
                 {% if notification.body %}
-                  <div>{{ notification.body|safe }}</div>
+                  <div class="d-flex flex-column">{{ notification.body|safe }}</div>
                 {% endif %}
                 <div class="d-flex justify-space-between align-center fill-width pt-2">
                   <div class="orders-list-item__status d-flex align-center text--grey">

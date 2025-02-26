@@ -1,12 +1,12 @@
 /*global jQuery */
 
-var oscar = (function(o, $) {
+var oscar = (function (o, $) {
 
     function onFileChange(evt) {
         var reader = new FileReader();
         var imgId = evt.target.id + "-image";
-        reader.onload = (function() {
-            return function(e) {
+        reader.onload = (function () {
+            return function (e) {
                 var imgDiv = $("#" + imgId);
                 imgDiv.children('img').attr('src', e.target.result);
             };
@@ -34,16 +34,16 @@ var oscar = (function(o, $) {
                 "[for^='id_images-']," +
                 "[id^='upload_button_id_images-']," +
                 "img[alt='thumbnail']").each(function () {
-                var $el = $(this);
-                ["id", "name", "for", "onload", "onerror"].forEach(function (attr) {
-                    var val = $el.attr(attr);
-                    if (val) {
-                        var parts = val.split('-');
-                        parts[1] = numExisting;
-                        $el.attr(attr, parts.join('-'));
-                    }
+                    var $el = $(this);
+                    ["id", "name", "for", "onload", "onerror"].forEach(function (attr) {
+                        var val = $el.attr(attr);
+                        if (val) {
+                            var parts = val.split('-');
+                            parts[1] = numExisting;
+                            $el.attr(attr, parts.join('-'));
+                        }
+                    });
                 });
-            });
             $newImg.find('#id_images-' + numExisting + '-display_order').val(numExisting);
             $newImg.find('#id_images-' + numExisting + '-product').val(productId);
 
@@ -54,25 +54,25 @@ var oscar = (function(o, $) {
         }
     }
 
-    o.getCsrfToken = function() {
+    o.getCsrfToken = function () {
         // Extract CSRF token from cookies
         var cookies = document.cookie.split(';');
         var csrf_token = null;
-        $.each(cookies, function(index, cookie) {
+        $.each(cookies, function (index, cookie) {
             var cookieParts = $.trim(cookie).split('=');
             if (cookieParts[0] == 'csrftoken') {
                 csrf_token = cookieParts[1];
             }
         });
         // Extract from cookies fails for HTML-Only cookies
-        if (! csrf_token) {
+        if (!csrf_token) {
             csrf_token = $(document.forms.valueOf()).find('[name="csrfmiddlewaretoken"]')[0].value;
         }
         return csrf_token;
     };
 
     o.dashboard = {
-        init: function(options) {
+        init: function (options) {
             // Run initialisation that should take place on every page of the dashboard.
             var defaults = {
                 'dateFormat': 'DD/MM/YYYY',
@@ -98,9 +98,9 @@ var oscar = (function(o, $) {
                     menubar: false,
                     plugins: "link lists",
                     style_formats: [
-                        {title: 'Text', block: 'p'},
-                        {title: 'Heading', block: 'h2'},
-                        {title: 'Subheading', block: 'h3'}
+                        { title: 'Text', block: 'p' },
+                        { title: 'Heading', block: 'h2' },
+                        { title: 'Subheading', block: 'h3' }
                     ],
                     toolbar: "styles | bold italic blockquote | bullist numlist | link"
                 }
@@ -110,7 +110,7 @@ var oscar = (function(o, $) {
             o.dashboard.initWidgets(window.document);
             o.dashboard.initForms();
 
-            $(".category-select ul").prev('a').on('click', function(){
+            $(".category-select ul").prev('a').on('click', function () {
                 var $this = $(this),
                     plus = $this.hasClass('ico_expand');
                 if (plus) {
@@ -122,20 +122,20 @@ var oscar = (function(o, $) {
             });
 
             // Adds error icon if there are errors in the product update form
-            $('[data-behaviour="tab-nav-errors"] .tab-pane').each(function(){
+            $('[data-behaviour="tab-nav-errors"] .tab-pane').each(function () {
                 var productErrorListener = $(this).find('[class*="error"]:not(:empty)').closest('.tab-pane').attr('id');
                 $('.tab-nav a[href="#' + productErrorListener + '"]').append('<i class="fas fa-info-circle float-right"></i>');
             });
 
-            document.querySelectorAll('.tab-nav .nav-link').forEach(function(tab) {
-                tab.addEventListener("click", function(event) {
+            document.querySelectorAll('.tab-nav .nav-link').forEach(function (tab) {
+                tab.addEventListener("click", function (event) {
                     window.location.hash = this.getAttribute("href");
                 });
             });
 
             o.dashboard.filereader.init();
         },
-        initWidgets: function(el) {
+        initWidgets: function (el) {
             /** Attach widgets to form input.
              *
              * This function is called once for the whole page. In that case el is window.document.
@@ -153,17 +153,17 @@ var oscar = (function(o, $) {
             o.dashboard.initSelects(el);
             o.dashboard.initProductImages(el);
         },
-        initMasks: function(el) {
+        initMasks: function (el) {
             $(el).find(':input').inputmask();
         },
-        initSelects: function(el) {
+        initSelects: function (el) {
             // Adds type/search for select fields
             var $selects = $(el).find('select').not('.no-widget-init select').not('.no-widget-init');
             $selects.filter('.form-stacked select').css('width', '100%');
             // $selects.filter('.form-inline select').css('width', '250px');
             // $selects.not('.related-widget-wrapper select').select2({width: 'resolve'});
             // $selects.not('.related-widget-wrapper select').select2();
-            $selects.not('.related-widget-wrapper select').select2({width: '100%'});
+            $selects.not('.related-widget-wrapper select').select2({ width: '100%' });
             $selects.filter('.related-widget-wrapper.single select').select2({
                 // Keep updated labels after editing related obj
                 templateResult: function (data) {
@@ -177,14 +177,14 @@ var oscar = (function(o, $) {
             // $selects.filter('.related-widget-wrapper.multiple select').select2({
             //     width: '95%'
             // });
-            $(el).find('select.select2').each(function(i, e) {
+            $(el).find('select.select2').each(function (i, e) {
                 var opts = {};
-                if($(e).data('ajax-url')) {
+                if ($(e).data('ajax-url')) {
                     opts = {
                         ajax: {
                             url: $(e).data('ajax-url'),
                             dataType: 'json',
-                            data: function(params) {
+                            data: function (params) {
                                 return {
                                     q: params.term,
                                     product_id: $(this).data('product-id'),
@@ -199,7 +199,7 @@ var oscar = (function(o, $) {
                 $(e).select2(opts);
             });
         },
-        initDatePickers: function(el) {
+        initDatePickers: function (el) {
             if ($.fn.datetimepicker) {
 
                 // Set "Tempus Dominus Bootstrap 4" datetime picker's global options.
@@ -211,7 +211,7 @@ var oscar = (function(o, $) {
                     'format': o.dashboard.options.dateFormat,
                 };
                 var $dates = $(el).find('[data-oscarWidget="date"]').not('.no-widget-init').not('.no-widget-init *');
-                $dates.each(function(ind, ele) {
+                $dates.each(function (ind, ele) {
                     var $ele = $(ele),
                         config = $.extend({}, defaultDatepickerConfig, {
                             'format': $ele.data('dateformat')
@@ -224,7 +224,7 @@ var oscar = (function(o, $) {
                     'stepping': o.dashboard.options.stepMinute
                 };
                 var $datetimes = $(el).find('[data-oscarWidget="datetime"]').not('.no-widget-init').not('.no-widget-init *');
-                $datetimes.each(function(ind, ele) {
+                $datetimes.each(function (ind, ele) {
                     var $ele = $(ele),
                         config = $.extend({}, defaultDatetimepickerConfig, {
                             'format': $ele.data('datetimeformat'),
@@ -238,7 +238,7 @@ var oscar = (function(o, $) {
                     'stepping': o.dashboard.options.stepMinute
                 };
                 var $times = $(el).find('[data-oscarWidget="time"]').not('.no-widget-init').not('.no-widget-init *');
-                $times.each(function(ind, ele) {
+                $times.each(function (ind, ele) {
                     var $ele = $(ele),
                         config = $.extend({}, defaultTimepickerConfig, {
                             'format': $ele.data('timeformat'),
@@ -249,40 +249,40 @@ var oscar = (function(o, $) {
                 });
             }
         },
-        initWYSIWYG: function(el) {
+        initWYSIWYG: function (el) {
             // Use TinyMCE by default
             var $textareas = $(el).find('textarea').not('.no-widget-init textarea').not('.no-widget-init');
             $textareas.filter('form.wysiwyg textarea').tinymce(o.dashboard.options.tinyConfig);
             $textareas.filter('.wysiwyg').tinymce(o.dashboard.options.tinyConfig);
         },
-        initForms: function() {
+        initForms: function () {
             // Disable buttons when they are clicked and show a "loading" message taken from the
             // data-loading-text attribute.
             // Do not disable if button is inside a form with invalid fields.
             // This uses a delegated event so that it keeps working for forms that are reloaded
             // via AJAX: https://api.jquery.com/on/#direct-and-delegated-events
-            $(document.body).on('click', '[data-loading-text]', function(){
+            $(document.body).on('click', '[data-loading-text]', function () {
                 var $btn_or_input = $(this),
                     form = $btn_or_input.parents("form");
                 if (!form || $(":invalid", form).length == 0) {
                     var d = 'disabled',
                         val = $btn_or_input.is('input') ? 'val' : 'html';
                     // push to event loop so as not to delay form submission
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $btn_or_input[val]($btn_or_input.data('loading-text'));
                         $btn_or_input.addClass(d).attr(d, d).prop(d, true);
                     });
                 }
             });
             // Display tabs that have invalid input fields
-            $('input').on('invalid', function(){
+            $('input').on('invalid', function () {
                 var id = $(this).closest('.tab-pane').attr('id');
                 if (id) {
                     $('.bs-docs-sidenav a[href="#' + id + '"]').tab('show');
                 }
             });
         },
-        initProductImages: function() {
+        initProductImages: function () {
             // convert last 'extra' form into a multi-upload
             // (assumes `extra=1` in django formset)
             var $productImages = $('#product_images');
@@ -301,7 +301,7 @@ var oscar = (function(o, $) {
                 cancel: '.sortable-disabled',
                 onDrop: function ($item, container, _super) {
                     var $sortFields = $("input[name$=-display_order]");
-                    $sortFields.each(function(i){
+                    $sortFields.each(function (i) {
                         $(this).val(i);
                     });
                     _super($item, container);
@@ -309,13 +309,13 @@ var oscar = (function(o, $) {
             });
         },
         offers: {
-            init: function() {
+            init: function () {
                 oscar.dashboard.offers.adjustBenefitForm();
-                $('#id_type').change(function() {
+                $('#id_type').change(function () {
                     oscar.dashboard.offers.adjustBenefitForm();
                 });
             },
-            adjustBenefitForm: function() {
+            adjustBenefitForm: function () {
                 var type = $('#id_type').val(),
                     $valueContainer = $('#id_value').parents('.form-group');
                 if (type == 'Multibuy') {
@@ -327,33 +327,33 @@ var oscar = (function(o, $) {
             }
         },
         product_attributes: {
-            init: function(){
+            init: function () {
                 var type_selects = $("select[name$=type]");
 
-                type_selects.each(function(){
+                type_selects.each(function () {
                     o.dashboard.product_attributes.toggleOptionGroup($(this));
                 });
 
-                type_selects.change(function(){
+                type_selects.change(function () {
                     o.dashboard.product_attributes.toggleOptionGroup($(this));
                 });
             },
 
-            toggleOptionGroup: function(type_select){
+            toggleOptionGroup: function (type_select) {
                 var option_group_select = $('#' + type_select.attr('id').replace('type', 'option_group'));
                 var v = type_select.val();
                 var showOptionGroup = v === 'option' || v === 'multi_option';
                 option_group_select.parent().parent().toggle(showOptionGroup);
-                if(showOptionGroup){
+                if (showOptionGroup) {
                     option_group_select.attr('required', 'required');
-                }else{
+                } else {
                     option_group_select.attr('required', null);
                 }
             }
         },
         ranges: {
-            init: function() {
-                $('[data-behaviours~="remove"]').click(function() {
+            init: function () {
+                $('[data-behaviours~="remove"]').click(function () {
                     var $this = $(this);
                     $this.parents('table').find('input').prop('checked', false);
                     $this.parents('tr').find('input').prop('checked', true);
@@ -362,7 +362,7 @@ var oscar = (function(o, $) {
             }
         },
         product: {
-            initProductClass: function() {
+            initProductClass: function () {
                 const selectElement = document.getElementById('id_product_class');
                 $(selectElement).on("select2:select", function () {
                     const form = selectElement.closest('form');
@@ -371,15 +371,15 @@ var oscar = (function(o, $) {
             }
         },
         orders: {
-            initTable: function() {
+            initTable: function () {
                 var table = $('form table'),
-                lines = document.querySelectorAll('[data-id="line-container"]'),
-                checkboxes = document.querySelectorAll('.table input[type="checkbox"]'),
-                actionsLinesDiv = document.getElementById('actions_lines'),
-                input = $('<input type="checkbox"/>');
+                    lines = document.querySelectorAll('[data-id="line-container"]'),
+                    checkboxes = document.querySelectorAll('.table input[type="checkbox"]'),
+                    actionsLinesDiv = document.getElementById('actions_lines'),
+                    input = $('<input type="checkbox"/>');
                 $('th:first', table).prepend(input);
                 function toggleActionsDiv() {
-                    if (actionsLinesDiv){
+                    if (actionsLinesDiv) {
                         const isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
                         if (isChecked) {
                             actionsLinesDiv.classList.remove('d-none');
@@ -388,27 +388,27 @@ var oscar = (function(o, $) {
                         }
                     }
                 };
-                $(input).change(function(){
-                    $('tr', table).each(function() {
+                $(input).change(function () {
+                    $('tr', table).each(function () {
                         $('td:first input', this).prop("checked", $(input).is(':checked'));
                     });
                     toggleActionsDiv();
                 });
                 checkboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
+                    checkbox.addEventListener('change', function () {
                         toggleActionsDiv();
                     });
                 });
-                
-                if (lines){
-                    $(lines).each(function(){
+
+                if (lines) {
+                    $(lines).each(function () {
                         var input_container = $(this).find('[data-id="line-input"]');
                         var input_checkbox = $(this).find('input[type="checkbox"]');
                         var input_field = $(input_container).find('input');
                         var more = $(this).find('[data-id="order-button-plus"]');
                         var less = $(this).find('[data-id="order-button-minus"]');
-                        more.on('click', function(){
-                            if ($(input_field).val() < $(input_field).attr('max')){
+                        more.on('click', function () {
+                            if ($(input_field).val() < $(input_field).attr('max')) {
                                 $(input_field).val(parseInt($(input_field).val()) + 1);
                                 $(less).prop('disabled', false);
                             }
@@ -418,8 +418,8 @@ var oscar = (function(o, $) {
                             $(input_checkbox).prop("checked", true);
                             toggleActionsDiv();
                         });
-                        less.on('click', function(){
-                            if ($(input_field).val() > 0){
+                        less.on('click', function () {
+                            if ($(input_field).val() > 0) {
                                 $(input_field).val(parseInt($(input_field).val()) - 1);
                                 $(more).prop('disabled', false);
                             }
@@ -431,13 +431,13 @@ var oscar = (function(o, $) {
                         });
                     })
                 }
-                
+
                 toggleActionsDiv();
 
                 var storeForm = document.getElementById('store_form');
                 if (storeForm) {
                     var selectInput = storeForm.querySelector('select');
-                    selectInput.addEventListener('change', function() {
+                    selectInput.addEventListener('change', function () {
                         storeForm.submit();
                     });
                 }
@@ -445,23 +445,23 @@ var oscar = (function(o, $) {
             }
         },
         crm: {
-            initTable: function() {
+            initTable: function () {
                 var forms = $('form')
-                forms.each(function() {
+                forms.each(function () {
                     var table = $(this).find('table');
                     if ($(table).length > 0) {
                         var checkboxes = $(this).find('input[type="checkbox"]');
                         var actionsLinesDiv = $(this).find('[data-id="actions-lines"]');
                         var input = $('<input type="checkbox"/>');
-                        $(input).change(function(){
-                            $('tr', table).each(function() {
+                        $(input).change(function () {
+                            $('tr', table).each(function () {
                                 $('td:first input', this).prop("checked", $(input).is(':checked'));
                             });
                             toggleActionsDiv();
                         });
                         $('th:first', table).prepend(input);
                         function toggleActionsDiv() {
-                            if ($(actionsLinesDiv).length > 0){
+                            if ($(actionsLinesDiv).length > 0) {
                                 const isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
                                 if (isChecked) {
                                     actionsLinesDiv.removeClass('d-none');
@@ -470,10 +470,10 @@ var oscar = (function(o, $) {
                                 }
                             }
                         };
-                        checkboxes.each(function() {
+                        checkboxes.each(function () {
                             var checkbox = $(this);
-                            checkbox.change(function() {
-                                var inputContainer = checkbox.closest('td').find('[data-id="selected-line-input"]'); 
+                            checkbox.change(function () {
+                                var inputContainer = checkbox.closest('td').find('[data-id="selected-line-input"]');
                                 if (inputContainer.length) {
                                     if (checkbox.is(':checked')) {
                                         inputContainer.removeClass('d-none');
@@ -491,15 +491,15 @@ var oscar = (function(o, $) {
                             });
                         });
                         var lines_input = $('[data-id="selected-line-container"]');
-                        if ($(lines_input).length > 0){
-                            $(lines_input).each(function(){
+                        if ($(lines_input).length > 0) {
+                            $(lines_input).each(function () {
                                 var input_container = $(this).find('[data-id="selected-line-input"]');
                                 var input_checkbox = $(this).find('input[type="checkbox"]');
                                 var input_field = $(input_container).find('input');
                                 var more = $(this).find('[data-id="order-button-plus"]');
                                 var less = $(this).find('[data-id="order-button-minus"]');
-                                more.on('click', function(){
-                                    if ($(input_field).val() < $(input_field).attr('max')){
+                                more.on('click', function () {
+                                    if ($(input_field).val() < $(input_field).attr('max')) {
                                         $(input_field).val(parseInt($(input_field).val()) + 1);
                                         $(less).prop('disabled', false);
                                     }
@@ -508,8 +508,8 @@ var oscar = (function(o, $) {
                                     }
                                 });
 
-                                less.on('click', function(){
-                                    if ($(input_field).val() > 0){
+                                less.on('click', function () {
+                                    if ($(input_field).val() > 0) {
                                         $(input_field).val(parseInt($(input_field).val()) - 1);
                                         $(more).prop('disabled', false);
                                     }
@@ -529,32 +529,32 @@ var oscar = (function(o, $) {
                 var storeForm = document.getElementById('store_form');
                 if (storeForm) {
                     var selectInput = storeForm.querySelector('select');
-                    selectInput.addEventListener('change', function() {
+                    selectInput.addEventListener('change', function () {
                         storeForm.submit();
                     });
                 }
             }
         },
-        reordering: (function() {
+        reordering: (function () {
             var options = {
-                    handle: '.btn-handle',
-                    submit_url: '#'
-                },
-                saveOrder = function(data) {
-                // Get the csrf token, otherwise django will not accept the
-                // POST request.
+                handle: '.btn-handle',
+                submit_url: '#'
+            },
+                saveOrder = function (data) {
+                    // Get the csrf token, otherwise django will not accept the
+                    // POST request.
                     var csrf = o.getCsrfToken();
                     $.ajax({
                         type: 'POST',
                         data: $.param(data),
                         dataType: "json",
                         url: options.submit_url,
-                        beforeSend: function(xhr) {
+                        beforeSend: function (xhr) {
                             xhr.setRequestHeader("X-CSRFToken", csrf);
                         }
                     });
                 },
-                init = function(user_options) {
+                init = function (user_options) {
                     options = $.extend(options, user_options);
                     var group = $(options.wrapper).sortable({
                         vertical: true,
@@ -576,7 +576,7 @@ var oscar = (function(o, $) {
                             }
                             else {
                                 var parts = parent.attr('id').split('_');
-                                return {'name': parts[0], 'value': parts[1]};
+                                return { 'name': parts[0], 'value': parts[1] };
                             }
                         },
                     });
@@ -599,10 +599,10 @@ var oscar = (function(o, $) {
             },
         },
         thumbnails: {
-            init: function() {
+            init: function () {
                 var imageModal = $("#product-image-modal"),
                     thumbnails = $('.sub-image');
-                thumbnails.click(function(e){
+                thumbnails.click(function (e) {
                     e.preventDefault();
                     var a = $(this);
                     imageModal.find('h4').text(a.find('img').attr('alt'));

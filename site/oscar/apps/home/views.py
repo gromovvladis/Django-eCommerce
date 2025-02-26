@@ -12,9 +12,11 @@ from django.core.cache import cache
 from django.template.loader import render_to_string
 
 from oscar.views import sort_queryset
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 
 _dir = settings.STATIC_PRIVATE_ROOT
+
+PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
 
 ConditionalOffer = get_model("offer", "ConditionalOffer")
 Action = get_model("home", "Action")
@@ -41,17 +43,14 @@ class GetCookiesView(APIView):
         return http.JsonResponse({"cookies": cookies}, status=202)
 
 
-class HomeView(ListView):
+class HomeView(PageTitleMixin, ListView):
     """
     Главная страница
     """
-
     template_name = "oscar/home/homepage.html"
 
     def get_queryset(self):
-
         actions = cache.get("actions_all")
-
         if not actions:
             actions = Action.objects.only("image", "slug", "title").filter(
                 is_active=True
@@ -62,10 +61,9 @@ class HomeView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["summary"] = settings.PRIMARY_TITLE
-
         agent = parse(self.request.META["HTTP_USER_AGENT"])
         ctx["is_mobile"] = agent.is_mobile
+        ctx["summary"] = "home"
 
         if not agent.is_mobile:
             promo_cats = cache.get("promo_cats_all")
@@ -80,14 +78,14 @@ class HomeView(ListView):
         return ctx
 
 
-class ActionsView(ListView):
+class ActionsView(PageTitleMixin, ListView):
     model = ConditionalOffer
     context_object_name = "offers"
     template_name = "oscar/home/actions/actions.html"
     paginate_by = settings.OSCAR_DASHBOARD_ITEMS_PER_PAGE
+    page_title = "Акции"
 
     def get_queryset(self):
-
         qs = self.model._default_manager.annotate(
             voucher_count=Count("vouchers")
         ).select_related("benefit", "condition")
@@ -117,14 +115,13 @@ class ActionsView(ListView):
             cache.set("actions_all", actions, 3600)
 
         ctx["actions"] = actions
-        ctx["summary"] = "Акции"
+        ctx["summary"] = "actions"
         return ctx
 
 
-class PromoDetailView(DetailView):
+class PromoDetailMixin(DetailView):
     template_name = "oscar/home/actions/detail.html"
     context_object_name = "action"
-    model = Action
     template_folder = "home"
 
     def get(self, request, *args, **kwargs):
@@ -155,13 +152,14 @@ class PromoDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["summary"] = self.object.title
+        ctx["summary"] = "actions"
+        ctx["page_title"] = self.object.title
         return ctx
 
 
-class ActionDetailView(PromoDetailView):
+class ActionDetailView(PromoDetailMixin):
     model = Action
 
 
-class PromoCatDetailView(PromoDetailView):
+class PromoCatDetailView(PromoDetailMixin):
     model = PromoCategory

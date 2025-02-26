@@ -25,9 +25,14 @@ from django.core.exceptions import (
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import get_default_currency, slugify
-from oscar.utils.models import get_image_upload_path
 from oscar.models.fields import AutoSlugField, NullCharField
 from oscar.models.fields.slugfield import SlugField
+from oscar.utils.image_processor import ImageProcessor
+from oscar.utils.models import (
+    get_image_products_upload_path,
+    get_image_categories_upload_path,
+    get_image_additionals_upload_path,
+)
 
 CategoryQuerySet, ProductQuerySet, AdditionalQuerySet, AttributeQuerySet = get_classes(
     "catalogue.managers",
@@ -191,7 +196,7 @@ class Category(MP_Node):
     )
     meta_description = models.TextField("Мета описание", blank=True, null=True)
     image = models.ImageField(
-        "Изображение", upload_to="categories", blank=True, null=True
+        "Изображение", upload_to=get_image_categories_upload_path, blank=True, null=True
     )
     slug = SlugField("Ярлык", max_length=255, db_index=True, unique=True)
     order = models.IntegerField("Порядок", default=0, null=False, blank=False)
@@ -300,8 +305,14 @@ class Category(MP_Node):
         instances with a slug already set, or expose a field on the
         appropriate forms.
         """
+        if self.image:
+            processor = ImageProcessor()
+            optimized_image = processor.optimize_image(self.image)
+            self.image.save(optimized_image.name, optimized_image, save=False)
+
         if not self.slug:
             self.slug = self.generate_slug()
+
         super().save(*args, **kwargs)
 
     def set_ancestors_are_public(self):
@@ -939,7 +950,7 @@ class Product(models.Model):
         meta_description = self.meta_description
         if not meta_description and self.is_child:
             meta_description = self.parent.meta_description
-        return meta_description or striptags(self.description)
+        return meta_description or striptags(self.short_description)
 
     get_meta_description.short_description = "Мета-описание товара"
 
@@ -1400,10 +1411,10 @@ class ProductAttribute(models.Model):
         verbose_name="Одно значение из группы атрибутов",
     )
     value_file = models.FileField(
-        upload_to=get_image_upload_path, max_length=255, blank=True, null=True
+        upload_to=get_image_products_upload_path, max_length=255, blank=True, null=True
     )
     value_image = models.ImageField(
-        upload_to=get_image_upload_path, max_length=255, blank=True, null=True
+        upload_to=get_image_products_upload_path, max_length=255, blank=True, null=True
     )
 
     entity_content_type = models.ForeignKey(
@@ -1413,6 +1424,13 @@ class ProductAttribute(models.Model):
         null=True, blank=True, editable=False
     )
     _dirty = False
+
+    def save(self, *args, **kwargs):
+        if self.value_image:
+            processor = ImageProcessor()
+            optimized_image = processor.optimize_image(self.value_image)
+            self.value_image.save(optimized_image.name, optimized_image, save=False)
+        super().save(*args, **kwargs)
 
     @cached_property
     def type(self):
@@ -1872,7 +1890,11 @@ class Additional(models.Model):
         verbose_name="Магазины",
     )
     image = models.ImageField(
-        "Изображение", upload_to="additionals", blank=True, null=True, max_length=255
+        "Изображение",
+        upload_to=get_image_additionals_upload_path,
+        blank=True,
+        null=True,
+        max_length=255,
     )
 
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
@@ -1901,6 +1923,13 @@ class Additional(models.Model):
         ordering = ["order", "name"]
         verbose_name = "Дополнительный товар"
         verbose_name_plural = "Дополнительные товары"
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            processor = ImageProcessor()
+            optimized_image = processor.optimize_image(self.image)
+            self.image.save(optimized_image.name, optimized_image, save=False)
+        super().save(*args, **kwargs)
 
     def get_name(self):
         return self.name
@@ -1984,7 +2013,7 @@ class ProductImage(models.Model):
         unique=True,
     )
     original = models.ImageField(
-        "Оригинал", upload_to=get_image_upload_path, max_length=255
+        "Оригинал", upload_to=get_image_products_upload_path, max_length=255
     )
     caption = models.CharField("Подпись", max_length=200, blank=True)
 
@@ -1993,7 +2022,7 @@ class ProductImage(models.Model):
         "Порядок отображения",
         default=0,
         db_index=True,
-        help_text=("Изображение с нулевым порядком отображения будет основным"),
+        help_text=("Изображение с нулевым порядком отображения будет основным."),
     )
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
@@ -2013,6 +2042,13 @@ class ProductImage(models.Model):
         Return bool if image display order is 0
         """
         return self.display_order == 0
+
+    def save(self, *args, **kwargs):
+        if self.original:
+            processor = ImageProcessor()
+            optimized_image = processor.optimize_image(self.original)
+            self.original.save(optimized_image.name, optimized_image, save=False)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         """

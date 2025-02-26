@@ -5,14 +5,6 @@
 {% load product_tags %}
 {% load static %}
 
-{% block title %}
-  {{ category.name }} | {{ block.super }}
-{% endblock %}
-
-{% block wrapper_class %}
-  menu fill-width fill-height grow-1 pd-2 pb-sm-4
-{% endblock %}
-
 {% block app_class %}
   app---category
 {% endblock %}
@@ -21,12 +13,12 @@
   app__nav--category
 {% endblock %}
 
-{% block nav_title %}
-  {{ category.name }}
+{% block wrapper_class %}
+  menu fill-width fill-height grow-1 pd-2 pb-sm-4
 {% endblock %}
 
 {% block description %}
-  {{ category.get_description }}
+  {{ category.get_meta_description }}
 {% endblock %}
 
 {% block breadcrumbs %}

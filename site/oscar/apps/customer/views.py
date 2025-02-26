@@ -174,12 +174,13 @@ class AccountAuthModalView(RegisterUserPhoneMixin, APIView):
         )
 
 
-class AccountAuthView(generic.TemplateView, AccountAuthModalView):
+class AccountAuthView(PageTitleMixin, generic.TemplateView, AccountAuthModalView):
     """
     Resiter via sms.
     """
 
     template_name = "oscar/customer/auth.html"
+    page_title = "Войти"
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -189,6 +190,7 @@ class AccountAuthView(generic.TemplateView, AccountAuthModalView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["auth_form"] = self.get_auth_form()
+        ctx["summary"] = "profile"
         return ctx
 
 
@@ -230,7 +232,7 @@ class ProfileView(PageTitleMixin, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["summary"] = "Профиль"
+        ctx["summary"] = "profile"
         ctx["content_open"] = False
         return ctx
 
@@ -335,7 +337,7 @@ class OrderHistoryView(PageTitleMixin, generic.ListView):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["form"] = self.form
         ctx["content_open"] = True
-        ctx["summary"] = "Профиль"
+        ctx["summary"] = "profile"
         return ctx
 
 
@@ -345,8 +347,9 @@ class OrderDetailView(PageTitleMixin, PostActionMixin, generic.DetailView):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["summary"] = "Профиль"
+        ctx["page_title"] = f"Заказ №{self.object.number}"
         ctx["content_open"] = True
+        ctx["summary"] = "profile"
         ctx["online_payments"] = settings.ONLINE_PAYMENTS
         return ctx
 
@@ -438,7 +441,7 @@ class AddressListView(PageTitleMixin, generic.ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "Профиль"
+        ctx["summary"] = "profile"
         return ctx
 
 
@@ -461,9 +464,8 @@ class AddressCreateView(PageTitleMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = "Добавить новый адрес"
-        ctx["summary"] = "Профиль"
         ctx["content_open"] = True
+        ctx["summary"] = "profile"
         return ctx
 
     def get_success_url(self):
@@ -485,9 +487,8 @@ class AddressUpdateView(PageTitleMixin, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = "Изменить адрес"
-        ctx["summary"] = "Профиль"
         ctx["content_open"] = True
+        ctx["summary"] = "profile"
         return ctx
 
     def get_object(self):
@@ -500,16 +501,15 @@ class AddressUpdateView(PageTitleMixin, generic.UpdateView):
 class AddressDeleteView(PageTitleMixin, generic.DeleteView):
     model = UserAddress
     template_name = "oscar/customer/address/address_delete.html"
-    page_title = "Удалить адрес?"
+    page_title = "Удалить адрес"
     active_tab = "address"
     context_object_name = "address"
     success_url = reverse_lazy("customer:address-list")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["title"] = "Удалить адрес"
-        ctx["summary"] = "Профиль"
         ctx["content_open"] = True
+        ctx["summary"] = "profile"
         return ctx
 
     def get_queryset(self):

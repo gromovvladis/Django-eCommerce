@@ -43,7 +43,7 @@ class CreateProductReview(PageTitleMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["product"] = self.product
-        context["summary"] = "Профиль"
+        context["summary"] = "profile"
         context["content_open"] = True
         return context
 
@@ -82,7 +82,6 @@ class ProductReviewList(ListView):
     model = ProductReview
     product_model = Product
     paginate_by = settings.OSCAR_REVIEWS_PER_PAGE
-    page_title = "Оставить отзыв"
 
     def get(self, request, *args, **kwargs):
         if self.request.user.is_staff:
@@ -105,7 +104,8 @@ class ProductReviewList(ListView):
         _product = get_object_or_404(
             self.product_model, slug=self.kwargs["product_slug"], is_public=True
         )
+        context["summary"] = "profile"
         context["product"] = _product
         context["form"] = self.form
-        context["page_title"] = "Отзывы товара " + _product.name
+        context["page_title"] = "Отзывы на товар " + _product.name
         return context

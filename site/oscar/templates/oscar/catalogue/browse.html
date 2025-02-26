@@ -5,16 +5,6 @@
 {% load svg_tags %}
 {% load static %}
 
-{% block title %}
-  {% if summary %}
-    {{ summary }} |
-  {% endif %} {{ block.super }}
-{% endblock %}
-
-{% block wrapper_class %}
-  menu fill-width fill-height grow-1 pd-2 pb-sm-4
-{% endblock %}
-
 {% block app_class %}
   app---category
 {% endblock %}
@@ -23,8 +13,8 @@
   app__nav--category
 {% endblock %}
 
-{% block nav_title %}
-  {{ summary }}
+{% block wrapper_class %}
+  menu fill-width fill-height grow-1 pd-2 pb-sm-4
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -32,13 +22,13 @@
     <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">{% icon file_name='interface/arrow-back' size=22 stroke='#111' %}</button>
     <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
     {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
-    <span class="bread__link" aria-current="page">{{ summary }}</span>
+    <span class="bread__link" aria-current="page">{{ page_title }}</span>
   </div>
 {% endblock %}
 
 {% block content %}
   <div class="menu__wrapper d-flex flex-column">
-    <h1 class="d-none d-sm-flex px-2 mb-2">{{ summary }}</h1>
+    <h1 class="d-none d-sm-flex px-2 mb-2">{{ page_title }}</h1>
     <div class="pxv-2">
       {% if products %}
         <div class="dishes row">

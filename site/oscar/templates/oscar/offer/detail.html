@@ -6,24 +6,16 @@
 {% load compress %}
 {% load static %}
 
-{% block title %}
-  {{ offer.name }} | {{ block.super }}
-{% endblock %}
-
-{% block nav_title_center %}
-  {{ offer.name }}
-{% endblock %}
-
-{% block wrapper_class %}
-  actions d-flex flex-column pd-2 pb-sm-4 container pd-0
-{% endblock %}
-
 {% block app_class %}
   app---action
 {% endblock %}
 
 {% block nav_class %}
   app__nav--action
+{% endblock %}
+
+{% block wrapper_class %}
+  actions d-flex flex-column pd-2 pb-sm-4 container pd-0
 {% endblock %}
 
 {% block breadcrumbs %}

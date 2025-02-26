@@ -4,14 +4,6 @@
 {% load compress %}
 {% load static %}
 
-{% block title %}
-  Адрес самовывоза | {{ block.super }}
-{% endblock %}
-
-{% block wrapper_class %}
-  delivery wrapper--small fill-width pd-2 pb-sm-4 delivery-address
-{% endblock %}
-
 {% block app_class %}
   app---delivery
 {% endblock %}
@@ -20,8 +12,8 @@
   app__nav--delivery
 {% endblock %}
 
-{% block nav_title %}
-  Адрес самовывоза
+{% block wrapper_class %}
+  delivery wrapper--small fill-width pd-2 pb-sm-4 delivery-address
 {% endblock %}
 
 {% block breadcrumbs %}

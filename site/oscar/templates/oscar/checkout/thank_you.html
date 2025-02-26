@@ -6,28 +6,16 @@
 {% load compress %}
 {% load static %}
 
-{% block title %}
-  Заказ №{{ order.number }} | {{ block.super }}
-{% endblock %}
-
-{% block nav_title %}
-  Заказ №{{ order.number }}
-{% endblock %}
-
-{% block nav_title_center %}
-  Заказ №{{ order.number }}
-{% endblock %}
-
-{% block wrapper_class %}
-  checkout fill-width pd-2 pb-4 checkout__container
-{% endblock %}
-
 {% block app_class %}
   app---thank
 {% endblock %}
 
 {% block nav_class %}
   app__nav--thank
+{% endblock %}
+
+{% block wrapper_class %}
+  checkout fill-width pd-2 pb-4 checkout__container
 {% endblock %}
 
 {% block breadcrumbs %}

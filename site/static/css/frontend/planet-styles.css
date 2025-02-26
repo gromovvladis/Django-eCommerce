@@ -6692,9 +6692,9 @@ html.drawer .app__side {
 
 
 
-.col>.card {
+/* .col>.card {
     height: 100%
-}
+} */
 
 /* 
 .text--primary {
@@ -8161,22 +8161,10 @@ html.drawer .app__side {
     line-height: 1.25rem;
     font-weight: 500;
     font-style: normal;
-
-
-    /* padding-right: 1rem; */
-    /* padding-left: 1rem; */
     padding: 0 1rem;
-
-    /* position: absolute; */
-    /* top: 50%; */
-    /* left: 50%; */
-    /* -webkit-transform: translate(-50%, -50%); */
-    /* transform: translate(-50%, -50%); */
     display: -webkit-inline-box;
     display: -ms-inline-flexbox;
     display: inline-flex;
-    /* -ms-flex-direction: column; */
-    /* flex-direction: column; */
 
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
@@ -11598,6 +11586,12 @@ ymaps[class*="search__suggest-item_selected"] {
     left: unset;
     -webkit-transform: unset;
     transform: unset
+}
+
+.app__nav--home .app-nav__title--center,
+.app__nav--category .app-nav__title--center,
+.app__nav--delivery .app-nav__title--center {
+    display: none;
 }
 
 

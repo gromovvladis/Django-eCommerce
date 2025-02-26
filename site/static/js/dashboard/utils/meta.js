@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     var seoTab = document.getElementById('seo');
     if (seoTab) {
         function setupCharCount(inputId, maxChars) {

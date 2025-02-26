@@ -13,6 +13,7 @@ from oscar.apps.basket.signals import basket_addition
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.core.utils import is_ajax, safe_referrer
 
+PageTitleMixin = get_class("customer.mixins", "PageTitleMixin")
 Applicator = get_class("offer.applicator", "Applicator")
 BasketLineFormSet = get_class("basket.formsets", "BasketLineFormSet")
 Repository = get_class("shipping.repository", "Repository")
@@ -29,13 +30,14 @@ Line = get_model("basket", "Line")
 Product = get_model("catalogue", "Product")
 
 
-class BasketView(ModelFormSetView):
+class BasketView(PageTitleMixin, ModelFormSetView):
     model = Line
     basket_model = Basket
     formset_class = BasketLineFormSet
     form_class = BasketLineForm
-    factory_kwargs = {"extra": 0, "can_delete": True}
+    page_title = "Корзина"
     template_name = "oscar/basket/basket.html"
+    factory_kwargs = {"extra": 0, "can_delete": True}
 
     def dispatch(self, request, *args, **kwargs):
         self.check_lines()
@@ -44,7 +46,7 @@ class BasketView(ModelFormSetView):
     def check_lines(self):
         if not is_ajax(self.request):
             updated = False
-            # переделай. когда товаров к корзине больше чем можем 
+            # переделай. когда товаров к корзине больше чем можем
             # продать нужно чтобы они автоматически уменьшались. если форма не валидная то хоть чтонибудб делай.
             for line in self.request.basket._all_lines():
                 if line.quantity == 0:
@@ -203,14 +205,12 @@ class BasketView(ModelFormSetView):
 
 
 class EmptyBasketView(View):
-
     def post(self, request, *args, **kwargs):
-
         basket = request.basket
         url = (reverse("basket:summary"),)
 
         if not basket.id:
-            return http.JsonResponse({"url": url, "status": 403}, status=403)
+            return http.JsonResponse({"url": url, "status": 404}, status=404)
         try:
             basket.flush()
         except Exception:
@@ -220,7 +220,6 @@ class EmptyBasketView(View):
 
 
 class GetUpsellMasseges(View):
-
     def get_upsell_messages(self, basket):
         offers = Applicator().get_offers(basket, self.request.user, self.request)
         applied_offers = list(basket.offer_applications.offers.values())
@@ -290,7 +289,6 @@ class BasketAddView(FormView):
         )
 
     def form_valid(self, form):
-
         self.request.basket.add_product(
             form.product, 1, form.cleaned_options(), form.cleaned_additionals()
         )

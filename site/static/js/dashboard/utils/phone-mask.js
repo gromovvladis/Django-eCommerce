@@ -5,18 +5,18 @@ let deleteMode = false;
 
 const defaultFormat = '+7 ({0}{1}{2}) {3}{4}{5}-{6}{7}{8}{9}';
 
-if (phoneInput){
+if (phoneInput) {
     phoneInput.addEventListener('keydown', (e) => {
         deleteMode = (e.key === 'Backspace');
     });
-        
+
     phoneInput.addEventListener('input', (e) => {
         if (deleteMode) {
             phoneInput.value = phoneInput.value;
             phoneStr = parsePhoneString(phoneInput.value);
         } else {
             if (e.inputType == 'insertText' && !isNaN(parseInt(e.data))) {
-                if (phoneStr.length <= 10){
+                if (phoneStr.length <= 10) {
                     phoneStr += e.data;
                 }
             }
@@ -26,15 +26,15 @@ if (phoneInput){
 }
 
 if (typeof codeInput !== 'undefined') {
-    codeInput.addEventListener('input', function(){
-        codeInput.value = codeInput.value.replace (/\D/g, '');
-        if (codeInput.value.length == 4){
+    codeInput.addEventListener('input', function () {
+        codeInput.value = codeInput.value.replace(/\D/g, '');
+        if (codeInput.value.length == 4) {
             $(btn_auth).prop("disabled", false);
         } else {
-            $(btn_auth).prop("disabled", true); 
+            $(btn_auth).prop("disabled", true);
         }
     })
-    
+
     codeInput.addEventListener('keypress', function (e) {
         var key = e.which || e.keyCode;
         if (key === 13) {
@@ -49,12 +49,12 @@ function formatPhoneString() {
     for (let i = 0; i < strArr.length; i++) {
         formattedStr = formattedStr.replace(`{${i}}`, strArr[i]);
     }
-    
+
     if (formattedStr.indexOf('{') === -1)
         return formattedStr;
     else
         return formattedStr.substring(0, formattedStr.indexOf('{'));
-    
+
 }
 
 function parsePhoneString(str) {
