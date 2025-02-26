@@ -45,7 +45,7 @@ function storeModalLoaded() {
                     };
                 })
                 .catch(error => {
-                    console.log("errorFunc", response);
+                    console.error("errorFunc", response);
                 });
 
         });

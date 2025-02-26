@@ -106,7 +106,6 @@ ymaps.ready(function () {
 
 // создаем карту при вводе адреса, при расчете маршрута и предоставим возможность выбора адреса по карте
 function createMap(address = null) {
-    console.log("createMap");
     ymaps.ready(function () {
 
         if (!map) {
@@ -238,7 +237,6 @@ function createMap(address = null) {
 
 // переместить плейсмарк
 function movePlacemark(coords, address = null, captured = false) {
-    console.log("movePlacemark");
     if (placemark) {
         placemark.geometry.setCoordinates(coords);
     } else {
@@ -261,9 +259,7 @@ function movePlacemark(coords, address = null, captured = false) {
 
 // Определяем адрес по координатам (обратное геокодирование).
 function showBalloon(coords, address = null, captured = false) {
-    console.log("showBalloon");
     ymaps.geocode(coords, { results: 1, boundedBy: DELIVERYBOUNDS }).then(function (result) {
-        console.log("balloonTime");
         var coords = result.geoObjects.get(0).geometry.getCoordinates();
         var address = result.geoObjects.get(0).properties._data.name;
         $(line1).val(result.geoObjects.get(0).properties._data.name);
@@ -280,8 +276,6 @@ function showBalloon(coords, address = null, captured = false) {
 
 // создание зон доставки
 function ZonesInit(json) {
-    console.log("ZonesInit");
-
     // Добавляем зоны на карту.
     deliveryZones = ymaps.geoQuery(json).addToMap(map);
     // Задаём цвет и контент балунов полигонов.
@@ -308,11 +302,9 @@ function ZonesInit(json) {
 
 // кнопка очистить адрес
 $(cleanAddress).on('click', function () {
-    console.log("cleanAddress");
     $(line1).val('');
     $(lon).val('');
     $(lat).val('');
-
     if (map) {
         map.geoObjects.remove(placemark);
         map.setCenter(MAPCENTER, 12);

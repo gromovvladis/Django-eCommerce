@@ -5,12 +5,7 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
 }
 
 function subscribe() {
-  // Регистрируем Service Worker
-  navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
-    .then(function (registration) {
-      // Дожидаемся готовности Service Worker
-      return navigator.serviceWorker.ready;
-    })
+  navigator.serviceWorker.ready
     .then(function (registration) {
       // Подписываемся на push-уведомления
       return registration.pushManager.subscribe({
@@ -21,7 +16,6 @@ function subscribe() {
     .then(function (subscription) {
       // Извлекаем токен из endpoint
       const currentToken = extractToken(subscription.endpoint);
-
       // Отправляем данные подписки на сервер
       return sendTokenToServer(currentToken, subscription);
     })
@@ -39,7 +33,6 @@ function extractToken(endpoint) {
 function sendTokenToServer(currentToken, subscription) {
   if (!isTokenSentToServer(currentToken)) {
     // Отправляем данные подписки на сервер
-    console.log('Сохранение подписки на сервере:', webpush_save_url);
     fetch(webpush_save_url, {
       method: 'POST',
       headers: {
@@ -55,7 +48,6 @@ function sendTokenToServer(currentToken, subscription) {
         return response.json();
       })
       .then(function (data) {
-        console.log('Подписка успешно сохранена:', data);
         setTokenSentToServer(currentToken);
       })
       .catch(function (error) {

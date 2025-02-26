@@ -73,10 +73,8 @@
     };
 
     o.updateRelatedObjectLinks = function (triggeringLink) {
-        console.log(triggeringLink);
         var $this = $(triggeringLink);
         var siblings = $this.nextAll('.change-related, .delete-related');
-        console.log(siblings);
         if (!siblings.length) {
             return;
         }
