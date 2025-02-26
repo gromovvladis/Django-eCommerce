@@ -34,7 +34,6 @@
                 {{ page_title }}
               {% endblock %}
             </div>
-            {% cache 3600 root_category %}
             <ul class="d-flex align-center fill-height">
               {% root_categories as root_categories %}
               {% if root_categories %}
@@ -46,7 +45,6 @@
               {% endif %}
             </ul>
             <a href="{% url 'search:search-page' %}" data-id="nav-search-icon-button" class="button app-nav__button--search button--small justify-center mr-sm-0 mr-2 shrink" aria-label="Поиск"><span class="button__wrapper d-flex">{% icon file_name='header/search' size=20 fill='#111' %}</span></a>
-            {% endcache %}
           </div>
           <a data-id="nav-basket-btn" class="app-nav__button d-none d-sm-flex ml-3" href="{% url 'basket:summary' %}">
             <div class="d-flex aling-center mr-1">
@@ -124,6 +122,7 @@
   <script src="{% static 'js/frontend/profile/notifications.js' %}" defer></script>
 
   <script src="{% static 'js/thirdpaty/datetimepicker/air-datepicker.js' %}" defer></script>
+  <script src="{% static 'js/service-worker/register-service-worker.js' %}" defer></script>
   {% endcompress %}
 {% endblock %}
 

@@ -25,7 +25,7 @@ PromoCategory = get_model("home", "PromoCategory")
 
 def service_worker(request):
     return HttpResponse(
-        open(_dir + "/js/dashboard/utils/service-worker.js", "rb").read(),
+        open(_dir + "/js/service-worker/service-worker.js", "rb").read(),
         status=202,
         content_type="application/javascript",
     )

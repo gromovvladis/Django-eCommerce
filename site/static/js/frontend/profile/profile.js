@@ -3,7 +3,6 @@ var profileWrapper = document.querySelector('[data-id="profile-wrapper"]');
 if (profileWrapper) {
     var profileTabs = document.querySelectorAll('[data-id="profile-tab"]');
     var isProfileLink = document.getElementById('app').classList.contains('app---profile-link');
-    console.log(isProfileLink)
     profileTabs.forEach(function (tab) {
         tab.addEventListener('click', function () {
             if (!tab.classList.contains('active') || isProfileLink) {

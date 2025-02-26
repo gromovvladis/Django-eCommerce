@@ -5,12 +5,7 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
 }
 
 function subscribe() {
-  // Регистрируем Service Worker
-  navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
-    .then(function (registration) {
-      // Дожидаемся готовности Service Worker
-      return navigator.serviceWorker.ready;
-    })
+  navigator.serviceWorker.ready
     .then(function (registration) {
       // Подписываемся на push-уведомления
       return registration.pushManager.subscribe({
@@ -21,7 +16,6 @@ function subscribe() {
     .then(function (subscription) {
       // Извлекаем токен из endpoint
       const currentToken = extractToken(subscription.endpoint);
-
       // Отправляем данные подписки на сервер
       return sendTokenToServer(currentToken, subscription);
     })
