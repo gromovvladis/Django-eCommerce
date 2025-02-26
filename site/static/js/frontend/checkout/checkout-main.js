@@ -112,8 +112,6 @@ deliveryTimeBtn.forEach(function (time_btn) {
 
 // Обновление итогов
 function getNewTotals(selectedMethod, zonaId = null) {
-    console.log('getNewTotals');
-
     // Формируем параметры запроса в URL
     const url = new URL(url_update_totals, baseURL);
     url.searchParams.append('shippingMethod', selectedMethod);
@@ -198,7 +196,6 @@ function validate() {
 
 // Валидация по мин заказу и адресу
 function validateCheckout() {
-    console.log('validateCheckout');
     validateAddress();
     validateTotals();
     checkValid();

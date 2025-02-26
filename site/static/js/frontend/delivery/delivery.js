@@ -274,7 +274,6 @@ if (line1Container) {
 
     // создаем карту при вводе адреса, при расчете маршрута и предоставим возможность выбора адреса по карте
     function createMap(address = null) {
-        console.log("createMap");
         ymaps.ready(function () {
 
             if (!map) {
@@ -508,7 +507,6 @@ if (line1Container) {
 
     // переместить плейсмарк
     function movePlacemark(coords, address = null, captured = false) {
-        console.log("movePlacemark");
         if (placemark) {
             placemark.geometry.setCoordinates(coords);
         } else {
@@ -531,11 +529,8 @@ if (line1Container) {
 
     // Определяем адрес по координатам (обратное геокодирование).
     function showBalloon(coords, address = null, captured = false) {
-        console.log("showBalloon");
         var zonaId = getZonaId(coords)
         if (zonaId) {
-            console.log("in zona");
-
             if (!address) {
                 ymaps.geocode(coords, { results: 1, kind: 'house' }).then(function (res) {
                     address = res.geoObjects.get(0).properties._data.name;
@@ -546,8 +541,6 @@ if (line1Container) {
             }
 
         } else {
-            console.log("no in zona");
-
             addressInfo = null;
             controls.classList.add('d-none');
             mapControl._addressSelected("");
@@ -591,7 +584,6 @@ if (line1Container) {
 
     // создание зон доставки
     function ZonesInit(json) {
-        console.log("ZonesInit");
         // Добавляем зоны на карту.
         deliveryZones = ymaps.geoQuery(json).addToMap(map);
         // Задаём цвет и контент балунов полигонов.
@@ -622,7 +614,6 @@ if (line1Container) {
 
     // проверка адреса в зоне доставки
     function getZonaId(coords) {
-        console.log("getZonaId");
         var zona = deliveryZones.searchContaining(coords).get(0);
         if (!zona) {
             return 0;
@@ -632,8 +623,6 @@ if (line1Container) {
 
     // адрес получен
     function addressCaptured(coords, address) {
-        console.log("addressCaptured");
-
         line1.readOnly = true;
         suggests.classList.add('d-none');
         line1Container.classList.remove('not-valid');
@@ -655,7 +644,6 @@ if (line1Container) {
 
     // очистить адрес
     function cleanAddress() {
-        console.log("cleanAddress");
         line1.value = '';
         line1.readOnly = false;
         hints.classList.add('d-none');
@@ -697,7 +685,6 @@ if (line1Container) {
     // кнопка открыть карту
     if (open_map) {
         open_map.addEventListener('click', function () {
-            console.log("map open");
             addressInfo = null;
             createMap(line1.value);
             mapContainer.classList.add('open');
@@ -708,12 +695,9 @@ if (line1Container) {
 
 // запрос времени доставки на сервере со временем
 function GetTime({ coords = '', address = '', shippingMethod = '', zonaId = '' } = {}) {
-    console.log('GetTime');
-
     if (Array.isArray(coords)) {
         coords = coords.join(",")
     }
-
     return fetch(url_time, {
         method: 'POST',
         headers: {
@@ -735,7 +719,7 @@ function GetTime({ coords = '', address = '', shippingMethod = '', zonaId = '' }
             });
         })
         .catch(error => {
-            console.log('error GetTime', error);
+            console.error('error GetTime', error);
             if (deliveryTime) {
                 deliveryTime.classList.remove('active');
             }
@@ -744,8 +728,6 @@ function GetTime({ coords = '', address = '', shippingMethod = '', zonaId = '' }
 
 // время можно показывать пользователю на странице и менять в ордер тайм
 function timeCaptured(result) {
-    console.log("timeCaptured");
-
     if (result.error) {
         if (hints) {
             hints.innerHTML = result.error;

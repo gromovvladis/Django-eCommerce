@@ -22,7 +22,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
-            console.log('Удаление старого кэша:', cache);
             return caches.delete(cache);
           }
         })

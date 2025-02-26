@@ -33,7 +33,6 @@ function extractToken(endpoint) {
 function sendTokenToServer(currentToken, subscription) {
   if (!isTokenSentToServer(currentToken)) {
     // Отправляем данные подписки на сервер
-    console.log('Сохранение подписки на сервере:', webpush_save_url);
     fetch(webpush_save_url, {
       method: 'POST',
       headers: {
@@ -49,7 +48,6 @@ function sendTokenToServer(currentToken, subscription) {
         return response.json();
       })
       .then(function (data) {
-        console.log('Подписка успешно сохранена:', data);
         setTokenSentToServer(currentToken);
       })
       .catch(function (error) {

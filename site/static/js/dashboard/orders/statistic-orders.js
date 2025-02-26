@@ -12,7 +12,6 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function (tab) {
 
     if (Array.isArray(products_name) && products_name.length > 0) {
         const getOrCreateLegendList = (chart, DataID) => {
-            console.log(DataID)
             const legendContainer = tab.querySelector(DataID);
             let listContainer = legendContainer.querySelector('ul');
 
@@ -26,14 +25,11 @@ document.querySelectorAll('[data-id="report-tab"]').forEach(function (tab) {
         const htmlLegendPlugin = {
             id: 'htmlLegend',
             afterUpdate(chart, args, options) {
-                console.log(options);
                 const ul = getOrCreateLegendList(chart, options.containerDataID);
-
                 // Remove old legend items
                 while (ul.firstChild) {
                     ul.firstChild.remove();
                 }
-
                 // Reuse the built-in legendItems generator
                 const items = chart.options.plugins.legend.labels.generateLabels(chart);
 
