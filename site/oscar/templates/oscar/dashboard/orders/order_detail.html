@@ -141,7 +141,7 @@
           <td>
             <span class="badge badge-96 {% if order.status == 'Завершён' %}
                 badge-success
-              {% elif order.status == 'Отменен' %}
+              {% elif order.status == 'Отменён' %}
                 badge-danger
               {% elif order.status == 'Готовится' %}
                 badge-info
@@ -213,7 +213,7 @@
             aria-expanded="false"
             class="badge {% if order.status == 'Завершён' %}
               badge-success
-            {% elif order.status == 'Отменен' %}
+            {% elif order.status == 'Отменён' %}
               badge-danger
             {% elif order.status == 'Готовится' %}
               badge-info
@@ -252,7 +252,7 @@
                 </thead>
                 <tbody>
                   {% for line in lines %}
-                    <tr data-id="line-container">
+                    <tr data-id="line-container" class="{% if line.status == 'Завершён' %}line-success{% elif line.status == 'Отменён' %}line-canceled{% else %}line-process{% endif %}">
                       <td class="checkbox">
                         <input type="checkbox" name="selected_line" value="{{ line.id }}" />
                       </td>
@@ -260,31 +260,20 @@
                         {% if line.product %}
                           {% with image=line.product.primary_image %}
                             {% oscar_thumbnail image.original '90x90' upscale=False as thumb %}
-                            <img class="img-dashboard"
-                              src="{{ thumb.url }}"
-                              alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}"
-                              loading="lazy" />
+                            <img class="img-dashboard" src="{{ thumb.url }}" loading="lazy"
+                              alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}" />
                           {% endwith %}
                         {% else %}
                           {% with image=line.missing_image %}
                             {% oscar_thumbnail image.original '90x90' upscale=False as thumb %}
-                            <img class="img-dashboard"
-                              src="{{ thumb.url }}"
-                              alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}"
-                              loading="lazy" />
+                            <img class="img-dashboard" src="{{ thumb.url }}" loading="lazy"
+                              alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}" />
                           {% endwith %}
                         {% endif %}
                       </td>
                       <td class="title">
                         <div class="d-flex align-items-center">
-                          <span class="spinner-border-sm {% if line.status == 'Готовится' %}
-                              badge-warning
-                            {% elif line.status == 'Отменен' %}
-                              badge-danger
-                            {% else %}
-                              badge-success
-                            {% endif %} rounded-circle mr-2">
-                            &nbsp;
+                          <span class="spinner-border-sm rounded-circle mr-2">&nbsp;
                           </span>
                           {% if line.product %}
                             <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">{{ line.product.get_name }}</a>
@@ -799,7 +788,7 @@
                             {% if txn.status == 'succeeded' %}
                               Успешно
                             {% elif txn.status == 'canceled' %}
-                              Отменен
+                              Отменён
                             {% else %}
                               Обрабатывется
                             {% endif %}

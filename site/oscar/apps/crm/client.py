@@ -7,8 +7,6 @@ from rest_framework.renderers import JSONRenderer
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.utils.timezone import now
-from django.db.models.functions import Coalesce, Greatest
-from django.db.models import F
 
 from oscar.apps.customer.serializers import UserGroupSerializer, StaffSerializer
 from oscar.apps.order.serializers import OrderSerializer
@@ -2009,17 +2007,6 @@ class EvotorDocClient(EvotorAPICloud):
 
             if serializer.is_valid():
                 order = serializer.save()
-
-                for line in order.lines.all():
-                    if line.stockrecord.can_track_allocations:
-                        if line.stockrecord and line.stockrecord.num_in_stock > 0:
-                            line.stockrecord.update(
-                                num_in_stock=Greatest(
-                                    (Coalesce(F("num_in_stock"), 0) - line.quantity), 0
-                                ),
-                            )
-                            line.stockrecord.refresh_from_db(field="num_in_stock")
-
             else:
                 json_valid = False
                 logger.error("Ошибка при сериализации %s" % serializer.errors)
@@ -2033,7 +2020,7 @@ class EvotorDocClient(EvotorAPICloud):
             logger.error(f"Ошибка при создании / обновлении заказа: {e}", exc_info=True)
             return f"Ошибка при создании / обновлении заказа: {e}"
 
-        return "Заказ был успешно обновлен"
+        return "Заказ был успешно обновлен!"
 
     def refund_site_order(self, order_json):
         error_msgs = []
@@ -2042,20 +2029,10 @@ class EvotorDocClient(EvotorAPICloud):
             try:
                 base_document_id = order_json.get("body").get("base_document_id")
                 order = Order.objects.get(evotor_id=base_document_id)
-                order_json["target"] = "RETURN"
-                order_json["reason"] = "Возврат заказа"
-
                 serializer = OrderSerializer(order, data=order_json)
 
                 if serializer.is_valid():
                     order = serializer.save()
-
-                    for line in order.lines.all():
-                        if line.product.get_product_class().track_stock:
-                            line.stockrecord.num_in_stock += line.quantity
-                            line.stockrecord.refresh_from_db(
-                                fields=["num_allocated", "num_in_stock"]
-                            )
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
@@ -2079,7 +2056,7 @@ class EvotorDocClient(EvotorAPICloud):
             logger.error(f"Ошибка при возврате заказа: {e}", exc_info=True)
             return f"Ошибка при возврате заказа: {e}"
 
-        return "Заказ был успешно обновлен"
+        return "Заказ был успешно возвращен!"
 
     def cash_transaction(self, trs_json):
         try:

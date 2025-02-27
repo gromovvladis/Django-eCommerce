@@ -549,9 +549,7 @@ class PaymentDetailsView(PageTitleMixin, OrderPlacementMixin, generic.TemplateVi
         return source, order
 
     def _crete_source(self, payment_method, order_total):
-
         payment_name = self.get_payment_method_display(payment_method)
-
         source_type = SourceType.objects.get_or_create(name=payment_name)[0]
 
         source = Source(
@@ -559,8 +557,6 @@ class PaymentDetailsView(PageTitleMixin, OrderPlacementMixin, generic.TemplateVi
             currency=order_total.currency,
             amount_allocated=order_total.money,
             reference=payment_method,
-            refundable=False,
-            paid=False,
         )
 
         self.add_payment_source(source)

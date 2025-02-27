@@ -48,7 +48,7 @@ function closeModal(response = null) {
     if (paymentSvg) {
         const svgMap = {
             "Ожидает оплаты": "#svg-order-pending",
-            "Отменен": "#svg-order-cancel",
+            "Отменён": "#svg-order-cancel",
         };
         const svgHref = svgMap[order_status] || "#svg-order-success";
         paymentSvg.innerHTML = `<use xlink:href="${svgHref}"></use>`;

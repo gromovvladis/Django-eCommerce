@@ -25,11 +25,10 @@
             </td>
             <td class="title">{{ order.get_items_name }}</td>
             <td class="status">
-              <span data-id="order-status"
-                data-number="{{ order.number }}"
+              <span data-id="order-status" data-number="{{ order.number }}"
                 class="badge badge-96 pointer {% if order.status == 'Завершён' %}
                   badge-success
-                {% elif order.status == 'Отменен' %}
+                {% elif order.status == 'Отменён' %}
                   badge-danger
                 {% elif order.status == 'Готовится' %}
                   badge-info
