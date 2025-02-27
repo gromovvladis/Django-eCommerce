@@ -324,14 +324,13 @@ class Yoomoney(PaymentMethod):
                 transaction.refundable = False
                 transaction.save()
                 self.create_refund_transaction(refund, transaction.source, amount)
+                return refund
         except Exception as e:
             try:
-                error = e.response.content
+                return e.response.content
             except Exception as e:
                 error = e
             raise UnableToRefund(f"Невозможно произвести возврат. Причина: {error}")
-
-        return refund
 
     def update_refund(self, refund, source):
         refund_transactions = self.get_transactions(source).filter(txn_type="Refund")
