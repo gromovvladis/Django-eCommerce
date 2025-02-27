@@ -44,6 +44,7 @@ class Basket(models.Model):
         "store.Store",
         related_name="baskets",
         null=True,
+        db_index=True,
         blank=False,
         verbose_name="Магазин",
         on_delete=models.SET_NULL,

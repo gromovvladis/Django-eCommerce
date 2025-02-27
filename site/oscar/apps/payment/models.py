@@ -1,6 +1,5 @@
 from decimal import Decimal
 
-from django.db.models import Q
 from django.db import models
 
 from oscar.core.compat import AUTH_USER_MODEL
