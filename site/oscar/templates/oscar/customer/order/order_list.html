@@ -78,11 +78,11 @@
                     </div>
                   {% endblock %}
                   <div class="d-flex justify-space-between align-center fill-width pt-1">
-                    <div class="orders-list-item__status d-flex align-center {% if order.status == 'Ожидает оплаты' or order.status == 'Обрабатывается' %}text--warning{% elif order.status == 'Отменен' %}text--red{% else %}text--success{% endif %}">
+                    <div class="orders-list-item__status d-flex align-center {% if order.status == 'Ожидает оплаты' or order.status == 'Обрабатывается' %}text--warning{% elif order.status == 'Отменён' %}text--red{% else %}text--success{% endif %}">
                       <svg data-id="payment-icon-svg" width="30" height="30">
                         {% if order.status == 'Ожидает оплаты' or order.status == 'Обрабатывается' %}
                           <use xlink:href="#svg-order-pending"></use>
-                        {% elif order.status == 'Отменен' %}
+                        {% elif order.status == 'Отменён' %}
                           <use xlink:href="#svg-order-cancel"></use>
                         {% else %}
                           <use xlink:href="#svg-order-success"></use>

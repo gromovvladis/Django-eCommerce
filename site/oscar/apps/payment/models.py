@@ -119,8 +119,6 @@ class Source(models.Model):
     # a transaction model for a particular payment store.
     reference = models.CharField("Референс", max_length=255, blank=True)
 
-    paid = models.BooleanField("Оплачено", blank=True, default=False)
-
     # A dictionary of submission data that is stored as part of the
     # checkout process, where we need to pass an instance of this class around
     submission_data = None
@@ -167,6 +165,7 @@ class Source(models.Model):
         payment_id=None,
         refund_id=None,
         evotor_id=None,
+        is_included=False,
     ):
         """
         Register the data for a transaction that can't be created yet due to FK
@@ -187,6 +186,7 @@ class Source(models.Model):
                 payment_id,
                 refund_id,
                 evotor_id,
+                is_included,
             )
         )
 
@@ -202,6 +202,7 @@ class Source(models.Model):
         payment_id="",
         refund_id="",
         evotor_id="",
+        is_included=False,
     ):
         return self.transactions.create(
             txn_type=txn_type,
@@ -214,6 +215,7 @@ class Source(models.Model):
             payment_id=payment_id,
             refund_id=refund_id,
             evotor_id=evotor_id,
+            is_included=is_included,
         )
 
     # =======
@@ -280,6 +282,7 @@ class Source(models.Model):
             receipt=receipt,
             payment_id=payment_id,
             evotor_id=evotor_id,
+            is_included=True,
         )
 
     debit.alters_data = True
@@ -317,7 +320,8 @@ class Source(models.Model):
 
         if status == "succeeded":
             self.amount_debited += amount
-            self.paid = self.balance >= self.amount_allocated
+            trx.is_included = True
+            trx.save()
 
         self.save()
 
@@ -374,7 +378,6 @@ class Source(models.Model):
 
                 if transaction_is_new or updated_fields:
                     self.amount_debited += amount_delta
-                    self.paid = self.balance >= self.amount_allocated
                     self.save()
 
                     if transaction_is_new:
@@ -424,6 +427,7 @@ class Source(models.Model):
             receipt=receipt,
             refund_id=refund_id,
             evotor_id=evotor_id,
+            is_included=True,
         )
 
     refund.alters_data = True
@@ -461,7 +465,8 @@ class Source(models.Model):
 
         if status == "succeeded":
             self.amount_refunded += amount
-            self.paid = self.balance >= self.amount_allocated
+            trx.is_included = True
+            trx.save()
 
         self.save()
 
@@ -519,7 +524,6 @@ class Source(models.Model):
 
                 if transaction_is_new or updated_fields:
                     self.amount_refunded -= amount_delta
-                    self.paid = self.balance >= self.amount_allocated
                     self.save()
 
                     if transaction_is_new:
@@ -544,6 +548,10 @@ class Source(models.Model):
     # ==========
     # Properties
     # ==========
+
+    @property
+    def paid(self):
+        return self.balance >= self.amount_allocated
 
     @property
     def balance(self):

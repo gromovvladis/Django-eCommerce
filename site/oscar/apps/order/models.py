@@ -277,7 +277,7 @@ class Order(models.Model):
         The amount of discount this order received
         """
         discount = D("0.00")
-        for line in self.lines.all():
+        for line in self.lines.exclude(status__in=settings.OSCAR_FAIL_LINE_STATUS):
             discount += line.discount
         return discount
 

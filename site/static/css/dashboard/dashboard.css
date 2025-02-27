@@ -3420,7 +3420,7 @@ input[type=button].btn-block {
 
 
 @media (max-width: 1200px) {
-  .navbar-header{
+  .navbar-header {
     justify-content: space-between;
   }
 }
@@ -19868,6 +19868,34 @@ input[type="number"]:focus {
   }
 
 }
+
+
+.line-canceled {
+  background-color: #fff3f3 !important;
+  color: #6c757d !important;
+}
+
+.line-canceled:nth-of-type(odd) {
+  background-color: #ffeeee !important;
+}
+
+.line-canceled .title a {
+  text-decoration: line-through !important;
+  color: #6c757d !important;
+}
+
+.line-canceled .spinner-border-sm {
+  background-color: #dc3545;
+}
+
+.line-success .spinner-border-sm {
+  background-color: #28a745;
+}
+
+.line-process .spinner-border-sm {
+  background-color: #ffeeee;
+}
+
 
 .order-button {
   --size: 42px !important;

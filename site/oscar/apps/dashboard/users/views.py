@@ -212,9 +212,7 @@ class UserDetailView(MultiTableMixin, DetailView):
     def get_orders_table(self):
         orders = self.user.orders.annotate(
             source=Max("sources__reference"),
-            amount_paid=Sum("sources__amount_debited")
-            - Sum("sources__amount_refunded"),
-            paid=F("sources__paid"),
+            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             before_order=Case(
                 When(
                     date_finish__isnull=True,

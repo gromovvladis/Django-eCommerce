@@ -38,7 +38,7 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ListView):
         """
         return self.model.objects.filter(
             Q(user=self.request.user),
-            Q(status="Завершён"),
+            Q(status=settings.OSCAR_SUCCESS_ORDER_STATUS),
             ~Q(reviews__isnull=False),  # Проверяем, что связанных отзывов нет
         )
 

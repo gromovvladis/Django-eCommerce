@@ -559,9 +559,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
         # base_queryset is equal to all orders the user is allowed to access
         self.base_queryset = queryset_orders(request=request).annotate(
             source=Max("sources__reference"),
-            amount_paid=Sum("sources__amount_debited")
-            - Sum("sources__amount_refunded"),
-            paid=F("sources__paid"),
+            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             before_order=Case(
                 When(
                     date_finish__isnull=True,
@@ -659,9 +657,7 @@ class OrderListView(EventHandlerMixin, BulkEditMixin, SingleTableView):
 
         return queryset.annotate(
             source=Max("sources__reference"),
-            amount_paid=Sum("sources__amount_debited")
-            - Sum("sources__amount_refunded"),
-            paid=F("sources__paid"),
+            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             before_order=Case(
                 When(
                     date_finish__isnull=True,
@@ -1038,9 +1034,7 @@ class OrderActiveListLookupView(APIView):
         # Аннотируем и сортируем queryset
         queryset = queryset.order_by("order_time").annotate(
             source=Max("sources__reference"),
-            amount_paid=Sum("sources__amount_debited")
-            - Sum("sources__amount_refunded"),
-            paid=F("sources__paid"),
+            amount_paid=Sum("sources__amount_debited") - Sum("sources__amount_refunded"),
             before_order=Case(
                 When(
                     date_finish__isnull=True,
@@ -1533,9 +1527,10 @@ class OrderDeleteView(DeleteView):
         self.object = self.get_object()
         form = self.get_form()
 
-        deletion_denied = self.deletion_denied(self.object)
-        if deletion_denied and not request.user.is_superuser:
-            return deletion_denied
+        if not request.user.is_superuser:
+            deletion_denied = self.deletion_denied(self.object)
+            if deletion_denied:
+                return deletion_denied
 
         if form.is_valid():
             return self.form_valid(form)
@@ -1553,14 +1548,14 @@ class OrderDeleteView(DeleteView):
         if amount_paid > 0:
             messages.error(
                 self.request,
-                "Верните оплату и переведите заказ в статус 'Отменен' перед удалением.",
+                "Верните оплату и переведите заказ в статус 'Отменён' перед удалением.",
             )
             return HttpResponseRedirect(
                 reverse("dashboard:order-detail", kwargs={"number": order.number})
             )
-        elif order.status != "Отменен":
+        elif order.status != settings.OSCAR_FAIL_ORDER_STATUS:
             messages.error(
-                self.request, "Переведите заказ в статус 'Отменен' перед удалением."
+                self.request, f"Переведите заказ в статус {settings.OSCAR_FAIL_ORDER_STATUS} перед удалением."
             )
             return HttpResponseRedirect(
                 reverse("dashboard:order-detail", kwargs={"number": order.number})

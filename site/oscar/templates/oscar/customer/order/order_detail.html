@@ -32,7 +32,7 @@
         <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
           {% if order.status == 'Ожидает оплаты' %}
             <use xlink:href="#svg-order-pending"></use>
-          {% elif order.status == 'Отменен' %}
+          {% elif order.status == 'Отменён' %}
             <use xlink:href="#svg-order-cancel"></use>
           {% else %}
             <use xlink:href="#svg-order-success"></use>

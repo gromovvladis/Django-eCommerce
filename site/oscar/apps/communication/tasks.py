@@ -69,7 +69,7 @@ def _send_site_notification_new_order_to_customer(ctx: dict):
 @shared_task()
 def _send_sms_notification_order_status_to_customer(ctx: dict):
     event_type_name_map = {
-        "Отменен": "Заказ отменен",
+        "Отменён": "Заказ отменён",
         "Готов": "Заказ ожидает получения",
         "Доставляется": "Заказ доставляется",
     }
@@ -84,8 +84,8 @@ def _send_sms_notification_order_status_to_customer(ctx: dict):
         )
 
         message = None
-        if ctx["new_status"] == "Отменен":
-            message = f"Заказ №{ctx['number']} отменен."
+        if ctx["new_status"] == "Отменён":
+            message = f"Заказ №{ctx['number']} отменён."
         elif ctx["new_status"] == "Доставляется":
             message = f"Заказ №{ctx['number']} уже в пути!"
         elif ctx["shipping_method"] == "Самовывоз" and ctx["new_status"] == "Готов":
@@ -109,7 +109,7 @@ def _send_site_notification_order_status_to_customer(ctx: dict):
 
     status = "Info"
 
-    if ctx["new_status"] == "Отменен":
+    if ctx["new_status"] == "Отменён":
         status = "Canceled"
 
     if ctx["new_status"] == "Обрабатывается" or ctx["new_status"] == "Ожидает оплаты":

@@ -49,7 +49,7 @@ class TransactionsListView(SingleTableView):
             params["status"] = status
             statuses = {
                 "succeeded": " Успешно",
-                "canceled": "Отменен",
+                "canceled": "Отменён",
                 "pending": "Обрабатывается",
                 "waiting_for_capture": "Требует действий",
             }
@@ -101,7 +101,7 @@ class PaymentsListView(TransactionsListView):
         context["title"] = "Список платежей Yookassa"
         context["status_options"] = [
             ("succeeded", "Платеж успешно завершён"),
-            ("canceled", "Платеж отменен"),
+            ("canceled", "Платеж отменён"),
             ("pending", "Платеж создан и ожидает оплаты от пользователя"),
             (
                 "waiting_for_capture",
@@ -121,7 +121,7 @@ class RefundsListView(TransactionsListView):
         context["title"] = "Список возвратов Юкасса"
         context["status_options"] = [
             ("succeeded", "Возврат успешно завершён"),
-            ("canceled", "Возврат отменен"),
+            ("canceled", "Возврат отменён"),
             ("pending", "Возврат в процессе обработки"),
         ]
         return context
@@ -282,8 +282,6 @@ class AddSourceView(FormView):
                 amount_allocated=form.cleaned_data["amount_allocated"],
                 amount_debited=D(0),
                 amount_refunded=D(0),
-                refundable=False,
-                paid=False,
                 order=self.order,
                 currency=self.order.currency,
                 reference=form.cleaned_data["source_type"],

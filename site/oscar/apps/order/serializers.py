@@ -1,6 +1,8 @@
 from decimal import Decimal as D
 from rest_framework import serializers
 
+from django.db.models.functions import Coalesce, Greatest
+from django.db.models import F
 from django.db import transaction
 from django.conf import settings
 from django.utils.timezone import now
@@ -53,6 +55,12 @@ class OrderLineSerializer(serializers.Serializer):
                 product,
                 stockrecord,
             )
+            if stockrecord.can_track_allocations:
+                stockrecord.num_in_stock = Greatest(
+                    Coalesce(F("num_in_stock"), 0) - line.quantity, 0
+                )
+                stockrecord.save()
+
         else:
             line = self._create_line(order, store, validated_data)
 
@@ -63,7 +71,13 @@ class OrderLineSerializer(serializers.Serializer):
 
         return line
 
-    def update_line(self, instance, validated_data, order, store):
+    def update_line(self, instance, validated_data, order, store, type):
+        line_status = (
+            settings.OSCAR_FAIL_LINE_STATUS
+            if type == "PAYBACK"
+            else settings.OSCAR_SUCCESS_LINE_STATUS
+        )
+        old_quantity = instance.quantity
         if validated_data.get("parent_id", None) != Additional.parent_id:
             product, stockrecord = self._get_product_and_stockrecord(
                 store, validated_data
@@ -71,11 +85,27 @@ class OrderLineSerializer(serializers.Serializer):
             line = self._update_line(
                 instance,
                 validated_data,
+                line_status,
                 product,
                 stockrecord,
             )
+            if stockrecord.can_track_allocations:
+                new_quantity = (
+                    -line.quantity
+                    if type == "PAYBACK"
+                    else (
+                        line.quantity - old_quantity
+                        if type == "CORRECTION"
+                        else line.quantity
+                    )
+                )
+                stockrecord.num_in_stock = Greatest(
+                    Coalesce(F("num_in_stock"), 0) - new_quantity, 0
+                )
+                stockrecord.save()
+
         else:
-            line = self._update_line(instance, validated_data)
+            line = self._update_line(instance, validated_data, line_status)
 
         self._create_or_update_line_price(order, line)
         self._create_or_update_position_discount(
@@ -116,7 +146,7 @@ class OrderLineSerializer(serializers.Serializer):
             name=product.get_name() if product else validated_data["product_name"],
             article=product.article if product else None,
             quantity=validated_data["quantity"],
-            status="Завершён",
+            status=settings.OSCAR_SUCCESS_LINE_STATUS,
             evotor_id=validated_data["uuid"],
             line_price=validated_data["result_sum"],
             line_price_before_discounts=validated_data["sum"],
@@ -124,7 +154,14 @@ class OrderLineSerializer(serializers.Serializer):
             tax_code=validated_data["tax"]["type"],
         )
 
-    def _update_line(self, line, validated_data, product=None, stockrecord=None):
+    def _update_line(
+        self,
+        line,
+        validated_data,
+        line_status,
+        product=None,
+        stockrecord=None,
+    ):
         line.name = product.get_name() if product else validated_data["product_name"]
         line.article = product.article if product else None
         line.product = product
@@ -135,6 +172,7 @@ class OrderLineSerializer(serializers.Serializer):
         line.line_price_before_discounts = validated_data["sum"]
         line.unit_price = validated_data["price"]
         line.tax_code = validated_data["tax"]["type"]
+        line.status = line_status
         line.save()
         return line
 
@@ -261,18 +299,28 @@ class PaymentSerializer(serializers.Serializer):
 
     def update_payment(self, validated_data, order, type):
         source_type = self._get_source_type(validated_data)
-        amount = self._get_transaction_amount(validated_data)
+        transaction_amount = self._get_transaction_amount(validated_data)
+        is_refund = type == "PAYBACK"
+        is_correction = type == "CORRECTION"
 
-        source, _ = Source.objects.update_or_create(
+        source, _ = Source.objects.get_or_create(
             order=order,
             source_type=source_type,
-            defaults={"amount_allocated": amount, "reference": validated_data["type"]},
+            defaults={
+                "reference": validated_data["type"],
+                "amount_allocated": transaction_amount,
+            },
         )
 
-        is_refund = type == "PAYBACK"
+        if is_refund:
+            source.amount_allocated = source.amount_allocated - transaction_amount
+        elif is_correction:
+            source.amount_allocated = transaction_amount
+        source.save()
+
         method = "update_refund" if is_refund else "update_payment"
         getattr(source, method)(
-            amount=amount,
+            amount=transaction_amount,
             reference="Эвотор",
             status="succeeded",
             paid=not is_refund,
@@ -305,9 +353,9 @@ class OrderSerializer(serializers.Serializer):
     def create(self, validated_data):
         with transaction.atomic():
             evotor_id = validated_data.get("evotor_id")
+            store_id = validated_data.get("store_id")
             type = validated_data.get("type")
             number = validated_data.get("number")
-            store_id = validated_data.get("store_id")
             body = validated_data.get("body")
 
             store = Store.objects.get(evotor_id=store_id)
@@ -324,13 +372,15 @@ class OrderSerializer(serializers.Serializer):
         with transaction.atomic():
             store_id = validated_data.get("store_id")
             type = validated_data.get("type")
+            number = validated_data.get("number")
             body = validated_data.get("body")
 
             store = Store.objects.get(evotor_id=store_id)
-            self._check_type(order, type, body)
+            order = self._update_order(order, body, type)
+            self._create_order_note(order, type, body, number)
 
+            self._process_positions(body.get("positions", []), order, store, type)
             self._process_discounts(body.get("doc_discounts", []), order)
-            self._process_positions(body.get("positions", []), order, store)
             self._process_payments(body.get("payments", []), order, type)
 
             return order
@@ -343,12 +393,12 @@ class OrderSerializer(serializers.Serializer):
                 message=str(extras),
             )
 
-    def _process_positions(self, positions, order, store):
+    def _process_positions(self, positions, order, store, type="SELL"):
         for position in positions:
             evotor_id = position.get("uuid")
             try:
                 line = order.lines.get(evotor_id=evotor_id)
-                OrderLineSerializer().update_line(line, position, order, store)
+                OrderLineSerializer().update_line(line, position, order, store, type)
             except Line.DoesNotExist:
                 OrderLineSerializer().create_line(position, order, store)
 
@@ -364,24 +414,17 @@ class OrderSerializer(serializers.Serializer):
             else:
                 PaymentSerializer().create_payment(payment, order, type)
 
-    def _check_type(self, order, type, body):
-        if type == "PAYBACK" and order.status != settings.OSCAR_FAIL_ORDER_STATUS:
-            order.set_status(settings.OSCAR_FAIL_ORDER_STATUS)
-        else:
-            message = "Коррекция возврата" if type == "PAYBACK" else "Коррекция продажи"
-            reason = body.get("reason", None)
-            if reason:
-                message += f". Сообщение: {reason}"
-
-            OrderNote.objects.create(
-                order=order,
-                note_type=OrderNote.SYSTEM,
-                message=message,
-            )
+    def _create_order_note(self, order, type, body, number):
+        message = f'{"Возврат" if type == "PAYBACK" else "Чек коррекции"}. Сообщение: {body.get("reason", f"Номер документа: {number}")}'
+        OrderNote.objects.create(
+            order=order,
+            note_type=OrderNote.SYSTEM,
+            message=message,
+        )
 
     def _create_order(self, evotor_id, number, type, body, store):
         return Order.objects.create(
-            number=(900000 + number),
+            number=f"E{100000 + number}",
             evotor_id=evotor_id,
             site="Эвотор",
             store=store,
@@ -395,6 +438,22 @@ class OrderSerializer(serializers.Serializer):
             date_finish=now(),
             order_time=now(),
         )
+
+    def _update_order(self, order, body, type):
+        new_total = (
+            order.total - body.get("result_sum", 0)
+            if type == "PAYBACK"
+            else body.get("result_sum", 0)
+        )
+        order.status = (
+            settings.OSCAR_SUCCESS_ORDER_STATUS
+            if new_total > 0
+            else settings.OSCAR_FAIL_ORDER_STATUS
+        )
+        order.total = new_total
+        order.date_finish = now()
+        order.save()
+        return order
 
     def to_representation(self, instance):
         paid = sum(

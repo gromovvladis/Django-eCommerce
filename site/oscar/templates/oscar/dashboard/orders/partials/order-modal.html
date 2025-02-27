@@ -11,7 +11,7 @@
   <div>
     <span class="badge mr-3 {% if order.status == 'Завершён' %}
         badge-success
-      {% elif order.status == 'Отменен' %}
+      {% elif order.status == 'Отменён' %}
         badge-danger
       {% elif order.status == 'Готовится' %}
         badge-info
@@ -110,7 +110,7 @@
       </thead>
       <tbody>
         {% for line in lines %}
-          <tr data-id="line-container">
+          <tr data-id="line-container" class="{% if line.status == 'Завершён' %}line-success{% elif line.status == 'Отменён' %}line-canceled{% else %}line-process{% endif %}">
             <td class="image">
               {% if line.product %}
                 {% with image=line.product.primary_image %}
