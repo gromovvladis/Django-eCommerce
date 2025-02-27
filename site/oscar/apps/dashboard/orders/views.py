@@ -1534,7 +1534,7 @@ class OrderDeleteView(DeleteView):
         form = self.get_form()
 
         deletion_denied = self.deletion_denied(self.object)
-        if deletion_denied:
+        if deletion_denied and not request.user.is_superuser:
             return deletion_denied
 
         if form.is_valid():
