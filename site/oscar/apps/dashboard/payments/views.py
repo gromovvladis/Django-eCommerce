@@ -427,6 +427,8 @@ class RefundTransactionView(DetailView):
         amount = D(request.POST.get("amount"))
         source_reference = self.object.source.reference
         payment_method = PaymentManager(source_reference, request.user).get_method()
+        fghdfh = self.object
+        logger.info(self.object)
         payment_method.refund(
             transaction=self.object,
             amount=amount,
@@ -435,12 +437,13 @@ class RefundTransactionView(DetailView):
             "Транзакция №{0} была отменена пользователем. Деньги вернулись клиенту. Сделал возврат пользователь с ID={1}".format(
                 self.object.id, request.user.id
             )
-            )
-            # payment_method.change_order_status(
-            #     tnx_status=refund.status,
-            #     tnx_type="refund",
-            #     order=self.object.source.order,
-            # )
+        )
+
+        # payment_method.change_order_status(
+        #     tnx_status=refund.status,
+        #     tnx_type="refund",
+        #     order=self.object.source.order,
+        # )
         # except Exception as e:
         #     logger.error(
         #         "Ошибка возврата транзакции №{0}, Пользователь: {1}, Ошибка: {2}".format(

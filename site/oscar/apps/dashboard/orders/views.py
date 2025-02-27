@@ -1292,10 +1292,7 @@ class OrderDetailView(EventHandlerMixin, DetailView):
 
     def get_payment_transactions(self):
         # return Transaction.objects.filter(source__order=self.object)
-        transactions = Transaction.objects.filter(source__order=self.object)
-        for trans in transactions:
-            setattr(trans, "source_refundable", trans.source.refundable)
-        return transactions
+        return Transaction.objects.filter(source__order=self.object)
 
     def get_order_note_form(self):
         kwargs = {"order": self.object, "user": self.request.user, "data": None}
