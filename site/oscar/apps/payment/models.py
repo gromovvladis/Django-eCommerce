@@ -120,8 +120,6 @@ class Source(models.Model):
     # a transaction model for a particular payment store.
     reference = models.CharField("Референс", max_length=255, blank=True)
 
-    refundable = models.BooleanField("Возврат возможен?", blank=True, default=False)
-
     paid = models.BooleanField("Оплачено", blank=True, default=False)
 
     # A dictionary of submission data that is stored as part of the
@@ -321,7 +319,6 @@ class Source(models.Model):
         if status == "succeeded":
             self.amount_debited += amount
             self.paid = self.balance >= self.amount_allocated
-            self.refundable = any(trx.refundable for trx in self.transactions.all())
 
         self.save()
 
@@ -344,7 +341,9 @@ class Source(models.Model):
         Обновление существующей транзакции оплаты.
         """
         try:
-            transaction = self.transactions.get(payment_id=payment_id, evotor_id=evotor_id)
+            transaction = self.transactions.get(
+                payment_id=payment_id, evotor_id=evotor_id
+            )
             old_amount = transaction.amount
 
             fields_to_update = {
@@ -377,7 +376,6 @@ class Source(models.Model):
                 if transaction_is_new or updated_fields:
                     self.amount_debited += amount_delta
                     self.paid = self.balance >= self.amount_allocated
-                    self.refundable = self.transactions.filter(refundable=True).exists()
                     self.save()
 
                     if transaction_is_new:
@@ -415,20 +413,19 @@ class Source(models.Model):
         """
         Convenience method for recording refunds against this source
         """
-        if self.refundable:
-            self.amount_refunded += amount
-            self.save()
-            self._create_transaction(
-                txn_type=Transaction.REFUND,
-                amount=amount,
-                reference=reference,
-                status=status,
-                paid=paid,
-                refundable=refundable,
-                receipt=receipt,
-                refund_id=refund_id,
-                evotor_id=evotor_id,
-            )
+        self.amount_refunded += amount
+        self.save()
+        self._create_transaction(
+            txn_type=Transaction.REFUND,
+            amount=amount,
+            reference=reference,
+            status=status,
+            paid=paid,
+            refundable=refundable,
+            receipt=receipt,
+            refund_id=refund_id,
+            evotor_id=evotor_id,
+        )
 
     refund.alters_data = True
 
@@ -466,7 +463,6 @@ class Source(models.Model):
         if status == "succeeded":
             self.amount_refunded += amount
             self.paid = self.balance >= self.amount_allocated
-            self.refundable = any(trx.refundable for trx in self.transactions.all())
 
         self.save()
 
@@ -489,7 +485,9 @@ class Source(models.Model):
         Обновление существующей транзакции возврата.
         """
         try:
-            transaction = self.transactions.get(refund_id=refund_id, evotor_id=evotor_id)
+            transaction = self.transactions.get(
+                refund_id=refund_id, evotor_id=evotor_id
+            )
             old_amount = transaction.amount
 
             # Обновляем только измененные поля
@@ -523,7 +521,6 @@ class Source(models.Model):
                 if transaction_is_new or updated_fields:
                     self.amount_refunded -= amount_delta
                     self.paid = self.balance >= self.amount_allocated
-                    self.refundable = self.transactions.filter(refundable=True).exists()
                     self.save()
 
                     if transaction_is_new:
@@ -538,7 +535,6 @@ class Source(models.Model):
                 reference=reference,
                 status=status,
                 paid=paid,
-                refundable=refundable,
                 receipt=receipt,
                 refund_id=refund_id,
                 evotor_id=evotor_id,

@@ -1135,6 +1135,7 @@ class LineAttribute(models.Model):
         "catalogue.Additional",
         on_delete=models.CASCADE,
         verbose_name="Дополнительный товар",
+        null=True,
     )
 
     value = models.JSONField("Значение", encoder=DjangoJSONEncoder)

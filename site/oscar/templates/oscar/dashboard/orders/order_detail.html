@@ -817,7 +817,7 @@
                         <td class="is_public" data-label="Чек">{{ txn.receipt|yesno:'✔️,❌' }}</td>
                         <td data-label="Дата">{{ txn.date_created }}</td>
                         <td data-label="Возврат">
-                          {% if txn.txn_type == 'Payment' and txn.source_refundable and txn.refundable %}
+                          {% if txn.txn_type == 'Payment' and txn.refundable %}
                             <a class="badge badge-danger" href="{% url 'dashboard:refund-transaction' pk=txn.id %}">Вернуть деньги</a>
                           {% elif txn.txn_type == 'Refund' %}
                             -
