@@ -170,8 +170,6 @@ class Yoomoney(PaymentMethod):
         "ТБ": "terabyte",
     }
 
-    # Payment
-
     def pay(self, order, source, amount=None, email=None):
         try:
             if amount is None:
@@ -279,8 +277,6 @@ class Yoomoney(PaymentMethod):
             return None
 
         return responce
-
-    # Refund
 
     def refund(self, transaction, amount=None):
         try:
