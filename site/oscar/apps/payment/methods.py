@@ -281,6 +281,7 @@ class Yoomoney(PaymentMethod):
     def refund(self, transaction, amount=None):
         try:
             payment_id = transaction.payment_id
+            logger.info(f"payment_id={payment_id}")
             if payment_id:
                 order = transaction.source.order
                 email = order.user.email
@@ -320,17 +321,19 @@ class Yoomoney(PaymentMethod):
                     receipt
                 )
                 request = builder.build()
+                logger.info(f"request={request}")
                 refund = Refund.create(request)
                 transaction.refundable = False
                 transaction.save()
                 self.create_refund_transaction(refund, transaction.source, amount)
+                logger.info(f"refund={refund}")
                 return refund
         except Exception as e:
             try:
-                return e.response.content
+                error = e.response.content
+                raise UnableToRefund(f"Возврат отклонен. Причина: {error}")
             except Exception as e:
-                error = e
-            raise UnableToRefund(f"Невозможно произвести возврат. Причина: {error}")
+                raise UnableToRefund(f"Невозможно произвести возврат. Причина: {e}")
 
     def update_refund(self, refund, source):
         refund_transactions = self.get_transactions(source).filter(txn_type="Refund")
