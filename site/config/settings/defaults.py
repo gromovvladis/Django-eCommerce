@@ -1,6 +1,6 @@
 from django.urls import reverse_lazy
 
-OSCAR_HOMEPAGE = reverse_lazy("home:index")
+OSCAR_HOMEPAGE = reverse_lazy("page:homepage")
 
 # Dynamic class loading
 OSCAR_DYNAMIC_CLASS_LOADER = "oscar.core.loading.default_class_loader"
@@ -262,35 +262,35 @@ OSCAR_DASHBOARD_NAVIGATION = [
     },
     {
         "label": "Эвотор",
-        "icon": "fas fa-crm",
+        "icon": "fas fa-evotor",
         "children": [
             {
                 "label": "Магазины",
-                "url_name": "dashboard:crm-stores",
+                "url_name": "dashboard:evotor-stores",
             },
             {
                 "label": "Терминалы",
-                "url_name": "dashboard:crm-terminals",
+                "url_name": "dashboard:evotor-terminals",
             },
             {
                 "label": "Персонал",
-                "url_name": "dashboard:crm-staffs",
+                "url_name": "dashboard:evotor-staffs",
             },
             {
                 "label": "Группы",
-                "url_name": "dashboard:crm-groups",
+                "url_name": "dashboard:evotor-groups",
             },
             {
                 "label": "Товары",
-                "url_name": "dashboard:crm-products",
+                "url_name": "dashboard:evotor-products",
             },
             {
                 "label": "Дополнительные товары",
-                "url_name": "dashboard:crm-additionals",
+                "url_name": "dashboard:evotor-additionals",
             },
             # {
             #     "label": "Документы",
-            #     "url_name": "dashboard:crm-docs",
+            #     "url_name": "dashboard:evotor-docs",
             # },
         ],
     },
@@ -322,6 +322,14 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "children": [
             {
                 "label": "Страницы",
+                "url_name": "dashboard:page-list",
+            },
+            {
+                "label": "Акции",
+                "url_name": "dashboard:page-list",
+            },
+            {
+                "label": "Промо-категории",
                 "url_name": "dashboard:page-list",
             },
             # {

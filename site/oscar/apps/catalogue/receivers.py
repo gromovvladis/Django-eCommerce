@@ -8,8 +8,8 @@ from oscar.core.thumbnails import get_thumbnailer
 Category = get_model("catalogue", "Category")
 Additional = get_model("catalogue", "Additional")
 ProductImage = get_model("catalogue", "ProductImage")
-PromoCategory = get_model("home", "PromoCategory")
-Action = get_model("home", "Action")
+PromoCategory = get_model("action", "PromoCategory")
+Action = get_model("action", "Action")
 
 
 # pylint: disable=unused-argument

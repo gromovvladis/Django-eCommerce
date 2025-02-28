@@ -1,4 +1,4 @@
-from django_tables2 import A, Column, ManyToManyColumn, TemplateColumn
+from django_tables2 import Column, ManyToManyColumn, TemplateColumn
 from django.utils.translation import ngettext_lazy
 
 from oscar.core.loading import get_class, get_model
@@ -9,7 +9,6 @@ Range = get_model("offer", "Range")
 
 
 class RangeTable(DashboardTable):
-
     name = TemplateColumn(
         verbose_name="Имя",
         template_name="oscar/dashboard/ranges/range_list_row_name.html",

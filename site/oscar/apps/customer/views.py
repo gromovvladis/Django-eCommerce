@@ -13,8 +13,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import generic
 
-from oscar.apps.sms_auth.providers.base import Smsaero
-from oscar.apps.sms_auth.services import GeneratorService
+from oscar.apps.sms.providers.base import Smsaero
+from oscar.apps.sms.services import GeneratorService
 from oscar.apps.customer.mixins import RegisterUserPhoneMixin
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_class, get_classes, get_model

@@ -10,7 +10,7 @@ from django.templatetags.static import static
 from django.contrib.auth import get_user_model
 
 from oscar.core.loading import get_model
-from oscar.apps.sms_auth.providers.base import Smsaero
+from oscar.apps.sms.providers.base import Smsaero
 from oscar.apps.telegram.bot.synchron.send_message import (
     send_message_to_staffs,
     send_message,

@@ -9,12 +9,12 @@ OpenBasketReportGenerator, SubmittedBasketReportGenerator = get_classes(
 )
 OfferReportGenerator = get_class("offer.reports", "OfferReportGenerator")
 VoucherReportGenerator = get_class("voucher.reports", "VoucherReportGenerator")
-CRMReportGenerator = get_class("crm.reports", "CRMReportGenerator")
+EvotorReportGenerator = get_class("evotor.reports", "EvotorReportGenerator")
 
 
 class GeneratorRepository(object):
     generators = [
-        CRMReportGenerator,
+        EvotorReportGenerator,
         OrderReportGenerator,
         ProductReportGenerator,
         UserReportGenerator,

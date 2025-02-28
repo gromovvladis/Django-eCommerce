@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from oscar.apps.sms_auth.conf import conf
+from oscar.apps.sms.conf import conf
 
 
 def get_provider_class():

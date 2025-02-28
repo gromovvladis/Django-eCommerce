@@ -6,7 +6,7 @@
       {% icon file_name='app_mobile_sticker/menu' size=24 stroke='#999' %}
       <span class="mt-1">Меню</span>
     </a>
-    <a href="{% url 'home:actions' %}" data-id="mobile-actions-link" {% if summary == 'actions' %}class="active"{% endif %}>
+    <a href="{% url 'action:action-list' %}" data-id="mobile-actions-link" {% if summary == 'actions' %}class="active"{% endif %}>
       {% icon file_name='app_mobile_sticker/actions' size=24 stroke='#999' %}
       <span class="mt-1">Акции</span>
     </a>

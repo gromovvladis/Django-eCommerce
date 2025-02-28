@@ -444,7 +444,7 @@ var oscar = (function (o, $) {
 
             }
         },
-        crm: {
+        evotor: {
             initTable: function () {
                 var forms = $('form')
                 forms.each(function () {

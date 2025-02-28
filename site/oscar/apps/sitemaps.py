@@ -2,6 +2,7 @@
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 from django.utils.translation import get_language, activate
+
 from oscar.core.loading import get_model
 
 Product = get_model("catalogue", "Product")

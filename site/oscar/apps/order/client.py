@@ -639,7 +639,7 @@
 
 # #     def get_mobilecashier_token(self):
 
-# #         cashier_token = CRMMobileCashierToken.objects.first()
+# #         cashier_token = EvotorMobileCashierToken.objects.first()
 # #         current_time = now()
 
 # #         if cashier_token and (current_time - cashier_token.created_at) < timedelta(
@@ -658,7 +658,7 @@
 # #             token = response.get("token", None)
 
 # #             if token is not None:
-# #                 CRMMobileCashierToken.objects.create(token=token)
+# #                 EvotorMobileCashierToken.objects.create(token=token)
 
 # #             return token
 
@@ -787,7 +787,7 @@
 
 # #     def get_mobilecashier_token(self):
 
-# #         cashier_token = CRMMobileCashierToken.objects.first()
+# #         cashier_token = EvotorMobileCashierToken.objects.first()
 # #         current_time = now()
 
 # #         if cashier_token and (current_time - cashier_token.created_at) < timedelta(
@@ -806,7 +806,7 @@
 # #             token = response.get("token", None)
 
 # #             if token is not None:
-# #                 CRMMobileCashierToken.objects.create(token=token)
+# #                 EvotorMobileCashierToken.objects.create(token=token)
 
 # #             return token
 
@@ -1251,7 +1251,7 @@
 
 # #     def get_mobilecashier_token(self):
 
-# #         cashier_token = CRMMobileCashierToken.objects.first()
+# #         cashier_token = EvotorMobileCashierToken.objects.first()
 # #         current_time = now()
 
 # #         if cashier_token and (current_time - cashier_token.created_at) < timedelta(
@@ -1270,7 +1270,7 @@
 # #             token = response.get("token", None)
 
 # #             if token is not None:
-# #                 CRMMobileCashierToken.objects.create(token=token)
+# #                 EvotorMobileCashierToken.objects.create(token=token)
 
 # #             return token
 
@@ -1399,7 +1399,7 @@
 
 # #     def get_mobilecashier_token(self):
 
-# #         cashier_token = CRMMobileCashierToken.objects.first()
+# #         cashier_token = EvotorMobileCashierToken.objects.first()
 # #         current_time = now()
 
 # #         if cashier_token and (current_time - cashier_token.created_at) < timedelta(
@@ -1418,7 +1418,7 @@
 # #             token = response.get("token", None)
 
 # #             if token is not None:
-# #                 CRMMobileCashierToken.objects.create(token=token)
+# #                 EvotorMobileCashierToken.objects.create(token=token)
 
 # #             return token
 
