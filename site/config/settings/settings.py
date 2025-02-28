@@ -119,7 +119,8 @@ INSTALLED_APPS = [
 
     'config.settings.config.Shop',
 
-    'oscar.apps.home.apps.HomeConfig',
+    'oscar.apps.page.apps.PageConfig',
+    'oscar.apps.action.apps.ActionConfig',
     'oscar.apps.analytics.apps.AnalyticsConfig',
     'oscar.apps.checkout.apps.CheckoutConfig',
     'oscar.apps.address.apps.AddressConfig',
@@ -138,8 +139,8 @@ INSTALLED_APPS = [
     'oscar.apps.voucher.apps.VoucherConfig',
     'oscar.apps.wishlists.apps.WishlistsConfig',
     'oscar.apps.telegram.apps.TelegramConfig',
-    'oscar.apps.crm.apps.CRMConfig',
-    'oscar.apps.sms_auth.apps.SmsConfig',
+    'oscar.apps.evotor.apps.EvotorConfig',
+    'oscar.apps.sms.apps.SmsConfig',
     'oscar.apps.user.apps.UserConfig',
 
     'oscar.apps.dashboard.apps.DashboardConfig',
@@ -155,9 +156,8 @@ INSTALLED_APPS = [
     'oscar.apps.dashboard.vouchers.apps.VouchersDashboardConfig',
     'oscar.apps.dashboard.communications.apps.CommunicationsDashboardConfig',
     'oscar.apps.dashboard.shipping.apps.ShippingDashboardConfig',
-
     'oscar.apps.dashboard.payments.apps.PaymentsDashboardConfig',
-    'oscar.apps.dashboard.crm.apps.CRMDashboardConfig',
+    'oscar.apps.dashboard.evotor.apps.EvotorDashboardConfig',
     'oscar.apps.dashboard.delivery.apps.DeliveryDashboardConfig',
     'oscar.apps.dashboard.telegram.apps.TelegramDashboardConfig',
 
@@ -167,14 +167,15 @@ INSTALLED_APPS = [
     'haystack', # search
     'treebeard', # thumbnail
     'sorl.thumbnail',
+    'celery', # celery
     'compressor', # static
     'rest_framework', # api
     'django_tables2', # tables
-    'celery', # celery
     'django_celery_beat',
     'django_celery_results',
     'django.contrib.sitemaps', # sitemap
 ]
+
 if DEBUG:
     INSTALLED_APPS += ['debug_toolbar']
 

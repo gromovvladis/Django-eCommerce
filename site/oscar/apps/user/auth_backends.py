@@ -3,7 +3,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.core.exceptions import ImproperlyConfigured
 
 from oscar.core.compat import get_user_model
-from oscar.apps.sms_auth.services import AuthService
+from oscar.apps.sms.services import AuthService
 
 User = get_user_model()
 

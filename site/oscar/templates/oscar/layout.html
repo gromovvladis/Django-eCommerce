@@ -96,7 +96,7 @@
 {% endblock %}
 
 {% block templatescripts %}
-  var csrf_token = "{{ csrf_token }}"; var url_get_cookie = "{% url 'home:cookies' %}"; var url_store_api = "{% url 'store:select' %}"; var url_auth_api = "{% url 'customer:api-login' %}"; var url_auth = "{% url 'customer:login' %}";
+  var csrf_token = "{{ csrf_token }}"; var url_get_cookie = "{% url 'page:cookies' %}"; var url_store_api = "{% url 'store:select' %}"; var url_auth_api = "{% url 'customer:api-login' %}"; var url_auth = "{% url 'customer:login' %}";
 {% endblock %}
 
 {% block scripts %}

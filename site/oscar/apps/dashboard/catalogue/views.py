@@ -16,7 +16,7 @@ from django.utils.timezone import now
 
 from oscar.core.loading import get_class, get_classes, get_model
 from oscar.views.generic import ObjectLookupView
-from oscar.apps.crm.signals import (
+from oscar.apps.evotor.signals import (
     send_evotor_category,
     send_evotor_product,
     send_evotor_additional,

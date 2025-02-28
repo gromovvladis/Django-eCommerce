@@ -243,7 +243,7 @@ class GroupForm(forms.ModelForm):
     скидки / offer +
        полный доступ / staff.full_access
 
-    црм / crm +
+    црм / evotor +
        полный доступ / staff.full_access
 
     телеграм / telegram +
