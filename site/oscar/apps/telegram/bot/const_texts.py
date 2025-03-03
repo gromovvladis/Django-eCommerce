@@ -1,4 +1,5 @@
 cancel_text = "Отмена"
+success_text = "Готово"
 phone_text = "Авторизоваться по номеру телефона"
 
 report_text = "Отчет"

@@ -1,21 +1,13 @@
-import json
 import datetime
-from rest_framework.renderers import JSONRenderer
 
 from django.conf import settings
 
-from oscar.apps.order.serializers import OrderSerializer
 from oscar.apps.checkout.signals import post_payment
 from oscar.apps.order.signals import order_status_changed
-from oscar.apps.checkout.signals import post_checkout
 from .tasks import (
     _send_site_notification_new_order_to_customer,
-    _send_site_notification_new_order_to_staff,
     _send_site_notification_order_status_to_customer,
-    _send_order_to_evotor,
-    _send_push_notification_new_order_to_staff,
     _send_sms_notification_order_status_to_customer,
-    _send_telegram_message_new_order_to_staff,
 )
 
 
@@ -69,45 +61,6 @@ def notify_customer_about_order_status(sender, order, **kwargs):
 
 order_status_changed.connect(notify_customer_about_order_status)
 
-
-def active_order_created(sender, order, **kwargs):
-    if order.status not in settings.ORDER_STATUS_SEND_TO_EVOTOR:
-        return
-
-    serializer = OrderSerializer(order)
-    order_json = json.loads(JSONRenderer().render(serializer.data).decode("utf-8"))
-
-    order_str = create_order_list(order)
-    order_time = format_order_time(order.order_time)
-
-    ctx = {
-        "user": order.user.get_name_and_phone(),
-        "user_id": order.user.id,
-        "source": order.sources.first().source_type.name,
-        "shipping_method": order.shipping_method,
-        "order_time": order_time,
-        "number": order.number,
-        "total": int(order.total),
-        "order": order_str,
-        "order_id": order.id,
-        "url": order.get_full_url(),
-        "staff_url": order.get_staff_url(),
-    }
-
-    if settings.CELERY:
-        _send_order_to_evotor.delay(order_json)
-        _send_site_notification_new_order_to_staff.delay(ctx)
-        _send_push_notification_new_order_to_staff.delay(ctx)
-        _send_telegram_message_new_order_to_staff.delay(ctx)
-    else:
-        _send_order_to_evotor(order_json)
-        _send_site_notification_new_order_to_staff(ctx)
-        _send_push_notification_new_order_to_staff(ctx)
-        _send_telegram_message_new_order_to_staff(ctx)
-
-
-order_status_changed.connect(active_order_created)
-post_checkout.connect(active_order_created)
 
 # helpers
 

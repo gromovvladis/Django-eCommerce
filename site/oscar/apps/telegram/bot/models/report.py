@@ -8,6 +8,7 @@ from oscar.core.loading import get_model
 
 User = get_user_model()
 Staff = get_model("user", "Staff")
+NotificationSetting = get_model("user", "NotificationSetting")
 Order = get_model("order", "Order")
 Line = get_model("order", "Line")
 Basket = get_model("basket", "Basket")
@@ -56,7 +57,7 @@ def get_staffs_message():
                 f"Телефон: {getattr(staff.user, 'username', 'Не указан')}\n"
                 f"Должность: {staff.get_role}\n"
                 f"Активен: {'✅' if staff.is_active else '❌'}\n"
-                f"Уведомления: {next((description for key, description in Staff.NOTIF_CHOICES if key == staff.notif), 'Уведомления не настроены')}"
+                f"Уведомления: {", ".join(notif.name for notif in staff.user.notification_settings.filter(code__in=NotificationSetting.STAFF_NOTIF)) if staff.user and staff.user.notification_settings.exists() else "Уведомления не настроены"}"
             )
 
             msg_list.append(msg)

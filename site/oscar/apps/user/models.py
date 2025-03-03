@@ -7,8 +7,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
-from django.contrib.auth.models import PermissionsMixin
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import PermissionsMixin, Group
 
 from oscar.core import compat
 from .tasks import send_sms_async
@@ -49,16 +48,6 @@ class Staff(models.Model):
         default=True,
         db_index=True,
         help_text="Активен сотрудник или нет",
-    )
-    NEW, STATUS, TECHNICAL, OFF = "new-order", "status-order", "technical", "off"
-    NOTIF_CHOICES = (
-        ("new-order", "Только уведомления о новых заказах"),
-        ("status-order", "Уведомления об изменении заказов и новых заказах"),
-        ("technical", "Технические уведомления"),
-        ("off", "Отключить уведомления"),
-    )
-    notif = models.CharField(
-        "Уведомления", choices=NOTIF_CHOICES, max_length=128, default=NEW, db_index=True
     )
 
     @staticmethod
@@ -171,19 +160,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False,
         help_text="Email подтвержден или нет",
     )
-    ORDER, OFFER, OFF = "order", "offer", "off"
-    NOTIF_CHOICES = (
-        ("order", "Только уведомления о заказах"),
-        ("offer", "Уведомления об персональных акциях и предложениях"),
-        ("off", "Отключить уведомления"),
-    )
-
-    notif = models.CharField(
-        "Уведомления",
-        choices=NOTIF_CHOICES,
-        max_length=128,
-        default=ORDER,
-        db_index=True,
+    notification_settings = models.ManyToManyField(
+        "user.NotificationSetting",
+        verbose_name="Настройки уведомлений",
+        related_name="users",
+        blank=True,
     )
 
     date_joined = models.DateTimeField("Дата регистрации", default=timezone.now)
@@ -253,7 +234,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             return "%s (%s)" % (name, self.username)
 
         return "%s" % self.username
-    
+
     @cached_property
     def primary_address(self):
         """
@@ -280,3 +261,42 @@ class User(AbstractBaseUser, PermissionsMixin):
             return send_sms_async.delay(message)
         else:
             return send_sms_async(message)
+
+
+class NotificationSetting(models.Model):
+    ORDER, OFFER, SELL, STATUS, STOCK, TECHNICAL, ERROR = (
+        "order",
+        "offer",
+        "sell",
+        "status",
+        "stock",
+        "technical",
+        "error",
+    )
+    CUSTOMER_CHOICES = (
+        ("order", "Уведомления о заказах"),
+        ("offer", "Уведомления о персональных акциях и предложениях"),
+    )
+    CUSTOMER_NOTIF = ("order", "offer")
+    STAFF_CHOICES = (
+        ("sell", "Уведомления о новых заказах"),
+        ("status", "Уведомления об изменении статусов заказов"),
+        ("stock", "Уведомления о товарных остатках"),
+        ("technical", "Технические уведомления"),
+        ("error", "Уведомления об ошибках"),
+    )
+    STAFF_NOTIF = ("sell", "status", "stock", "technical", "error")
+    code = models.CharField(max_length=128, unique=True)
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = "auth_notificationsetting"
+        verbose_name = "Настройка уведомлений"
+        verbose_name_plural = "Настройки уведомлений"
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.name = dict(self.STAFF_CHOICES + self.CUSTOMER_CHOICES).get(self.code, "")
+        super().save(*args, **kwargs)

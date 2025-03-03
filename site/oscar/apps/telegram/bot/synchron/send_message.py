@@ -9,6 +9,7 @@ from oscar.core.loading import get_model
 
 User = get_user_model()
 Staff = get_model("user", "Staff")
+NotificationSetting = get_model("user", "NotificationSetting")
 TelegramMessage = get_model("telegram", "TelegramMessage")
 
 STAFF_BOT = settings.TELEGRAM_STAFF_BOT_TOKEN
@@ -85,23 +86,26 @@ def send_message_to_staffs(
     bot_token: str = STAFF_BOT,
     **kwargs,
 ):
-    if type == TelegramMessage.TECHNICAL:
-        staffs = Staff.objects.filter(
-            is_active=True, notif=Staff.TECHNICAL, telegram_id__isnull=False
-        ).select_related("user")
-    elif type == TelegramMessage.STATUS:
-        staffs = Staff.objects.filter(
-            is_active=True,
-            notif__in=[Staff.STATUS, Staff.TECHNICAL],
-            telegram_id__isnull=False,
-        ).select_related("user")
-    else:
-        staffs = (
-            Staff.objects.filter(is_active=True, telegram_id__isnull=False)
-            .exclude(notif=Staff.OFF)
-            .select_related("user")
-        )
+    # Словарь для соответствия типа уведомления и кода уведомления
+    notification_codes = {
+        TelegramMessage.SELL: NotificationSetting.SELL,
+        TelegramMessage.STATUS: NotificationSetting.STATUS,
+        TelegramMessage.STOCK: NotificationSetting.STOCK,
+        TelegramMessage.TECHNICAL: NotificationSetting.TECHNICAL,
+        TelegramMessage.ERROR: NotificationSetting.ERROR,
+    }
 
+    # Базовый запрос для фильтрации сотрудников
+    staffs = Staff.objects.filter(
+        is_active=True,
+        telegram_id__isnull=False,
+    ).select_related("user")
+
+    # Если тип уведомления есть в словаре, добавляем фильтр по коду уведомления
+    if type in notification_codes:
+        staffs = staffs.filter(notifications__code=notification_codes[type])
+
+    # Если указан store_id, фильтруем сотрудников по магазину или суперпользователям
     if store_id:
         staffs = staffs.filter(
             Q(user__stores__id=store_id) | Q(user__is_superuser=True)

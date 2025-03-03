@@ -12,6 +12,7 @@ from oscar.apps.telegram.bot.keyboards.default.user_register import (
 from oscar.apps.telegram.bot.states.states import UserAuth
 
 Staff = get_model("user", "Staff")
+NotificationSetting = get_model("user", "NotificationSetting")
 User = get_user_model()
 
 
@@ -55,7 +56,7 @@ async def get_staff_by_contact(number, user_id: int):
 
 async def user_is_staff(telegram_id: int) -> bool:
     try:
-        staff = await Staff.objects.aget(telegram_id=telegram_id, is_active=True)
+        await Staff.objects.aget(telegram_id=telegram_id, is_active=True)
         return True
     except Staff.DoesNotExist:
         return False
@@ -80,13 +81,15 @@ async def check_staff_status(message: Message, state: FSMContext) -> bool:
 async def get_current_notif(telegram_id: int):
     staff = await get_staff_by_telegram_id(telegram_id)
     if staff:
-        return next(
-            (
-                description
-                for key, description in Staff.NOTIF_CHOICES
-                if key == staff.notif
-            ),
-            "Уведомления не настроены",
+        return (
+            ", ".join(
+                notif.name
+                for notif in staff.user.notification_settings.filter(
+                    code__in=NotificationSetting.STAFF_NOTIF
+                )
+            )
+            if staff.user and staff.user.notification_settings.exists()
+            else "Уведомления не настроены"
         )
     return None
 
@@ -94,18 +97,22 @@ async def get_current_notif(telegram_id: int):
 # ================= sync ====================
 
 
-@sync_to_async
+@sync_to_async(thread_sensitive=True)
 def change_notif(telegram_id: str, new_status: str):
     try:
         staff = Staff.objects.get(telegram_id=telegram_id)
-        staff.notif = new_status
+        notif, _ = NotificationSetting.objects.get_or_create(code=new_status)
+
+        if staff.user.notification_settings.filter(code=new_status).exists():
+            staff.user.notification_settings.remove(notif)
+        else:
+            staff.user.notification_settings.add(notif)
         staff.save()
-        return "Настройки уведомлений обновлены"
     except Staff.DoesNotExist:
-        return "Настройки не примены. Телеграм не связан с профилем персонала"
+        pass
 
 
-@sync_to_async
+@sync_to_async(thread_sensitive=True)
 def link_telegram_to_user(phone_number: str, user_id: str):
     """
     Привязывает Telegram ID к пользователю на основе номера телефона.
@@ -121,7 +128,7 @@ def link_telegram_to_user(phone_number: str, user_id: str):
         return None
 
 
-@sync_to_async
+@sync_to_async(thread_sensitive=True)
 def link_telegram_to_staff(phone_number: str, user_id: str):
     """
     Привязывает Telegram ID к пользователю и создает/обновляет запись в Staff.
@@ -138,7 +145,6 @@ def link_telegram_to_staff(phone_number: str, user_id: str):
         defaults={
             "is_active": user.is_active,
             "telegram_id": user_id,
-            "notif": Staff.NEW,
         },
     )
     staff.telegram_id = user_id
@@ -147,6 +153,6 @@ def link_telegram_to_staff(phone_number: str, user_id: str):
     return staff, created
 
 
-@sync_to_async
+@sync_to_async(thread_sensitive=True)
 def get_staffs():
     return Staff.objects.filter(is_active=True)

@@ -11,25 +11,29 @@ class TelegramMessage(models.Model):
     user = models.ForeignKey(
         AUTH_USER_MODEL, verbose_name="Пользователь cайта", on_delete=models.CASCADE
     )
-
-    NEW, STATUS, TECHNICAL, OFFER, MISC = (
-        "new-order",
-        "status-order",
-        "technical",
+    ORDER, OFFER, SELL, STATUS, STOCK, TECHNICAL, ERROR, MISC = (
+        "order",
         "offer",
+        "sell",
+        "status",
+        "stock",
+        "technical",
+        "error",
         "misc",
     )
     TYPE_CHOICES = (
-        ("new-order", "Уведомление о новом заказе"),
-        ("status-order", "Уведомление об изменении статуса заказа"),
-        ("technical", "Техническое уведомление"),
+        ("order", "Уведомление о заказе"),
         ("offer", "Уведомление о персональном предложении"),
+        ("sell", "Уведомления о новом заказе"),
+        ("status", "Уведомление об изменении статуса заказа"),
+        ("stock", "Уведомление о товарной записи"),
+        ("technical", "Техническое уведомление"),
+        ("error", "Уведомление об ошибке"),
         ("misc", "Без типа"),
     )
     type = models.CharField(
         "Тип сообщения", max_length=128, choices=TYPE_CHOICES, default=MISC
     )
-
     message = models.TextField("Описание", blank=True)
     date_sent = models.DateTimeField("Дата отправки", auto_now_add=True)
 

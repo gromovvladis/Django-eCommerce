@@ -16,6 +16,7 @@ from oscar.apps.telegram.bot.synchron.send_message import (
     send_message,
 )
 
+NotificationSetting = get_model("user", "NotificationSetting")
 Notification = get_model("communication", "Notification")
 CommunicationEvent = get_model("order", "CommunicationEvent")
 CommunicationEventType = get_model("communication", "CommunicationEventType")
@@ -35,7 +36,9 @@ def _send_site_notification_new_order_to_staff(ctx: dict):
         "oscar/customer/alerts/staff_new_order_message.html"
     )
     description = "Заказ №%s успешно создан!" % (ctx["number"])
-    staffs = User.objects.filter(is_staff=True)
+    staffs = User.objects.filter(
+        is_staff=True, notification_settings=NotificationSetting.SELL
+    )
 
     for staff in staffs:
         Notification.objects.create(
@@ -229,9 +232,3 @@ def _send_telegram_message_to_staffs(
 @shared_task
 def _send_telegram_message_to_user(telegram_id: int, msg: str, type: str):
     send_message(telegram_id, msg, type)
-
-
-# ================= Evotor =================
-@shared_task
-def _send_order_to_evotor(order_json: dict):
-    pass
