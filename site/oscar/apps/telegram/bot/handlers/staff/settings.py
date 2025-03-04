@@ -32,16 +32,17 @@ async def notif(message: Message, state: FSMContext):
         telegram_id = message.from_user.id
         current_notif = await get_current_notif(telegram_id)
         await message.answer(
-            f"Настройка уведомлений.\n\nТекущие настройки уведомлений:\n<b>{current_notif}</b>",
+            f"Настройка уведомлений.\n\nТекущие настройки уведомлений:\n\n<b>{current_notif}</b>",
             reply_markup=edit_notif_buttons,
         )
 
 
 @settings_router.message(StaffNotif.notif_status, F.text == notif_edit_text)
 async def notif_edit(message: Message, state: FSMContext):
-    await state.set_state(StaffNotif.notif_status)
+    await state.set_state(StaffNotif.notif_edit)
     await message.answer(
-        "Настройка уведомлений", reply_markup=get_notif_keyboard(message.from_user.id)
+        "Настройка уведомлений",
+        reply_markup=await get_notif_keyboard(message.from_user.id),
     )
 
 
@@ -51,18 +52,20 @@ async def notif_cancel(message: Message, state: FSMContext):
     await state.clear()
 
 
-@settings_router.message(StaffNotif.notif_edit, F.text == success_text)
-async def notif_success(message: Message, state: FSMContext):
-    await message.answer("Настройки сохранены!", reply_markup=staff_buttons)
-    await state.clear()
-
-
 @settings_router.callback_query(StaffNotif.notif_edit)
 async def notif_edit(callback: CallbackQuery, state: FSMContext):
     telegram_id = callback.from_user.id
     data = callback.data
-    await change_notif(str(telegram_id), data)
-    new_keyboard = get_notif_keyboard(telegram_id)
+    if data == success_text:
+        await callback.message.answer(
+            "Настройки сохранены!", reply_markup=staff_buttons
+        )
+        await state.clear()
+        await callback.answer()
+        return
+
+    await change_notif(telegram_id, data)
+    new_keyboard = await get_notif_keyboard(telegram_id)
     await callback.message.edit_reply_markup(reply_markup=new_keyboard)
 
 
@@ -73,7 +76,7 @@ async def notif_edit(callback: CallbackQuery, state: FSMContext):
 async def open_site(message: Message, state: FSMContext):
     await state.set_state(StaffSite.open_site)
     await message.answer(
-        "Нажмите на кнопку ниже, чтобы открыть сайт", reply_markup=open_site_button
+        "Нажмите на кнопку ниже, чтобы открыть панель управления", reply_markup=open_site_button
     )
 
 

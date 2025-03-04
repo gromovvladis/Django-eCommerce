@@ -1,17 +1,18 @@
+from asgiref.sync import sync_to_async
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from oscar.apps.telegram.bot.const_texts import success_text
 
 from oscar.core.loading import get_model
 
-Staff = get_model("user", "Staff")
+User = get_model("user", "User")
 
 
-def get_notif_keyboard(telegram_id):
+async def get_notif_keyboard(telegram_id):
     try:
-        staff = Staff.objects.get(telegram_id=telegram_id)
-        notification_codes = set(
-            staff.user.notification_settings.values_list("code", flat=True)
-        )
-
+        user = await User.objects.aget(telegram_id=telegram_id)
+        notification_codes = await sync_to_async(
+            lambda: list(user.notification_settings.values_list("code", flat=True))
+        )()
         keyboard = [
             [
                 InlineKeyboardButton(
@@ -43,14 +44,14 @@ def get_notif_keyboard(telegram_id):
                     callback_data="error",
                 )
             ],
-            [InlineKeyboardButton(text="Готово", callback_data="done")],
+            [InlineKeyboardButton(text="Готово", callback_data=success_text)],
         ]
-    except Staff.DoesNotExist:
+    except User.DoesNotExist:
         keyboard = [
             [
                 InlineKeyboardButton(
                     text="Настройки невозможно изменить. Телеграм не связан с профилем персонала.",
-                    callback_data="success",
+                    callback_data=success_text,
                 )
             ]
         ]

@@ -68,7 +68,12 @@ order_status_changed.connect(notify_customer_about_order_status)
 def create_order_list(order):
     """Создает строку с перечнем товаров"""
     return ", ".join(
-        [f"{line.product.get_name()} ({line.quantity})" for line in order.lines.all()]
+        [
+            (
+                f"{line.product.get_name() if line.product else line.name} ({line.quantity})"
+            )
+            for line in order.lines.all()
+        ]
     )
 
 

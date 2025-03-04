@@ -72,18 +72,10 @@ def get_customers_message():
         return "Список пользователей пуст."
     else:
         users_count = users.count()
-        customers = users.filter(orders__isnull=False)
-        customers_count = customers.count()
-        customers_2orders = (
-            customers.annotate(order_count=Count("orders"))
-            .filter(order_count__gte=2)
-            .count()
-        )
-        customers_5orders = (
-            customers.annotate(order_count=Count("orders"))
-            .filter(order_count__gte=5)
-            .count()
-        )
+        customers = users.annotate(order_count=Count("orders"))
+        customers_count = customers.filter(order_count__gte=1).count()
+        customers_2orders = customers.filter(order_count__gte=2).count()
+        customers_5orders = customers.filter(order_count__gte=5).count()
         open_customer_baskets = Basket.objects.filter(
             status=Basket.OPEN, owner__isnull=False
         ).count()
@@ -92,8 +84,8 @@ def get_customers_message():
         ).count()
 
         order_msg = (
-            f"Всего пользователей: <b>{users_count}</b>\n"
-            f"Всего клиентов: <b>{customers_count}</b>\n"
+            f"Всего клиентов: <b>{users_count}</b>\n"
+            f"Клиенты с заказами: <b>{customers_count}</b>\n"
             f"Клиенты с 2 и более заказами: <b>{customers_2orders}</b>\n"
             f"Клиенты с 5 и более заказами: <b>{customers_5orders}</b>\n"
             f"Открыто авторизованных корзин: <b>{open_customer_baskets}</b>\n"

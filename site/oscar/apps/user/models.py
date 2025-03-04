@@ -23,7 +23,6 @@ class Staff(models.Model):
     first_name = models.CharField("Имя", blank=False, null=True, max_length=255)
     last_name = models.CharField("Фамилия", blank=True, null=True, max_length=255)
     middle_name = models.CharField("Отчество", blank=True, null=True, max_length=255)
-
     role = models.ForeignKey(
         Group,
         on_delete=models.SET_NULL,
@@ -38,9 +37,6 @@ class Staff(models.Model):
     )
     date_of_birth = models.DateField(
         verbose_name="Дата рождения", null=True, blank=True
-    )
-    telegram_id = models.CharField(
-        "ID Телеграм чата", max_length=128, null=True, blank=True
     )
     evotor_id = models.CharField("ID Эвотор", max_length=128, null=True, blank=True)
     is_active = models.BooleanField(

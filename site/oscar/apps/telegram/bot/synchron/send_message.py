@@ -96,23 +96,24 @@ def send_message_to_staffs(
     }
 
     # Базовый запрос для фильтрации сотрудников
-    staffs = Staff.objects.filter(
-        is_active=True,
+    users = User.objects.filter(
+        is_staff=True,
+        staff_profile__is_active=True,
         telegram_id__isnull=False,
-    ).select_related("user")
+    )
 
     # Если тип уведомления есть в словаре, добавляем фильтр по коду уведомления
     if type in notification_codes:
-        staffs = staffs.filter(notifications__code=notification_codes[type])
+        users = users.filter(notification_settings__code=notification_codes[type])
 
     # Если указан store_id, фильтруем сотрудников по магазину или суперпользователям
     if store_id:
-        staffs = staffs.filter(
-            Q(user__stores__id=store_id) | Q(user__is_superuser=True)
+        users = users.filter(
+            Q(stores__id=store_id) | Q(is_superuser=True)
         )
 
-    for staff in staffs:
-        send_message(staff.telegram_id, text, type, staff.user, bot_token, **kwargs)
+    for user in users:
+        send_message(user.telegram_id, text, type, user, bot_token, **kwargs)
 
 
 def send_message_to_customer(

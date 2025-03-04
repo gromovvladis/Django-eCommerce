@@ -48,7 +48,7 @@ def orders_list(orders):
         msg_list = []
         for order in orders:
             order_lines = [
-                f"{line.product.get_name()} ({line.quantity})"
+                f"{line.product.get_name() if line.product else line.name} ({line.quantity})"
                 for line in order.lines.all()
             ]
 

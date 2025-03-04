@@ -1,6 +1,6 @@
 {% load django_tables2 %}
 
-{% if record.telegram_id and record.notifications.exists %}
+{% if record.user.telegram_id and record.user.notification_settings.exists %}
   ✔️
 {% else %}
   ❌

@@ -77,7 +77,12 @@ post_checkout.connect(active_order_created)
 def create_order_list(order):
     """Создает строку с перечнем товаров"""
     return ", ".join(
-        [f"{line.product.get_name()} ({line.quantity})" for line in order.lines.all()]
+        [
+            (
+                f"{line.product.get_name() if line.product else line.name} ({line.quantity})"
+            )
+            for line in order.lines.all()
+        ]
     )
 
 
