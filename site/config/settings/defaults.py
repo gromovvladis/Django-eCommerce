@@ -25,11 +25,11 @@ OSCAR_RECENTLY_VIEWED_PRODUCTS = 10
 # Currency
 OSCAR_DEFAULT_CURRENCY = "RUB"
 OSCAR_CURRENCY_FORMAT = {
-    'RUB': {
-        'currency_digits': False,
-        'format_type': "accounting",
-        'format': '###0\xa0¤',
-    } 
+    "RUB": {
+        "currency_digits": False,
+        "format_type": "accounting",
+        "format": "###0\xa0¤",
+    }
 }
 
 # Paths
@@ -220,7 +220,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Список возвратов",
                 "url_name": "dashboard:refunds-list",
             },
-        ]
+        ],
     },
     {
         "label": "Клиенты",
@@ -351,7 +351,25 @@ OSCAR_DASHBOARD_NAVIGATION = [
         "icon": "fas fa-chart-bar",
         "url_name": "dashboard:reports-index",
     },
-]  
+    # {
+    #     "label": "Настройки",
+    #     "icon": "fas fa-gear",
+    #     "children": [
+    #         {
+    #             "label": "Основные",
+    #             "url_name": "dashboard:page-list",
+    #         },
+    #         {
+    #             "label": "Доставка",
+    #             "url_name": "dashboard:page-list",
+    #         },
+    #         {
+    #             "label": "Промо-категории",
+    #             "url_name": "dashboard:page-list",
+    #         },
+    #     ],
+    # },
+]
 
 OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION = "oscar.apps.dashboard.nav.default_access_fn"
 
@@ -362,29 +380,26 @@ OSCAR_SAVE_SENT_EMAILS_TO_DB = True
 
 # Rest settings
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_METADATA_CLASS": "rest_framework.metadata.SimpleMetadata",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.BasicAuthentication",
     ),
-    'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata',
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
+    "DEFAULT_PARSER_CLASSES": (
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
     ),
-
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser'
-    ),
-    'PAGE_SIZE': 20,
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'DATETIME_FORMAT': '%s',
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ]
+    "PAGE_SIZE": 20,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DATETIME_FORMAT": "%s",
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
 }
 
-AUTH_USER_MODEL = 'user.User'
-PHONENUMBER_DEFAULT_REGION = 'RU'
+AUTH_USER_MODEL = "user.User"
+PHONENUMBER_DEFAULT_REGION = "RU"
 
 
 # =============
@@ -394,145 +409,136 @@ PHONENUMBER_DEFAULT_REGION = 'RU'
 # Sample order/line status settings. This is quite simplistic. It's like you'll
 # want to override the set_status method on the order object to do more
 # sophisticated things.
-OSCAR_SUCCESS_ORDER_STATUS = 'Завершён'
-OSCAR_FAIL_ORDER_STATUS = 'Отменён'
-OSCAR_INITIAL_ORDER_STATUS = 'Обрабатывается'
-OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = 'Ожидает оплаты'
+OSCAR_SUCCESS_ORDER_STATUS = "Завершён"
+OSCAR_FAIL_ORDER_STATUS = "Отменён"
+OSCAR_INITIAL_ORDER_STATUS = "Обрабатывается"
+OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = "Ожидает оплаты"
 
-OSCAR_SUCCESS_LINE_STATUS = 'Завершён'
-OSCAR_INITIAL_LINE_STATUS = 'Обрабатывается'
-OSCAR_FAIL_LINE_STATUS = 'Отменён'
+OSCAR_SUCCESS_LINE_STATUS = "Завершён"
+OSCAR_INITIAL_LINE_STATUS = "Обрабатывается"
+OSCAR_FAIL_LINE_STATUS = "Отменён"
 
 # Доставка:
-    # Наличные (Не доделано):
-    # Обрабатывается  - Готовится - Готов - Доставляется - Завершён
+# Наличные (Не доделано):
+# Обрабатывается  - Готовится - Готов - Доставляется - Завершён
 
-    # Безналичные:
-    # Ожидает оплаты - Оплачен - Готовится - Готов - Доставляется - Завершён
+# Безналичные:
+# Ожидает оплаты - Оплачен - Готовится - Готов - Доставляется - Завершён
 
 # Самовывоз
-    # Наличные (Не доделано):
-    # Ожидает оплаты - Оплачен - Готовится - Готов - Завершён
-    
-    # Безналичные:
-    # Ожидает оплаты - Оплачен - Готовится - Готов - Завершён
+# Наличные (Не доделано):
+# Ожидает оплаты - Оплачен - Готовится - Готов - Завершён
+
+# Безналичные:
+# Ожидает оплаты - Оплачен - Готовится - Готов - Завершён
 
 # This dict defines the new order statuses than an order can move to
 OSCAR_ORDER_STATUS_PIPELINE = {
-    'Обрабатывается': ('Готовится', 'Оплачен', 'Завершён', 'Отменён'),
-
-    'Ожидает оплаты': ('Оплачен', 'Обрабатывается', 'Завершён', 'Отменён'),
-    'Оплачен': ('Готовится', 'Завершён', 'Отменён'),
-
-    'Готовится': ('Готов', 'Завершён', 'Отменён'),
-    'Готов': ('Доставляется', 'Завершён', 'Отменён'),
-    'Доставляется': ('Завершён', 'Отменён'),
-
-    'Завершён': ('Отменён',),
-    'Отменён': (),
+    "Обрабатывается": ("Готовится", "Оплачен", "Завершён", "Отменён"),
+    "Ожидает оплаты": ("Оплачен", "Обрабатывается", "Завершён", "Отменён"),
+    "Оплачен": ("Готовится", "Завершён", "Отменён"),
+    "Готовится": ("Готов", "Завершён", "Отменён"),
+    "Готов": ("Доставляется", "Завершён", "Отменён"),
+    "Доставляется": ("Завершён", "Отменён"),
+    "Завершён": ("Отменён",),
+    "Отменён": (),
 }
 
 PICKUP_NEXT_STATUS_PIPELINE = {
-    'Обрабатывается': 'Готовится',
-    'Ожидает оплаты': 'Оплачен',
-    'Оплачен': 'Готовится',
-    'Готовится': 'Готов',
-    'Готов': 'Завершён',
+    "Обрабатывается": "Готовится",
+    "Ожидает оплаты": "Оплачен",
+    "Оплачен": "Готовится",
+    "Готовится": "Готов",
+    "Готов": "Завершён",
 }
 
 DELIVERY_NEXT_STATUS_PIPELINE = {
-    'Обрабатывается': 'Готовится',
-    'Ожидает оплаты': 'Оплачен',
-    'Оплачен': 'Готовится',
-    'Готовится': 'Готов',
-    'Готов': 'Доставляется',
-    'Доставляется': 'Завершён',
+    "Обрабатывается": "Готовится",
+    "Ожидает оплаты": "Оплачен",
+    "Оплачен": "Готовится",
+    "Готовится": "Готов",
+    "Готов": "Доставляется",
+    "Доставляется": "Завершён",
 }
 
 OSCAR_LINE_STATUS_PIPELINE = {
-    'Обрабатывается': ('Готовится', 'Отменён'),
-    'Готовится': ('Готов', 'Отменён'),
-    'Готов': ('Завершён', 'Отменён'),
-    'Отменён': (),
-    'Завершён': (),
+    "Обрабатывается": ("Готовится", "Отменён"),
+    "Готовится": ("Готов", "Отменён"),
+    "Готов": ("Завершён", "Отменён"),
+    "Отменён": (),
+    "Завершён": (),
 }
 
 # This dict defines the line statuses that will be set when an order's status
 # is changed
 OSCAR_ORDER_STATUS_CASCADE = {
-    'Готовится': 'Готовится',
-    'Готов': 'Готов',
-    'Завершён': 'Завершён',
-    'Отменён': 'Отменён',
+    "Готовится": "Готовится",
+    "Готов": "Готов",
+    "Завершён": "Завершён",
+    "Отменён": "Отменён",
 }
 
 ORDER_ACTIVE_STATUSES = (
-    'Обрабатывается',
-    'Оплачен',
-    'Готовится',
-    'Готов',
+    "Обрабатывается",
+    "Оплачен",
+    "Готовится",
+    "Готов",
 )
 
 ORDER_BUSY_STATUSES = (
-    'Ожидает оплаты',
-    'Обрабатывается',
-    'Оплачен',
-    'Готовится',
+    "Ожидает оплаты",
+    "Обрабатывается",
+    "Оплачен",
+    "Готовится",
 )
 
 ORDER_FINAL_STATUSES = (
-    'Завершён', 
-    'Отменён',
+    "Завершён",
+    "Отменён",
 )
 
 ORDER_STATUS_SEND_TO_EVOTOR = (
-    'Обрабатывается', 
-    'Оплачен', 
+    "Обрабатывается",
+    "Оплачен",
 )
 
 WEBSHOP_PAYMENT_CHOICES = (
-    ('ONLINECARD', 'Картой Онлайн'),
-    ('ELECTRON', 'Картой в магазине'),
-    ('CASH', 'Наличные'),
+    ("YOOMONEY", "Картой Онлайн"),
+    ("ELECTRON", "Картой в магазине"),
+    ("CASH", "Наличные"),
 )
 
-ONLINE_PAYMENTS = (
-    'ONLINECARD',
-)
+ONLINE_PAYMENTS = ("YOOMONEY",)
 
 OFFLINE_PAYMENTS = (
-    'CASH',
-    'ELECTRON',
+    "CASH",
+    "ELECTRON",
 )
 
-CASH_PAYMENTS = (
-    'CASH',
-)
+CASH_PAYMENTS = ("CASH",)
 
-OFFLINE_ORDERS = (
-    'Эвотор',
-)
+OFFLINE_ORDERS = ("Эвотор",)
 
 PAYMENT_STATUS = {
-    'succeeded': 'Успешная оплата',
-    'canceled': 'Оплата не удалась',
-    'pending': 'Платеж обрабатвается',
+    "succeeded": "Успешная оплата",
+    "canceled": "Оплата не удалась",
+    "pending": "Платеж обрабатвается",
 }
 
 REFUND_STATUS = {
-    'succeeded': 'Успешный возврат',
-    'canceled': 'Возврат не удался',
-    'pending': 'Возврат обрабатывается',
+    "succeeded": "Успешный возврат",
+    "canceled": "Возврат не удался",
+    "pending": "Возврат обрабатывается",
 }
 
 PAYMENT_ORDER_STATUS = {
-    'succeeded': 'Оплачен',
-    'canceled': 'Отменён',
-    'pending': 'Обрабатывается',
+    "succeeded": "Оплачен",
+    "canceled": "Отменён",
+    "pending": "Обрабатывается",
 }
 
 REFUND_ORDER_STATUS = {
-    'succeeded': 'Отменён',
-    'canceled': 'Оплачен',
-    'pending': 'Обрабатывается',
+    "succeeded": "Отменён",
+    "canceled": "Оплачен",
+    "pending": "Обрабатывается",
 }

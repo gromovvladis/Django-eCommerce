@@ -13,7 +13,7 @@ admin.autodiscover()
 urlpatterns = [
     # Include admin as convenience. It's unsupported and only included
     # for developers.
-    path("gromov/", admin.site.urls),
+    path("superadmin/", admin.site.urls),
     # include a basic sitemap
     path("sitemap.xml", views.index, {"sitemaps": base_sitemaps}),
     path(

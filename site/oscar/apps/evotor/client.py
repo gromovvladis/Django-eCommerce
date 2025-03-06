@@ -221,6 +221,8 @@ class EvotorAPICloud:
                 error = "Превышено максимальное количество запросов Эвотор в текущем периоде."
             logger.error(f"Ошибка HTTP запроса при отправке Эвотор запроса: {http_err}")
             return {"error": error}
+        except ConnectionError:
+            return {"error": "Ошибка интернет соединения."}
         except Exception as err:
             if response is not None and response.status_code == 204:
                 return {}
@@ -303,10 +305,10 @@ class EvotorStoreClient(EvotorAPICloud):
 
     def create_or_update_site_stores(self, stores_json, is_filtered=False):
         try:
+            stores_list = []
             error_msgs = []
             evotor_ids = []
             json_valid = True
-            created = False
             stores = {obj.evotor_id: obj for obj in Store.objects.all()}
             for store_json in stores_json:
                 evotor_id = store_json.get("id")
@@ -316,23 +318,23 @@ class EvotorStoreClient(EvotorAPICloud):
                 if store:
                     serializer = StoreSerializer(store, data=store_json)
                 else:
-                    created = True
                     serializer = StoreSerializer(data=store_json)
 
                 if serializer.is_valid():
                     serializer.save()
-                    event_type = EvotorEvent.CREATION if created else EvotorEvent.UPDATE
-                    EvotorEvent.objects.create(
-                        body="Store created / or updated",
-                        sender=EvotorEvent.STORE,
-                        event_type=event_type,
-                    )
+                    stores_list.append(store_json.get("name", "Магазин"))
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(
                         f"Ошибка сериализации магазина: {serializer.errors}"
                     )
+            if stores_list:
+                EvotorEvent.objects.create(
+                    body=f"Добавлены или изменены магазины: {', '.join(stores_list)}",
+                    sender=EvotorEvent.STORE,
+                    event_type=EvotorEvent.UPDATE,
+                )
 
             if not json_valid:
                 logger.error(f"Ошибка json: {error_msgs}")
@@ -352,10 +354,10 @@ class EvotorStoreClient(EvotorAPICloud):
 
     def create_or_update_site_terminals(self, terminals_json, is_filtered=False):
         try:
+            terminal_list = []
             error_msgs = []
             evotor_ids = []
             json_valid = True
-            created = False
             terminals = {obj.evotor_id: obj for obj in Terminal.objects.all()}
             for terminal_json in terminals_json:
                 evotor_id = terminal_json.get("id")
@@ -365,23 +367,24 @@ class EvotorStoreClient(EvotorAPICloud):
                 if trm:
                     serializer = TerminalSerializer(trm, data=terminal_json)
                 else:
-                    created = True
                     serializer = TerminalSerializer(data=terminal_json)
 
                 if serializer.is_valid():
                     serializer.save()
-                    event_type = EvotorEvent.CREATION if created else EvotorEvent.UPDATE
-                    EvotorEvent.objects.create(
-                        body="Store created / or updated",
-                        sender=EvotorEvent.TERMINAL,
-                        event_type=event_type,
-                    )
+                    terminal_list.append(terminal_json.get("id", "Терминал"))
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(
                         f"Ошибка сериализации терминалов: {serializer.errors}"
                     )
+
+            if terminal_list:
+                EvotorEvent.objects.create(
+                    body=f"Добавлены или изменены терминалы: {', '.join(terminal_list)}",
+                    sender=EvotorEvent.TERMINAL,
+                    event_type=EvotorEvent.UPDATE,
+                )
 
             if not json_valid:
                 logger.error(f"Ошибка json: {error_msgs}")
@@ -534,10 +537,10 @@ class EvotorStaffClient(EvotorAPICloud):
 
     def create_or_update_site_roles(self, roles_json, is_filtered=False):
         try:
+            role_list = []
             error_msgs = []
             evotor_ids = []
             json_valid = True
-            created = False
             roles = {obj.evotor_id: obj for obj in Group.objects.all()}
             for role_json in roles_json:
                 evotor_id = role_json.get("id")
@@ -546,23 +549,24 @@ class EvotorStaffClient(EvotorAPICloud):
                 if role:
                     serializer = UserGroupSerializer(role, data=role_json)
                 else:
-                    created = True
                     serializer = UserGroupSerializer(data=role_json)
 
                 if serializer.is_valid():
                     serializer.save()
-                    event_type = EvotorEvent.CREATION if created else EvotorEvent.UPDATE
-                    EvotorEvent.objects.create(
-                        body="Role role created / or updated",
-                        sender=EvotorEvent.STAFF,
-                        event_type=event_type,
-                    )
+                    role_list.append(role_json.get("name", "Роль сотрудников"))
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(
                         f"Ошибка сериализации роли сотрудника: {serializer.errors}"
                     )
+
+            if role_list:
+                EvotorEvent.objects.create(
+                    body=f"Добавлены или изменены роли сотрудников: {', '.join(role_list)}",
+                    sender=EvotorEvent.STAFF,
+                    event_type=EvotorEvent.UPDATE,
+                )
 
             if not json_valid:
                 logger.error(f"Ошибка json: {error_msgs}")
@@ -584,8 +588,8 @@ class EvotorStaffClient(EvotorAPICloud):
         try:
             error_msgs = []
             evotor_ids = []
+            staff_list = []
             json_valid = True
-            created = False
             staffs = {obj.evotor_id: obj for obj in Staff.objects.all()}
             for staff_json in staffs_json:
                 evotor_id = staff_json.get("id")
@@ -594,16 +598,15 @@ class EvotorStaffClient(EvotorAPICloud):
                 if staff:
                     serializer = StaffSerializer(staff, data=staff_json)
                 else:
-                    created = True
                     serializer = StaffSerializer(data=staff_json)
 
                 if serializer.is_valid():
                     serializer.save()
-                    event_type = EvotorEvent.CREATION if created else EvotorEvent.UPDATE
-                    EvotorEvent.objects.create(
-                        body="Staff created / or updated",
-                        sender=EvotorEvent.STAFF,
-                        event_type=event_type,
+                    staff_list.append(
+                        ", ".join(
+                            staff_json.get("name", "Имя сотрудника"),
+                            staff_json.get("last_name", "Фамилия сотрудника"),
+                        )
                     )
                 else:
                     json_valid = False
@@ -611,6 +614,13 @@ class EvotorStaffClient(EvotorAPICloud):
                     error_msgs.append(
                         f"Ошибка сериализации сотрудника: {serializer.errors}"
                     )
+
+            if staff_list:
+                EvotorEvent.objects.create(
+                    body=f"Добавлены или изменены сотрудники: {', '.join(staff_list)}",
+                    sender=EvotorEvent.STAFF,
+                    event_type=EvotorEvent.UPDATE,
+                )
 
             if not json_valid:
                 logger.error(f"Ошибка json: {error_msgs}")
@@ -973,7 +983,7 @@ class EvotorGroupClient(EvotorAPICloud):
             error_msgs = []
             category_evotor_ids = []
             product_evotor_ids = []
-            created = False
+            group_list = []
             json_valid = True
             categories = {obj.evotor_id: obj for obj in Category.objects.all()}
             products = {obj.evotor_id: obj for obj in Product.objects.all()}
@@ -994,23 +1004,25 @@ class EvotorGroupClient(EvotorAPICloud):
                 if instance:
                     serializer = ProductGroupSerializer(instance, data=group_json)
                 else:
-                    created = True
                     serializer = ProductGroupSerializer(data=group_json)
 
                 if serializer.is_valid():
-                    group = serializer.save()
-                    event_type = EvotorEvent.CREATION if created else EvotorEvent.UPDATE
-                    EvotorEvent.objects.create(
-                        body=f"ProductGroup created / or updated - { group.name }",
-                        sender=EvotorEvent.GROUP,
-                        event_type=event_type,
-                    )
+                    serializer.save()
+                    group_list.append(group_json.get("name", "Группа Эвотор без имени"))
+
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(
                         f"Ошибка сериализации группы товаров или модификации товаров: {serializer.errors}"
                     )
+
+            if group_list:
+                EvotorEvent.objects.create(
+                    body=f"Добавлены или изменены группы товаров: {', '.join(group_list)}",
+                    sender=EvotorEvent.GROUP,
+                    event_type=EvotorEvent.UPDATE,
+                )
 
             if not json_valid:
                 logger.error(f"Ошибка json: {error_msgs}")
@@ -1022,9 +1034,9 @@ class EvotorGroupClient(EvotorAPICloud):
                         category.evotor_id = None
                         category.save()
                 for product in products.values():
-                    if category.evotor_id not in product_evotor_ids:
-                        category.evotor_id = None
-                        category.save()
+                    if product.evotor_id not in product_evotor_ids:
+                        product.evotor_id = None
+                        product.save()
 
         except Exception as e:
             logger.error(
@@ -1538,8 +1550,8 @@ class EvotorProductClient(EvotorGroupClient):
         try:
             error_msgs = []
             evotor_ids = []
+            product_list = []
             json_valid = True
-            created = False
             products = {obj.evotor_id: obj for obj in Product.objects.all()}
             for product_json in products_json:
                 parent_id = product_json.get("parent_id", None)
@@ -1552,23 +1564,25 @@ class EvotorProductClient(EvotorGroupClient):
                 if prd:
                     serializer = ProductSerializer(prd, data=product_json)
                 else:
-                    created = True
                     serializer = ProductSerializer(data=product_json)
 
                 if serializer.is_valid():
                     product = serializer.save()
-                    event_type = EvotorEvent.CREATION if created else EvotorEvent.UPDATE
-                    EvotorEvent.objects.create(
-                        body=f"Product created / updated - { product.name }",
-                        sender=EvotorEvent.PRODUCT,
-                        event_type=event_type,
-                    )
+                    product_list.append(product_json.get("name", "Товар без имени"))
+
                 else:
                     json_valid = False
                     logger.error("Ошибка при сериализации %s" % serializer.errors)
                     error_msgs.append(
                         f"Ошибка сериализации товара: {serializer.errors}"
                     )
+
+            if product_list:
+                EvotorEvent.objects.create(
+                    body=f"Добавлены или изменены товары: {', '.join(product_list)}",
+                    sender=EvotorEvent.PRODUCT,
+                    event_type=EvotorEvent.UPDATE,
+                )
 
             if not json_valid:
                 logger.error(f"Ошибка json: {error_msgs}")
@@ -1831,8 +1845,8 @@ class EvotorAdditionalClient(EvotorProductClient):
         try:
             error_msgs = []
             evotor_ids = []
+            additioanl_list = []
             json_valid = True
-            created = False
             additionals = {obj.evotor_id: obj for obj in Additional.objects.all()}
             for additional_json in additionals_json:
                 parent_id = additionals_json.get("parent_id", None)
@@ -1846,16 +1860,12 @@ class EvotorAdditionalClient(EvotorProductClient):
                 if addit:
                     serializer = AdditionalSerializer(addit, data=additional_json)
                 else:
-                    created = True
                     serializer = AdditionalSerializer(data=additional_json)
 
                 if serializer.is_valid():
                     additional = serializer.save()
-                    event_type = EvotorEvent.CREATION if created else EvotorEvent.UPDATE
-                    EvotorEvent.objects.create(
-                        body=f"Additional created / updated - { additional.name }",
-                        sender=EvotorEvent.PRODUCT,
-                        event_type=event_type,
+                    additioanl_list.append(
+                        additional_json.get("name", "Дополнительный товар без имени")
                     )
                 else:
                     json_valid = False
@@ -1863,6 +1873,13 @@ class EvotorAdditionalClient(EvotorProductClient):
                     error_msgs.append(
                         f"Ошибка сериализации доп. товара: {serializer.errors}"
                     )
+
+            if additioanl_list:
+                EvotorEvent.objects.create(
+                    body=f"Добавлены или изменены дополнительные товары: {', '.join(additioanl_list)}",
+                    sender=EvotorEvent.PRODUCT,
+                    event_type=EvotorEvent.UPDATE,
+                )
 
             if not json_valid:
                 logger.error(f"Ошибка json: {error_msgs}")

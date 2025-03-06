@@ -33,7 +33,7 @@ var emailBlock = document.querySelector('[data-field="email-field"]');
 var emailField = emailBlock.querySelector('#email_field_label');
 
 const OFFLINE_PAYMENT = ['CASH', 'ELECTRON'];
-const ONLINE_PAYMENT = ['SBP', 'ONLINECARD'];
+const ONLINE_PAYMENT = ['SBP', 'YOOMONEY'];
 const baseURL = window.location.origin;
 
 var deliveryTimeMethod = "now";

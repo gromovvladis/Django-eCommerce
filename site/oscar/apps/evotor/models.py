@@ -3,23 +3,26 @@ from django.db import models
 
 class EvotorEvent(models.Model):
     body = models.TextField()
-    TERMINAL, STORE, ORDER, DOC = "TERMINAL", "STORE", "ORDER", "DOC"
-    INSTALLATION, STAFF, PRODUCT, GROUP, MICS = (
+    INSTALLATION, STORE, TERMINAL, STAFF, GROUP, PRODUCT, ORDER, DOC, MICS = (
         "INSTALLATION",
+        "STORE",
+        "TERMINAL",
         "STAFF",
-        "PRODUCT",
         "GROUP",
+        "PRODUCT",
+        "ORDER",
+        "DOC",
         "MICS",
     )
     sender_choices = (
-        (TERMINAL, "Терминал"),
+        (INSTALLATION, "Установка / Удаление"),
         (STORE, "Магазин"),
+        (TERMINAL, "Терминал"),
+        (STAFF, "Персонал"),
+        (GROUP, "Группа"),
+        (PRODUCT, "Товар"),
         (ORDER, "Заказ"),
         (DOC, "Документы"),
-        (INSTALLATION, "Установка / Удаление"),
-        (STAFF, "Персонал"),
-        (PRODUCT, "Товар"),
-        (GROUP, "Группа"),
         (MICS, "Неизвестно"),
     )
     sender = models.CharField(max_length=32, choices=sender_choices, default=MICS)
@@ -40,7 +43,7 @@ class EvotorEvent(models.Model):
         (BULK, "Переодическая задача"),
         (ERROR, "Ошибка"),
     )
-    event_type = models.CharField(max_length=255, choices=type_choices, default=INFO)
+    event_type = models.CharField(max_length=32, choices=type_choices, default=INFO)
 
     date_created = models.DateTimeField("Дата создания", auto_now_add=True)
 
@@ -104,13 +107,3 @@ class EvotorBulk(models.Model):
 
     def __str__(self):
         return f"{self.object_type} - {self.status} - {self.date_finish}"
-
-
-# class EvotorMobileCashierToken(models.Model):
-#     token = models.CharField(max_length=255, unique=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-#     class Meta:
-#         ordering = ("-created_at",)
-#         verbose_name = "Токен пользователя мобильного кассира Эвотор"
-#         verbose_name_plural = "Токены пользователя мобильного кассира Эвотор"

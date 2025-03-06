@@ -11,7 +11,7 @@ class StaffOrders(StatesGroup):
 
 class StaffNotif(StatesGroup):
     notif_status = State()
-    status_edit = State()
+    notif_edit = State()
 
 
 class StaffSite(StatesGroup):

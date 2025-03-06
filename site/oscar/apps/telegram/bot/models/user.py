@@ -2,8 +2,6 @@ from asgiref.sync import sync_to_async
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from django.db.models import Q
-
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_model
 from oscar.apps.telegram.bot.keyboards.default.user_register import (
@@ -12,6 +10,7 @@ from oscar.apps.telegram.bot.keyboards.default.user_register import (
 from oscar.apps.telegram.bot.states.states import UserAuth
 
 Staff = get_model("user", "Staff")
+NotificationSetting = get_model("user", "NotificationSetting")
 User = get_user_model()
 
 
@@ -23,14 +22,9 @@ async def get_user_by_telegram_id(telegram_id: int):
         return None
 
 
-async def get_or_create_staff_by_user_id(user_id: int):
-    user, created = await Staff.objects.aget_or_create(telegram_id=user_id)
-    return user
-
-
 async def get_staff_by_telegram_id(telegram_id: int):
     try:
-        staff = await Staff.objects.aget(telegram_id=telegram_id)
+        staff = await Staff.objects.aget(user__telegram_id=telegram_id)
         return staff
     except Staff.DoesNotExist:
         return None
@@ -55,7 +49,7 @@ async def get_staff_by_contact(number, user_id: int):
 
 async def user_is_staff(telegram_id: int) -> bool:
     try:
-        staff = await Staff.objects.aget(telegram_id=telegram_id, is_active=True)
+        await Staff.objects.aget(user__telegram_id=telegram_id, is_active=True)
         return True
     except Staff.DoesNotExist:
         return False
@@ -78,42 +72,49 @@ async def check_staff_status(message: Message, state: FSMContext) -> bool:
 
 
 async def get_current_notif(telegram_id: int):
-    staff = await get_staff_by_telegram_id(telegram_id)
-    if staff:
-        return next(
-            (
-                description
-                for key, description in Staff.NOTIF_CHOICES
-                if key == staff.notif
-            ),
-            "Уведомления не настроены",
+    user = await get_user_by_telegram_id(telegram_id)
+    if not user:
+        return "Пользователь не найден"
+
+    notification_settings = await sync_to_async(
+        lambda: list(
+            user.notification_settings.filter(
+                code__in=NotificationSetting.STAFF_NOTIF
+            ).all()
         )
-    return None
+    )()
+
+    if not notification_settings:
+        return "Уведомления не настроены"
+
+    return "\n".join(notif.name for notif in notification_settings)
 
 
 # ================= sync ====================
 
 
-@sync_to_async
+@sync_to_async(thread_sensitive=True)
 def change_notif(telegram_id: str, new_status: str):
     try:
-        staff = Staff.objects.get(telegram_id=telegram_id)
-        staff.notif = new_status
-        staff.save()
-        return "Настройки уведомлений обновлены"
+        user = User.objects.get(telegram_id=telegram_id)
+        notif, _ = NotificationSetting.objects.get_or_create(code=new_status)
+
+        if user.notification_settings.filter(code=new_status).exists():
+            user.notification_settings.remove(notif)
+        else:
+            user.notification_settings.add(notif)
+        user.save()
     except Staff.DoesNotExist:
-        return "Настройки не примены. Телеграм не связан с профилем персонала"
+        pass
 
 
-@sync_to_async
+@sync_to_async(thread_sensitive=True)
 def link_telegram_to_user(phone_number: str, user_id: str):
     """
     Привязывает Telegram ID к пользователю на основе номера телефона.
     """
     try:
-        user = User.objects.filter(Q(is_staff=True) | Q(groups__isnull=False)).get(
-            username=phone_number
-        )
+        user = User.objects.get(username=phone_number)
         user.telegram_id = user_id
         user.save()
         return user
@@ -121,15 +122,15 @@ def link_telegram_to_user(phone_number: str, user_id: str):
         return None
 
 
-@sync_to_async
+@sync_to_async(thread_sensitive=True)
 def link_telegram_to_staff(phone_number: str, user_id: str):
     """
     Привязывает Telegram ID к пользователю и создает/обновляет запись в Staff.
     """
-    # Ищем пользователя с правами staff или группами
-    user, _ = User.objects.filter(
-        Q(is_staff=True) | Q(groups__isnull=False)
-    ).get_or_create(username=phone_number, defaults={"telegram_id": user_id})
+    user, _ = User.objects.get_or_create(
+        username=phone_number, defaults={"telegram_id": user_id}
+    )
+    user.is_staff = True
     user.telegram_id = user_id
     user.save()
 
@@ -137,16 +138,12 @@ def link_telegram_to_staff(phone_number: str, user_id: str):
         user=user,
         defaults={
             "is_active": user.is_active,
-            "telegram_id": user_id,
-            "notif": Staff.NEW,
         },
     )
-    staff.telegram_id = user_id
-    staff.save()
 
     return staff, created
 
 
-@sync_to_async
+@sync_to_async(thread_sensitive=True)
 def get_staffs():
     return Staff.objects.filter(is_active=True)

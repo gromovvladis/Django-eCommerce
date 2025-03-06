@@ -8,6 +8,7 @@ from oscar.core.loading import get_model
 
 User = get_user_model()
 Staff = get_model("user", "Staff")
+NotificationSetting = get_model("user", "NotificationSetting")
 Order = get_model("order", "Order")
 Line = get_model("order", "Line")
 Basket = get_model("basket", "Basket")
@@ -56,7 +57,7 @@ def get_staffs_message():
                 f"Телефон: {getattr(staff.user, 'username', 'Не указан')}\n"
                 f"Должность: {staff.get_role}\n"
                 f"Активен: {'✅' if staff.is_active else '❌'}\n"
-                f"Уведомления: {next((description for key, description in Staff.NOTIF_CHOICES if key == staff.notif), 'Уведомления не настроены')}"
+                f"Уведомления: {", ".join(notif.name for notif in staff.user.notification_settings.filter(code__in=NotificationSetting.STAFF_NOTIF)) if staff.user and staff.user.notification_settings.exists() else "Уведомления не настроены"}"
             )
 
             msg_list.append(msg)
@@ -71,18 +72,10 @@ def get_customers_message():
         return "Список пользователей пуст."
     else:
         users_count = users.count()
-        customers = users.filter(orders__isnull=False)
-        customers_count = customers.count()
-        customers_2orders = (
-            customers.annotate(order_count=Count("orders"))
-            .filter(order_count__gte=2)
-            .count()
-        )
-        customers_5orders = (
-            customers.annotate(order_count=Count("orders"))
-            .filter(order_count__gte=5)
-            .count()
-        )
+        customers = users.annotate(order_count=Count("orders"))
+        customers_count = customers.filter(order_count__gte=1).count()
+        customers_2orders = customers.filter(order_count__gte=2).count()
+        customers_5orders = customers.filter(order_count__gte=5).count()
         open_customer_baskets = Basket.objects.filter(
             status=Basket.OPEN, owner__isnull=False
         ).count()
@@ -91,8 +84,8 @@ def get_customers_message():
         ).count()
 
         order_msg = (
-            f"Всего пользователей: <b>{users_count}</b>\n"
-            f"Всего клиентов: <b>{customers_count}</b>\n"
+            f"Всего клиентов: <b>{users_count}</b>\n"
+            f"Клиенты с заказами: <b>{customers_count}</b>\n"
             f"Клиенты с 2 и более заказами: <b>{customers_2orders}</b>\n"
             f"Клиенты с 5 и более заказами: <b>{customers_5orders}</b>\n"
             f"Открыто авторизованных корзин: <b>{open_customer_baskets}</b>\n"

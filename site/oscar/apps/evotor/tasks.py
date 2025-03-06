@@ -31,6 +31,7 @@ def process_bulk_task(self, bulk_evotor_id):
             return
 
         EvotorEvent.objects.create(
+            body="Добавлена переодическая задача",
             sender=(
                 EvotorEvent.PRODUCT
                 if bulk.object_type == bulk.PRODUCT

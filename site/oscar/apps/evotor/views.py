@@ -111,7 +111,7 @@ class EvotorInstallationEndpointView(APIView):
             return not_allowed
 
         EvotorEvent.objects.create(
-            body=f"Terminals recived {request.data}",
+            body=f"Приложение установлено {request.data}",
             sender=EvotorEvent.INSTALLATION,
             event_type=EvotorEvent.INFO,
         )
@@ -163,7 +163,7 @@ class EvotorStoreEndpointView(APIView):
 
         stores = []
         for store_json in stores_json:
-            stores.append(store_json.get("id", "Магазин"))
+            stores.append(store_json.get("name", "Магазин"))
 
         EvotorEvent.objects.create(
             body=f"Добавлены или изменены магазины: {', '.join(stores)}",
@@ -231,7 +231,12 @@ class EvotorStaffEndpointView(APIView):
 
         staffs = []
         for staff_json in staffs_json:
-            staffs.append(staff_json.get("id", "Сотрудник"))
+            staffs.append(
+                ", ".join(
+                    staff_json.get("name", "Имя сотрудника"),
+                    staff_json.get("last_name", "Фамилия сотрудника"),
+                )
+            )
 
         EvotorEvent.objects.create(
             body=f"Добавлены или изменены сотрудники: {', '.join(staffs)}",
@@ -261,7 +266,7 @@ class EvotorRoleEndpointView(APIView):
 
         roles = []
         for role_json in roles_json:
-            roles.append(role_json.get("id", "Роль сотрудников"))
+            roles.append(role_json.get("name", "Роль сотрудников"))
 
         EvotorEvent.objects.create(
             body=f"Добавлены или изменены роли сотрудников: {', '.join(roles)}",

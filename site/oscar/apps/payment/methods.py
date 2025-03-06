@@ -36,7 +36,7 @@ class PaymentManager:
         self.user = user
 
     def get_method(self):
-        if self.source_reference == "ONLINECARD":
+        if self.source_reference == "YOOMONEY":
             return Yoomoney(self.source_reference, self.user)
         if self.source_reference == "ELECTRON":
             return CardOffline(self.source_reference, self.user)

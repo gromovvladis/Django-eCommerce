@@ -15,6 +15,7 @@ from oscar.core.loading import get_model
 
 User = get_user_model()
 Staff = get_model("user", "Staff")
+NotificationSetting = get_model("user", "NotificationSetting")
 
 logger = logging.getLogger("oscar.user")
 
@@ -37,7 +38,7 @@ class StaffForm(forms.ModelForm):
     )
     first_name = forms.CharField(
         label="Имя",
-        required=False,
+        required=True,
         help_text="Имя сотрудника. Пример: 'Иван'",
     )
     middle_name = forms.CharField(
@@ -63,16 +64,18 @@ class StaffForm(forms.ModelForm):
     date_of_birth = forms.DateField(
         label="Дата рождения", required=False, widget=DatePickerInput
     )
+    notifications = forms.MultipleChoiceField(
+        label="Уведомления Телеграм",
+        required=False,
+        choices=NotificationSetting.STAFF_CHOICES,
+        help_text="Уведомления будут поступать только из магазина, в котором пользователь отмечен как сотрудник.",
+    )
     # evotor_update = forms.BooleanField(
     #     label="Эвотор",
     #     required=False,
     #     initial=True,
     #     help_text="Синхронизировать с Эвотор",
     # )
-    error_messages = {
-        "invalid_login": "Пожалуйста, введите корректный номер телефона.",
-        "inactive": "Этот аккаунт не активен.",
-    }
     redirect_url = forms.CharField(widget=forms.HiddenInput, required=False)
 
     class Meta:
@@ -109,9 +112,12 @@ class StaffForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["role"].choices = Staff.get_role_choices()
         # self.fields["evotor_update"].initial = self.request.COOKIES.get("evotor_update", True) == "True"
-        staff = kwargs["instance"]
-        if staff and staff.user:
-            self.fields["username"].initial = staff.user.username
+        if self.instance and self.instance.pk:
+            self.fields["notifications"].initial = list(
+                self.instance.notifications.values_list("code", flat=True)
+            )
+            if self.instance.user:
+                self.fields["username"].initial = self.instance.user.username
 
     def clean_redirect_url(self):
         url = self.cleaned_data["redirect_url"].strip()
@@ -129,6 +135,24 @@ class StaffForm(forms.ModelForm):
                 raise forms.ValidationError("Выбранная роль не существует.")
         return None
 
+    def clean_notifications(self):
+        """
+        Обрабатывает уведомления:
+        - Проверяет, что коды уведомлений корректны.
+        - Создает объекты NotificationSetting, если они не существуют.
+        - Возвращает список объектов NotificationSetting.
+        """
+        notifications = self.cleaned_data.get("notifications", [])
+        valid_notifications = []
+        for code in notifications:
+            if code in NotificationSetting.STAFF_NOTIF:
+                notification, _ = NotificationSetting.objects.get_or_create(code=code)
+                valid_notifications.append(notification)
+            else:
+                raise forms.ValidationError(f"Недопустимый код уведомления: {code}")
+
+        return valid_notifications
+
     def clean_username(self):
         number = self.cleaned_data.get("username")
         try:
@@ -144,55 +168,47 @@ class StaffForm(forms.ModelForm):
 
         return username
 
+    def _update_user_groups(self, user, role):
+        """Обновляет группы пользователя на основе выбранной роли."""
+        if role:
+            user.groups.set([role])
+        else:
+            user.groups.clear()
+
+    def _update_staff_notifications(self, user, notifications):
+        """Обновляет уведомления сотрудника."""
+        user.notification_settings.set(notifications)
+
     def save(self, commit=True):
-        username = self.cleaned_data.get("username", None)
-        user, created = User.objects.get_or_create(username=username)
+        username = self.cleaned_data.get("username")
+        user, _ = User.objects.get_or_create(username=username)
         user.is_staff = True
 
         if self.store:
             self.store.users.add(user)
 
-        if self.instance.pk:
-            staff = self.instance
-            role = self.cleaned_data.get("role", staff.role)
+        staff = self.instance if self.instance.pk else Staff(user=user)
+        staff.user = user
+        staff.first_name = self.cleaned_data.get("first_name", staff.first_name)
+        staff.last_name = self.cleaned_data.get("last_name", staff.last_name)
+        staff.middle_name = self.cleaned_data.get("middle_name", staff.middle_name)
+        staff.gender = self.cleaned_data.get("gender", staff.gender)
+        staff.is_active = self.cleaned_data.get("is_active", staff.is_active)
+        staff.date_of_birth = self.cleaned_data.get(
+            "date_of_birth", staff.date_of_birth
+        )
 
-            staff.user = user
-            staff.first_name = self.cleaned_data.get("first_name", staff.first_name)
-            staff.last_name = self.cleaned_data.get("last_name", staff.last_name)
-            staff.middle_name = self.cleaned_data.get("middle_name", staff.middle_name)
-            staff.role = role
-            staff.gender = self.cleaned_data.get("gender", staff.gender)
-            staff.is_active = self.cleaned_data.get("is_active", staff.is_active)
-            staff.date_of_birth = self.cleaned_data.get(
-                "date_of_birth", staff.date_of_birth
-            )
+        # Обновляем группы пользователя
+        role = self.cleaned_data.get("role")
+        self._update_user_groups(user, role)
+
+        # Обновляем уведомления сотрудника
+        notifications = self.cleaned_data.get("notifications")
+        self._update_staff_notifications(user, notifications)
+
+        if commit:
             staff.save()
-
-            if role:
-                user.groups.clear()
-                group = Group.objects.get(name=role)
-                user.groups.add(group)
-
-        else:
-            # Создаем новый объект Staff, если он не существует
-            role = self.cleaned_data.get("role", "")
-            staff = Staff.objects.create(
-                user=user,
-                first_name=self.cleaned_data.get("first_name", ""),
-                last_name=self.cleaned_data.get("last_name", ""),
-                middle_name=self.cleaned_data.get("middle_name", ""),
-                role=role,
-                gender=self.cleaned_data.get("gender", ""),
-                is_active=self.cleaned_data.get("is_active", False),
-                date_of_birth=self.cleaned_data.get("date_of_birth", None),
-            )
-
-            if role:
-                user.groups.clear()
-                group = Group.objects.get(name=role)
-                user.groups.add(group)
-
-        user.save()
+            user.save()
 
         # evotor_update = self.cleaned_data.get("evotor_update")
         # if evotor_update:
