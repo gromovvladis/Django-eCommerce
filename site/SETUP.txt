@@ -290,9 +290,8 @@
 
     13.2 Provence              
         source venv/bin/activate
-        cd provence/site#
-        git pull https://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@github.com/gromovvladis/mikado.git --force
-        git pull --rebase https://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@github.com/gromovvladis/mikado.git
+        cd provence/site
+        git pull https://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@github.com/gromovvladis/mikado.git
         python manage.py makemigrations
         python manage.py migrate
         python manage.py collectstatic
