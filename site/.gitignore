@@ -16,7 +16,6 @@ logs/*
 /pip-selfcheck.json
 
 # migrations
-migrations
 migrations/*
 !migrations/__init__.py
 
