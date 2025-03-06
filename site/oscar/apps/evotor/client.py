@@ -603,12 +603,7 @@ class EvotorStaffClient(EvotorAPICloud):
                 if serializer.is_valid():
                     serializer.save()
                     staff_list.append(
-                        ", ".join(
-                            [
-                                staff_json.get("name", "Имя сотрудника"),
-                                staff_json.get("last_name", "Фамилия сотрудника"),
-                            ]
-                        )
+                        f"{staff_json.get("name", "Имя")}, {staff_json.get("last_name", "Фамилия")}"
                     )
                 else:
                     json_valid = False
