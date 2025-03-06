@@ -1,0 +1,18 @@
+{% load wishlist_tags %}
+
+{% if user.is_authenticated %}
+  {% with wishlist=user.wishlist %}
+    {% wishlists_containing_product wishlist product as wishlist_contains %}
+    <form data-id="wishlist-form" class="pos-absolute add-to-wishlist" data-remove="false" method="post" action="{% if wishlist_contains %}{% url 'customer:wishlist-remove-product' product_pk=product.pk %}{% else %}{% url 'customer:wishlist-add-product' product_pk=product.pk %}{% endif %}">
+      <button data-id="wishlist-btn" type="submit" class="pd-0" aria-label="Добавить в избранное">
+        <svg width="24" height="24">
+          {% if wishlist_contains %}
+            <use xlink:href="#add-to-wishlist"></use>
+          {% else %}
+            <use xlink:href="#remove-from-wishlist"></use>
+          {% endif %}
+        </svg>
+      </button>
+    </form>
+  {% endwith %}
+{% endif %}

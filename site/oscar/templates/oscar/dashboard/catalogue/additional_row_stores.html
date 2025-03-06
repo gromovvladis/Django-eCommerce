@@ -1,0 +1,8 @@
+{% if not record.stores.all %}
+  -
+{% else %}
+  {% for store in record.stores.all %}
+    <a href="{% url 'dashboard:store-manage' pk=store.id %}">{{ store.name }}</a>
+    <br />
+  {% endfor %}
+{% endif %}

@@ -1,0 +1,11 @@
+{% extends 'oscar/error.html' %}
+
+{% block error_code %}
+  403
+{% endblock %}
+
+{% block error_message %}
+  <p class="font-bold mb-2">Ошибка доступа</p>
+  <p class="text--grey">У вас нет доступа к этой странице</p>
+  <p class="text--grey">И здесь нет ничего вкусного :)</p>
+{% endblock %}

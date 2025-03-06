@@ -1,0 +1,30 @@
+{% load django_tables2 %}
+<div class="btn-toolbar">
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-edit"></i></button>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" href="{% url 'dashboard:delivery-update-zona' pk=record.id %}">Редактировать</a>
+      <form class="dropdown-item" method="post" action="{% url 'dashboard:delivery-hide-zona' pk=record.id %}">
+        {% csrf_token %}
+        <input class="simple-button"
+          type="submit"
+          value="{% if record.isHide %}
+            Показать на карте
+          {% else %}
+            Скрыть с карты
+          {% endif %}" />
+      </form>
+      <form class="dropdown-item" method="post" action="{% url 'dashboard:delivery-available-zona' pk=record.id %}">
+        {% csrf_token %}
+        <input class="simple-button"
+          type="submit"
+          value="{% if record.isAvailable %}
+            Сделать недоступной
+          {% else %}
+            Сделать доступной
+          {% endif %}" />
+      </form>
+      <a class="dropdown-item" href="{% url 'dashboard:delivery-delete-zona' pk=record.id %}">Удалить</a>
+    </div>
+  </div>
+</div>

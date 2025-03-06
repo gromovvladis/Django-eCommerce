@@ -1,0 +1,258 @@
+{% load image_tags %}
+{% load currency_filters %}
+{% load dashboard_tags %}
+{% load widget_tweaks %}
+{% load static %}
+
+<div class="modal-header">
+  <h4 class="modal-title">
+    Заказ №{{ order.number }} | {% if order.store %}<a href="{% url 'dashboard:store-manage' pk=order.store.id %}">{{ order.store|default:'-' }}</a>{% else %}{{ order.store|default:'-' }}{% endif %}
+  </h4>
+  <div>
+    <span class="badge mr-3 {% if order.status == 'Завершён' %}
+        badge-success
+      {% elif order.status == 'Отменён' %}
+        badge-danger
+      {% elif order.status == 'Готовится' %}
+        badge-info
+      {% else %}
+        badge-warning
+      {% endif %}">
+      {{ order.status|default:'N/A' }}
+    </span>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">×</span></button>
+  </div>
+</div>
+<div class="modal-body">
+  <div class="d-flex">
+    <div class="col-6 p-0">
+      <h3 class="text-info">Информация о заказе</h3>
+      {% if order.before_order %}
+        <p class="text-secondary mb-0 mt-2">
+          До заказа
+          <span class="ml-2">
+            {% with before_order=order|before_order_badge %}
+              <span data-id="order-badge" data-seconds="{{ before_order.2 }}" class="badge {{ before_order.1 }}">{{ before_order.0 }}</span>
+            {% endwith %}
+          </span>
+        </p>
+      {% endif %}
+      {% if order.user %}
+        <p class="text-secondary mb-0 mt-2">Клиент</p>
+        <span>{{ order.user.get_full_name }}</span>
+        <a href="{% url 'dashboard:user-detail' pk=order.user.id %}" class="d-flex flex-column">{{ order.user.username }}</a>
+      {% else %}
+        Эвотор заказ
+      {% endif %}
+      {% with notes=order.notes.all %}
+        {% if notes %}
+          <p class="text-secondary mb-0 mt-2">Заметки</p>
+          {% for note in notes %}
+            <span><strong>{{ note.message }}</strong></span>
+            <span class="text-muted">({{ note.note_type|default:'-' }})</span>
+            <br />
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+    <div class="col-6 p-0">
+      <h3 class="text-info">Доставка и оплата</h3>
+      <p class="text-secondary mb-0 mt-2">Метод доставки</p>
+      <span>{{ order.shipping_method }}</span>
+      {% if order.shipping_method == 'Доставка' %}
+        <p class="text-secondary mb-0 mt-2">Адрес</p>
+        <address>
+          {% for field in order.shipping_address.active_address_fields_and_labels %}
+            {{ field.label }}: {{ field.value }}
+            <br />
+          {% endfor %}
+          {% if order.shipping_address.notes %}
+            <td>{{ order.shipping_address.notes }}</td>
+          {% endif %}
+        </address>
+      {% endif %}
+      {% with sources=order.sources.all %}
+        {% if sources %}
+          <p class="text-secondary mb-0 mt-2">Оплата</p>
+          {% if order_paid == order.total %}
+            <span class="badge badge-success my-1"><strong>Заказ оплачен</strong></span>
+          {% elif order_paid == 0 %}
+            <span class="badge badge-danger my-1"><strong>Заказ не оплачен</strong></span>
+          {% else %}
+            <span class="badge badge-warning my-1"><strong>Оплачено: {{ order_paid|currency:order.currency }}</strong></span>
+          {% endif %}
+          {% for source in sources %}
+            <div class="d-flex align-items-center">
+              <span class="spinner-border-sm {% if source.paid %}
+                  badge-success
+                {% else %}
+                  badge-danger
+                {% endif %} rounded-circle mr-1">
+              </span>
+              {{ source.source_type }}
+              <span class="ml-2"><i class="fa-solid fa-arrow-down text-success"></i> {{ source.amount_debited|currency:order.currency }}</span>&nbsp;
+              <span><i class="fa-solid fa-arrow-up text-danger"></i> {{ source.amount_refunded|currency:order.currency }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+  <div class="mobile-table mt-4">
+    <table class="table modal-table table-striped table-bordered table-hover mb-0">
+      <thead>
+        <tr>
+          <th class="image"></th>
+          <th class="title">Продукт</th>
+          <th class="quantity">Кол-во</th>
+          <th class="text-right">Цена</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in lines %}
+          <tr data-id="line-container" class="{% if line.status == 'Завершён' %}line-success{% elif line.status == 'Отменён' %}line-canceled{% else %}line-process{% endif %}">
+            <td class="image">
+              {% if line.product %}
+                {% with image=line.product.primary_image %}
+                  {% oscar_thumbnail image.original '50x50' upscale=False as thumb %}
+                  <img class="img-dashboard"
+                    src="{{ thumb.url }}"
+                    alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}"
+                    loading="lazy" />
+                {% endwith %}
+              {% else %}
+                {% with image=line.missing_image %}
+                  {% oscar_thumbnail image.original '50x50' upscale=False as thumb %}
+                  <img class="img-dashboard"
+                    src="{{ thumb.url }}"
+                    alt="{% if image.caption %}{{ image.caption }}{% else %}{{ line.name }}{% endif %}"
+                    loading="lazy" />
+                {% endwith %}
+              {% endif %}
+            </td>
+            <td class="title">
+              <div class="d-flex align-items-center">
+                {% if line.product %}
+                  <a href="{% url 'dashboard:catalogue-product' pk=line.product.id %}">{{ line.product.get_name }}</a>
+                {% else %}
+                  {{ line.name }}
+                {% endif %}
+              </div>
+              {% if line.product %}
+                <div class="d-flex flex-column">
+                  <span>{{ line.options }}</span>
+                  <span>{{ line.variants }}</span>
+                  <span>{{ line.additions }}</span>
+                </div>
+              {% endif %}
+              <span class="badge badge-info my-1 d-md-none">{{ line.quantity }} шт.</span>
+            </td>
+            <td data-label="Количество" class="quantity">{{ line.quantity }}</td>
+            <td data-label="Цена" class="text-right">{{ line.line_price|currency:order.currency }}</td>
+            <td class="toggle-row">
+              <button class="btn btn-secondary" type="button">
+                <i class="fa-solid fa-chevron-up"></i>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+            </td>
+          </tr>
+        {% endfor %}
+        {% if order.total_discount %}
+          <tr class="order-totals table-caption" data-toggle="collapse" data-target=".discount_details" aria-expanded="false" aria-controls="discount_details" style="cursor: pointer;">
+            <td colspan="2"></td>
+            <th class="text-left" style="color: var(--primary);">
+              Скидки
+              <i class="fa-solid fa-chevron-down"></i>
+              <i class="fa-solid fa-chevron-up"></i>
+            </th>
+            <th class="text-right">{{ order.total_discount|currency:order.currency }}</th>
+          </tr>
+        {% endif %}
+        {% with discounts=order.basket_discounts %}
+          {% if discounts %}
+            <tr class="order-totals collapse discount_details">
+              <td colspan="2"></td>
+              <th class="text-left">Сумма заказа без скидки</th>
+              <th class="text-right">{{ order.basket_total_before_discounts|currency:order.currency }}</th>
+            </tr>
+            {% for discount in discounts %}
+              <tr class="order-totals collapse discount_details">
+                <td colspan="2"></td>
+                <th class="text-left">{{ discount.offer_name|default:discount.message }}</th>
+                <th class="text-right">- {{ discount.amount|currency:order.currency }}</th>
+              </tr>
+            {% endfor %}
+            <tr class="order-totals collapse discount_details">
+              <td colspan="2"></td>
+              <th class="text-left">Сумма заказа со скидкой</th>
+              <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
+            </tr>
+          {% else %}
+            <tr class="order-totals">
+              <td colspan="2"></td>
+              <th class="text-left">Товары</th>
+              <th class="text-right">{{ order.basket_total|currency:order.currency }}</th>
+            </tr>
+          {% endif %}
+        {% endwith %}
+        {% if order.has_shipping_discounts %}
+          <tr class="order-totals">
+            <td colspan="2"></td>
+            <th class="text-left">Доставка без скидки</th>
+            <th class="text-right">{{ order.shipping_before_discounts|currency:order.currency }}</th>
+          </tr>
+          {% for discount in order.shipping_discounts %}
+            <tr class="order-totals">
+              <td colspan="2"></td>
+              <th class="text-left">
+                <span class="badge badge-success">Скидка на доставку</span>
+                {{ discount.offer_name }}
+              </th>
+              <th class="text-right">- {{ discount.amount|currency:order.currency }}</th>
+            </tr>
+          {% endfor %}
+          <tr class="order-totals">
+            <td colspan="3"></td>
+            <th colspan="1" class="text-left">Доставка</th>
+            <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
+          </tr>
+        {% elif order.has_shipping %}
+          <tr class="order-totals">
+            <td colspan="2"></td>
+            <th class="text-left">Доставка</th>
+            <th class="text-right">{{ order.shipping|currency:order.currency }}</th>
+          </tr>
+        {% endif %}
+        {% with surcharges=order.surcharges.all %}
+          {% if surcharges %}
+            {% for charge in surcharges %}
+              <tr class="order-totals">
+                <td colspan="2"></td>
+                <th class="text-left">Доплата {{ charge.name }}</th>
+                <th class="text-right">{{ charge.money|currency:order.currency }}</th>
+              </tr>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <tr class="order-totals">
+          <td colspan="2"></td>
+          <th class="font-weight-semibold text-left">Итого</th>
+          <th class="text-right font-weight-semibold">{{ order.total|currency:order.currency }}</th>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="modal-footer">
+  <div class="d-flex fill-width justify-content-between align-items-center">
+    {% if order.next_status %}
+      <button role="button" data-id="next-status" data-status="{{ order.next_status }}" data-number="{{ order.number }}" class="btn btn-success">{{ order.next_status }}</button>
+    {% else %}
+      <span class="btn btn-outline-success disabled">{{ order.status }}</span>
+    {% endif %}
+    <a href="{% url 'dashboard:order-detail' number=order.number %}" class="btn btn-outline-primary">
+      <i class="fas fa-edit"></i>
+      Изменить
+    </a>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+{% load django_tables2 %}
+<div class="d-flex flex-column">
+  <div>
+    {% if record.evotor_id %}
+      <span class="text-success"><i class="fa-solid fa-circle-check"></i>&nbsp;</span>
+    {% endif %}
+    {% if product_access %}
+      <a href="{% url 'dashboard:catalogue-product' pk=record.pk %}{% querystring %}">{{ record.get_name }}</a>
+    {% else %}
+      <span>{{ record.get_name }}</span>
+    {% endif %}
+  </div>
+  {% if record.is_child %}
+    <span class="text-muted small">{{ record.get_variants }}</span>
+  {% endif %}
+  <span class="text-muted small">Артикул: {{ record.article|default:'-' }}</span>
+</div>

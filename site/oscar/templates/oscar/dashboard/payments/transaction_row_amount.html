@@ -1,0 +1,7 @@
+{% load currency_filters %}
+
+{% if not record.amount %}
+  -
+{% else %}
+  {{ record.amount.value|currency }}
+{% endif %}

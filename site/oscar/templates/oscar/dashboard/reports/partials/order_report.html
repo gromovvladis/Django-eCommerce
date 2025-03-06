@@ -1,0 +1,71 @@
+{% extends 'oscar/dashboard/reports/index.html' %}
+{% load currency_filters %}
+
+{% block report %}
+  <table class="table table-striped table-bordered table-hover">
+    {% if objects %}
+      <thead>
+        <tr>
+          <th class="name">Номер заказа</th>
+          <th class="title">Состав заказа</th>
+          <th class="status">Статус заказа</th>
+          <th class="user">Номер телефона клиента</th>
+          <th class="delivery">Доставка</th>
+          <th class="payment">Оплата</th>
+          <th class="site">Источник</th>
+          <th class="total">Итого</th>
+          <th class="order_time">Дата размещения</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in objects %}
+          <tr>
+            <td class="name">
+              <a href="{% url 'dashboard:order-detail' order.number %}">{{ order.number }}</a>
+            </td>
+            <td class="title">{{ order.get_items_name }}</td>
+            <td class="status">
+              <span data-id="order-status" data-number="{{ order.number }}"
+                class="badge badge-96 pointer {% if order.status == 'Завершён' %}
+                  badge-success
+                {% elif order.status == 'Отменён' %}
+                  badge-danger
+                {% elif order.status == 'Готовится' %}
+                  badge-info
+                {% elif order.status == 'Доставляется' %}
+                  badge-primary
+                {% else %}
+                  badge-warning
+                {% endif %}">
+                {{ order.status }}
+              </span>
+            </td>
+            <td data-label="Номер телефона клиента" class="user">
+              {% if order.user %}
+                <a href="{% url 'dashboard:user-detail' order.user.id %}">{{ order.user.username }}</a>
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td data-label="Доставка" class="delivery">{{ order.shipping_method }}</td>
+            <td data-label="Оплата" class="payment">{{ order.sources.last|default:'Нет оплаты' }}</td>
+            <td data-label="Источник" class="site">{{ order.site }}</td>
+            <td data-label="Итого" class="total">{{ order.total|currency:order.currency }}</td>
+            <td class="order_time">{{ order.date_placed|date:'d.m.y H:i' }}</td>
+            <td class="toggle-row">
+              <button class="btn btn-secondary" type="button">
+                <i class="fa-solid fa-chevron-up"></i>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    {% else %}
+      <tr class="empty-tr">
+        <td class="empty-td">Заказы не найдены за заданный период.</td>
+      </tr>
+    {% endif %}
+  </table>
+  {% include 'oscar/dashboard/partials/pagination.html' %}
+{% endblock %}

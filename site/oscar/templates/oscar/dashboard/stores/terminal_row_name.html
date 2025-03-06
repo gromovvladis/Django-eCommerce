@@ -1,0 +1,12 @@
+{% load django_tables2 %}
+
+<a href="{% url 'dashboard:terminal-detail' pk=record.id %}{% querystring %}">
+  {% if record.evotor_id %}
+    <span class="text-success"><i class="fa-solid fa-circle-check"></i>&nbsp;</span>
+  {% endif %}
+  {% if record.name %}
+    {{ record.name }}
+  {% else %}
+    -
+  {% endif %}
+</a>

@@ -1,0 +1,154 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% load currency_filters %}
+
+{% block title %}
+  Обновить отзыв на товар | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:reviews-product-list' %}">Отзывы на товары</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Отзыв №{{ review.id }} на товар {{ review.product }}</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <h1>Отзыв №{{ review.id }} на товар {{ review.product }}</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  <div class="mobile-table confirm-content">
+    <table class="table table-striped table-bordered">
+      <caption>
+        <div class="d-flex justify-space-between">
+          <h3>
+            <i class="fa-solid fa-cookie"></i>
+            Товар
+          </h3>
+        </div>
+      </caption>
+      <thead>
+        <tr>
+          <td class="title">Товар</td>
+          <td class="title">Категория</td>
+          <td class="title">Время приготовления</td>
+          <td class="title">Цена</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="title" data-label="Товар">
+            <div class="d-flex flex-column">
+              <div>
+                {% if review.product.evotor_id %}
+                  <span class="text-success"><i class="fa-solid fa-circle-check"></i>&nbsp;</span>
+                {% endif %}
+                <a href="{% url 'dashboard:catalogue-product' pk=review.product.pk %}">{{ review.product.get_name }}</a>
+              </div>
+              {% if review.product.is_child %}
+                <span class="text-muted small">{{ review.product.get_variants }}</span>
+              {% endif %}
+              <span class="text-muted small">Артикул: {{ review.product.article|default:'-' }}</span>
+            </div>
+          </td>
+          <td class="title" data-label="Категория">
+            {% with categories=review.product.get_categories %}
+              {% if categories %}
+                {% for cat in categories %}
+                  <a href="{% url 'dashboard:catalogue-category-update' pk=cat.pk %}">{{ cat }}</a>
+                  {% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              {% else %}
+                -
+              {% endif %}
+            {% endwith %}
+          </td>
+          <td class="title" data-label="Время приготовления">{{ review.product.cooking_time }} мин.</td>
+          <td class="title" data-label="Цена">
+            {% if not review.product.get_prices %}
+              -
+            {% else %}
+              {% if review.product_old_price %}
+                {% if review.product_min_price != review.product_max_price %}
+                  <span class="text-danger">от {{ review.product_min_price|currency }}</span>
+                  <br />
+                  <span class="text-muted text-line-through">до {{ review.product_old_price|currency }}</span>
+                {% else %}
+                  <span class="text-danger">{{ review.product_min_price|currency }}</span>
+                  <br />
+                  <span class="text-muted text-line-through">{{ review.product_old_price|currency }}</span>
+                {% endif %}
+              {% else %}
+                {% if review.product_min_price != review.product_max_price %}
+                  от {{ review.product_min_price|currency }}
+                  <br />
+                  до {{ review.product_max_price|currency }}
+                {% else %}
+                  {{ review.product_min_price|currency }}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <form method="post" class="form-stacked confirm-content mb-4" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="table-header">
+      <h3>
+        <i class="fa-solid fa-comment-dots"></i>
+        Информация об отзыве
+      </h3>
+    </div>
+    <div class="card card-body card-confirm bg-light">
+      <p>
+        Оценка:{% if review.score < 3 %}
+          <span class="badge badge-danger">{{ review.score }} / 5</span>
+        {% elif review.score == 3 %}
+          <span class="badge badge-warning">{{ review.score }} / 5</span>
+        {% else %}
+          <span class="badge badge-success">{{ review.score }} / 5</span>
+        {% endif %}
+      </p>
+      <p>Отзыв</p>
+      <textarea cols="30" rows="5" class="form-control mb-3" readonly>{{ review.body }}</textarea>
+      <div class="clearfix">
+        {% for field in form %}
+          <div class="form-group">
+            {{ field.label_tag }}
+            <div class="controls">
+              {{ field }}
+              {% for error in field.errors %}
+                <span class="error-block">{{ error|escape }}</span>
+              {% endfor %}
+              {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="table-footer">
+      <div class="d-flex justify-content-end">
+        <a class="btn btn-secondary mr-2" href="{% url 'dashboard:reviews-order-list' %}">
+          <i class="fa-regular fa-circle-xmark"></i>
+          <span>Отменить</span>
+        </a>
+        <button class="btn btn-primary" type="submit" value="continue" data-loading-text="Сохранение...">
+          <i class="fa-regular fa-floppy-disk"></i>
+          <span>Сохранить</span>
+        </button>
+      </div>
+    </div>
+  </form>
+{% endblock %}

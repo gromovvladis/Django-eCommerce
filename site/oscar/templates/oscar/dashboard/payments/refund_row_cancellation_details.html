@@ -1,0 +1,5 @@
+{% if not record.cancellation_details %}
+  -
+{% else %}
+  {{ record.cancellation_details }}
+{% endif %}

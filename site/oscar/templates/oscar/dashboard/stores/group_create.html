@@ -1,0 +1,102 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% load category_tags %}
+
+{% block title %}
+  Создание | Группы персонала | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:group-list' %}">Группы персонала</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Создание группы персонала</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <h1>Создание группы персонала</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  <form class="form-stacked half-wrapper fixed-actions" method="post" data-behaviour="tab-nav-errors">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-12">
+        <div class="tab-content">
+          {% block group_details %}
+            <div class="tab-pane active" id="group_details">
+              <div class="table-header">
+                <h3>
+                  <i class="fa-solid fa-users-line"></i>
+                  Описание группы персонала
+                </h3>
+              </div>
+              <div class="card card-body bg-light option-details">
+                {% if form.non_field_errors %}
+                  {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                      <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+                {% include 'oscar/dashboard/partials/form_field.html' with field=form.name %}
+                <ul class="nav nav-tabs my-3 mt-sm-2 p-0 fill-width" role="tablist">
+                  <div class="nav tabs-button d-flex fill">
+                    <div class="tabs-button__active-block" style="width: 20%; min-width: 130px; left: 0px;">
+                      <div class="fill-width fill-height"></div>
+                    </div>
+                    {% for app_label, permissions in form.permissions.field.choices %}
+                      <button role="button" class="tabs-button__button tabs-button__icon {% if forloop.first %}active{% endif %}" href="#app_label_{{ forloop.counter }}" data-toggle="tab">
+                        <div class="no-wrap">
+                          <i class="fa-regular fa-circle-check"></i>
+                          <span>{{ app_label }}</span>
+                        </div>
+                      </button>
+                    {% endfor %}
+                  </div>
+                </ul>
+                <div class="tab-content">
+                  {% for app_label, permissions in form.permissions.field.choices %}
+                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %} mt-2" id="app_label_{{ forloop.counter }}" role="tabpanel">
+                      {% for permission_id, permission_name in permissions %}
+                        <div>
+                          <label>
+                            <input type="checkbox" name="permissions" {% if permission_id in form.permissions.value %}checked{% endif %} value="{{ permission_id }}" />
+                            {{ permission_name }}
+                          </label>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+    {% block fixed_actions_group %}
+      <div class="fixed-actions-group">
+        <div class="container container-fluid">
+          <div class="d-flex justify-content-end">
+            <a class="btn btn-secondary mr-2" href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
+              <i class="fa-regular fa-circle-xmark"></i>
+              <span>Отменить</span>
+            </a>
+            <button type="submit" class="btn btn-primary" data-loading-text="Сохранение...">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Сохранить</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+  </form>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% for restriction in record.availability_restrictions %}
+  {% if not restriction.is_satisfied %}
+    <label class="badge badge-danger">{{ restriction.description }}</label>
+  {% else %}
+    {{ restriction.description }}<br />
+  {% endif %}
+{% endfor %}

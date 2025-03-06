@@ -1,0 +1,7 @@
+{% load django_tables2 %}
+
+{% if record.start_worktime and record.end_worktime %}
+  {{ record.start_worktime|date:'H:i' }} - {{ record.end_worktime|date:'H:i' }}
+{% else %}
+  -
+{% endif %}

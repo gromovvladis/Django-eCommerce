@@ -1,0 +1,7 @@
+{% load django_tables2 %}
+
+{% if record.is_editable %}
+  <a href="{% url 'dashboard:range-update' pk=record.id %}">{{ record.name }}</a>
+{% else %}
+  {{ record.name }}
+{% endif %}

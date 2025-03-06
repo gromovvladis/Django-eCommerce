@@ -1,0 +1,99 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% load render_table from django_tables2 %}
+{% load sorting_tags %}
+{% load widget_tweaks %}
+{% load dashboard_tags %}
+{% load currency_filters %}
+
+{% block title %}
+  Акции | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Акции</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block header %}
+  <div class="page-header d-flex justify-content-between align-items-center">
+    <h1>Акции</h1>
+    <a href="{% url 'dashboard:offer-metadata' %}" class="btn btn-primary ml-3"><i class="fas fa-plus"></i> Создать акцию</a>
+  </div>
+{% endblock %}
+
+{% block dashboard_content %}
+  <div class="table-wrapper mb-3">
+    <div class="table-header d-flex justify-space-between" data-target="#search-body" data-toggle="collapse" aria-controls="search-body" aria-expanded="false">
+      <h3><i class="fas fa-search"></i> Поиск</h3>
+      <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+      <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+    </div>
+    <div class="card card-body bg-light {% if form.is_valid %}collapse{% endif %}" id="search-body">
+      <form method="get" class="form-inline fill-width d-flex justify-content-between" id="search_form">
+        {% for field in form %}
+          {% if field.name in form.basic_fields %}
+            {% if field.is_hidden %}
+              {{ field }}
+            {% else %}
+              <div class="form-group form-flex-inline{% if field.errors %} error{% endif %}">
+                {{ field.label_tag }}
+                {% render_field field class='form-control' %}
+                {% for error in field.errors %}
+                  <ul class="error-block">
+                    <li>{{ error }}</li>
+                  </ul>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% else %}
+            <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}" />
+          {% endif %}
+        {% endfor %}
+        <div class="btn-form d-flex my-2">
+          <button class="btn btn-primary flex-fill" type="submit">
+            <i class="fas fa-search"></i>
+            <span class="ml-2">Поиск</span>
+          </button>
+          <a data-toggle="modal" class="btn btn-third ml-2" data-target="#SearchModal" href="#"><i class="fa-solid fa-bars"></i></a>
+          {% if search_filters %}
+            <a href="{% url 'dashboard:order-list' %}" class="btn btn-danger ml-2"><i class="fa-solid fa-trash"></i></a>
+          {% endif %}
+        </div>
+      </form>
+      {% include 'oscar/dashboard/partials/advanced_search_modal.html' with form=form style='horizontal' %}
+      {% if search_filters %}
+        <div class="search-filter-list mt-4">
+          <label class="mr-2">Фильтры:</label>
+          {% for filter, param in search_filters %}
+            <span class="badge badge-filter mb-2 mr-1">
+              {{ filter }}
+              <a class="delete-filter text-danger ml-1" href="{% delete_filter request param %}"><i class="fa-solid fa-xmark"></i></a>
+            </span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <form method="post" class="mobile-table order-table">
+    {% csrf_token %}
+    {% if offers %}
+      {% render_table offers %}
+    {% else %}
+      <p class="empty">Акции не созданы.</p>
+    {% endif %}
+  </form>
+{% endblock %}
+
+{% block onbodyload %}
+  {{ block.super }}
+  {% if advanced_form.errors %}
+    $('#SearchModal').modal('show');
+  {% endif %}
+{% endblock %}
