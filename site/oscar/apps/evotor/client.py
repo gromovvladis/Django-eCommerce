@@ -604,8 +604,10 @@ class EvotorStaffClient(EvotorAPICloud):
                     serializer.save()
                     staff_list.append(
                         ", ".join(
-                            staff_json.get("name", "Имя сотрудника"),
-                            staff_json.get("last_name", "Фамилия сотрудника"),
+                            [
+                                staff_json.get("name", "Имя сотрудника"),
+                                staff_json.get("last_name", "Фамилия сотрудника"),
+                            ]
                         )
                     )
                 else:
