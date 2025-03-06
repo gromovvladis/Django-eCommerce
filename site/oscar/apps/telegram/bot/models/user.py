@@ -4,10 +4,10 @@ from aiogram.types import Message
 
 from oscar.core.compat import get_user_model
 from oscar.core.loading import get_model
+from oscar.apps.telegram.bot.states.states import UserAuth
 from oscar.apps.telegram.bot.keyboards.default.user_register import (
     contact_request_buttons,
 )
-from oscar.apps.telegram.bot.states.states import UserAuth
 
 Staff = get_model("user", "Staff")
 NotificationSetting = get_model("user", "NotificationSetting")
@@ -30,14 +30,14 @@ async def get_staff_by_telegram_id(telegram_id: int):
         return None
 
 
-async def get_staff_by_contact(number, user_id: int):
+async def get_staff_by_contact(number, telegram_id: int):
     if number:
         try:
-            user, created = await link_telegram_to_staff(number, user_id)
+            staff, created = await link_telegram_to_staff(number, telegram_id)
             if created:
-                return user, "Вы успешно подписались на уведомления."
+                return staff, "Вы успешно подписались на уведомления."
             else:
-                return user, "Вы уже подписаны на уведомления."
+                return staff, "Вы уже подписаны на уведомления."
         except User.DoesNotExist:
             return (
                 None,
@@ -109,13 +109,13 @@ def change_notif(telegram_id: str, new_status: str):
 
 
 @sync_to_async(thread_sensitive=True)
-def link_telegram_to_user(phone_number: str, user_id: str):
+def link_telegram_to_user(phone_number: str, telegram_id: str):
     """
     Привязывает Telegram ID к пользователю на основе номера телефона.
     """
     try:
         user = User.objects.get(username=phone_number)
-        user.telegram_id = user_id
+        user.telegram_id = telegram_id
         user.save()
         return user
     except User.DoesNotExist:
@@ -123,15 +123,12 @@ def link_telegram_to_user(phone_number: str, user_id: str):
 
 
 @sync_to_async(thread_sensitive=True)
-def link_telegram_to_staff(phone_number: str, user_id: str):
+def link_telegram_to_staff(phone_number: str, telegram_id: str):
     """
     Привязывает Telegram ID к пользователю и создает/обновляет запись в Staff.
     """
-    user, _ = User.objects.get_or_create(
-        username=phone_number, defaults={"telegram_id": user_id}
-    )
-    user.is_staff = True
-    user.telegram_id = user_id
+    user, _ = User.objects.get(username=phone_number, is_staff=True)
+    user.telegram_id = telegram_id
     user.save()
 
     staff, created = Staff.objects.get_or_create(
