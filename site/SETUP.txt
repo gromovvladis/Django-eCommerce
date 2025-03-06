@@ -228,6 +228,7 @@
 
         для проверки телеграм бота: 
             /home/vladis/venv/bin/python /home/vladis/mikado/site/manage.py runbot_staff
+            /home/vladis/venv/bin/python /home/vladis/provence/site/manage.py runbot_staff
 
     активируем супервизора:
         sudo update-rc.d supervisor enable

@@ -57,7 +57,7 @@ def get_staffs_message():
                 f"Телефон: {getattr(staff.user, 'username', 'Не указан')}\n"
                 f"Должность: {staff.get_role}\n"
                 f"Активен: {'✅' if staff.is_active else '❌'}\n"
-                f"Уведомления: {", ".join(notif.name for notif in staff.user.notification_settings.filter(code__in=NotificationSetting.STAFF_NOTIF)) if staff.user and staff.user.notification_settings.exists() else "Уведомления не настроены"}"
+                f"Уведомления: {', '.join(notif.name for notif in staff.user.notification_settings.filter(code__in=NotificationSetting.STAFF_NOTIF)) if staff.user and staff.user.notification_settings.exists() else 'Уведомления не настроены'}"
             )
 
             msg_list.append(msg)
