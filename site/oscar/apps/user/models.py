@@ -270,16 +270,16 @@ class NotificationSetting(models.Model):
         "error",
     )
     CUSTOMER_CHOICES = (
-        ("order", "Уведомления о заказах"),
-        ("offer", "Уведомления о персональных акциях и предложениях"),
+        (ORDER, "Уведомления о заказах"),
+        (OFFER, "Уведомления о персональных акциях и предложениях"),
     )
-    CUSTOMER_NOTIF = ("order", "offer")
+    CUSTOMER_NOTIF = (ORDER, OFFER)
     STAFF_CHOICES = (
-        ("sell", "Уведомления о новых заказах"),
-        ("status", "Уведомления об изменении статусов заказов"),
-        ("stock", "Уведомления о товарных остатках"),
-        ("technical", "Технические уведомления"),
-        ("error", "Уведомления об ошибках"),
+        (SELL, "Уведомления о новых заказах"),
+        (STATUS, "Уведомления об изменении статусов заказов"),
+        (STOCK, "Уведомления о товарных остатках"),
+        (TECHNICAL, "Технические уведомления"),
+        (ERROR, "Уведомления об ошибках"),
     )
     STAFF_NOTIF = ("sell", "status", "stock", "technical", "error")
     code = models.CharField(max_length=128, unique=True)

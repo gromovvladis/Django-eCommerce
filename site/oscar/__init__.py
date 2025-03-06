@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "oscar.apps.telegram.apps.TelegramConfig",
     "oscar.apps.evotor.apps.EvotorConfig",
     "oscar.apps.user.apps.UserConfig",
+    "oscar.apps.settings.apps.SettingsConfig",
     "oscar.apps.sms.apps.SmsConfig",
     "oscar.apps.dashboard.apps.DashboardConfig",
     "oscar.apps.dashboard.reports.apps.ReportsDashboardConfig",
