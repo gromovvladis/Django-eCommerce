@@ -57,10 +57,9 @@ class Settings(models.Model):
     )
     payments = models.ManyToManyField(
         "settings.PaymentSettings",
-        on_delete=models.SET_NULL,
-        related_name="settings",
         verbose_name="Способы оплаты",
-        null=True,
+        related_name="settings",
+        blank=True,
     )
     yoomoney_id = models.CharField(
         verbose_name="ID аккаунта ЮКасса",
