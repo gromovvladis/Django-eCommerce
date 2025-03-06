@@ -324,14 +324,14 @@ OSCAR_DASHBOARD_NAVIGATION = [
                 "label": "Страницы",
                 "url_name": "dashboard:page-list",
             },
-            {
-                "label": "Акции",
-                "url_name": "dashboard:page-list",
-            },
-            {
-                "label": "Промо-категории",
-                "url_name": "dashboard:page-list",
-            },
+            # {
+            #     "label": "Акции",
+            #     "url_name": "dashboard:page-list",
+            # },
+            # {
+            #     "label": "Промо-категории",
+            #     "url_name": "dashboard:page-list",
+            # },
             # {
             #     "label": "Шаблоны Email",
             #     "url_name": "dashboard:email-list",
