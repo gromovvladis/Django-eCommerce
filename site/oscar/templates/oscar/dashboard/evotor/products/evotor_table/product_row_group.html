@@ -1,7 +1,0 @@
-{% if record.parent %}
-  <a href="{{ record.parent.get_staff_url }}">{{ record.parent.get_name }}</a>
-{% elif record.parent_id %}
-  {{ record.parent_id }}
-{% else %}
-  -
-{% endif %}

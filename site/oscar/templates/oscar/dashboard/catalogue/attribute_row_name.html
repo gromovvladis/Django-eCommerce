@@ -1,9 +1,0 @@
-{% load django_tables2 %}
-<div class="d-flex flex-column">
-  {% if product_access %}
-    <a href="{% url 'dashboard:catalogue-attribute-update' pk=record.pk %}{% querystring %}">{{ value }}</a>
-  {% else %}
-    <span>{{ value }}</span>
-  {% endif %}
-  <span class="text-muted small">{{ record.code }}</span>
-</div>

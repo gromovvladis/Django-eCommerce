@@ -1,6 +1,0 @@
-{% load django_tables2 %}
-
-{% if record.evotor_id %}
-    <span class="text-success"><i class="fa-solid fa-circle-check"></i>&nbsp;</span>
-{% endif %}
-<a href="{% url 'dashboard:catalogue-attribute-option-group-update' pk=record.pk %}{% querystring %}">{{ value }}</a>
