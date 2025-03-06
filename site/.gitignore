@@ -6,6 +6,11 @@ __pycache__
 /build/
 /node_modules/
 
+# migrations
+migrations
+migrations
+!migrations/__init__.py
+
 # venv
 logs/*
 .venv
@@ -14,10 +19,6 @@ logs/*
 /share
 /pyvenv.cfg
 /pip-selfcheck.json
-
-# migrations
-migrations
-!migrations/__init__.py
 
 /config/*.conf
 /config/*.conf.py
