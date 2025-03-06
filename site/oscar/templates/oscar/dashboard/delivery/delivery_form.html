@@ -1,0 +1,111 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% load category_tags %}
+{% load compress %}
+{% load static %}
+
+{% block title %}
+  {{ title }} | Зоны доставки | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:delivery-zones' %}">Зоны доставки</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <h1>{{ title }}</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="table-header">
+        <h2 class="d-flex"><i class="fa-solid fa-map"></i> Зоны доствки на карте</h2>
+      </div>
+      <div class="delivery__map table">
+        <div class="map__wrapper">
+          <div id="map" class="map"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors">
+    {% csrf_token %}
+    <div class="row">
+      {% if to_field %}
+        <input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}" />
+      {% endif %}
+      <div class="col-md-12">
+        <div class="tab-content">
+          {% block option_details %}
+            <div class="tab-pane active" id="option_details">
+              <div class="table-header">
+                <h3>Данные зоны доставки</h3>
+              </div>
+              <div class="card card-body bg-light option-details">
+                {% if form.non_field_errors %}
+                  {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                      <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+                {% for field in form %}
+                  {% include 'oscar/dashboard/partials/form_field.html' with field=field %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+    {% block fixed_actions_group %}
+      <div class="fixed-actions-group">
+        <div class="container container-fluid">
+          <div class="d-flex justify-content-end">
+            <div class="float-right">
+              <a class="btn btn-secondary mr-2" href="{% url 'dashboard:delivery-zones' %}">
+                <i class="fa-regular fa-circle-xmark"></i>
+                <span>Отменить</span>
+              </a>
+              <button class="btn btn-primary" type="submit" data-loading-text="Сохранение...">
+                <i class="fa-regular fa-floppy-disk"></i>
+                <span>Сохранить</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+  </form>
+{% endblock %}
+
+{% block externalscripts %}
+  <script type="application/javascript" src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&lang=ru_RU"></script>
+{% endblock %}
+
+{% block templatescripts %}
+  {{ block.super }}
+  var url_delivery_zones = "{% url 'dashboard:delivery-zona-json' %}"; var url_delivery_zona = "{% url 'dashboard:delivery-zona' %}";
+{% endblock %}
+
+{% block extrascripts %}
+  {{ block.super }}
+  {% compress js %}
+  <script type="application/javascript" src="{% static 'js/dashboard/delivery/delivery-zones-dashboard.js' %}"></script>
+  {% endcompress %}
+{% endblock %}
+
+{% block onbodyload %}
+  createMap("{{ number }}");
+{% endblock %}

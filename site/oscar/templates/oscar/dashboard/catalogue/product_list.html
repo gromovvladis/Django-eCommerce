@@ -1,0 +1,95 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% load render_table from django_tables2 %}
+
+{% block title %}
+  Товары | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Товары</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block header %}
+  <div class="page-header">
+    <h1>Товары</h1>
+  </div>
+{% endblock %}
+
+{% block dashboard_content %}
+  {% block search_products %}
+    <div class="table-wrapper mb-3">
+      <div class="table-header d-flex justify-space-between" data-target="#card-body" data-toggle="collapse" aria-controls="card-body" aria-expanded="false">
+        <h3><i class="fas fa-search"></i> Поиск и создание</h3>
+        <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+        <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+      </div>
+      <div class="card card-body dropdown-list collapse" id="card-body">
+        {% if product_access %}
+          <h2 class="mb-4">Создание</h2>
+          <form action="{% url 'dashboard:catalogue-product-create' %}" method="get" class="form-inline fill-width justify-space-between mb-4">
+            {% include 'oscar/dashboard/partials/form_fields_inline.html' with form=productclass_form %}
+            <div class="btn-form d-flex my-2">
+              <button class="btn btn-primary flex-fill" type="submit" data-loading-text="Создание продукта...">
+                <i class="fas fa-plus"></i>
+                <span class="ml-2">Новый продукт</span>
+              </button>
+            </div>
+          </form>
+        {% endif %}
+        <h2 class="mb-4">Поиск</h2>
+        <form method="get" class="form-inline justify-space-between">
+          <div class="d-flex form-row">
+            {% for name, value in request.GET.items %}
+              {% if name not in form.fields %}
+                <input type="hidden" name="{{ name }}" value="{{ value }}" />
+              {% endif %}
+            {% endfor %}
+            {% include 'oscar/dashboard/partials/form_fields_inline.html' with form=form %}
+          </div>
+          <div class="btn-form d-flex my-2">
+            <button type="submit" class="btn btn-primary flex-fill"><i class="fas fa-search"></i><span class="ml-2">Поиск</span></button>
+            {% if searching %}
+              <a class="btn btn-danger ml-2" href="{% url 'dashboard:catalogue-product-list' %}"><i class="fa-regular fa-circle-xmark"></i></a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endblock %}
+  {% if products %}
+    {% block product_list %}
+      <form class="mobile-table" method="post">
+        {% csrf_token %}
+        {% render_table products %}
+      </form>
+      <div class="modal fade" id="product-image-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title"></h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body text-center">
+              <img class="img-fluid mx-auto" loading="lazy" />
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+  {% else %}
+    <p class="py-2">Ничего не найдено</p>
+  {% endif %}
+{% endblock %}
+
+{% block onbodyload %}
+  {{ block.super }}
+  oscar.dashboard.thumbnails.init();
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'oscar/layout.html' %}
+
+{% load svg_tags %}
+{% load category_tags %}
+{% load product_tags %}
+{% load static %}
+
+{% block app_class %}
+  app---category
+{% endblock %}
+
+{% block nav_class %}
+  app__nav--category
+{% endblock %}
+
+{% block wrapper_class %}
+  menu fill-width fill-height grow-1 pd-2 pb-sm-4
+{% endblock %}
+
+{% block description %}
+  {{ category.get_meta_description }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3">
+    <button onclick="getBack(); return false" data-id="back-bread-btn" class="mr-1 pd-0">{% icon file_name='interface/arrow-back' size=22 stroke='#111' %}</button>
+    <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    {% for category in category.get_ancestors %}
+      <a href="{{ category.get_absolute_url }}">{{ category.name }}</a>
+      {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    {% endfor %}
+    <span class="bread__link" aria-current="page">{{ category.name }}</span>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <h1 class="d-none d-sm-flex mb-2">{{ category.name }}</h1>
+  {% subcategory_tree category as child_categories %}
+  {% if child_categories %}
+    <ul class="child-cats d-flex align-center fill-height no-scroll mb-2 mb-sm-3">
+      {% for child_category in child_categories %}
+        <li>
+          <a class="cat_item cat_item--child mr-2" href="{{ child_category.url }}" data-id="categories-tabs-item-hits">{{ child_category.name }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% if products %}
+    <div class="dishes row">
+      {% for product in products %}
+        <div class="dishes--item col col-6 col-xs-6 col-sm-4 col-md-4 col-lg-3">
+          {% render_product product.object %}
+        </div>
+      {% endfor %}
+    </div>
+    {% include 'oscar/partials/pagination.html' %}
+  {% else %}
+    <p class="py-2">Ничего не найдено</p>
+  {% endif %}
+{% endblock %}

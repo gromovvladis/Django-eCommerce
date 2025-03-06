@@ -1,0 +1,40 @@
+{% extends 'oscar/dashboard/reports/index.html' %}
+{% load currency_filters %}
+
+{% block report %}
+  <table class="table table-striped table-bordered table-hover">
+    {% if objects %}
+      <thead>
+        <tr>
+          <th class="name">Промокод</th>
+          <th>Добавлений в коризну</th>
+          <th>Использований в заказах</th>
+          <th>Суммарная скидка</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for voucher in objects %}
+          <tr>
+            <td class="name">
+              <a href="{% url 'dashboard:voucher-stats' voucher.id %}">{{ voucher.code }}</a>
+            </td>
+            <td data-label="Добавлений в коризну">{{ voucher.num_basket_additions }}</td>
+            <td data-label="Использований в заказах">{{ voucher.num_orders }}</td>
+            <td data-label="Суммарная скидка">{{ voucher.total_discount|currency }}</td>
+            <td class="toggle-row">
+              <button class="btn btn-secondary" type="button">
+                <i class="fa-solid fa-chevron-up"></i>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    {% else %}
+      <tr class="empty-tr">
+        <td class="empty-td">Нет примененных промокодов за заданный период.</td>
+      </tr>
+    {% endif %}
+  </table>
+  {% include 'oscar/dashboard/partials/pagination.html' %}
+{% endblock %}

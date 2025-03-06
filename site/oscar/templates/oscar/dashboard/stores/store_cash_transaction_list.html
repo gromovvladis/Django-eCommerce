@@ -1,0 +1,78 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% load render_table from django_tables2 %}
+{% load currency_filters %}
+
+{% block title %}
+  Магазин {{ store }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        <a href="{% url 'dashboard:store-manage' pk=store.id %}">{{ store }}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Внесения / Изъятия наличных</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block header %}
+  <div class="page-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+      <h1>{{ store.name|default:'Магазин' }}</h1>
+      <a href="{% url 'dashboard:store-cash-transaction-list' store_id=store.id %}" class="fa-1x ml-2 badge badge-info">Наличные: {{ store.cash.sum|default:'0'|currency:'RUB' }}</a>
+    </div>
+    <a class="btn btn-success ml-2" href="{% url 'dashboard:store-cash-transaction-create' store_id=store.id %}">
+      <i class="fa-solid fa-plus"></i>
+      <span>Создать</span>
+    </a>
+  </div>
+{% endblock %}
+
+{% block dashboard_content %}
+  <div class="half-wrapper">
+    <div class="table-header d-flex">
+      <h2>Магазин</h2>
+    </div>
+    <table class="table table-bordered">
+      <tr>
+        <th>Название</th>
+        <td>{{ store.name|default:'-' }}</td>
+      </tr>
+      <tr>
+        <th>Адрес</th>
+        <td>{{ store.primary_address|default:'-' }}</td>
+      </tr>
+      <tr>
+        <th>Персонал</th>
+        <td>
+          {% with staffs=store.users.all %}
+            {% if staffs %}
+              {% for staff in staffs %}
+                <a href="{% url 'dashboard:staff-detail' pk=user.staff_profile.id %}">{{ staff.get_staff_name }}{% if not forloop.last %},{% endif %}</a>
+              {% endfor %}
+            {% else %}
+              -
+            {% endif %}
+          {% endwith %}
+        </td>
+      </tr>
+      <tr>
+        <th>Активен</th>
+        <td>{{ store.is_active|yesno:'✔️,❌' }}</td>
+      </tr>
+    </table>
+  </div>
+  {% if cash_transactions %}
+    <div class="mobile-table">
+      {% render_table cash_transactions %}
+    </div>
+  {% else %}
+    <p class="py-2">Ничего не найдено</p>
+  {% endif %}
+{% endblock %}

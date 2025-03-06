@@ -1,0 +1,13 @@
+{% load widget_tweaks %}
+
+{% if not field.is_hidden %}
+  {% block widget %}
+    {% if form_id %}
+      {% render_field field data-id=data_id form=form_id %}
+    {% else %}
+      {% render_field field data-id=data_id %}
+    {% endif %}
+  {% endblock %}
+{% else %}
+  {{ field }}
+{% endif %}

@@ -1,0 +1,69 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% block title %}
+  {{ title }} | Удалить группу атрибутов | {{ block.super }}
+{% endblock %}
+
+{% block navbar %}
+  {% if not is_popup %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
+
+{% block dashboard_nav %}
+  {% if not is_popup %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+  {% if not is_popup %}
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard:index' %}">Главная</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard:catalogue-attribute-option-group-list' %}">Группы атрибутов</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Удалить</li>
+      </ol>
+    </nav>
+  {% endif %}
+{% endblock %}
+
+{% block navtext %}
+  <h1>{{ title }}</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  <div class="confirm-content">
+    {% if disallow %}
+      <p>Перед удалением убедитесь, что все атрибуты продукта назначены другой группе атрибутов.</p>
+    {% else %}
+      <div class="table-header">
+        <h2>Удалить группу атрибутов</h2>
+      </div>
+      <form method="post" class="card card-body bg-light">
+        {% csrf_token %}
+        {% if is_popup %}
+          <input type="hidden" name="{{ is_popup_var }}" value="1" />
+        {% endif %}
+        {% if not is_popup %}
+          {% for key, value in http_get_params.items %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}" />
+          {% endfor %}
+        {% endif %}
+        <p>
+          Удалить группу атрибутов <strong>{{ object.name }}</strong> - вы уверены?
+        </p>
+      </form>
+      <div class="table-footer">
+        <div class="form-actions fill-width d-flex justify-content-end">
+          <a class="btn btn-info mr-2" {% if not is_popup %}href="{% url 'dashboard:catalogue-attribute-option-group-list' %}"{% else %}href="#" onclick="window.close();return false;"{% endif %}>Отмена</a>
+          <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">Удалить</button>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

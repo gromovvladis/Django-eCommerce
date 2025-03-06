@@ -1,0 +1,61 @@
+{% extends 'oscar/dashboard/layout.html' %}
+
+{% block title %}
+  {{ title }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:page-list' %}">Страницы</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <h1>{{ title }}</h1>
+  {% if page %}
+    <a class="btn btn-danger ml-2" href="{% url 'dashboard:page-delete' pk=page.id %}">
+      <i class="fa-solid fa-trash"></i>
+      <span>Удалить</span>
+    </a>
+  {% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+  <div class="table-header">
+    <h2>{{ title }}</h2>
+  </div>
+  <form method="post" class="card card-body form-stacked fixed-actions" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% include 'oscar/dashboard/partials/form_fields.html' with form=form %}
+    {% block fixed_actions_group %}
+      <div class="fixed-actions-group">
+        <div class="container container-fluid">
+          <div class="d-flex justify-content-end">
+            {% if page %}
+              <a class="btn btn-outline-info mr-2" href="{{ page.get_absolute_url }}">
+                <i class="fa-solid fa-share"></i>
+                <span>Смотреть на сайте</span>
+              </a>
+            {% endif %}
+            <a class="btn btn-secondary mr-2" href="{% url 'dashboard:page-list' %}">
+              <i class="fa-regular fa-circle-xmark"></i>
+              <span>Отменить</span>
+            </a>
+            <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+              <i class="fa-regular fa-floppy-disk"></i>
+              <span>Сохранить</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+  </form>
+{% endblock %}

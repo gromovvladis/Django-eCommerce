@@ -1,0 +1,6 @@
+{% load svg_tags %}
+
+{% if upsell_message %}
+  <span class="fill-width mt-2 order-dialog__title">Условия акции:</span>
+  <span class="fill-width mt-2 order-dialog__text">{{ upsell_message }}</span>
+{% endif %}
