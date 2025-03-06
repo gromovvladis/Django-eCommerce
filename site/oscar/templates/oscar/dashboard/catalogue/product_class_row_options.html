@@ -1,9 +1,0 @@
-{% load django_tables2 %}
-
-{% if record.get_options %}
-  {% for opt in record.get_options %}
-    {{ opt.name }}{% if not forloop.last %}, {% endif %}
-  {% endfor %}
-{% else %}
-  —
-{% endif %}
