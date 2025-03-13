@@ -55,7 +55,7 @@ class EvotorConfig(OscarConfig):
             ),
             path("api/roles/", self.evotor_api_role_view.as_view(), name="api-roles"),
             path(
-                "api/stores/<str:store_id>/products/",
+                "api/v1/inventories/stores/<str:store_id>/products/",
                 self.evotor_api_product_view.as_view(),
                 name="api-products",
             ),

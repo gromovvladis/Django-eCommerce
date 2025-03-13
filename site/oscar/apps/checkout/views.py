@@ -577,10 +577,7 @@ class PaymentDetailsView(PageTitleMixin, OrderPlacementMixin, generic.TemplateVi
         surcharges,
         **order_kwargs,
     ):
-        if payment_method in settings.ONLINE_PAYMENTS:
-            order_kwargs["status"] = settings.OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS
-        else:
-            order_kwargs["status"] = settings.OSCAR_INITIAL_ORDER_STATUS
+        order_kwargs["status"] = self._get_order_status(payment_method)
 
         try:
             return self.handle_order_placement(
@@ -611,6 +608,12 @@ class PaymentDetailsView(PageTitleMixin, OrderPlacementMixin, generic.TemplateVi
             )
             self.restore_frozen_basket()
             return self.render_to_response(self.get_context_data(error=e))
+
+    def _get_order_status(self, payment_method):
+        if payment_method in settings.ONLINE_PAYMENTS:
+            return settings.OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS
+        else:
+            return settings.OSCAR_INITIAL_ORDER_STATUS
 
     def _add_user_note(self, order, user, order_note):
         try:
@@ -737,6 +740,7 @@ class ThankYouView(generic.DetailView):
     """
     Displays the 'thank you' page which summarises the order just submitted.
     """
+
     template_name = "oscar/checkout/thank_you.html"
     context_object_name = "order"
 

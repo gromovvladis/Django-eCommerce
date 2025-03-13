@@ -49,7 +49,7 @@ class UserAddressForm(forms.ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.user = user
+        self.instance.user = user if user.is_authenticated else None
 
 
 class UserLiteAddressForm(forms.ModelForm):
@@ -67,4 +67,4 @@ class UserLiteAddressForm(forms.ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.user = user
+        self.instance.user = user if user.is_authenticated else None

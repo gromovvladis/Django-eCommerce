@@ -22,6 +22,11 @@ class DeliveryZona(models.Model):
 
     name = models.CharField("Название", max_length=255, blank=True, null=True)
     order_price = models.PositiveIntegerField("Минимальная сумма заказа", default=700)
+    min_delivery_time = models.PositiveIntegerField(
+        "Минимальная время доставки",
+        default=0,
+        help_text="Минимальная время доставки заказа в данную зону",
+    )
     delivery_price = models.PositiveIntegerField("Стоимость доставки", default=0)
     coords = models.CharField(
         "Координаты",
@@ -93,7 +98,6 @@ class DeliveryZona(models.Model):
 
         # Создаем JSON объекты
         user_json = {"type": "FeatureCollection", "features": user_zones_list}
-
         admin_json = {"type": "FeatureCollection", "features": admin_zones_list}
 
         # Оптимизированная запись файлов с использованием контекстного менеджера

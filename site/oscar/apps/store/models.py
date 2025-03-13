@@ -1,7 +1,7 @@
 import datetime
 
 from django.db import models, router
-from django.db.models import F, signals, Value
+from django.db.models import F, signals
 from django.db.models.functions import Coalesce, Least
 from django.utils.functional import cached_property
 from django.utils import timezone

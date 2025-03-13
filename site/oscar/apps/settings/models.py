@@ -1,14 +1,25 @@
 from django.db import models
-from django.contrib.auth.models import Group
 
 
 class Settings(models.Model):
+
+    # General settings
+
+    subdomain = models.CharField(
+        verbose_name="Поддомен клиента",
+        null=False,
+        blank=False,
+        max_length=255,
+    )
+
+    # Auntification settings
+
     auth = models.CharField(
         verbose_name="Название сайта",
         null=False,
         blank=False,
         max_length=255,
-        help_text="Пример: Доставка суши и роллов | Сайт Москва",
+        help_text="Пример: 'Доставка суши и роллов | Сайт Москва'",
     )
     AUTH_PHONE, AUTH_EMAIL = (
         "oscar.apps.user.auth_backends.PhoneBackend",
@@ -55,6 +66,9 @@ class Settings(models.Model):
         max_length=255,
         help_text="Ключ полученый при регистрации",
     )
+
+    # Payment settings
+
     payments = models.ManyToManyField(
         "settings.PaymentSettings",
         verbose_name="Способы оплаты",
@@ -90,10 +104,20 @@ class Settings(models.Model):
         choices=tax_choises,
         default=0,
     )
+
+    # Delivery settings
+
     delivery_available = models.BooleanField(
         "Доставка",
         default=False,
         help_text="Магазин осуществляет доставку?",
+    )
+    delivery_provider = models.CharField(
+        verbose_name="Ключ API карт",
+        null=True,
+        blank=True,
+        max_length=255,
+        help_text="API ключ Яндекс, 2ГИС или DaData",
     )
     delivery_api_key = models.CharField(
         verbose_name="Ключ API карт",
@@ -115,6 +139,18 @@ class Settings(models.Model):
         on_delete=models.SET_NULL,
         help_text="Данный магазин используется, если клиент еще не выбрал магазин",
     )
+
+    # Social settings
+
+    support_link = models.CharField(
+        verbose_name="Ссылка на канал поддержки",
+        null=True,
+        blank=True,
+        max_length=255,
+    )
+
+    # SEO settings
+
     analytics_google = models.CharField(
         verbose_name="ID Google аналитики",
         null=True,
@@ -159,3 +195,19 @@ class PaymentSettings(models.Model):
     def save(self, *args, **kwargs):
         self.name = dict(self.PAYMENT_CHOICES).get(self.code, "")
         super().save(*args, **kwargs)
+
+    @property
+    def is_online(self):
+        return self.code in ("YOOMONEY",)
+
+    @property
+    def is_offline(self):
+        return self.code in ("CASH", "ELECTRON")
+
+    @property
+    def is_cash(self):
+        return self.code in ("CASH", "CASH_RECEIVE")
+
+
+class Subscription(models.Model):
+    pass

@@ -209,7 +209,7 @@ OSCAR_DASHBOARD_NAVIGATION = [
     #     ],
     # },
     {
-        "label": "Оплата",
+        "label": "ЮKassa",
         "icon": "fas fa-credit-card",
         "children": [
             {

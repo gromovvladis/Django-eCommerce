@@ -17,6 +17,7 @@ class DeliveryZonaForm(forms.ModelForm):
             "name",
             "order_price",
             "delivery_price",
+            "min_delivery_time",
             "coords",
             "isAvailable",
             "isHide",

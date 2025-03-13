@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Exists, OuterRef, Q
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
 from django.utils.functional import cached_property
@@ -22,6 +22,9 @@ Unavailable = get_class("store.availability", "Unavailable")
 StockRequired = get_class("store.availability", "StockRequired")
 LineDiscountRegistry = get_class("basket.utils", "LineDiscountRegistry")
 OpenBasketManager = get_class("basket.managers", "OpenBasketManager")
+
+Store = get_model("store", "Store")
+StockRecord = get_model("store", "StockRecord")
 
 
 class Basket(models.Model):
@@ -136,10 +139,6 @@ class Basket(models.Model):
     def _all_lines(self):
         """
         Return a cached set of basket lines.
-
-        This is important for offers as they alter the line models and you
-        don't want to reload them from the DB as that information would be
-        lost.
         """
         if self.id is None:
             return self.lines.model.objects.none()  # pylint: disable=E1101
@@ -152,19 +151,59 @@ class Basket(models.Model):
                     "product__categories",
                     "product__stockrecords",
                 )
+                .annotate(
+                    has_stockrecord=Exists(
+                        StockRecord.objects.filter(
+                            product=OuterRef("product_id")
+                        ).filter(Q(store_id=self.store_id) if self.store_id else Q())
+                    )
+                )
                 .order_by(self._meta.pk.name)
             )
         return self._lines
 
     def all_lines(self):
         if self._filtered_lines is None:
-            store_id = self.store_id or settings.STORE_DEFAULT
             self._filtered_lines = [
-                line
-                for line in self._all_lines()
-                if line.product.stockrecords.filter(store_id=store_id).exists()
+                line for line in self._all_lines() if line.has_stockrecord
             ]
         return self._filtered_lines
+
+    # def _all_lines(self):
+    #     """
+    #     Return a cached set of basket lines.
+
+    #     This is important for offers as they alter the line models and you
+    #     don't want to reload them from the DB as that information would be
+    #     lost.
+    #     """
+    #     if self.id is None:
+    #         return self.lines.model.objects.none()  # pylint: disable=E1101
+    #     if self._lines is None:
+    #         self._lines = (
+    #             self.lines.select_related("product", "stockrecord")
+    #             .prefetch_related(
+    #                 "attributes",
+    #                 "product__images",
+    #                 "product__categories",
+    #                 "product__stockrecords",
+    #             )
+    #             .order_by(self._meta.pk.name)
+    #         )
+    #     return self._lines
+
+    # def all_lines(self):
+    #     if self._filtered_lines is None:
+    #         store_id = self.store_id
+    #         if store_id:
+    #             self._filtered_lines = [
+    #                 line
+    #                 for line in self._all_lines()
+    #                 if line.product.stockrecords.filter(store_id=store_id).exists()
+    #             ]
+    #         else:
+    #             self._filtered_lines = self._all_lines()
+    #     return self._filtered_lines
 
     def max_allowed_quantity(self):
         """
@@ -255,7 +294,6 @@ class Basket(models.Model):
             self.save()
         else:
             if line.stockrecord.store_id != self.store_id:
-                Store = get_model("store", "Store")
                 raise ValueError(
                     ("Данный товар не доступен в %s, закажите его в %s")
                     % (

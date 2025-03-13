@@ -98,7 +98,7 @@ class PaymentsListView(TransactionsListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["search_filters"] = self.search_filters
-        context["title"] = "Список платежей Yookassa"
+        context["title"] = "Список платежей ЮKassa"
         context["status_options"] = [
             ("succeeded", "Платеж успешно завершён"),
             ("canceled", "Платеж отменён"),

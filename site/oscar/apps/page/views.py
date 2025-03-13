@@ -46,6 +46,7 @@ class HomePageView(PageTitleMixin, ListView):
     """
 
     template_name = "oscar/home/homepage.html"
+    context_object_name = "actions"
 
     def get_queryset(self):
         actions = cache.get("actions_all")
@@ -64,12 +65,12 @@ class HomePageView(PageTitleMixin, ListView):
         ctx["summary"] = "home"
 
         if not agent.is_mobile:
-            promo_cats = cache.get("promo_cats_all")
+            promo_cats = cache.get("promo_cats")
             if not promo_cats:
                 promo_cats = PromoCategory.objects.prefetch_related("products").filter(
                     is_active=True
                 )
-                cache.set("promo_cats_all", promo_cats, 3600)
+                cache.set("promo_cats", promo_cats, 3600)
 
             ctx["promo_cats"] = promo_cats
 

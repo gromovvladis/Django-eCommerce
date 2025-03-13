@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.dispatch import receiver
-from django.db import transaction
 from django.db.models import Sum
 
 from oscar.apps.basket.signals import basket_addition
