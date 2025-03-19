@@ -342,6 +342,7 @@ class OrderHistoryView(PageTitleMixin, ThemeMixin, generic.ListView):
 class OrderDetailView(PageTitleMixin, ThemeMixin, PostActionMixin, generic.DetailView):
     model = Order
     active_tab = "orders"
+    template_name = "customer/order/order_detail.html"
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
@@ -350,9 +351,6 @@ class OrderDetailView(PageTitleMixin, ThemeMixin, PostActionMixin, generic.Detai
         ctx["summary"] = "profile"
         ctx["online_payments"] = settings.ONLINE_PAYMENTS
         return ctx
-
-    def get_template_names(self):
-        return ["webshop/customer/order/order_detail.html"]
 
     def get_page_title(self):
         """

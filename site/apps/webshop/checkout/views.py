@@ -277,7 +277,9 @@ class CheckoutView(PageTitleMixin, ThemeMixin, CheckoutSessionMixin, generic.For
         return str(self.success_url)
 
 
-class PaymentDetailsView(PageTitleMixin, ThemeMixin, OrderPlacementMixin, generic.TemplateView):
+class PaymentDetailsView(
+    PageTitleMixin, ThemeMixin, OrderPlacementMixin, generic.TemplateView
+):
     """
     The final step to submit the payment.
     This includes an additional form to input comments, and proceeds to the payment provider.
@@ -294,7 +296,7 @@ class PaymentDetailsView(PageTitleMixin, ThemeMixin, OrderPlacementMixin, generi
     `validate_payment_submission` should be provided.
     """
 
-    template_name_preview = "webshop/checkout/preview.html"
+    template_name_preview = "checkout/preview.html"
     page_title = "Заказ не оформлен"
     preview = False
     # If preview=True, then we render a preview template that shows all order
@@ -711,7 +713,7 @@ class UpdateTotalsView(View):
             )
 
             new_totals = render_to_string(
-                "webshop/checkout/checkout_totals.html",
+                "checkout/checkout_totals.html",
                 {
                     "basket": self.request.basket,
                     "shipping_method": shipping_method,
@@ -846,7 +848,7 @@ class VoucherAddView(FormView):
                 "code": voucher.code
             }
             _dict["new_totals"] = render_to_string(
-                "webshop/checkout/checkout_totals.html",
+                "checkout/checkout_totals.html",
                 {"basket": self.request.basket, "editable": True},
                 request=self.request,
             )
@@ -896,7 +898,7 @@ class VoucherRemoveView(View):
             self.remove_signal.send(sender=self, basket=request.basket, voucher=voucher)
             update_discounts(request.basket, request.user, request)
             new_totals = render_to_string(
-                "webshop/checkout/checkout_totals.html",
+                "checkout/checkout_totals.html",
                 {"basket": request.basket},
                 request=request,
             )

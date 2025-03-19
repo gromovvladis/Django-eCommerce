@@ -44,7 +44,7 @@ class HomePageView(PageTitleMixin, ThemeMixin, ListView):
     Главная страница
     """
 
-    template_name = "webshop/homepage/homepage.html"
+    template_name = "homepage/homepage.html"
     context_object_name = "actions"
 
     def get_queryset(self):

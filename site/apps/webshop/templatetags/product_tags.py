@@ -27,7 +27,7 @@ def render_product(context, product):
     #     "webshop/catalogue/partials/product.html",
     # ]
     # template_ = select_template(names)
-    template_ = "webshop/catalogue/partials/product.html"
+    template_ = "catalogue/partials/product.html"
     context = context.flatten()
 
     # Ensure the passed product is in the context as 'product'

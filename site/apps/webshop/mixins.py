@@ -43,7 +43,7 @@ class ThemeMixin(object):
         """
         names = super().get_template_names()
         theme = getattr(self.request, "theme", "planet")
-        return [f"webshop/{theme}/{name}" for name in names]
+        return [f"webshop/themes/{theme}/{name}" for name in names]
 
 
 class RegisterUserMixin(object):

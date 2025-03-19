@@ -41,7 +41,6 @@ class WebshopConfig(Config):
             path("search/", self.search_app.urls),
             path("offers/", self.offer_app.urls),
             path("wishlists/", self.wishlists_app.urls),
-            path("shipping/", self.shipping_app.urls),
             path("address/", self.address_app.urls),
             path("payment/", self.payment_app.urls),
             path("store/", self.store_app.urls),

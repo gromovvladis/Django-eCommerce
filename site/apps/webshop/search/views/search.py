@@ -5,19 +5,21 @@ from django.template.loader import render_to_string
 from django.views.generic import TemplateView
 from haystack.query import SearchQuerySet
 from apps.webshop.search.signals import user_search
-from core.loading import get_class
+from core.loading import get_class, get_classes
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
-PageTitleMixin = get_class("webshop.mixins", "PageTitleMixin")
+PageTitleMixin, ThemeMixin = get_classes(
+    "webshop.mixins", ["PageTitleMixin", "ThemeMixin"]
+)
 SearchForm = get_class("webshop.search.forms", "SearchForm")
 BaseSearchView = get_class("webshop.search.views.base", "BaseSearchView")
 
 
-class FacetedSearchView(BaseSearchView):
+class FacetedSearchView(ThemeMixin, BaseSearchView):
     form_class = SearchForm
-    template_name = "webshop/search/results.html"
+    template_name = "search/results.html"
     context_object_name = "results"
 
     def dispatch(self, request, *args, **kwargs):
@@ -48,7 +50,7 @@ class FacetedSearchView(BaseSearchView):
 
 class SearchView(PageTitleMixin, BaseSearchView, TemplateView):
     form_class = SearchForm
-    template_name = "webshop/search/search.html"
+    template_name = "search/search.html"
     page_title = "Поиск"
 
 
@@ -80,6 +82,6 @@ class SuggestionsView(APIView, BaseSearchView):
         )
 
         res = render_to_string(
-            "webshop/search/results.html", context, request=self.request
+            "search/results.html", context, request=self.request
         )
         return http.JsonResponse({"results": res}, status=200)

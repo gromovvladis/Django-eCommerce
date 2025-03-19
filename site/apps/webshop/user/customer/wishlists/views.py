@@ -26,7 +26,7 @@ class WishListDetailView(PageTitleMixin, ThemeMixin, ListView):
     display a product then adapt a DetailView to handle form validation.
     """
 
-    template_name = "webshop/customer/wishlists/wishlists_detail.html"
+    template_name = "customer/wishlists/wishlists_detail.html"
     context_object_name = "products"
     active_tab = "wishlist"
     page_title = "Избранное"

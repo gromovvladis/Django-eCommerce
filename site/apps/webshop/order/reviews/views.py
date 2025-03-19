@@ -24,7 +24,7 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ThemeMixin, ListView):
     """
 
     context_object_name = "orders"
-    template_name = "webshop/customer/feedbacks/feedbacks_order_list.html"
+    template_name = "customer/feedbacks/feedbacks_order_list.html"
     paginate_by = settings.ORDERS_PER_PAGE
     model = Order
     page_title = "Оставить отзыв"

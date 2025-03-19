@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <title>{% block title %}{{ page_title }} | {{ primary_title }}{% endblock %}</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="description" content="{% block description %}{% endblock %}" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+    <meta name="theme-color" content="#298eff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:type" content="website" />
+    {% comment %} 
+    <meta property="og:title" content="Rumbaba Красноярск" />
+    <meta property="article:modified_time" content="2024-04-08T07:11:08+00:00" />
+    <meta property="og:description" content="Торты, капкейки, кейк-попсы, макарон, подарочные наборы и многое другое! Сладкие будни вместе с Rumbaba. Доставка и самовывоз Красноярск" />
+    <meta property="og:url" content="https://rumbaba.ru/" />
+    <meta property="og:site_name" content="Rumbaba" />
+    <meta property="og:image" content="https://rumbaba.ru/wp-content/uploads/2022/12/yx48ojzNV_g.jpg" />
+    <meta property="og:image:width" content="964" />
+    <meta property="og:image:height" content="1200" />
+    <meta property="og:image:type" content="image/webp" />
+    <link rel="canonical" href="https://rumbaba.ru/" />
+    <link rel="mask-icon" href="https://rumbaba.ru/wp-content/themes/rumbaba/icon/safari-pinned-tab.svg" color="#fdffc5" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://rumbaba.ru/wp-content/themes/rumbaba/icon/apple-touch-icon.png" />
+
+    <meta property="og:availability" content="instock" />
+    <meta property="product:availability" content="instock" />
+    <meta property="product:condition" content="new" />
+    <meta property="product:price:currency" content="RUB" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta property="product:price:amount" content="2000" />
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": "Название товара",
+            "image": "URL изображения",
+            "description": "Описание товара",
+            "sku": "Артикул товара",
+            "brand": {
+            "@type": "Brand",
+            "name": "Название бренда"
+            },
+            "offers": {
+            "@type": "Offer",
+            "price": "Цена",
+            "priceCurrency": "Валюта",
+            "availability": "Наличие",
+            "url": "URL страницы товара"
+            },
+            "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "Средний рейтинг",
+            "reviewCount": "Количество отзывов"
+            },
+            "review": [
+            {
+                "@type": "Review",
+                "author": "Автор отзыва",
+                "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "Рейтинг отзыва"
+                },
+                "reviewBody": "Текст отзыва"
+            }
+            ]
+        }
+    </script>
+    {% endcomment %}
+    <link rel="manifest" href="{% static 'manifest.json' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Galada&family=Onest:wght@100..700&display=swap" rel="stylesheet" />
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
+    {% block meta %}{% endblock %}
+    {% block styles %}{% endblock %}
+    {% block extrastyles %}{% endblock %}
+    {% block tracking %}{% include 'webshop/themes/planet/partials/analytics.html' %}{% endblock %}
+  </head>
+  <body>
+    {% block layout %}{% endblock %}
+    {% block SVG %}{% endblock %}
+    {% block cdn_scripts %}{% endblock %}
+    <script>{% block templatescripts %}{% endblock %}</script>
+    {% block externalscripts %}{% endblock %}
+    {% block scripts %}{% endblock %}
+    {% block extrascripts %}{% endblock %}
+    <script>document.addEventListener('DOMContentLoaded', function() { {% block onbodyload %}{% endblock %} })</script>
+  </body>
+</html>

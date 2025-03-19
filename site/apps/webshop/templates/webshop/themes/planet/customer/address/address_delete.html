@@ -1,0 +1,50 @@
+{% extends 'webshop/customer/baseaccountpage.html' %}
+
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
+
+{% block app_class %}
+  {{ block.super }} app---profile-link
+{% endblock %}
+
+{% block breadcrumbs %}
+  <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+    <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">{% icon file_name='webshop/themes/planet/interface/arrow-back' size=22 stroke='#111' %}</button>
+    <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
+    {% icon file_name='webshop/themes/planet/interface/arrow-left' size=24 stroke='#999' %}
+    <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Личный кабинет</a>
+    {% icon file_name='webshop/themes/planet/interface/arrow-left' size=24 stroke='#999' %}
+    <a href="{% url 'customer:address-list' %}" data-id="back-bread-btn" class="bread__link router-link-active">Адрес доставки</a>
+    {% icon file_name='webshop/themes/planet/interface/arrow-left' size=24 stroke='#999' %}
+    <span class="bread__link" aria-current="page">{{ page_title }}</span>
+  </div>
+{% endblock %}
+
+{% block tabcontent %}
+  <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
+    <form method="post">
+      {% csrf_token %}
+      <div class="shipping" id="address_fields">
+        <div class="d-none d-sm-flex mb-2">
+          <h1>Вы уверены, что хотите удалить этот адрес?</h1>
+        </div>
+        <p>
+          {% for field in object.active_address_fields_and_labels %}
+            {{ field.label }}: {{ field.value }}{% if not forloop.last %},{% endif %}
+            <br />
+          {% endfor %}
+        </p>
+        <div class="d-flex align-center justify-space-between mt-2 mt-sm-3">
+          <div class="confirm__button">
+            <button type="submit" class="button fill-width button--outline justify-center shrink"><span class="button__wrapper"><span class="button__value">Удалить адрес</span></span></button>
+          </div>
+          <div class="confirm__button">
+            <button onclick="window.location.href='{% url 'customer:address-list' %}" type="button" class="button fill-width button--white justify-center shrink"><span class="button__wrapper"><span class="button__value">Отмена</span></span></button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
