@@ -1,0 +1,43 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:shipping-zones' %}">Зоны доставки</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Удалить зону доставки?</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <h1>Удалить зону доставки?</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  <div class="table-header">
+    <h2>Удалить зону доставки?</h2>
+  </div>
+  <form method="post" class="card card-body bg-light">
+    {% csrf_token %}
+    {{ form }}
+    <p>
+      Удалить зону доставки <strong>№{{ number }}</strong> - Вы уверены?
+    </p>
+    <p>{{ description }}</p>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-danger" data-loading-text="Удаление...">Удалить</button>
+      или <a href="{% if parent %}
+          {% url 'dashboard:catalogue-category-detail-list' pk=parent.pk %}
+        {% else %}
+          {% url 'dashboard:catalogue-category-list' %}
+        {% endif %}">
+        Отмена
+      </a>
+    </div>
+  </form>
+{% endblock %}

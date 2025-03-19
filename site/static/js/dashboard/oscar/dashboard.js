@@ -1,6 +1,6 @@
 /*global jQuery */
 
-var oscar = (function (o, $) {
+var dashboard = (function (o, $) {
 
     function onFileChange(evt) {
         var reader = new FileReader();
@@ -71,7 +71,7 @@ var oscar = (function (o, $) {
         return csrf_token;
     };
 
-    o.dashboard = {
+    o = {
         init: function (options) {
             // Run initialisation that should take place on every page of the dashboard.
             var defaults = {
@@ -310,9 +310,9 @@ var oscar = (function (o, $) {
         },
         offers: {
             init: function () {
-                oscar.dashboard.offers.adjustBenefitForm();
+                dashboard.offers.adjustBenefitForm();
                 $('#id_type').change(function () {
-                    oscar.dashboard.offers.adjustBenefitForm();
+                    dashboard.offers.adjustBenefitForm();
                 });
             },
             adjustBenefitForm: function () {
@@ -615,4 +615,4 @@ var oscar = (function (o, $) {
 
     return o;
 
-})(oscar || {}, jQuery);
+})(dashboard || {}, jQuery);

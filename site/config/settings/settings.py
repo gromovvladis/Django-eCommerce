@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
+
 from decouple import config
 from django.contrib.messages import constants as messages
+
 from .defaults import *
 
 # =============
@@ -67,9 +69,9 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.contrib.messages.context_processors.messages",
                 # Oscar specific
-                "oscar.apps.search.context_processors.search_form",
-                "oscar.apps.communication.notifications.context_processors.notifications",
-                "oscar.core.context_processors.metadata",
+                "apps.webshop.search.context_processors.search_form",
+                "apps.webshop.communication.notifications.context_processors.notifications",
+                "core.context_processors.metadata",
             ],
             "debug": DEBUG,
         },
@@ -92,8 +94,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
     # oscar
-    "oscar.apps.basket.middleware.BasketMiddleware",
-    "oscar.apps.dashboard.middleware.DashboardMiddleware",
+    "apps.webshop.middleware.WebshopMiddleware",
+    "apps.dashboard.middleware.DashboardMiddleware",
 ]
 
 if DEBUG:
@@ -112,48 +114,47 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.flatpages",
-    "config.settings.config.Shop",
-    "oscar.apps.page.apps.PageConfig",
-    "oscar.apps.action.apps.ActionConfig",
-    "oscar.apps.analytics.apps.AnalyticsConfig",
-    "oscar.apps.checkout.apps.CheckoutConfig",
-    "oscar.apps.address.apps.AddressConfig",
-    "oscar.apps.shipping.apps.ShippingConfig",
-    "oscar.apps.delivery.apps.DeliveryConfig",
-    "oscar.apps.catalogue.apps.CatalogueConfig",
-    "oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig",
-    "oscar.apps.communication.apps.CommunicationConfig",
-    "oscar.apps.store.apps.StoreConfig",
-    "oscar.apps.basket.apps.BasketConfig",
-    "oscar.apps.payment.apps.PaymentConfig",
-    "oscar.apps.offer.apps.OfferConfig",
-    "oscar.apps.order.apps.OrderConfig",
-    "oscar.apps.customer.apps.CustomerConfig",
-    "oscar.apps.search.apps.SearchConfig",
-    "oscar.apps.voucher.apps.VoucherConfig",
-    "oscar.apps.wishlists.apps.WishlistsConfig",
-    "oscar.apps.telegram.apps.TelegramConfig",
-    "oscar.apps.evotor.apps.EvotorConfig",
-    "oscar.apps.sms.apps.SmsConfig",
-    "oscar.apps.user.apps.UserConfig",
-    "oscar.apps.settings.apps.SettingsConfig",
-    "oscar.apps.dashboard.apps.DashboardConfig",
-    "oscar.apps.dashboard.reports.apps.ReportsDashboardConfig",
-    "oscar.apps.dashboard.users.apps.UsersDashboardConfig",
-    "oscar.apps.dashboard.orders.apps.OrdersDashboardConfig",
-    "oscar.apps.dashboard.catalogue.apps.CatalogueDashboardConfig",
-    "oscar.apps.dashboard.offers.apps.OffersDashboardConfig",
-    "oscar.apps.dashboard.stores.apps.StoresDashboardConfig",
-    "oscar.apps.dashboard.pages.apps.PagesDashboardConfig",
-    "oscar.apps.dashboard.ranges.apps.RangesDashboardConfig",
-    "oscar.apps.dashboard.reviews.apps.ReviewsDashboardConfig",
-    "oscar.apps.dashboard.vouchers.apps.VouchersDashboardConfig",
-    "oscar.apps.dashboard.communications.apps.CommunicationsDashboardConfig",
-    "oscar.apps.dashboard.shipping.apps.ShippingDashboardConfig",
-    "oscar.apps.dashboard.payments.apps.PaymentsDashboardConfig",
-    "oscar.apps.dashboard.evotor.apps.EvotorDashboardConfig",
-    "oscar.apps.dashboard.delivery.apps.DeliveryDashboardConfig",
-    "oscar.apps.dashboard.telegram.apps.TelegramDashboardConfig",
+    "apps.webshop.apps.WebshopConfig",
+    "apps.webshop.page.apps.PageConfig",
+    "apps.webshop.action.apps.ActionConfig",
+    "apps.webshop.analytics.apps.AnalyticsConfig",
+    "apps.webshop.checkout.apps.CheckoutConfig",
+    "apps.webshop.address.apps.AddressConfig",
+    "apps.webshop.shipping.apps.ShippingConfig",
+    "apps.webshop.catalogue.apps.CatalogueConfig",
+    "apps.webshop.catalogue.reviews.apps.CatalogueReviewsConfig",
+    "apps.webshop.communication.apps.CommunicationConfig",
+    "apps.webshop.store.apps.StoreConfig",
+    "apps.webshop.basket.apps.BasketConfig",
+    "apps.webshop.payment.apps.PaymentConfig",
+    "apps.webshop.offer.apps.OfferConfig",
+    "apps.webshop.order.apps.OrderConfig",
+    "apps.webshop.order.reviews.apps.OrderReviewsConfig",
+    "apps.webshop.search.apps.SearchConfig",
+    "apps.webshop.voucher.apps.VoucherConfig",
+    "apps.webshop.wishlists.apps.WishlistsConfig",
+    "apps.webshop.user.apps.UserConfig",
+    "apps.webshop.user.customer.apps.CustomerConfig",
+    "apps.dashboard.apps.DashboardMainConfig",
+    "apps.dashboard.reports.apps.ReportsDashboardConfig",
+    "apps.dashboard.users.apps.UsersDashboardConfig",
+    "apps.dashboard.orders.apps.OrdersDashboardConfig",
+    "apps.dashboard.catalogue.apps.CatalogueDashboardConfig",
+    "apps.dashboard.offers.apps.OffersDashboardConfig",
+    "apps.dashboard.stores.apps.StoresDashboardConfig",
+    "apps.dashboard.pages.apps.PagesDashboardConfig",
+    "apps.dashboard.ranges.apps.RangesDashboardConfig",
+    "apps.dashboard.reviews.apps.ReviewsDashboardConfig",
+    "apps.dashboard.vouchers.apps.VouchersDashboardConfig",
+    "apps.dashboard.communications.apps.CommunicationsDashboardConfig",
+    "apps.dashboard.shipping.apps.ShippingDashboardConfig",
+    "apps.dashboard.payments.apps.PaymentsDashboardConfig",
+    "apps.dashboard.evotor.apps.EvotorDashboardConfig",
+    "apps.dashboard.telegram.apps.TelegramDashboardConfig",
+    "apps.settings.apps.SettingsConfig",
+    "apps.telegram.apps.TelegramConfig",
+    "apps.evotor.apps.EvotorConfig",
+    "apps.sms.apps.SmsConfig",
     "smsaero",  # sms
     "webpush",  # notif push
     "widget_tweaks",  # inputs
@@ -176,9 +177,9 @@ if DEBUG:
 # AUTHENTICATION
 # =============
 
-AUTH_BACKEND = "oscar.apps.user.auth_backends.PhoneBackend"
+AUTH_BACKEND = "apps.webshop.user.auth_backends.PhoneBackend"
 
-AUTHENTICATION_BACKENDS = ("oscar.apps.user.auth_backends.PhoneBackend",)
+AUTHENTICATION_BACKENDS = ("apps.webshop.user.auth_backends.PhoneBackend",)
 
 LOGIN_REDIRECT_URL = "/"
 APPEND_SLASH = True

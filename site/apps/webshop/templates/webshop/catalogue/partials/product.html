@@ -1,0 +1,68 @@
+{% load image_tags %}
+{% load purchase_info_tags %}
+{% load cache %}
+
+{% block product %}
+  {% purchase_info_for_product request product as session %}
+  <div class="dish card elevation-none{% if not session.availability.is_available_to_buy %} unavailable{% endif %}">
+    <div class="dish-wrapper grow-1">
+      {% cache 3600 product_compact_img product %}
+      {% block product_image %}
+        {% with image=product.primary_image %}
+          {% oscar_thumbnail image.original 'x600' upscale=False as thumb %}
+          <a href="{{ product.get_absolute_url }}" class="dish-item-image pos-relative" data-id="dish-item-image-link" aria-label="{{ product.get_name }}">
+            <div class="dish-image dish-image--product fill-width fill-height pos-relative none-select">
+              <div class="image__inner image__inner--product">
+                <img src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0" />
+              </div>
+            </div>
+          </a>
+        {% endwith %}
+      {% endblock %}
+      {% endcache %}
+      <div class="pos-relative product-description d-flex flex-column">
+        {% cache 3600 product_compact_desc product %}
+        <a href="{{ product.get_absolute_url }}" title="{{ product.get_name }}" class="d-flex flex-column fill-height fill-width px-2 py-0 px-sm-2 mt-2" data-id="dish-item-link">
+          <div class="dish_name-wrapper d-flex align-start">
+            <h3 class="dish__name">{{ product.get_name|truncatewords:4 }}</h3>
+            <div role="separator" class="spacer"></div>
+            {% if product.has_weight %}
+              <div class="weight">{{ product.weight }} г</div>
+            {% endif %}
+          </div>
+          {% if product.short_description %}
+            <div class="d-flex align-center mt-1">
+              <span class="short-description">{{ product.short_description }}</span>
+            </div>
+          {% endif %}
+          <div role="separator" class="spacer"></div>
+        </a>
+        {% endcache %}
+        {% cache 1200 product_compact_price product.date_updated session.stockrecords.latest.date_updated %}
+        <div class="card__actions fill-width px-sm-2 pb-sm-2 align-end">
+          {% if session.availability.is_available_to_buy and session.price.exists %}
+            {% include 'webshop/catalogue/partials/product_price.html' %}
+            <div role="separator" class="spacer"></div>
+            {% if not product.is_parent and not product.has_options %}
+              {% include 'webshop/catalogue/partials/add_to_cart_form_compact.html' %}
+            {% else %}
+              <a href="{{ product.get_absolute_url }}" data-id="dish-item-submit-button-0" class="button button--dish justify-center" aria-label="Выбрать вариант">
+                <span class="button__wrapper">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="d-sm-none">
+                    <path d="M6 12H18M12 6V18" stroke="#d32225" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  <span class="button__value d-none d-sm-inline">Выбрать</span>
+                </span>
+              </a>
+            {% endif %}
+          {% else %}
+            <div role="separator" class="spacer"></div>
+            <span class="error-mark">Временно недоступно</span>
+          {% endif %}
+        </div>
+        <span class="add-to-cart-error" data-id="add-to-cart-error-compact"></span>
+        {% endcache %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,30 +1,30 @@
 from django.urls import reverse_lazy
 
-OSCAR_HOMEPAGE = reverse_lazy("page:homepage")
+HOMEPAGE = reverse_lazy("page:homepage")
 
 # Dynamic class loading
-OSCAR_DYNAMIC_CLASS_LOADER = "oscar.core.loading.default_class_loader"
+DYNAMIC_CLASS_LOADER = "core.loading.default_class_loader"
 
-OSCAR_DEFAULT_COOKIE_LIFETIME = 7 * 24 * 60 * 60
+DEFAULT_COOKIE_LIFETIME = 7 * 24 * 60 * 60
 
 # Store cookies settings
-OSCAR_STORE_COOKIE_LIFETIME = 7 * 24 * 60 * 60
+STORE_COOKIE_LIFETIME = 7 * 24 * 60 * 60
 
 # Basket settings
-OSCAR_BASKET_COOKIE_LIFETIME = 7 * 24 * 60 * 60
-OSCAR_BASKET_COOKIE_OPEN = "open_basket"
-OSCAR_BASKET_COOKIE_SECURE = False
-OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = 99
+BASKET_COOKIE_LIFETIME = 7 * 24 * 60 * 60
+BASKET_COOKIE_OPEN = "open_basket"
+BASKET_COOKIE_SECURE = False
+MAX_BASKET_QUANTITY_THRESHOLD = 99
 
 # Recently-viewed products
-OSCAR_RECENTLY_VIEWED_COOKIE_LIFETIME = 7 * 24 * 60 * 60
-OSCAR_RECENTLY_VIEWED_COOKIE_NAME = "history"
-OSCAR_RECENTLY_VIEWED_COOKIE_SECURE = False
-OSCAR_RECENTLY_VIEWED_PRODUCTS = 10
+RECENTLY_VIEWED_COOKIE_LIFETIME = 7 * 24 * 60 * 60
+RECENTLY_VIEWED_COOKIE_NAME = "history"
+RECENTLY_VIEWED_COOKIE_SECURE = False
+RECENTLY_VIEWED_PRODUCTS = 10
 
 # Currency
-OSCAR_DEFAULT_CURRENCY = "RUB"
-OSCAR_CURRENCY_FORMAT = {
+DEFAULT_CURRENCY = "RUB"
+CURRENCY_FORMAT = {
     "RUB": {
         "currency_digits": False,
         "format_type": "accounting",
@@ -33,54 +33,54 @@ OSCAR_CURRENCY_FORMAT = {
 }
 
 # Paths
-OSCAR_IMAGE_CATEGORIES_FOLDER = "images/categories/%Y/%m/"
-OSCAR_IMAGE_PRODUCTS_FOLDER = "images/products/%Y/%m/"
-OSCAR_IMAGE_ADDITIONALS_FOLDER = "images/additionals/%Y/%m/"
-OSCAR_IMAGE_ACTIONS_FOLDER = "images/actions/%Y/%m/"
-OSCAR_IMAGE_PROMOCATEGORIES_FOLDER = "images/promo-categories/%Y/%m/"
-OSCAR_IMAGE_OFFERS_FOLDER = "images/offers/%Y/%m/"
+IMAGE_CATEGORIES_FOLDER = "images/categories/%Y/%m/"
+IMAGE_PRODUCTS_FOLDER = "images/products/%Y/%m/"
+IMAGE_ADDITIONALS_FOLDER = "images/additionals/%Y/%m/"
+IMAGE_ACTIONS_FOLDER = "images/actions/%Y/%m/"
+IMAGE_PROMOCATEGORIES_FOLDER = "images/promo-categories/%Y/%m/"
+IMAGE_OFFERS_FOLDER = "images/offers/%Y/%m/"
 
-# Copy this image from oscar/static/img to your MEDIA_ROOT folder.
+# Copy this image from /static/img to your MEDIA_ROOT folder.
 # It needs to be there so Sorl can resize it.
-OSCAR_MISSING_IMAGE_URL = "image_not_found.jpg"
+MISSING_IMAGE_URL = "image_not_found.jpg"
 
 # Pagination settings
-OSCAR_OFFERS_PER_PAGE = 40
-OSCAR_PRODUCTS_PER_PAGE = 100
-OSCAR_REVIEWS_PER_PAGE = 30
-OSCAR_NOTIFICATIONS_PER_PAGE = 30
-OSCAR_EMAILS_PER_PAGE = 30
-OSCAR_ORDERS_PER_PAGE = 30
-OSCAR_ADDRESSES_PER_PAGE = 30
-OSCAR_STOCK_ALERTS_PER_PAGE = 30
+OFFERS_PER_PAGE = 40
+PRODUCTS_PER_PAGE = 100
+REVIEWS_PER_PAGE = 30
+NOTIFICATIONS_PER_PAGE = 30
+EMAILS_PER_PAGE = 30
+ORDERS_PER_PAGE = 30
+ADDRESSES_PER_PAGE = 30
+STOCK_ALERTS_PER_PAGE = 30
 
-OSCAR_EVOTOR_ITEMS_PER_PAGE = 40
-OSCAR_DASHBOARD_ITEMS_PER_PAGE = 40
-OSCAR_DASHBOARD_PAYMENTS_PER_PAGE = 40
+EVOTOR_ITEMS_PER_PAGE = 40
+DASHBOARD_ITEMS_PER_PAGE = 40
+DASHBOARD_PAYMENTS_PER_PAGE = 40
 
 # Accounts
-OSCAR_ACCOUNTS_REDIRECT_URL = "customer:profile-view"
+ACCOUNTS_REDIRECT_URL = "customer:profile-view"
 
 # Slug handling
-OSCAR_SLUG_FUNCTION = "oscar.core.utils.default_slugifier"
-OSCAR_SLUG_MAP = {}
-OSCAR_SLUG_BLACKLIST = []
-OSCAR_SLUG_ALLOW_UNICODE = True
+SLUG_FUNCTION = "core.utils.default_slugifier"
+SLUG_MAP = {}
+SLUG_BLACKLIST = []
+SLUG_ALLOW_UNICODE = True
 
 # Cookies
-OSCAR_COOKIES_DELETE_ON_LOGOUT = [
+COOKIES_DELETE_ON_LOGOUT = [
     "recently_viewed_products",
 ]
 
 # Values (using the names of the model constants) from
 # "offer.ConditionalOffer.TYPE_CHOICES"
-OSCAR_OFFERS_IMPLEMENTED_TYPES = [
+OFFERS_IMPLEMENTED_TYPES = [
     "SITE",
     "VOUCHER",
 ]
 
 # Menu structure of the dashboard navigation
-OSCAR_DASHBOARD_NAVIGATION = [
+DASHBOARD_NAVIGATION = [
     {
         "label": "Статистика",
         "icon": "fas fa-line-chart",
@@ -173,38 +173,38 @@ OSCAR_DASHBOARD_NAVIGATION = [
     },
     # {
     #     "label": "Доставка",
-    #     "icon": "fas fa-delivery",
+    #     "icon": "fas fa-shipping",
     #     "children": [
     #         {
     #             "label": "Текущие",
-    #             "url_name": "dashboard:delivery-active",
-    #             "notification": "delivery_active",
+    #             "url_name": "dashboard:shipping-active",
+    #             "notification": "shipping_active",
     #         },
     #         {
     #             "label": "Все доставки",
-    #             "url_name": "dashboard:delivery-list",
+    #             "url_name": "dashboard:shipping-list",
     #         },
     #         {
     #             "label": "Заказы на кухне",
-    #             "url_name": "dashboard:delivery-stores",
-    #             "notification": "delivery_store",
+    #             "url_name": "dashboard:shipping-stores",
+    #             "notification": "shipping_store",
     #         },
     #         {
     #             "label": "Заказы в доставке",
-    #             "url_name": "dashboard:delivery-couriers",
-    #             "notification": "delivery_couriers",
+    #             "url_name": "dashboard:shipping-couriers",
+    #             "notification": "shipping_couriers",
     #         },
     #         {
     #             "label": "Статистика",
-    #             "url_name": "dashboard:delivery-stats",
+    #             "url_name": "dashboard:shipping-stats",
     #         },
     #         {
     #             "label": "Зоны доставки",
-    #             "url_name": "dashboard:delivery-zones",
+    #             "url_name": "dashboard:shipping-zones",
     #         },
     #         {
     #             "label": "Курьеры",
-    #             "url_name": "dashboard:delivery-couriers-list",
+    #             "url_name": "dashboard:shipping-couriers-list",
     #         },
     #     ],
     # },
@@ -371,12 +371,12 @@ OSCAR_DASHBOARD_NAVIGATION = [
     # },
 ]
 
-OSCAR_DASHBOARD_DEFAULT_ACCESS_FUNCTION = "oscar.apps.dashboard.nav.default_access_fn"
+DASHBOARD_DEFAULT_ACCESS_FUNCTION = "apps.webshop.dashboard.nav.default_access_fn"
 
 # Search facets
-OSCAR_THUMBNAILER = "oscar.core.thumbnails.SorlThumbnail"
-OSCAR_URL_SCHEMA = "http"
-OSCAR_SAVE_SENT_EMAILS_TO_DB = True
+THUMBNAILER = "core.thumbnails.SorlThumbnail"
+URL_SCHEMA = "http"
+SAVE_SENT_EMAILS_TO_DB = True
 
 # Rest settings
 REST_FRAMEWORK = {
@@ -409,14 +409,14 @@ PHONENUMBER_DEFAULT_REGION = "RU"
 # Sample order/line status settings. This is quite simplistic. It's like you'll
 # want to override the set_status method on the order object to do more
 # sophisticated things.
-OSCAR_SUCCESS_ORDER_STATUS = "Завершён"
-OSCAR_FAIL_ORDER_STATUS = "Отменён"
-OSCAR_INITIAL_ORDER_STATUS = "Обрабатывается"
-OSCAR_INITIAL_ONLINE_PAYMENT_ORDER_STATUS = "Ожидает оплаты"
+SUCCESS_ORDER_STATUS = "Завершён"
+FAIL_ORDER_STATUS = "Отменён"
+INITIAL_ORDER_STATUS = "Обрабатывается"
+INITIAL_ONLINE_PAYMENT_ORDER_STATUS = "Ожидает оплаты"
 
-OSCAR_SUCCESS_LINE_STATUS = "Завершён"
-OSCAR_INITIAL_LINE_STATUS = "Обрабатывается"
-OSCAR_FAIL_LINE_STATUS = "Отменён"
+SUCCESS_LINE_STATUS = "Завершён"
+INITIAL_LINE_STATUS = "Обрабатывается"
+FAIL_LINE_STATUS = "Отменён"
 
 # Доставка:
 # Наличные (Не доделано):
@@ -433,7 +433,7 @@ OSCAR_FAIL_LINE_STATUS = "Отменён"
 # Ожидает оплаты - Оплачен - Готовится - Готов - Завершён
 
 # This dict defines the new order statuses than an order can move to
-OSCAR_ORDER_STATUS_PIPELINE = {
+ORDER_STATUS_PIPELINE = {
     "Обрабатывается": ("Готовится", "Оплачен", "Завершён", "Отменён"),
     "Ожидает оплаты": ("Оплачен", "Обрабатывается", "Завершён", "Отменён"),
     "Оплачен": ("Готовится", "Завершён", "Отменён"),
@@ -461,7 +461,7 @@ DELIVERY_NEXT_STATUS_PIPELINE = {
     "Доставляется": "Завершён",
 }
 
-OSCAR_LINE_STATUS_PIPELINE = {
+LINE_STATUS_PIPELINE = {
     "Обрабатывается": ("Готовится", "Отменён"),
     "Готовится": ("Готов", "Отменён"),
     "Готов": ("Завершён", "Отменён"),
@@ -471,7 +471,7 @@ OSCAR_LINE_STATUS_PIPELINE = {
 
 # This dict defines the line statuses that will be set when an order's status
 # is changed
-OSCAR_ORDER_STATUS_CASCADE = {
+ORDER_STATUS_CASCADE = {
     "Готовится": "Готовится",
     "Готов": "Готов",
     "Завершён": "Завершён",

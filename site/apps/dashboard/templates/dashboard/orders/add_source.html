@@ -1,0 +1,40 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %}
+  Добавить способ оплаты | Заказ №{{ order.number }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:order-list' %}">Заказы</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:order-detail' number=order.number %}">№{{ order.number }}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Добавить способ оплаты</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <h1>Добавить способ оплаты для заказа №{{ order.number }}</h1>
+{% endblock %}
+
+{% block content %}
+  <div class="table-header d-flex justify-space-between" data-target="#card-body" data-toggle="collapse" aria-controls="card-body" aria-expanded="true">
+    <h3><i class="fa-solid fa-plus"></i> Новый способ оплаты</h3>
+  </div>
+  <form method="post" class="card card-body mb-3">
+    {% csrf_token %}
+    {% include 'dashboard/partials/form_fields.html' with form=form style='horizontal' %}
+    <div class="form-actions d-flex justify-content-end fill-width">
+      <a class="btn btn-danger mr-2" href="{% url 'dashboard:order-detail' number=order.number %}">Назад</a>
+      <button type="submit" class="btn btn-primary" data-loading-text="Добавление...">Добавить</button>
+    </div>
+  </form>
+{% endblock %}

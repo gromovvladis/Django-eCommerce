@@ -3,7 +3,7 @@ var line1 = document.querySelector('#id_line1');
 var suggests = document.querySelector('#suggest_list');
 var cleanAddress = document.querySelector('#clean_address');
 
-var mapContainer = document.querySelector('.delivery__map');
+var mapContainer = document.querySelector('.shipping__map');
 var mapdiv = mapContainer.querySelector('#map');
 // var controls = mapContainer.querySelector('#map_controls');
 
@@ -18,7 +18,7 @@ var placemark;
 var addressInfo;
 var mapControl;
 var cleanButton;
-var deliveryZones;
+var shippingZones;
 var LayoutPin
 var offsetBtns = 150;
 
@@ -57,7 +57,7 @@ ymaps.ready(function () {
 
     //     _readyToEvent: function (parentDomContainer) {
     //         // Создаем HTML-элемент с текстом.
-    //         this._$content = $(['<div class="v-delivery-map--address"></div>',].join('')).appendTo(document.querySelector('#map_address'));
+    //         this._$content = $(['<div class="v-shipping-map--address"></div>',].join('')).appendTo(document.querySelector('#map_address'));
     //     },
 
     //     _addressSelected: function (address) {
@@ -68,7 +68,7 @@ ymaps.ready(function () {
     // });
 
     LayoutPin = ymaps.templateLayoutFactory.createClass(
-        '<div class="wrapper-icon-delivery">' +
+        '<div class="wrapper-icon-shipping">' +
 
         '{% if properties.loading  %}' +
 
@@ -79,13 +79,13 @@ ymaps.ready(function () {
 
         '{% else %}' +
 
-        '<div class="icon-delivery__title {% if properties.error %}icon-delivery__title_error{% endif %}">' +
+        '<div class="icon-shipping__title {% if properties.error %}icon-shipping__title_error{% endif %}">' +
         '{% if properties.error %}' +
         '<span>{{ properties.error|default:"Адрес вне зоны доставки" }}</span> ' +
         '{% else %}' +
-        '<span class="delivery-balloon__minutes">{{ properties.address }}</span>' +
+        '<span class="shipping-balloon__minutes">{{ properties.address }}</span>' +
         '<br>' +
-        '<span class="delivery-balloon__text">Адрес магазина</span>' +
+        '<span class="shipping-balloon__text">Адрес магазина</span>' +
         '{% endif %}' +
         '</div>' +
 
@@ -121,7 +121,7 @@ function createMap(address = null) {
             });
 
             $.ajax({
-                url: url_delivery_zones,
+                url: url_shipping_zones,
                 dataType: 'json',
                 success: function (json) {
                     ZonesInit(json);
@@ -277,10 +277,10 @@ function showBalloon(coords, address = null, captured = false) {
 // создание зон доставки
 function ZonesInit(json) {
     // Добавляем зоны на карту.
-    deliveryZones = ymaps.geoQuery(json).addToMap(map);
+    shippingZones = ymaps.geoQuery(json).addToMap(map);
     // Задаём цвет и контент балунов полигонов.
     var color = ""
-    deliveryZones.each(function (zona) {
+    shippingZones.each(function (zona) {
         if (zona.properties.get('available')) {
             color = "#59ff85"
         } else {

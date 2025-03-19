@@ -1,5 +1,6 @@
-from .settings import *
 from yookassa import Configuration
+
+from .settings import *
 
 # =============
 # MULTI STORES
@@ -181,9 +182,9 @@ WEBPUSH_ADMIN_EMAIL = "s.gromovvladis@gmail.com"
 
 # Registration
 EMAIL_SUBJECT_PREFIX = "Mikado"
-OSCAR_FROM_EMAIL = "info@mikado-sushi.ru"
-OSCAR_SEND_ORDER_PLACED_EMAIL = False
-OSCAR_SEND_REGISTRATION_EMAIL = False
+FROM_EMAIL = "info@mikado-sushi.ru"
+SEND_ORDER_PLACED_EMAIL = False
+SEND_REGISTRATION_EMAIL = False
 
 # Email
 # EMAIL_USER=

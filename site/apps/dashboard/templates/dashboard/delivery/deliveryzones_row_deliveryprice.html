@@ -1,0 +1,7 @@
+{% load currency_filters %}
+
+{% if not record.shipping_price %}
+  -
+{% else %}
+  {{ record.shipping_price|currency }}
+{% endif %}

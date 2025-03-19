@@ -37,7 +37,7 @@ const updateActiveTable = (force = false) => {
                     if (orderModal) {
                         orderModal();
                     }
-                    oscar.dashboard.orders.initTable();
+                    dashboard.orders.initTable();
                     badgeChanged(tableContainer.querySelectorAll('span[data-id="order-badge"]'));
                 }
             }

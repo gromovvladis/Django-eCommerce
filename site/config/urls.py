@@ -4,9 +4,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps import views
 from django.urls import include, path
-
-from oscar.views import handler403, handler404, handler500
-from oscar.apps.sitemaps import base_sitemaps
+from apps.webshop.sitemaps import base_sitemaps
+from core.views import handler403, handler404, handler500
 
 admin.autodiscover()
 
@@ -24,8 +23,8 @@ urlpatterns = [
     ),
 ]
 
-# Prefix Oscar URLs
-urlpatterns += [path("", include(apps.get_app_config("oscar").urls[0]))]
+# Prefix Webshop URLs
+urlpatterns += [path("", include(apps.get_app_config("webshop").urls[0]))]
 
 if settings.DEBUG:
     import debug_toolbar

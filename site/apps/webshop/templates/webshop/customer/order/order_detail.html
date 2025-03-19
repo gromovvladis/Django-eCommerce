@@ -1,0 +1,212 @@
+{% extends 'webshop/customer/baseaccountpage.html' %}
+
+{% load currency_filters %}
+{% load display_tags %}
+{% load reviews_tags %}
+{% load image_tags %}
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
+
+{% block app_class %}
+  {{ block.super }} app---profile-link
+{% endblock %}
+
+{% block breadcrumbs %}
+  <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+    <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">{% icon file_name='interface/arrow-back' size=22 stroke='#111' %}</button>
+    <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Личный кабинет</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <a href="{% url 'customer:order-list' %}" data-id="back-bread-btn" class="bread__link router-link-active">Заказы</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <span class="bread__link" aria-current="page">{{ page_title }}</span>
+  </div>
+{% endblock %}
+
+{% block tabcontent %}
+  <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4 mb-1">
+    <div class="order__title d-flex justify-space-between mb-2 justify-start align-center">
+      <div class="d-flex align-center">
+        <svg class="mr-2" data-id="payment-icon-svg" width="30" height="30">
+          {% if order.status == 'Ожидает оплаты' %}
+            <use xlink:href="#svg-order-pending"></use>
+          {% elif order.status == 'Отменён' %}
+            <use xlink:href="#svg-order-cancel"></use>
+          {% else %}
+            <use xlink:href="#svg-order-success"></use>
+          {% endif %}
+        </svg>
+        <h1>Заказ №{{ order.number }}</h1>
+      </div>
+      {% block order_actions %}
+        <form id="order_form_{{ order.id }}" action="{% url 'customer:order' order_number=order.number %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="order_id" value="{{ order.id }}" />
+          <input type="hidden" name="action" value="reorder" />
+          <button type="submit" class="button button--main justify-center shrink">Повторить</button>
+        </form>
+      {% endblock %}
+    </div>
+    <div class="mb-4">
+      {% for line in order.lines.all %}
+        {% with product=line.product %}
+          <div class="dish-order d-flex fill-width">
+            <div class="dish-order__picture">
+              {% if product %}
+                <a href="{{ product.get_absolute_url }}" aria-current="page" class="d-block router-link-exact-active router-link-active" data-id="dish-order-image-link">
+                  <div class="dish-image fill-width pos-relative">
+                    <div class="image">
+                      <div class="image__inner" style="padding-bottom: 72.072%;">
+                        {% with image=product.primary_image %}
+                          {% oscar_thumbnail image.original '100x100' upscale=False as thumb %}
+                          <img src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy" />
+                        {% endwith %}
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              {% else %}
+                <span aria-current="page" class="d-block router-link-exact-active router-link-active" data-id="dish-order-image-link">
+                  <div class="dish-image fill-width pos-relative">
+                    <div class="image">
+                      <div class="image__inner" style="padding-bottom: 72.072%;">
+                        {% with image=line.missing_image %}
+                          {% oscar_thumbnail image.original '100x100' upscale=False as thumb %}
+                          <img src="{{ thumb.url }}" alt="{{ line.name }}" loading="lazy" />
+                        {% endwith %}
+                      </div>
+                    </div>
+                  </div>
+                </span>
+              {% endif %}
+            </div>
+            <div class="dish-order__content d-flex flex-column fill-width ml-1">
+              <div class="dish-order__title s d-flex align-start fill-width">
+                <div class="dish-order__name-wrapper d-flex fill-width">
+                  {% if product %}
+                    <a href="{{ product.get_absolute_url }}" aria-current="page" class="dish-order__name router-link-exact-active router-link-active" data-id="dish-order-link">{{ product.get_name }} - {{ line.quantity }} {{ product.get_product_class.measure_name }}</a><br />
+                  {% else %}
+                    <span>{{ line.name }} - {{ line.quantity }} шт.</span><br />
+                  {% endif %}
+                </div>
+              </div>
+              {% if product %}
+                <div class="dish-order__toppings d-flex fill-width flex-wrap" data-id="dish-order-toppings">
+                  <span>{{ line.variants }}</span>
+                  <span>{{ line.options }}</span>
+                  <span>{{ line.additions }}</span>
+                </div>
+              {% endif %}
+              {% if order.status == 'Завершён' %}
+                {% if product and product|is_review_permitted:user %}
+                  <a class="page__block text--info d-flex shrink pd-0" href="{% url 'catalogue:reviews-add' product_slug=product.slug product_pk=product.id %}">Оценить</a>
+                {% endif %}
+              {% endif %}
+              <div role="separator" class="spacer"></div>
+              <div class="d-flex fill-width mt-1 pos-relative align-center">
+                <div role="separator" class="spacer"></div>
+                <span class="prices d-flex flex-column align-start"><span class="prices__price no-wrap">{{ line.unit_price|currency:order.currency }}</span></span>
+              </div>
+            </div>
+          </div>
+        {% endwith %}
+      {% endfor %}
+      {% include 'webshop/customer/order/order_totals.html' %}
+    </div>
+    {% block shipping_info %}
+      <div class="checkout__datail pb-2">
+        {% if order.shipping_address %}
+          <div class="order__subtitle mb-1 mb-sm-2">
+            <h2>Адрес доставки</h2>
+          </div>
+          <address class="checkout__detail-text mb-2">
+            {% for field in order.shipping_address.active_address_fields_and_labels %}
+              {{ field.label }}: {{ field.value }}{% if not forloop.last %},{% endif %}
+              <br />
+            {% endfor %}
+          </address>
+          <div class="checkout__detail-text mt-1">Заказ будет доставлен: {{ order.order_time|date:'d.m H:i' }}</div>
+          {% if order.shipping_address.notes %}
+            <div class="checkout__detail-text mb-1">
+              <span>Инструкции курьеру:</span>
+              <span>{{ order.shipping_address.notes }}</span>
+            </div>
+          {% endif %}
+          {% with order_note=order.client_note %}
+            {% if order_note %}
+              <div class="checkout__detail-text mb-2">
+                <span>Коментарий к заказу:</span>
+                <span>{{ order_note }}</span>
+              </div>
+            {% endif %}
+          {% endwith %}
+        {% else %}
+          <div class="order__subtitle mb-1 mb-sm-2">
+            <h2>Адрес самовывоза</h2>
+          </div>
+          <a href="{% url 'address:pickup-address' %}" class="checkout__detail-text">
+            <address>
+              {{ order.store }}
+              <br />
+              {{ order.store.primary_address }}
+            </address>
+          </a>
+          <div class="checkout__detail-text mt-1">Заказ будет готов: {{ order.order_time|date:'d.m H:i' }}</div>
+        {% endif %}
+      </div>
+      <div class="checkout__datail">
+        <div class="order__subtitle mb-1 mb-sm-2">
+          <h2>Телефон для связи</h2>
+        </div>
+        <div class="mb-2 checkout__detail-text">
+          <p>{{ request.user.username }}</p>
+        </div>
+      </div>
+    {% endblock %}
+    {% block payment_info %}
+      <div class="order__subtitle mb-1 mb-sm-2">
+        <h2>Оплата</h2>
+      </div>
+      {% for source in order.sources.all %}
+        <div class="checkout__detail-text mr-2">
+          <span>Способ оплаты:</span>
+          <span>{{ source.source_type.name }}</span>
+        </div>
+        <div class="checkout__detail-text mr-2">
+          <span>Сумма:</span>
+          <span>{{ source.amount_allocated|currency:source.currency }}</span>
+        </div>
+        <div class="checkout__detail-text mr-2">
+          <span>Статус заказа:</span>
+          <strong><span class="text--info" data-id="payment-status">{{ order.status }}</span></strong>
+        </div>
+      {% endfor %}
+    {% endblock %}
+  </div>
+{% endblock %}
+
+{% block SVG %}
+  <svg style="display: none">
+    <symbol id="svg-order-cancel" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#b24040" d="M23,12A11,11,0,0,1,1,12a10.827,10.827,0,0,1,.29-2.5,11,11,0,0,1,21.42,0A10.827,10.827,0,0,1,23,12Z" />
+      <ellipse fill="#ce5959" cx="12" cy="9.5" rx="10.71" ry="8.5" />
+      <path fill="#6c2e7c" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z" />
+      <path fill="#6c2e7c" d="M16.707,7.293a1,1,0,0,0-1.414,0L12,10.586,8.707,7.293A1,1,0,1,0,7.293,8.707L10.586,12,7.293,15.293a1,1,0,1,0,1.414,1.414L12,13.414l3.293,3.293a1,1,0,0,0,1.414-1.414L13.414,12l3.293-3.293A1,1,0,0,0,16.707,7.293Z" />
+    </symbol>
+    <symbol id="svg-order-pending" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#e1ca00" d="M23,12A11,11,0,0,1,1,12a10.827,10.827,0,0,1,.29-2.5,11,11,0,0,1,21.42,0A10.827,10.827,0,0,1,23,12Z" />
+      <ellipse fill="#fe0" cx="12" cy="9.5" rx="10.71" ry="8.5" />
+      <path fill="#cffeff" d="M15,16a1,1,0,0,1-.707-.293l-3-3A1,1,0,0,1,11,12V6a1,1,0,0,1,2,0v5.586l2.707,2.707A1,1,0,0,1,15,16Z" />
+      <path fill="#6c2e7c" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z" />
+      <path fill="#6c2e7c" d="M13,11.586V6a1,1,0,0,0-2,0v6a1,1,0,0,0,.293.707l3,3a1,1,0,0,0,1.414-1.414Z" />
+    </symbol>
+    <symbol id="svg-order-success" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#56b54e" d="M23,12A11,11,0,0,1,1,12a10.827,10.827,0,0,1,.29-2.5,11,11,0,0,1,21.42,0A10.827,10.827,0,0,1,23,12Z" />
+      <ellipse fill="#60cc5a" cx="12" cy="9.5" rx="10.71" ry="8.5" />
+      <path fill="#6c2e7c" d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10.011,10.011,0,0,1,12,22Z" />
+      <path fill="#6c2e7c" d="M16.293,8.293,10,14.586,7.707,12.293a1,1,0,0,0-1.414,1.414l3,3a1,1,0,0,0,1.414,0l7-7a1,1,0,0,0-1.414-1.414Z" />
+    </symbol>
+  </svg>
+{% endblock %}

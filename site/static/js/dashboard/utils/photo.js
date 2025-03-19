@@ -15,7 +15,7 @@ $(document).ready(function () {
             '<span onclick="deleteFile(); return false;" class="input-file-list-remove"></span>' +
             '</a>';
         $files_list.append(new_file_input);
-        oscar.dashboard.thumbnails.init();
+        dashboard.thumbnails.init();
         $checkbox = $($photo_input).find('input[type="checkbox"]')
         if ($checkbox.length > 0) {
             $checkbox.prop('checked', false);
@@ -43,7 +43,7 @@ $('#id_image').on('change', function () {
             '</a>';
         $files_list.empty();
         $files_list.append(new_file_input);
-        oscar.dashboard.thumbnails.init();
+        dashboard.thumbnails.init();
     }
 
     this.files = dt.files;

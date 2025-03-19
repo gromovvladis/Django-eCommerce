@@ -1,0 +1,44 @@
+{% extends 'webshop/customer/baseaccountpage.html' %}
+
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
+
+{% block app_class %}
+  {{ block.super }} app---profile-link
+{% endblock %}
+
+{% block breadcrumbs %}
+  <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center px-2 my-2">
+    <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">{% icon file_name='interface/arrow-back' size=22 stroke='#111' %}</button>
+    <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Личный кабинет</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <a href="{% url 'customer:address-list' %}" data-id="back-bread-btn" class="bread__link router-link-active">Адрес доставки</a>
+    {% icon file_name='interface/arrow-left' size=24 stroke='#999' %}
+    <span class="bread__link" aria-current="page">{{ page_title }}</span>
+  </div>
+{% endblock %}
+
+{% block tabcontent %}
+  <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
+    {% include 'webshop/partials/add-edit-address-form.html' %}
+  </div>
+{% endblock %}
+
+{% block templatescripts %}
+  {{ block.super }}
+  var url_shipping_zones = "{% url 'shipping:shipping-zones' %}"; var url_time = "{% url 'shipping:order-now' %}";
+{% endblock %}
+
+{% block externalscripts %}
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=27bbbf17-40e2-4c01-a257-9b145870aa2a&suggest_apikey=a95e9492-342c-4d78-a53c-c7e78f0570ec&lang=ru_RU"></script>
+{% endblock %}
+
+{% block extrascripts %}
+  {{ block.super }}
+  {% compress js %}
+  <script src="{% static 'js/webstore/profile/edit-address.js' %}" defer></script>
+  {% endcompress %}
+{% endblock %}

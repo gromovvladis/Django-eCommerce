@@ -1,0 +1,83 @@
+{% extends 'dashboard/layout.html' %}
+{% load i18n %}
+
+{% block title %}
+  {% trans 'Stores' %}| {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:store-list' %}">{% trans 'Stores' %}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ store.name }}</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block header %}
+  <div class="page-header d-flex justify-content-between align-items-center">
+    <h1>{% trans 'Manage users' %}</h1>
+    <div class="btn-group float-right">
+      <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">
+        <i class="fas fa-plus"></i>
+        {% trans 'Link a user' %}
+      </a>
+      <ul class="dropdown-menu dropdown-menu-right">
+        <li>
+          <a href="{% url 'dashboard:store-user-create' store_pk=store.pk %}">{% trans 'Link a new user' %}</a>
+        </li>
+        <li>
+          <a href="{% url 'dashboard:store-user-select' store_pk=store.pk %}">{% trans 'Link an existing user' %}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+{% endblock %}
+
+{% block dashboard_content %}
+  {% if users %}
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>
+            {% trans 'Email' %}
+          </th>
+          <th>
+            {% trans 'First name' %}
+          </th>
+          {% comment %} <th>
+            {% trans 'Last name' %}
+          </th> {% endcomment %}
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>
+              <a href="{% url 'dashboard:store-user-update' store_pk=store.pk user_pk=user.id %}">{{ user.email }}</a>
+            </td>
+            <td>{{ user.name|default:'-' }}</td>
+            {% comment %} <td>{{ user.last_name|default:'-' }}</td> {% endcomment %}
+            <td>
+              <form action="{% url 'dashboard:store-user-unlink' store_pk=store.id user_pkuser.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" data-loading-text="{% trans 'Unlinking...' %}">{% trans 'Unlink user' %}</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>
+      {% trans 'No users linked.' %}
+    </p>
+  {% endif %}
+  {% include 'dashboard/partials/pagination.html' %}
+
+  <h1>{% trans 'Update details' %}</h1>
+  {% include 'dashboard/partials/form.html' %}
+{% endblock %}

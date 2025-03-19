@@ -12112,7 +12112,7 @@ textarea.form-control-lg {
 }
 
 
-.delivery__map {
+.shipping__map {
   width: 100%;
   height: 450px;
   position: relative;
@@ -12136,7 +12136,7 @@ textarea.form-control-lg {
 }
 
 
-.delivery-balloon__minutes {
+.shipping-balloon__minutes {
   font-family: Onest, sans-serif;
   font-size: .9rem;
   line-height: 1rem;
@@ -12144,7 +12144,7 @@ textarea.form-control-lg {
   white-space: nowrap
 }
 
-.delivery-balloon__text {
+.shipping-balloon__text {
   font-family: Onest, sans-serif;
   color: #dfdfdf;
   font-size: .75rem;
@@ -12165,16 +12165,16 @@ textarea.form-control-lg {
 }
 
 
-.icon-delivery__svg {
+.icon-shipping__svg {
   fill: #530000;
   border-radius: 50%
 }
 
-.icon-delivery__svg_error {
+.icon-shipping__svg_error {
   fill: #b21f2d;
 }
 
-.icon-delivery__title {
+.icon-shipping__title {
   position: absolute;
   left: 0;
   bottom: calc(100% + 10px);
@@ -12189,7 +12189,7 @@ textarea.form-control-lg {
   white-space: nowrap
 }
 
-.icon-delivery__title_error {
+.icon-shipping__title_error {
   background: #b21f2d;
   font-family: Onest, sans-serif;
   font-size: .9rem;;
@@ -12197,7 +12197,7 @@ textarea.form-control-lg {
   width: 120px
 }
 
-.icon-delivery__title:after {
+.icon-shipping__title:after {
   content: "";
   position: absolute;
   top: 100%;
@@ -12206,7 +12206,7 @@ textarea.form-control-lg {
   border-top: 10px solid #140e38;
 }
 
-.icon-delivery__title_error:after {
+.icon-shipping__title_error:after {
   border-top: 10px solid #b21f2d;
 }
 

@@ -18041,7 +18041,7 @@ readers do not read off random characters that represent icons */
   content: "\f2c2";
 }
 
-.fa-delivery::before {
+.fa-shipping::before {
   content: "\f0d1";
 }
 
@@ -19369,7 +19369,7 @@ caption {
 
 }
 
-.delivery__map {
+.shipping__map {
   width: 100%;
   height: 450px;
   position: relative;
@@ -19461,7 +19461,7 @@ caption {
   }
 }
 
-.delivery-map .map-custom-controls {
+.shipping-map .map-custom-controls {
   height: 100vh;
   top: 0
 }
@@ -19469,7 +19469,7 @@ caption {
 
 
 
-.delivery-map--map {
+.shipping-map--map {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -19477,7 +19477,7 @@ caption {
   overflow: hidden
 }
 
-.delivery-map--label {
+.shipping-map--label {
   width: 100%;
   min-height: 44px;
   background: #fff;
@@ -19489,7 +19489,7 @@ caption {
   z-index: 1
 }
 
-.delivery-map--error {
+.shipping-map--error {
 
   font-size: 1rem;
   line-height: 1.25rem;
@@ -19499,7 +19499,7 @@ caption {
   margin-bottom: .25rem
 }
 
-.delivery-map--submit {
+.shipping-map--submit {
   width: 100%;
   pointer-events: none;
   bottom: 0;
@@ -19510,26 +19510,26 @@ caption {
   z-index: 6
 }
 
-.delivery-map--address {
+.shipping-map--address {
   font-size: .9rem;
   line-height: 1.125rem;
   font-weight: 400
 }
 
-.delivery-map--address,
-.delivery-map--note {
+.shipping-map--address,
+.shipping-map--note {
 
   font-style: normal;
   color: #000
 }
 
-.delivery-map--note {
+.shipping-map--note {
   font-size: 1.125rem;
   line-height: 1.25rem;
   font-weight: 500
 }
 
-.delivery-map--info {
+.shipping-map--info {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -19550,23 +19550,23 @@ caption {
 }
 
 
-.delivery--clear {
+.shipping--clear {
   border: none;
   background: none;
 }
 
-.delivery--clear svg {
+.shipping--clear svg {
   color: var(--color-primary);
   width: 24px;
   height: 24px
 }
 
-.delivery--clear:active svg {
+.shipping--clear:active svg {
   color: #ac090b
 }
 
 
-.delivery-balloon__minutes {
+.shipping-balloon__minutes {
   font-family: Onest, sans-serif;
   font-size: .9rem;
   line-height: 1rem;
@@ -19574,7 +19574,7 @@ caption {
   white-space: nowrap
 }
 
-.delivery-balloon__text {
+.shipping-balloon__text {
   font-family: Onest, sans-serif;
   color: #dfdfdf;
   font-size: .75rem;
@@ -19595,16 +19595,16 @@ caption {
 }
 
 
-.icon-delivery__svg {
+.icon-shipping__svg {
   fill: #530000;
   border-radius: 50%
 }
 
-.icon-delivery__svg_error {
+.icon-shipping__svg_error {
   fill: #b21f2d;
 }
 
-.icon-delivery__title {
+.icon-shipping__title {
   position: absolute;
   left: 0;
   bottom: calc(100% + 10px);
@@ -19620,7 +19620,7 @@ caption {
   white-space: nowrap
 }
 
-.icon-delivery__title_error {
+.icon-shipping__title_error {
   background: #b21f2d;
   font-family: Onest, sans-serif;
   font-size: .9rem;
@@ -19629,7 +19629,7 @@ caption {
   width: 120px
 }
 
-.icon-delivery__title:after {
+.icon-shipping__title:after {
   content: "";
   position: absolute;
   top: 100%;
@@ -19638,7 +19638,7 @@ caption {
   border-top: 10px solid #140e38;
 }
 
-.icon-delivery__title_error:after {
+.icon-shipping__title_error:after {
   border-top: 10px solid #b21f2d;
 }
 

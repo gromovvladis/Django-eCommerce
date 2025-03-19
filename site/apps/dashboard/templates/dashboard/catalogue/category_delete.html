@@ -1,0 +1,68 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %}
+  {{ title }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% if parent %}
+            {% url 'dashboard:catalogue-category-detail-list' pk=parent.pk %}
+          {% else %}
+            {% url 'dashboard:catalogue-category-list' %}
+          {% endif %}">
+          Категории
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:catalogue-category-update' pk=object.pk %}">{{ object.name }}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <h1>{{ object.name }} | Удаление</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  <form method="post" class="confirm-content">
+    <div class="table-header">
+      <h2>{{ title }}</h2>
+    </div>
+    <div class="card card-body card-confirm bg-light">
+      {% csrf_token %}
+      {{ form }}
+      <p>
+        Удалить категорию <strong>{{ object.name }}</strong> - вы уверены?
+      </p>
+    </div>
+    <div class="table-footer">
+      <div class="form-actions d-flex justify-content-between flex-wrap align-items-end fill-width">
+        <div>
+          <label for="id_evotor_update" class="checkbox-ios">
+            <input type="checkbox" name="evotor_update" class="form-control" id="id_evotor_update" checked />
+            <span class="checkbox-ios-switch"></span>
+          </label>
+          <small class="form-text text-muted">Удалить в Эвотор</small>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+          <a class="btn btn-secondary" href="{% url 'dashboard:catalogue-category-list' %}">
+            <i class="fa-solid fa-ban"></i>
+            Отмена
+          </a>
+          <button class="btn btn-danger ml-2" type="submit" class="btn btn-danger" data-loading-text="Удаление...">
+            <i class="fa-solid fa-trash"></i>
+            Удалить
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}

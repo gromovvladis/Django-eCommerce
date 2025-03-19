@@ -1,0 +1,107 @@
+{% extends 'dashboard/layout.html' %}
+
+{% load render_table from django_tables2 %}
+{% load sorting_tags %}
+{% load widget_tweaks %}
+{% load dashboard_tags %}
+{% load compress %}
+{% load static %}
+
+{% block title %}
+  {{ title }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block header %}
+  <div class="page-header d-flex flex-wrap justify-content-start store-select">
+    <h1 class="mr-2">Активные заказы</h1>
+    <form method="get" class="btn d-flex align-items-center no-widget-init" id="store_form">
+      {% for field in form %}
+        {% if 'store' in field.id_for_label %}
+          {% render_field field class='store-point' %}
+          {% for error in field.errors %}
+            <ul class="error-block">
+              <li>{{ error }}</li>
+            </ul>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </form>
+  </div>
+{% endblock %}
+
+{% block dashboard_content %}
+  <form method="post" id="orders_form" class="mobile-table order-table">
+    {% csrf_token %}
+    <div data-id="active-orders">
+      {% if orders %}
+        {% render_table orders %}
+      {% else %}
+        <p class="empty">Заказы не найдены.</p>
+      {% endif %}
+    </div>
+    <div class="table-wrapper mb-3 d-none" id="actions_lines">
+      <div class="table-header d-flex justify-space-between" data-target="#status-body" data-toggle="collapse" aria-controls="status-body" aria-expanded="true">
+        <h3><i class="fa-solid fa-list-check"></i>Изменить статус заказа</h3>
+        <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+        <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+      </div>
+      <div class="card card-body dropdown-list" id="status-body">
+        <h2 class="mb-3">Изменить статус заказа</h2>
+        {% if order_statuses %}
+          <div class="form-inline fill-width justify-space-between">
+            <div class="form-group form-flex-inline">
+              <label for="new_status_id">Новый статус</label>
+              <select id="new_status_id" name="new_status">
+                <option value="">-- Новый статус --</option>
+                {% for status in order_statuses %}
+                  <option>{{ status }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="btn-form d-flex my-2">
+              <button type="submit" name="action" value="change_order_statuses" class="btn btn-primary">Изменить статус заказа</button>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+  <audio id="order-sound" src="{% static 'audio/dashboard/orders/new-order.mp3' %}" preload="auto"></audio>
+  <div class="modal fade justify-content-center" data-id="order-modal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div data-id="order-modal-content" class="d-flex flex-column fill-height content-loading"></div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block templatescripts %}
+  {{ block.super }}
+  var active_orders_lookup_url = "{% url 'dashboard:order-active-list-lookup' %}"; var order_modal_url = "{% url 'dashboard:order-modal' %}"; var next_status_url = "{% url 'dashboard:order-next-status' %}";
+{% endblock %}
+
+{% block extrascripts %}
+  {{ block.super }}
+  {% compress js %}
+  <script type="application/javascript" src="{% static 'js/dashboard/orders/before-order.js' %}"></script>
+  <script type="application/javascript" src="{% static 'js/dashboard/orders/order-modal.js' %}"></script>
+  <script type="application/javascript" src="{% static 'js/dashboard/orders/active-orders.js' %}"></script>
+  {% endcompress %}
+{% endblock %}
+
+{% block onbodyload %}
+  {{ block.super }}
+  dashboard.orders.initTable();
+{% endblock %}

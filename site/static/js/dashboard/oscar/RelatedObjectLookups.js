@@ -145,4 +145,4 @@
     });
     $('.related-widget-wrapper select').trigger('change');
 
-})(oscar || {}, jQuery);
+})(dashboard || {}, jQuery);

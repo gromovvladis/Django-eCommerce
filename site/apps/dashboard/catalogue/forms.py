@@ -1,0 +1,709 @@
+import logging
+
+from django import forms
+from django.core import exceptions
+from django.db.models.query import QuerySet
+from core.loading import get_class, get_classes, get_model
+from core.utils import slugify
+from core.forms.widgets import DateTimePickerInput, ImageInput, ThumbnailInput
+from treebeard.forms import movenodeform_factory
+
+AttributeSelect = get_class("dashboard.catalogue.widgets", "AttributeSelect")
+ProductSelect = get_class("dashboard.catalogue.widgets", "ProductSelect")
+AdditionalSelect = get_class("dashboard.catalogue.widgets", "AdditionalSelect")
+(RelatedFieldWidgetWrapper, RelatedMultipleFieldWidgetWrapper) = get_classes(
+    "dashboard.widgets",
+    ("RelatedFieldWidgetWrapper", "RelatedMultipleFieldWidgetWrapper"),
+)
+
+Product = get_model("catalogue", "Product")
+ProductClass = get_model("catalogue", "ProductClass")
+Attribute = get_model("catalogue", "Attribute")
+ProductAttribute = get_model("catalogue", "ProductAttribute")
+Category = get_model("catalogue", "Category")
+Store = get_model("store", "Store")
+StockRecord = get_model("store", "StockRecord")
+StockRecordOperation = get_model("store", "StockRecordOperation")
+ProductCategory = get_model("catalogue", "ProductCategory")
+ProductImage = get_model("catalogue", "ProductImage")
+ProductRecommendation = get_model("catalogue", "ProductRecommendation")
+ProductAdditional = get_model("catalogue", "ProductAdditional")
+AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
+AttributeOption = get_model("catalogue", "AttributeOption")
+Option = get_model("catalogue", "Option")
+Additional = get_model("catalogue", "Additional")
+
+logger = logging.getLogger("apps.catalogue")
+
+BaseCategoryForm = movenodeform_factory(
+    Category,
+    fields=[
+        "name",
+        "slug",
+        "description",
+        "order",
+        "image",
+        "is_public",
+        "meta_title",
+        "meta_description",
+    ],
+    exclude=["ancestors_are_public"],
+    widgets={
+        "meta_description": forms.Textarea(attrs={"class": "no-widget-init"}),
+        "image": ThumbnailInput(),
+    },
+)
+
+
+class SEOFormMixin:
+    seo_fields = ["meta_title", "meta_description", "slug"]
+
+    def primary_form_fields(self):
+        return [
+            field
+            for field in self
+            if not field.is_hidden and not self.is_seo_field(field)
+        ]
+
+    def seo_form_fields(self):
+        return [field for field in self if self.is_seo_field(field)]
+
+    def is_seo_field(self, field):
+        return field.name in self.seo_fields
+
+
+class CategoryForm(SEOFormMixin, BaseCategoryForm):
+    evotor_update = forms.BooleanField(
+        label="Эвотор",
+        required=False,
+        initial=True,
+        help_text="Синхронизировать с Эвотор",
+    )
+
+    class Meta:
+        model = Category
+        fields = [
+            "name",
+            "slug",
+            "description",
+            "order",
+            "image",
+            "is_public",
+            "meta_title",
+            "meta_description",
+            "evotor_update",
+        ]
+        widgets = {
+            "image": ThumbnailInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "slug" in self.fields:
+            self.fields["slug"].required = False
+            self.fields["slug"].help_text = (
+                "Оставьте пустым, чтобы сгенерировать на основе названия категории"
+            )
+
+
+class ProductClassSelectForm(forms.Form):
+    """
+    Form which is used before creating a product to select it's product class
+    """
+
+    product_class = forms.ModelChoiceField(
+        label="Создать товар",
+        empty_label="Выберите тип товара",
+        queryset=ProductClass.objects.all(),
+        widget=forms.Select(
+            attrs={
+                "class": "select-field",
+            }
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        """
+        If there's only one product class, pre-select it
+        """
+        super().__init__(*args, **kwargs)
+        qs = self.fields["product_class"].queryset
+        if not kwargs.get("initial") and len(qs) == 1:
+            self.fields["product_class"].initial = qs[0]
+
+
+class ProductSearchForm(forms.Form):
+    article = forms.CharField(max_length=64, required=False, label="Артикул товара")
+    name = forms.CharField(max_length=255, required=False, label="Имя товара")
+    categories = forms.ModelMultipleChoiceField(
+        label="Категория",
+        queryset=Category.objects.all(),
+        required=False,
+    )
+    product_class = forms.ModelMultipleChoiceField(
+        label="Тип товара",
+        queryset=ProductClass.objects.all(),
+        required=False,
+    )
+    is_public = forms.BooleanField(
+        label="Доступен",
+        required=False,
+        widget=forms.widgets.CheckboxInput(attrs={"checked": True}),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_data["article"] = cleaned_data["article"].strip()
+        cleaned_data["name"] = cleaned_data["name"].strip()
+        return cleaned_data
+
+
+class StockRecordForm(forms.ModelForm):
+    def __init__(self, product_class, user, *args, **kwargs):
+        # The user kwarg is not used by stock StockRecordForm. We pass it
+        # anyway in case one wishes to customise the store queryset
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+        if not product_class.track_stock:
+            if "low_stock_threshold" in self.fields:
+                del self.fields["low_stock_threshold"]
+        else:
+            if "price" in self.fields:
+                self.fields["price"].required = True
+
+    class Meta:
+        model = StockRecord
+        fields = [
+            "store",
+            "cost_price",
+            "old_price",
+            "price",
+            "price_currency",
+            "tax",
+            "low_stock_threshold",
+            "is_public",
+        ]
+
+
+class StockRecordStockForm(forms.ModelForm):
+    def __init__(self, product_class, user, *args, **kwargs):
+        # The user kwarg is not used by stock StockRecordForm. We pass it
+        # anyway in case one wishes to customise the store queryset
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = StockRecord
+        fields = [
+            "is_public",
+        ]
+
+
+class StockRecordOperationForm(forms.ModelForm):
+    def __init__(self, product, user, *args, **kwargs):
+        self.product = product
+        self.user = user
+        super().__init__(*args, **kwargs)
+        self.set_initial_data()
+        self.fields["num"].required = False
+
+    def set_initial_data(self):
+        stockrecords = StockRecord.objects.filter(product=self.product)
+        stockrecord_choices = [(sr.id, sr.store) for sr in stockrecords]
+        store_field = self.fields.get("stockrecord")
+        if store_field:
+            store_field.initial = stockrecords.first()
+            store_field.choices = stockrecord_choices
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.user = self.user
+
+        if not instance.num:
+            return None
+
+        if commit:
+            instance.save()
+        return instance
+
+    class Meta:
+        model = StockRecordOperation
+        fields = [
+            "stockrecord",
+            "type",
+            "message",
+            "num",
+            "user",
+        ]
+        exclude = ["user"]
+
+
+class StockAlertSearchForm(forms.Form):
+    status = forms.CharField(label="Статус")
+
+
+def _attr_text_field(attribute):
+    return forms.CharField(label=attribute.name, required=attribute.required)
+
+
+def _attr_textarea_field(attribute):
+    return forms.CharField(
+        label=attribute.name, widget=forms.Textarea(), required=attribute.required
+    )
+
+
+def _attr_integer_field(attribute):
+    return forms.IntegerField(label=attribute.name, required=attribute.required)
+
+
+def _attr_boolean_field(attribute):
+    return forms.BooleanField(label=attribute.name, required=attribute.required)
+
+
+def _attr_float_field(attribute):
+    return forms.FloatField(label=attribute.name, required=attribute.required)
+
+
+def _attr_date_field(attribute):
+    return forms.DateField(
+        label=attribute.name,
+        required=attribute.required,
+        widget=forms.widgets.DateInput,
+    )
+
+
+def _attr_datetime_field(attribute):
+    return forms.DateTimeField(
+        label=attribute.name, required=attribute.required, widget=DateTimePickerInput()
+    )
+
+
+def _attr_option_field(attribute):
+    return forms.ModelChoiceField(
+        label=attribute.name,
+        required=attribute.required,
+        queryset=attribute.option_group.options.all(),
+    )
+
+
+def _attr_variant_field(attribute, value):
+    return forms.ModelChoiceField(
+        label=attribute.name,
+        required=attribute.required,
+        queryset=value,
+        empty_label=None,
+    )
+
+
+def _attr_multi_option_field(attribute):
+    return forms.ModelMultipleChoiceField(
+        label=attribute.name,
+        required=attribute.required,
+        queryset=attribute.option_group.options.all(),
+    )
+
+
+# pylint: disable=unused-argument
+def _attr_entity_field(attribute):
+    # Product entities don't have out-of-the-box supported in the ProductForm.
+    # There is no ModelChoiceField for generic foreign keys, and there's no
+    # good default behaviour anyway; offering a choice of *all* model instances
+    # is hardly useful.
+    return None
+
+
+def _attr_numeric_field(attribute):
+    return forms.FloatField(label=attribute.name, required=attribute.required)
+
+
+def _attr_file_field(attribute):
+    return forms.FileField(label=attribute.name, required=attribute.required)
+
+
+def _attr_image_field(attribute):
+    return forms.ImageField(label=attribute.name, required=attribute.required)
+
+
+class ProductClassForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # pylint: disable=no-member
+        remote_field = self._meta.model._meta.get_field("options").remote_field
+        self.fields["options"].widget = RelatedMultipleFieldWidgetWrapper(
+            self.fields["options"].widget, remote_field
+        )
+
+    class Meta:
+        model = ProductClass
+        fields = ["name", "requires_shipping", "track_stock", "options"]
+
+
+class ProductForm(SEOFormMixin, forms.ModelForm):
+    FIELD_FACTORIES = {
+        "text": _attr_text_field,
+        "richtext": _attr_textarea_field,
+        "integer": _attr_integer_field,
+        "boolean": _attr_boolean_field,
+        "float": _attr_float_field,
+        "date": _attr_date_field,
+        "datetime": _attr_datetime_field,
+        "option": _attr_option_field,
+        "multi_option": _attr_multi_option_field,
+        "entity": _attr_entity_field,
+        "numeric": _attr_numeric_field,
+        "file": _attr_file_field,
+        "image": _attr_image_field,
+    }
+    evotor_update = forms.BooleanField(
+        label="Эвотор",
+        required=False,
+        initial=True,
+        help_text="Синхронизировать с Эвотор",
+    )
+
+    class Meta:
+        model = Product
+        fields = [
+            "name",
+            "product_class",
+            "article",
+            "short_description",
+            "description",
+            "order",
+            "cooking_time",
+            "weight",
+            "is_public",
+            "is_discountable",
+            "structure",
+            "slug",
+            "meta_title",
+            "meta_description",
+            "evotor_update",
+        ]
+        widgets = {
+            "structure": forms.HiddenInput(),
+            "meta_description": forms.Textarea(attrs={"class": "no-widget-init"}),
+        }
+
+    def __init__(self, product_class, *args, data=None, parent=None, **kwargs):
+        self.request = kwargs.pop("request", None)
+        self.set_initial(product_class, parent, kwargs)
+        super().__init__(data, *args, **kwargs)
+        if parent:
+            self.instance.parent = parent
+            # We need to set the correct product structures explicitly to pass
+            # attribute validation and child product validation. Note that
+            # those changes are not persisted.
+            self.instance.structure = Product.CHILD
+            self.instance.parent.structure = Product.PARENT
+
+            self.delete_non_child_fields()
+            self.add_variant_fields()
+        else:
+            # Only set product class for non-child products
+            self.fields["product_class"].empty_label = None
+            self.instance.product_class = product_class
+            self.add_attribute_fields(product_class, self.instance.is_parent)
+
+        if "slug" in self.fields:
+            self.fields["slug"].required = False
+            self.fields["slug"].help_text = (
+                "Оставьте поле пустым, чтобы сгенерировать из названия товара"
+            )
+        if "name" in self.fields:
+            self.fields["name"].widget = forms.TextInput(attrs={"autocomplete": "off"})
+
+    def set_initial(self, product_class, parent, kwargs):
+        """
+        Set initial data for the form. Sets the correct product structure
+        and fetches initial values for the dynamically constructed attribute
+        fields.
+        """
+        kwargs["initial"]["product_class"] = product_class
+        if "initial" not in kwargs:
+            kwargs["initial"] = {}
+        self.set_initial_attribute_values(product_class, kwargs)
+        if parent:
+            kwargs["initial"]["structure"] = Product.CHILD
+        kwargs["initial"]["evotor_update"] = (
+            self.request.COOKIES.get("evotor_update", True) == "True"
+        )
+
+    def set_initial_attribute_values(self, product_class, kwargs):
+        """
+        Update the kwargs['initial'] value to have the initial values based on
+        the product instance's attributes
+        """
+        instance = kwargs.get("instance")
+        if instance is None:
+            return
+        for attribute in (
+            product_class.class_attributes.all() | instance.attributes.all()
+        ):
+            try:
+                attr = instance.attribute_values.get(attribute=attribute)
+                value = attr.value
+                is_variant = attr.is_variant
+            except exceptions.ObjectDoesNotExist:
+                pass
+            else:
+                if instance.is_child:
+                    value = value.first()
+
+                kwargs["initial"]["attr_%s" % attribute.code] = value
+                kwargs["initial"]["attr_is_variant_%s" % attribute.code] = is_variant
+
+    def add_variant_fields(self):
+        """
+        For each attribute specified by the product class, this method
+        dynamically adds form fields to the product form.
+        """
+        attribute_values = self.instance.parent.get_variant_attributes()
+
+        for attribute_value in attribute_values:
+            field = _attr_variant_field(
+                attribute_value.attribute, attribute_value.value
+            )
+            if field:
+                field.required = True
+                self.fields["attr_%s" % attribute_value.attribute.code] = field
+
+    def add_attribute_fields(self, product_class, is_parent=False):
+        """
+        For each attribute specified by the product class, this method
+        dynamically adds form fields to the product form.
+        """
+        if self.instance.id:
+            attributes = (
+                product_class.class_attributes.all() | self.instance.attributes.all()
+            )
+        else:
+            attributes = product_class.class_attributes.all()
+
+        for attribute in attributes:
+            field = self.get_attribute_field(attribute)
+            if field:
+                if is_parent:
+                    field.required = False
+
+                self.fields["attr_%s" % attribute.code] = field
+                if attribute.type == "multi_option":
+                    self.fields["attr_is_variant_%s" % attribute.code] = (
+                        forms.BooleanField(
+                            required=False,
+                            label="Используется для вариаций?",
+                            help_text="Данный атрибут можно использовать при создании вариативного товара.",
+                        )
+                    )
+
+    def get_attribute_field(self, attribute):
+        """
+        Gets the correct form field for a given attribute type.
+        """
+        return self.FIELD_FACTORIES[attribute.type](attribute)
+
+    def delete_non_child_fields(self):
+        """
+        Deletes any fields not needed for child products. Override this if
+        you want to e.g. keep the description field.
+        """
+        for field_name in [
+            "description",
+            "short_description",
+            "product_class",
+            "weight",
+            "is_discountable",
+            "meta_title",
+            "meta_description",
+        ]:
+            if field_name in self.fields:
+                del self.fields[field_name]
+
+    def _post_clean(self):
+        """
+        Set attributes before ModelForm calls the product's clean method
+        (which it does in _post_clean), which in turn validates attributes.
+        """
+        for attribute in self.instance.attr.get_all_attributes():
+            field_name = "attr_%s" % attribute.code
+            is_variant_name = "attr_is_variant_%s" % attribute.code
+            # An empty text field won't show up in cleaned_data.
+            if field_name in self.cleaned_data:
+                value = self.cleaned_data[field_name]
+                if attribute.type == "multi_option" and not isinstance(value, QuerySet):
+                    value = [value]
+
+                setattr(self.instance.attr, attribute.code, value)
+
+            if self.instance.id:
+                if is_variant_name in self.cleaned_data:
+                    value = self.cleaned_data[is_variant_name]
+                    attribute_obj = self.instance.attribute_values.filter(
+                        attribute=attribute
+                    ).first()
+                    if attribute_obj:
+                        attribute_obj.is_variant = value
+                        attribute_obj.save()
+
+        super()._post_clean()
+
+
+class ProductCategoryForm(forms.ModelForm):
+    class Meta:
+        model = ProductCategory
+        fields = ("category",)
+
+
+class ProductImageForm(forms.ModelForm):
+    class Meta:
+        model = ProductImage
+        fields = ["product", "original", "caption", "display_order"]
+        # use ImageInput widget to create HTML displaying the
+        # actual uploaded image and providing the upload dialog
+        # when clicking on the actual image.
+        widgets = {
+            "original": ImageInput(),
+            "display_order": forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, data=None, **kwargs):
+        self.prefix = kwargs.get("prefix", None)
+        instance = kwargs.get("instance", None)
+        if not instance:
+            initial = {"display_order": self.get_display_order()}
+            initial.update(kwargs.get("initial", {}))
+            kwargs["initial"] = initial
+        super().__init__(data, *args, **kwargs)
+
+    def get_display_order(self):
+        return int(self.prefix.split("-").pop())
+
+
+class ProductRecommendationForm(forms.ModelForm):
+    class Meta:
+        model = ProductRecommendation
+        fields = ["primary", "recommendation", "ranking"]
+        widgets = {
+            "recommendation": ProductSelect,
+        }
+
+
+class AdditionalForm(forms.ModelForm):
+    evotor_update = forms.BooleanField(
+        label="Эвотор",
+        required=False,
+        initial=True,
+        help_text="Синхронизировать с Эвотор",
+    )
+
+    class Meta:
+        model = Additional
+        fields = [
+            "name",
+            "article",
+            "order",
+            "description",
+            "stores",
+            "price_currency",
+            "price",
+            "old_price",
+            "cost_price",
+            "weight",
+            "max_amount",
+            "tax",
+            "is_public",
+            "image",
+        ]
+        widgets = {
+            "image": ThumbnailInput(),
+        }
+
+
+class ProductAdditionalForm(forms.ModelForm):
+    class Meta:
+        model = ProductAdditional
+        fields = ["primary_product", "additional_product", "ranking"]
+        widgets = {
+            "additional_product": AdditionalSelect,
+        }
+
+
+class ProductClassAdditionalForm(forms.ModelForm):
+    class Meta:
+        model = ProductAdditional
+        fields = ["primary_class", "additional_product", "ranking"]
+        widgets = {
+            "additional_product": AdditionalSelect,
+        }
+
+
+class AttributeForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # because we'll allow submission of the form with blank
+        # codes so that we can generate them.
+        self.fields["code"].required = False
+
+        # pylint: disable=no-member
+        remote_field = self._meta.model._meta.get_field("option_group").remote_field
+        self.fields["option_group"].widget = RelatedFieldWidgetWrapper(
+            self.fields["option_group"].widget, remote_field
+        )
+
+    def clean_code(self):
+        code = self.cleaned_data.get("code")
+        name = self.cleaned_data.get("name")
+
+        if not code and name:
+            code = slugify(name)
+
+        return code
+
+    def clean(self):
+        attr_type = self.cleaned_data.get("type")
+        option_group = self.cleaned_data.get("option_group")
+        if attr_type in [Attribute.OPTION, Attribute.MULTI_OPTION] and not option_group:
+            self.add_error("option_group", "Требуется группа опций.")
+
+    class Meta:
+        model = Attribute
+        fields = ["name", "code", "type", "option_group", "required"]
+
+
+class ProductAttributesForm(forms.ModelForm):
+    class Meta:
+        model = ProductAttribute
+        fields = ["product", "attribute"]
+        widgets = {
+            "attribute": AttributeSelect,
+        }
+
+
+class ProductClassAttributesForm(forms.ModelForm):
+    class Meta:
+        model = ProductAttribute
+        fields = ["product_class", "attribute"]
+        widgets = {
+            "attribute": AttributeSelect,
+        }
+
+
+class AttributeOptionGroupForm(forms.ModelForm):
+    class Meta:
+        model = AttributeOptionGroup
+        fields = ["name"]
+
+
+class AttributeOptionForm(forms.ModelForm):
+    class Meta:
+        model = AttributeOption
+        fields = ["option"]
+
+
+class OptionForm(forms.ModelForm):
+    class Meta:
+        model = Option
+        fields = ["name", "type", "required", "order", "help_text", "option_group"]
