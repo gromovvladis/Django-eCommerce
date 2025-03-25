@@ -17,14 +17,14 @@
           {% if promo_cat.has_products %}
             {% for product in promo_cat.all_products|slice:':6' %}
               <div class="home-nav--item home-nav--width swiper-slide">
-                <a href="{{ product.get_absolute_url }}" class="dish-order d-flex fill-width fill-height mb-1 dish-order--info" aria-label="{{ product.get_title }}">
+                <a href="{{ product.get_absolute_url }}" class="dish-order d-flex fill-width fill-height mb-1 dish-order--info" aria-label="{{ product.get_name }}">
                   <div class="dish-order__picture">
                     <div class="dish-image d-block fill-width pos-relative" data-id="dish-order-image-link">
                       <div class="image">
                         <div class="image__inner" style="padding-bottom: 100%;">
                           {% with image=product.primary_image %}
                             {% oscar_thumbnail image.original 'x450' upscale=False as thumb %}
-                            <img src="{{ thumb.url }}" alt="{{ product.get_title }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0" />
+                            <img src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy" class="img-thumbnail w-auto mx-auto my-0" />
                           {% endwith %}
                         </div>
                       </div>
@@ -32,7 +32,7 @@
                   </div>
                   <div class="dish-order__content d-flex flex-column fill-width">
                     <div class="dish-order__name-wrapper d-flex flex-column align-start fill-width">
-                      <span class="dish-order__name mb-1" data-id="dish-order-link">{{ product.get_title }}</span>
+                      <span class="dish-order__name mb-1" data-id="dish-order-link">{{ product.get_name }}</span>
                       {% if product.short_description %}
                         <span class="short-description">{{ product.short_description }}</span>
                       {% endif %}

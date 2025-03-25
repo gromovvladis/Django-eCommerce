@@ -19,7 +19,7 @@ class Action(models.Model):
     title = models.CharField("Заголовок", max_length=128, blank=False, null=False)
     description = models.TextField("Описание", blank=True)
     order = models.IntegerField("Порядок", null=False, blank=False, default=0)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(verbose_name="Активен", default=True)
     products = models.ManyToManyField(
         "catalogue.Product",
         blank=True,
@@ -127,6 +127,8 @@ class ActionProduct(models.Model):
     class Meta:
         app_label = "action"
         unique_together = ("action", "product")
+        verbose_name = "Товар акция-баннера"
+        verbose_name_plural = "Товары акций-баннеров"
 
 
 class PromoCategory(models.Model):
@@ -135,7 +137,7 @@ class PromoCategory(models.Model):
     title = models.CharField("Заголовок", max_length=128, blank=False, null=False)
     description = models.TextField("Описание", blank=True)
     order = models.IntegerField("Порядок", null=False, blank=False, default=0)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(verbose_name="Активен", default=True)
     products = models.ManyToManyField(
         "catalogue.Product",
         blank=True,
@@ -153,17 +155,17 @@ class PromoCategory(models.Model):
     )
     meta_description = models.TextField("Мета описание", blank=True, null=True)
 
-    PROMO, RECOMENDATION, ACTION = "PROMO", "RECOMEND", "ACTION"
+    PROMO, RECOMEND, ACTION = "PROMO", "RECOMEND", "ACTION"
     choices = (
         (PROMO, "Промо-категория"),
-        (RECOMENDATION, "Рекомендованные товары"),
+        (RECOMEND, "Рекомендованные товары"),
         (ACTION, "Акция на товары"),
     )
     type = models.CharField(
         max_length=255,
         choices=choices,
         verbose_name="Тип категории",
-        default=RECOMENDATION,
+        default=RECOMEND,
     )
 
     class Meta:
@@ -252,3 +254,5 @@ class PromoCategoryProduct(models.Model):
     class Meta:
         app_label = "action"
         unique_together = ("promo_category", "product")
+        verbose_name = "Товар категории промо-товаров"
+        verbose_name_plural = "Товары категорий промо-товаров"

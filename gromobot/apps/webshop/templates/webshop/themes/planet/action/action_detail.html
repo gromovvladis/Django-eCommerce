@@ -32,7 +32,7 @@
 {% endblock %}
 
 {% block content %}
-  {% cache 600 action_bread action.id %}
+  {% cache 600 action_detail action.id %}
   <div class="action__wrapper d-flex flex-column">
     <div class="actions__action-detail-header d-flex flex-column align-start">
       {% if action.has_image %}
