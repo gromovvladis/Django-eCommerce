@@ -13,7 +13,7 @@ class EvotorEventAdmin(admin.ModelAdmin):
         "body",
         "date_created",
     )
-    search_fields = ["body"]
+    search_fields = ("body",)
 
 
 admin.site.register(EvotorEvent, EvotorEventAdmin)

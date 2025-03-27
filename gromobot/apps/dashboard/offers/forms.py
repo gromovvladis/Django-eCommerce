@@ -142,7 +142,7 @@ class ConditionForm(forms.ModelForm):
 
     class Meta:
         model = Condition
-        fields = ["range", "type", "value"]
+        fields = ("range", "type", "value")
 
     def clean(self):
         data = super().clean()
@@ -199,7 +199,7 @@ class BenefitForm(forms.ModelForm):
 
     class Meta:
         model = Benefit
-        fields = ["range", "type", "value", "max_affected_items"]
+        fields = ("range", "type", "value", "max_affected_items")
 
     def clean(self):
         data = super().clean()
@@ -247,10 +247,10 @@ class OfferSearchForm(forms.Form):
     )
     voucher_code = forms.CharField(required=False, label="Код промокода")
 
-    basic_fields = [
+    basic_fields = (
         "name",
         "is_active",
-    ]
+    )
 
     @property
     def is_voucher_offer_type(self):

@@ -15,7 +15,7 @@ class StoreAddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StoreAddress
-        fields = ["address"]
+        fields = ("address",)
 
 
 class StoreSerializer(serializers.ModelSerializer):
@@ -26,7 +26,7 @@ class StoreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Store
-        fields = ["id", "name", "address", "updated_at"]
+        fields = ("id", "name", "address", "updated_at")
 
     def create(self, validated_data):
         # Извлекаем адрес из данных, если передан
@@ -69,7 +69,7 @@ class StoresSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Store
-        fields = ["items"]
+        fields = ("items",)
 
     def create(self, validated_data):
         items_data = validated_data.get("items", [])
@@ -106,7 +106,7 @@ class TerminalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Terminal
-        fields = [
+        fields = (
             "id",
             "name",
             "model",
@@ -115,7 +115,7 @@ class TerminalSerializer(serializers.ModelSerializer):
             "store_id",
             "location",
             "updated_at",
-        ]
+        )
 
     def create(self, validated_data):
 
@@ -175,7 +175,7 @@ class TerminalsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Terminal
-        fields = ["items"]
+        fields = ("items",)
 
     def create(self, validated_data):
         items_data = validated_data.get("items", [])
@@ -268,12 +268,12 @@ class StockRecordOperationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockRecordOperation
-        fields = [
+        fields = (
             "store_id",
             "type",
             "close_user_id",
             "body",
-        ]
+        )
 
     def validate(self, data):
         """

@@ -18,12 +18,18 @@ class CheckoutConfig(Config):
         self.index_view = get_class("webshop.checkout.views", "IndexView")
 
         self.checkoutview_view = get_class("webshop.checkout.views", "CheckoutView")
-        self.payment_details_view = get_class("webshop.checkout.views", "PaymentDetailsView")
-        self.update_totals_view = get_class("webshop.checkout.views", "UpdateTotalsView")
+        self.payment_details_view = get_class(
+            "webshop.checkout.views", "PaymentDetailsView"
+        )
+        self.update_totals_view = get_class(
+            "webshop.checkout.views", "UpdateTotalsView"
+        )
         self.thankyou_view = get_class("webshop.checkout.views", "ThankYouView")
 
         self.add_voucher_view = get_class("webshop.checkout.views", "VoucherAddView")
-        self.remove_voucher_view = get_class("webshop.checkout.views", "VoucherRemoveView")
+        self.remove_voucher_view = get_class(
+            "webshop.checkout.views", "VoucherRemoveView"
+        )
 
     def get_urls(self):
         urls = [

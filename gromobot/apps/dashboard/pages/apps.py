@@ -8,9 +8,7 @@ class PagesDashboardConfig(DashboardConfig):
     name = "apps.dashboard.pages"
     verbose_name = "Панель управления - Страницы"
 
-    default_permissions = [
-        "user.full_access",
-    ]
+    default_permissions = ("user.full_access",)
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

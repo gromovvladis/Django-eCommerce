@@ -466,7 +466,7 @@ class ActiveOrderSearchForm(forms.Form):
 class OrderNoteForm(forms.ModelForm):
     class Meta:
         model = OrderNote
-        fields = ["message"]
+        fields = ("message",)
 
     def __init__(self, order, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -477,13 +477,13 @@ class OrderNoteForm(forms.ModelForm):
 class ShippingAddressForm(PhoneNumberMixin, forms.ModelForm):
     class Meta:
         model = ShippingAddress
-        fields = [
+        fields = (
             "line1",
             "line2",
             "line3",
             "line4",
             "notes",
-        ]
+        )
 
 
 class OrderStatusForm(forms.Form):
@@ -580,7 +580,7 @@ class NewTransactionForm(forms.ModelForm):
 
     class Meta:
         model = Transaction
-        fields = [
+        fields = (
             "source",
             "txn_type",
             "amount",
@@ -588,4 +588,4 @@ class NewTransactionForm(forms.ModelForm):
             "status",
             "paid",
             "refundable",
-        ]
+        )

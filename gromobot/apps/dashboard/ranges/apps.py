@@ -8,10 +8,10 @@ class RangesDashboardConfig(DashboardConfig):
     name = "apps.dashboard.ranges"
     verbose_name = "Панель управления - Ассортименты"
 
-    default_permissions = [
+    default_permissions = (
         "staff.full_access",
         "catalogue.full_access",
-    ]
+    )
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

@@ -35,7 +35,9 @@ class ProductSerializer(serializers.ModelSerializer):
 
     # класс товара
     type = serializers.CharField(write_only=True, required=False)
-    measure_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    measure_name = serializers.CharField(
+        write_only=True, required=False, allow_blank=True
+    )
 
     # товарная запись
     code = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -50,7 +52,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = [
+        fields = (
             "id",
             "name",
             "code",
@@ -66,7 +68,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "tax",
             "allow_to_sell",
             "updated_at",
-        ]
+        )
 
     def create(self, validated_data):
         # Извлечение данных из validated_data
@@ -334,7 +336,7 @@ class ProductsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ["items"]
+        fields = ("items",)
 
     def create(self, validated_data):
         items_data = validated_data.get("items", [])
@@ -397,13 +399,13 @@ class ProductGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = [
+        fields = (
             "id",
             "name",
             "parent_id",
             "attributes",
             "updated_at",
-        ]
+        )
 
     def create(self, validated_data):
         """
@@ -651,7 +653,7 @@ class ProductGroupsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ["items"]
+        fields = ("items",)
 
     def create(self, validated_data):
         items_data = validated_data.get("items", [])
@@ -702,7 +704,7 @@ class AdditionalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = [
+        fields = (
             "id",
             "name",
             "description",
@@ -714,7 +716,7 @@ class AdditionalSerializer(serializers.ModelSerializer):
             "allow_to_sell",
             "tax",
             "updated_at",
-        ]
+        )
 
     def create(self, validated_data):
         # Извлечение данных из validated_data
@@ -807,7 +809,7 @@ class AdditionalsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Additional
-        fields = ["items"]
+        fields = ("items",)
 
     def create(self, validated_data):
         items_data = validated_data.get("items", [])

@@ -8,9 +8,7 @@ class CommunicationsDashboardConfig(DashboardConfig):
     name = "apps.dashboard.communications"
     verbose_name = "Панель управления - Сообщения"
 
-    default_permissions = [
-        "user.full_access",
-    ]
+    default_permissions = ("user.full_access",)
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

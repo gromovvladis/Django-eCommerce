@@ -14,13 +14,13 @@ ARTICLE_SET_REGEX = re.compile(r"[^,\s]+")
 class RangeForm(forms.ModelForm):
     class Meta:
         model = Range
-        fields = [
+        fields = (
             "name",
             "description",
             "is_public",
             "includes_all_products",
             "included_categories",
-        ]
+        )
 
 
 # pylint: disable=attribute-defined-outside-init

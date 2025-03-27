@@ -24,13 +24,13 @@ class VoucherForm(forms.ModelForm):
 
     class Meta:
         model = Voucher
-        fields = [
+        fields = (
             "name",
             "code",
             "start_datetime",
             "end_datetime",
             "usage",
-        ]
+        )
         widgets = {
             "start_datetime": widgets.DateTimePickerInput(),
             "end_datetime": widgets.DateTimePickerInput(),
@@ -54,12 +54,12 @@ class VoucherSearchForm(forms.Form):
         required=False, label="Есть предложения?", widget=widgets.NullBooleanSelect
     )
 
-    basic_fields = [
+    basic_fields = (
         "name",
         "code",
         "is_active",
         "in_set",
-    ]
+    )
 
     def clean_code(self):
         return self.cleaned_data["code"].upper()
@@ -77,14 +77,14 @@ class VoucherSetForm(forms.ModelForm):
 
     class Meta:
         model = VoucherSet
-        fields = [
+        fields = (
             "name",
             "code_length",
             "description",
             "start_datetime",
             "end_datetime",
             "count",
-        ]
+        )
         widgets = {
             "start_datetime": widgets.DateTimePickerInput(),
             "end_datetime": widgets.DateTimePickerInput(),

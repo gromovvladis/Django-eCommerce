@@ -8,9 +8,7 @@ class ReportsDashboardConfig(DashboardConfig):
     name = "apps.dashboard.reports"
     verbose_name = "Панель управления - Отчеты"
 
-    default_permissions = [
-        "user.full_access",
-    ]
+    default_permissions = ("user.full_access",)
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

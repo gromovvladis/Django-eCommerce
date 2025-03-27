@@ -1,7 +1,7 @@
 <div class="home-desc__wrapper d-none mt-2">
   {% for promo_cat in promo_cats %}
-    {% if promo_cat.type == 'RECOMEND' %}
-      {% include 'webshop/homepage/partials/promocat_recomend.html' %}
+    {% if promo_cat.type == 'RECOMMEND' %}
+      {% include 'webshop/homepage/partials/promocat_recommend.html' %}
     {% elif promo_cat.type == 'ACTION' %}
       {% include 'webshop/homepage/partials/promocat_action.html' %}
     {% else %}

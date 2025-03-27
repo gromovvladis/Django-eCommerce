@@ -81,11 +81,11 @@ class CommunicationEventTypeForm(forms.ModelForm):
 
     class Meta:
         model = CommunicationEventType
-        fields = [
+        fields = (
             "name",
             "email_subject_template",
             "email_body_template",
             "email_body_html_template",
             "preview_order_number",
             "preview_email",
-        ]
+        )

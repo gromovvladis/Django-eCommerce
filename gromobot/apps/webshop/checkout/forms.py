@@ -4,6 +4,7 @@ from django import forms
 from django.conf import settings
 
 User = get_user_model()
+ShippingAddress = get_model("order", "ShippingAddress")
 
 
 class CheckoutVoucherForm(forms.Form):
@@ -18,18 +19,15 @@ class CheckoutVoucherForm(forms.Form):
 
 
 class CheckoutForm(forms.ModelForm, forms.Form):
-
     method_code = forms.ChoiceField(
         label="Выберите способ доставки", widget=forms.HiddenInput
     )
-
     order_time = forms.DateTimeField(
         required=False,
         widget=forms.HiddenInput(),
         localize=True,
         input_formats=["%d.%m.%Y %H:%M"],
     )
-
     order_note = forms.CharField(
         label="Комментарий к заказу",
         widget=forms.Textarea(
@@ -40,7 +38,6 @@ class CheckoutForm(forms.ModelForm, forms.Form):
         ),
         required=False,
     )
-
     email_or_change = forms.CharField(
         label="Эмаил для чеков или поле для сдачи",
         widget=forms.TextInput(
@@ -50,7 +47,6 @@ class CheckoutForm(forms.ModelForm, forms.Form):
         ),
         required=False,
     )
-
     payment_method = forms.ChoiceField(
         label="Выберите метод оплаты",
         choices=settings.WEBSHOP_PAYMENT_CHOICES,
@@ -69,8 +65,8 @@ class CheckoutForm(forms.ModelForm, forms.Form):
         self.fields["method_code"].initial = self.fields["method_code"].choices[0][0]
 
     class Meta:
-        model = get_model("order", "shippingaddress")
-        fields = [
+        model = ShippingAddress
+        fields = (
             "line1",
             "line2",
             "line3",
@@ -78,7 +74,7 @@ class CheckoutForm(forms.ModelForm, forms.Form):
             "notes",
             "coords_long",
             "coords_lat",
-        ]
+        )
 
         widgets = {
             "line1": forms.TextInput(

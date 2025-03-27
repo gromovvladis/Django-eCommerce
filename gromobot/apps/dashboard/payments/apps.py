@@ -8,42 +8,40 @@ class PaymentsDashboardConfig(DashboardConfig):
     name = "apps.dashboard.payments"
     verbose_name = "Панель управления - Онлайн-оплата Юкасса"
 
-    default_permissions = [
-        "user.full_access",
-    ]
+    default_permissions = ("user.full_access",)
 
-    permissions_map = _map = {
+    permissions_map = {
         "payments-list": (
-            ["user.full_access"],
-            ["payment.full_access"],
-            ["payment.read"],
+            "user.full_access",
+            "payment.full_access",
+            "payment.read",
         ),
         "refunds-list": (
-            ["user.full_access"],
-            ["payment.full_access"],
-            ["payment.read"],
+            "user.full_access",
+            "payment.full_access",
+            "payment.read",
         ),
         "payment-detail": (
-            ["user.full_access"],
-            ["payment.full_access"],
-            ["payment.read"],
+            "user.full_access",
+            "payment.full_access",
+            "payment.read",
         ),
         "refund-detail": (
-            ["user.full_access"],
-            ["payment.full_access"],
-            ["payment.read"],
+            "user.full_access",
+            "payment.full_access",
+            "payment.read",
         ),
         "refund-transaction": (
-            ["user.full_access"],
-            ["payment.full_access"],
-            ["payment.make_refund"],
-            ["order.update_order"],
+            "user.full_access",
+            "payment.full_access",
+            "payment.make_refund",
+            "order.update_order",
         ),
         "update-source": (
-            ["user.full_access"],
-            ["payment.full_access"],
-            ["payment.make_refund"],
-            ["order.update_order"],
+            "user.full_access",
+            "payment.full_access",
+            "payment.make_refund",
+            "order.update_order",
         ),
         "delete-source": (
             ["user.full_access"],
@@ -52,16 +50,16 @@ class PaymentsDashboardConfig(DashboardConfig):
             ["order.update_order"],
         ),
         "add-source": (
-            ["user.full_access"],
-            ["payment.full_access"],
-            ["payment.make_refund"],
-            ["order.update_order"],
+            "user.full_access",
+            "payment.full_access",
+            "payment.make_refund",
+            "order.update_order",
         ),
         "add-transaction": (
-            ["user.full_access"],
-            ["payment.full_access"],
-            ["payment.make_refund"],
-            ["order.update_order"],
+            "user.full_access",
+            "payment.full_access",
+            "payment.make_refund",
+            "order.update_order",
         ),
     }
 

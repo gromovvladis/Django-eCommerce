@@ -8,9 +8,7 @@ class TelegramDashboardConfig(DashboardConfig):
     name = "apps.dashboard.telegram"
     verbose_name = "Панель управления - Telegram bot"
 
-    default_permissions = [
-        "user.full_access",
-    ]
+    default_permissions = ("user.full_access",)
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

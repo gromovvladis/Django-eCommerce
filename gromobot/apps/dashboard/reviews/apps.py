@@ -8,9 +8,7 @@ class ReviewsDashboardConfig(DashboardConfig):
     name = "apps.dashboard.reviews"
     verbose_name = "Панель управления - Отзывы"
 
-    default_permissions = [
-        "user.full_access",
-    ]
+    default_permissions = ("user.full_access",)
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

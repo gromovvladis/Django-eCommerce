@@ -56,7 +56,7 @@ BaseCategoryForm = movenodeform_factory(
 
 
 class SEOFormMixin:
-    seo_fields = ["meta_title", "meta_description", "slug"]
+    seo_fields = ("meta_title", "meta_description", "slug")
 
     def primary_form_fields(self):
         return [
@@ -82,7 +82,7 @@ class CategoryForm(SEOFormMixin, BaseCategoryForm):
 
     class Meta:
         model = Category
-        fields = [
+        fields = (
             "name",
             "slug",
             "description",
@@ -92,7 +92,7 @@ class CategoryForm(SEOFormMixin, BaseCategoryForm):
             "meta_title",
             "meta_description",
             "evotor_update",
-        ]
+        )
         widgets = {
             "image": ThumbnailInput(),
         }
@@ -168,13 +168,13 @@ class StockRecordForm(forms.ModelForm):
         if not product_class.track_stock:
             if "low_stock_threshold" in self.fields:
                 del self.fields["low_stock_threshold"]
-        else:
-            if "price" in self.fields:
-                self.fields["price"].required = True
+        # else:
+        #     if "price" in self.fields:
+        #         self.fields["price"].required = True
 
     class Meta:
         model = StockRecord
-        fields = [
+        fields = (
             "store",
             "cost_price",
             "old_price",
@@ -183,7 +183,7 @@ class StockRecordForm(forms.ModelForm):
             "tax",
             "low_stock_threshold",
             "is_public",
-        ]
+        )
 
 
 class StockRecordStockForm(forms.ModelForm):
@@ -195,9 +195,7 @@ class StockRecordStockForm(forms.ModelForm):
 
     class Meta:
         model = StockRecord
-        fields = [
-            "is_public",
-        ]
+        fields = ("is_public",)
 
 
 class StockRecordOperationForm(forms.ModelForm):
@@ -206,9 +204,9 @@ class StockRecordOperationForm(forms.ModelForm):
         self.user = user
         super().__init__(*args, **kwargs)
         self.set_initial_data()
-        self.fields["num"].required = False
 
     def set_initial_data(self):
+        self.fields["num"].required = False
         stockrecords = StockRecord.objects.filter(product=self.product)
         stockrecord_choices = [(sr.id, sr.store) for sr in stockrecords]
         store_field = self.fields.get("stockrecord")
@@ -218,24 +216,25 @@ class StockRecordOperationForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        instance.user = self.user
 
         if not instance.num:
             return None
 
         if commit:
+            instance.user = self.user
             instance.save()
+
         return instance
 
     class Meta:
         model = StockRecordOperation
-        fields = [
+        fields = (
             "stockrecord",
             "type",
             "message",
             "num",
             "user",
-        ]
+        )
         exclude = ["user"]
 
 
@@ -326,7 +325,6 @@ def _attr_image_field(attribute):
 
 
 class ProductClassForm(forms.ModelForm):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # pylint: disable=no-member
@@ -337,7 +335,7 @@ class ProductClassForm(forms.ModelForm):
 
     class Meta:
         model = ProductClass
-        fields = ["name", "requires_shipping", "track_stock", "options"]
+        fields = ("name", "requires_shipping", "track_stock", "options")
 
 
 class ProductForm(SEOFormMixin, forms.ModelForm):
@@ -559,7 +557,7 @@ class ProductCategoryForm(forms.ModelForm):
 class ProductImageForm(forms.ModelForm):
     class Meta:
         model = ProductImage
-        fields = ["product", "original", "caption", "display_order"]
+        fields = ("product", "original", "caption", "display_order")
         # use ImageInput widget to create HTML displaying the
         # actual uploaded image and providing the upload dialog
         # when clicking on the actual image.
@@ -584,7 +582,7 @@ class ProductImageForm(forms.ModelForm):
 class ProductRecommendationForm(forms.ModelForm):
     class Meta:
         model = ProductRecommendation
-        fields = ["primary", "recommendation", "ranking"]
+        fields = ("primary", "recommendation", "ranking")
         widgets = {
             "recommendation": ProductSelect,
         }
@@ -600,7 +598,7 @@ class AdditionalForm(forms.ModelForm):
 
     class Meta:
         model = Additional
-        fields = [
+        fields = (
             "name",
             "article",
             "order",
@@ -615,7 +613,7 @@ class AdditionalForm(forms.ModelForm):
             "tax",
             "is_public",
             "image",
-        ]
+        )
         widgets = {
             "image": ThumbnailInput(),
         }
@@ -624,7 +622,7 @@ class AdditionalForm(forms.ModelForm):
 class ProductAdditionalForm(forms.ModelForm):
     class Meta:
         model = ProductAdditional
-        fields = ["primary_product", "additional_product", "ranking"]
+        fields = ("primary_product", "additional_product", "ranking")
         widgets = {
             "additional_product": AdditionalSelect,
         }
@@ -633,7 +631,7 @@ class ProductAdditionalForm(forms.ModelForm):
 class ProductClassAdditionalForm(forms.ModelForm):
     class Meta:
         model = ProductAdditional
-        fields = ["primary_class", "additional_product", "ranking"]
+        fields = ("primary_class", "additional_product", "ranking")
         widgets = {
             "additional_product": AdditionalSelect,
         }
@@ -670,13 +668,13 @@ class AttributeForm(forms.ModelForm):
 
     class Meta:
         model = Attribute
-        fields = ["name", "code", "type", "option_group", "required"]
+        fields = ("name", "code", "type", "option_group", "required")
 
 
 class ProductAttributesForm(forms.ModelForm):
     class Meta:
         model = ProductAttribute
-        fields = ["product", "attribute"]
+        fields = ("product", "attribute")
         widgets = {
             "attribute": AttributeSelect,
         }
@@ -685,7 +683,7 @@ class ProductAttributesForm(forms.ModelForm):
 class ProductClassAttributesForm(forms.ModelForm):
     class Meta:
         model = ProductAttribute
-        fields = ["product_class", "attribute"]
+        fields = ("product_class", "attribute")
         widgets = {
             "attribute": AttributeSelect,
         }
@@ -694,16 +692,16 @@ class ProductClassAttributesForm(forms.ModelForm):
 class AttributeOptionGroupForm(forms.ModelForm):
     class Meta:
         model = AttributeOptionGroup
-        fields = ["name"]
+        fields = ("name",)
 
 
 class AttributeOptionForm(forms.ModelForm):
     class Meta:
         model = AttributeOption
-        fields = ["option"]
+        fields = ("option",)
 
 
 class OptionForm(forms.ModelForm):
     class Meta:
         model = Option
-        fields = ["name", "type", "required", "order", "help_text", "option_group"]
+        fields = ("name", "type", "required", "order", "help_text", "option_group")

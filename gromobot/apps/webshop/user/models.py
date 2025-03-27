@@ -2,8 +2,12 @@ from functools import cached_property
 
 from core import compat
 from django.conf import settings
-from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
-                                        Group, PermissionsMixin)
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    Group,
+    PermissionsMixin,
+)
 from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
@@ -100,7 +104,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email"]
+    REQUIRED_FIELDS = ("email",)
 
     class Meta:
         db_table = "auth_user"

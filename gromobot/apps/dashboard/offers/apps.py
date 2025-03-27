@@ -8,9 +8,7 @@ class OffersDashboardConfig(DashboardConfig):
     name = "apps.dashboard.offers"
     verbose_name = "Панель управления - Предложения"
 
-    default_permissions = [
-        "user.full_access",
-    ]
+    default_permissions = ("user.full_access",)
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

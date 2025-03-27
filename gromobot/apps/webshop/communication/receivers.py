@@ -4,9 +4,11 @@ from apps.webshop.checkout.signals import post_payment
 from apps.webshop.order.signals import order_status_changed
 from django.conf import settings
 
-from .tasks import (_send_site_notification_new_order_to_customer,
-                    _send_site_notification_order_status_to_customer,
-                    _send_sms_notification_order_status_to_customer)
+from .tasks import (
+    _send_site_notification_new_order_to_customer,
+    _send_site_notification_order_status_to_customer,
+    _send_sms_notification_order_status_to_customer,
+)
 
 
 def notify_about_new_order(sender, view, **kwargs):

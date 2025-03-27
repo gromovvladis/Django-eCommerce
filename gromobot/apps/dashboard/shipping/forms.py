@@ -13,7 +13,7 @@ class ShippingZonaForm(forms.ModelForm):
 
     class Meta:
         model = ShippingZona
-        fields = [
+        fields = (
             "name",
             "order_price",
             "shipping_price",
@@ -21,4 +21,4 @@ class ShippingZonaForm(forms.ModelForm):
             "coords",
             "isAvailable",
             "isHide",
-        ]
+        )

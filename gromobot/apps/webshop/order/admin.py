@@ -24,10 +24,10 @@ class LineInline(admin.TabularInline):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    raw_id_fields = [
+    raw_id_fields = (
         "user",
         "shipping_address",
-    ]
+    )
     list_display = (
         "number",
         "total",
@@ -41,7 +41,7 @@ class OrderAdmin(admin.ModelAdmin):
         "shipping",
     )
     inlines = [LineInline]
-    search_fields = ["number"]
+    search_fields = ("number",)
 
 
 class LineAdmin(admin.ModelAdmin):

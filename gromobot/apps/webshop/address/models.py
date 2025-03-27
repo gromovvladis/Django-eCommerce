@@ -31,19 +31,18 @@ class Address(models.Model):
     )
 
     # Fields, used for `summary` property definition and hash generation.
-    search_fields = base_fields = [
+    search_fields = base_fields = (
         "line1",
         "line2",
         "line3",
         "line4",
-    ]
-
-    address_fields = [
+    )
+    address_fields = (
         ("line1", line1.verbose_name),
         ("line2", line2.verbose_name),
         ("line3", line3.verbose_name),
         ("line4", line4.verbose_name),
-    ]
+    )
 
     def __str__(self):
         return self.summary

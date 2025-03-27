@@ -8,9 +8,7 @@ class EvotorDashboardConfig(DashboardConfig):
     name = "apps.dashboard.evotor"
     verbose_name = "Панель управления - Облако Эвотор"
 
-    default_permissions = [
-        "user.full_access",
-    ]
+    default_permissions = ("user.full_access",)
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

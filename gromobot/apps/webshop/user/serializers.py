@@ -18,7 +18,7 @@ class UserGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ["name", "id"]
+        fields = ("name", "id")
 
     def create(self, validated_data):
         # Извлекаем адрес из данных, если передан
@@ -71,7 +71,7 @@ class StaffSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Staff
-        fields = [
+        fields = (
             "id",
             "name",
             "last_name",
@@ -81,7 +81,7 @@ class StaffSerializer(serializers.ModelSerializer):
             "role",
             "role_id",
             "updated_at",
-        ]
+        )
 
     def create(self, validated_data):
         # Извлекаем адрес из данных, если передан
@@ -206,7 +206,7 @@ class StaffsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Staff
-        fields = ["items"]
+        fields = ("items",)
 
     def create(self, validated_data):
         items_data = validated_data.get("items", [])

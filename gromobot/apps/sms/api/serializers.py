@@ -21,7 +21,7 @@ class ChangePhoneNumberSerializer(serializers.Serializer):
 class DefaultUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
+        fields = (
             "pk",
             "name",
-        ]
+        )

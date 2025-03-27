@@ -192,7 +192,7 @@ class BasketLineForm(forms.ModelForm):
 
     class Meta:
         model = Line
-        fields = ["quantity"]
+        fields = ("quantity",)
 
 
 class AddToBasketForm(forms.Form):

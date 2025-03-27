@@ -8,21 +8,21 @@ class ShippingDashboardConfig(DashboardConfig):
     name = "apps.dashboard.shipping"
     verbose_name = "Панель управления - Доставка"
 
-    default_permissions = [
+    default_permissions = (
         "user.full_access",
         "shipping.full_access",
-    ]
+    )
 
     permissions_map = {
         "shipping-active": (
-            ["user.full_access"],
-            ["shipping.full_access"],
-            ["shipping.read"],
+            "user.full_access",
+            "shipping.full_access",
+            "shipping.read",
         ),
         "shipping-list": (
-            ["user.full_access"],
-            ["shipping.full_access"],
-            ["shipping.read"],
+            "user.full_access",
+            "shipping.full_access",
+            "shipping.read",
         ),
     }
 

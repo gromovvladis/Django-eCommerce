@@ -24,7 +24,7 @@ class AttributeInline(admin.TabularInline):
 class ProductRecommendationInline(admin.TabularInline):
     model = ProductRecommendation
     fk_name = "primary"
-    raw_id_fields = ["primary", "recommendation"]
+    raw_id_fields = ("primary", "recommendation")
 
 
 class CategoryInline(admin.TabularInline):
@@ -53,10 +53,10 @@ class ProductAdmin(admin.ModelAdmin):
         "date_created",
     )
     list_filter = ["structure", "is_discountable"]
-    raw_id_fields = ["parent"]
+    raw_id_fields = ("parent",)
     inlines = [AttributeInline, CategoryInline, ProductRecommendationInline]
     prepopulated_fields = {"slug": ("name",)}
-    search_fields = ["article", "name"]
+    search_fields = ("article", "name")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

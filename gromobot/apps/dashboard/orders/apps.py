@@ -8,42 +8,42 @@ class OrdersDashboardConfig(DashboardConfig):
     name = "apps.dashboard.orders"
     verbose_name = "Панель управления - Заказы"
 
-    default_permissions = [
+    default_permissions = (
         "user.full_access",
         "order.full_access",
-    ]
+    )
     permissions_map = {
-        "order-list": (["user.full_access"], ["order.full_access"], ["order.read"]),
+        "order-list": ("user.full_access", "order.full_access", "order.read"),
         "order-active-list": (
-            ["user.full_access"],
-            ["order.full_access"],
-            ["order.read"],
+            "user.full_access",
+            "order.full_access",
+            "order.read",
         ),
         "order-active-list-lookup": (
-            ["user.full_access"],
-            ["order.full_access"],
-            ["order.read"],
+            "user.full_access",
+            "order.full_access",
+            "order.read",
         ),
-        "order-detail": (["user.full_access"], ["order.full_access"], ["order.read"]),
+        "order-detail": ("user.full_access", "order.full_access", "order.read"),
         "order-line-detail": (
-            ["user.full_access"],
-            ["order.full_access"],
-            ["order.read"],
+            "user.full_access",
+            "order.full_access",
+            "order.read",
         ),
         "order-delete": (
-            ["user.full_access"],
-            ["order.full_access"],
-            ["order.remove_order"],
+            "user.full_access",
+            "order.full_access",
+            "order.remove_order",
         ),
         "order-detail-note": (
-            ["user.full_access"],
-            ["order.full_access"],
-            ["order.update_order"],
+            "user.full_access",
+            "order.full_access",
+            "order.update_order",
         ),
         "order-shipping-address": (
-            ["user.full_access"],
-            ["order.full_access"],
-            ["order.update_order"],
+            "user.full_access",
+            "order.full_access",
+            "order.update_order",
         ),
         "order-stats": (["user.full_access"], ["order.full_access"], ["order.read"]),
     }

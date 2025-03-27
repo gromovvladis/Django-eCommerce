@@ -10,9 +10,7 @@ class DashboardMainConfig(DashboardConfig):
     verbose_name = "Панель управления"
 
     namespace = "dashboard"
-    permissions_map = {
-        "index": (["is_staff"]),
-    }
+    permissions_map = {"index": ("is_staff",)}
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):

@@ -114,7 +114,7 @@ def create_product(
     product.save()
 
     # Shortcut for creating stockrecord
-    stockrecord_fields = [price, partner_sku, partner_name, num_in_stock, partner_users]
+    stockrecord_fields = (price, partner_sku, partner_name, num_in_stock, partner_users)
     if any([field is not None for field in stockrecord_fields]):
         create_stockrecord(
             product,

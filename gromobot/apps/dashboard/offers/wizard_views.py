@@ -79,7 +79,7 @@ class OfferWizardStepView(FormView):
         # Instead, we save an alternative form
         instance = form.save(commit=False)
         # remove fields that do not exist (yet) on the uncommitted instance, i.e. m2m fields
-        cleanfields = [field.name for field in instance._meta.local_fields]
+        cleanfields = (field.name for field in instance._meta.local_fields)
 
         json_qs = serializers.serialize("json", [instance], fields=tuple(cleanfields))
 

@@ -8,40 +8,40 @@ class CatalogueDashboardConfig(DashboardConfig):
     name = "apps.dashboard.catalogue"
     verbose_name = "Каталог"
 
-    default_permissions = [
+    default_permissions = (
         "user.full_access",
         "catalogue.full_access",
-    ]
-    permissions_map = _map = {
+    )
+    permissions_map = {
         "catalogue-product": (
-            ["user.full_access"],
-            ["catalogue.full_access"],
-            ["catalogue.update_stockrecord"],
+            "user.full_access",
+            "catalogue.full_access",
+            "catalogue.update_stockrecord",
         ),
         "catalogue-additional-update": (
-            ["user.full_access"],
-            ["catalogue.full_access"],
-            ["catalogue.update_stockrecord"],
+            "user.full_access",
+            "catalogue.full_access",
+            "catalogue.update_stockrecord",
         ),
         "catalogue-product-list": (
-            ["user.full_access"],
-            ["catalogue.full_access"],
-            ["catalogue.read"],
+            "user.full_access",
+            "catalogue.full_access",
+            "catalogue.read",
         ),
         "catalogue-additional-list": (
-            ["user.full_access"],
-            ["catalogue.full_access"],
-            ["catalogue.read"],
+            "user.full_access",
+            "catalogue.full_access",
+            "catalogue.read",
         ),
         "stock-alert-list": (
-            ["user.full_access"],
-            ["catalogue.full_access"],
-            ["catalogue.read"],
+            "user.full_access",
+            "catalogue.full_access",
+            "catalogue.read",
         ),
         "stock-alert-update-list": (
-            ["user.full_access"],
-            ["catalogue.full_access"],
-            ["catalogue.read"],
+            "user.full_access",
+            "catalogue.full_access",
+            "catalogue.read",
         ),
     }
 

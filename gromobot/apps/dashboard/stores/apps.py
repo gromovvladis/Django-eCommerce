@@ -8,9 +8,7 @@ class StoresDashboardConfig(DashboardConfig):
     name = "apps.dashboard.stores"
     verbose_name = "Панель управления - Магазины"
 
-    default_permissions = [
-        "user.full_access",
-    ]
+    default_permissions = ("user.full_access",)
 
     # pylint: disable=attribute-defined-outside-init
     def ready(self):
