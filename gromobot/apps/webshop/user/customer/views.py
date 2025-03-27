@@ -82,9 +82,7 @@ class AccountAuthModalView(ThemeMixin, RegisterUserPhoneMixin, APIView):
             return self.validate_sms_form()
         if request.POST.get("action") == "auth":
             return self.validate_auth_form()
-        return http.JsonResponse(
-            {"errors": "Ошибка авторизации", "status": 400}, status=400
-        )
+        return http.JsonResponse({"errors": "Ошибка авторизации"}, status=400)
 
     # AUTH
     def get_auth_form(self, bind_data=False):
@@ -132,9 +130,9 @@ class AccountAuthModalView(ThemeMixin, RegisterUserPhoneMixin, APIView):
 
                 url = self.get_auth_success_url(form)
 
-                return http.JsonResponse({"success": url, "status": 200}, status=200)
+                return http.JsonResponse({"success": url}, status=200)
 
-        return http.JsonResponse({"error": "Код не верный", "status": 400}, status=404)
+        return http.JsonResponse({"error": "Код не верный"}, status=404)
 
     def get_auth_success_url(self, form):
         redirect_url = self.request.POST.get("redirect_url")
@@ -158,17 +156,13 @@ class AccountAuthModalView(ThemeMixin, RegisterUserPhoneMixin, APIView):
                 sms_result = auth_service.send_sms()
 
                 if sms_result == "secceded":
-                    return http.JsonResponse(
-                        {"secceded": "Смс выслано", "status": 200}, status=200
-                    )
+                    return http.JsonResponse({"secceded": "Смс выслано"}, status=200)
 
             except Exception as e:
-                return http.JsonResponse(
-                    {"error": e.message, "status": 403}, status=403
-                )
+                return http.JsonResponse({"error": e.message}, status=403)
 
         return http.JsonResponse(
-            {"error": "Укажите корректный номер телефона", "status": 400}, status=400
+            {"error": "Укажите корректный номер телефона"}, status=400
         )
 
 

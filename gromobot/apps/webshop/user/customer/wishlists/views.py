@@ -11,7 +11,6 @@ PageTitleMixin, ThemeMixin = get_classes(
     "webshop.mixins", ["PageTitleMixin", "ThemeMixin"]
 )
 
-
 WishList = get_model("wishlists", "WishList")
 Line = get_model("wishlists", "Line")
 Product = get_model("catalogue", "Product")
@@ -41,10 +40,13 @@ class WishListDetailView(PageTitleMixin, ThemeMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_wishlist_or_404(self, user):
-        wishlist, created = WishList.objects.get_or_create(owner_id=user.id)
-        if wishlist.is_allowed_to_edit(user):
-            return wishlist
-        else:
+        try:
+            wishlist, created = WishList.objects.get_or_create(owner_id=user.id)
+            if wishlist.is_allowed_to_edit(user):
+                return wishlist
+            else:
+                raise PermissionDenied
+        except WishList.DoesNotExist:
             raise Http404
 
     def get_context_data(self, **kwargs):
@@ -64,7 +66,6 @@ class WishListAddProduct(View):
     - If the product is already in the wish list, its quantity is increased.
     """
 
-    # pylint: disable=attribute-defined-outside-init
     def dispatch(self, request, *args, **kwargs):
         self.product = get_object_or_404(Product, pk=kwargs["product_pk"])
         self.wishlist = self.get_or_create_wishlist(request, *args, **kwargs)
@@ -78,7 +79,7 @@ class WishListAddProduct(View):
         else:
             wishlist = request.user.wishlist
             if not wishlist:
-                return request.user.wishlist.create()
+                wishlist = WishList.objects.create(owner=request.user)
 
         if not wishlist.is_allowed_to_edit(request.user):
             raise PermissionDenied
@@ -88,7 +89,11 @@ class WishListAddProduct(View):
         return self.add_product()
 
     def add_product(self):
-        self.wishlist.add(self.product)
+        try:
+            self.wishlist.add(self.product)
+        except Exception as e:
+            return http.JsonResponse({"error": str(e)}, status=500)
+
         return http.JsonResponse(
             {
                 "html": '<svg width="24" height="24"><use xlink:href="#add-to-wishlist"></use></svg>',
@@ -96,7 +101,6 @@ class WishListAddProduct(View):
                     "customer:wishlist-remove-product",
                     kwargs={"product_pk": self.product.id},
                 ),
-                "status": 200,
             },
             status=200,
         )
@@ -126,6 +130,8 @@ class LineMixin(object):
             )
         except Line.MultipleObjectsReturned:
             raise Http404
+        except WishList.DoesNotExist:
+            raise Http404
         self.wishlist = self.line.wishlist
         self.product = self.line.product
 
@@ -143,7 +149,11 @@ class WishListRemoveProduct(LineMixin, View):
         return self._delete()
 
     def _delete(self):
-        self.object.delete()
+        try:
+            self.object.delete()
+        except Exception as e:
+            return http.JsonResponse({"error": str(e)}, status=500)
+
         return http.JsonResponse(
             {
                 "html": '<svg width="24" height="24"><use xlink:href="#remove-from-wishlist"></use></svg>',
@@ -151,7 +161,6 @@ class WishListRemoveProduct(LineMixin, View):
                     "customer:wishlist-add-product",
                     kwargs={"product_pk": self.product.id},
                 ),
-                "status": 200,
             },
             status=200,
         )

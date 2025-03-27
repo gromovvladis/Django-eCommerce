@@ -37,7 +37,7 @@ class ShippingZonesGeoJsonView(APIView):
                 _dir + "/js/dashboard/shipping/geojson/shipping_zones.geojson", "rb"
             ).read()
         )
-        return http.JsonResponse(json_file, status=202)
+        return http.JsonResponse(json_file, status=200)
 
 
 class ShippingZonaView(APIView):

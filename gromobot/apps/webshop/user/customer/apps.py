@@ -26,8 +26,6 @@ class CustomerConfig(Config):
             "webshop.user.customer.views", "OrderDetailView"
         )
 
-        # self.order_line_view = get_class("webshop.user.customer.views", "OrderLineView")
-
         self.address_list_view = get_class(
             "webshop.user.customer.views", "AddressListView"
         )
@@ -48,9 +46,6 @@ class CustomerConfig(Config):
         self.logout_view = get_class("webshop.user.customer.views", "LogoutView")
 
         self.profile_view = get_class("webshop.user.customer.views", "ProfileView")
-        # self.profile_update_view = get_class("webshop.user.customer.views", "ProfileUpdateView")
-        # self.profile_delete_view = get_class("webshop.user.customer.views", "ProfileDeleteView")
-        # self.change_password_view = get_class("webshop.user.customer.views", "ChangePasswordView")
 
         self.notification_inbox_view = get_class(
             "webshop.communication.notifications.views", "InboxView"
@@ -74,6 +69,8 @@ class CustomerConfig(Config):
         self.wishlists_remove_product_view = get_class(
             "webshop.user.customer.wishlists.views", "WishListRemoveProduct"
         )
+
+        # self.change_password_view = get_class("webshop.user.customer.views", "ChangePasswordView")
 
     def get_urls(self):
         urls = [

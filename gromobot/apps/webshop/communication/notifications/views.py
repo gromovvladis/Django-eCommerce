@@ -69,7 +69,7 @@ class UpdateView(NotifEditMixin, generic.View):
             num_unread = ""
 
         return http.JsonResponse(
-            {"action": "archive", "num_unread": num_unread, "status": 200}, status=200
+            {"action": "archive", "num_unread": num_unread}, status=200
         )
 
     def delete(self, request, notification):
@@ -78,7 +78,7 @@ class UpdateView(NotifEditMixin, generic.View):
             recipient=request.user, location="Archive"
         ).count()
         return http.JsonResponse(
-            {"action": "delete", "nums_total": nums_total, "status": 200}, status=200
+            {"action": "delete", "nums_total": nums_total}, status=200
         )
 
 

@@ -56,7 +56,7 @@
                             <span class="error-mark">{{ line.warning }}</span>
                           </div>
                         {% endif %}
-                        {% if line.critical_warning %}
+                        {% if line.unavailable %}
                           {% render_field form.quantity readonly='true' type='hidden' data-id='quantity-input' %}
                         {% else %}
                           <div role="separator" class="spacer"></div>

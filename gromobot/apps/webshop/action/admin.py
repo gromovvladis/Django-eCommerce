@@ -6,7 +6,28 @@ ActionProduct = get_model("action", "ActionProduct")
 PromoCategory = get_model("action", "PromoCategory")
 PromoCategoryProduct = get_model("action", "PromoCategoryProduct")
 
-admin.site.register(Action)
-admin.site.register(ActionProduct)
-admin.site.register(PromoCategory)
-admin.site.register(PromoCategoryProduct)
+
+class ActionProductInline(admin.TabularInline):
+    model = ActionProduct
+    extra = 3
+
+
+class ActionAdmin(admin.ModelAdmin):
+    inlines = [
+        ActionProductInline,
+    ]
+
+
+class PromoCategoryProductInline(admin.TabularInline):
+    model = PromoCategoryProduct
+    extra = 3
+
+
+class PromoCategoryAdmin(admin.ModelAdmin):
+    inlines = [
+        PromoCategoryProductInline,
+    ]
+
+
+admin.site.register(Action, ActionAdmin)
+admin.site.register(PromoCategory, PromoCategoryAdmin)

@@ -57,6 +57,7 @@ class Node(object):
     def filter(self, user):
         if not self.is_visible(user):
             return None
+
         node = Node(
             label=self.label,
             url_name=self.url_name,
@@ -66,11 +67,15 @@ class Node(object):
             icon=self.icon,
             notif=self.notif,
         )
-        for child in self.children:
-            if child.is_visible(user):
-                node.add_child(child)
+
+        # Добавление видимых дочерних элементов
+        for child in filter(lambda child: child.is_visible(user), self.children):
+            node.add_child(child)
+
+        # Добавление путей
         for path in self.paths:
             node.add_path(path)
+
         return node
 
     def has_children(self):
@@ -119,7 +124,6 @@ def default_access_fn(user, url_name, url_args=None, url_kwargs=None):
     url_match = resolve(url)
     url_name = url_match.url_name
     app_config_instance = _dashboard_url_names_to_config()[url_name]
-
     permissions = app_config_instance.get_permissions(url_name)
 
     return check_permissions(user, permissions)

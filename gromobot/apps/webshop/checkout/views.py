@@ -723,11 +723,11 @@ class UpdateTotalsView(View):
                 request=self.request,
             )
             return http.JsonResponse(
-                {"totals": new_totals, "min_order": min_order_html, "status": 202},
+                {"totals": new_totals, "min_order": min_order_html},
                 status=202,
             )
         except Exception:
-            return http.JsonResponse({"totals": "error", "status": 200}, status=200)
+            return http.JsonResponse({"totals": "error"}, status=200)
 
     def get_shipping_method(self, new_method):
         return Repository().get_shipping_method(method=new_method)

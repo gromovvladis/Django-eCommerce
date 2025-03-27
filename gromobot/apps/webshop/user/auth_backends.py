@@ -9,7 +9,7 @@ User = get_user_model()
 if hasattr(User, "REQUIRED_FIELDS"):
     if not (User.USERNAME_FIELD == "username" or "username" in User.REQUIRED_FIELDS):
         raise ImproperlyConfigured(
-            "PhoneBack: Your User model must have an username field with blank=False"
+            "PhoneBack: Your User model must have a username field with blank=False"
         )
 
 
@@ -29,13 +29,13 @@ class PhoneBackend(ModelBackend):
             return None
 
     def authenticate(self, username=None, password=None, *args, **kwargs):
+        # Проверка на наличие username и password, если они не переданы
         if not username:
-            if "username" not in kwargs or kwargs["username"] is None:
-                return None
-            username = kwargs["username"]
+            username = kwargs.get("username", None)
         if not password:
-            if "password" not in kwargs or kwargs["password"] is None:
-                return None
-            password = kwargs["password"]
+            password = kwargs.get("password", None)
+
+        if not username or not password:
+            return None
 
         return self._authenticate(username, password)

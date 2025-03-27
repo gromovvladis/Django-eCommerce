@@ -85,9 +85,7 @@ class GetUpsellMasseges(ThemeMixin, View):
 
         except ConditionalOffer.DoesNotExist:
             raise http.JsonResponse(
-                {"error": "ConditionalOffer.DoesNotExist", "status": 404}, status=404
+                {"error": "ConditionalOffer.DoesNotExist"}, status=404
             )
 
-        return http.JsonResponse(
-            {"upsell_message": upsell_message, "status": 202}, status=202
-        )
+        return http.JsonResponse({"upsell_message": upsell_message}, status=202)

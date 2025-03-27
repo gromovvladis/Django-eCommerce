@@ -44,23 +44,21 @@ class BasketView(PageTitleMixin, ThemeMixin, ModelFormSetView):
 
     def check_lines(self):
         if not is_ajax(self.request):
-            updated = False
-            # переделай. когда товаров к корзине больше чем можем
-            # продать нужно чтобы они автоматически уменьшались. если форма не валидная то хоть чтонибудб делай.
-            for line in self.request.basket._all_lines():
-                if line.quantity == 0:
-                    updated = True
-                    try:
-                        line.delete()
-                    except Exception:
-                        pass
+            updated = any(
+                self._update_or_remove_line(line)
+                for line in self.request.basket._all_lines()
+            )
 
             if updated:
                 self.request.basket.reset_offer_applications()
                 Applicator().apply(self.request.basket, self.request.user, self.request)
 
-            for line in self.request.basket._all_lines():
-                line.get_warning()
+    def _update_or_remove_line(self, line):
+        if line.quantity == 0:
+            line.delete()
+            return True
+
+        return line.check_availability()
 
     def get_formset_kwargs(self):
         kwargs = super().get_formset_kwargs()
@@ -76,17 +74,14 @@ class BasketView(PageTitleMixin, ThemeMixin, ModelFormSetView):
 
     def get_upsell_messages(self, basket):
         offers = Applicator().get_offers(basket, self.request.user, self.request)
-        applied_offers = list(basket.offer_applications.offers.values())
-        msgs = []
-        for offer in offers:
-            if (
-                offer.is_condition_partially_satisfied(basket)
-                and offer not in applied_offers
-                and offer.is_available()
-            ):
-                data = {"message": offer.get_upsell_message(basket), "offer": offer}
-                msgs.append(data)
-        return msgs
+        applied_offers = set(basket.offer_applications.offers.values())
+        return [
+            {"message": offer.get_upsell_message(basket), "offer": offer}
+            for offer in offers
+            if offer.is_condition_partially_satisfied(basket)
+            and offer not in applied_offers
+            and offer.is_available()
+        ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -119,10 +114,8 @@ class BasketView(PageTitleMixin, ThemeMixin, ModelFormSetView):
                 },
                 request=self.request,
             )
-
             return http.JsonResponse(
                 {
-                    "status": 202,
                     "new_totals": new_totals,
                     "new_nums": self.request.basket.num_items,
                 },
@@ -132,24 +125,16 @@ class BasketView(PageTitleMixin, ThemeMixin, ModelFormSetView):
         return super().formset_valid(formset)
 
     def formset_invalid(self, formset):
-        has_deletion = any(formset._should_delete_form(form) for form in formset.forms)
-        has_no_invalid_non_deletion = all(
-            form.is_valid() or formset._should_delete_form(form)
-            for form in formset.forms
-        )
-        if has_deletion:
+        if any(formset._should_delete_form(form) for form in formset.forms):
             self.remove_deleted_forms(formset)
-            if has_no_invalid_non_deletion:
+            if all(
+                form.is_valid() or formset._should_delete_form(form)
+                for form in formset.forms
+            ):
                 return self.formset_valid(formset)
 
         if is_ajax(self.request):
-            return http.JsonResponse(
-                {
-                    "errors": formset.errors,
-                    "status": 404,
-                },
-                status=404,
-            )
+            return http.JsonResponse({"errors": formset.errors}, status=404)
 
         return super().formset_invalid(formset)
 
@@ -206,41 +191,40 @@ class BasketView(PageTitleMixin, ThemeMixin, ModelFormSetView):
 class EmptyBasketView(View):
     def post(self, request, *args, **kwargs):
         basket = request.basket
-        url = (reverse("basket:summary"),)
-
+        url = reverse("basket:summary")
+        # Если корзина пуста или не существует, сразу возвращаем ошибку
         if not basket.id:
-            return http.JsonResponse({"url": url, "status": 404}, status=404)
+            return http.JsonResponse({"url": url}, status=404)
         try:
             basket.flush()
         except Exception:
-            pass
+            return http.JsonResponse({"url": url}, status=500)
 
-        return http.JsonResponse({"url": url, "status": 200}, status=200)
+        return http.JsonResponse({"url": url}, status=200)
 
 
-class GetUpsellMasseges(View):
+class GetUpsellMessages(View):
     def get_upsell_messages(self, basket):
+        # Получаем предложения
         offers = Applicator().get_offers(basket, self.request.user, self.request)
-        applied_offers = list(basket.offer_applications.offers.values())
-        msgs = []
-        for offer in offers:
-            if (
-                offer.is_condition_partially_satisfied(basket)
-                and offer not in applied_offers
-            ):
-                data = {"message": offer.get_upsell_message(basket), "offer": offer}
-                msgs.append(data)
-        return msgs
+        applied_offers = set(basket.offer_applications.offers.values())
+
+        # Собираем только те предложения, которые удовлетворяют условиям
+        return [
+            {"message": offer.get_upsell_message(basket), "offer": offer}
+            for offer in offers
+            if offer.is_condition_partially_satisfied(basket)
+            and offer not in applied_offers
+        ]
 
     def get(self, request, *args, **kwargs):
+        # Формируем ответ с использованием шаблона
         upsell_messages = render_to_string(
             "basket/partials/upsell_messages.html",
             {"upsell_messages": self.get_upsell_messages(request.basket)},
             request=self.request,
         )
-        return http.JsonResponse(
-            {"upsell_messages": upsell_messages, "status": 202}, status=202
-        )
+        return http.JsonResponse({"upsell_messages": upsell_messages}, status=202)
 
 
 class BasketAddView(FormView):
@@ -264,30 +248,33 @@ class BasketAddView(FormView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["basket"] = self.request.basket
-        kwargs["store_id"] = self.request.store.id
-        kwargs["product"] = self.product
+        kwargs.update(
+            {
+                "basket": self.request.basket,
+                "store_id": self.request.store.id,
+                "product": self.product,
+            }
+        )
         return kwargs
 
-    def form_invalid(self, form):
-        msgs = []
-        for error in form.errors.values():
-            msgs.append(error.as_text())
-        clean_msgs = [m.replace("* ", "") for m in msgs if m.startswith("* ")]
+    def _prepare_errors(self, form):
+        """Helper method to prepare error messages."""
+        return " ".join(
+            error.as_text().replace("* ", "")
+            for error in form.errors.values()
+            if error.as_text().startswith("* ")
+        )
 
-        # We serialize the POST data with JSONSerializer before adding it to the session.
-        # Without this, we could expose the site to a security vulnerability
-        # if the SESSION_SERIALIZER has been configured to 'django.contrib.sessions.serializers.PickleSerializer'.
-        # see: https://docs.djangoproject.com/en/3.2/topics/http/sessions/#cookie-session-backend
+    def form_invalid(self, form):
+        # Serialize POST data to avoid security vulnerabilities
         serialized_data = JSONSerializer().dumps(self.request.POST)
-        self.request.session["add_to_basket_form_post_data_%s" % self.product.pk] = (
+        self.request.session[f"add_to_basket_form_post_data_{self.product.pk}"] = (
             serialized_data.decode("latin-1")
         )
-        return http.JsonResponse(
-            {"errors": " ".join(clean_msgs), "status": 404}, status=404
-        )
+        return http.JsonResponse({"errors": self._prepare_errors(form)}, status=404)
 
     def form_valid(self, form):
+        # Add product to the basket
         self.request.basket.add_product(
             form.product, 1, form.cleaned_options(), form.cleaned_additionals()
         )
@@ -302,9 +289,7 @@ class BasketAddView(FormView):
 
         super().form_valid(form)
 
-        return http.JsonResponse(
-            {"cart_nums": form.basket.num_items, "status": 200}, status=200
-        )
+        return http.JsonResponse({"cart_nums": form.basket.num_items}, status=200)
 
     def get_success_url(self):
         post_url = self.request.POST.get("next")

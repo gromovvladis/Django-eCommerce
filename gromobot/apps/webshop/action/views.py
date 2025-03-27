@@ -21,25 +21,20 @@ class ActionsListView(PageTitleMixin, ThemeMixin, ListView):
     template_name = "action/action_list.html"
     paginate_by = settings.DASHBOARD_ITEMS_PER_PAGE
     page_title = "Акции"
+    sort_fields = [
+        "name",
+        "offer_type",
+        "start_datetime",
+        "end_datetime",
+        "num_applications",
+        "total_discount",
+    ]
 
     def get_queryset(self):
         qs = self.model._default_manager.annotate(
             voucher_count=Count("vouchers")
         ).select_related("benefit", "condition")
-        qs = sort_queryset(
-            qs,
-            self.request,
-            [
-                "name",
-                "offer_type",
-                "start_datetime",
-                "end_datetime",
-                "num_applications",
-                "total_discount",
-            ],
-        )
-
-        return qs
+        return sort_queryset(qs, self.request, self.sort_fields)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

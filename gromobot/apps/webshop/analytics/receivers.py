@@ -1,8 +1,10 @@
-from apps.webshop.analytics.tasks import (record_products_in_order_task,
-                                          record_user_order_task,
-                                          update_counter_task,
-                                          user_searched_product_task,
-                                          user_viewed_product_task)
+from apps.webshop.analytics.tasks import (
+    record_products_in_order_task,
+    record_user_order_task,
+    update_counter_task,
+    user_searched_product_task,
+    user_viewed_product_task,
+)
 from apps.webshop.basket.signals import basket_addition
 from apps.webshop.catalogue.signals import product_viewed
 from apps.webshop.order.signals import order_placed

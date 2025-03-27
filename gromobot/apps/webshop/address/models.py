@@ -70,7 +70,9 @@ class Address(models.Model):
                     self.__dict__[field] = self.__dict__[field].strip()
 
     def _update_search_text(self):
-        self.search_text = self.join_fields(self.search_fields, separator=" ")
+        self.search_text = " ".join(
+            filter(None, [str(getattr(self, field)) for field in self.search_fields])
+        )
 
     # Properties
 
@@ -92,23 +94,6 @@ class Address(models.Model):
                 field_values.append(str(value))
         return field_values
 
-    def get_address_field_values(self, fields):
-        """
-        Returns set of field values within the salutation and country.
-        """
-        field_values = [
-            f.strip() for f in self.get_field_values(fields) if isinstance(f, str)
-        ]
-        field_values += [f for f in self.get_field_values(fields) if isinstance(f, int)]
-        return field_values
-
-    def join_fields(self, fields, separator=", "):
-        """
-        Join a sequence of fields using the specified separator
-        """
-        field_values = self.get_field_values(fields)
-        return separator.join(filter(bool, field_values))
-
     def populate_alternative_model(self, address_model):
         """
         For populating an address model using the matching fields
@@ -123,28 +108,44 @@ class Address(models.Model):
                 setattr(address_model, field_name, getattr(self, field_name))
 
     def active_address_fields(self):
-        """
-        Returns the non-empty components of the address, but merging the
-        title, first_name and last_name into a single line. It uses fields
-        listed out in `base_fields` property.
-        """
-        return self.get_address_field_values(self.base_fields)
+        return [
+            str(val)
+            for val in [getattr(self, field) for field in self.search_fields]
+            if val is not None
+        ]
 
     def active_address_fields_and_labels(self):
-        """
-        Returns the non-empty components of the address, but merging the
-        title, first_name and last_name into a single line. It uses fields
-        listed out in `base_fields` property.
-        """
-        field_values = []
-        for f in self.address_fields:
-            label = f[1]
-            value = getattr(self, f[0])
-            if value:
-                str(value).strip()
-                field_values.append({"label": label, "value": value})
+        return [
+            {"label": label, "value": str(getattr(self, field))}
+            for field, label in self.address_fields
+            if getattr(self, field)
+        ]
 
-        return field_values
+
+class StoreAddress(Address):
+    """
+    A store can have one or more addresses. This can be useful e.g. when
+    determining US which depends on the origin of the shipment.
+    """
+
+    store = models.OneToOneField(
+        "store.Store",
+        on_delete=models.CASCADE,
+        related_name="address",
+        verbose_name="Магазин",
+    )
+
+    class Meta:
+        app_label = "store"
+        verbose_name = "Адрес магазина"
+        verbose_name_plural = "Адреса магазинов"
+
+    def save(self, *args, **kwargs):
+        if self.line1:
+            super().save(*args, **kwargs)
+        else:
+            if self.pk:
+                self.delete()
 
 
 class ShippingAddress(Address):
@@ -226,29 +227,3 @@ class UserAddress(ShippingAddress):
         app_label = "address"
         verbose_name = "Адрес пользователя"
         verbose_name_plural = "Адреса пользователей"
-
-
-class StoreAddress(Address):
-    """
-    A store can have one or more addresses. This can be useful e.g. when
-    determining US which depends on the origin of the shipment.
-    """
-
-    store = models.OneToOneField(
-        "store.Store",
-        on_delete=models.CASCADE,
-        related_name="address",
-        verbose_name="Магазин",
-    )
-
-    class Meta:
-        app_label = "store"
-        verbose_name = "Адрес магазина"
-        verbose_name_plural = "Адреса магазинов"
-
-    def save(self, *args, **kwargs):
-        if self.line1:
-            super().save(*args, **kwargs)
-        else:
-            if self.pk:
-                self.delete()

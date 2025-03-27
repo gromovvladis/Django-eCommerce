@@ -168,42 +168,6 @@ class Basket(models.Model):
             ]
         return self._filtered_lines
 
-    # def _all_lines(self):
-    #     """
-    #     Return a cached set of basket lines.
-
-    #     This is important for offers as they alter the line models and you
-    #     don't want to reload them from the DB as that information would be
-    #     lost.
-    #     """
-    #     if self.id is None:
-    #         return self.lines.model.objects.none()  # pylint: disable=E1101
-    #     if self._lines is None:
-    #         self._lines = (
-    #             self.lines.select_related("product", "stockrecord")
-    #             .prefetch_related(
-    #                 "attributes",
-    #                 "product__images",
-    #                 "product__categories",
-    #                 "product__stockrecords",
-    #             )
-    #             .order_by(self._meta.pk.name)
-    #         )
-    #     return self._lines
-
-    # def all_lines(self):
-    #     if self._filtered_lines is None:
-    #         store_id = self.store_id
-    #         if store_id:
-    #             self._filtered_lines = [
-    #                 line
-    #                 for line in self._all_lines()
-    #                 if line.product.stockrecords.filter(store_id=store_id).exists()
-    #             ]
-    #         else:
-    #             self._filtered_lines = self._all_lines()
-    #     return self._filtered_lines
-
     def max_allowed_quantity(self):
         """
         Returns maximum product quantity, that can be added to the basket
@@ -292,15 +256,12 @@ class Basket(models.Model):
             self.store_id = line.stockrecord.store_id
             self.save()
         else:
-            if line.stockrecord.store_id != self.store_id:
+            store = Store.objects.get(store_id=self.store_id)
+            line_store = Store.objects.get(store_id=line.stockrecord.store_id)
+
+            if line_store.store_id != self.store_id:
                 raise ValueError(
-                    ("Данный товар не доступен в %s, закажите его в %s")
-                    % (
-                        Store.objects.get(store_id=self.store_id).primary_address,
-                        Store.objects.get(
-                            store_id=line.stockrecord.store_id
-                        ).primary_address,
-                    )
+                    f"Данный товар не доступен в {store.primary_address}, закажите его в {line_store.primary_address}"
                 )
 
     def add_product(self, product, quantity=1, options=None, additionals=None):
@@ -557,7 +518,7 @@ class Basket(models.Model):
         Returns a reference string for a line based on the item
         and its options.
         """
-        base = "%s_%s" % (product.id, stockrecord.id)
+        base = f"{product.id}_{stockrecord.id}"
 
         if not options and not additionals:
             return base
@@ -565,23 +526,25 @@ class Basket(models.Model):
         repr_list = []
 
         if options:
-            repr_list += [
-                {"key": repr(option["option"]), "value": repr(option["value"])}
+            repr_list.extend(
+                [{"key": repr(option["option"]), "value": repr(option["value"])}]
                 for option in options
-            ]
+            )
 
         if additionals:
-            repr_list += [
-                {
-                    "key": repr(additional["additional"]),
-                    "value": repr(additional["value"]),
-                }
+            repr_list.extend(
+                [
+                    {
+                        "key": repr(additional["additional"]),
+                        "value": repr(additional["value"]),
+                    }
+                ]
                 for additional in additionals
-            ]
+            )
 
         repr_list.sort(key=itemgetter("key"))
 
-        return "%s_%s" % (base, zlib.crc32(repr(repr_list).encode("utf8")))
+        return f"{base}_{zlib.crc32(repr(repr_list).encode('utf8'))}"
 
     def _get_total(self, model_property):
         """
@@ -683,7 +646,6 @@ class Basket(models.Model):
     def num_lines(self):
         """Return number of lines"""
         return len(self.all_lines())
-        # return self.all_lines().count()
 
     @property
     def num_all_items(self):
@@ -697,17 +659,11 @@ class Basket(models.Model):
 
     @property
     def num_items_without_discount(self):
-        num = 0
-        for line in self.all_lines():
-            num += line.quantity_without_discount
-        return num
+        return sum(line.quantity_without_discount for line in self.all_lines())
 
     @property
     def num_items_with_discount(self):
-        num = 0
-        for line in self.all_lines():
-            num += line.quantity_with_discount
-        return num
+        return sum(line.quantity_with_discount for line in self.all_lines())
 
     @property
     def time_before_submit(self):
@@ -974,40 +930,36 @@ class Line(models.Model):
             offer
         ) + self.quantity_with_offer_discount(offer)
 
-    def get_warning(self):
+    def check_availability(self):
         """
         Return a warning message about this basket line if one is applicable
 
         This could be things like the price has changed
         """
-        if isinstance(self.purchase_info.availability, Unavailable):
-            msg = "Временно не доступен"
-            self.warning = msg
-            self.critical_warning = True
-            return msg
-        elif isinstance(self.purchase_info.availability, StockRequired):
-            available, msg = self.purchase_info.availability.is_purchase_permitted(
-                self.quantity
-            )
+        availability = self.purchase_info.availability
+
+        if isinstance(availability, Unavailable):
+            self.unavailable = True
+            self.warning = "Временно не доступен"
+            return self.warning
+
+        if isinstance(availability, StockRequired):
+            available, self.warning = availability.is_purchase_permitted(self.quantity)
             if not available:
-                self.warning = msg
-                self.critical_warning = True
-                max_quantity = self.stockrecord.num_in_stock
+                max_quantity = availability.num_available
                 if self.quantity > max_quantity:
                     self.quantity = max_quantity
-                    self.critical_warning = False
+                    self.unavailable = False
                     self.save()
 
-                return msg
+                    return self.warning
 
     def get_options(self):
-        ops = []
-        for attribute in self.attributes.all():
-            if attribute.option:
-                if isinstance(attribute.value, list):
-                    ops.append(attribute)
-
-        return ops
+        return [
+            attribute
+            for attribute in self.attributes.all()
+            if isinstance(attribute.value, list)
+        ]
 
     def get_additions(self):
         return self.attributes.filter(
@@ -1019,15 +971,18 @@ class Line(models.Model):
 
     def get_full_name(self):
         if self.product:
-            name_parts = [
-                self.product.get_name(),
-                self.variants or None,
-                self.options or None,
-                self.additions or None,
-            ]
-            return " | ".join(filter(None, name_parts))
-        else:
-            return self.name
+            return " | ".join(
+                filter(
+                    None,
+                    [
+                        self.product.get_name(),
+                        self.variants,
+                        self.options,
+                        self.additions,
+                    ],
+                )
+            )
+        return self.name
 
     # ==========
     # Properties
@@ -1092,8 +1047,7 @@ class Line(models.Model):
 
     @property
     def name(self):
-        d = smart_str(self.product)
-        return d
+        return smart_str(self.product)
 
     @property
     def options(self):
@@ -1108,20 +1062,21 @@ class Line(models.Model):
 
     @property
     def additions(self):
-        additions = self.attributes.filter(
-            additional__isnull=False,
-            additional__is_public=True,
-            additional__stores__id=self.basket.store_id,
-            value__gt=0,
-        ).distinct()
         return ", ".join(
-            f"{attr.additional.name} ({attr.value} шт)" for attr in additions
+            f"{attr.additional.name} ({attr.value} шт)"
+            for attr in self.attributes.filter(
+                additional__isnull=False,
+                additional__is_public=True,
+                additional__stores__id=self.basket.store_id,
+                value__gt=0,
+            ).distinct()
         )
 
     @property
     def additions_total(self):
         if not self.pk:
             return D("0.00")
+
         return sum(
             attribute.value * attribute.additional.price
             for attribute in self.attributes.filter(
@@ -1138,12 +1093,9 @@ class Line(models.Model):
 
     @property
     def old_price(self):
-        old_price = None
         if self.stockrecord.old_price:
-            additions_total = self.additions_total
-            old_price = self.stockrecord.old_price + additions_total
-
-        return old_price
+            return self.stockrecord.old_price + self.additions_total
+        return None
 
     @cached_property
     def has_topping(self):
@@ -1170,7 +1122,6 @@ class LineAttribute(models.Model):
         verbose_name="Дополнительный товар",
         null=True,
     )
-
     value = models.JSONField("Значение", encoder=DjangoJSONEncoder)
 
     class Meta:
