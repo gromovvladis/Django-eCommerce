@@ -1,5 +1,4 @@
 from decimal import Decimal as D
-from functools import lru_cache
 
 from core.loading import get_model
 from shapely.geometry import Point, Polygon
@@ -9,65 +8,74 @@ ShippingZona = get_model("shipping", "ShippingZona")
 
 class ZonesUtils:
 
-    @classmethod
-    @lru_cache(maxsize=128)
-    def zones(self):
-        return ShippingZona.objects.filter(isHide=False)
+    _zones = None
+    _available_zones = None
+    _zones_polygon = None
 
-    @classmethod
+    def zones(self):
+        if self._zones is None:
+            self._zones = ShippingZona.objects.filter(isHide=False)
+        return self._zones
+
     def available_zones(self):
         """Return list of available shipping zones."""
-        return ShippingZona.objects.filter(isHide=False, isAvailable=True)
+        if self._available_zones is None:
+            self._available_zones = ShippingZona.objects.filter(
+                isHide=False, isAvailable=True
+            )
+        return self._available_zones
 
-    @classmethod
-    @lru_cache(maxsize=128)
-    def zones_polygon(self, zones=None):
-        polygon_zones = {}
-        if zones is None:
-            zones = self.zones()
+    def zones_polygon(self):
+        if self._zones_polygon is None:
+            self._zones_polygon = {
+                zona.id: Polygon(
+                    [
+                        (D(coord.split(",")[0]), D(coord.split(",")[1]))
+                        for coord in zona.coords.replace("][", "],[").split("],")
+                    ]
+                )
+                for zona in self.zones()
+            }
 
-        for zona in zones:
-            coords = []
-            for crd in zona.coords.split("],"):
-                crd = crd.replace("]", "").replace("[", "")
-                crd = crd.split(",")
-                coords.append((D(crd[0]), D(crd[1])))
+        return self._zones_polygon
 
-            polygon_zones[zona.id] = Polygon(coords)
-
-        return polygon_zones
-
-    @classmethod
-    def zona_id(self, coords, zones=None) -> int:
+    def get_zona_id(self, coords) -> int:
         """Получает координы обекта, возвращает id зоны доставки, либо 0, если адрес вне зоны доставки"""
-        zones = self.zones_polygon(zones)
+        polygon_zones = self.zones_polygon()
         coords_point = Point(coords[0], coords[1])
 
-        for zonaId, zona in zones.items():
+        for zonaId, zona in polygon_zones.items():
             if coords_point.within(zona):
                 return zonaId
 
         return 0
 
-    # ==================================================
+    # helpers calculate
 
-    @classmethod
-    def min_order_for_zona(self, zona_id, zones=None) -> int:
-        try:
-            if zones is None:
-                zones = self.available_zones()
-            zona = zones.get(number=zona_id)
+    def min_order_for_zona(self, zona_id) -> int:
+        zona = self._get_zona(zona_id)
+        if zona:
             return zona.order_price
-        except Exception:
-            return 700
+        return 700
 
-    @classmethod
-    def is_zona_available(self, zona_id, zones=None) -> bool:
+    def is_zona_available(self, zona_id) -> bool:
+        return self._get_zona(zona_id) is not None
+
+    def zona_charge(self, zona_id):
+        zona = self._get_zona(zona_id)
+        if zona:
+            return zona.shipping_price
+        return 0
+
+    def min_order(self, zona_id):
+        zona = self._get_zona(zona_id)
+        if zona:
+            return zona.order_price
+        return 700  # default value
+
+    # Общий метод для получения зоны
+    def _get_zona(self, zona_id):
         try:
-            if zones is None:
-                zones = self.available_zones()
-            zones.get(number=zona_id)
+            return self.available_zones().get(number=zona_id)
         except ShippingZona.DoesNotExist:
-            return False
-
-        return True
+            return None

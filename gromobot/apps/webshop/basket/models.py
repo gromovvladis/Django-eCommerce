@@ -934,25 +934,27 @@ class Line(models.Model):
         """
         Return a warning message about this basket line if one is applicable
 
-        This could be things like the price has changed
+        This could be things like the quantity has changed
         """
         availability = self.purchase_info.availability
 
         if isinstance(availability, Unavailable):
-            self.unavailable = True
+            self.available = False
             self.warning = "Временно не доступен"
             return self.warning
 
         if isinstance(availability, StockRequired):
-            available, self.warning = availability.is_purchase_permitted(self.quantity)
-            if not available:
+            self.available, self.warning = availability.is_purchase_permitted(
+                self.quantity
+            )
+            if not self.available:
                 max_quantity = availability.num_available
                 if self.quantity > max_quantity:
                     self.quantity = max_quantity
-                    self.unavailable = False
+                    self.available = True
                     self.save()
-
-                    return self.warning
+                    
+            return self.warning
 
     def get_options(self):
         return [

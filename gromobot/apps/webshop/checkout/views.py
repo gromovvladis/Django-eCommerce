@@ -87,39 +87,28 @@ class CheckoutView(PageTitleMixin, ThemeMixin, CheckoutSessionMixin, generic.For
 
     def get_initial(self):
         initial = {}
-        if self.request.COOKIES.get("orderNote"):
-            initial["order_note"] = unquote(
-                unquote(self.request.COOKIES.get("orderNote"))
-            )
+        cookies = self.request.COOKIES
 
+        # Получение заметки к заказу
+        if order_note := cookies.get("orderNote"):
+            initial["order_note"] = unquote(unquote(order_note))
+
+        # Получение адреса пользователя
         user_address = self.get_available_address()
 
         if user_address:
-            initial["line1"] = user_address.line1
-            initial["line2"] = user_address.line2
-            initial["line3"] = user_address.line3
-            initial["line4"] = user_address.line4
-            initial["notes"] = user_address.notes
+            for field in ["line1", "line2", "line3", "line4", "notes"]:
+                initial[field] = getattr(user_address, field, "")
         else:
-            if self.request.COOKIES.get("line1"):
-                initial["line1"] = unquote(unquote(self.request.COOKIES.get("line1")))
-            if self.request.COOKIES.get("line2"):
-                initial["line2"] = unquote(unquote(self.request.COOKIES.get("line2")))
-            if self.request.COOKIES.get("notes"):
-                initial["line3"] = unquote(unquote(self.request.COOKIES.get("line3")))
-            if self.request.COOKIES.get("line3"):
-                initial["line4"] = unquote(unquote(self.request.COOKIES.get("line4")))
-            if self.request.COOKIES.get("line4"):
-                initial["notes"] = unquote(unquote(self.request.COOKIES.get("notes")))
+            for field in ["line1", "line2", "line3", "line4", "notes"]:
+                if value := cookies.get(field):
+                    initial[field] = unquote(unquote(value))
 
         initial["order_time"] = now() + datetime.timedelta(hours=2)
-
         return initial
 
     def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["methods"] = self._methods
-        return kwargs
+        return {**super().get_form_kwargs(), "methods": self._methods}
 
     def get_voucher_form(self):
         """
@@ -138,32 +127,28 @@ class CheckoutView(PageTitleMixin, ThemeMixin, CheckoutSessionMixin, generic.For
             currency=self.request.basket.currency, money=D("700.0")
         )
 
-        method = self.get_default_shipping_method(self.request.basket)
-        ctx["shipping_method"] = method
+        shipping_method = self.get_default_shipping_method(self.request.basket)
 
-        # shipping method form
-        if self.request.user.is_authenticated:
-            # Look up address book data
-            address = self.get_available_address()
-            ctx["address"] = address
-            if address and address.coords_lat and address.coords_long:
-                shipping_charge, min_order = method.calculate(
-                    self.request.basket, address
-                )
+        address = self.get_available_address()
+        if address and address.coords_lat and address.coords_long:
+            shipping_charge, min_order = shipping_method.calculate(
+                self.request.basket, address
+            )
 
-        # payment form
-        ctx["methods"] = self._methods
-        ctx["min_order"] = int(min_order.money)
-        ctx["shipping_charge"] = int(shipping_charge.money)
-
-        # promocode
-        ctx["voucher_form"] = self.get_voucher_form()
+        ctx.update(
+            address=address,
+            shipping_method=shipping_method,
+            methods=self._methods,
+            min_order=int(min_order.money),
+            shipping_charge=int(shipping_charge.money),
+            voucher_form=self.get_voucher_form(),
+        )
 
         return ctx
 
     def get_default_shipping_method(self, basket):
         return Repository().get_default_shipping_method(
-            basket=self.request.basket,
+            basket=basket,
             user=self.request.user,
             request=self.request,
         )
@@ -172,7 +157,8 @@ class CheckoutView(PageTitleMixin, ThemeMixin, CheckoutSessionMixin, generic.For
         return redirect(self.get_success_url())
 
     def get_available_address(self):
-        return getattr(self.request.user, "address", None)
+        if self.request.user.is_authenticated:
+            return getattr(self.request.user, "address", None)
 
     def get_available_shipping_methods(self):
         """
@@ -189,12 +175,7 @@ class CheckoutView(PageTitleMixin, ThemeMixin, CheckoutSessionMixin, generic.For
             request=self.request,
         )
 
-    def post(self, request, *args, **kwargs):
-        self._methods = self.get_available_shipping_methods()
-        super().post(request, *args, **kwargs)
-        return redirect(self.get_success_url())
-
-    def get(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         self._methods = self.get_available_shipping_methods()
         if len(self._methods) == 0:
             # No shipping methods available for given address
@@ -204,12 +185,12 @@ class CheckoutView(PageTitleMixin, ThemeMixin, CheckoutSessionMixin, generic.For
             )
             return redirect("checkout:checkoutview")
 
-        return super().get(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        address_fields = dict(
+        address_fields = {
             (k, v) for (k, v) in form.instance.__dict__.items() if not k.startswith("_")
-        )
+        }
         shipping_method = form.cleaned_data["method_code"]
 
         # нужна проверак полей алреса
@@ -235,31 +216,26 @@ class CheckoutView(PageTitleMixin, ThemeMixin, CheckoutSessionMixin, generic.For
         self.checkout_session.set_order_time(form.cleaned_data["order_time"])
         self.checkout_session.set_email_or_change(form.cleaned_data["email_or_change"])
 
+        return super().form_valid(form)
+
     def is_shipping_address_set(self, address_fields, shipping_method):
         if shipping_method == "zona-shipping":
-            requred_fields = [
+            required_fields = {
                 "line1",
                 "line2",
                 "line3",
                 "line4",
                 "coords_long",
                 "coords_lat",
-            ]
-            for field in address_fields.items():
-                if field[0] in requred_fields and not field[1]:
-                    return False
-
+            }
+            return all(address_fields.get(field) for field in required_fields)
         return True
 
     def is_min_order_set(self, shipping_address, shipping_method):
         if shipping_method == "zona-shipping":
             method = Repository().get_shipping_method(shipping_method)
-            shipping_charge, min_order = method.calculate(
-                self.request.basket, shipping_address
-            )
-            if min_order.money > self.request.basket.total:
-                return False
-
+            _, min_order = method.calculate(self.request.basket, shipping_address)
+            return min_order.money <= self.request.basket.total
         return True
 
     # переделай
@@ -552,7 +528,7 @@ class PaymentDetailsView(
 
     def _crete_source(self, payment_method, order_total):
         payment_name = self.get_payment_method_display(payment_method)
-        source_type = SourceType.objects.get_or_create(name=payment_name)[0]
+        source_type, _ = SourceType.objects.get_or_create(name=payment_name)
 
         source = Source(
             source_type=source_type,
@@ -705,7 +681,7 @@ class UpdateTotalsView(View):
             new_method = request.GET.get("shipping_method")
             zona_id = request.GET.get("zona_id")
             shipping_method = self.get_shipping_method(new_method)
-            shipping_charge, min_order = shipping_method.calculate(
+            shipping_charge, min_order = shipping_method.calculate_from_zona_id(
                 self.request.basket, zona_id
             )
             min_order_html = (

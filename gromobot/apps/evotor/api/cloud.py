@@ -3,17 +3,21 @@ import logging
 from collections import defaultdict
 
 import requests
-from apps.webshop.catalogue.serializers import (AdditionalSerializer,
-                                                AdditionalsSerializer,
-                                                ProductGroupSerializer,
-                                                ProductGroupsSerializer,
-                                                ProductSerializer,
-                                                ProductsSerializer)
+from apps.webshop.catalogue.serializers import (
+    AdditionalSerializer,
+    AdditionalsSerializer,
+    ProductGroupSerializer,
+    ProductGroupsSerializer,
+    ProductSerializer,
+    ProductsSerializer,
+)
 from apps.webshop.order.serializers import OrderSerializer
-from apps.webshop.store.serializers import (StockRecordOperationSerializer,
-                                            StoreCashTransactionSerializer,
-                                            StoreSerializer,
-                                            TerminalSerializer)
+from apps.webshop.store.serializers import (
+    StockRecordOperationSerializer,
+    StoreCashTransactionSerializer,
+    StoreSerializer,
+    TerminalSerializer,
+)
 from apps.webshop.user.serializers import StaffSerializer, UserGroupSerializer
 from core.loading import get_model
 from django.conf import settings

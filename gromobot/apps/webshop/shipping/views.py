@@ -10,10 +10,10 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
-from .maps import Map
 from .utils import pickup_now
 
 ZonesUtils = get_class("webshop.shipping.zones", "ZonesUtils")
+Map = get_class("webshop.shipping.maps", "Map")
 
 ShippingZona = get_model("shipping", "ShippingZona")
 Order = get_model("order", "Order")
@@ -82,15 +82,15 @@ class OrderNowView(APIView):
         if not address or not any(item.strip() != "" for item in coords):
             return {"error": "Адрес не найден"}
 
-        zones = ZonesUtils.available_zones()
+        zones_utils = ZonesUtils()
 
         if not zona_id:
-            zona_id = ZonesUtils.zona_id(coords, zones)
+            zona_id = zones_utils.get_zona_id(coords)
 
         if not zona_id or zona_id == "0":
             return {"error": "Адрес вне зоны доставки"}
 
-        if not ZonesUtils.is_zona_available(zona_id, zones):
+        if not zones_utils.is_zona_available(zona_id):
             return {
                 "coords": coords,
                 "address": address,
@@ -98,7 +98,7 @@ class OrderNowView(APIView):
                 "shipping_time_text": "Доставка по данному адресу временно не осуществляется",  # Доставим через Х мин.
             }
 
-        min_order = ZonesUtils.min_order_for_zona(zona_id, zones)
+        min_order = zones_utils.min_order_for_zona(zona_id)
 
         if not self.is_working_time():
             return {
@@ -169,7 +169,7 @@ class OrderNowView(APIView):
 
         end_points = []
         end_points.append(coords)
-        rote_time = self.map.routeTime(start_point, end_points)
+        rote_time = self.map.route_time(start_point, end_points)
 
         return rote_time + coock_time
 

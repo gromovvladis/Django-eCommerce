@@ -222,32 +222,34 @@ class OrderLineSerializer(serializers.Serializer):
         )[0]
 
     def to_representation(self, instance):
+        product_class = (
+            instance.product.get_product_class() if instance.product else None
+        )
+        measure_name = product_class.measure_name if product_class else "шт"
+        sub_positions = [
+            {
+                "type": "NORMAL",
+                "commodity_id": additional.additional.evotor_id,
+                "name": additional.additional.name,
+                "measureName": "шт",
+                "quantity": additional.value,
+                "tax": additional.additional.tax,
+                "price": additional.additional.price,
+            }
+            for additional in instance.attributes.filter(additional__isnull=False)
+        ]
+
         return {
             "type": "NORMAL",
             "code": instance.stockrecord.evotor_code if instance.stockrecord else None,
             "commodity_id": instance.product.evotor_id if instance.product else None,
             "name": instance.name,
-            "measureName": (
-                instance.product.get_product_class().measure_name
-                if instance.product
-                else "шт"
-            ),
+            "measureName": measure_name,
             "quantity": instance.quantity,
             "tax": instance.tax_code,
             "price": instance.line_price_before_discounts,
             "priceWithDiscount": instance.line_price,
-            "sub_positions": [
-                {
-                    "type": "NORMAL",
-                    "commodity_id": additional.additional.evotor_id,
-                    "name": additional.additional.name,
-                    "measureName": "шт",
-                    "quantity": additional.value,
-                    "tax": additional.additional.tax,
-                    "price": additional.additional.price,
-                }
-                for additional in instance.attributes.filter(additional__isnull=False)
-            ],
+            "sub_positions": sub_positions,
         }
 
 
@@ -312,9 +314,10 @@ class PaymentSerializer(serializers.Serializer):
         )
 
         if is_refund:
-            source.amount_allocated = source.amount_allocated - transaction_amount
+            source.amount_allocated -= transaction_amount
         elif is_correction:
             source.amount_allocated = transaction_amount
+
         source.save()
 
         method = "update_refund" if is_refund else "update_payment"

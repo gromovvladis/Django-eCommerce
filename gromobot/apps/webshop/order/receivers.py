@@ -6,10 +6,11 @@ from apps.webshop.checkout.signals import post_checkout
 from apps.webshop.communication.tasks import (
     _send_push_notification_new_order_to_staff,
     _send_site_notification_new_order_to_staff,
-    _send_telegram_message_new_order_to_staff)
+    _send_telegram_message_new_order_to_staff,
+)
 from apps.webshop.order.serializers import OrderSerializer
 from apps.webshop.order.signals import order_placed, order_status_changed
-from apps.webshop.order.tasks import update_paying_status_task
+from apps.webshop.order.tasks import update_paying_status_after_11_minutes_task
 from django.conf import settings
 from django.dispatch import receiver
 from django.utils.timezone import now
@@ -20,9 +21,9 @@ from .tasks import _send_order_to_evotor
 
 # pylint: disable=unused-argument
 @receiver(order_placed)
-def update_paying_status(sender, order, user, **kwargs):
+def update_paying_status_after_11_minutes(sender, order, user, **kwargs):
     if order.status == settings.INITIAL_ONLINE_PAYMENT_ORDER_STATUS and settings.CELERY:
-        update_paying_status_task.apply_async(
+        update_paying_status_after_11_minutes_task.apply_async(
             args=[order.number], eta=now() + timedelta(minutes=11)
         )
 

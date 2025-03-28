@@ -65,7 +65,7 @@ class PromoDetailMixin(ThemeMixin, DetailView):
             raise Http404()
 
         response = super().get(request, *args, **kwargs)
-        # self.send_signal(request, response, product)
+        # self.send_signal(request, response, action)
         return response
 
     def is_viewable(self, action, request):

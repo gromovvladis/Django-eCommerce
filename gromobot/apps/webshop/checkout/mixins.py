@@ -209,13 +209,16 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         """
         if not self._payment_events:
             return
+
         for event in self._payment_events:
             event.order = order
             event.save()
-            for line in order.lines.all():
-                PaymentEventQuantity.objects.create(
-                    event=event, line=line, quantity=line.quantity
-                )
+            PaymentEventQuantity.objects.bulk_create(
+                [
+                    PaymentEventQuantity(event=event, line=line, quantity=line.quantity)
+                    for line in order.lines.all()
+                ]
+            )
 
     def save_payment_sources(self, order):
         """

@@ -4,9 +4,11 @@ from core.loading import get_class, get_classes, get_model
 from core.models.fields import AutoSlugField, NullCharField, SlugField
 from core.models.img.image_processor import ImageProcessor
 from core.models.img.missing_image import MissingImage
-from core.models.img.paths import (get_image_additionals_upload_path,
-                                   get_image_categories_upload_path,
-                                   get_image_products_upload_path)
+from core.models.img.paths import (
+    get_image_additionals_upload_path,
+    get_image_categories_upload_path,
+    get_image_products_upload_path,
+)
 from core.utils import get_default_currency, slugify
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
@@ -223,13 +225,11 @@ class Category(MP_Node):
         Returns the primary image for a product. Usually used when one can
         only display one product image, e.g. in a list of products.
         """
-        img = self.image
-        caption = self.name
-        if not img:
+        if not self.image:
             mis_img = MissingImage()
-            return {"original": mis_img, "caption": caption, "is_missing": True}
+            return {"original": mis_img, "caption": self.name, "is_missing": True}
 
-        return {"original": img, "caption": caption, "is_missing": False}
+        return {"original": self.image, "caption": self.name, "is_missing": False}
 
     @property
     def full_name(self):
@@ -635,23 +635,15 @@ class Product(models.Model):
         """
         Return a product's variant absolute URL
         """
-        if self.is_child:
-            slug = self.parent.slug
-            cat = self.parent.categories.first()
-            if cat:
-                category = cat.full_slug
-            else:
-                category = "misc"
-        else:
-            slug = self.slug
-            cat = self.categories.first()
-            if cat:
-                category = cat.full_slug
-            else:
-                category = "misc"
+        product = self.parent if self.is_child else self
+        category = product.categories.first()
 
         return reverse(
-            "catalogue:detail", kwargs={"product_slug": slug, "category_slug": category}
+            "catalogue:detail",
+            kwargs={
+                "product_slug": product.slug,
+                "category_slug": category.full_slug if category else "misc",
+            },
         )
 
     def get_staff_url(self):
@@ -733,26 +725,33 @@ class Product(models.Model):
             raise ValidationError("Родительский товар не может иметь складские записи.")
 
     def save(self, *args, **kwargs):
+        # Генерация slug если он отсутствует
         if not self.slug:
             if self.is_child:
-                if not self.name:
-                    self.slug = slugify(self.get_variant_name())
-                else:
-                    self.slug = slugify(f"{self.parent.get_name()}-{self.get_name()}")
+                name = self.name or self.get_variant_name()
+                base_name = f"{self.parent.get_name()}-{name}" if self.name else name
+                self.slug = slugify(base_name)
             else:
                 self.slug = slugify(self.get_name())
 
-        # Добавляем проверку уникальности slug
-        original_slug = self.slug
-        counter = 1
-
-        # Проверка на уникальность slug
-        while (
-            self.__class__.objects.filter(slug=self.slug).exclude(id=self.id).exists()
+        # Проверка уникальности slug
+        if (
+            not self.pk
+            or self.__class__.objects.filter(slug=self.slug)
+            .exclude(pk=self.pk)
+            .exists()
         ):
-            self.slug = f"{original_slug}-{counter}"
-            counter += 1
+            original_slug = self.slug
+            counter = 1
+            while (
+                self.__class__.objects.filter(slug=self.slug)
+                .exclude(pk=self.pk)
+                .exists()
+            ):
+                self.slug = f"{original_slug}-{counter}"
+                counter += 1
 
+        # Сохранение article и вызов родительского save()
         self.article = self.slug
         super().save(*args, **kwargs)
         self.attr.save()
@@ -798,7 +797,7 @@ class Product(models.Model):
         Returns a set of all valid options for this product.
         It's possible to have options product class-wide, and per product.
         """
-        return self.get_product_class().options.all() | self.product_options.all()
+        return self.get_class_options() | self.get_product_options()
 
     @cached_property
     def additionals(self):
@@ -816,10 +815,7 @@ class Product(models.Model):
         # if has_product_class_options is not None and has_product_options is not None:
         #     return has_product_class_options or has_product_options
 
-        options = self.options.all()
-        if options:
-            return True
-        return False
+        return self.options.exists()
 
     @cached_property
     def has_additions(self):
@@ -829,25 +825,11 @@ class Product(models.Model):
         # has_product_additionals = getattr(self, "has_product_additionals", None)
         # if has_product_class_additionals is not None and has_product_additionals is not None:
         #     return has_product_class_additionals or has_product_additionals
-
-        additionals = self.additionals.filter(is_public=True)
-        if additionals:
-            return True
-        return False
+        return self.additionals.filter(is_public=True).exists()
 
     @cached_property
     def has_attributes(self):
-        # Extracting annotated value with number of product class options
-        # from product list queryset.
-        # has_product_class_additionals = getattr(self, "has_product_class_additionals", None)
-        # has_product_additionals = getattr(self, "has_product_additionals", None)
-        # if has_product_class_additionals is not None and has_product_additionals is not None:
-        #     return has_product_class_additionals or has_product_additionals
-
-        attributes = self.attributes.all()
-        if attributes:
-            return True
-        return False
+        return self.attributes.exists()
 
     @cached_property
     def has_weight(self):
@@ -862,9 +844,7 @@ class Product(models.Model):
         """
         Test if this product has any stockrecords
         """
-        if self.id:
-            return self.stockrecords.exists()
-        return False
+        return self.stockrecords.exists() if self.id else False
 
     @property
     def num_stockrecords(self):
@@ -876,8 +856,7 @@ class Product(models.Model):
         Return a string of all of a product's attributes
         """
         attributes = self.get_attribute_values()
-        pairs = [attribute.summary() for attribute in attributes]
-        return ", ".join(pairs)
+        return ", ".join([attribute.summary() for attribute in attributes])
 
     @cached_property
     def attributes_variants(self):
@@ -885,27 +864,25 @@ class Product(models.Model):
         Return a string of all of a product's attributes
         """
         attributes = self.attribute_values.all()
-        pairs = [attribute.summary() for attribute in attributes]
-        return ", ".join(pairs)
+        return ", ".join([attribute.summary() for attribute in attributes])
 
     def get_name(self):
         """
         Return a product's name or it's parent's name if it has no name
         """
-        name = self.name
-        if not name and self.parent_id:
-            name = self.parent.name
-        return name
+        return self.name or (self.parent.name if self.parent_id else None)
 
     def get_variant_name(self):
         """
         Return a variant name
         """
-        patent_name = self.get_name()
         variants = "-".join(
-            str(attr[0].option) for attr in self.attr.get_attribute_values()
+            str(attr.option)
+            for attr in self.attr.get_attribute_values().values_list(
+                "option", flat=True
+            )
         )
-        return "%s-%s" % (patent_name, variants)
+        return f"{self.get_name()}-{variants}" if variants else self.get_name()
 
     def get_variants(self):
         """
@@ -913,8 +890,7 @@ class Product(models.Model):
         """
         if self.is_child:
             attributes = self.attribute_values.all()
-            pairs = [attribute.summary() for attribute in attributes]
-            return ", ".join(pairs)
+            return ", ".join([attribute.summary() for attribute in attributes])
 
         return ""
 
@@ -928,22 +904,28 @@ class Product(models.Model):
     get_name.short_description = "Название товара"
 
     def get_meta_title(self):
-        title = self.meta_title
-        if not title and self.is_child:
-            title = self.parent.meta_title
-        return title or self.get_name()
+        return (
+            self.meta_title
+            or (self.parent.meta_title if self.is_child else None)
+            or self.get_name()
+        )
 
     get_meta_title.short_description = "Мета-заголовок товара"
 
     def get_meta_description(self):
-        meta_description = self.meta_description
-        if not meta_description and self.is_child:
-            meta_description = self.parent.meta_description
-        return meta_description or striptags(self.short_description)
+        return (
+            self.meta_description
+            or (
+                self.parent.meta_description
+                if self.is_child and not self.meta_description
+                else None
+            )
+            or striptags(self.short_description)
+        )
 
     get_meta_description.short_description = "Мета-описание товара"
 
-    def get_parent(self):
+    def get_evotor_parent(self):
         return self.parent if self.parent else self.categories.first()
 
     def get_product_class(self):
@@ -956,6 +938,14 @@ class Product(models.Model):
             return self.product_class
 
     get_product_class.short_description = "Класс товара"
+
+    def get_class_options(self):
+        return self.get_product_class().get_options()
+
+    def get_product_options(self):
+        if self.is_child:
+            return self.parent.product_options.all()
+        return self.product_options.all()
 
     def get_class_additionals(self):
         return self.get_product_class().class_additionals.filter(is_public=True)
@@ -978,7 +968,7 @@ class Product(models.Model):
     get_categories.short_description = "Категории"
 
     def get_evotor_parent_id(self):
-        parent = self.get_parent()
+        parent = self.get_evotor_parent()
         return parent.evotor_id if parent else ""
 
     def get_attribute_values(self):
@@ -986,32 +976,17 @@ class Product(models.Model):
             return self.attribute_values.model.objects.none()
 
         attribute_values = self.attribute_values.all()
-        if self.is_child:
-            parent_attribute_values = self.parent.attribute_values.exclude(
-                attribute__code__in=attribute_values.values("attribute__code")
-            )
-            return attribute_values | parent_attribute_values
+        if not self.is_child:
+            return attribute_values
 
-        return attribute_values
-
-    def get_prices(self):
-        """
-        Get list of stockrecord prices
-        """
-        prices = []
-        stockrecords = []
-        if self.id:
-            if self.is_parent:
-                childs = self.children.all()
-                for child in childs:
-                    stockrecords += child.stockrecords.values_list("price")
-            else:
-                stockrecords += self.stockrecords.values_list("price")
-            if stockrecords:
-                for stc in stockrecords:
-                    prices.append(stc[0])
-                prices = set([min(prices), max(prices)])
-        return prices
+        return attribute_values.union(
+            self.parent.attribute_values.exclude(
+                attribute__code__in=attribute_values.values_list(
+                    "attribute__code", flat=True
+                )
+            ),
+            all=False,
+        )
 
     # Images
 
@@ -1040,9 +1015,7 @@ class Product(models.Model):
             # We return a dict with fields that mirror the key properties of
             # the ProductImage class so this missing image can be used
             # interchangeably in templates.  Strategy pattern ftw!
-            mis_img = MissingImage()
-            caption = self.name
-            return {"original": mis_img, "caption": caption, "is_missing": True}
+            return {"original": MissingImage(), "caption": self.name, "is_missing": True}
 
     # Updating methods
 
@@ -1060,7 +1033,7 @@ class Product(models.Model):
         """
         Calculate rating value
         """
-        result = self.reviews.all().aggregate(sum=Sum("score"), count=Count("id"))
+        result = self.reviews.aggregate(sum=Sum("score"), count=Count("id")).all()
         reviews_sum = result["sum"] or 0
         reviews_count = result["count"] or 0
         rating = None
@@ -1899,13 +1872,11 @@ class Additional(models.Model):
         Returns the primary image for a product. Usually used when one can
         only display one product image, e.g. in a list of products.
         """
-        img = self.image
-        caption = self.name
-        if not img:
+        if not self.image:
             mis_img = MissingImage()
-            return {"original": mis_img, "caption": caption, "is_missing": True}
+            return {"original": mis_img, "caption": self.name, "is_missing": True}
 
-        return {"original": img, "caption": caption, "is_missing": False}
+        return {"original": self.image, "caption": self.name, "is_missing": False}
 
     class Meta:
         app_label = "catalogue"

@@ -107,16 +107,15 @@ class PhoneAuthenticationForm(forms.Form):
             )
 
     def get_user(self):
-        phone_number = self.cleaned_data.get("username")
-        code = self.cleaned_data.get("password")
-        if phone_number is not None and code is not None:
+        username = self.cleaned_data.get("username")
+        password = self.cleaned_data.get("password")
+
+        if username and password:
             backend = import_string(settings.AUTH_BACKEND)()
             self.user_cache = backend.authenticate(
-                request=self.request, username=phone_number, password=code
+                request=self.request, username=username, password=password
             )
-            if self.user_cache is None:
-                return
-            else:
+            if self.user_cache:
                 self.confirm_login_allowed(self.user_cache)
 
         return self.user_cache
@@ -131,26 +130,15 @@ class PhoneAuthenticationForm(forms.Form):
         phone_number = self.cleaned_data.get("username")
         return phone_number
 
-    def clean_phone_number_field(self, field_name):
-        number = self.cleaned_data.get(field_name)
-
+    def clean_username(self):
+        number = self.cleaned_data.get("username")
         try:
             phone_number = PhoneNumber.from_string(number, region="RU")
             if not phone_number.is_valid():
-                self.add_error(field_name, "Это недопустимый формат телефона.")
+                self.add_error("username", "Это недопустимый формат телефона.")
         except phonenumbers.NumberParseException:
-            self.add_error(
-                field_name,
-                "Это недействительный формат телефона.",
-            )
-            return number
-
+            self.add_error("username", "Это недействительный формат телефона.")
         return phone_number
-
-    def clean(self):
-        cleaned_data = super().clean()
-        cleaned_data["username"] = self.clean_phone_number_field("username")
-        return cleaned_data
 
 
 class PhoneUserCreationForm(forms.Form):
@@ -176,13 +164,3 @@ class PhoneUserCreationForm(forms.Form):
     def __init__(self, *args, host=None, **kwargs):
         self.host = host
         super().__init__(*args, **kwargs)
-
-    def _post_clean(self):
-        super()._post_clean()
-        # Validate after self.instance is updated with form data
-        # otherwise validators can't access email
-        # see django.contrib.auth.forms.UserCreationForm
-
-    def save(self, commit=True):
-        user = super().save(commit=commit)
-        return user

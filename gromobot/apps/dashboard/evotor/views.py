@@ -4,21 +4,27 @@ from itertools import chain
 
 from apps.dashboard.evotor.mixins import EvotorTablesMixin
 from apps.evotor.api.cloud import EvatorCloud
-from apps.evotor.signals import (send_evotor_additionals,
-                                 send_evotor_categories, send_evotor_products,
-                                 update_site_additionals, update_site_groups,
-                                 update_site_products, update_site_staffs,
-                                 update_site_stores, update_site_terminals)
-from apps.webshop.catalogue.serializers import (AdditionalsSerializer,
-                                                ProductGroupsSerializer,
-                                                ProductsSerializer)
-from apps.webshop.store.serializers import (StoresSerializer,
-                                            TerminalsSerializer)
+from apps.evotor.signals import (
+    send_evotor_additionals,
+    send_evotor_categories,
+    send_evotor_products,
+    update_site_additionals,
+    update_site_groups,
+    update_site_products,
+    update_site_staffs,
+    update_site_stores,
+    update_site_terminals,
+)
+from apps.webshop.catalogue.serializers import (
+    AdditionalsSerializer,
+    ProductGroupsSerializer,
+    ProductsSerializer,
+)
+from apps.webshop.store.serializers import StoresSerializer, TerminalsSerializer
 from apps.webshop.user.serializers import StaffsSerializer
 from core.loading import get_class, get_classes, get_model
 from django.contrib import messages
-from django.db.models import (BooleanField, Case, Count, DecimalField, Max,
-                              Min, Q, When)
+from django.db.models import BooleanField, Case, Count, DecimalField, Max, Min, Q, When
 from django.urls import reverse_lazy
 from django_tables2 import SingleTableView
 

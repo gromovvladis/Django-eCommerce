@@ -219,12 +219,8 @@ class ProductAttributesContainer:
         return self.cache.attribute_values.queryset()
 
     def get_attribute_values(self):
-        values = []
-        for attribute in self.get_all_attributes():
-            value = getattr(self, attribute.code, None)
-            values.append(value)
-
-        return values
+        """Возвращает список значений всех атрибутов продукта"""
+        return [getattr(self, attr.code, None) for attr in self.get_all_attributes()]
 
     def get_value_by_attribute(self, attribute):
         return self.cache.attribute_values.get(attribute.code)

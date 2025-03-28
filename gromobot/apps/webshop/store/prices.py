@@ -43,9 +43,7 @@ class FixedPrice(Base):
     It can work for when tax isn't known (like in the US).
 
     Note that this price class uses the tax-exclusive price for offers, even if
-    the tax is known.  This may not be what you want.  Use the
-    TaxInclusiveFixedPrice class if you want offers to use tax-inclusive
-    prices.
+    the tax is known.
     """
 
     exists = True
@@ -56,15 +54,3 @@ class FixedPrice(Base):
         self.money = money
         self.old_price = old_price
         self.tax_code = tax_code
-
-
-class TaxInclusiveFixedPrice(FixedPrice):
-    """
-    Specialised version of FixedPrice that must have tax passed.  It also
-    specifies that offers should use the tax-inclusive price (which is the norm
-    in the UK).
-    """
-
-    @property
-    def effective_price(self):
-        return self.money

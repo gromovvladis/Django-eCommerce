@@ -16,7 +16,6 @@ Repository = get_class("webshop.shipping.repository", "Repository")
 SurchargeApplicator = get_class("webshop.checkout.applicator", "SurchargeApplicator")
 OrderTotalCalculator = get_class("webshop.checkout.calculators", "OrderTotalCalculator")
 CheckoutSessionData = get_class("webshop.checkout.utils", "CheckoutSessionData")
-Map = get_class("webshop.shipping.maps", "Map")
 ZonesUtils = get_class("webshop.shipping.zones", "ZonesUtils")
 
 ShippingAddress = get_model("order", "ShippingAddress")
@@ -116,15 +115,17 @@ class CheckoutSessionMixin(object):
 
     def delete_non_valid_lines(self, request):
         lines = self.request.basket.all_lines()
-        for line in lines:
-            is_available = line.purchase_info.availability.is_available_to_buy
-            if line.quantity == 0 or not is_available:
-                try:
-                    line.delete()
-                    request.basket._lines = None
-                    request.basket._filtered_lines = None
-                except Exception:
-                    pass
+        to_delete = [
+            line.id
+            for line in lines
+            if line.quantity == 0
+            or not line.purchase_info.availability.is_available_to_buy
+        ]
+
+        if to_delete:
+            self.request.basket.lines.filter(id__in=to_delete).delete()
+            request.basket._lines = None
+            request.basket._filtered_lines = None
 
     def check_basket_is_valid(self, request):
         """
@@ -132,20 +133,21 @@ class CheckoutSessionMixin(object):
         is, all the basket lines are available to buy - nothing has gone out of
         stock since it was added to the basket.
         """
-        messages_list = []
+
         strategy = request.strategy
-        for line in request.basket.all_lines():
-            result = strategy.fetch_for_line(line)
-            is_permitted, reason = result.availability.is_purchase_permitted(
-                line.quantity
-            )
-            if not is_permitted:
-                # Create a more meaningful message to show on the basket page
-                msg = (
-                    '"%(name)s" больше нельзя купить (%(reason)s).'
-                    # 'Пожалуйста, скорректируйте корзину, чтобы продолжить'
-                ) % {"name": line.product.get_name(), "reason": reason}
-                messages_list.append(msg)
+        lines = request.basket.all_lines()
+
+        messages_list = [
+            f'"{line.product.name}" больше нельзя купить ({reason}).'
+            for line in lines
+            for is_permitted, reason in [
+                strategy.fetch_for_line(line).availability.is_purchase_permitted(
+                    line.quantity
+                )
+            ]
+            if not is_permitted
+        ]
+
         if messages_list:
             raise exceptions.FailedPreCondition(
                 url=reverse("basket:summary"), messages=messages_list
@@ -242,18 +244,8 @@ class CheckoutSessionMixin(object):
             shipping_charge = min_order = prices.Price(
                 currency=basket.currency, money=D("0.00")
             )
-
         elif shipping_address:
-            if shipping_address.coords_lat and shipping_address.coords_long:
-                shipping_charge, min_order = shipping_method.calculate(
-                    basket, shipping_address
-                )
-            elif shipping_address.line1:
-                map = Map()
-                geoObject = map.geocode(address=shipping_address.line1)
-                coords = map.coordinates(geoObject)
-                zona_id = ZonesUtils.zona_id(coords)
-                shipping_charge, min_order = shipping_method.calculate(basket, zona_id)
+            shipping_charge, min_order = shipping_method.calculate(basket, shipping_address)
 
         submission = {
             "user": self.request.user,

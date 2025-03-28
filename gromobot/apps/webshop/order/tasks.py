@@ -11,7 +11,7 @@ Order = get_model("order", "Order")
 
 
 @shared_task
-def update_paying_status_task(order_number, *args, **kwargs):
+def update_paying_status_after_11_minutes_task(order_number, *args, **kwargs):
     try:
         order = Order.objects.get(number=order_number)
         if order.status == settings.INITIAL_ONLINE_PAYMENT_ORDER_STATUS:
@@ -23,6 +23,8 @@ def update_paying_status_task(order_number, *args, **kwargs):
 
 
 # ================= Evotor =================
+
+
 @shared_task
 def _send_order_to_evotor(order_json: dict):
     try:

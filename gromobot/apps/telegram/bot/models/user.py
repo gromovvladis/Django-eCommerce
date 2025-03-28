@@ -1,7 +1,6 @@
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from apps.telegram.bot.keyboards.default.user_register import \
-    contact_request_buttons
+from apps.telegram.bot.keyboards.default.user_register import contact_request_buttons
 from apps.telegram.bot.states.states import UserAuth
 from asgiref.sync import sync_to_async
 from core.compat import get_user_model

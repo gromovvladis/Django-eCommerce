@@ -10,7 +10,6 @@ Available = get_class("webshop.store.availability", "Available")
 StockRequiredAvailability = get_class("webshop.store.availability", "StockRequired")
 UnavailablePrice = get_class("webshop.store.prices", "Unavailable")
 FixedPrice = get_class("webshop.store.prices", "FixedPrice")
-TaxInclusiveFixedPrice = get_class("webshop.store.prices", "TaxInclusiveFixedPrice")
 
 StockRecord = get_model("store", "StockRecord")
 PurchaseInfo = namedtuple(
@@ -83,6 +82,25 @@ class Base(object):
             "information."
         )
 
+    def fetch_for_products(self, products):
+        """
+        Given a products, return a ``PurchaseInfo`` instancies.
+
+        The ``PurchaseInfo`` class is a named tuple with attributes:
+
+        - ``price``: a pricing policy object.
+        - ``availability``: an availability policy object.
+        - ``stockrecord``: the stockrecord that is being used
+
+        If a stockrecord is passed, return the appropriate ``PurchaseInfo``
+        instance for that product and stockrecord is returned.
+        """
+        raise NotImplementedError(
+            "A strategy class must define a fetch_for_products method "
+            "for returning the availability and pricing "
+            "information."
+        )
+
     def fetch_for_parent(self, product):
         """
         Given a parent product, fetch a ``StockInfo`` instance
@@ -133,8 +151,8 @@ class Structured(Base):
         Return the appropriate ``PurchaseInfo`` instance.
         This method is not intended to be overridden.
         """
-        stockrecords = self.available_stockrecords(product)
-        stockrecord = stockrecord or self.select_stockrecord(stockrecords)
+        stockrecords = self.product_stockrecords(product)
+        stockrecord = stockrecord or self.select_stockrecord_by_store(stockrecords)
         price = self.pricing_policy(stockrecord)
         return PurchaseInfo(
             price=price,
@@ -163,12 +181,12 @@ class Structured(Base):
             stockrecords=stockrecords,
         )
 
-    def select_stockrecord(self, stockrecords):
+    def select_stockrecord_by_store(self, stockrecords):
         """
         Select the appropriate stockrecord
         """
         raise NotImplementedError(
-            "A structured strategy class must define a 'select_stockrecord' method"
+            "A structured strategy class must define a 'select_stockrecord_by_store' method"
         )
 
     def pricing_policy(self, stockrecord):
@@ -205,10 +223,9 @@ class Structured(Base):
             "'parent_availability_policy' method"
         )
 
-    def available_stockrecords(self, product):
+    def product_stockrecords(self, product):
         raise NotImplementedError(
-            "A structured strategy class must define a "
-            "'available_stockrecords' method"
+            "A structured strategy class must define a " "'product_stockrecords' method"
         )
 
     def is_available(self, product):
@@ -223,7 +240,7 @@ class UseStoreStockRecord:
     This mixin picks the first (normally only) stockrecord to fulfil a product.
     """
 
-    def select_stockrecord(self, stockrecords):
+    def select_stockrecord_by_store(self, stockrecords):
         return stockrecords.filter(store_id=self.get_store_id()).first()
 
     def get_store_id(self):
@@ -231,7 +248,7 @@ class UseStoreStockRecord:
             self._cached_store_id = self.request.store.id
         return self._cached_store_id
 
-    def available_stockrecords(self, product):
+    def product_stockrecords(self, product):
         filter_field = "product__parent_id" if product.is_parent else "product_id"
         base_query = Q(**{filter_field: product.id, "is_public": True})
         if product.get_product_class().track_stock:
@@ -241,7 +258,7 @@ class UseStoreStockRecord:
 
     def is_available(self, product):
         if not hasattr(self, "_cached_availability"):
-            self._cached_availability = self.available_stockrecords(product).exists()
+            self._cached_availability = self.product_stockrecords(product).exists()
         return self._cached_availability
 
 

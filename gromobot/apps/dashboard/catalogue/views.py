@@ -1,11 +1,15 @@
 # pylint: disable=attribute-defined-outside-init
 from typing import Any
 
-from apps.evotor.signals import (delete_evotor_additional,
-                                 delete_evotor_category, delete_evotor_product,
-                                 send_evotor_additional, send_evotor_category,
-                                 send_evotor_product,
-                                 update_evotor_stockrecord)
+from apps.evotor.signals import (
+    delete_evotor_additional,
+    delete_evotor_category,
+    delete_evotor_product,
+    send_evotor_additional,
+    send_evotor_category,
+    send_evotor_product,
+    update_evotor_stockrecord,
+)
 from core.loading import get_class, get_classes, get_model
 from core.views.generic import ObjectLookupView
 from django.conf import settings

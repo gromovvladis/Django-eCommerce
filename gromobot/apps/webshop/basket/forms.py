@@ -9,10 +9,10 @@ from django.forms.utils import ErrorDict
 
 Unavailable = get_class("webshop.store.availability", "Unavailable")
 
-Line = get_model("basket", "line")
-Basket = get_model("basket", "basket")
-Option = get_model("catalogue", "option")
-Product = get_model("catalogue", "product")
+Line = get_model("basket", "Line")
+Basket = get_model("basket", "Basket")
+Option = get_model("catalogue", "Option")
+Product = get_model("catalogue", "Product")
 
 
 def _option_text_field(form, product, option):
@@ -221,7 +221,6 @@ class AddToBasketForm(forms.Form):
         self._create_product_fields(product)
 
     def _create_parent_product_fields(self, product):
-        childs = product.children.public()
         childs_data = [
             {
                 child.id: {
@@ -235,7 +234,7 @@ class AddToBasketForm(forms.Form):
                     "old_price": getattr(child.stockrecord, "old_price", None),
                 }
             }
-            for child in childs
+            for child in product.children.public()
         ]
 
         self.fields["child_id"] = forms.CharField(

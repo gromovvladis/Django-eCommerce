@@ -67,8 +67,6 @@ class StaffSerializer(serializers.ModelSerializer):
     role = serializers.CharField(write_only=True, required=False)
     role_id = serializers.CharField(write_only=True, required=False)
 
-    updated_at = serializers.DateTimeField(write_only=True)
-
     class Meta:
         model = Staff
         fields = (
@@ -80,13 +78,9 @@ class StaffSerializer(serializers.ModelSerializer):
             "stores",
             "role",
             "role_id",
-            "updated_at",
         )
 
     def create(self, validated_data):
-        # Извлекаем адрес из данных, если передан
-        validated_data.pop("updated_at", None)
-
         phone_data = validated_data.pop("phone", None)
         stores_data = validated_data.pop("stores", None)
         role_data = validated_data.pop("role", None)

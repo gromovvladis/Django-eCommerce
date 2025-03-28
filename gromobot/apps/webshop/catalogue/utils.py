@@ -10,7 +10,7 @@ from core.loading import get_model
 from django.core.files import File
 from django.db.transaction import atomic
 from PIL import Image, UnidentifiedImageError
-from utils.image_processor import ImageProcessor
+from core.models.img.image_processor import ImageProcessor
 
 Product = get_model("catalogue", "Product")
 ProductImage = get_model("catalogue", "ProductImage")

@@ -18,6 +18,8 @@ class BaseUserAddressForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.user = user if user.is_authenticated else None
+        self.fields["coords_long"].widget = self.hidden_fields["coords_long"]
+        self.fields["coords_lat"].widget = self.hidden_fields["coords_lat"]
 
 
 class UserAddressForm(BaseUserAddressForm):
@@ -37,8 +39,6 @@ class UserAddressForm(BaseUserAddressForm):
         super().__init__(*args, **kwargs)
         for field in ("line1", "line2", "line3", "line4", "notes"):
             self.fields[field].widget.attrs.update(self.common_attrs)
-        self.fields["coords_long"].widget = self.hidden_fields["coords_long"]
-        self.fields["coords_lat"].widget = self.hidden_fields["coords_lat"]
 
 
 class UserLiteAddressForm(BaseUserAddressForm):
@@ -49,5 +49,3 @@ class UserLiteAddressForm(BaseUserAddressForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["line1"].widget.attrs.update(self.common_attrs)
-        self.fields["coords_long"].widget = self.hidden_fields["coords_long"]
-        self.fields["coords_lat"].widget = self.hidden_fields["coords_lat"]

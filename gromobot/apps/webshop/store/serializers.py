@@ -22,16 +22,12 @@ class StoreSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source="evotor_id")
     name = serializers.CharField()
     address = serializers.CharField(write_only=True, required=False)
-    updated_at = serializers.DateTimeField(write_only=True)
 
     class Meta:
         model = Store
-        fields = ("id", "name", "address", "updated_at")
+        fields = ("id", "name", "address")
 
     def create(self, validated_data):
-        # Извлекаем адрес из данных, если передан
-        validated_data.pop("updated_at", None)
-
         address_data = validated_data.pop("address", None)
         # Создаем объект партнера
         store = Store.objects.create(**validated_data)
@@ -64,33 +60,8 @@ class StoreSerializer(serializers.ModelSerializer):
         return instance
 
 
-class StoresSerializer(serializers.ModelSerializer):
+class StoresSerializer(serializers.Serializer):
     items = StoreSerializer(many=True)
-
-    class Meta:
-        model = Store
-        fields = ("items",)
-
-    def create(self, validated_data):
-        items_data = validated_data.get("items", [])
-        return [StoreSerializer().create(item_data) for item_data in items_data]
-
-    def update(self, instances, validated_data):
-        items_data = validated_data.get("items", [])
-        stores = []
-
-        for item_data in items_data:
-            try:
-                store_instance = instances.get(
-                    evotor_id=item_data["id"]
-                )  # `instance` — это QuerySet
-                store = StoreSerializer().update(store_instance, item_data)
-            except Store.DoesNotExist:
-                continue  # Пропускаем, если объект не найден
-
-            stores.append(store)
-
-        return stores
 
 
 class TerminalSerializer(serializers.ModelSerializer):
@@ -102,7 +73,6 @@ class TerminalSerializer(serializers.ModelSerializer):
 
     store_id = serializers.CharField(write_only=True)
     location = serializers.JSONField(write_only=True, required=False)
-    updated_at = serializers.DateTimeField(write_only=True)
 
     class Meta:
         model = Terminal
@@ -114,12 +84,9 @@ class TerminalSerializer(serializers.ModelSerializer):
             "imei",
             "store_id",
             "location",
-            "updated_at",
         )
 
     def create(self, validated_data):
-
-        validated_data.pop("updated_at", None)
         store_id = validated_data.pop("store_id")
 
         location = validated_data.pop("location", {})
@@ -170,36 +137,11 @@ class TerminalSerializer(serializers.ModelSerializer):
         return instance
 
 
-class TerminalsSerializer(serializers.ModelSerializer):
+class TerminalsSerializer(serializers.Serializer):
     items = TerminalSerializer(many=True)
 
-    class Meta:
-        model = Terminal
-        fields = ("items",)
 
-    def create(self, validated_data):
-        items_data = validated_data.get("items", [])
-        return [TerminalSerializer().create(item_data) for item_data in items_data]
-
-    def update(self, instances, validated_data):
-        items_data = validated_data.get("items", [])
-        terminals = []
-
-        for item_data in items_data:
-            try:
-                terminal_instance = instances.get(
-                    evotor_id=item_data["id"]
-                )  # `instance` — это QuerySet
-                terminal = TerminalSerializer().update(terminal_instance, item_data)
-            except Terminal.DoesNotExist:
-                continue  # Пропускаем, если объект не найден
-
-            terminals.append(terminal)
-
-        return terminals
-
-
-class StoreCashTransactionSerializer(serializers.Serializer):
+class StoreCashTransactionSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source="evotor_id")
     type = serializers.CharField()
     store_id = serializers.CharField(write_only=True)

@@ -1,10 +1,10 @@
 from decimal import Decimal as D
 
-from apps.webshop.address.models import ShippingAddress, UserAddress
 from core import prices
 from core.loading import get_class, get_model
 
 ZonesUtils = get_class("webshop.shipping.zones", "ZonesUtils")
+Map = get_class("webshop.shipping.maps", "Map")
 
 ShippingZona = get_model("shipping", "ShippingZona")
 
@@ -86,17 +86,17 @@ class NoShippingRequired(Free):
     pickup_discount = None
 
     def __init__(self, pickup_discount=0, default_selected=False):
+        super().__init__()  # Вызов конструктора родительского класса (если необходимо)
         if pickup_discount is not None:
             self.pickup_discount = pickup_discount
         self.default_selected = default_selected
 
     def calculate(self, basket, address=None):
-        """ "Returns the shipping charges and minimum order price"""
-
+        """Returns the shipping charges and minimum order price"""
         discount = basket.total * self.pickup_discount / 100
-        return prices.Price(currency=basket.currency, money=-discount), prices.Price(
-            currency=basket.currency, money=D("0")
-        )
+        shipping_charge = prices.Price(currency=basket.currency, money=-discount)
+        minimum_order_price = prices.Price(currency=basket.currency, money=D("0"))
+        return shipping_charge, minimum_order_price
 
 
 class FixedPrice(Base):
@@ -118,10 +118,10 @@ class FixedPrice(Base):
         self.default_selected = default_selected
 
     def calculate(self, basket, address=None):
-        """ "Returns the shipping charges and minimum order price"""
-        return prices.Price(currency=basket.currency, money=self.charge), prices.Price(
-            currency=basket.currency, money=D("700.00")
-        )
+        """Returns the shipping charges and minimum order price"""
+        shipping_charge = prices.Price(currency=basket.currency, money=self.charge)
+        minimum_order_price = prices.Price(currency=basket.currency, money=D("700.00"))
+        return shipping_charge, minimum_order_price
 
 
 class ZonaBasedShipping(Base):
@@ -135,49 +135,47 @@ class ZonaBasedShipping(Base):
 
     def __init__(self, default_selected=False):
         self.default_selected = default_selected
+        self.zones_utils = ZonesUtils()
 
-    def calculate(self, basket, address):
+    def calculate(self, basket, address=None):
         """ "Returns the shipping charges and minimum order price"""
-        zona_id = 0
-        shipping_charge = D("0.0")
-        min_order = D("700.0")
 
-        zones = ZonesUtils.available_zones()
+        if not address or not address.line1:
+            return self._get_default_shipping_price(basket)
 
-        if isinstance(address, ShippingAddress) or isinstance(address, UserAddress):
-            zona_id = ZonesUtils.zona_id(
-                [address.coords_lat, address.coords_long], zones
-            )
-        else:
-            zona_id = int(address)
+        if not address.coords_lat or not address.coords_long:
+            self._get_coords(address)
 
-        if zona_id > 0:
-            shipping_charge = self.zona_charge(zona_id, zones)
-            min_order = self.min_order(zona_id, zones)
+        zona_id = self.zones_utils.get_zona_id(
+            [address.coords_lat, address.coords_long]
+        )
+        return self.calculate_from_zona_id(basket, zona_id)
 
-        return prices.Price(
+    def calculate_from_zona_id(self, basket, zona_id):
+        shipping_charge = self.zones_utils.zona_charge(zona_id)
+        min_order = self.zones_utils.min_order(zona_id)
+        shipping_charge_price = prices.Price(
             currency=basket.currency, money=shipping_charge
-        ), prices.Price(currency=basket.currency, money=min_order)
+        )
+        minimum_order_price = prices.Price(currency=basket.currency, money=min_order)
+        return shipping_charge_price, minimum_order_price
 
-    def zona_charge(self, zona_id, zones):
-        charge = 0
-        try:
-            zona = zones.get(number=zona_id)
-            charge = zona.shipping_price
-        except Exception:
-            return 0
+    def _get_coords(self, shipping_address):
+        """Retrieves coordinates for the shipping address using geocoding."""
+        map = Map()
+        geoObject = map.geocode(address=shipping_address.line1)
+        coords = map.coordinates(geoObject)
 
-        return charge
+        # Сохраняем координаты в адресе
+        shipping_address.coords_lat = coords[0]
+        shipping_address.coords_long = coords[1]
+        shipping_address.save()
 
-    def min_order(self, zona_id, zones):
-        amount = 700
-        try:
-            zona = zones.get(number=zona_id)
-            amount = zona.order_price
-        except Exception:
-            return 700
-
-        return amount
+    def _get_default_shipping_price(self, basket):
+        """Returns the default shipping charge and minimum order price."""
+        shipping_charge = prices.Price(currency=basket.currency, money=0)
+        minimum_order_price = prices.Price(currency=basket.currency, money=0)
+        return shipping_charge, minimum_order_price
 
 
 # pylint: disable=abstract-method
@@ -224,9 +222,9 @@ class OfferDiscount(Base):
         """
         return self.method.description
 
-    def calculate_excl_discount(self, basket, zonaId):
+    def calculate_excl_discount(self, basket, zona_id):
         """
         Returns the shipping charge for the given basket without
         discount applied.
         """
-        return self.method.calculate(basket, zonaId)
+        return self.method.calculate_from_zona_id(basket, zona_id)

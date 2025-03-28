@@ -1,4 +1,5 @@
 from core import prices
+from decimal import Decimal as D
 
 
 class OrderTotalCalculator(object):
@@ -17,9 +18,9 @@ class OrderTotalCalculator(object):
         money = basket.total
 
         if shipping_charge:
-            money += shipping_charge.money
+            money += D(shipping_charge.money)
 
         if surcharges is not None:
-            money += surcharges.total.money
+            money += D(surcharges.total.money)
 
         return prices.Price(currency=basket.currency, money=money)

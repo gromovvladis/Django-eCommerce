@@ -161,21 +161,6 @@ class Terminal(models.Model):
         return self.display_name
 
 
-# class BarCode(models.Model):
-
-#     code = models.CharField(
-#         "Штрих-код",
-#         max_length=128,
-#         unique=True,
-#     )
-
-#     class Meta:
-#         app_label = "store"
-#         ordering = ("code",)
-#         verbose_name = "Штрих-код"
-#         verbose_name_plural = "Штрих-коды"
-
-
 class StockRecord(models.Model):
     """
     A stock record.
@@ -218,10 +203,6 @@ class StockRecord(models.Model):
         default=get_default_currency,
         help_text="Валюта. Рубли = RUB",
     )
-
-    # bar_codes = models.ManyToManyField(
-    #     "store.BarCode", related_name="bars", verbose_name="Штрих-коды", blank=True
-    # )
 
     # This is the base price for calculations - whether this is inclusive or exclusive of
     # tax depends on your implementation, as this is highly domain-specific.
