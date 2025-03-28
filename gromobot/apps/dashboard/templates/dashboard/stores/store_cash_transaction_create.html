@@ -1,0 +1,67 @@
+{% extends 'dashboard/layout.html' %}
+
+{% load widget_tweaks %}
+{% load currency_filters %}
+
+{% block title %}
+  Магазин {{ store }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        <a href="{% url 'dashboard:store-manage' pk=store.id %}">{{ store }}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        <a href="{% url 'dashboard:store-cash-transaction-list' store_id=store.id %}">Список внесения / изъятия наличных</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Создание транзакции</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <div class="d-flex align-items-center">
+    <h1>{{ store.name|default:'Магазин' }}</h1>
+    <a href="{% url 'dashboard:store-cash-transaction-list' store_id=store.id %}" class="fa-1x ml-2 badge badge-info">Наличные: {{ store.cash.sum|default:'0'|currency:'RUB' }}</a>
+  </div>
+{% endblock %}
+
+{% block dashboard_content %}
+  <div class="half-wrapper">
+    <div class="table-header">
+      <h2>Внести / Изъять наличные</h2>
+    </div>
+    <form method="post" class="fixed-actions">
+      <div class="card card-body mb-3">
+        {% csrf_token %}
+        <span class="error-block">{{ form.non_field_errors }}</span>
+        {% for field in form %}
+          {% include 'dashboard/partials/form_field.html' with field=field %}
+        {% endfor %}
+      </div>
+      {% block fixed_actions_group %}
+        <div class="fixed-actions-group">
+          <div class="container container-fluid">
+            <div class="d-flex justify-content-end align-items-end">
+              <div class="d-flex justify-content-end">
+                <a class="btn btn-secondary mr-2" href="{% url 'dashboard:staff-list' %}">
+                  <i class="fa-regular fa-circle-xmark"></i>
+                  <span>Отменить</span>
+                </a>
+                <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+                  <i class="fa-regular fa-floppy-disk"></i>
+                  <span>Сохранить</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endblock %}
+    </form>
+  </div>
+{% endblock %}

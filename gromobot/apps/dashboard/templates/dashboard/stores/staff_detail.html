@@ -1,0 +1,75 @@
+{% extends 'dashboard/layout.html' %}
+
+{% load widget_tweaks %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:staff-list' %}">Персонал</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Изменить сотрудника</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <h1>{{ staff.get_full_name }}</h1>
+  <a class="btn btn-danger ml-2" href="{% url 'dashboard:staff-delete' pk=staff.id %}">
+    <i class="fa-solid fa-trash"></i>
+    <span>Удалить</span>
+  </a>
+{% endblock %}
+
+{% block dashboard_content %}
+  <div class="table-header">
+    <h2>Информация о сотруднике</h2>
+  </div>
+  <form method="post" class="fixed-actions">
+    <div class="card card-body mb-3">
+      {% csrf_token %}
+      <span class="error-block">{{ form.non_field_errors }}</span>
+      {% for field in form %}
+        {% comment %} {% if 'evotor_update' not in field.id_for_label %}
+          {% include 'dashboard/partials/form_field.html' with field=field %}
+        {% endif %} {% endcomment %}
+        {% include 'dashboard/partials/form_field.html' with field=field %}
+      {% endfor %}
+    </div>
+    {% block fixed_actions_group %}
+      <div class="fixed-actions-group">
+        <div class="container container-fluid">
+          <div class="d-flex justify-content-end align-items-end">
+            {% comment %} <div>
+              {% with evotor_field=form.evotor_update %}
+                <label for="{{ evotor_field.auto_id }}" class="checkbox-ios">
+                  {% render_field evotor_field='form-control' %}
+                  <span class="checkbox-ios-switch"></span>
+                </label>
+                {% for error in evotor_field.errors %}
+                  <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                {% endfor %}
+                {% if evotor_field.help_text %}
+                  <small class="form-text text-muted">{{ evotor_field.help_text|safe }}</small>
+                {% endif %}
+              {% endwith %}
+            </div> {% endcomment %}
+            <div class="d-flex justify-content-end">
+              <a class="btn btn-secondary mr-2" href="{% url 'dashboard:staff-list' %}">
+                <i class="fa-regular fa-circle-xmark"></i>
+                <span>Отменить</span>
+              </a>
+              <button class="btn btn-primary" name="action" type="submit" value="continue" data-loading-text="Сохранение...">
+                <i class="fa-regular fa-floppy-disk"></i>
+                <span>Сохранить</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+  </form>
+{% endblock %}

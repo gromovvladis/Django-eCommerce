@@ -1,0 +1,208 @@
+{% extends 'dashboard/layout.html' %}
+
+{% load render_table from django_tables2 %}
+{% load currency_filters %}
+{% load dashboard_tags %}
+{% load compress %}
+{% load static %}
+
+{% block title %}
+  Пользователь {{ customer.username }} | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:customer-list' %}">Клиенты</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ customer.username }}</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block navtext %}
+  <h1>{{ customer.username }}</h1>
+{% endblock %}
+
+{% block dashboard_content %}
+  {% block user_general_info %}
+    <div class="half-wrapper">
+      <table class="table table-bordered">
+        <caption class="table-caption" data-target="#client-body" data-toggle="collapse" aria-controls="client-body" aria-expanded="true">
+          <div class="d-flex justify-space-between">
+            <h2>
+              Основное
+              <span class="badge badge-info ml-2">{{ customer.date_joined|from_now }} / {{ user_info.order_count|default:'0' }} зак.</span>
+            </h2>
+            <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+            <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+          </div>
+        </caption>
+        <tbody id="client-body">
+          <tr>
+            <th>Имя</th>
+            <td>{{ customer.get_full_name|default:'-' }}</td>
+          </tr>
+          <tr>
+            <th>Email</th>
+            <td>{{ customer.email|default:'-' }}</td>
+          </tr>
+          <tr>
+            <th>Телеграм</th>
+            <td>{{ customer.telegram_id|yesno:'✔️,❌' }}</td>
+          </tr>
+          <tr>
+            <th>Активен</th>
+            <td>{{ customer.is_active|yesno:'✔️,❌' }}</td>
+          </tr>
+          <tr>
+            <th>Сотрудник</th>
+            <td>{{ customer.is_staff|yesno:'✔️,❌' }}</td>
+          </tr>
+          <tr>
+            <th>Последний вход</th>
+            <td>{{ customer.last_login|date:'d.m H:i' }}</td>
+          </tr>
+          <tr>
+            <th>Дата регистрации</th>
+            <td>{{ customer.date_joined|date:'d.m H:i' }}</td>
+          </tr>
+          {% if customer.userrecord %}
+            {% with record=customer.userrecord %}
+              <tr>
+                <th>Товаров просмотренно</th>
+                <td>{{ record.num_product_views|default:0 }}</td>
+              </tr>
+              <tr>
+                <th>Количество заказов</th>
+                <td>{{ record.num_orders|default:0 }}</td>
+              </tr>
+              <tr>
+                <th>Количество заказанных товаров</th>
+                <td>{{ record.num_order_items|default:0 }}</td>
+              </tr>
+              <tr>
+                <th>Всего потрачено</th>
+                <td>{{ record.total_spent|default:0|currency }}</td>
+              </tr>
+            {% endwith %}
+          {% endif %}
+          <tr>
+            <th>Написанные отзывы</th>
+            <td>{{ customer.total_reviews }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  {% endblock %}
+  {% block user_additional_info %}
+    <div class="tabbable dashboard">
+      {% block nav_tabs %}
+        <ul class="nav nav-tabs mb-3 p-0" role="tablist">
+          <div class="half-wrapper">
+            <div class="nav tabs-button d-flex fill">
+              <div class="tabs-button__active-block" style="width: calc(100% / 3); min-width: 130px; left: 0px;">
+                <div class="fill-width fill-height"></div>
+              </div>
+              <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_orders' %}active{% endif %}" href="#user_orders" data-toggle="tab">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Заказы</span>
+                {% if customer.userrecord %}
+                  {% with num_orders=customer.userrecord.num_orders %}
+                    {% if num_orders %}
+                      <div class="dropdown-item-badge">{{ num_orders }}</div>
+                    {% endif %}
+                  {% endwith %}
+                {% endif %}
+              </button>
+              <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_address' %}active{% endif %}" href="#user_address" data-toggle="tab">
+                <i class="fa-solid fa-truck-fast"></i>
+                <span>Доставка</span>
+                {% if customer.address %}
+                  <div class="dropdown-item-badge">1</div>
+                {% endif %}
+              </button>
+              <button role="button" class="tabs-button__button tabs-button__icon {% if active_tab == 'user_reviews' %}active{% endif %}" href="#user_reviews" data-toggle="tab">
+                <i class="fa-regular fa-note-sticky"></i>
+                <span>Отзывы</span>
+                {% if customer.total_reviews %}
+                  <div class="dropdown-item-badge">{{ customer.total_reviews }}</div>
+                {% endif %}
+              </button>
+            </div>
+          </div>
+        </ul>
+      {% endblock %}
+      <div class="tab-content">
+        {% block user_orders %}
+          <div id="user_orders" class="tab-pane fade show active" role="tabpanel">
+            <div class="mobile-table">
+              {% if tables.0 %}
+                {% render_table tables.0 %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="modal fade justify-content-center" data-id="order-modal">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div data-id="order-modal-content" class="d-flex flex-column fill-height content-loading"></div>
+              </div>
+            </div>
+          </div>
+        {% endblock %}
+        {% block user_address %}
+          <div id="user_address" class="tab-pane fade" role="tabpanel">
+            <table class="table table-striped table-bordered table-hover half-wrapper">
+              <caption>Адрес доставки</caption>
+              {% with address=customer.address %}
+                {% if address %}
+                  {% for field in address.active_address_fields_and_labels %}
+                    <tr>
+                      <th>{{ field.label }}</th>
+                      <th>{{ field.value }}</th>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td>Этот клиент не сохранил адрес доставки.</td>
+                  </tr>
+                {% endif %}
+              {% endwith %}
+            </table>
+          </div>
+        {% endblock %}
+        {% block user_reviews %}
+          <div id="user_reviews" class="tab-pane fade" role="tabpanel">
+            <div class="mobile-table">
+              {% if tables.1 %}
+                {% render_table tables.1 %}
+              {% endif %}
+            </div>
+            <div class="mobile-table">
+              {% if tables.2 %}
+                {% render_table tables.2 %}
+              {% endif %}
+            </div>
+          </div>
+        {% endblock %}
+      </div>
+    </div>
+  {% endblock %}
+{% endblock %}
+
+{% block templatescripts %}
+  {{ block.super }}
+  var order_modal_url = "{% url 'dashboard:order-modal' %}"; var next_status_url = "{% url 'dashboard:order-next-status' %}";
+{% endblock %}
+
+{% block extrascripts %}
+  {{ block.super }}
+  {% compress js %}
+  <script type="application/javascript" src="{% static 'js/dashboard/orders/before-order.js' %}"></script>
+  <script type="application/javascript" src="{% static 'js/dashboard/orders/order-modal.js' %}"></script>
+  {% endcompress %}
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'webshop/customer/baseaccountpage.html' %}
+
+{% load currency_filters %}
+{% load purchase_info_tags %}
+{% load image_tags %}
+{% load svg_tags %}
+{% load compress %}
+{% load static %}
+
+{% block breadcrumbs %}
+  <div aria-label="breadcrumb" class="bread d-none d-sm-flex align-center mt-2 mb-3 mx-md-0">
+    <button onclick="getBack(); return false" data-id="back-bread-btn" class="pd-0 mr-1">{% icon file_name='webshop/themes/planet/interface/arrow-back' size=22 stroke='#111' %}</button>
+    <a href="{{ homepage_url }}" data-id="back-bread-btn" class="bread__link router-link-active">Главная</a>
+    {% icon file_name='webshop/themes/planet/interface/arrow-left' size=24 stroke='#999' %}
+    <a href="{% url 'customer:summary' %}" data-id="back-bread-btn" class="bread__link router-link-active">Личный кабинет</a>
+    {% icon file_name='webshop/themes/planet/interface/arrow-left' size=24 stroke='#999' %}
+    <span class="bread__link" aria-current="page">{{ page_title }}</span>
+  </div>
+{% endblock %}
+
+{% block tabcontent %}
+  <div class="profile-personal__block fill-width d-flex flex-column pd-0 pd-sm-4">
+    <div class="d-none d-sm-flex mb-2">
+      <h1>Избранное</h1>
+    </div>
+    {% if products %}
+      <div class="cabinet-orders fill-width grow-1 mb-2">
+        <div class="cabinet__promo-wrapper fill-width d-flex flex-column">
+          <ul class="orders-list d-flex flex-column fill-width fill-width">
+            {% for line in products %}
+              {% with product=line.product %}
+                <form data-id="wishlist-form" data-remove="true" action="{% url 'customer:wishlist-remove-product' product_pk=product.pk %}" method="post">
+                  {% csrf_token %}
+                  <li class="orders-list-item fill-width" data-id="wishlist-line">
+                    <div data-id="cart-item-form" class="cart-items--item">
+                      <div class="dish-order d-flex fill-width">
+                        <div class="dish-order__picture">
+                          <a href="{{ product.get_absolute_url }}" aria-current="page" class="d-block router-link-exact-active router-link-active" data-id="dish-order-image-link">
+                            <div class="dish-image fill-width pos-relative">
+                              <div class="image">
+                                <div class="image__inner" style="padding-bottom: 72.072%;">
+                                  {% if product %}
+                                    {% with image=product.primary_image %}
+                                      {% oscar_thumbnail image.original '100x100' upscale=False as thumb %}
+                                      {% if product.is_public %}
+                                        <a href="{{ product.get_absolute_url }}"><img class="img-thumbnail" src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy" /></a>
+                                      {% else %}
+                                        <img class="img-thumbnail" src="{{ thumb.url }}" alt="{{ product.get_name }}" loading="lazy" />
+                                      {% endif %}
+                                    {% endwith %}
+                                  {% endif %}
+                                </div>
+                              </div>
+                            </div>
+                          </a>
+                        </div>
+                        <div class="dish-order__content d-flex flex-column fill-width ml-1">
+                          <div class="dish-order__title s d-flex align-start fill-width">
+                            <div class="dish-order__name-wrapper d-flex fill-width">
+                              <a href="{{ product.get_absolute_url }}" aria-current="page" class="dish-order__name router-link-exact-active router-link-active" data-id="dish-order-link">
+                                {% if product and product.is_public %}
+                                  <a href="{{ line.product.get_absolute_url }}">{{ line.name }}</a>
+                                {% else %}
+                                  {{ line.name }} (Временно недоступен)
+                                {% endif %}
+                              </a>
+                            </div>
+                            <div class="dish-order__delete d-flex shrink pd-0">
+                              <button data-id="wishlist-btn" type="submit" class="pr-0 pt-0 pl-1 pb-1">{% icon file_name='webshop/themes/planet/interface/close' size=22 stroke='#999' %}</button>
+                            </div>
+                          </div>
+                          <div role="separator" class="spacer"></div>
+                          <div class="d-flex fill-width mt-1 pos-relative align-center">
+                            <div role="separator" class="spacer"></div>
+                            <span class="prices d-flex flex-column align-start">
+                              <span class="prices__price no-wrap">
+                                {% purchase_info_for_product request product as session %}
+                                {% include 'webshop/catalogue/partials/product_price.html' %}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                </form>
+              {% endwith %}
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% else %}
+      <p class="text--info">Список избранного пуст</p>
+    {% endif %}
+  </div>
+{% endblock %}

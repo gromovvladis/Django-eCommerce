@@ -1,0 +1,9 @@
+{% extends 'dashboard/offers/step_form.html' %}
+
+{% block progress %}
+  {% include 'dashboard/offers/progress.html' with step=1 %}
+{% endblock %}
+
+{% block submittext %}
+  Continue to step 2
+{% endblock %}

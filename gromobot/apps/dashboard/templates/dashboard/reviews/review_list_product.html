@@ -1,0 +1,25 @@
+{% extends 'dashboard/reviews/review_list.html' %}
+
+{% load currency_filters %}
+{% load sorting_tags %}
+
+{% block title %}
+  Отзывы на товары | {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard:index' %}">Главная</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Отзывы на товары</li>
+    </ol>
+  </nav>
+{% endblock %}
+
+{% block header %}
+  <div class="page-header">
+    <h1>Отзывы на товары</h1>
+  </div>
+{% endblock %}

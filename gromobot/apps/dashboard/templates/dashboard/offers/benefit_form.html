@@ -1,0 +1,35 @@
+{% extends 'dashboard/offers/step_form.html' %}
+
+{% block progress %}
+  {% include 'dashboard/offers/progress.html' with step=2 %}
+{% endblock %}
+
+{% block form_fields %}
+  <span class="error-block">{{ form.non_field_errors }}</span>
+
+  {% if form.fields.custom_benefit.choices %}
+    <h4>Build a new incentive</h4>
+  {% endif %}
+  {% include 'dashboard/partials/form_field.html' with field=form.range %}
+  <p>
+    {% url 'dashboard:range-list' as range_list_url %}
+    Ranges can be created and edited from within the <a href="{{ range_list_url }}" target="_blank">range dashboard</a>.
+  </p>
+  {% include 'dashboard/partials/form_field.html' with field=form.type %}
+  {% include 'dashboard/partials/form_field.html' with field=form.value %}
+  {% include 'dashboard/partials/form_field.html' with field=form.max_affected_items %}
+
+  {% if form.fields.custom_benefit.choices %}
+    <h4>...or choose a pre-defined one</h4>
+    {% include 'dashboard/partials/form_field.html' with field=form.custom_benefit %}
+  {% endif %}
+{% endblock %}
+
+{% block submittext %}
+  Continue to step 3
+{% endblock %}
+
+{% block onbodyload %}
+  {{ block.super }}
+  dashboard.offers.init();
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'dashboard/layout.html' %}
+
+{% load compress %}
+{% load static %}
+
+{% block title %}
+  {{ title }} | {{ block.super }}
+{% endblock %}
+
+{% block body_class %}
+  {{ block.super }} {% if is_popup %}popup-page{% endif %}
+{% endblock %}
+
+{% block navbar %}
+  {% if not is_popup %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
+
+{% block dashboard_nav %}
+  {% if not is_popup %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+  {% if not is_popup %}
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard:index' %}">Главная</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard:catalogue-option-list' %}">Опции</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+      </ol>
+    </nav>
+  {% endif %}
+{% endblock %}
+
+{% block navtext %}
+  <h1>{{ title }}</h1>
+  {% if option %}
+    <a class="btn btn-danger ml-2" href="{% url 'dashboard:catalogue-option-delete' pk=option.id %}">
+      <i class="fa-solid fa-trash"></i>
+      <span>Удалить</span>
+    </a>
+  {% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+  <form class="form-stacked wysiwyg fixed-actions" method="post" data-behaviour="tab-nav-errors">
+    {% csrf_token %}
+    <div class="row">
+      {% if is_popup %}
+        <input type="hidden" name="{{ is_popup_var }}" value="{{ is_popup }}" />
+      {% endif %}
+      {% if to_field %}
+        <input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}" />
+      {% endif %}
+      <div class="col-md-12">
+        <div class="tab-content">
+          {% block option_details %}
+            <div class="tab-pane active" id="option_details">
+              <div class="table-header">
+                <h3>Описание опции</h3>
+              </div>
+              <div class="card card-body bg-light option-details">
+                {% if form.non_field_errors %}
+                  {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                      <span class="error-block"><i class="fas fa-exclamation"></i> {{ error }}</span>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+                {% for field in form %}
+                  {% include 'dashboard/partials/form_field.html' with field=field %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+    {% block fixed_actions_group %}
+      <div class="fixed-actions-group">
+        <div class="container container-fluid">
+          <div class="d-flex justify-content-end">
+            <a class="btn btn-secondary mr-2" href="#" {% if not is_popup %}onclick="window.history.go(-1);return false"{% else %}onclick="window.close();return false;"{% endif %}>
+              <i class="fa-regular fa-circle-xmark"></i>
+              <span>Отменить</span>
+            </a>
+            <button class="btn btn-primary" type="submit" data-loading-text="Сохранение...">
+              <i class="fa-regular fa-floppy-disk"></i>
+              <span>Сохранить</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+  </form>
+{% endblock %}
+
+{% block extrascripts %}
+  {% compress js %}
+  <script src="{% static 'js/dashboard/catalogue/attribute_form.js' %}" async></script>
+  {% endcompress %}
+{% endblock %}

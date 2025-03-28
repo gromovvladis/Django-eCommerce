@@ -1,0 +1,155 @@
+{% extends 'dashboard/layout.html' %}
+{% load render_table from django_tables2 %}
+
+{% block header %}
+{% endblock %}
+
+{% block dashboard_content %}
+  <ul class="nav nav-tabs mb-3 p-0 fill-width" role="tablist">
+    <div class="half-wrapper">
+      <div class="nav tabs-button d-flex fill">
+        <div class="tabs-button__active-block" style="width: 50%; min-width: 130px; left: 0px;">
+          <div class="fill-width fill-height"></div>
+        </div>
+        <button role="button" class="tabs-button__button tabs-button__icon active" href="#tab_evotor" data-toggle="tab">
+          <div class="no-wrap">
+            <i class="fa-solid fa-tablet-screen-button"></i>
+            <span>Эвотор</span>
+          </div>
+        </button>
+        <button role="button" class="tabs-button__button tabs-button__icon" href="#tab_site" data-toggle="tab">
+          <div class="no-wrap">
+            <i class="fa-solid fa-globe"></i>
+            <span>Сайт</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="tab_evotor" role="tabpanel">
+      <div class="table-wrapper mb-3">
+        <div class="table-header d-flex justify-space-between half-wrapper" data-target="#evotor-body" data-toggle="collapse" aria-controls="evotor-body" aria-expanded="false">
+          <h3>Эвотор</h3>
+          <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+          <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+        </div>
+        <table class="table table-striped table-bordered half-wrapper collapse" id="evotor-body">
+          <tr>
+            <td class="text-center">
+              <span class="text-success"><i class="fa-solid fa-circle-check"></i></span>
+            </td>
+            <td>Данные кооректно перенесены из системы Эвотор на сайт</td>
+          </tr>
+          <tr>
+            <td class="text-center">
+              <span class="text-warning"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            </td>
+            <td>Данные требует обновления на сайте</td>
+          </tr>
+          <tr>
+            <td class="text-center">
+              <span class="text-danger"><i class="fa-solid fa-circle-xmark"></i></span>
+            </td>
+            <td>Данные не были добавлены на сайт</td>
+          </tr>
+        </table>
+      </div>
+      {% if tables.0 %}
+        <form id="evotor_form" method="post" class="mobile-table">
+          {% csrf_token %}
+          {% render_table tables.0 %}
+          <div class="table-wrapper mb-3 d-none" data-id="actions-lines">
+            <div class="table-header d-flex justify-space-between" data-target="#status-body" data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
+              <h3><i class="fa-solid fa-list-check"></i>Обновить на сайте</h3>
+              <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+              <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+            </div>
+            <div class="card card-body dropdown-list collapse" id="status-body">
+              <h2 class="mb-3">Обновить выбранные позиции</h2>
+              <p class="mb-3">Данные позиции будут скопированы из системы Эвотор в базу данных сайта</p>
+              <div class="form-inline fill-width justify-space-between">
+                <div class="btn-form d-flex my-2">
+                  <button type="submit" name="update_site" value="False" class="btn btn-primary" data-loading-text="Обновление...">Обновить</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      {% else %}
+        <p class="py-2">Ничего не найдено</p>
+      {% endif %}
+    </div>
+    <div class="tab-pane fade" id="tab_site" role="tabpanel">
+      <div class="table-wrapper mb-3">
+        <div class="table-header d-flex justify-space-between half-wrapper" data-target="#evotor-body" data-toggle="collapse" aria-controls="evotor-body" aria-expanded="false">
+          <h3>Сайт</h3>
+          <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+          <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+        </div>
+        <table class="table table-striped table-bordered half-wrapper collapse" id="evotor-body">
+          <tr>
+            <td class="text-center">
+              <span class="text-success"><i class="fa-solid fa-circle-check"></i></span>
+            </td>
+            <td>Данные кооректно перенесены из системы Эвотор на сайт</td>
+            <td>{{ is_valid }}</td>
+          </tr>
+          <tr>
+            <td class="text-center">
+              <span class="text-warning"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            </td>
+            <td>Данные требует обновления на сайте</td>
+            <td>{{ not_is_valid }}</td>
+          </tr>
+          <tr>
+            <td class="text-center">
+              <span class="text-primary"><i class="fa-solid fa-circle-exclamation"></i></span>
+            </td>
+            <td>Данные созданы только на сайте и не имеют Эвотор ID</td>
+            <td>{{ not_evotor_id }}</td>
+          </tr>
+          <tr>
+            <td class="text-center">
+              <span class="text-danger"><i class="fa-solid fa-circle-xmark"></i></span>
+            </td>
+            <td>Данные имеют некооретный Evotor ID и должны быть удалены</td>
+            <td>{{ wrong_evotor_id }}</td>
+          </tr>
+        </table>
+      </div>
+      {% if tables.1 %}
+        <form id="site_form" method="post" class="mobile-table">
+          {% csrf_token %}
+          {% render_table tables.1 %}
+          <div class="table-wrapper mb-3 d-none" data-id="actions-lines">
+            <div class="table-header d-flex justify-space-between" data-target="#status-body" data-toggle="collapse" aria-controls="status-body" aria-expanded="false">
+              <h3><i class="fa-solid fa-list-check"></i>Действия с выбранными</h3>
+              <i class="fa-solid fa-chevron-up" style="color: var(--primary);"></i>
+              <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+            </div>
+            <div class="card card-body dropdown-list collapse" id="status-body">
+              <h2 class="mb-3">Удалить выбранные позиции</h2>
+              <p class="mb-3">Данные позиции будут удалены из базы данных сайта</p>
+              <div class="form-inline fill-width justify-space-between">
+                <div class="btn-form d-flex my-2">
+                  <button type="submit" name="delete_selected" value="True" class="btn btn-danger mr-2" data-loading-text="Удаление...">Удалить выбранные</button>
+                  <button type="submit" name="delete_invalid" value="True" class="btn btn-warning" data-loading-text="Удаление...">Удалить некорректные</button>
+                </div>
+              </div>
+              {% block update_evotor %}
+              {% endblock %}
+            </div>
+          </div>
+        </form>
+      {% else %}
+        <p class="py-2">Ничего не найдено</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block onbodyload %}
+  {{ block.super }}
+  dashboard.evotor.initTable();
+{% endblock %}
