@@ -82,9 +82,9 @@
     git init / указываем git, что данная директория является репозиторием Git
 
     если репа приватная то используем токен - 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
-    git pull https://token@github.com/gromovvladis/mikado.git
+    git pull https://token@github.com/gromovvladis/gromobot.git
 
-    git pull https://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@github.com/gromovvladis/mikado.git
+    git pull https://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@github.com/gromovvladis/gromobot.git
 
     отменить все локальные изменения 
         git reset --hard
@@ -280,7 +280,7 @@
     13.1 Mikado
         source venv/bin/activate
         cd mikado/site
-        git pull https://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@github.com/gromovvladis/mikado.git
+        git pull https://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@github.com/gromovvladis/gromobot.git
         python manage.py makemigrations
         python manage.py migrate
         python manage.py collectstatic
@@ -291,7 +291,7 @@
     13.2 Provence              
         source venv/bin/activate
         cd provence/site
-        git pull https://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@github.com/gromovvladis/mikado.git
+        git pull https://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@github.com/gromovvladis/gromobot.git
         python manage.py makemigrations
         python manage.py migrate
         python manage.py collectstatic
