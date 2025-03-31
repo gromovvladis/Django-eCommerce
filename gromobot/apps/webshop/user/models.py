@@ -172,17 +172,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         Returns a user primary shipping address. Usually that will be the
         headquarters or similar..
         """
-        address = getattr(self, "address", "")
-        if not address:
-            return ""
-        else:
-            return address.line1
+        return getattr(getattr(self, "address", None), "line1", "")
 
     def email_user(self, subject, message, from_email=None, **kwargs):
         """
         Send an email to this user.
         """
-        send_mail(subject, message, from_email, [self.email], **kwargs)
+        if settings.CELERY:
+            return send_mail(subject, message, from_email, [self.email], **kwargs)
+        else:
+            return send_mail(subject, message, from_email, [self.email], **kwargs)
 
     def sms_user(self, message):
         """

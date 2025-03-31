@@ -16,19 +16,19 @@ class OrderReviewsConfig(Config):
         self.reviews_available_view = get_class(
             "webshop.order.reviews.views", "OrderFeedbackAvailibleListView"
         )
-        self.reviews_view = get_class(
+        self.reviews_list_view = get_class(
             "webshop.order.reviews.views", "OrderFeedbackListView"
         )
-        self.reviews_add_view = get_class(
-            "webshop.order.reviews.views", "AddOrderFeedbackView"
+        self.reviews_create_view = get_class(
+            "webshop.order.reviews.views", "CreateOrderFeedbackView"
         )
 
     def get_urls(self):
         urls = [
             path(
                 "",
-                login_required(self.reviews_view.as_view()),
-                name="reviews",
+                login_required(self.reviews_list_view.as_view()),
+                name="reviews-list",
             ),
             path(
                 "available/",
@@ -37,7 +37,7 @@ class OrderReviewsConfig(Config):
             ),
             path(
                 "add/",
-                login_required(self.reviews_add_view.as_view()),
+                login_required(self.reviews_create_view.as_view()),
                 name="reviews-add",
             ),
         ]

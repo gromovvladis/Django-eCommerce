@@ -5,7 +5,8 @@ import logging
 from core.loading import get_class, get_model
 from django import http
 from django.db.models import Q
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
 from yookassa.domain.notification import WebhookNotificationFactory
 
@@ -19,14 +20,15 @@ logger = logging.getLogger("apps.webshop.payment")
 
 
 class UpdatePayment(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
 
     def get(self, request, *args, **kwargs):
         try:
-            pk = kwargs.get("pk")
-            sources = PaymentManager.get_sources(pk)
+            order_number = kwargs.get("order_number")
+            sources = PaymentManager().get_sources(order_number)
         except Exception as e:
-            logger.error(f"Error retrieving sources for order {pk}: {e}")
+            logger.error(f"Error retrieving sources for order {order_number}: {e}")
             return http.JsonResponse(
                 {"error": "Sources for order not found"}, status=400
             )
@@ -107,19 +109,21 @@ class YookassaPaymentHandler(APIView):
     def post(self, request, *args, **kwargs):
         try:
             request_ip = self.get_client_ip(request)
+
             if not self.is_ip_allowed(request_ip):
                 logger.warning("Недопустимый IP: %s", request_ip)
                 return http.JsonResponse({"error": "ip error"}, status=400)
 
             event_json = json.loads(request.body)
             notification = WebhookNotificationFactory().create(event_json)
+
             trans_id = notification.object.id
             transaction = Transaction.objects.get(
                 Q(payment_id=trans_id) | Q(refund_id=trans_id)
             )
+
             source = transaction.source
-            source_reference = source.reference
-            payment = PaymentManager(source_reference).get_method()
+            payment = PaymentManager(source.reference).get_method()
 
             if "payment" in notification.event:
                 payment.update(
@@ -165,4 +169,4 @@ class YookassaPaymentHandler(APIView):
                 "Неожиданная ошибка: %s. Тело запроса: %s", e, request.body
             )
 
-        return http.JsonResponse({"success": "ok"}, status=200)
+        return http.JsonResponse({"success": "Updated"}, status=200)

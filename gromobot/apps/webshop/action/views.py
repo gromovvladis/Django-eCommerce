@@ -18,6 +18,7 @@ PromoCategory = get_model("action", "PromoCategory")
 class ActionsListView(PageTitleMixin, ThemeMixin, ListView):
     model = ConditionalOffer
     context_object_name = "offers"
+    summary = "actions"
     template_name = "action/action_list.html"
     paginate_by = settings.DASHBOARD_ITEMS_PER_PAGE
     page_title = "Акции"
@@ -38,20 +39,18 @@ class ActionsListView(PageTitleMixin, ThemeMixin, ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        actions = cache.get("actions_all")
-
-        if not actions:
-            actions = Action.objects.prefetch_related("products").filter(is_active=True)
-            cache.set("actions_all", actions, 3600)
-
-        ctx["actions"] = actions
-        ctx["summary"] = "actions"
+        ctx["actions"] = cache.get_or_set(
+            "actions_all",
+            lambda: Action.objects.prefetch_related("products").filter(is_active=True),
+            3600,
+        )
         return ctx
 
 
-class PromoDetailMixin(ThemeMixin, DetailView):
+class PromoDetailMixin(PageTitleMixin, ThemeMixin, DetailView):
     template_name = "action/action_detail.html"
     context_object_name = "action"
+    summary = "actions"
 
     def get(self, request, *args, **kwargs):
         """
@@ -79,11 +78,8 @@ class PromoDetailMixin(ThemeMixin, DetailView):
             self.kwargs["slug"] = self.kwargs.get("action_slug")
             return super().get_object(queryset)
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["summary"] = "actions"
-        ctx["page_title"] = self.object.title
-        return ctx
+    def get_page_title(self):
+        return self.object.title
 
 
 class ActionDetailView(PromoDetailMixin):

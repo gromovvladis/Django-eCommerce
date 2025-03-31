@@ -28,6 +28,7 @@ class WishListDetailView(PageTitleMixin, ThemeMixin, ListView):
     template_name = "customer/wishlists/wishlists_detail.html"
     context_object_name = "products"
     active_tab = "wishlist"
+    summary = "profile"
     page_title = "Избранное"
     paginate_by = settings.PRODUCTS_PER_PAGE
 
@@ -53,7 +54,6 @@ class WishListDetailView(PageTitleMixin, ThemeMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["wishlist"] = self.object
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
 

@@ -175,7 +175,7 @@
 
 {% block templatescripts %}
   {{ block.super }}
-  action_back = function(){window.location.href="{{ homepage_url }}"}; var update_payment_url = "{% url 'payment:update' pk=order.pk %}";
+  action_back = function(){window.location.href="{{ homepage_url }}"}; var update_payment_url = "{% url 'payment:update' order_number=order.number %}";
 {% endblock %}
 
 {% block extrascripts %}

@@ -1,14 +1,10 @@
-import json
 from datetime import timedelta
 
 from core.compat import get_user_model
-from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
 User = get_user_model()
-
-_dir = settings.STATIC_PRIVATE_ROOT
 
 
 # -------- Зона доставки ---------------
@@ -48,75 +44,11 @@ class ShippingZona(models.Model):
         verbose_name = "Зона доставки"
         verbose_name_plural = "Зоны доставки"
 
-    # Saving
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.update_json()
-
-    @classmethod
-    def update_json(cls):
-        all_zones = cls.objects.all()
-
-        user_zones_list = []
-        admin_zones_list = []
-
-        # Вспомогательная функция для преобразования строк координат в список кортежей
-        def parse_coords(coord_string):
-            return [
-                tuple(map(float, crd.replace("]", "").replace("[", "").split(",")))
-                for crd in coord_string.split("],")
-            ]
-
-        # Вспомогательная функция для создания JSON объектов зоны
-        def create_feature(zona, coords, is_admin=False):
-            properties = {
-                "number": zona.id,
-                "available": zona.isAvailable,
-            }
-            if is_admin:
-                properties["hide"] = zona.isHide
-
-            return {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [coords],
-                },
-                "properties": properties,
-            }
-
-        # Обработка каждой зоны
-        for zona in all_zones:
-            coords = parse_coords(zona.coords)
-
-            # Создаем объекты зон для пользователей и администраторов
-            if not zona.isHide:
-                user_zones_list.append(create_feature(zona, coords))
-
-            admin_zones_list.append(create_feature(zona, coords, is_admin=True))
-
-        # Создаем JSON объекты
-        user_json = {"type": "FeatureCollection", "features": user_zones_list}
-        admin_json = {"type": "FeatureCollection", "features": admin_zones_list}
-
-        # Оптимизированная запись файлов с использованием контекстного менеджера
-        file_paths = {
-            "user": _dir + "/js/webshop/shipping/geojson/shipping_zones.geojson",
-            "admin": _dir + "/js/dashboard/shipping/geojson/shipping_zones.geojson",
-        }
-
-        with open(file_paths["user"], "w") as user_file, open(
-            file_paths["admin"], "w"
-        ) as admin_file:
-            json.dump(user_json, user_file)
-            json.dump(admin_json, admin_file)
-
 
 # -------- Курьер и его смены ---------------
 
 
 class Courier(models.Model):
-
     STATUS_CHOICES = [
         ("pedestrian", "Пешеход"),
         ("driving", "Автокурьер"),
@@ -138,7 +70,6 @@ class Courier(models.Model):
 
 
 class CourierShift(models.Model):
-
     courier = models.ForeignKey("shipping.Courier", on_delete=models.CASCADE)
     routes = models.ManyToManyField("shipping.Route")
     start_time = models.DateTimeField()
@@ -162,7 +93,6 @@ class CourierShift(models.Model):
 
 
 class ShippingOrder(models.Model):
-
     order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, null=False, blank=False
     )
@@ -189,7 +119,6 @@ class ShippingOrder(models.Model):
 
 
 class Trip(models.Model):
-
     start_point_coords = models.CharField(max_length=255)
     start_point_address = models.CharField(max_length=255)
     start_zona_id = models.IntegerField()
@@ -214,7 +143,6 @@ class Trip(models.Model):
 
 
 class Route(models.Model):
-
     trips = models.ManyToManyField("shipping.Trip")
     courier = models.ForeignKey("shipping.Courier", on_delete=models.CASCADE)
     start_time = models.DateTimeField()
@@ -234,7 +162,6 @@ class Route(models.Model):
 
 
 class ShippingSession(models.Model):
-
     orders = models.ManyToManyField("shipping.ShippingOrder")
     couriers = models.ManyToManyField("shipping.Courier")
     stores = models.ManyToManyField("store.Store")

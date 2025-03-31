@@ -173,6 +173,7 @@ class AccountAuthView(PageTitleMixin, generic.TemplateView, AccountAuthModalView
 
     template_name = "customer/auth.html"
     page_title = "Войти"
+    summary = "profile"
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -182,7 +183,6 @@ class AccountAuthView(PageTitleMixin, generic.TemplateView, AccountAuthModalView
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["auth_form"] = self.get_auth_form()
-        ctx["summary"] = "profile"
         return ctx
 
 
@@ -210,6 +210,7 @@ class ProfileView(PageTitleMixin, ThemeMixin, generic.UpdateView):
     template_name = "customer/profile/profile.html"
     page_title = "Профиль"
     active_tab = "profile"
+    summary = "profile"
     model = User
     context_object_name = "user"
     success_url = reverse_lazy("customer:profile-view")
@@ -224,7 +225,6 @@ class ProfileView(PageTitleMixin, ThemeMixin, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["summary"] = "profile"
         ctx["content_open"] = False
         return ctx
 
@@ -290,6 +290,7 @@ class OrderHistoryView(PageTitleMixin, ThemeMixin, generic.ListView):
     form_class = OrderSearchForm
     page_title = "История заказов"
     active_tab = "orders"
+    summary = "profile"
 
     def get(self, request, *args, **kwargs):
         if "date_range" in request.GET:
@@ -329,20 +330,18 @@ class OrderHistoryView(PageTitleMixin, ThemeMixin, generic.ListView):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["form"] = self.form
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
 
 class OrderDetailView(PageTitleMixin, ThemeMixin, PostActionMixin, generic.DetailView):
     model = Order
     active_tab = "orders"
+    summary = "profile"
     template_name = "customer/order/order_detail.html"
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        ctx["page_title"] = f"Заказ №{self.object.number}"
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         ctx["online_payments"] = settings.ONLINE_PAYMENTS
         return ctx
 
@@ -350,7 +349,7 @@ class OrderDetailView(PageTitleMixin, ThemeMixin, PostActionMixin, generic.Detai
         """
         Order number as page title
         """
-        return "%s №%s" % ("Заказ", self.object.number)
+        return f"Заказ №{self.object.number}"
 
     def get_object(self, queryset=None):
         return get_object_or_404(
@@ -422,6 +421,7 @@ class AddressListView(PageTitleMixin, ThemeMixin, generic.ListView):
     template_name = "customer/address/address_list.html"
     paginate_by = settings.ADDRESSES_PER_PAGE
     active_tab = "address"
+    summary = "profile"
     page_title = "Адрес доставки"
 
     def get_queryset(self):
@@ -431,7 +431,6 @@ class AddressListView(PageTitleMixin, ThemeMixin, generic.ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
 
@@ -440,6 +439,7 @@ class AddressCreateView(PageTitleMixin, ThemeMixin, generic.CreateView):
     model = UserAddress
     template_name = "customer/address/address_form.html"
     active_tab = "address"
+    summary = "profile"
     page_title = "Добавить новый адрес"
     success_url = reverse_lazy("customer:address-list")
 
@@ -455,7 +455,6 @@ class AddressCreateView(PageTitleMixin, ThemeMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
     def get_success_url(self):
@@ -467,6 +466,7 @@ class AddressUpdateView(PageTitleMixin, ThemeMixin, generic.UpdateView):
     model = UserAddress
     template_name = "customer/address/address_form.html"
     active_tab = "address"
+    summary = "profile"
     page_title = "Изменить адрес"
     success_url = reverse_lazy("customer:address-list")
 
@@ -478,7 +478,6 @@ class AddressUpdateView(PageTitleMixin, ThemeMixin, generic.UpdateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
     def get_object(self):
@@ -493,13 +492,13 @@ class AddressDeleteView(PageTitleMixin, ThemeMixin, generic.DeleteView):
     template_name = "customer/address/address_delete.html"
     page_title = "Удалить адрес"
     active_tab = "address"
+    summary = "profile"
     context_object_name = "address"
     success_url = reverse_lazy("customer:address-list")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
     def get_queryset(self):

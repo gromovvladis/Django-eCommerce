@@ -23,7 +23,7 @@
     </li>
   {% endif %}
   <li class="profile__menu-list">
-    <button data-link="{% url 'customer:feedbacks-available' %}" class="profile__menu-button{% if active_tab == 'feedback' %} active{% endif %}" data-id="profile-tab">
+    <button data-link="{% url 'order:reviews-available' %}" class="profile__menu-button{% if active_tab == 'review' %} active{% endif %}" data-id="profile-tab">
       Оставить отзыв<div role="separator" class="spacer"></div>
       {% icon file_name='webshop/themes/planet/interface/arrow-left' size=24 stroke='#222' %}
     </button>

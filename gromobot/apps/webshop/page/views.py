@@ -46,31 +46,33 @@ class HomePageView(PageTitleMixin, ThemeMixin, ListView):
 
     template_name = "homepage/homepage.html"
     context_object_name = "actions"
+    summary = "home"
 
     def get_queryset(self):
-        actions = cache.get("actions_all")
-        if not actions:
-            actions = Action.objects.only("image", "slug", "title").filter(
+        return cache.get_or_set(
+            "actions_all",
+            lambda: Action.objects.only("image", "slug", "title").filter(
                 is_active=True
-            )
-            cache.set("actions_all", actions, 3600)
-
-        return actions
+            ),
+            3600,
+        )
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        agent = parse(self.request.META["HTTP_USER_AGENT"])
-        ctx["is_mobile"] = agent.is_mobile if agent else False
-        ctx["summary"] = "home"
+        ctx["is_mobile"] = self._is_mobile(self.request)
 
-        if not agent.is_mobile:
-            promo_cats = cache.get("promo_cats")
-            if not promo_cats:
-                promo_cats = PromoCategory.objects.prefetch_related("products").filter(
+        if not ctx["is_mobile"]:
+            ctx["promo_cats"] = cache.get_or_set(
+                "promo_cats",
+                lambda: PromoCategory.objects.prefetch_related("products").filter(
                     is_active=True
-                )
-                cache.set("promo_cats", promo_cats, 3600)
-
-            ctx["promo_cats"] = promo_cats
+                ),
+                3600,
+            )
 
         return ctx
+
+    def _is_mobile(self):
+        """Проверяем мобильное ли устройство"""
+        agent = parse(self.request.META.get("HTTP_USER_AGENT", ""))
+        return agent.is_mobile if agent else False

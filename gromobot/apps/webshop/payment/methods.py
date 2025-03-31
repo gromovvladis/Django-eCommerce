@@ -1,8 +1,11 @@
 import logging
 import uuid
 
-from apps.webshop.order.models import (PaymentEvent, PaymentEventQuantity,
-                                       PaymentEventType)
+from apps.webshop.order.models import (
+    PaymentEvent,
+    PaymentEventQuantity,
+    PaymentEventType,
+)
 from apps.webshop.payment.exceptions import UnableToRefund, UnableToTakePayment
 from apps.webshop.payment.models import Source, Transaction
 from django.conf import settings
@@ -12,8 +15,7 @@ from yookassa import Payment, Refund
 from yookassa.domain.common.confirmation_type import ConfirmationType
 from yookassa.domain.models.receipt import Receipt
 from yookassa.domain.request import RefundRequestBuilder
-from yookassa.domain.request.payment_request_builder import \
-    PaymentRequestBuilder
+from yookassa.domain.request.payment_request_builder import PaymentRequestBuilder
 from yookassa.domain.response.payment_response import PaymentResponse
 from yookassa.domain.response.refund_response import RefundResponse
 
@@ -38,9 +40,8 @@ class PaymentManager:
         else:
             return Cash(self.source_reference, self.user)
 
-    @classmethod
-    def get_sources(self, pk):
-        return Source.objects.filter(order_id=pk).select_related("order")
+    def get_sources(self, order_number):
+        return Source.objects.filter(order__number=order_number).select_related("order")
 
 
 class PaymentMethod(object):

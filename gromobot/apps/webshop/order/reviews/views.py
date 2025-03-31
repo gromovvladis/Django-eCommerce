@@ -28,7 +28,8 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ThemeMixin, ListView):
     paginate_by = settings.ORDERS_PER_PAGE
     model = Order
     page_title = "Оставить отзыв"
-    active_tab = "feedback"
+    active_tab = "review"
+    summary = "profile"
 
     def get_queryset(self):
         """
@@ -44,7 +45,6 @@ class OrderFeedbackAvailibleListView(PageTitleMixin, ThemeMixin, ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
 
@@ -58,7 +58,8 @@ class OrderFeedbackListView(PageTitleMixin, ThemeMixin, ListView):
     paginate_by = settings.ORDERS_PER_PAGE
     model = OrderReview
     page_title = "Отзывы"
-    active_tab = "feedback"
+    active_tab = "review"
+    summary = "profile"
 
     def get_queryset(self):
         """
@@ -70,18 +71,18 @@ class OrderFeedbackListView(PageTitleMixin, ThemeMixin, ListView):
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
 
-class AddOrderFeedbackView(PageTitleMixin, ThemeMixin, CreateView):
+class CreateOrderFeedbackView(PageTitleMixin, ThemeMixin, CreateView):
     context_object_name = "order_review"
     template_name = "customer/feedbacks/feedbacks_add.html"
     model = OrderReview
     order_model = Order
     form_class = OrderReviewForm
     page_title = "Создание отзыва"
-    active_tab = "feedback"
+    active_tab = "review"
+    summary = "profile"
     view_signal = order_review_added
     success_url = reverse_lazy("customer:feedbacks")
 
@@ -107,7 +108,6 @@ class AddOrderFeedbackView(PageTitleMixin, ThemeMixin, CreateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["order"] = self.order
-        ctx["summary"] = "profile"
         ctx["content_open"] = True
         return ctx
 

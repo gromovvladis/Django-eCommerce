@@ -15,13 +15,13 @@ from django_tables2 import SingleTableView
 ReviewOrderTable, ReviewProductTable = get_classes(
     "dashboard.reviews.tables", ("ReviewOrderTable", "ReviewProductTable")
 )
-ProductReviewSearchForm, DashboardProductReviewForm, DashboardOrderReviewForm = (
+ProductReviewSearchForm, ProductReviewForm, OrderReviewForm = (
     get_classes(
         "dashboard.reviews.forms",
         (
             "ProductReviewSearchForm",
-            "DashboardProductReviewForm",
-            "DashboardOrderReviewForm",
+            "ProductReviewForm",
+            "OrderReviewForm",
         ),
     )
 )
@@ -169,7 +169,7 @@ class BaseReviewListView(BulkEditMixin, SingleTableView):
 class ReviewProductListView(BaseReviewListView):
     table_class = ReviewProductTable
     model = ProductReview
-    review_form_class = DashboardProductReviewForm
+    review_form_class = ProductReviewForm
     success_url = reverse_lazy("dashboard:reviews-product-list")
     template_name = "dashboard/reviews/review_list_product.html"
 
@@ -180,7 +180,7 @@ class ReviewProductListView(BaseReviewListView):
 class ReviewProductUpdateView(generic.UpdateView):
     model = ProductReview
     template_name = "dashboard/reviews/review_update_product.html"
-    form_class = DashboardProductReviewForm
+    form_class = ProductReviewForm
     context_object_name = "review"
 
     def get(self, request, *args, **kwargs):
@@ -259,7 +259,7 @@ class ReviewOrderListView(BaseReviewListView):
 class ReviewOrderUpdateView(generic.UpdateView):
     model = OrderReview
     template_name = "dashboard/reviews/review_update_order.html"
-    form_class = DashboardProductReviewForm
+    form_class = ProductReviewForm
     context_object_name = "review"
 
     def get(self, request, *args, **kwargs):
