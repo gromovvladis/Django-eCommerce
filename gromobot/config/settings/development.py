@@ -82,7 +82,7 @@ STATICFILES_FINDERS = (
 # SECURE
 # =============
 
-ALLOWED_HOSTS = ("mikado-sushi.ru", "127.0.0.1", "localhost")
+ALLOWED_HOSTS = ("127.0.0.1", "localhost")
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
@@ -180,16 +180,16 @@ EVOTOR_SITE_USER_TOKEN = ""
 # WEBPUSH
 # =============
 
-WEBPUSH_PUBLIC_KEY = "BHuErJY5HcTiN8dfgdfgdfgdqP7hgmDm6IW2PmriE-GSVOOzlTLCqz5gbQKWhJc7R2OE437Q"
-WEBPUSH_PRIVATE_KEY = "MIdfgdfgdfgdfgjyjndrgtM49AwEHBG0wawIBAQQg6nb0Jg7856xHDcKr7sJ2d1s_XDQHRX6dS462Ge3Tf4yhRANCAAR7hKyWOR3E4jfIhs-RDgYAj_7xoY60Jh4WDG_Naj-4YJg5uiFtj5q4hPhklTjs5Uywqs-YG0CloSXO0djhON-0"
-WEBPUSH_ADMIN_EMAIL = "s.gromovvladis@gmail.com"
+WEBPUSH_PUBLIC_KEY = ""
+WEBPUSH_PRIVATE_KEY = ""
+WEBPUSH_ADMIN_EMAIL = ""
 
 # =============
 # EMAIL
 # =============
 
 # Registration
-EMAIL_SUBJECT_PREFIX = "Mikado"
-FROM_EMAIL = "info@mikado-sushi.ru"
+EMAIL_SUBJECT_PREFIX = ""
+FROM_EMAIL = ""
 SEND_ORDER_PLACED_EMAIL = False
 SEND_REGISTRATION_EMAIL = False
