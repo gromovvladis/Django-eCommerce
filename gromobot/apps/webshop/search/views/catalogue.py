@@ -10,18 +10,21 @@ from django.shortcuts import get_object_or_404, redirect
 BrowseCategoryForm = get_class("webshop.search.forms", "BrowseCategoryForm")
 CategoryForm = get_class("webshop.search.forms", "CategoryForm")
 BaseSearchView = get_class("webshop.search.views.base", "BaseSearchView")
+PageTitleMixin = get_class("webshop.mixins", "PageTitleMixin")
 
 Category = get_model("catalogue", "Category")
 
 
-class CatalogueView(BaseSearchView):
+class CatalogueView(PageTitleMixin, BaseSearchView):
     """
     Browse all products in the catalogue
     """
+
     form_class = BrowseCategoryForm
     context_object_name = "products"
     template_name = "catalogue/browse.html"
     enforce_paths = True
+    page_title = "Меню"
 
     def get(self, request, *args, **kwargs):
         try:
@@ -31,16 +34,12 @@ class CatalogueView(BaseSearchView):
             messages.error(request, "Категория не найдена.")
             return redirect("catalogue:index")
 
-    def get_context_data(self, *args, **kwargs):
-        ctx = super().get_context_data(*args, **kwargs)
-        ctx["page_title"] = "Меню"
-        return ctx
 
-
-class ProductCategoryView(BaseSearchView):
+class ProductCategoryView(PageTitleMixin, BaseSearchView):
     """
     Browse products in a given category
     """
+
     form_class = CategoryForm
     enforce_paths = True
     context_object_name = "products"
@@ -76,24 +75,26 @@ class ProductCategoryView(BaseSearchView):
                 return HttpResponsePermanentRedirect(expected_path)
 
     def get_category(self):
-        category = cache.get("category_%s" % self.kwargs["category_slug"])
+        """Получает категорию из кеша или БД, используя slug из URL."""
+        cache_key = f"category_{self.kwargs['category_slug']}"
+        category = cache.get(cache_key)
 
-        if not category:
-            # category = get_object_or_404(Category, slug=self.kwargs["category_slug"])
-            # slug = self.kwargs["category_slug"].split(Category._slug_separator)
+        if category is None:
             slug = self.kwargs["category_slug"].split(Category._slug_separator)[-1]
             category = get_object_or_404(Category, slug=slug)
-            cache.set("category_%s" % self.kwargs["category_slug"], category, 3600)
+            cache.set(cache_key, category, timeout=3600)
 
         return category
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["category"] = self.category
-        context["page_title"] = self.category.get_name()
         return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["categories"] = self.category.get_descendants_and_self()
         return kwargs
+
+    def get_page_title(self):
+        return self.category.get_name()

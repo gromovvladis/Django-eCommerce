@@ -14,13 +14,14 @@ class StoreSelectForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.set_initail_stores()
 
-        stores = cache.get("stores")
-        if not stores:
-            stores = Store.objects.prefetch_related("address", "users").all()
-            cache.set("stores", stores, 21600)
-
+    def set_initail_stores(self):
+        self.stores = cache.get_or_set(
+            "stores",
+            lambda: Store.objects.prefetch_related("address", "users").all(),
+            7200,
+        )
         self.fields["store_id"].choices = [
-            (store.id, store.name) for store in stores if store.is_active
+            (store.id, store.name) for store in self.stores if store.is_active
         ]
-        self.stores = stores

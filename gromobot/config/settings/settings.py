@@ -68,8 +68,7 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 "django.template.context_processors.static",
                 "django.contrib.messages.context_processors.messages",
-                # Oscar specific
-                "apps.webshop.search.context_processors.search_form",
+                # Webshop specific
                 "apps.webshop.communication.notifications.context_processors.notifications",
                 "core.context_processors.metadata",
             ],

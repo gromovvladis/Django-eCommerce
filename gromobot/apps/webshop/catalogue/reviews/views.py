@@ -24,6 +24,7 @@ class CreateProductReview(PageTitleMixin, ThemeMixin, CreateView):
     form_class = ProductReviewForm
     view_signal = product_review_added
     page_title = "Оставить отзыв"
+    summary = "profile"
 
     def dispatch(self, request, *args, **kwargs):
         # pylint: disable=attribute-defined-outside-init
@@ -44,7 +45,6 @@ class CreateProductReview(PageTitleMixin, ThemeMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["product"] = self.product
-        context["summary"] = "profile"
         context["content_open"] = True
         return context
 
@@ -73,13 +73,14 @@ class CreateProductReview(PageTitleMixin, ThemeMixin, CreateView):
         )
 
 
-class ProductReviewList(ThemeMixin, ListView):
+class ProductReviewList(PageTitleMixin, ThemeMixin, ListView):
     """
     Browse reviews for a product
     """
 
     template_name = "catalogue/reviews/review_list.html"
     context_object_name = "reviews"
+    summary = "profile"
     model = ProductReview
     product_model = Product
     paginate_by = settings.REVIEWS_PER_PAGE
@@ -102,11 +103,11 @@ class ProductReviewList(ThemeMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        _product = get_object_or_404(
+        context["product"] = get_object_or_404(
             self.product_model, slug=self.kwargs["product_slug"], is_public=True
         )
-        context["summary"] = "profile"
-        context["product"] = _product
         context["form"] = self.form
-        context["page_title"] = "Отзывы на товар " + _product.name
         return context
+
+    def get_page_title(self):
+        return f"Отзывы на товар {_product.name}"

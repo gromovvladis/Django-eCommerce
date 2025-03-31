@@ -1,18 +1,21 @@
-from core.loading import get_class, get_model
+from core.loading import get_classes, get_model
 from django import http
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.views.generic import ListView, View
 
-ThemeMixin = get_class("webshop.mixins", "ThemeMixin")
+ThemeMixin, PageTitleMixin = get_classes(
+    "webshop.mixins", ["ThemeMixin", "PageTitleMixin"]
+)
 
 ConditionalOffer = get_model("offer", "ConditionalOffer")
 Range = get_model("offer", "Range")
 
 
-class OfferDetailView(ThemeMixin, ListView):
+class OfferDetailView(PageTitleMixin, ThemeMixin, ListView):
     context_object_name = "products"
+    summary = "actions"
     template_name = "offer/detail.html"
     paginate_by = settings.OFFERS_PER_PAGE
 
@@ -29,10 +32,11 @@ class OfferDetailView(ThemeMixin, ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["offer"] = self.offer
-        ctx["summary"] = "actions"
-        ctx["page_title"] = self.offer.name
         ctx["upsell_message"] = self.offer.get_upsell_message(self.request.basket)
         return ctx
+
+    def get_page_title(self):
+        return self.offer.name
 
     def get_queryset(self):
         """
@@ -42,9 +46,10 @@ class OfferDetailView(ThemeMixin, ListView):
         return self.offer.products()
 
 
-class RangeDetailView(ThemeMixin, ListView):
+class RangeDetailView(PageTitleMixin, ThemeMixin, ListView):
     template_name = "offer/range.html"
     context_object_name = "products"
+    summary = "actions"
     paginate_by = settings.PRODUCTS_PER_PAGE
 
     # pylint: disable=W0201
@@ -63,9 +68,10 @@ class RangeDetailView(ThemeMixin, ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["range"] = self.range
-        ctx["summary"] = "actions"
-        ctx["page_title"] = self.offer.name
         return ctx
+
+    def get_page_title(self):
+        return self.offer.name
 
 
 class GetUpsellMasseges(ThemeMixin, View):

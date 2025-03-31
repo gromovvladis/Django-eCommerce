@@ -18,12 +18,12 @@ class NotificationListView(PageTitleMixin, generic.ListView):
     paginate_by = settings.NOTIFICATIONS_PER_PAGE
     page_title = "Уведомления"
     active_tab = "notifications"
+    summary = "profile"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["list_type"] = self.list_type
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
 
@@ -87,12 +87,12 @@ class DetailView(PageTitleMixin, generic.DetailView):
     template_name = "communication/notifications/notifications_detail.html"
     context_object_name = "notification"
     active_tab = "notifications"
+    summary = "profile"
     page_title = "Уведомление"
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["content_open"] = True
-        ctx["summary"] = "profile"
         return ctx
 
     def get_object(self, queryset=None):

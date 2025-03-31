@@ -6,7 +6,7 @@ ProductReview = get_model("product_reviews", "ProductReview")
 OrderReview = get_model("order_reviews", "OrderReview")
 
 
-class DashboardProductReviewForm(forms.ModelForm):
+class ProductReviewForm(forms.ModelForm):
     choices = (
         (ProductReview.HELPFUL, "Полезный"),
         (ProductReview.UNHELPFUL, "Неполезный"),
@@ -18,7 +18,7 @@ class DashboardProductReviewForm(forms.ModelForm):
         fields = ("status",)
 
 
-class DashboardOrderReviewForm(forms.ModelForm):
+class OrderReviewForm(forms.ModelForm):
     choices = (
         (ProductReview.HELPFUL, "Полезный"),
         (ProductReview.UNHELPFUL, "Неполезный"),

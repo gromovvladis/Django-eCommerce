@@ -714,7 +714,7 @@ class UpdateTotalsView(View):
 # =========
 
 
-class ThankYouView(ThemeMixin, generic.DetailView):
+class ThankYouView(PageTitleMixin, ThemeMixin, generic.DetailView):
     """
     Displays the 'thank you' page which summarises the order just submitted.
     """
@@ -751,9 +751,7 @@ class ThankYouView(ThemeMixin, generic.DetailView):
         ctx = super().get_context_data(*args, **kwargs)
         # Remember whether this view has been loaded.
         # Only send tracking information on the first load.
-        pk = ctx["order"].pk
-        ctx["page_title"] = f"Заказ №{self.object.number}"
-        key = "order_{}_thankyou_viewed".format(pk)
+        key = "order_{}_thankyou_viewed".format(ctx["order"].pk)
         if not self.request.session.get(key, False):
             self.request.session[key] = True
             ctx["send_analytics_event"] = True
@@ -761,6 +759,12 @@ class ThankYouView(ThemeMixin, generic.DetailView):
             ctx["send_analytics_event"] = False
 
         return ctx
+
+    def get_page_title(self):
+        """
+        Order number as page title
+        """
+        return f"Заказ №{self.object.number}"
 
 
 # =========

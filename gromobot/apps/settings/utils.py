@@ -5,10 +5,8 @@ Settings = get_model("settings", "Settings")
 
 
 def load_settings():
-    settings = cache.get("settings")
-
-    if not settings:
-        settings = Settings.objects.prefetch_related("products").filter(is_active=True)
-    cache.set("settings", settings, 7200)
-
-    return settings
+    return cache.get_or_set(
+        "settings",
+        lambda: Settings.objects.prefetch_related("products").filter(is_active=True),
+        7200,
+    )

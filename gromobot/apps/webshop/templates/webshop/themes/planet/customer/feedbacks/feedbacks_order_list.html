@@ -32,7 +32,7 @@
             {% for order in orders %}
               <li class="orders-list-item fill-width">
                 <div class="orders-list-item fill-width">
-                  <a href="{% url 'customer:feedback-add' order_number=order.number %}" class="orders-list-item__button d-flex flex-column fill-width py-3">
+                  <a href="{% url 'order:reviews-add' order_number=order.number %}" class="orders-list-item__button d-flex flex-column fill-width py-3">
                     <div class="d-flex justify-space-between align-center fill-width">
                       <span class="orders-list-item__title">Заказ №{{ order.number }}</span>
                       <span class="prices d-flex flex-column align-start"><span class="prices__price no-wrap">{{ order.total|currency:order.currency }}</span></span>

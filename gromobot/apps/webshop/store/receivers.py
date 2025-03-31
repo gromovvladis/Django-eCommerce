@@ -24,9 +24,3 @@ def update_stock_alerts(sender, instance, created, **kwargs):
         StockAlert.objects.create(stockrecord=stockrecord)
     elif not stockrecord.is_below_threshold and alert:
         alert.close()
-
-
-# @receiver(post_save, sender=StockRecord)
-# def update_cache_product(sender, instance, created, **kwargs):
-#     if settings.DEBUG:
-#         update_cache_product_task.delay(product_id=instance.product_id, store_id=instance.store_id)

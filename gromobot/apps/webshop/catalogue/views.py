@@ -1,17 +1,19 @@
 from urllib.parse import quote
 
 from apps.webshop.catalogue.signals import product_viewed
-from core.loading import get_class, get_model
+from core.loading import get_classes, get_class, get_model
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.views.generic import DetailView
 
-ThemeMixin = get_class("webshop.mixins", "ThemeMixin")
+ThemeMixin, PageTitleMixin = get_classes(
+    "webshop.mixins", ["ThemeMixin", "PageTitleMixin"]
+)
 
 Product = get_model("catalogue", "product")
 Category = get_model("catalogue", "category")
 
 
-class ProductDetailView(ThemeMixin, DetailView):
+class ProductDetailView(PageTitleMixin, ThemeMixin, DetailView):
     context_object_name = "product"
     model = Product
     view_signal = product_viewed
@@ -79,10 +81,11 @@ class ProductDetailView(ThemeMixin, DetailView):
             response=response,
         )
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["page_title"] = self.object.get_name()
-        return ctx
+    def get_page_title(self):
+        """
+        Order number as page title
+        """
+        return self.object.get_name()
 
     # def get_template_names(self):
     #     """
