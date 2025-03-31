@@ -90,7 +90,7 @@ CSRF_COOKIE_SECURE = False
 CORS_REPLACE_HTTPS_REFERER = False
 HOST_SCHEME = "http://"
 
-SECRET_KEY = "UtjFCuyjDKmWHe15neauXzHi2rZoRTg6RMbT5JyAdPiAcBP6Rra1"
+SECRET_KEY = ""
 
 # =============
 # CACHES
@@ -126,26 +126,26 @@ SMS_AUTH_SETTINGS = {
     "SMS_AUTH_PROVIDER_FROM": "Mikado",
     "SMS_AUTH_MESSAGE": "Код для входа на сайт:",
     "SMS_DEBUG": True,
-    "SMS_DEBUG_CODE": 1111,
+    "SMS_DEBUG_CODE": 1234,
     "SMS_AUTH_PROVIDER_URL": "https://gate.smsaero.ru/v2",
     "SMS_USER_SERIALIZER": "api.serializers.DefaultUserSerializer",
-    "SMS_AUTH_PROVIDER_LOGIN": "s.gromovvladis@gmail.com",
-    "SMS_AUTH_PROVIDER_API_TOKEN": "eZKAeSTM6ElHOWJ7Sry6sSSexq9R2faM",
+    "SMS_AUTH_PROVIDER_LOGIN": "",
+    "SMS_AUTH_PROVIDER_API_TOKEN": "",
 }
 
 # =============
 # Yoomaney settings
 # =============
 
-Configuration.account_id = 1017790
-Configuration.secret_key = "test_edf_VEetjIP5Yi4JDjvOsgzItD1whJpET4Px3nLIa6U"
+Configuration.account_id = ""
+Configuration.secret_key = ""
 
 # =============
 # MAP settings
 # =============
 
-YANDEX_API_KEY = "27bbbf17-40e2-4c01-a257-9b145870aa2a"
-GIS_API_KEY = "6013c28d-62ae-4764-a509-f403d2ee92c6"
+YANDEX_API_KEY = ""
+GIS_API_KEY = ""
 
 # =============
 # TRACING
@@ -158,30 +158,30 @@ YANDEX_ANALYTICS_ID = None
 # TELEGRAM
 # =============
 
-TELEGRAM_STAFF_BOT_TOKEN = "7440346552:AAH-k0ooubFF51xjcp3r-MIOkTAvnUF6F3I"
+TELEGRAM_STAFF_BOT_TOKEN = ""
 TELEGRAM_CUSTOMER_BOT_TOKEN = None
 TELEGRAM_SUPPORT_BOT_TOKEN = None
-TELEGRAM_SUPPORT_CHAT_ID = 1001234567890
+TELEGRAM_SUPPORT_CHAT_ID = "
 
-TELEGRAM_ADMINS_LIST = ("6560722014",)
+TELEGRAM_ADMINS_LIST = ("",)
 
 # =============
 # EVATOR
 # =============
 
-EVOTOR_CLOUD_TOKEN = "1aa13792-abcf-40aa-8221-a78cfd702ea4"
+EVOTOR_CLOUD_TOKEN = ""
 
-EVOTOR_SITE_LOGIN = "evotor"
-EVOTOR_SITE_PASS = "Evotormikadopassword25"
-EVOTOR_SITE_TOKEN = "9179d780-56a4-49ea-b042-435e3257eaf7"
-EVOTOR_SITE_USER_TOKEN = "9179d780-56a4-49ea-b042-435e3257eaf8"
+EVOTOR_SITE_LOGIN = ""
+EVOTOR_SITE_PASS = ""
+EVOTOR_SITE_TOKEN = ""
+EVOTOR_SITE_USER_TOKEN = ""
 
 # =============
 # WEBPUSH
 # =============
 
-WEBPUSH_PUBLIC_KEY = "BHuErJY5HcTiN8iGz5EOBgCP_vGhjrQmHhYMb81qP7hgmDm6IW2PmriE-GSVOOzlTLCqz5gbQKWhJc7R2OE437Q"
-WEBPUSH_PRIVATE_KEY = "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg6nb0Jg7856xHDcKr7sJ2d1s_XDQHRX6dS462Ge3Tf4yhRANCAAR7hKyWOR3E4jfIhs-RDgYAj_7xoY60Jh4WDG_Naj-4YJg5uiFtj5q4hPhklTjs5Uywqs-YG0CloSXO0djhON-0"
+WEBPUSH_PUBLIC_KEY = "BHuErJY5HcTiN8dfgdfgdfgdqP7hgmDm6IW2PmriE-GSVOOzlTLCqz5gbQKWhJc7R2OE437Q"
+WEBPUSH_PRIVATE_KEY = "MIdfgdfgdfgdfgjyjndrgtM49AwEHBG0wawIBAQQg6nb0Jg7856xHDcKr7sJ2d1s_XDQHRX6dS462Ge3Tf4yhRANCAAR7hKyWOR3E4jfIhs-RDgYAj_7xoY60Jh4WDG_Naj-4YJg5uiFtj5q4hPhklTjs5Uywqs-YG0CloSXO0djhON-0"
 WEBPUSH_ADMIN_EMAIL = "s.gromovvladis@gmail.com"
 
 # =============
@@ -193,13 +193,3 @@ EMAIL_SUBJECT_PREFIX = "Mikado"
 FROM_EMAIL = "info@mikado-sushi.ru"
 SEND_ORDER_PLACED_EMAIL = False
 SEND_REGISTRATION_EMAIL = False
-
-# Email
-# EMAIL_USER=
-# EMAIL_PASSWORD=
-
-# =============
-# CAMS
-# =============
-
-# CAMS_PASSWORD = "Mastersup25"
