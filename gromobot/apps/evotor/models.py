@@ -121,11 +121,3 @@ class EvotorUserGroup(models.Model):
         unique_together = (("group", "evotor_id"),)
         verbose_name = "Группа пользователей Эвотор"
         verbose_name_plural = "Группа пользователей Эвотор"
-
-
-class EvotorUser(models.Model):
-    pass
-
-
-class EvotorSubscription(models.Model):
-    pass
