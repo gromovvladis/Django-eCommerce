@@ -26,7 +26,7 @@ TAX_SYSTEM = 2
 # SITE
 # =============
 
-PRIMARY_TITLE = "Доставка суши и роллов | Микадо Красноярск"
+PRIMARY_TITLE = "#"
 SUPPORT_LINK = "#"
 
 # =============
