@@ -159,15 +159,14 @@ INSTALLED_APPS = [
     "webpush",  # notif push
     "widget_tweaks",  # inputs
     "haystack",  # search
-    "treebeard",  # thumbnail
-    "sorl.thumbnail",
+    "treebeard", # trees
+    "sorl.thumbnail", # thumbnail
     "compressor",  # static
     "rest_framework",  # api
     "django_tables2",  # tables
-    "celery",  # celery
+    "celery",  # tasks
     "django_celery_beat",
     "django_celery_results",
-    "komtet_kassa_sdk",
 ]
 
 if DEBUG:
@@ -178,11 +177,8 @@ if DEBUG:
 # =============
 
 AUTH_BACKEND = "apps.webshop.user.auth_backends.PhoneBackend"
-
 AUTHENTICATION_BACKENDS = ("apps.webshop.user.auth_backends.PhoneBackend",)
-
 LOGIN_REDIRECT_URL = "/"
-APPEND_SLASH = True
 
 # ====================
 # Messages contrib app
@@ -195,7 +191,6 @@ MESSAGE_TAGS = {messages.ERROR: "danger"}
 # ====================
 
 HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
-
 HAYSTACK_CONNECTIONS = {
     "default": {
         "ENGINE": "haystack.backends.whoosh_backend.WhooshEngine",
@@ -233,6 +228,7 @@ SECURE_BROWSER_XSS_FILTER = True
 # SETTINGS
 # ====================
 
+APPEND_SLASH = True
 ROOT_URLCONF = "config.urls"
 SESSION_SERIALIZER = "django.contrib.sessions.serializers.JSONSerializer"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
