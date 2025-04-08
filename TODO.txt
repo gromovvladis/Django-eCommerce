@@ -1,0 +1,9 @@
+1. Pytest
+2. Power BI
+3. SQL
+4. Python теория
+5. Jira
+6. Git
+7. Docker
+8. Fast Api
+9. Python Core
