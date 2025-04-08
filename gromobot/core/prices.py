@@ -1,10 +1,3 @@
-class TaxNotKnown(Exception):
-    """
-    Exception for when a t-inclusive price is requested but we don't know
-    what the t applicable is (yet).
-    """
-
-
 class Price(object):
     """
     Simple price class that encapsulates a price and its tax information
@@ -25,7 +18,7 @@ class Price(object):
 
     def __eq__(self, other):
         """
-        Two price objects are equal if currency, price.excl_tax and tax match.
+        Two price objects are equal if currency, price.money and tax match.
         """
         return (
             self.currency == other.currency
