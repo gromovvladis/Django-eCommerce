@@ -3,7 +3,6 @@ from babel.dates import format_date
 from core.loading import get_class, get_model
 from django.conf import settings
 from django.contrib import messages
-# from django.db.models import F, Func
 from django.db.models import Count, OuterRef, Subquery, Sum
 from django.db.models.functions import TruncDate
 from django.http import HttpResponse, HttpResponseRedirect
@@ -40,10 +39,7 @@ class EvotorReportCSVFormatter(ReportCSVFormatter):
         else:
             wb = openpyxl.load_workbook(file_path)
             ws = wb.active
-            # Найдем строку, после которой нужно вставить новые данные
             start_row = 16
-            # Вставка данных из списка data в ячейки A16, B16, C16 и далее
-
             ws.cell(
                 row=8,
                 column=19,
@@ -97,11 +93,6 @@ class EvotorReportGenerator(ReportGenerator):
         .filter(status=settings.SUCCESS_ORDER_STATUS)
         .annotate(
             day=TruncDate("date_placed"),
-            # day=Func(
-            #     F("date_placed"),
-            #     function="DATE",  # SQLite поддерживает DATE функцию
-            #     template="%(function)s(%(expressions)s)",
-            # ),
             line_quantity=Subquery(
                 Line.objects.filter(order=OuterRef("pk"))
                 .values("order")
